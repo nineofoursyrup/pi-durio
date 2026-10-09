@@ -36,3 +36,11 @@
 机器单独核对 cold-start 无 timeout/无需 retry、测宽成功、原状态保留、旧工作明确结束、新 task 实际完成、新 provider 请求只含新任务且未消费旧队列、raw/stty 恢复。人类 P 不能覆盖机器缺口。`F启动时...` 与 `F 启动时...` 均记 FAIL，原答复永久保留；旧 r1 的评分字段不重写。
 
 r1 第二阶段已确认的 readonly/end/frozen 事实与新任务未实际输入的缺口分别保留。新补测必须有实际 `全新任务` 受理/完成，不能仅凭人工主观判断补齐。
+
+## 最终组合与安装
+
+修复提交 `52c63eb` 已合入 #20 的精确整合 `6d2d3aba847965542a3cab4e1653a2bc340bf92a`，产品候选为 `f67a2edd377d37e3f13bbc0da273028103695d6f`。合并后的 29 项 UI/宽度/恢复/history 检查和 1 项 storage 面板/CLI 检查全部通过；#20 其余未变模块继续复用它的已有确定性结果。新 runner 的安装文件增删/字节变化拒绝检查共 2 项通过。
+
+独立 r2 安装中的 99 个编译文件及 package/execution-lock 与构建一致；12,746 项完整安装清单在真实 offline 准备和 end/new-task/frozen-queue headless smoke 后再次核验一致。原 r1 source archive、tgz、manifest、runner 和 12,725 项安装文件核验未改。r2 非 Terminal 调用被拒绝，未创建 manual 证据。
+
+最终命令与人工范围见 [operator-card-r2.md](operator-card-r2.md)，不可将 headless 结果替换为原生观察。
