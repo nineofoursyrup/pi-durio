@@ -767,7 +767,9 @@
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/coordinator-acceptance.json",
         "sha256": "fe88c495f6566b3349d64b045115f29c5d38fab0a49a72314f8256ef47491179"
       },
-      "note": "Exact formal execution and future-default activation accepted with 30/30 affected checks and scoped installed evidence. Early 196/196 is not final-source-bound. Real provider, self-build and final acceptance remain separate."
+      "note": "Exact formal execution and future-default activation accepted with 30/30 affected checks and scoped installed evidence. Early 196/196 is not final-source-bound. Real provider, self-build and final acceptance remain separate.",
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/25#issuecomment-6088646418",
+      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/publication/readback.json"
     },
     "26": {
       "number": 26,
@@ -938,11 +940,14 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-preparation-awaiting-authorization",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-30",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "cf6a45f0f6c2c74621fdedc8be846b599b429a97",
+      "integrated_sha": "f7890ede828f20c1f7b45689be50cc703e9322ba",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-30/coordinator-preparation.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/merge-preparation-readback.json"
+      ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T201412Z/issue-30.json",
       "preparation": {
         "status": "unapproved draft; actual post-25 candidate/plan pending",
@@ -962,7 +967,33 @@
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "integration_base": "7553824adf2a7769e2add9c6bf9c20c06ff8f821",
-      "claim_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/claim-readback.json"
+      "claim_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/claim-readback.json",
+      "checkpoint": "Bounded preparation integrated and exact-tree/static checks verified. Paid grant and credential source questions pending; no live call and issue30 incomplete.",
+      "paid_batch_request": {
+        "status": "PENDING_HUMAN_REPLY",
+        "requestedAt": "2026-10-09T20:38:00.889284+00:00",
+        "batchId": "pi-durio-v1-live-r1",
+        "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/frozen-manifest-r2.json",
+        "manifestSha256": "fd9b8b5741e8ec9f7ef1dff965e6abcbedda33a668ea4cdd7b318881e9d90892",
+        "proposalSha256": "aed354567fe633b8cb262b5a0c4e885d8b0ca2ef06bad7ce2cb7b28f20a8dfbf",
+        "maxRequests": 40,
+        "maxTokens": 4000000,
+        "usdCeilingRequested": 5,
+        "conservativeTokenEstimateUsd": 4.8,
+        "grantToStartHours": 24,
+        "starts": 1,
+        "activeMinutes": 60,
+        "candidateSelection": "Not granted by batch authorization",
+        "credentialSource": "Earlier question still pending; no read/authentication"
+      },
+      "preparation_handoff": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/preparation-handoff.json",
+      "preparation_commit": "dea2f5a77bc47ca6cc8cdecec1c27d2737c78f8a",
+      "preparation_integration": {
+        "at": "2026-10-09T20:42:50.868771+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/coordinator-preparation.json",
+        "sha256": "ffd01ee7e18ef48929bb67089ed4205b21483e2fe29a7055d3ddcc9a82b5c57e"
+      },
+      "note": "Preparation only; paid batch and permitted credential source await human reply. No live call, no actual candidate or selection, not accepted and #31 not unblocked."
     },
     "31": {
       "number": 31,
@@ -1008,7 +1039,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "7553824adf2a7769e2add9c6bf9c20c06ff8f821",
+  "integration_tip": "f7890ede828f20c1f7b45689be50cc703e9322ba",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -1018,8 +1049,8 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T20:22:30.735082+00:00",
-  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/publication/readback.json",
+  "updated_at": "2026-10-09T20:42:50.958556+00:00",
+  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/publication/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
       "commit": "01f2d3a562b12a9917b3db1dc8111ea2717d386f",
@@ -1072,5 +1103,12 @@
       "acceptedMerge": "a35cb3b672f412d0e6330b43ad947c24a085b9b1"
     }
   },
-  "root_write_owner": "/root coordinator"
+  "root_write_owner": "/root coordinator",
+  "heavy_validation_window": {
+    "owner": "/root/issue26",
+    "grantedAt": "2026-10-09T20:32:14.636778+00:00",
+    "scope": "Affected self-source/new-build/eval-asset compile and real new-process/VM acceptance",
+    "paid": "NOT GRANTED",
+    "release": "Explicit worker completion or coordinator transfer"
+  }
 }
