@@ -1,0 +1,405 @@
+{
+  "schema": "pi-durio-issue-11-validation-v1",
+  "issue": "https://github.com/nineofoursyrup/pi-durio/issues/11",
+  "scope": "PI-DURIO-V1-TICKETS-r1:T01",
+  "status": "PASS for scoped offline acceptance; not full v1 or live-provider acceptance",
+  "createdAt": "2026-10-09T09:59:11.898588+00:00",
+  "environment": {
+    "platform": "Darwin",
+    "arch": "arm64",
+    "node": "v26.8.2",
+    "npm": "11.19.1"
+  },
+  "checks": {
+    "install": {
+      "command": "npm ci",
+      "result": "PASS"
+    },
+    "buildAndBehavior": {
+      "command": "npm run check",
+      "result": "PASS",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "log": "evidence/check-16-data-root.log"
+    },
+    "independentInstall": {
+      "command": "npm install --offline --omit=dev <candidate.tgz>",
+      "result": "PASS",
+      "compiledContentMatchesSource": true,
+      "componentComparison": {
+        "match": true,
+        "sourceCount": 94,
+        "installedCount": 94,
+        "missing": [],
+        "extra": [],
+        "embeddedLockMatchesCanonical": true
+      },
+      "edgeComparison": {
+        "match": true,
+        "sourceEdges": 223,
+        "installedEdges": 223,
+        "missing": [],
+        "extra": []
+      }
+    },
+    "demonstration": {
+      "mode": "offline",
+      "networkModelCalls": 0,
+      "runId": "03ff7f1f-9de0-4c2e-ad2d-1a6dbf761f38",
+      "sessionId": "eb44f740-eeb2-47b3-91ff-5598fa5ce278",
+      "runStatus": "completed",
+      "showExit": 0,
+      "missingAuthExit": 78,
+      "originalFailureStatus": "unknown",
+      "originalFailureRequests": 1,
+      "secondWriterExit": 73,
+      "ownerCleanup": "confirmed",
+      "usage": {
+        "source": "pi.usage",
+        "scope": "session:eb44f740-eeb2-47b3-91ff-5598fa5ce278",
+        "completeness": "known",
+        "value": {
+          "models": {
+            "deepseek/deepseek-flash": {
+              "input": 20,
+              "output": 8,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "reasoning": 0,
+              "totalTokens": 28,
+              "cost": {
+                "input": 6e-06,
+                "output": 9.6e-06,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 1.56e-05
+              }
+            }
+          },
+          "tools": {}
+        },
+        "cost": {
+          "kind": "estimate",
+          "currency": "USD",
+          "source": "@earendil-works/pi-ai@1.1.0 model price catalog",
+          "observedAt": "2026-10-09T09:57:55.040Z"
+        }
+      }
+    }
+  },
+  "candidate": {
+    "archive": "/Users/nineofour/pi-durio-v1-run/evidence/issue-11/pack-accepted/pi-durio-0.1.0.tgz",
+    "sha256": "a2e3b6cdc4efdb333bbf36940e594e28e310bfd8ae9137f4f5d7ef8bbdc0e2d2",
+    "bytes": 21319588,
+    "npmIntegrity": "sha512-hoXv4sd0jFW93EE1YvRNDRzH6S7gif4qU/drV0eEwgC69szH4L5/sV9TT7OesyoPPnlSE+7p48bz/jnOa65g3A==",
+    "npmShasum": "33b07f4b67f598c1d3173c4b120b4677e4c160c2",
+    "unpackedBytes": 94428641,
+    "target": "macOS arm64",
+    "bundledProductionDependencies": true,
+    "canonicalLock": {
+      "sha256": "92a077c44c185ae74439bae1e21d3663c668b0427640f63d0f30a3f7c17a1034",
+      "bytes": 63279
+    }
+  },
+  "sourceIdentity": {
+    "baseCommit": "b405c3ace329ec4601cbeb1753385e8c890132b3",
+    "files": {
+      "package.json": {
+        "sha256": "f39ef44b01b69639624cbb7b13432b20f35796d19d9ac0e8858397dfa0b1ec22",
+        "bytes": 1059
+      },
+      "package-lock.json": {
+        "sha256": "92a077c44c185ae74439bae1e21d3663c668b0427640f63d0f30a3f7c17a1034",
+        "bytes": 63279
+      },
+      "tsconfig.json": {
+        "sha256": "e4b18ea6bc4b6853ecd2c17be6fa272e12e7e48fe4cadd27bbf96c456b63675b",
+        "bytes": 274
+      },
+      "src/artifact.ts": {
+        "sha256": "54dafd93bd49f7cde93fef8ccd939bee28770d1781f1d08433b950e45889a5e8",
+        "bytes": 2646
+      },
+      "src/cli.ts": {
+        "sha256": "84aafd403fe8442fffc4f0c86215893f74e6240240f07e2484b4dec4d51f2f96",
+        "bytes": 3083
+      },
+      "src/evidence.ts": {
+        "sha256": "64240481ac7251ebcf8acbc3588d34e3d689afae06c80b373fde887e71939766",
+        "bytes": 4387
+      },
+      "src/offline.ts": {
+        "sha256": "2ff7e35a64c19619424b6d2739f3f88ef14024886fddaa2b8c8a747967346091",
+        "bytes": 1419
+      },
+      "src/ownership.ts": {
+        "sha256": "0c443090bd14f0109303580cb0f4063838cc1fbc6d577f705d6aab5727f5a389",
+        "bytes": 1704
+      },
+      "src/preflight.ts": {
+        "sha256": "dfdd84ae6c21441635bb851cdf4ce0d1053372ef1af6809757eed52a27eb056e",
+        "bytes": 6440
+      },
+      "src/read-environment.ts": {
+        "sha256": "7fbcf4ae2e94e16d5b4dcdbdd5f02f3c19d071a3d4020462d6a9be5c427e5b28",
+        "bytes": 2510
+      },
+      "src/runtime.ts": {
+        "sha256": "9e9d1fe1f71ef1193cd2db0034f1d088e946904a5f23bd81f9523e17716308a9",
+        "bytes": 16751
+      },
+      "scripts/build-artifact.mjs": {
+        "sha256": "d83e9d220ec7f7a0f455b6788582a4ba6016097cea99b47cad53a6b48b7536ba",
+        "bytes": 282
+      },
+      "scripts/prepare-pack.mjs": {
+        "sha256": "ca6e47d469876e867d3972f16111464467619fe7ddbdb35e8458c1dfc3327201",
+        "bytes": 817
+      },
+      "test/fixtures/project/README.md": {
+        "sha256": "03b38e56583c0045020e794e949a28c9a5fb33be4feb88bae65f2bac759219ed",
+        "bytes": 81
+      },
+      "test/runtime.test.ts": {
+        "sha256": "cce1ec70ae1ac1c3d7b1176e9c6c40f8f9b48a24643cbc9cc907b3a4cb496e81",
+        "bytes": 15394
+      }
+    },
+    "compiled": {
+      "dist/src/artifact.d.ts": {
+        "sha256": "768997d555af4b8a80f76d9c386611ff81540acff06aec8302ff78c5e29f996a",
+        "bytes": 464
+      },
+      "dist/src/artifact.js": {
+        "sha256": "70f986bcb33e9ffdfc3395cb18769291ed0742bfa292fc7b8bfa004c689c6715",
+        "bytes": 2692
+      },
+      "dist/src/artifact.js.map": {
+        "sha256": "60157e4551a76911f8659379ee9387b7e7c61123bb3457f53aaa2bc9dda3ef15",
+        "bytes": 2989
+      },
+      "dist/src/cli.d.ts": {
+        "sha256": "43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012",
+        "bytes": 31
+      },
+      "dist/src/cli.js": {
+        "sha256": "b16ac29cafd485c0ecfcec8fc7519162055ecb0e8a4cdd19d18edf5fc059790d",
+        "bytes": 3258
+      },
+      "dist/src/cli.js.map": {
+        "sha256": "e0aa9968e5c340ccf7a4d41bb37dad363b4a49d5614366d948e8958b09a9d438",
+        "bytes": 3672
+      },
+      "dist/src/evidence.d.ts": {
+        "sha256": "acd7ba7b1f56d48786f9858f0511459c68e6059241f10973b53479e46fcc91f9",
+        "bytes": 1281
+      },
+      "dist/src/evidence.js": {
+        "sha256": "36fec0b250e58745e9e2b45387007999da4ad1221f1b051688679524be72e6fa",
+        "bytes": 4466
+      },
+      "dist/src/evidence.js.map": {
+        "sha256": "021ef0e25dcc94fa837751d2159e7309570b04c061f2eafc5815b20cc5fea243",
+        "bytes": 4779
+      },
+      "dist/src/offline.d.ts": {
+        "sha256": "4fabb293c7f20609c25135038582a087012e3fcd0fc32caf628e59ddbc5bf7c6",
+        "bytes": 197
+      },
+      "dist/src/offline.js": {
+        "sha256": "a6f0066f8847ebc5a064349b61327bf4c1c24567d88438f6c6a7ab1ee37bd261",
+        "bytes": 1438
+      },
+      "dist/src/offline.js.map": {
+        "sha256": "a34d47ca8b7a9fdc8a808ec019b4f9cab07aa0297f8315fbb87fde30c885a9ce",
+        "bytes": 1764
+      },
+      "dist/src/ownership.d.ts": {
+        "sha256": "4b5157cb6f4ffeaca6687071b74ba8bbf8c38e93ba4650c1500eab37fcfd8cdc",
+        "bytes": 244
+      },
+      "dist/src/ownership.js": {
+        "sha256": "6131842faeda157335273b304a73287a5387cf396367a6063c25505503022031",
+        "bytes": 1753
+      },
+      "dist/src/ownership.js.map": {
+        "sha256": "438b68aa8dcf3d63f19c2964a55d9218007975a03b984b588e5285ced8e6eca1",
+        "bytes": 1935
+      },
+      "dist/src/preflight.d.ts": {
+        "sha256": "110136a4997fbf85622ef96e6f5118ea9460c604f5738bbc6a5c0b1c3a15262d",
+        "bytes": 1463
+      },
+      "dist/src/preflight.js": {
+        "sha256": "db6669a5c489cf9d0225fe3d174b2a8179e21e39214f1b542acf8bd5d5556873",
+        "bytes": 6999
+      },
+      "dist/src/preflight.js.map": {
+        "sha256": "d7e8ef31a7f0c36ca51450cf4d943a2b9e69a52da37d2bf4861c0bb6d9875ba1",
+        "bytes": 6729
+      },
+      "dist/src/read-environment.d.ts": {
+        "sha256": "58c54501ba6a8fe721e9c5b1820aa42d21668a634592f9ad7d0ffce588247faa",
+        "bytes": 208
+      },
+      "dist/src/read-environment.js": {
+        "sha256": "c768aedd08eb7e2bc32bd0cc52b285e28b0a8f0883818df9279eefb82bb8f082",
+        "bytes": 2978
+      },
+      "dist/src/read-environment.js.map": {
+        "sha256": "befadcc011441efd8a13496e6c50f98395f9ea6d39ba328e7ce71c594050ce17",
+        "bytes": 2708
+      },
+      "dist/src/runtime.d.ts": {
+        "sha256": "edbf66a603a341ee532fd4faeca5acba7482707289c7da68b415cbecedfce17e",
+        "bytes": 1480
+      },
+      "dist/src/runtime.js": {
+        "sha256": "575aaf0198cc22575de456f72710a667268cb62807f9070874838fb6646d816e",
+        "bytes": 17355
+      },
+      "dist/src/runtime.js.map": {
+        "sha256": "2ae3c9d7f080b758094e6d1583e27b43fa6b77f8a84ee431765d7026ee0cdc55",
+        "bytes": 16465
+      }
+    }
+  },
+  "evidence": {
+    "externalRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-11",
+    "persistentDemoRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-11/accepted-smoke",
+    "files": {
+      "npm-ci.log": {
+        "sha256": "e26fffc300f6016c384474e92b102d6120dc22ad8adbdc01d2107179fadf4d94",
+        "bytes": 706
+      },
+      "registry-durable-1.1.0.json": {
+        "sha256": "50ca93da34b2aedd4f6165d3d1400af9afb66247810011e8e949d3838c183554",
+        "bytes": 1052
+      },
+      "registry-ai-1.1.0.json": {
+        "sha256": "7093ef495bfde800d14b93d3a797ea31595ea8a4b3751a185f31ff851d789363",
+        "bytes": 1037
+      },
+      "registry-chord-1.1.0.json": {
+        "sha256": "201f0dc6de64efa198fe118caed31caaf265deea515170bdee95125c17dee526",
+        "bytes": 1037
+      },
+      "source-production-tree.json": {
+        "sha256": "a1b6f83c4104dbaa2b525142f5eddd7f5eb5c9ab33575003430c65511db891c3",
+        "bytes": 38812
+      },
+      "check-16-data-root.log": {
+        "sha256": "592489400b7a7e7102bed396d5d88041db95280e84f2730d4ed37ed3b2f1e592",
+        "bytes": 1567
+      },
+      "red-01-build.log": {
+        "sha256": "ba0ceab14fefca49a04a8058bb6356c154d53cd43a6a69072a4c5f71d5b71fda",
+        "bytes": 621
+      },
+      "red-02-original-failure.log": {
+        "sha256": "b1baeeb951bbad3acba25be97a52981d20dd1a7c6511ab6911a92366a1153a2d",
+        "bytes": 1089
+      },
+      "red-04-auth-init.log": {
+        "sha256": "69db656535189bedeab4a5160b45df3da1170706236f1657e7c4d0a26baeb5b9",
+        "bytes": 2258
+      },
+      "red-05-data-root-mutation.log": {
+        "sha256": "4662c5d9c3f7da138739a049f9a82d5b03db736a5a74b2e20431c3ea158b13f6",
+        "bytes": 980
+      },
+      "pack-accepted/pack.json": {
+        "sha256": "508a5bed509af310b61ede1ee9e27578c5aec7c05bec658f237a8100876cdedc",
+        "bytes": 1762998
+      },
+      "pack-accepted/pack-all.log": {
+        "sha256": "67aec4e8ddfd99c86a2643696761f9d2946c8f789e5da8ada8afe9017068ab10",
+        "bytes": 1763140
+      },
+      "accepted-smoke/install.log": {
+        "sha256": "4955234449b97195553fcb08c5bd2aa8f68630cdc59dbe0571c3014bd6214c19",
+        "bytes": 138
+      },
+      "accepted-smoke/installed-production-tree.json": {
+        "sha256": "f66db4ef7d554cf0c198c4709c1d841ad32451f77da7b8233cc7129bbee838cc",
+        "bytes": 33015
+      },
+      "accepted-smoke/dependency-comparison.json": {
+        "sha256": "097b05e3715a6fc56d9f6be4e435ae4479b8a1450f9d8becc468716b0bd2cbef",
+        "bytes": 136
+      },
+      "accepted-smoke/dependency-edge-comparison.json": {
+        "sha256": "f696aa33357065f4f5d09fe7785a449a7a3698d5b4568f3a9a662e4183c85405",
+        "bytes": 99
+      },
+      "accepted-smoke/run.json": {
+        "sha256": "e33d586afc7ab438aa4fcfa66de0b41da657194519d951ec7690913d8ef17929",
+        "bytes": 1175
+      },
+      "accepted-smoke/show.json": {
+        "sha256": "009ff00cb8b5ca3797cdb9524e921e2a9314f398c59957a49b40ab7773a69d66",
+        "bytes": 47087
+      },
+      "accepted-smoke/missing-auth.json": {
+        "sha256": "6ac212978cfbbc46a7de95972ef9a25ea94c06691556e05d602aec819e3087fa",
+        "bytes": 111
+      },
+      "accepted-smoke/original-failure.json": {
+        "sha256": "8e204f14235b62bc4dd216f5c8c2f52e41049321e51e8b387b279dbc9ce57e63",
+        "bytes": 24510
+      },
+      "accepted-smoke/owner-conflict.json": {
+        "sha256": "365a011d8fc9dfe4f172477700a8bf411338c6237c111fb4a4bf5adcc18b57a8",
+        "bytes": 374
+      },
+      "accepted-smoke/demonstration-summary.json": {
+        "sha256": "0595ff6de2c3771ddeb1ce775091c886f827a8d8adcabdbd0c122a3940de1d63",
+        "bytes": 1123
+      },
+      "accepted-smoke/demonstrations.mjs": {
+        "sha256": "88e023a1c5cbd3264c3dad4c3880b77397071c916806b7789457c56cc935fb90",
+        "bytes": 2678
+      }
+    },
+    "retainedSmallCopies": [
+      "red-01-build.log",
+      "check-16-data-root.log",
+      "accepted-smoke/install.log",
+      "accepted-smoke/demonstration-summary.json",
+      "accepted-smoke/dependency-comparison.json",
+      "accepted-smoke/dependency-edge-comparison.json",
+      "installed-smoke/dependency-comparison.json",
+      "bundled-smoke/install.log"
+    ],
+    "copyPolicy": "Raw failure logs remain unchanged in externalRoot with hashes above. Selected byte-identical text copies are retained here; logs with original trailing whitespace remain external."
+  },
+  "preservedFirstFailures": [
+    "red-01-build.log",
+    "build-02.log",
+    "test-01.log",
+    "test-02.log",
+    "test-03.log",
+    "red-02-original-failure.log",
+    "red-04-auth-init.log",
+    "test-06.log",
+    "test-09.log",
+    "test-10.log",
+    "installed-smoke/dependency-comparison.json",
+    "bundled-smoke/install.log",
+    "red-05-data-root-mutation.log"
+  ],
+  "limits": {
+    "networkModelCalls": 0,
+    "liveProvider": "NOT RUN: no paid-provider grant",
+    "realCredentials": "NOT RUN",
+    "realBilling": "UNKNOWN; offline usage is synthetic and cost estimate is not billing",
+    "writableCoding": "NOT IMPLEMENTED in this slice",
+    "executionRecovery": "preflight blocks unknown or pending; no resume or repair interface",
+    "osSandbox": "no claim; trusted local read capability fence only",
+    "tuiAndTerminal": "NOT RUN",
+    "fullV1": "NOT COMPLETE",
+    "portability": "native bundle verified on macOS arm64 only",
+    "runtimeFootprint": "archive size recorded; no full-version lightweight or performance acceptance claim"
+  }
+}

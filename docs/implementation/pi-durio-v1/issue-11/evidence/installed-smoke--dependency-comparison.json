@@ -1,0 +1,14 @@
+{
+  "match": false,
+  "sourceCount": 94,
+  "installedCount": 94,
+  "missing": [
+    "@types/node@24.10.1",
+    "undici-types@7.16.0"
+  ],
+  "extra": [
+    "@types/node@26.6.4",
+    "undici-types@8.9.0"
+  ],
+  "shrinkwrapMatchesCanonical": true
+}
