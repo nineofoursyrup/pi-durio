@@ -13,7 +13,9 @@ import {validateGroup,validateImproveGroup,groupReservation,type ValidationGroup
 import {validateFormalSelection,captureGroupIdentities,applyImproveGroup,type FormalSelection} from './improve-formal.js';
 import {assertWorkspaceUnfenced} from './workspace-fence.js';
 import {plannedDefaults,validateDefaultScope} from './improve-defaults.js';
+import {effectiveProfileChanges,validateProfileBasis,type EffectiveProfileChange} from './improve-profile-validation.js';
 export {readImproveDefaults} from './improve-defaults.js';
+export {readImproveEffectiveConfig,type EffectiveConfig,type EffectiveProfileChange} from './improve-profile-validation.js';
 export {rollbackImproveDecision,type ImproveRollback} from './improve-rollback.js';
 export {readImproveDecision,scopedImproveDecisions,suppressionMatch,listImproveSuppressions} from './improve-history.js';
 
@@ -69,9 +71,11 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
   const group=groups.find(g=>g.candidateIds.includes(c.id));
   if(group&&c.dependencies.some(id=>group.candidateIds.indexOf(id)>group.candidateIds.indexOf(c.id)))throw Error('IMPROVE_DEPENDENCY_ORDER');
  }
+ const effectiveProfiles:{groupId:string;profiles:EffectiveProfileChange[]}[]=[];
  for(const group of groups){validateGroup(group,active,l.deadline);const selected=d.selections.filter(s=>group.candidateIds.includes(s.candidateId)),modes=selected.map(s=>s.mode);if(new Set(modes).size!==1)throw Error('IMPROVE_COMBINATION_MODE_CONFLICT');
   if(group.profileScope){validateDefaultScope(group.profileScope,report.target.workspace);if(!selected.some(s=>['agent-config','prompt-skill'].includes(s.target.kind)))throw Error('IMPROVE_PROFILE_SCOPE_TARGET_REQUIRED');if(selected.some(s=>s.formal?.activate)&&selected.filter(s=>['agent-config','prompt-skill'].includes(s.target.kind)).some(s=>!isDeepStrictEqual(s.formal?.activate,group.profileScope)))throw Error('IMPROVE_PROFILE_ACTIVATION_COMBINATION_MISMATCH');}
   const defaults=plannedDefaults(root,selected,group);
+  const profiles=effectiveProfileChanges(defaults);validateProfileBasis(group,profiles);if(profiles.length)effectiveProfiles.push({groupId:group.id,profiles});
   if(modes.includes('execute-declared-scope')&&group.changes.some(c=>Buffer.byteLength(c.content)>262144))throw Error('IMPROVE_FORMAL_FILE_SIZE_LIMIT');
   for(const check of group.checks)if(check.kind==='fresh'&&check.effectiveTask&&!defaults.some(d=>d.current.taskType===check.effectiveTask))throw Error('IMPROVE_EFFECTIVE_PROFILE_SCOPE_REQUIRED');
   if(!['no-behavior','deterministic-fix'].includes(group.basis?.impact??''))for(const d of defaults)if(!group.checks.some(c=>c.kind==='fresh'&&c.effectiveTask===d.current.taskType))throw Error('IMPROVE_EFFECTIVE_PROFILE_CHECK_REQUIRED: legacy instruction-only comparison cannot authorize runtime profile activation');
@@ -79,7 +83,7 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
  const total=groups.reduce((n,g)=>{const r=groupReservation(g);return {checks:n.checks+r.checks,requests:n.requests+r.requests,tokens:n.tokens+r.tokens};},{checks:0,requests:0,tokens:0});
  if(total.checks>l.maxChecks||total.requests>l.maxRequests||total.tokens>l.maxTokens)throw Error('IMPROVE_TOTAL_BUDGET_EXCEEDED');
  if(groups.length){checkTemporaryDirectory(d.directory,candidates.map(c=>c.target));if(candidates.some(c=>c.target.workspace&&contains(c.target.workspace,realpathSync(root))))throw Error('IMPROVE_RECORDING_ROOT_OVERLAPS_FORMAL_TARGET');if(Date.parse(l.deadline)<=Date.now())throw Error('IMPROVE_DEADLINE');}
- return {...d,summary:{order:d.selections.map(s=>s.candidateId),executionOrder:groups.map(g=>({group:g.id,candidates:g.candidateIds})),targets:candidates.map(c=>c.target.workspace),dependencies:candidates.map(c=>({candidateId:c.id,dependencies:c.dependencies,conflicts:c.conflicts})),totalBudget:d.limits,plannedReservation:total,writeback:'not-written',activation:'not-enabled'}};
+ return {...d,summary:{order:d.selections.map(s=>s.candidateId),executionOrder:groups.map(g=>({group:g.id,candidates:g.candidateIds})),targets:candidates.map(c=>c.target.workspace),dependencies:candidates.map(c=>({candidateId:c.id,dependencies:c.dependencies,conflicts:c.conflicts})),totalBudget:d.limits,plannedReservation:total,effectiveProfiles,writeback:'not-written',activation:'not-enabled'}};
 }
 type SubmitOptions={dataRoot:string;decision:ImproveDecision;fault?:(kind:string)=>void;signal?:AbortSignal};
 async function workspaceLeases(decision:ImproveDecision,onCompromised:(error:Error)=>void){

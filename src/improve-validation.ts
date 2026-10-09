@@ -6,6 +6,7 @@ import type {ImproveCandidate} from './improve.js';
 import {verifiedImage,prepareEval,runEval,type PrepareEvalOptions,type PrepareComparison} from './eval/runner.js';
 import {installedRuntimeFiles,captureFiles,regularFiles} from './eval/store.js';
 import type {DefaultChange,TaskType,DefaultScope} from './improve-defaults.js';
+import {effectiveProfileChanges,type EffectiveProfileChange} from './improve-profile-validation.js';
 
 export interface ContentChange {targetId:string;path:string;content:string}
 export interface DirectCheck {kind:'direct'|'regression'|'resource';program:string;timeoutMs:number;resource?:{direction:'lower'|'higher';delta:number;unit:string;basis:string}}
@@ -17,7 +18,7 @@ export interface FreshCheck {
  comparison:Omit<PrepareComparison,'sides'>;
 }
 export type ImproveCheck=DirectCheck|FreshCheck;
-export interface ValidationGroup {id:string;candidateIds:string[];changes:ContentChange[];checks:ImproveCheck[];profileScope?:DefaultScope;basis?:{impact:'no-behavior'|'deterministic-fix'|'model-behavior'|'unknown';reason:string;checkIndices:number[]}}
+export interface ValidationGroup {id:string;candidateIds:string[];changes:ContentChange[];checks:ImproveCheck[];profileScope?:DefaultScope;basis?:{impact:'no-behavior'|'deterministic-fix'|'model-behavior'|'unknown';reason:string;checkIndices:number[];equivalence?:'exact'|'trim-instructions-end';expectedProfiles?:EffectiveProfileChange[]}}
 export function describeImproveRuntime(installation:string){
  const files=installedRuntimeFiles(installation).map(path=>{const bytes=readFileSync(join(installation,path));return {path,ref:{sha256:digest(bytes),bytes:bytes.length},mode:lstatSync(join(installation,path)).mode&0o777};});
  return digest(JSON.stringify(files));
@@ -60,7 +61,7 @@ export function validateGroup(group:ValidationGroup,candidates:ImproveCandidate[
   else if(check.kind==='resource'&&(!check.resource||!['lower','higher'].includes(check.resource.direction)||!Number.isFinite(check.resource.delta)||check.resource.delta<=0||!check.resource.unit||!check.resource.basis))throw Error('IMPROVE_RESOURCE_THRESHOLD_REQUIRED');
  }
  const basis=group.basis;
- if(basis&&(!['no-behavior','deterministic-fix','model-behavior','unknown'].includes(basis.impact)||typeof basis.reason!=='string'||!basis.reason.trim()||basis.reason.length>4096||!Array.isArray(basis.checkIndices)||!basis.checkIndices.length||new Set(basis.checkIndices).size!==basis.checkIndices.length||basis.checkIndices.some(i=>!Number.isSafeInteger(i)||i<0||i>=group.checks.length)||!Object.keys(basis).every(k=>['impact','reason','checkIndices'].includes(k))))throw Error('IMPROVE_VALIDATION_BASIS_INVALID');
+ if(basis&&(!['no-behavior','deterministic-fix','model-behavior','unknown'].includes(basis.impact)||typeof basis.reason!=='string'||!basis.reason.trim()||basis.reason.length>4096||!Array.isArray(basis.checkIndices)||!basis.checkIndices.length||new Set(basis.checkIndices).size!==basis.checkIndices.length||basis.checkIndices.some(i=>!Number.isSafeInteger(i)||i<0||i>=group.checks.length)||!Object.keys(basis).every(k=>['impact','reason','checkIndices','equivalence','expectedProfiles'].includes(k))||basis.equivalence!==undefined&&(basis.impact!=='no-behavior'||!['exact','trim-instructions-end'].includes(basis.equivalence))||basis.expectedProfiles!==undefined&&(basis.impact!=='deterministic-fix'||!Array.isArray(basis.expectedProfiles))))throw Error('IMPROVE_VALIDATION_BASIS_INVALID');
  const directBasis=basis&&['no-behavior','deterministic-fix'].includes(basis.impact);
  if(directBasis&&basis.checkIndices.some(i=>!['direct','regression'].includes(group.checks[i].kind))||basis?.impact==='deterministic-fix'&&!basis.checkIndices.some(i=>group.checks[i].kind==='regression'))throw Error('IMPROVE_VALIDATION_BASIS_CHECK_REQUIRED');
  // The exact user-submitted plan can bind a non-behavior or deterministic basis
@@ -80,7 +81,8 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
  const baseline=new Map<string,Buffer>(),content=new Map<string,Buffer>();
  for(const target of targets)for(const file of target.files){const key=`${target.id}/${file.path}`,bytes=readObject(root,file.content);baseline.set(key,bytes);content.set(key,bytes);}
  for(const change of group.changes)content.set(`${change.targetId}/${change.path}`,Buffer.from(change.content));
- const construction={targets:targets.map(t=>({id:t.id,workspace:t.workspace,baseline:t.baseline})),files:[...content].map(([path,bytes])=>({path,before:e.blob(baseline.get(path)!),after:e.blob(bytes)}))};
+ const profiles=effectiveProfileChanges(options.defaults??[]);
+ const construction={targets:targets.map(t=>({id:t.id,workspace:t.workspace,baseline:t.baseline})),files:[...content].map(([path,bytes])=>({path,before:e.blob(baseline.get(path)!),after:e.blob(bytes)})),...(profiles.length?{effectiveProfiles:e.blob(JSON.stringify(profiles)),...(group.basis?.expectedProfiles?{expectedProfiles:e.blob(JSON.stringify(group.basis.expectedProfiles))}:{})}:{} )};
  record('improve.prepared',{groupId:group.id,construction,scope:'temporary copies only; formal target/default unchanged'});
  const checks:any[]=[];let effect='direct-checks-passed',state='completed',reason:string|null=null;
  const engine=await import(new URL('../execution/isolation/boundary.mjs',import.meta.url).href);
@@ -111,7 +113,11 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
     const input=join(checkDirectory,'input');await mkdir(input);
     for(const [key,bytes]of [...[...content].map(([k,v])=>[`targets/${k}`,v] as const),...[...baseline].map(([k,v])=>[`baseline/${k}`,v] as const)]){const path=join(input,key);await mkdir(dirname(path),{recursive:true});await writeFile(path,bytes,{flag:'wx',mode:0o444});}
     await writeFile(join(input,'check.mjs'),check.program,{flag:'wx',mode:0o444});
-    const bootstrap="import {cp,chmod} from 'node:fs/promises'; await cp('/input/targets','/work/targets',{recursive:true}); await chmod('/work/targets',0o755); process.chdir('/work/targets'); await import('/input/check.mjs');";
+    if(profiles.length)await writeFile(join(input,'effective-profiles.json'),JSON.stringify(profiles),{flag:'wx',mode:0o444});
+    const checkedProfiles=Boolean(group.basis?.expectedProfiles&&group.basis.checkIndices.includes(index));
+    if(checkedProfiles)await writeFile(join(input,'expected-profiles.json'),JSON.stringify(group.basis!.expectedProfiles),{flag:'wx',mode:0o444});
+    const profileAssertion=checkedProfiles?"const assert=(await import('node:assert/strict')).default;assert.deepEqual(JSON.parse(await readFile('/input/effective-profiles.json','utf8')),JSON.parse(await readFile('/input/expected-profiles.json','utf8')),'Declared complete effective profile regression');":"";
+    const bootstrap="import {cp,chmod,readFile} from 'node:fs/promises'; await cp('/input/targets','/work/targets',{recursive:true}); await chmod('/work/targets',0o755); process.chdir('/work/targets'); "+profileAssertion+"await import('/input/check.mjs');";
     await writeFile(join(input,'bootstrap.mjs'),bootstrap,{flag:'wx',mode:0o444});
     const execution=await engine.runRestricted({image:verifiedImage,inputDir:input,runDir:join(checkDirectory,'execution'),command:['node','/input/bootstrap.mjs'],timeoutMs:Math.max(100,Math.min(check.timeoutMs,Date.parse(options.deadline)-Date.now())),signal:options.signal});
     guard();let artifacts:any[]=[];
@@ -129,7 +135,7 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
      effect=!resource.protectionsPassed||delta<=-check.resource!.delta?'退化':delta>=check.resource!.delta?'改善':'无明显差异';
      if(!resource.protectionsPassed){state='failed';reason='Declared resource protection failed';}
     }
-    checks.push({index,kind:check.kind,state,reason,effect:check.kind==='resource'?effect:state==='completed'?'direct-checks-passed':'direct-checks-failed',execution,executionRef:e.blob(JSON.stringify(execution)),artifacts,resource});
+    checks.push({index,kind:check.kind,state,reason,effect:check.kind==='resource'?effect:state==='completed'?'direct-checks-passed':'direct-checks-failed',execution,executionRef:e.blob(JSON.stringify(execution)),artifacts,resource,...(profiles.length?{profileInput:construction.effectiveProfiles,fullProfileAssertions:checkedProfiles}:{} )});
    }
   }catch(error){state=options.signal.aborted?'cancelled':'unknown';reason=String(error);checks.push({index,kind:check.kind,state,reason});}
   record('improve.check',{groupId:group.id,...checks.at(-1)});

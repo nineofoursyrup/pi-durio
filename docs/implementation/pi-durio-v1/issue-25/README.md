@@ -4,7 +4,7 @@ This ticket extends the accepted #24 API. `execute-declared-scope` now supports 
 
 ## Exact selection and commands
 
-Use `pi-durio/improve-decisions` exports `previewImproveDecision`, `submitImproveDecision`, `readImproveDecision`, `readImproveDefaults`, `resumeImproveDecision` and `rollbackImproveDecision`. The existing headless `improve preview|submit --spec FILE` and TUI `/improve-select JSON` use the same checked host boundary. The TUI starts unselected; `e` selects execute, `v` selects validation only, `s` renders the complete aggregate and Enter submits it once. The template never preselects candidates. Repeating an ID returns the original state, with no retries or writes.
+Use `pi-durio/improve-decisions` exports `previewImproveDecision`, `submitImproveDecision`, `readImproveDecision`, `readImproveDefaults`, `readImproveEffectiveConfig`, `resumeImproveDecision` and `rollbackImproveDecision`. The existing headless `improve preview|submit --spec FILE` and TUI `/improve-select JSON` use the same checked host boundary. The TUI starts unselected; `e` selects execute, `v` selects validation only, `s` renders the complete aggregate and Enter submits it once. The template never preselects candidates. Repeating an ID returns the original state, with no retries or writes.
 
 An execution selection extends the existing report/revision/target/steps binding:
 
@@ -61,7 +61,25 @@ A validation group may declare `profileScope: scope` independently of any formal
 
 The comparison identity includes the effective task type/profile. The existing restricted eval guest sends the fixed profile to the common runtime via its existing trusted provider capability. The runtime applies it to actual system instructions and Harness settings; it is not appended to the user request as a description of hypothetical settings. An auto-compaction verification scenario cannot override a selected profile. Necessary resource/fresh comparisons and protections retain every result and original failure.
 
-Legacy #24 fresh checks retain their original instruction-in-user-prompt semantics and remain valid as their stated experiments. They do not alone authorize actual profile activation. Non-behavior cleanup and deterministic fixes can use the explicitly declared exact basis and real direct/regression checks; no irrelevant model A/B is added.
+Legacy #24 fresh checks retain their original instruction-in-user-prompt semantics and remain valid as their stated experiments. They do not alone authorize actual profile activation. File equivalence alone also does not establish loading equivalence: introducing a previously unused skill changes the actual instructions even when its file was only trimmed.
+
+For an effective profile, `basis.impact:'no-behavior'` additionally requires the explicit rule `equivalence:'exact'` or `'trim-instructions-end'`. The host uses the same runtime loader to compare actual before/after instructions and every setting. The latter rule only ignores trailing whitespace at the end of the final instruction string; settings must remain exactly equal. A first mapping of already-effective setting values can pass; a first introduction of nonempty instructions or changed settings cannot use this classification.
+
+A real deterministic configuration repair can use direct regression without model A/B. Its basis must bind complete expected actual before/after profiles for every selected workspace/task type, for example:
+
+```js
+const before = readImproveEffectiveConfig(dataRoot, workspace, 'coding');
+const after = structuredClone(before);
+after.settings.stream.timeoutMs = 90000; // the declared known defect
+group.basis = {
+  impact: 'deterministic-fix',
+  reason: 'Correct the known timeout; preserve every other setting and instruction',
+  checkIndices: [0],
+  expectedProfiles: [{ workspace, taskType: 'coding', before, after }]
+};
+```
+
+These literal expectations are part of the user's exact selected plan. Missing fields, extra fields and incomplete task coverage are rejected. Actual before values come from the selected current default and runtime loader, never from an unused candidate file. Direct/regression checks can read `/input/effective-profiles.json`. Before each named regression program, the existing restricted check automatically compares this actual complete profile to `/input/expected-profiles.json`; a mismatch retains a failed check and prevents writeback/default selection. Both inputs are retained in the construction evidence. A passing deterministic regression is limited to its declared correction and protections, and is not a model improvement claim. First introduction of model-facing instructions instead uses applicable effective-profile fresh validation.
 
 ## File identity, partial writes and recovery
 
@@ -81,4 +99,4 @@ The eval guest supplies a mediated live transport only through its existing trus
 
 `test/improve-execution.test.ts` covers exact execution/reopen, validation drift, partial and unknown result receipts, cross-root admission, edited-file/default protection, performance no-gain, strict configuration, future defaults and old pending content. Existing decision, lifecycle, queue, recovery and eval suites remain required.
 
-`scripts/demo-improve-execution.mjs INSTALL_ROOT LINUX_RUNTIME NEW_EVIDENCE_DIRECTORY` uses independently installed public exports, an actual Pi analysis loop with explicit synthetic transport, structured TUI submission, real restricted VM checks and effective-profile fresh pairs. It preserves failures and cold CLI readbacks. This is implementation evidence only. Real DeepSeek generation/effect belongs to #30; native final composition/day-to-day acceptance remains #31/#32. No main merge, release, issue closure or paid provider use is authorized by this ticket.
+`scripts/demo-improve-execution.mjs INSTALL_ROOT LINUX_RUNTIME NEW_EVIDENCE_DIRECTORY` uses independently installed public exports, an actual Pi analysis loop with explicit synthetic transport, structured TUI submission, real restricted VM checks and effective-profile fresh pairs. An optional `--activation-only` repeats only the changed profile/activation paths when unchanged original checks remain applicable. It preserves the wrong-profile first failure, rejects file-only first-activation shortcuts, proves first skill activation with fresh actual profiles and then permits declared equivalent cleanup of the already-loaded skill. Cold CLI readbacks remain byte-identical. `scripts/demo-live-guest.mjs` supplies the separately labelled no-paid-provider diagnostic described above. This is implementation evidence only. Real DeepSeek generation/effect belongs to #30; native final composition/day-to-day acceptance remains #31/#32. No main merge, release, issue closure or paid provider use is authorized by this ticket.
