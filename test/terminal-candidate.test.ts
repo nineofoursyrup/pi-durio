@@ -6,8 +6,8 @@ import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 
-test('Terminal candidate verification rejects added and missing files as well as changed bytes',()=>{
-  const root=mkdtempSync(join(tmpdir(),'durio-candidate-')),packageRoot=join(root,'package'),manifest=join(root,'manifest.json'),runner=resolve('scripts/terminal-validation.mjs');
+for(const runnerName of ['terminal-validation.mjs','recovery-start-terminal-validation.mjs'])test(`${runnerName} candidate verification rejects added and missing files as well as changed bytes`,()=>{
+  const root=mkdtempSync(join(tmpdir(),'durio-candidate-')),packageRoot=join(root,'package'),manifest=join(root,'manifest.json'),runner=resolve('scripts',runnerName);
   const sha=(value:string|Buffer)=>createHash('sha256').update(value).digest('hex');
   mkdirSync(packageRoot);writeFileSync(join(packageRoot,'module.js'),'export const candidate = 1;');
   writeFileSync(manifest,JSON.stringify({commit:'fixture',packageRoot,runnerSha256:sha(readFileSync(runner)),files:[{path:'module.js',sha256:sha(readFileSync(join(packageRoot,'module.js')))}]}));

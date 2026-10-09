@@ -1,0 +1,35 @@
+{
+  "candidate": "f67a2edd377d37e3f13bbc0da273028103695d6f",
+  "sourceTree": "9b7ac996d027235bd7a6b99a932a13819e8c7206",
+  "sourceBinding": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/source-binding.json",
+  "sourceBindingSha256": "4b2c5e7041e8f01e4b70e5f6eb49ee8f0a3f56a1083f5db046faf0b9cb3ec0c0",
+  "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manifest.json",
+  "manifestSha256": "4dd92b179e26ec29f1724bc256885fcb55b209addfcc4a25dadc59aef46ff693",
+  "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/recovery-start-terminal-validation.mjs",
+  "runnerSha256": "a5b280f8f4244c4b50498cff69db734f442d4742d161e3c33a879458d943cb10",
+  "archive": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/pi-durio-0.1.0.tgz",
+  "archiveSha256": "6fdb3a17fadded5ef5fe4a983697118174c393160f8653ee5081cd571df8b55c",
+  "installedFileCount": 12746,
+  "ownCompiledFilesCompared": 99,
+  "checks": {
+    "beforeCombination": "30/30 affected; 2/2 candidate integrity",
+    "combined": "29/29 UI + 1/1 storage panel/CLI; build PASS",
+    "installation": "99 compiled files + package/lock equal; 12746 exact files before/after installed offline prep and end/new-task/frozen-queue smoke",
+    "nonTerminal": "Refused; no manual evidence created",
+    "r1": "Source/archive/manifest/runner hashes and 12725 installed files unchanged"
+  },
+  "native": "NOT RUN for r2",
+  "paidProvider": "NOT RUN",
+  "inheritedApplicability": [
+    "r1 queue-stop machine facts/operator P/raw/stty PASS; original immutable",
+    "r1 readonly prohibition/source-ended/original-preserved/old-queue-frozen facts apply to unchanged runtime/queue path",
+    "r1 startup WIDTH_CPR_TIMEOUT remains FAIL; r1 actual new-task execution remains unverified",
+    "r2 must cold-open without Ctrl+L and actually execute new task after e; inspect old frozen queue and restore terminal"
+  ],
+  "command": [
+    "node",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/recovery-start-terminal-validation.mjs",
+    "--manifest",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manifest.json"
+  ]
+}
