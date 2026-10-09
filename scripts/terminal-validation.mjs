@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import { parseArgs } from 'node:util';
 const {values}=parseArgs({options:{manifest:{type:'string'},scenario:{type:'string'},'verify-only':{type:'boolean'}}});
-if(!values.manifest)throw Error('Usage: node scripts/terminal-validation.mjs --manifest /absolute/candidate.json [--scenario normal|stop|esc|exit|fault]');
+if(!values.manifest)throw Error('Usage: node scripts/terminal-validation.mjs --manifest /absolute/candidate.json [--scenario cursor|normal|stop|esc|exit|fault]');
 const manifest=JSON.parse(readFileSync(resolve(values.manifest),'utf8'));
 const sha=value=>createHash('sha256').update(value).digest('hex');
 if(sha(readFileSync(new URL(import.meta.url)))!==manifest.runnerSha256)throw Error('CANDIDATE_RUNNER_CHANGED');
@@ -28,12 +28,19 @@ const {ReadOnlyTui,copyToMacClipboard}=await import(pathToFileURL(join(manifest.
 const {demoTransport}=await import(pathToFileURL(join(manifest.packageRoot,'dist/src/offline.js')).href);
 const {ProcessTerminal}=await import(pathToFileURL(join(manifest.packageRoot,'node_modules/@earendil-works/pi-tui/dist/index.js')).href);
 const scenarios=values.scenario?[values.scenario]:['normal','stop','esc','exit','fault'];
-for(const scenario of scenarios)if(!['normal','stop','esc','exit','fault'].includes(scenario))throw Error(`Unknown scenario ${scenario}`);
+for(const scenario of scenarios)if(!['cursor','normal','stop','esc','exit','fault'].includes(scenario))throw Error(`Unknown scenario ${scenario}`);
 writeFileSync(join(root,'plan.json'),JSON.stringify({candidate:manifest.commit,scenarios,terminalObservations:'NOT RUN until the operator reports them',paidProvider:'NOT RUN; deterministic offline transport only'},null,2));
 for(const scenario of scenarios){
   const folder=join(root,scenario),workspace=join(folder,'project'),dataRoot=join(folder,'data');mkdirSync(workspace,{recursive:true});
   writeFileSync(join(workspace,'README.md'),'# Terminal 验收 fixture\n果实数量 7；中文 👩‍💻 é 宽字符；只读。\n'+Array.from({length:2300},(_,i)=>`第 ${String(i).padStart(4,'0')} 行：中文👩‍💻 é | 可复制的长输出 | fruit count 7`).join('\n'));
-  const steps=scenario==='normal'?[
+  const steps=scenario==='cursor'?[
+    '1. 直接复制粘贴这段测试文字：A👩‍💻é中B。确认未提交；只出现一个输入光标，左右移动时没有旧光标残留。',
+    '2. Ctrl+A，向右两次，再 Ctrl+D；应得到 A👩‍💻中B（é 整簇删除）。Ctrl+C 清草稿。',
+    '3. 输入几行文字（Ctrl+J 换行，至少六行）；检查末行光标。缩小到 40×12 左右再恢复，光标应仍在当前插入位置。',
+    '4. F2 打开菜单，Esc 返回；Ctrl+L 重绘；切换窗口再返回。菜单中没有遗留的编辑光标，返回后位置和草稿保持。再用中文输入法组合并选择候选，确认没有误提交且候选窗贴近输入位置。',
+    '5. Ctrl+C 清草稿，输入“读取 README”并 Enter；输出时键入“保留草稿”，观察只有一个光标，重绘不在其他行闪出光标。',
+    '6. F2 → exit → Enter 确认退出；检查原终端的光标和普通输入已恢复。'
+  ]:scenario==='normal'?[
     '1. 先用中文输入法组合“读取 README”，选择候选时按 Enter；观察它仅确认候选、不提交。',
     '2. 添加 👩‍💻、é、中文；分别 Shift+Enter、Ctrl+J、反斜杠后 Enter 换行；粘贴两行，确认不提交。',
     '3. 提交请求后立即写“保留草稿”，按 Enter；应保留且未受理。',
@@ -51,7 +58,8 @@ for(const scenario of scenarios){
   const event=data=>writeSync(eventsFd,JSON.stringify({at:new Date().toISOString(),...data})+'\n');
   const terminal=new ProcessTerminal(),originalStart=terminal.start.bind(terminal);
   terminal.start=(input,resize)=>originalStart(data=>{event({event:'input',data,columns:terminal.columns,rows:terminal.rows});input(data);},()=>{event({event:'resize',columns:terminal.columns,rows:terminal.rows});resize();});
-  const originalWrite=process.stdout.write;process.stdout.write=function(...args){writeSync(screenFd,typeof args[0]==='string'?args[0]:Buffer.from(args[0]));return originalWrite.apply(this,args);};
+  let outputOffset=0;
+  const originalWrite=process.stdout.write;process.stdout.write=function(...args){const data=typeof args[0]==='string'?args[0]:Buffer.from(args[0]);const bytes=Buffer.byteLength(data);event({event:'terminal-write',offset:outputOffset,bytes});writeSync(screenFd,data);outputOffset+=bytes;return originalWrite.apply(this,args);};
   const fixture=demoTransport();let calls=0,cancelled=false;const timers=new Set();
   const transport=async(url,init)=>{
     calls++;event({event:'provider-request',ordinal:calls});
@@ -63,7 +71,7 @@ for(const scenario of scenarios){
       const abort=()=>{if(stopped)return;stopped=true;cancelled=true;event({event:'provider-cancellation-received'});schedule(()=>{event({event:'provider-stream-terminated'});stream.error(new Error('offline transport cancelled'));},200);};
       init.signal.addEventListener('abort',abort,{once:true});
       const send=()=>{if(stopped)return;const text=expanded.shift();if(text){stream.enqueue(new TextEncoder().encode(text));schedule(send,15);}else{stopped=true;init.signal.removeEventListener('abort',abort);stream.close();event({event:'provider-stream-completed'});}};
-      schedule(send,scenario==='normal'?1500:45000);
+      schedule(send,scenario==='normal'||scenario==='cursor'?1500:45000);
     }}),{headers:{'content-type':'text/event-stream'}});
   };
   const clipboard=[];
@@ -78,7 +86,7 @@ for(const scenario of scenarios){
   writeFileSync(join(folder,'machine.json'),JSON.stringify(machine,null,2));event({event:'scenario-finished'});closeSync(eventsFd);
   console.log(`\n场景 ${scenario} 已退出；raw/stty 恢复：${machine.rawRestored}/${machine.sttyRestored}；headless 同一结果：${readback?.sameResult??'无运行结果'}。`);
   const report=createInterface({input:process.stdin,output:process.stdout});
-  const observed=await report.question('请填写本场景观察（PASS/FAIL/UNKNOWN + 原因；normal 请分别写 IME、多行键位、字符簇、复制、焦点、缩放最小格宽、退出原缓冲区）：\n');report.close();
+  const observed=await report.question(scenario==='cursor'?'请填写光标复测（PASS/FAIL/UNKNOWN：单光标、重绘闪动、菜单/焦点恢复、多行缩放、IME 候选位置、é 粘贴与删除、退出恢复；失败请写步骤）：\n':'请填写本场景观察（PASS/FAIL/UNKNOWN + 原因；normal 请分别写 IME、多行键位、字符簇、复制、焦点、缩放最小格宽、退出原缓冲区）：\n');report.close();
   writeFileSync(join(folder,'operator-observation.json'),JSON.stringify({at:new Date().toISOString(),scenario,candidate:manifest.commit,reportedBy:'human-terminal-operator',observation:observed||'UNKNOWN: no observation supplied'},null,2));
 }
 console.log(`证据已保存：${root}\n请将目录发回协调 chat；任何未明确观察的项目继续保持 UNKNOWN。`);
