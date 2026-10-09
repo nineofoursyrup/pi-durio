@@ -9,9 +9,10 @@ import type {DefaultChange,TaskType,DefaultScope} from './improve-defaults.js';
 import {effectiveProfileChanges,type EffectiveProfileChange} from './improve-profile-validation.js';
 
 export interface ContentChange {targetId:string;path:string;content:string}
-export interface DirectCheck {kind:'direct'|'regression'|'resource';program:string;timeoutMs:number;resource?:{direction:'lower'|'higher';delta:number;unit:string;basis:string}}
+export type BenefitRole='required'|'diagnostic';
+export interface DirectCheck {benefit?:BenefitRole;kind:'direct'|'regression'|'resource';program:string;timeoutMs:number;resource?:{direction:'lower'|'higher';delta:number;unit:string;basis:string}}
 export interface FreshCheck {
- kind:'fresh';installation:string;runtimeIdentity:string;
+ kind:'fresh';benefit?:BenefitRole;installation:string;runtimeIdentity:string;
  effectiveTask?:TaskType;
  files:{targetId:string;path:string}[];
  options:Omit<PrepareEvalOptions,'dataRoot'|'id'|'installation'|'comparison'|'image'>;
@@ -31,10 +32,11 @@ export function scopedImproveSource(dataRoot:string,source:string){
  const match=/^e1:([1-9][0-9]*):([a-f0-9]{64})$/.exec(source);if(!match)throw Error('IMPROVE_CHILD_SOURCE_INVALID');
  return {scope:'child-data-root',dataRoot,sequence:Number(match[1]),digest:match[2]};
 }
-export function summarizeImproveValidation(checks:{kind:string;state:string;effect?:string}[]){
+export function summarizeImproveValidation(checks:{kind:string;state:string;effect?:string;benefit?:BenefitRole}[]){
  const comparisons=checks.filter(c=>['fresh','resource'].includes(c.kind)),effects=comparisons.map(c=>c.effect??'证据不足');
  const effect=effects.includes('退化')?'退化':checks.some(c=>c.state==='failed')?'direct-checks-failed':checks.some(c=>c.state!=='completed')||effects.includes('证据不足')?'证据不足':!comparisons.length?'direct-checks-passed':effects.every(e=>e==='改善')?'改善':effects.every(e=>e==='无明显差异')?'无明显差异':'证据不足';
- return {effect,allChecksPassed:checks.length>0&&checks.every(c=>c.state==='completed'),allDeclaredBenefitsMet:comparisons.length>0&&effects.every(e=>e==='改善')&&checks.every(c=>c.state==='completed'),rule:'Every declared check/protection remains necessary; all declared benefit comparisons must meet their own thresholds. Mixed or missing conclusions cannot be replaced by the last result.'};
+ const required=comparisons.filter(c=>c.benefit!=='diagnostic'),allChecksPassed=checks.length>0&&checks.every(c=>c.state==='completed');
+ return {effect,allChecksPassed,allDeclaredBenefitsMet:comparisons.length>0&&effects.every(e=>e==='改善')&&allChecksPassed,requiredBenefitCount:required.length,diagnosticBenefitCount:comparisons.length-required.length,allRequiredBenefitsMet:required.every(c=>c.effect==='改善')&&allChecksPassed,rule:'Every declared check/protection remains necessary for every objective. All required benefits must meet their own thresholds; omitted benefit role means required. Explicit diagnostic effects remain observations and never satisfy a required benefit. Performance requires at least one required comparison. Mixed or missing conclusions are retained, never replaced by the last result.'};
 }
 const safePath=(path:unknown)=>typeof path==='string'&&/^[a-zA-Z0-9_@+.,=-]+(?:\/[a-zA-Z0-9_@+.,=-]+)*$/.test(path)&&!path.split('/').some(p=>p==='.'||p==='..'||p==='.git'||p==='node_modules');
 export function validateGroup(group:ValidationGroup,candidates:ImproveCandidate[],deadline:string){
@@ -49,15 +51,16 @@ export function validateGroup(group:ValidationGroup,candidates:ImproveCandidate[
  if(bytes>1048576)throw Error('IMPROVE_CHANGE_SIZE_LIMIT');
  for(const c of selected)if(c.objective!=='validation'&&!group.changes.some(p=>p.targetId===c.target.id&&c.scope.includes(p.path)))throw Error('IMPROVE_CANDIDATE_CONTENT_REQUIRED');
  for(const check of group.checks){
+  if(check.benefit!==undefined&&(!['fresh','resource'].includes(check.kind)||!['required','diagnostic'].includes(check.benefit)))throw Error('IMPROVE_BENEFIT_ROLE_INVALID');
   if(check.kind==='fresh'){
    if(!check.installation?.startsWith('/')||describeImproveRuntime(check.installation)!==check.runtimeIdentity)throw Error('IMPROVE_RUNTIME_CONTENT_DRIFT');
    const o=check.options;if(!o||!['offline','live'].includes(o.mode??'')||!o.budget||!['maxRequests','maxTokens','maxRequestTokens'].every(k=>Number.isSafeInteger((o.budget as any)[k])&&(o.budget as any)[k]>0)||Date.parse(o.budget.deadline)>Date.parse(deadline)||!Number.isFinite(Date.parse(o.budget.deadline))||!check.comparison||'sides' in check.comparison||!Array.isArray(check.files)||!check.files.length)throw Error('IMPROVE_FRESH_PLAN_INVALID');
    if(!Object.keys(o).every(k=>['purpose','mode','budget','trialTimeoutMs','gradingTimeoutMs','maxOutputTokens','cases','trials','paid','price'].includes(k)))throw Error('IMPROVE_FRESH_SCOPE_DENIED');
-   if(!Object.keys(check).every(k=>['kind','installation','runtimeIdentity','files','options','comparison','effectiveTask'].includes(k))||check.effectiveTask!==undefined&&!['coding','read'].includes(check.effectiveTask))throw Error('IMPROVE_FRESH_SCOPE_DENIED');
+   if(!Object.keys(check).every(k=>['kind','installation','runtimeIdentity','files','options','comparison','effectiveTask','benefit'].includes(k))||check.effectiveTask!==undefined&&!['coding','read'].includes(check.effectiveTask))throw Error('IMPROVE_FRESH_SCOPE_DENIED');
    for(const file of check.files)if(!group.changes.some(p=>p.targetId===file.targetId&&p.path===file.path)||!selected.some(c=>c.target.id===file.targetId&&['prompt-skill','agent-config'].includes(c.target.kind)))throw Error('IMPROVE_FRESH_BINDING_REQUIRED: fresh instructions must come from the declared temporary prompt/config content');
    if(group.changes.some(p=>!check.files.some(f=>f.targetId===p.targetId&&f.path===p.path)))throw Error('IMPROVE_FRESH_COMBINATION_BINDING_REQUIRED: every changed part of this combination must enter both fixed comparison sides');
    if(selected.some(c=>c.target.kind==='eval-asset'))throw Error('IMPROVE_GRADER_CANDIDATE_COMPARISON_DENIED');
-  }else if(!['direct','regression','resource'].includes(check.kind)||typeof check.program!=='string'||!check.program.trim()||Buffer.byteLength(check.program)>131072||!Number.isSafeInteger(check.timeoutMs)||check.timeoutMs<100||check.timeoutMs>300000||!Object.keys(check).every(k=>['kind','program','timeoutMs','resource'].includes(k))){throw Error('IMPROVE_CHECK_INVALID');}
+  }else if(!['direct','regression','resource'].includes(check.kind)||typeof check.program!=='string'||!check.program.trim()||Buffer.byteLength(check.program)>131072||!Number.isSafeInteger(check.timeoutMs)||check.timeoutMs<100||check.timeoutMs>300000||!Object.keys(check).every(k=>['kind','program','timeoutMs','resource','benefit'].includes(k))){throw Error('IMPROVE_CHECK_INVALID');}
   else if(check.kind==='resource'&&(!check.resource||!['lower','higher'].includes(check.resource.direction)||!Number.isFinite(check.resource.delta)||check.resource.delta<=0||!check.resource.unit||!check.resource.basis))throw Error('IMPROVE_RESOURCE_THRESHOLD_REQUIRED');
  }
  const basis=group.basis;
@@ -69,6 +72,7 @@ export function validateGroup(group:ValidationGroup,candidates:ImproveCandidate[
  for(const c of selected){if(['prompt-skill','agent-config'].includes(c.target.kind)&&!directBasis&&!group.checks.some(check=>check.kind==='fresh'&&check.files.some(f=>f.targetId===c.target.id&&c.scope.includes(f.path))))throw Error('IMPROVE_BEHAVIOR_FRESH_REQUIRED');
   if(c.objective==='bug'&&!group.checks.some(check=>['regression','fresh'].includes(check.kind)))throw Error('IMPROVE_REGRESSION_REQUIRED');
   if(c.objective==='performance'&&!group.checks.some(check=>['resource','fresh'].includes(check.kind)))throw Error('IMPROVE_PERFORMANCE_CHECK_REQUIRED');
+  if(c.objective==='performance'&&!group.checks.some(check=>['resource','fresh'].includes(check.kind)&&check.benefit!=='diagnostic'))throw Error('IMPROVE_PERFORMANCE_REQUIRED_BENEFIT');
  }
 }
 
@@ -87,11 +91,11 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
  const checks:any[]=[];let effect='direct-checks-passed',state='completed',reason:string|null=null;
  const engine=await import(new URL('../execution/isolation/boundary.mjs',import.meta.url).href);
  for(let index=0;index<group.checks.length;index++){
-  const check=group.checks[index];
-  if(state!=='completed'){checks.push({index,kind:check.kind,state:'not-run',reason});continue;}
-  guard();if(options.signal.aborted||Date.now()>=Date.parse(options.deadline)){state=options.signal.aborted?'cancelled':'failed';reason=options.signal.aborted?'cancelled':'IMPROVE_DEADLINE';checks.push({index,kind:check.kind,state,reason});continue;}
+  const check=group.checks[index],benefit=['fresh','resource'].includes(check.kind)?{benefit:check.benefit??'required'}:{};
+  if(state!=='completed'){checks.push({index,kind:check.kind,...benefit,state:'not-run',reason});continue;}
+  guard();if(options.signal.aborted||Date.now()>=Date.parse(options.deadline)){state=options.signal.aborted?'cancelled':'failed';reason=options.signal.aborted?'cancelled':'IMPROVE_DEADLINE';checks.push({index,kind:check.kind,...benefit,state,reason});continue;}
   const checkDirectory=join(directory,`check-${index}`);await mkdir(checkDirectory,{mode:0o700});
-  record('improve.check-started',{groupId:group.id,index,kind:check.kind,directory:checkDirectory});
+  record('improve.check-started',{groupId:group.id,index,kind:check.kind,...benefit,directory:checkDirectory});
   try{
    if(check.kind==='fresh'){
     if(describeImproveRuntime(check.installation)!==check.runtimeIdentity)throw Error('IMPROVE_RUNTIME_CONTENT_DRIFT');
@@ -138,9 +142,10 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
     checks.push({index,kind:check.kind,state,reason,effect:check.kind==='resource'?effect:state==='completed'?'direct-checks-passed':'direct-checks-failed',execution,executionRef:e.blob(JSON.stringify(execution)),artifacts,resource,...(profiles.length?{profileInput:construction.effectiveProfiles,fullProfileAssertions:checkedProfiles}:{} )});
    }
   }catch(error){state=options.signal.aborted?'cancelled':'unknown';reason=String(error);checks.push({index,kind:check.kind,state,reason});}
+  Object.assign(checks.at(-1),benefit);
   record('improve.check',{groupId:group.id,...checks.at(-1)});
  }
  const conclusion=summarizeImproveValidation(checks);
- if(state==='completed'&&conclusion.effect==='证据不足'){state='unknown';reason='Declared combined benefits remain insufficient; remaining work frozen.';}
+ if(state==='completed'&&conclusion.effect==='证据不足'&&!conclusion.allRequiredBenefitsMet){state='unknown';reason='Declared combined benefits remain insufficient; remaining work frozen.';}
  return {state,reason,construction,checks,effect:conclusion.effect,conclusion,scope:'Only the selected combination, fixed contents and restricted checks; no per-candidate causal credit or host-performance claim.',writeback:'not-written',activation:'not-enabled'};
 }

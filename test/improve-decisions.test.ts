@@ -159,3 +159,9 @@ test('narrow selection viewport keeps the current candidate title and mode visib
  const resized=view.render(32,8).join('\n');assert.ok(resized.includes('Choice 5'),resized);
  for(let i=3;i>=0;i--){await view.handleInput('\x1b[A');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('[defer]'),screen);}
 });
+
+test('diagnostic effects remain visible beside required results and cannot hide missing necessary evidence',()=>{
+ const required={kind:'resource',state:'completed',effect:'改善'},diagnostic={kind:'fresh',benefit:'diagnostic' as const,state:'completed',effect:'无明显差异'};
+ const both=summarizeImproveValidation([required,diagnostic]);assert.equal(both.effect,'证据不足');assert.equal(both.allDeclaredBenefitsMet,false);assert.equal(both.allRequiredBenefitsMet,true);assert.equal(both.requiredBenefitCount,1);assert.equal(both.diagnosticBenefitCount,1);
+ const missing=summarizeImproveValidation([required,{...diagnostic,state:'unknown',effect:'证据不足'}]);assert.equal(missing.allRequiredBenefitsMet,false);assert.equal(missing.allChecksPassed,false);
+});
