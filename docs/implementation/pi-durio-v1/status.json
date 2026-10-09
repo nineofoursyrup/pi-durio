@@ -30,7 +30,7 @@
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "note": "T01 offline real Pi runtime acceptance passed; source/compiled/evidence/install identities verified. Paid provider NOT RUN.",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-11.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-11.json"
     },
     "12": {
       "number": 12,
@@ -56,7 +56,7 @@
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "note": "Ticket acceptance and merge identity verified. Formal product eval remains #21; issue remains OPEN.",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-12.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-12.json"
     },
     "13": {
       "number": 13,
@@ -84,7 +84,7 @@
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "note": "T03 local/offline applicable acceptance passed. Source/compiled/evidence identities and original materials verified; complete lifecycle/recovery/Terminal/provider remain later obligations.",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-13.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-13.json",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/13#issuecomment-6079270047"
     },
     "14": {
@@ -112,7 +112,7 @@
       "agent": "/root/issue14",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T103610Z/issue-14.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-14.json",
       "note": "T04 applicable acceptance passed: 44/44 combined checks and 9/9 independent lifecycle cases; all artifacts verified. Real Terminal human gate remains separate.",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/14#issuecomment-6079745129"
     },
@@ -141,7 +141,7 @@
       "agent": "/root/issue15",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T110901Z/issue-15.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-15.json",
       "note": "T05 applicable acceptance passed: 59/59 combined checks, 4/4 standalone recovery cases, 8/8 concurrent startup; exact candidate tree and artifacts verified. Unknown foreign pending/raw crash remains fenced with explicit responsibility. Terminal acceptance remains #16.",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/15#issuecomment-6080374212"
     },
@@ -196,7 +196,7 @@
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "note": "T06 applicable acceptance complete: inherited unchanged native C/N/STOP/ESC plus r6 first-pair C/D, fault, completed and explicit 40x12 input/menu. Original FAIL/UNKNOWN retained; final v1 acceptance and paid provider remain separate.",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-16.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-16.json",
       "local_checkpoint": "e98fef9",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6079513003",
       "human_evidence_request": {
@@ -394,7 +394,7 @@
         "docs/implementation/pi-durio-v1/issue-17/terminal-r2-pass.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/reopen-repair/merge-integration-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-17.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-17.json",
       "branch": "codex/pi-durio-v1-issue-17",
       "agent": "/root/issue17",
       "model_requested": "gpt-6-astra",
@@ -458,7 +458,7 @@
         "docs/implementation/pi-durio-v1/issue-18/acceptance.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/merge-integration-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-18.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-18.json",
       "branch": "codex/pi-durio-v1-issue-18",
       "agent": "/root/issue18",
       "model_requested": "gpt-6-astra",
@@ -504,7 +504,7 @@
       "base_commit": "4ffa16e926e2d5bc3cd34a45b76ea40019b951b2",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T155256Z/issue-19.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-19.json",
       "note": "T09 applicable public-runtime/installed compaction acceptance complete; native aggregate remains #31; original failures retained.",
       "local_checkpoint": "4aeb3b6a2d20d41d0172fc45287de6fe2fdead68",
       "product_commit": "b556530dcbac6a93255cdbc07e31f9b43b08acdd",
@@ -543,7 +543,7 @@
       "agent": "/root/issue20",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T144939Z/issue-20.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-20.json",
       "note": "Applicable archive/retention/cleanup/migration evidence passed and merged product bytes bound; native management composition remains #31.",
       "product_commit": "68fb251623326b1a6357e7efb8b2602ecbc74f3e",
       "acceptance": {
@@ -579,7 +579,7 @@
         "docs/implementation/pi-durio-v1/issue-21/coordinator-acceptance.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/merge-integration-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T145831Z/issue-21.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-21.json",
       "note": "T11 applicable controlled-provider restricted runtime, budget, independent grading and installed readonly evidence accepted; paired comparison and paid model acceptance remain separate.",
       "branch": "codex/pi-durio-v1-issue-21",
       "agent": "/root/issue21",
@@ -622,7 +622,7 @@
       "agent": "/root/issue22",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T161054Z/issue-22.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-22.json",
       "note": "T12 fixed controlled-provider fresh comparison, report and same-outcome revision accepted. Paid model effect and native integrated acceptance remain separate.",
       "base_commit": "0782fe35e941567d94d05ef71da5e45857c4e57c",
       "local_checkpoint": "f7191308674d8b92d2e4d717c57386b77046867a",
@@ -659,7 +659,7 @@
         "docs/implementation/pi-durio-v1/issue-23/coordinator-acceptance.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/merge-integration-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T165127Z/issue-23.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-23.json",
       "branch": "codex/pi-durio-v1-issue-23",
       "agent": "/root/issue23",
       "model_requested": "gpt-6-astra",
@@ -701,7 +701,7 @@
         "docs/implementation/pi-durio-v1/issue-24/coordinator-acceptance.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/merge-integration-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T174316Z/issue-24.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-24.json",
       "base_commit": "23dca71d36ad289f335f3dc45111cd1f14c41ce1",
       "branch": "codex/pi-durio-v1-issue-24",
       "agent": "/root/issue24",
@@ -752,7 +752,7 @@
         "docs/implementation/pi-durio-v1/issue-25/coordinator-acceptance.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-integration-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T201412Z/issue-25.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-25.json",
       "branch": "codex/pi-durio-v1-issue-25",
       "agent": "/root/issue25",
       "model_requested": "gpt-6-astra",
@@ -784,18 +784,29 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-26",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T201412Z/issue-26.json",
+      "commit": "ccc8e53257cb4274889b1a0bc3fd982fe6de3597",
+      "integrated_sha": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-26/coordinator-acceptance.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/merge-integration-readback.json"
+      ],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-26.json",
       "branch": "codex/pi-durio-v1-issue-26",
       "agent": "/root/issue26",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "integration_base": "7553824adf2a7769e2add9c6bf9c20c06ff8f821",
-      "claim_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/claim-readback.json"
+      "claim_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/claim-readback.json",
+      "product_commit": "2554316e5a175299d1149d02e5bb2d8a5824beef",
+      "handoff": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/handoff.json",
+      "note": "Registered source/build/new process/old pending/rollback and independent both-side grader revision acceptance passed on retained actual installation and VM records. Final Spec/Standards review and provider/native/technical/daily-use gates remain separate.",
+      "acceptance": {
+        "at": "2026-10-09T21:35:38.839543+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/coordinator-acceptance.json",
+        "sha256": "3ca72ffeb18736e62223ba12e8c0de174726108600198dd425c67997f7cef30c"
+      }
     },
     "27": {
       "number": 27,
@@ -822,7 +833,7 @@
         "docs/implementation/pi-durio-v1/issue-27/coordinator-acceptance.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/merge-integration-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T171238Z/issue-27.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-27.json",
       "branch": "codex/pi-durio-v1-issue-27",
       "agent": "/root/issue27",
       "base_commit": "e07a2d547eb12e7fbabdf359094a451def0c3147",
@@ -861,7 +872,7 @@
         "docs/implementation/pi-durio-v1/issue-28/coordinator-acceptance.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/merge-integration-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T175937Z/issue-28.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-28.json",
       "base_commit": "3316841271c0181425795a26de51474bdbfaa37b",
       "branch": "codex/pi-durio-v1-issue-28",
       "agent": "/root/issue28",
@@ -909,7 +920,7 @@
         "docs/implementation/pi-durio-v1/issue-29/coordinator-acceptance.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/merge-integration-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T184952Z/issue-29.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-29.json",
       "branch": "codex/pi-durio-v1-issue-29",
       "agent": "/root/issue29",
       "model_requested": "gpt-6-astra",
@@ -948,7 +959,7 @@
         "docs/implementation/pi-durio-v1/issue-30/coordinator-preparation.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/merge-preparation-readback.json"
       ],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T201412Z/issue-30.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-30.json",
       "preparation": {
         "status": "unapproved draft; actual post-25 candidate/plan pending",
         "fixture": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/improve-fixture-proposal-r1.json",
@@ -993,7 +1004,8 @@
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/coordinator-preparation.json",
         "sha256": "ffd01ee7e18ef48929bb67089ed4205b21483e2fe29a7055d3ddcc9a82b5c57e"
       },
-      "note": "Preparation only; paid batch and permitted credential source await human reply. No live call, no actual candidate or selection, not accepted and #31 not unblocked."
+      "note": "Preparation only; paid batch and permitted credential source await human reply. No live call, no actual candidate or selection, not accepted and #31 not unblocked.",
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/30#issuecomment-6088950683"
     },
     "31": {
       "number": 31,
@@ -1016,7 +1028,15 @@
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T194338Z/issue-31.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-31.json",
+      "independent_preparation": {
+        "status": "partial local measurements; native batch FROZEN_NOT_RUN; whole ticket blocked by #30",
+        "inventory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/inventory.json",
+        "processStartup": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/process-startup/result.json",
+        "nativeConfig": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/native-config.json",
+        "nativeRequest": "User launch requested asynchronously; no response yet",
+        "contractNavigation": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/contract-applicability-preparation-r2.json"
+      }
     },
     "32": {
       "number": 32,
@@ -1034,12 +1054,12 @@
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T194338Z/issue-32.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T211650Z/issue-32.json"
     }
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "f7890ede828f20c1f7b45689be50cc703e9322ba",
+  "integration_tip": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -1049,8 +1069,8 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T20:42:50.958556+00:00",
-  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/publication/readback.json",
+  "updated_at": "2026-10-09T21:35:38.839543+00:00",
+  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/evidence/readme-current-34d16e6/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
       "commit": "01f2d3a562b12a9917b3db1dc8111ea2717d386f",
@@ -1105,10 +1125,19 @@
   },
   "root_write_owner": "/root coordinator",
   "heavy_validation_window": {
-    "owner": "/root/issue26",
-    "grantedAt": "2026-10-09T20:32:14.636778+00:00",
-    "scope": "Affected self-source/new-build/eval-asset compile and real new-process/VM acceptance",
+    "owner": "/root coordinator",
+    "grantedAt": "2026-10-09T21:31:48.698845+00:00",
+    "scope": "Fixed candidate local inventory/process measurements; native batch not started",
     "paid": "NOT GRANTED",
-    "release": "Explicit worker completion or coordinator transfer"
+    "release": "Coordinator transfer"
+  },
+  "latest_contract_refresh": "remote/20261009T211650Z/summary.json",
+  "review": {
+    "candidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+    "tree": "e5ad9f25f84ded025fe7b2dff49fc08936a89eb3",
+    "baseline": "25d311616136766b37c0274f3f490ec1105f9592",
+    "spec": "running /root/review_spec",
+    "standards": "pending sequential independent reviewer",
+    "scope": "Implemented #11–29 and #30 preparation; declared paid/native/technical/human gates remain unaccepted"
   }
 }

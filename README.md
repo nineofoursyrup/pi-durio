@@ -59,7 +59,7 @@ node dist/src/cli.js history --data-root /absolute/data-root --format json
 ## eval、improve 与报告
 
 - **eval**：先固定案例、工件、评分资产、顺序、预算与期限，再在验证过的受限环境执行和独立评分；普通本机试跑仅提供诊断证据。[固定计划](docs/implementation/pi-durio-v1/issue-21/README.md) · [fresh 对照](docs/implementation/pi-durio-v1/issue-22/README.md)。
-- **improve**：显式请求受限分析，候选默认不选；用户逐项选择“执行已声明范围”或“仅验证”，核对汇总后提交。自然语言意见和分析完成不构成写入授权。[分析](docs/implementation/pi-durio-v1/issue-23/README.md) · [结构化选择](docs/implementation/pi-durio-v1/issue-24/README.md) · [精确写回、后续任务配置与回退](docs/implementation/pi-durio-v1/issue-25/README.md)。自身新构建和独立 eval 资产路径的当前状态见总索引。
+- **improve**：显式请求受限分析，候选默认不选；用户逐项选择“执行已声明范围”或“仅验证”，核对汇总后提交。自然语言意见和分析完成不构成写入授权。[分析](docs/implementation/pi-durio-v1/issue-23/README.md) · [结构化选择](docs/implementation/pi-durio-v1/issue-24/README.md) · [精确写回、后续任务配置与回退](docs/implementation/pi-durio-v1/issue-25/README.md)。[注册源码、新构建与独立 eval 资产](docs/implementation/pi-durio-v1/issue-26/README.md)分别保留验证、写回、后续入口和实际新进程事实，旧 pending 不热迁移。
 - **报告**：`metrics`、`operations`、`feedback-report` 分别显示任务验收、全样本成本与故障、人工介入与返工；`completed` 只表示运行结束，不等于需求通过或用户接受。[验收口径](docs/implementation/pi-durio-v1/issue-27/README.md) · [成本/故障](docs/implementation/pi-durio-v1/issue-28/README.md) · [介入/返工](docs/implementation/pi-durio-v1/issue-29/README.md)。
 - **记录管理**：历史、原文分页、trace、用量与固定证据使用同一只读查询接口。归档和迁移保留源数据，清理另需 preview 和明确 commit，受引用保护的材料不能静默删掉。[查询](docs/implementation/pi-durio-v1/issue-18/README.md) · [存储管理](docs/implementation/pi-durio-v1/issue-20/README.md)。
 

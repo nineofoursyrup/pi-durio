@@ -1,6 +1,6 @@
 # pi-durio v1 implementation status
 
-Integration: `codex/pi-durio-v1`; observed tip: `f7890ede828f20c1f7b45689be50cc703e9322ba`.
+Integration: `codex/pi-durio-v1`; observed tip: `1be8e2826fa5d523e9224677838dd97b2d4d8ac3`.
 Draft PR: https://github.com/nineofoursyrup/pi-durio/pull/33.
 
 Issues remain OPEN; integrated-accepted means ticket acceptance only, not v1 acceptance or release.
@@ -22,7 +22,7 @@ Issues remain OPEN; integrated-accepted means ticket acceptance only, not v1 acc
 | #23 improve 受限取证与候选报告 | integrated-accepted | #17, #18 | ea0c1ed70a28240214a740a4c543e91a6d00291f | ee33413ab9e6af1af5bc98a51536149433098625 | /Users/nineofour/pi-durio-v1-run/evidence/issue-23/handoff.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-23/coordinator-premerge.json, docs/implementation/pi-durio-v1/issue-23/README.md, docs/implementation/pi-durio-v1/issue-23/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-23/merge-integration-readback.json |
 | #24 improve 结构化选择、仅验证与建议抑制 | integrated-accepted | #22, #23 | ab5d8179c153fc54acd294aa6b806dfeb7023731 | 6e0c39132daf1beb9883fe0110ed7d5d0b20889b | docs/implementation/pi-durio-v1/issue-24/README.md, docs/implementation/pi-durio-v1/issue-24/acceptance.json, docs/implementation/pi-durio-v1/issue-24/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-24/merge-integration-readback.json |
 | #25 项目与配置候选的验证后写回、启用和回退 | integrated-accepted | #24 | 29f00ced7c033816d1413cd53cf39870e475e191 | ac14c395823fe9c81e1b551288d4d3a487df3da8 | docs/implementation/pi-durio-v1/issue-25/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-integration-readback.json |
-| #26 自身源码新构建与独立 eval 资产改进 | implementing | #25 | — | — | NOT RUN |
+| #26 自身源码新构建与独立 eval 资产改进 | integrated-accepted | #25 | ccc8e53257cb4274889b1a0bc3fd982fe6de3597 | 1be8e2826fa5d523e9224677838dd97b2d4d8ac3 | docs/implementation/pi-durio-v1/issue-26/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-26/merge-integration-readback.json |
 | #27 任务验收三率与执行、验收双时钟 | integrated-accepted | #17, #18 | 0d292488cef06eedf917cf032d7c8417a9db3584 | 716aab74832e781c4652246671893430699808ea | /Users/nineofour/pi-durio-v1-run/evidence/issue-27/handoff.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-27/coordinator-premerge.json, docs/implementation/pi-durio-v1/issue-27/README.md, docs/implementation/pi-durio-v1/issue-27/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-27/merge-integration-readback.json |
 | #28 全样本成本与任务、尝试故障报告 | integrated-accepted | #27 | 960db7658f6a8afc1c544bd20a4fed2e74184ecf | a35cb3b672f412d0e6330b43ad947c24a085b9b1 | docs/implementation/pi-durio-v1/issue-28/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-28/merge-integration-readback.json |
 | #29 低打扰人工介入与交付后返工报告 | integrated-accepted | #27 | 210a9c005c89c9deaaf4cfd2be8e2a2c8eb1b589 | a78014c20b875facc033bbed03b824207de01c67 | docs/implementation/pi-durio-v1/issue-29/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-29/merge-integration-readback.json |
