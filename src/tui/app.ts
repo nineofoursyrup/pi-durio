@@ -6,6 +6,7 @@ import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiA
 import { runReadTask, type ReadTaskOptions, type RunResult } from '../runtime.js';
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
+import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
@@ -76,6 +77,7 @@ export class ReadOnlyTui {
   private failure?:string;
   private historyWindow=false;
   private removeInput?:()=>void;
+  private restoreTerminalWrite?:()=>void;
   private removeSignals:Array<()=>void>=[];
 
   constructor(private readonly options:TuiOptions) {
@@ -86,7 +88,7 @@ export class ReadOnlyTui {
     this.drafts=new Drafts(options.draftRoot??join(homedir(),'Library','Application Support','pi-durio','ui-drafts'),options.workspace,options.dataRoot);
     this.closed=new Promise(resolve=>{this.resolveClosed=resolve;});
     this.tui=new TuiAltScreen(this.terminal,true,undefined,{copySelection:this.copy,copyOnSelect:true,scrollToEndIndicator:()=> ' ↓ 回到底部 · /bottom '});
-    this.editor=new Editor(this.tui,theme,{autocompleteMaxVisible:2});
+    this.editor=new HardwareCursorEditor(this.tui,theme,{autocompleteMaxVisible:2});
     this.editor.setAutocompleteProvider(completion);
     this.editor.onChange=()=>{
       const text=this.editor.getExpandedText();
@@ -139,6 +141,7 @@ export class ReadOnlyTui {
     process.on('uncaughtException',fault); this.removeSignals.push(()=>process.off('uncaughtException',fault));
     const rejection=(reason:unknown)=>fault(reason instanceof Error?reason:new Error(String(reason)));
     process.on('unhandledRejection',rejection); this.removeSignals.push(()=>process.off('unhandledRejection',rejection));
+    this.restoreTerminalWrite=hideCursorDuringPaint(this.terminal);
     this.tui.start();
     this.terminal.write('\x1b[?1004h'); // Focus reports invalidate any pending exit confirmation.
     this.timer=setInterval(()=>{if(this.pendingRefresh) this.refresh();},75);
@@ -428,7 +431,7 @@ export class ReadOnlyTui {
         try {await this.terminal.drainInput(150,30);} catch(error){this.failure??=`终端 drain 失败：${String(error)}`;}
         try {this.terminal.write('\x1b[?1004l');this.tui.stop({preserveScreen:true});}
         catch(error){this.failure??=`终端清理失败：${String(error)}`;try{this.terminal.stop();}catch{/* Preserve the cleanup failure. */}}
-        finally {try{this.terminal.showCursor();}catch{/* Earlier failure remains visible in the exit result. */}}
+        finally {try{this.terminal.showCursor();}catch{/* Earlier failure remains visible in the exit result. */}this.restoreTerminalWrite?.();}
       }
     }
     const result={result:this.result,error:this.failure,draftSaved};

@@ -4,8 +4,9 @@ import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
+import { CURSOR_MARKER, TuiAltScreen, stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
+import { HardwareCursorEditor } from '../src/tui/cursor.js';
 import { demoTransport } from '../src/offline.js';
 import { readRun } from '../src/runtime.js';
 
@@ -16,7 +17,7 @@ class TestTerminal implements Terminal {
   stop() { this.stopped=true; }
   async drainInput() {}
   write(value:string) { this.writes.push(value); }
-  moveBy() {} hideCursor() {} showCursor() {} clearLine() {} clearFromCursor() {} clearScreen() {} setTitle() {} setProgress() {} setProgramStatus() {}
+  moveBy() {} hideCursor() { this.write('\x1b[?25l'); } showCursor() { this.write('\x1b[?25h'); } clearLine() {} clearFromCursor() {} clearScreen() {} setTitle() {} setProgress() {} setProgramStatus() {}
 }
 const tick = () => new Promise(r => setTimeout(r,30));
 async function until(predicate:()=>boolean) { for(let i=0;i<200;i++) { if(predicate()) return; await tick(); } throw Error('condition timed out'); }
@@ -155,4 +156,76 @@ test('real read tools show source truncation and failure while folded without ex
       release();await until(()=>f.screen().includes('已完成'));
     } finally {release();await f.app.exit();}
   }
+});
+
+// Assert at the real pi-tui ANSI boundary, not against stripped display text.
+// The recorded r3 Terminal frames draw a reverse-video software caret while
+// also showing the hardware caret. These are independently owned cursors.
+test('focused editor uses one hardware caret without a competing painted caret', async () => {
+  const f=fixture(),key=(s:string)=>f.terminal.input(s);
+  try {
+    // Same input prefix as the second recorded real-Terminal run (events 40–48).
+    for(const input of ['读','取',' ','R','E','A','D','M','E']) key(input);
+    f.app.screen();
+    const ansi=f.terminal.writes.join('');
+    const visible=ansi.lastIndexOf('\x1b[?25h')>ansi.lastIndexOf('\x1b[?25l');
+    assert.equal(visible,true,'focused editor must show its hardware caret for IME');
+    assert.doesNotMatch(ansi,/\x1b\[7m/, 'software caret competes with the visible hardware caret');
+    f.terminal.writes=[];
+    key('\x1bOQ');f.app.screen();
+    const overlay=f.terminal.writes.join('');
+    assert.ok(overlay.lastIndexOf('\x1b[?25l')>overlay.lastIndexOf('\x1b[?25h'),'menu owns focus and hides the editor caret');
+    assert.doesNotMatch(overlay,/\x1b\[7m/,'blurred editor must not leave a painted caret behind');
+    key('\x1b');f.app.screen();
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[20;12H\x1b\[\?25h/,'return to the unchanged editor insertion point');
+  } finally { await f.app.exit(); }
+});
+
+test('caret adaptation preserves independent reverse-video component styles', () => {
+  const terminal=new TestTerminal(),tui=new TuiAltScreen(terminal,true);
+  const identity=(text:string)=>text;
+  const editor=new HardwareCursorEditor(tui,{borderColor:text=>`\x1b[7m${text}\x1b[0m`,selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}});
+  editor.setText('é');
+  for(const focused of [true,false]) {
+    editor.focused=focused;
+    const lines=editor.render(20);
+    assert.match(lines[0],/^\x1b\[7m─+/,'the border theme keeps its independent reverse-video style');
+    assert.doesNotMatch(lines[1],/\x1b\[7m/,'only the editor caret loses reverse-video styling');
+    assert.equal(lines[1].includes(CURSOR_MARKER),focused,'only focused input provides the IME insertion marker');
+    assert.equal(editor.focused,focused,'rendering does not change input focus');
+  }
+});
+
+test('real bracketed paste preserves combining text and keeps caret visible through multiline resize', async () => {
+  const f=fixture(),key=(s:string)=>f.terminal.input(s);
+  try {
+    key('\x1b[200~A👩‍💻é中B\x1b[201~');f.app.screen();
+    assert.equal(f.transport.calls.length,0,'paste must not submit');
+    assert.match(f.screen(),/A👩‍💻é中B/);
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[20;8H\x1b\[\?25h/,'wide and combining text position the hardware caret in terminal cells');
+    key('\x01');key('\x1b[C');key('\x1b[C');key('\x04');
+    assert.match(f.screen(),/A👩‍💻中B/,'Ctrl+D removes the complete combining grapheme');
+    key('\x03');
+    // The constrained footer must retain Pi's cursor-aware layout clipping.
+    key('\x1b[200~一\n二\n三\n四\n五\n六\n七\n八\x1b[201~');
+    for(const [columns,rows] of [[80,24],[40,12],[120,30]]) {
+      f.terminal.columns=columns;f.terminal.rows=rows;f.terminal.resize();f.app.screen();
+      const ansi=f.terminal.writes.join('');
+      assert.ok(ansi.lastIndexOf('\x1b[?25h')>ansi.lastIndexOf('\x1b[?25l'),`caret stays visible at ${columns}×${rows}`);
+      assert.match(f.screen(),/八/,'current insertion line remains visible');
+    }
+  } finally {await f.app.exit();}
+});
+
+test('repainting hides the hardware caret before moving it through display rows', async () => {
+  const f=fixture(),key=(s:string)=>f.terminal.input(s);
+  try {
+    f.app.screen(); // A visible hardware caret exists before this update.
+    f.terminal.writes=[];
+    key('A');f.app.screen();
+    const paint=f.terminal.writes.find(value=>value.includes('\x1b[2K'));
+    assert.ok(paint,'typing must repaint the real ANSI frame');
+    assert.match(paint,/^\x1b\[\?2026h\x1b\[\?25l/,'hide before drawing on terminals without synchronized-output support');
+    assert.match(paint,/\x1b\[20;2H\x1b\[\?25h\x1b\[\?2026l$/,'restore the hardware caret at the actual insertion point');
+  } finally {await f.app.exit();}
 });
