@@ -85,3 +85,5 @@ pi-durio recover --run UUID --data-root PATH --authorization auth.json --decisio
 - 首败日志与所有原未知事实保留；要求—证据与精确候选身份见外部 `evidence/issue-15/handoff.json`，其路径在协调运行目录 `/Users/nineofour/pi-durio-v1-run/`。
 
 一手合同核对：[Pi 1.1.0 README](https://github.com/earendil-works/pi/blob/abe508e1b89912adde45528136c3221eb69acdd7/packages/durable/README.md)、[ToolTask recovery](https://github.com/earendil-works/pi/blob/abe508e1b89912adde45528136c3221eb69acdd7/packages/durable/src/harness/tool.ts)，并阅读本次实际安装的公开 `.d.ts` 和发布 `.js`。使用的 Storage scans、LiveDoc、ToolTask/GenerationTask checkpoint 是公开导出合同，不读取 durable 私有 SQL schema。
+
+2026-10-10 的 SPEC-01 有界 host/admission 修复、验证范围与目标 session 恢复的后续边界见 [preflight-memory-repair.md](preflight-memory-repair.md)。原验收与首败文件保持历史身份，不以新候选覆盖。

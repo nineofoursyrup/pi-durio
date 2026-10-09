@@ -1,0 +1,177 @@
+{
+  "ticket": 30,
+  "finding": "SPEC-02",
+  "status": "LOCAL_IMPLEMENTATION_COMMITTED; READY_FOR_INDEPENDENT_REVIEW; PAID_NOT_RUN; ISSUE_30_INCOMPLETE",
+  "branch": "codex/pi-durio-v1-repair-30-cancel",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel",
+  "base": "54a8c22aba4a5a62fac0b3c88ff8db292bd30760",
+  "reviewCandidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+  "commit": "6fc87ea168a3129699dea88c75c63ca47f920ab1",
+  "tree": "966457f539b641a0167dfcf3afd15cc8500a7569",
+  "clean": true,
+  "requestedModel": "gpt-6-astra",
+  "requestedEffort": "xhigh",
+  "actualBackendAttestation": "unavailable; not independently proven",
+  "changedFiles": [
+    "docs/implementation/pi-durio-v1/issue-30/README.md",
+    "scripts/live-batch/run.mjs",
+    "test/live-batch.test.ts"
+  ],
+  "behavior": [
+    "SIGINT/SIGTERM persist first cancellation intent and abort the existing shared controller",
+    "Wait for public runEval/analyzeImprove cleanup promise; repeated signals do not bypass it",
+    "Cancelled preparation does not admit eval; cancelled eval does not admit improve",
+    "Save cancelled/failed/unknown and NOT RUN facts, preserve original stage outputs; no claim of remote termination",
+    "Return 130 for first SIGINT, 143 for first SIGTERM, nonzero for other stopped batches; no process.exit bypass",
+    "Actual runner and loaded common helper must be present in frozen harness with the already-required matching bytes"
+  ],
+  "checks": {
+    "build": {
+      "first": {
+        "status": "FAIL",
+        "path": "build.log",
+        "reason": "New test child.stdout/stderr possibly null; original retained"
+      },
+      "final": {
+        "status": "PASS",
+        "path": "build-r2.log"
+      }
+    },
+    "test": {
+      "original": {
+        "status": "FAIL",
+        "path": "red.log",
+        "failed": 2,
+        "wrapperExitCode": 0,
+        "explanation": "Initial shell returned cat status; Node report and child process evidence retain both actual signal failures"
+      },
+      "intermediateImprove": {
+        "status": "FAIL",
+        "path": "red-improve.log"
+      },
+      "intermediateIdentity": {
+        "status": "FAIL",
+        "path": "red-runner-gate.log"
+      },
+      "earlyCompiled": {
+        "status": "PASS",
+        "passed": 6,
+        "path": "compiled.log",
+        "applicability": "Outputs were emitted by failed tsc; NOT final source/build correspondence evidence"
+      },
+      "finalCompiled": {
+        "status": "PASS",
+        "passed": 6,
+        "path": "compiled-r2.log",
+        "scenarios": 8
+      }
+    },
+    "syntax": {
+      "status": "PASS",
+      "scope": "All 6 scripts/live-batch/*.mjs"
+    },
+    "diff": {
+      "status": "PASS",
+      "command": "git diff --check"
+    },
+    "notRun": [
+      "Full product test suite: product source and dependencies unchanged; focused entrypoint checks cover modification",
+      "VM cancellation: public product cancel/cleanup mechanism unchanged; entrypoint wiring tested with actual signals and deterministic installed API fixture",
+      "Actual provider, authentication, paid batch, real candidate generation and selection",
+      "New package/installation/native Terminal acceptance"
+    ],
+    "actualProviderRequests": 0,
+    "realCredentialReads": 0,
+    "vmStarts": 0,
+    "paidGrant": "NOT GRANTED",
+    "syntheticTestKeys": "Locally defined offline placeholder only; child environment does not inherit user credentials"
+  },
+  "sourceBuildIdentity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/identity.json",
+    "bytes": 2068,
+    "sha256": "e3df0a89766481c497a0b7e411ffd457a4f788e4b07f75435944887eb49a0903"
+  },
+  "sourceBuildManifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/source-build.json",
+    "bytes": 88569,
+    "sha256": "7b06b8920626dd38bf7e082120c2397f340a02446be3cfa674ea00ae3daf6cf0"
+  },
+  "finalTest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/compiled-r2.log",
+    "bytes": 684,
+    "sha256": "39aacfa0d2cb41693720c431486a3de274c8dc59c2063ad3de7ff0bc8137b0fe"
+  },
+  "changedSources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel/scripts/live-batch/run.mjs",
+      "bytes": 8506,
+      "sha256": "aa0cb70081fedfb584d0f8ff156ad6af8647bd353203d6c383a89c1de6a9f041"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel/scripts/live-batch/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel/test/live-batch.test.ts",
+      "bytes": 11139,
+      "sha256": "ed11d951bd4b37ff5680c8559d2665349953f8bc51573ebab63eb8d49bcdfbf0"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel/docs/implementation/pi-durio-v1/issue-30/README.md",
+      "bytes": 10796,
+      "sha256": "1f2ea6f29fbc7d21e8746717c2202339579c433db4991373b28efee3bbc8da29"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel/package-lock.json",
+      "bytes": 64781,
+      "sha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67"
+    }
+  ],
+  "compiledTest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel/dist/test/live-batch.test.js",
+    "bytes": 12419,
+    "sha256": "c781753d653300479f90702cf2b1b3d871acef725734107ef3ebe58e9bc7fa82"
+  },
+  "evidenceManifest": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/evidence-manifest.json",
+  "oldPreparation": {
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/frozen-manifest-r2.json",
+      "bytes": 5614,
+      "sha256": "fd9b8b5741e8ec9f7ef1dff965e6abcbedda33a668ea4cdd7b318881e9d90892"
+    },
+    "stillMatchesOriginalReferences": true,
+    "immutable": true,
+    "applicability": "Historical r2 preparation and original provider-auth-stop results retain their original identity and scope. The current runner is not bound by r2; it refuses a manifest freezing only the old runner/common paths. No old paid authorization is inherited (none was granted).",
+    "requiresBeforeAnyFutureLiveStart": [
+      "Freeze a new concrete harness/manifest including actual current runner and common paths/content",
+      "Recheck exact intended installed product, source/build identity, runtime/input/fixture/grader/seed, budget and time-window applicability; do not relabel old producer",
+      "Obtain explicit human grant bound to the new manifest and permitted credential source",
+      "Keep actual generated candidate selection separate from paid batch authorization"
+    ]
+  },
+  "boundaries": {
+    "actualProviderRequests": 0,
+    "realCredentialReads": 0,
+    "vmStarts": 0,
+    "paidGrant": "NOT GRANTED",
+    "currentActualCandidate": "not generated or selected",
+    "productSourceChanged": false,
+    "dependenciesChanged": false,
+    "productTestsAndVM": "Existing product cancellation implementation is unchanged; this check covers the preparation entrypoint only",
+    "scopeNotProven": [
+      "Actual provider cancellation/refund or termination",
+      "Actual VM stop under this entrypoint",
+      "A1 real coding/improve loop",
+      "New distribution/install/native Terminal acceptance",
+      "SIGHUP/SIGKILL or abrupt host-loss cleanup; existing eval CLI convention covers SIGINT/SIGTERM"
+    ]
+  },
+  "delivery": {
+    "pushed": false,
+    "ticketsModified": false,
+    "rootStateModified": false,
+    "mainModified": false,
+    "next": "Coordinator integrates commit and arranges independent review; no issue closeout or paid execution implied"
+  }
+}

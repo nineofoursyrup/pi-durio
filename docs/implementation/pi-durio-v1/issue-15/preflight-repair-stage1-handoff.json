@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "issue": 15,
+  "finding": "SPEC-01",
+  "status": "READY_FOR_COORDINATOR_INTEGRATION_WITH_DOCUMENTED_REMAINING_E2_SCOPE",
+  "commit": "5ab40019d56eaf4e36c64d30cb3ebc84d20be072",
+  "tree": "df6b26c81c18697fb0e1233cd5b4e7ea59125955",
+  "base": "54a8c22aba4a5a62fac0b3c88ff8db292bd30760",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-15-preflight",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/candidate-manifest.json",
+    "sha256": "f858ca393a4973afc2938dbda57356be214e2213ce38eba5911dac590409e9da",
+    "bytes": 6118
+  },
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/source-build.json",
+    "sha256": "10f2da5c693ff27c2a4983697a845d5dae6efb5c0344ccc409953932756cdeca",
+    "bytes": 89374
+  },
+  "checks": [
+    {
+      "command": "npm run build",
+      "status": "PASS",
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/build-green-07.log",
+        "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+        "bytes": 59
+      }
+    },
+    {
+      "command": "node --test dist/test/preflight.test.js dist/test/recovery-facts.test.js dist/test/recovery.test.js dist/test/runtime.test.js dist/test/storage.test.js dist/test/control.test.js dist/test/compaction.test.js",
+      "status": "PASS",
+      "tests": 60,
+      "passed": 60,
+      "failed": 0,
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/affected-07.log",
+        "sha256": "29ba24bcb195d70cfd6905bdd2f5c008daee37dee0ec0fe8f6166ba87ca8efd0",
+        "bytes": 7365
+      }
+    },
+    {
+      "command": "node benchmark.mjs",
+      "status": "PASS",
+      "cases": 6,
+      "results": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-results.json",
+        "sha256": "a959406f8f5857251cdcf5e37be82d0f8f99e09c02f64f98235932403d91b7c7",
+        "bytes": 3551
+      },
+      "identity": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-identity.json",
+        "sha256": "9d8de53ba6d723667640703989aba4ee3f45d74a337d6a635b5875a9efad963d",
+        "bytes": 479
+      }
+    },
+    {
+      "command": "node benchmark-gc.mjs",
+      "status": "PASS",
+      "cases": 6,
+      "results": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-gc-results.json",
+        "sha256": "449b8cedb77864111f1fe380762dcaf3ba6d36fd58e338456fd42b24d1ba6791",
+        "bytes": 4306
+      },
+      "identity": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-gc-identity.json",
+        "sha256": "9d8de53ba6d723667640703989aba4ee3f45d74a337d6a635b5875a9efad963d",
+        "bytes": 479
+      }
+    },
+    {
+      "command": "post-commit source-build and compiler content verification",
+      "status": "PASS",
+      "inputs": 159,
+      "outputs": 234,
+      "compilerFiles": 140
+    },
+    {
+      "command": "git diff --check; git status --porcelain",
+      "status": "PASS",
+      "clean": true
+    }
+  ],
+  "metrics": [
+    {
+      "rawOutputBytes": 0,
+      "strategy": "admission",
+      "status": 0,
+      "heapUsedAfter": 6189392,
+      "heapUsedAfterGC": 6095888,
+      "maxRSS": 53136,
+      "elapsedMs": 4.727625000000003
+    },
+    {
+      "rawOutputBytes": 0,
+      "strategy": "recovery-snapshot",
+      "status": 0,
+      "heapUsedAfter": 6123808,
+      "heapUsedAfterGC": 6064000,
+      "maxRSS": 53088,
+      "elapsedMs": 1.2438749999999956
+    },
+    {
+      "rawOutputBytes": 4194304,
+      "strategy": "admission",
+      "status": 0,
+      "heapUsedAfter": 6187736,
+      "heapUsedAfterGC": 6096296,
+      "maxRSS": 53664,
+      "elapsedMs": 4.8509169999999955
+    },
+    {
+      "rawOutputBytes": 4194304,
+      "strategy": "recovery-snapshot",
+      "status": 0,
+      "heapUsedAfter": 16355728,
+      "heapUsedAfterGC": 6133192,
+      "maxRSS": 70672,
+      "elapsedMs": 26.720458
+    },
+    {
+      "rawOutputBytes": 25165824,
+      "strategy": "admission",
+      "status": 0,
+      "heapUsedAfter": 6187696,
+      "heapUsedAfterGC": 6096232,
+      "maxRSS": 53632,
+      "elapsedMs": 4.727333000000002
+    },
+    {
+      "rawOutputBytes": 25165824,
+      "strategy": "recovery-snapshot",
+      "status": 0,
+      "heapUsedAfter": 13621328,
+      "heapUsedAfterGC": 6226816,
+      "maxRSS": 102432,
+      "elapsedMs": 153.462292
+    }
+  ],
+  "remainingRequiredWork": [
+    {
+      "path": "src/recovery.ts:93 -> inspectSession; src/preflight.ts:61",
+      "defect": "Target session inspection retains all transcript entries, tasks, submissions, conversations and documents; report.tools also grows with committed history.",
+      "proposal": "Public scanTasks/scanSubmissions page and validate all ownership; public entry(assistantId/outcome.entryId) on demand; target conversation pi.agent/pi.live only; disk-backed minimal joins where needed. Provide completed-history summary/page without truncating unresolved tools or decision/snapshot coverage. Freeze a separate candidate and add real target-session regression before claiming full E2."
+    },
+    {
+      "path": "src/retention.ts:104; src/storage-archive.ts:36; src/runtime.ts:257,765",
+      "defect": "Remaining full-inspection consumers have separate exact needs: storage needs counts/conversation identity/pending, withdrawal needs one compaction task and summary, close needs pending and usage.",
+      "proposal": "Use purpose-specific public projections under the same stable source fence; preserve storage protected dependencies and usage semantics."
+    }
+  ],
+  "scopeNotes": [
+    "Normal admission and recovery non-target sessions now use bounded pages.",
+    "Normal continuation/queue/maintenance shared host reader is lazy; snapshot hashes validate all original fact bodies and preserve original digest bytes.",
+    "Non-admission output missing/corrupt state is read through existing history query; admission authority/closure/management facts are still validated before admission.",
+    "No main, push, issue or state.json modification."
+  ],
+  "modelRequest": {
+    "model": "gpt-6-astra",
+    "effort": "xhigh",
+    "backendIdentity": "UNKNOWN: not exposed by this child execution"
+  }
+}

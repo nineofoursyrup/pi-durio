@@ -135,7 +135,10 @@
       "integrated_sha": "bb0ba36b1c17743e05ee1765f6c0389bcc6f16ef",
       "evidence": [
         "docs/implementation/pi-durio-v1/issue-15/README.md",
-        "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/merge-integration-readback.json"
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/merge-integration-readback.json",
+        "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-handoff.json",
+        "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-merge-integration-readback.json",
+        "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-remaining-scope.md"
       ],
       "branch": "codex/pi-durio-v1-issue-15",
       "agent": "/root/issue15",
@@ -147,9 +150,25 @@
       "status_before_review": "integrated-accepted",
       "review_repair": {
         "status": "IN_PROGRESS",
-        "agent": "/root/repair15_preflight",
+        "agent": "pending fresh stage-2 implementer",
         "finding": "SPEC-01",
-        "previous_acceptance_retained": true
+        "previous_acceptance_retained": true,
+        "subphases": [
+          {
+            "name": "bounded admission and host facts",
+            "status": "INTEGRATED_PENDING_REVIEW",
+            "commit": "5ab40019d56eaf4e36c64d30cb3ebc84d20be072",
+            "handoff": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/handoff.json",
+            "integrated_sha": "e43f902df4321dc0b87c8fc7b194f6942b94fc7c",
+            "merge_readback": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/merge-integration-readback.json"
+          },
+          {
+            "name": "bounded target session recovery",
+            "status": "required next repair; full inspector accumulates original entries/tasks/submissions",
+            "scope": "Use public storage by-ID/paged reads, bounded report/detail references, preserve all authorization and unknown-effect checks"
+          }
+        ],
+        "remaining_scope": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/remaining-scope.md"
       }
     },
     "16": {
@@ -791,7 +810,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "integrated-accepted",
+      "status": "integrated-review-repair-required",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-26",
       "commit": "ccc8e53257cb4274889b1a0bc3fd982fe6de3597",
       "integrated_sha": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
@@ -815,7 +834,14 @@
         "sha256": "3ca72ffeb18736e62223ba12e8c0de174726108600198dd425c67997f7cef30c"
       },
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/26#issuecomment-6089692943",
-      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/publication/readback.json"
+      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/publication/readback.json",
+      "status_before_review": "integrated-accepted",
+      "review_repair": {
+        "status": "IN_PROGRESS",
+        "agent": "/root/repair26_output",
+        "finding": "STD-02",
+        "previous_acceptance_retained": true
+      }
     },
     "27": {
       "number": 27,
@@ -831,7 +857,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "integrated-accepted",
+      "status": "integrated-review-repair-required",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-27",
       "commit": "0d292488cef06eedf917cf032d7c8417a9db3584",
       "integrated_sha": "716aab74832e781c4652246671893430699808ea",
@@ -858,7 +884,15 @@
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/coordinator-acceptance.json"
       },
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/27#issuecomment-6086662953",
-      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/publication/readback.json"
+      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/publication/readback.json",
+      "status_before_review": "integrated-accepted",
+      "review_repair": {
+        "status": "IN_PROGRESS",
+        "agent": "/root/repair27_owner",
+        "finding": "STD-03",
+        "previous_acceptance_retained": true,
+        "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-27-owner"
+      }
     },
     "28": {
       "number": 28,
@@ -1018,11 +1052,15 @@
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/30#issuecomment-6088950683",
       "status_before_review": "integrated-preparation-awaiting-authorization",
       "review_repair": {
-        "status": "IN_PROGRESS",
+        "status": "INTEGRATED_REVIEW_PENDING",
         "agent": "/root/repair30_cancel",
         "finding": "SPEC-02",
         "previous_preparation_retained": true,
-        "paid": "NOT_GRANTED"
+        "paid": "NOT_GRANTED",
+        "commit": "6fc87ea168a3129699dea88c75c63ca47f920ab1",
+        "integrated_sha": "bd975d6cbe776b694143ed805b6a0ff473029c4e",
+        "handoff": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/handoff.json",
+        "merge_readback": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/merge-integration-readback.json"
       }
     },
     "31": {
@@ -1058,7 +1096,13 @@
         "nativeConfig": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/native-config.json",
         "nativeRequest": "User launch requested asynchronously; no response yet",
         "contractNavigation": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/contract-applicability-preparation-r2.json",
-        "trackedPartialReport": "docs/implementation/pi-durio-v1/issue-31/local-r1-report.md"
+        "trackedPartialReport": "docs/implementation/pi-durio-v1/issue-31/local-r1-report.md",
+        "headlessPlan": {
+          "status": "PREPARATION_ONLY_NOT_RUN",
+          "harness": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/headless-session.mjs",
+          "snapshot": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/harness-preparation-r8.json",
+          "scope": "Separate independent local resource workload; no native or daily-use claim"
+        }
       }
     },
     "32": {
@@ -1082,7 +1126,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "54a8c22aba4a5a62fac0b3c88ff8db292bd30760",
+  "integration_tip": "e43f902df4321dc0b87c8fc7b194f6942b94fc7c",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -1092,8 +1136,8 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T21:47:24.798319+00:00",
-  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/publication/readback.json",
+  "updated_at": "2026-10-09T22:11:07.506878+00:00",
+  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/publication-r1/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
       "commit": "01f2d3a562b12a9917b3db1dc8111ea2717d386f",
@@ -1148,11 +1192,11 @@
   },
   "root_write_owner": "/root coordinator",
   "heavy_validation_window": {
-    "owner": "/root coordinator",
-    "grantedAt": "2026-10-09T21:31:48.698845+00:00",
-    "scope": "No measurements active; two repair workers may build/run bounded tests; serialize VM/native after coordination",
+    "owner": "/root/repair26_output",
+    "grantedAt": "2026-10-09T22:06:33.083470+00:00",
+    "scope": "Frozen targeted actual VM boundary/build/launch checks after new output tests; no provider/native",
     "paid": "NOT GRANTED",
-    "release": "Coordinator transfer"
+    "release": "Worker confirms complete"
   },
   "latest_contract_refresh": "remote/20261009T211650Z/summary.json",
   "review": {
@@ -1160,26 +1204,62 @@
     "tree": "e5ad9f25f84ded025fe7b2dff49fc08936a89eb3",
     "baseline": "25d311616136766b37c0274f3f490ec1105f9592",
     "spec": "CHANGES_REQUESTED: SPEC-01 and SPEC-02, both P1; repairs in progress",
-    "standards": "running /root/review_standards",
+    "standards": "FAIL: STD-01 P1 (overlaps SPEC-01), STD-02 P2 output retention, STD-03 P2 metrics owner; 1 optional smell",
     "scope": "Implemented #11–29 and #30 preparation; declared paid/native/technical/human gates remain unaccepted",
     "open_findings": [
       {
         "id": "SPEC-01",
         "ticket": 15,
-        "status": "repairing",
+        "status": "stage1-integrated-stage2-required",
         "agent": "/root/repair15_preflight",
         "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-15-preflight",
-        "evidence": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory"
+        "evidence": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory",
+        "alsoAddresses": [
+          "STD-01"
+        ],
+        "stage1_integrated_sha": "e43f902df4321dc0b87c8fc7b194f6942b94fc7c",
+        "remaining_scope": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/remaining-scope.md"
       },
       {
         "id": "SPEC-02",
         "ticket": 30,
-        "status": "repairing",
+        "status": "integrated-awaiting-independent-review",
         "agent": "/root/repair30_cancel",
         "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel",
-        "scope": "Prepared runner signal handling; no live batch executed"
+        "scope": "Prepared runner signal handling; no live batch executed",
+        "commit": "6fc87ea168a3129699dea88c75c63ca47f920ab1",
+        "integrated_sha": "bd975d6cbe776b694143ed805b6a0ff473029c4e",
+        "merge_readback": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/merge-integration-readback.json"
+      },
+      {
+        "id": "STD-02",
+        "ticket": 26,
+        "status": "repairing",
+        "agent": "/root/repair26_output",
+        "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-26-output"
+      },
+      {
+        "id": "STD-03",
+        "ticket": 27,
+        "status": "repairing",
+        "scope": "shared acceptance/feedback/cost owner boundary",
+        "agent": "/root/repair27_owner",
+        "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-27-owner"
       }
     ],
-    "specReport": "docs/implementation/pi-durio-v1/review/1be8e282/spec-review.json"
+    "specReport": "docs/implementation/pi-durio-v1/review/1be8e282/spec-review.json",
+    "standardsReport": "docs/implementation/pi-durio-v1/review/1be8e282/standards-review.json",
+    "axis_counts": {
+      "spec": {
+        "findings": 2,
+        "highestPriority": 1
+      },
+      "standards": {
+        "documentedFindings": 3,
+        "highestPriority": 1,
+        "optionalSmells": 1
+      },
+      "uniqueConcreteRepairGroups": 4
+    }
   }
 }

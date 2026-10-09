@@ -1,0 +1,60 @@
+{
+  "candidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+  "axisCounts": {
+    "spec": {
+      "findings": 2,
+      "highestPriority": 1
+    },
+    "standards": {
+      "documentedFindings": 3,
+      "highestPriority": 1,
+      "optionalSmells": 1
+    },
+    "uniqueConcreteRepairGroups": 4
+  },
+  "status": "CHANGES_REQUIRED_REPAIRS_IN_PROGRESS",
+  "groups": [
+    {
+      "findings": [
+        "SPEC-01",
+        "STD-01"
+      ],
+      "ticket": 15,
+      "scope": "normal preflight plus same root-cause recovery/context facts; target durable recovery inspector remains next required related repair",
+      "stage1Integrated": "e43f902df4321dc0b87c8fc7b194f6942b94fc7c",
+      "remaining": "target recovery/normal close/withdrawal/storage full inspector and report memory",
+      "remainingScope": "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-remaining-scope.md"
+    },
+    {
+      "findings": [
+        "SPEC-02"
+      ],
+      "ticket": 30,
+      "scope": "prepared batch signal/cleanup identity; implementation 6fc87ea integrated bd975d6; independent review pending"
+    },
+    {
+      "findings": [
+        "STD-02"
+      ],
+      "ticket": 26,
+      "scope": "actual acquired output retention across common isolation/new-process entry"
+    },
+    {
+      "findings": [
+        "STD-03"
+      ],
+      "ticket": 27,
+      "scope": "shared acceptance/feedback/cost owner boundary"
+    }
+  ],
+  "optional": [
+    {
+      "id": "SMELL-01",
+      "disposition": "not part of required repair; no demonstrated contract failure from duplication alone"
+    }
+  ],
+  "provider": "NOT_GRANTED_NOT_RUN",
+  "native": "NOT_RUN_USER_LAUNCH_PENDING",
+  "dailyUse": "NOT_ACCEPTED",
+  "updatedAt": "2026-10-09T22:11:07.506878+00:00"
+}
