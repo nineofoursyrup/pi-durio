@@ -15,6 +15,12 @@ import {EvalView} from '../src/tui/eval.js';
 import {pairedTrials} from '../src/eval/comparison.js';
 function plan(e:Evidence):EvalPlan{return{id:'plan',purpose:'test fixed reporting',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:{id:'content-v1',manifest:e.blob('[]'),bytes:2},cases:representativeCases,trials:['good','failure','grader-error','not-run'].map(id=>({id,caseId:'local-fix',version:'content-v1',side:'candidate',repeat:1,pair:null})),budget:{maxRequests:8,maxTokens:1000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null},trialTimeoutMs:1000,gradingTimeoutMs:1000,maxOutputTokens:32,requestRetryLimit:0,price:{version:'test',source:'controlled',currency:'USD',perMillionTokens:0},authorization:{scope:'run-all-listed-trials',paid:false},environment:{node:'v24.8.0',isolation:'fixture only',writable:'new',cache:'empty'},mainObjective:'requirements',protection:['originals'],improvementConclusion:'not-evaluated'};}
 
+test('a started trial without final host duration is unknown time rather than a zero-duration total',async()=>{
+ const root=mkdtempSync(join(tmpdir(),'durio-eval-time-gap-')),e=new Evidence(root,'plan');const source=appendFact(e,'eval.plan',plan(e));e.close();await fixEvidence(root,{id:'eval-plan:plan',sources:[source],purpose:'fixed time-gap fixture'});
+ const facts=new Evidence(root,'plan');appendFact(facts,'eval.trial-started',{trialId:'good'});facts.close();
+ const report=evalReport(root,'plan');assert.deepEqual(report.timing,{...report.timing,taskMs:null,knownTaskMs:0,missing:1});assert.equal(report.counts.started,1);assert.equal(report.trials[0].outcome.status,'unknown');
+});
+
 test('report preserves all planned identities, grader errors and first failure; missing actual evidence removes eligibility',async()=>{
  const root=mkdtempSync(join(tmpdir(),'durio-eval-report-')),e=new Evidence(root,'plan');const p=plan(e),source=appendFact(e,'eval.plan',p),artifact=e.blob('original product');e.close();await fixEvidence(root,{id:'eval-plan:plan',sources:[source],purpose:'test fixed plan'});
  const facts=new Evidence(root,'plan');
