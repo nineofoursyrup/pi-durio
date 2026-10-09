@@ -66,6 +66,7 @@ export async function readRun(root: string, runId: string, options: { after?: nu
     const rows = db.prepare('SELECT seq,kind,at,body FROM records WHERE run_id=? AND seq>? ORDER BY seq LIMIT ?').all(runId, options.after ?? 0, limit + 1);
     const decode = (row: typeof rows[number]): EvidenceRecord => ({ seq: Number(row.seq), kind: String(row.kind), at: String(row.at), data: JSON.parse(readObject(root, JSON.parse(String(row.body))).toString()) });
     const resultRow = db.prepare("SELECT seq,kind,at,body FROM records WHERE run_id=? AND kind='run.closed' ORDER BY seq DESC LIMIT 1").get(runId);
-    return { runId, result: resultRow ? decode(resultRow).data : { status: 'unknown', reason: 'No confirmed close receipt; recovery check required' }, records: rows.slice(0, limit).map(decode), next: rows.length > limit ? Number(rows[limit - 1].seq) : null };
+    const recoveryRow = db.prepare("SELECT seq,kind,at,body FROM records WHERE run_id=? AND kind IN ('recovery.closed','recovery.ended','recovery.report') ORDER BY seq DESC LIMIT 1").get(runId);
+    return { runId, result: resultRow ? decode(resultRow).data : { status: 'unknown', reason: 'No confirmed close receipt; recovery check required' }, ...(recoveryRow ? {recovery:decode(recoveryRow)} : {}), records: rows.slice(0, limit).map(decode), next: rows.length > limit ? Number(rows[limit - 1].seq) : null };
   } finally { db.close(); }
 }
