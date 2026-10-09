@@ -1,0 +1,27 @@
+{
+  "source-build-r5.json": {
+    "changedInputs": [
+      "src/preflight.ts",
+      "src/recovery-projection.ts",
+      "src/recovery.ts",
+      "test/fixtures/recovery-projection.ts",
+      "test/recovery-projection.test.ts",
+      "test/runtime.test.ts"
+    ],
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/source-build-r5.json",
+      "sha256": "a4273821078d00001b52b3b3d5d0370c935ed29651274817cff4c0d8f0c5a53b",
+      "bytes": 91832
+    }
+  },
+  "source-build-r6.json": {
+    "changedInputs": [
+      "src/recovery-projection.ts"
+    ],
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/source-build-r6.json",
+      "sha256": "337e5f75a49358f20bb7924ba3d5e16b8e26ec0591a9219ba6999ee28eddf71c",
+      "bytes": 91832
+    }
+  }
+}

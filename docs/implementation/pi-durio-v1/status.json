@@ -138,7 +138,11 @@
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/merge-integration-readback.json",
         "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-handoff.json",
         "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-merge-integration-readback.json",
-        "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-remaining-scope.md"
+        "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-remaining-scope.md",
+        "docs/implementation/pi-durio-v1/issue-15/target-session-repair-handoff.json",
+        "docs/implementation/pi-durio-v1/issue-15/target-session-repair-checks.json",
+        "docs/implementation/pi-durio-v1/issue-15/target-session-repair-build-deltas.json",
+        "docs/implementation/pi-durio-v1/issue-15/target-session-repair-merge-integration-readback.json"
       ],
       "branch": "codex/pi-durio-v1-issue-15",
       "agent": "/root/issue15",
@@ -149,7 +153,7 @@
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/15#issuecomment-6080374212",
       "status_before_review": "integrated-accepted",
       "review_repair": {
-        "status": "IN_PROGRESS",
+        "status": "ALL_PLANNED_REPAIRS_INTEGRATED_PENDING_COMBINED_GATE_AND_REVIEW",
         "agent": "/root/repair15_target",
         "finding": "SPEC-01",
         "previous_acceptance_retained": true,
@@ -164,11 +168,15 @@
           },
           {
             "name": "bounded target session recovery",
-            "status": "IMPLEMENTING",
+            "status": "INTEGRATED_PENDING_REVIEW",
             "scope": "Use public storage by-ID/paged reads, bounded report/detail references, preserve all authorization and unknown-effect checks",
             "agent": "/root/repair15_target",
             "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-15-target-session",
-            "base": "5bb1b1176fc4316e407e4ebc211a47c592792aee"
+            "base": "5bb1b1176fc4316e407e4ebc211a47c592792aee",
+            "commit": "52cec0cdeb62600e7cf3aba8c8d4401bd4eb86c4",
+            "handoff": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/handoff.json",
+            "integrated_sha": "8c40b5018594cc835790fb617b9fe5a1b4260372",
+            "merge_readback": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/merge-integration-readback.json"
           }
         ],
         "remaining_scope": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/remaining-scope.md",
@@ -1143,7 +1151,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "6a8c1aba3fd6a4938875357ecf9996ea4b169391",
+  "integration_tip": "8c40b5018594cc835790fb617b9fe5a1b4260372",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -1153,8 +1161,8 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T22:27:29.598246+00:00",
-  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/publication-r2/readback.json",
+  "updated_at": "2026-10-09T22:50:13.737193+00:00",
+  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/publication-r3/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
       "commit": "01f2d3a562b12a9917b3db1dc8111ea2717d386f",
@@ -1228,7 +1236,7 @@
       {
         "id": "SPEC-01",
         "ticket": 15,
-        "status": "stage1-integrated-stage2-implementing",
+        "status": "all-planned-repairs-integrated-awaiting-combined-gate-and-independent-review",
         "agent": "/root/repair15_target",
         "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-15-target-session",
         "evidence": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory",
@@ -1236,7 +1244,10 @@
           "STD-01"
         ],
         "stage1_integrated_sha": "e43f902df4321dc0b87c8fc7b194f6942b94fc7c",
-        "remaining_scope": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/remaining-scope.md"
+        "remaining_scope": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/remaining-scope.md",
+        "commit": "52cec0cdeb62600e7cf3aba8c8d4401bd4eb86c4",
+        "integrated_sha": "8c40b5018594cc835790fb617b9fe5a1b4260372",
+        "merge_readback": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/merge-integration-readback.json"
       },
       {
         "id": "SPEC-02",
