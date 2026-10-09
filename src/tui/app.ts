@@ -243,7 +243,10 @@ export class ReadOnlyTui {
     else if(command==='/bottom')this.bottom();
     else if(command==='/older')this.window('older');
     else if(command==='/newer')this.window('newer');
-    else if(command==='/history'||command.startsWith('/history ')) {this.historyView=new HistoryView(this.options.dataRoot,command==='/history'?{}:JSON.parse(command.slice(9)));this.openPanel('history');}
+    else if(command==='/history'||command.startsWith('/history ')) {
+      try{this.historyView=new HistoryView(this.options.dataRoot,command==='/history'?{}:JSON.parse(command.slice(9)));this.openPanel('history');}
+      catch(error){this.notice=`历史查询失败（当前工作未改变）：${safe(String(error))}`;this.tui.requestRender();}
+    }
     else if(command==='/details')this.openDetail(this.records.at(-1));
     else if(command==='/copy')void this.copyOutput();
     else if(command==='/stop')this.stop();
