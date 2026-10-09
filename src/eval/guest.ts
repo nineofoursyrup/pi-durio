@@ -19,7 +19,7 @@ const transport:typeof fetch=async(_url,init)=>{if(typeof init?.body!=='string')
 // non-secret placeholder; only the trusted host supplies the actual credential.
 if(input.mode==='live')process.env.DEEPSEEK_API_KEY='eval-mediated-no-credential';
 try{
- const result=await runCodingTask({dataRoot:'/work/data',workspace:'/work/project',input:input.prompt,mode:input.mode==='live'?'live':'offline',transport,providerBoundary:{purpose:'generation',operationId:input.trialId,transport},...(input.verificationCompaction?{verificationCompaction:input.verificationCompaction}:{}),...(input.originalFailure?{fault:(kind:string)=>{if(kind==='model.provider-event')throw Error('CONTROLLED_ORIGINAL_WRITE_FAILURE');}}:{})});
+ const result=await runCodingTask({dataRoot:'/work/data',workspace:'/work/project',input:input.prompt,taskOrigin:{kind:'eval',source:'eval',trialId:input.trialId},mode:input.mode==='live'?'live':'offline',transport,providerBoundary:{purpose:'generation',operationId:input.trialId,transport},...(input.verificationCompaction?{verificationCompaction:input.verificationCompaction}:{}),...(input.originalFailure?{fault:(kind:string)=>{if(kind==='model.provider-event')throw Error('CONTROLLED_ORIGINAL_WRITE_FAILURE');}}:{})});
  await writeFile('/work/product-result.json',JSON.stringify(result));
  process.exitCode=result.status==='completed'?0:1;
 }catch(error){await writeFile('/work/product-error.json',JSON.stringify({error:String(error)}));process.exitCode=1;}

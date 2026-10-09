@@ -1,3 +1,4 @@
+import {stampFact} from './fact-clock.js';
 import { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync, chmodSync, openSync, closeSync, writeFileSync, fsyncSync, renameSync, existsSync, readFileSync, readSync } from 'node:fs';
@@ -130,10 +131,11 @@ export class Evidence {
   }
   append(kind: string, data: unknown): number {
     this.fault?.(kind);
-    const body = JSON.stringify(data);
+    const stamped=stampFact(kind,data);
+    const body = JSON.stringify(stamped);
     if (Buffer.byteLength(body) > 2 * 1024 * 1024) throw new Error('EVIDENCE_RECORD_LIMIT');
     const ref = this.blob(body);
-    const row = this.db.prepare('INSERT INTO records(run_id,kind,at,body) VALUES(?,?,?,?)').run(this.runId, kind, new Date().toISOString(), JSON.stringify(ref));
+    const row = this.db.prepare('INSERT INTO records(run_id,kind,at,body) VALUES(?,?,?,?)').run(this.runId, kind, (stamped as any)?.clock?.wallTime ?? new Date().toISOString(), JSON.stringify(ref));
     return Number(row.lastInsertRowid);
   }
   close() { this.db.close(); }
