@@ -11,6 +11,6 @@ export function executionConfig(coding: boolean, mode: 'live'|'offline', environ
   if (!model || model.api !== 'openai-completions' || model.baseUrl !== 'https://api.deepseek.com') throw new Error('MODEL_CONFIGURATION_MISMATCH');
   const shell = coding ? toolEnvironment(environment) : undefined;
   return { model, instructions: coding ? CODING_INSTRUCTIONS : READ_INSTRUCTIONS,
-    settings: { retry: { enabled: false, maxRetries: 0 }, compaction: { enabled: false }, stream: { maxRetries: 0, timeoutMs: 120000 }, contextRetentionMs: 0, ...(coding ? { toolExecution: 'sequential' as const } : {}) }, mode,
+    settings: { retry: { enabled: false, maxRetries: 0 }, compaction: { enabled: true, reserveTokens: 16384, keepRecentTokens: 20000 }, stream: { maxRetries: 0, timeoutMs: 120000 }, contextRetentionMs: 0, ...(coding ? { toolExecution: 'sequential' as const } : {}) }, mode,
     ...(shell ? { toolEnvironment: { version: environment?.version ?? 'minimal-build-v1', baseVersion: 'minimal-build-v1', names: Object.keys(shell).sort(), inheritEnv: false, digest: digest(JSON.stringify(Object.entries(shell).sort(([a],[b]) => a.localeCompare(b)))) } } : {}) };
 }

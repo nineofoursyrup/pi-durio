@@ -56,10 +56,10 @@ test('stable evidence pages preserve bytes and distinguish source gaps, display 
 });
 
 test('trace counts dispatch boundaries, preserves failed retry identity and does not end a live stream at HTTP headers',()=>{
-  const root=fixture(),e=accept(root,'a');e.append('model.intent',{attemptId:'m1',purpose:'generation'});e.append('model.dispatch',{attemptId:'m1'});e.append('model.http',{attemptId:'m1',status:503});e.append('model.dispatch',{attemptId:'m1'});e.append('model.http',{attemptId:'m1',status:200});
+  const root=fixture(),e=accept(root,'a');e.append('model.intent',{attemptId:'m1',purpose:'generation'});e.append('model.dispatch',{attemptId:'m1',transportEntered:true});e.append('model.http',{attemptId:'m1',status:503});e.append('model.dispatch',{attemptId:'m1',transportEntered:true});e.append('model.http',{attemptId:'m1',status:200});
   const live=queryAttempts(root,'a').items[0];assert.equal(live.observableRequests,2);assert.equal(live.endedAt,null);assert.equal(live.status,'unknown');assert.equal(new Set(live.requests.map(r=>r.id)).size,2);
-  e.append('model.response',{attemptId:'m1',message:{stopReason:'aborted'},completeness:'partial',usage:'unknown'});e.append('model.intent',{attemptId:'m2',purpose:'compaction'});e.close();
-  const terminal=queryAttempts(root,'a').items;assert.ok(terminal[0].endedAt);assert.equal(terminal[0].status,'cancelled');assert.equal(terminal[1].purpose,'compaction');assert.equal(terminal[1].usage,'unknown');
+  e.append('model.response',{attemptId:'m1',message:{stopReason:'aborted'},completeness:'partial',usage:'unknown'});e.append('model.intent',{attemptId:'m2',purpose:'compaction'});e.append('model.intent',{attemptId:'legacy',purpose:'generation'});e.append('model.dispatch',{attemptId:'legacy'});e.close();
+  const terminal=queryAttempts(root,'a').items;assert.ok(terminal[0].endedAt);assert.equal(terminal[0].status,'cancelled');assert.equal(terminal[1].purpose,'compaction');assert.equal(terminal[1].usage,'unknown');assert.equal(terminal[2].observableRequests,0);assert.equal(terminal[2].unverifiedDispatchIntents,1);assert.equal(terminal[2].dispatchState,'unknown');
 });
 
 test('committed cumulative usage deduplicates across runs and reopen, reasoning is not added, and re-estimates append',async()=>{

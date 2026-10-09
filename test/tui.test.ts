@@ -278,3 +278,23 @@ test('history overlay is reachable and consumes command-like text without changi
     assert.match(f.screen(),/已完成/);assert.equal(f.transport.calls.length,calls);
   } finally {await f.app.exit();}
 });
+
+test('compact has a visible menu, idle summary reaches next input, and readonly history cannot compress',async()=>{
+ const calls:any[]=[];const transport:typeof fetch=async(url,init)=>{calls.push(JSON.parse(String(init?.body)));const response=await scriptedTransport([]).fetch(url,init);return new Response((await response.text()).replace('Controlled response: inspect actual tool evidence for acceptance.',calls.length===1?'INITIAL FINAL '+'z'.repeat(90000):calls.length===2?'VISIBLE COMPACT SUMMARY':'NEXT FINAL'),{headers:{'content-type':'text/event-stream'}});};
+ const f=fixture(transport),key=(s:string)=>f.terminal.input(s),dataRoot=join(f.root,'data');
+ try{
+  key('\x1bOQ');assert.match(f.screen(),/compact/);key('\x1b');
+  key('ORIGINAL UI REQUEST');key('\r');await until(()=>f.screen().includes('已完成'));
+  key('/compact');key('\r');await until(()=>f.screen().includes('上下文压缩 applied'));assert.equal(calls.length,2);assert.equal(readAcceptedTasks(dataRoot).tasks.length,1);
+  key('/compactions');key('\r');assert.match(f.screen(),/上下文压缩/);key('\x1b');
+  key('NEXT UI REQUEST');key('\r');await until(()=>calls.length===3&&f.screen().includes('已完成'));
+  assert.match(JSON.stringify(calls[2]),/VISIBLE COMPACT SUMMARY/);assert.doesNotMatch(JSON.stringify(calls[2]),/ORIGINAL UI REQUEST/);assert.equal(readAcceptedTasks(dataRoot).tasks.length,2);
+  key('/older');key('\r');key('/compact');key('\r');assert.match(f.screen(),/只读历史\/恢复视图不能压缩/);assert.equal(calls.length,3);
+ }finally{await f.app.exit();}
+});
+
+test('a failed TUI task never implicitly supplies context to the next independent request',async()=>{
+ const calls:any[]=[];const transport:typeof fetch=async(url,init)=>{calls.push(JSON.parse(String(init?.body)));return calls.length===1?new Response('controlled denied',{status:401}):scriptedTransport([]).fetch(url,init);};
+ const f=fixture(transport),key=(s:string)=>f.terminal.input(s);
+ try{key('FAILED ORIGINAL INPUT');key('\r');await until(()=>f.screen().includes('失败'));key('EXPLICIT NEW INPUT');key('\r');await until(()=>f.screen().includes('已完成'));assert.equal(calls.length,2);assert.doesNotMatch(JSON.stringify(calls[1]),/FAILED ORIGINAL INPUT/);}finally{await f.app.exit();}
+});

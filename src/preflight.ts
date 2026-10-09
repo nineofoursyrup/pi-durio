@@ -136,6 +136,12 @@ export async function preflight(owner: OwnerLease) {
     if (closed?.cleanup === 'confirmed' && closed.status !== 'unknown' || checked?.status === 'completed' && JSON.stringify(checked.session?.sourceFiles) === JSON.stringify(report.sourceFiles)) resolved.add(run.runId);
   }
   for (const record of records.filter(record => record.kind === 'run.started')) if (!sessions.some(dir => dir.name === record.data.sessionId)&&!sessionRemovalVerified(root,record.data.sessionId,records)) throw new Error('RECOVERY_REQUIRED: recorded session storage is missing or cleanup is incomplete');
+  for(const start of records.filter(record=>record.kind==='compaction.started')){
+    const history=records.filter(record=>record.runId===start.runId),closed=history.findLast(record=>record.kind==='compaction.closed'&&record.data.requestId===start.data.requestId)?.data.result;
+    const snapshot=reports.find(report=>report.source===join(root,'sessions',start.data.source.sourceSessionId,'durable.sqlite'));
+    const ended=snapshot&&history.some(record=>record.kind==='recovery.ended'&&record.data.sourceId===digest(JSON.stringify(snapshot.sourceFiles)));
+    if(!ended&&(!closed||closed.cleanup!=='confirmed'||closed.status==='unknown'))throw Error('RECOVERY_REQUIRED: unresolved compaction close or cross-store gap');
+  }
   for (const run of accepted) {
     if (resolved.has(run.runId)) continue;
     const receipt = records.findLast(record => record.runId === run.runId && record.kind === 'run.closed')?.data;

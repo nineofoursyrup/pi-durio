@@ -190,7 +190,7 @@ test('a cancellation at the final model or shell dispatch boundary cannot launch
   const { mkdir, readFile } = await import('node:fs/promises');
   const { runCodingTask } = await import('../src/runtime.js');
   const { scriptedTransport } = await import('../src/offline.js');
-  for (const boundary of ['model.dispatch', 'shell.started']) {
+  for (const boundary of ['model.fetch-intent', 'shell.started']) {
     const root = await mkdtemp(join(tmpdir(), 'durio-dispatch-stop-'));
     const workspace = join(root, 'project');
     await mkdir(workspace);
@@ -200,7 +200,7 @@ test('a cancellation at the final model or shell dispatch boundary cannot launch
       onObservation: event => { if (event.kind === boundary) controller.abort(); }
     });
     assert.equal(result.status, 'aborted');
-    if (boundary === 'model.dispatch') assert.equal(script.calls.length, 0);
+    if (boundary === 'model.fetch-intent') assert.equal(script.calls.length, 0);
     else await assert.rejects(readFile(join(workspace, 'forbidden.txt')), /ENOENT/);
   }
 });
