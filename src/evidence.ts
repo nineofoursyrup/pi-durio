@@ -15,7 +15,9 @@ export class Evidence {
     mkdirSync(join(root, 'objects'), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(join(root, 'host.sqlite'));
     chmodSync(join(root, 'host.sqlite'), 0o600);
-    this.db.exec('PRAGMA journal_mode=DELETE; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS records (seq INTEGER PRIMARY KEY, run_id TEXT NOT NULL, kind TEXT NOT NULL, at TEXT NOT NULL, body TEXT NOT NULL); CREATE INDEX IF NOT EXISTS records_run ON records(run_id, seq)');
+    // Public readonly viewers can briefly hold a shared lock. Wait only for that
+    // SQLite lock; this never retries a tool/model or masks a lasting write failure.
+    this.db.exec('PRAGMA busy_timeout=1000; PRAGMA journal_mode=DELETE; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS records (seq INTEGER PRIMARY KEY, run_id TEXT NOT NULL, kind TEXT NOT NULL, at TEXT NOT NULL, body TEXT NOT NULL); CREATE INDEX IF NOT EXISTS records_run ON records(run_id, seq)');
   }
   blob(bytes: string | Uint8Array): BlobRef {
     const value = Buffer.from(bytes);
@@ -66,6 +68,7 @@ export async function readRun(root: string, runId: string, options: { after?: nu
     const rows = db.prepare('SELECT seq,kind,at,body FROM records WHERE run_id=? AND seq>? ORDER BY seq LIMIT ?').all(runId, options.after ?? 0, limit + 1);
     const decode = (row: typeof rows[number]): EvidenceRecord => ({ seq: Number(row.seq), kind: String(row.kind), at: String(row.at), data: JSON.parse(readObject(root, JSON.parse(String(row.body))).toString()) });
     const resultRow = db.prepare("SELECT seq,kind,at,body FROM records WHERE run_id=? AND kind='run.closed' ORDER BY seq DESC LIMIT 1").get(runId);
-    return { runId, result: resultRow ? decode(resultRow).data : { status: 'unknown', reason: 'No confirmed close receipt; recovery check required' }, records: rows.slice(0, limit).map(decode), next: rows.length > limit ? Number(rows[limit - 1].seq) : null };
+    const recoveryRow = db.prepare("SELECT seq,kind,at,body FROM records WHERE run_id=? AND kind IN ('recovery.closed','recovery.ended','recovery.report') ORDER BY seq DESC LIMIT 1").get(runId);
+    return { runId, result: resultRow ? decode(resultRow).data : { status: 'unknown', reason: 'No confirmed close receipt; recovery check required' }, ...(recoveryRow ? {recovery:decode(recoveryRow)} : {}), records: rows.slice(0, limit).map(decode), next: rows.length > limit ? Number(rows[limit - 1].seq) : null };
   } finally { db.close(); }
 }
