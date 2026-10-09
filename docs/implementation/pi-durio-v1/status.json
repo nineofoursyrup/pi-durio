@@ -63,11 +63,16 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-13",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-13",
+      "agent": "/root/issue13",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "note": "Fresh gpt-6-astra/xhigh implementer; runtime/coding ownership fixed in interfaces-13-16.md."
     },
     "14": {
       "number": 14,
@@ -114,11 +119,16 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-16",
+      "agent": "/root/issue16",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "note": "Fresh gpt-6-astra/xhigh implementer; real Terminal evidence required, offline provider only."
     },
     "17": {
       "number": 17,
@@ -407,12 +417,9 @@
       "evidence": []
     }
   },
-  "frontier": [
-    13,
-    16
-  ],
+  "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "b373e1780444b51c913d438a85daec3a00b1b2a1",
+  "integration_tip": "fb8a173ee6d3bf224894d2ca119662fe04a331bc",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -422,7 +429,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T10:05:04.310786+00:00",
+  "updated_at": "2026-10-09T10:06:05.749033+00:00",
   "last_remote_readback": {
     "baseRefName": "main",
     "closingIssuesReferences": [],
