@@ -74,6 +74,50 @@ function calibratedFixture(transportOverride?:typeof fetch){
   return {root,terminal,transport,app,draftRoot,painted};
 }
 
+for(const [label,key,draft] of [['Ctrl+D','\x04',''],['Ctrl+C','\x03','keep this draft']] as const) {
+  test(`calibration replies between the first two ${label} presses do not cancel exit confirmation`,async()=>{
+    const f=calibratedFixture();
+    try {
+      await until(f.painted);
+      if(draft){f.terminal.key(draft);await until(f.painted);}
+      const before=f.terminal.samples.length,firstAt=Date.now();f.terminal.key(key);
+      await until(()=>f.painted()&&f.terminal.samples.length>before);
+      assert.ok(Date.now()-firstAt<800,'responses and the second key are inside the unchanged confirmation window');
+      f.terminal.key(key);await new Promise(resolve=>setTimeout(resolve,30));
+      assert.equal(f.terminal.stopped,true,'CPR/DA1 are protocol responses, not user actions that revoke confirmation');
+      const result=await f.app.closed;assert.equal(result.draftSaved,!!draft);assert.equal(f.transport.calls.length,0);
+    }finally{await f.app.exit();}
+  });
+}
+
+test('real input, focus and resize revoke confirmation on arrival even while width replies are held',async()=>{
+  for(const change of ['text','focus','page','modified-f3','pasted-reply','resize']) {
+    const f=calibratedFixture();
+    try {
+      await until(f.painted);f.terminal.hold='A';f.terminal.key('\x04');
+      await until(()=>f.terminal.held.length===1);
+      if(change==='resize'){f.terminal.columns=81;f.terminal.resize();}
+      else f.terminal.key({text:'x',focus:'\x1b[O',page:'\x1b[5~','modified-f3':'\x1b[1;2R','pasted-reply':'\x1b[200~\x1b[2;99R\x1b[?1;2c\x1b[201~'}[change]!);
+      f.terminal.key('\x04');await new Promise(resolve=>setTimeout(resolve,30));
+      assert.equal(f.terminal.stopped,false,`${change} invalidates the first press before any held event is replayed`);
+    }finally{f.terminal.release();await f.app.exit();}
+  }
+});
+
+test('late inactive CPR and fragmented DA1 stay protocol events, while the 800ms expiry remains intact',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);const count=f.terminal.samples.length;
+    f.terminal.key('\x04');await until(()=>f.painted()&&f.terminal.samples.length>count);
+    await new Promise(resolve=>setTimeout(resolve,820));
+    f.terminal.key('\x04');assert.equal(f.terminal.stopped,false,'the expired first press cannot authorize exit');
+    f.terminal.key('\x1b[2;');await new Promise(resolve=>setTimeout(resolve,2));
+    f.terminal.key('99R\x1b[?1;');await new Promise(resolve=>setTimeout(resolve,2));f.terminal.key('2c');
+    f.terminal.key('\x04');await new Promise(resolve=>setTimeout(resolve,30));
+    assert.equal(f.terminal.stopped,true,'a late complete reply does not revoke a fresh confirmation');
+  }finally{await f.app.exit();}
+});
+
 test('product first paste is measured before paint, keeps later keys ordered and discovers combined graphemes',async()=>{
   const f=calibratedFixture(),key=(data:string)=>f.terminal.key(data);
   try {
