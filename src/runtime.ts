@@ -8,16 +8,19 @@ import { BACKGROUND_CONTEXT, withAbortSignal, awaitWithContext } from '@earendil
 import { Harness, createRegistry, defineExtension, GenerationTask, hook, type Conversation, type UsageState, type Storage, type ToolRegistration, type ToolDiagnostic } from '@earendil-works/pi-durable';
 import { createReadTool, createWriteTool, createEditTool, createBashTool } from '@earendil-works/pi-durable/tools';
 import { openNodeSqliteStorage } from '@earendil-works/pi-durable/storage/sqlite/node';
-import { Evidence, type FaultInjector } from './evidence.js';
+import { Evidence, readObject, readQueue, type BlobRef, type QueueItemFact, type FaultInjector } from './evidence.js';
+import { TaskControl, RunControls, findQueueItem, validControlId, previousQueueDecision, type QueueDecision } from './control.js';
 import { acquireOwner } from './ownership.js';
 import { preflight, inspectSession } from './preflight.js';
 import { readEnvironment } from './read-environment.js';
-import { captureArtifact } from './artifact.js';
+import { captureArtifact, verifyArtifact } from './artifact.js';
 import { codingEnvironment, toolEnvironment, type ToolEnvironmentConfig, type ObservedFile } from './coding-environment.js';
 import { acquireWorkspaceOwner, resolveWorkspaceRoot } from './workspace-ownership.js';
 import { executionConfig, READ_INSTRUCTIONS, CODING_INSTRUCTIONS } from './execution-config.js';
-import { prepareRecovery, type RecoveryOptions, type RecoveryDecision, type RecoveryPlan, type RecoveryReport } from './recovery.js';
-export { readRun, readObject } from './evidence.js';
+import { prepareRecovery, recoveryRecords, type RecoveryOptions, type RecoveryDecision, type RecoveryPlan, type RecoveryReport } from './recovery.js';
+export { readRun, readObject, readAcceptedTasks, readQueue } from './evidence.js';
+export { TaskControl } from './control.js';
+export type { ControlInput, QueueDecision } from './control.js';
 export { inspectRecovery, checkRecovery, settleRecoveryOwners } from './recovery.js';
 export type { RecoveryOptions, RecoveryDecision, RecoveryReport, RecoveryAuthorization } from './recovery.js';
 
@@ -37,6 +40,8 @@ export interface ReadTaskOptions {
   fault?: FaultInjector;
   /** Injectable credential source for embedding/tests; value is never recorded. */
   apiKey?: string;
+  /** UI and headless share the same admission/withdrawal boundary. */
+  control?:TaskControl;
 }
 export interface CodingTaskOptions extends ReadTaskOptions { toolEnvironment?: ToolEnvironmentConfig }
 export type { ToolEnvironmentConfig } from './coding-environment.js';
@@ -46,6 +51,7 @@ export interface RunResult {
   answer?: string; reason?: string; observation: 'ok' | 'degraded'; cleanup: 'confirmed' | 'unknown';
   lifecycle?: { intent: 'stop' | 'exit' | null; disposition: 'completed' | 'failed' | 'aborted' | 'resumable' | 'needs-recovery'; cleanupTimeoutMs: number; storage: 'not-opened' | 'closed' | 'unknown'; owner: 'release-after-host-close' | 'retained'; remoteTermination: 'unknown' };
   executionCleanup?: { managedCommands: 'settled' | 'unknown'; started: number; settled: number; externalProcesses: 'unknown' };
+  controls?:{status:'needs-decision';exitCode:75;requestIds:string[];reason:string};
   usage: { source: 'pi.usage'; scope: string; completeness: 'known' | 'partial' | 'unknown'; value: UsageState | null; cost: { kind: 'estimate'; currency: 'USD'; source: string; observedAt: string } };
 }
 
@@ -81,7 +87,7 @@ export function waitForRun(run: Promise<RunResult>, signal?: AbortSignal): Promi
 }
 
 /** Explicit recovery is a checked reopening of the same run, not a new scheduler or task loop. */
-export async function recoverRun(options: RecoveryOptions & { decision: RecoveryDecision; transport?: typeof fetch; apiKey?: string; signal?: AbortSignal; cancellation?: 'stop' | 'exit'; onObservation?: ReadTaskOptions['onObservation']; fault?: FaultInjector }): Promise<RunResult | RecoveryReport> {
+export async function recoverRun(options: RecoveryOptions & { decision: RecoveryDecision; transport?: typeof fetch; apiKey?: string; signal?: AbortSignal; cancellation?: 'stop' | 'exit'; onObservation?: ReadTaskOptions['onObservation']; fault?: FaultInjector; control?:TaskControl }): Promise<RunResult | RecoveryReport> {
   const stable = { ...options, authorization: options.authorization && structuredClone(options.authorization), decision: structuredClone(options.decision) };
   const prepared = await prepareRecovery(stable);
   if (!prepared || typeof prepared !== 'object' || !('owner' in prepared)) return prepared as RunResult | RecoveryReport;
@@ -92,8 +98,14 @@ export async function recoverRun(options: RecoveryOptions & { decision: Recovery
     throw new Error('RECOVERY_TRANSPORT_OR_AUTH_MISSING');
   }
   try {
-    return await executeTask({ ...options, dataRoot: plan.owner.path, workspace: stable.authorization.workspace, mode: stable.authorization.mode, toolEnvironment: stable.authorization.toolEnvironment,
-      input: plan.accepted.input, cleanupTimeoutMs: plan.config.cleanupTimeoutMs }, plan.coding, plan);
+    const handoff:RunHandoff={};
+    const result=await executeTask({ ...options, dataRoot: plan.owner.path, workspace: stable.authorization.workspace, mode: stable.authorization.mode, toolEnvironment: stable.authorization.toolEnvironment,
+      input: plan.accepted.input, cleanupTimeoutMs: plan.config.cleanupTimeoutMs,get cancellation(){return options.cancellation;} }, plan.coding, plan,undefined,handoff);
+    if(handoff.pending?.length&&result.cleanup==='confirmed') {
+      await freezeQueued(options.dataRoot,handoff.pending,'Recovery continuation does not automatically dispatch independent requests; explicitly inspect and decide');
+      result.controls={status:'needs-decision',exitCode:75,requestIds:handoff.pending.map(item=>item.requestId),reason:'Recovery-bound independent requests remain frozen'};
+    }
+    return result;
   } catch(error) { if(!plan.adopted)await plan.owner.release();throw error; }
 }
 
@@ -102,11 +114,101 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
   const latch = () => { firstIntent ??= options.cancellation ?? 'exit'; };
   options.signal?.addEventListener('abort', latch, { once: true });
   if (options.signal?.aborted) latch();
-  try { return await executeTask({ ...options, get cancellation() { return firstIntent ?? options.cancellation; } }, coding); }
+  const stable={...options,toolEnvironment:options.toolEnvironment&&structuredClone(options.toolEnvironment),get cancellation(){return firstIntent??options.cancellation;}};
+  try {
+    let handoff:RunHandoff={},result=await executeTask(stable,coding,undefined,undefined,handoff);
+    const pending=[...(handoff.pending??[])];
+    // Independent host requests only. Each request still uses the unmodified public Pi agent loop.
+    while(result.status==='completed'&&result.cleanup==='confirmed'&&pending.length&&!options.signal?.aborted) {
+      const item=pending.shift()!;
+      if(item.kind!=='follow-up') {await freezeQueued(options.dataRoot,[item,...pending],'Management request awaits its installed handler and an explicit decision');break;}
+      const current=findQueueItem(options.dataRoot,item.requestId);
+      if(!current||current.status!=='pending')continue;
+      const next:RunHandoff={inheritedPending:[...pending]};
+      try {result=await executeTask({...stable,input:item.input,get cancellation(){return firstIntent??options.cancellation;}},coding,undefined,{item:current,context:handoff.context!},next);}
+      catch(error){await freezeQueued(options.dataRoot,[item,...pending],`Dispatch blocked: ${String(error)}`);throw error;}
+      pending.push(...(next.pending??[]));handoff=next;
+    }
+    if(options.signal?.aborted&&pending.length&&result.cleanup==='confirmed')await freezeQueued(options.dataRoot,pending,`Application ${firstIntent??options.cancellation??'exit'}; admission frozen`);
+    if(options.control) {
+      const unresolved=queueItems(options.dataRoot).filter(item=>item.status==='pending'||item.status==='dispatching'||item.status==='frozen');
+      if(unresolved.length)result.controls={status:'needs-decision',exitCode:75,requestIds:unresolved.map(item=>item.requestId),reason:'Saved queue remains visible and frozen; ordinary input never reattaches it'};
+    }
+    return result;
+  }
   finally { options.signal?.removeEventListener('abort', latch); }
 }
 
-async function executeTask(options: CodingTaskOptions, coding: boolean, recovery?: RecoveryPlan): Promise<RunResult> {
+interface ContextSnapshot {sourceRunId:string;sourceSessionId:string;sourceConversationId:number;messages:BlobRef;receiptSeq:number}
+interface RunHandoff {pending?:QueueItemFact[];context?:ContextSnapshot;inheritedPending?:QueueItemFact[]}
+function queueItems(root:string) {const items:QueueItemFact[]=[];let after:number|undefined,through:number|undefined;do{const page=readQueue(root,{after,through,limit:200});items.push(...page.items);after=page.next??undefined;through=page.through;}while(after);return items;}
+async function freezeQueued(root:string,items:QueueItemFact[],reason:string) {
+  if(!items.length)return;
+  const owner=await acquireOwner(root,()=>{});
+  try {for(const item of items){const current=findQueueItem(root,item.requestId);if(!current||!['pending','dispatching'].includes(current.status))continue;const evidence=new Evidence(root,item.target.runId);try{evidence.append('control.receipt',{requestId:item.requestId,status:'frozen',reason});evidence.append('control.report',{status:'needs-decision',exitCode:75,requestIds:[item.requestId],reason,options:['inspect','withdraw','reattach compatible completed-source follow-up','explicitly submit old text as new work']});}finally{evidence.close();}}}
+  finally {await owner.release();}
+}
+
+/** Persist a machine-readable decision requirement without opening the upstream Harness. */
+export async function checkQueue(dataRoot:string) {
+  const owner=await acquireOwner(dataRoot,()=>{});
+  try {
+    for(const item of queueItems(owner.path).filter(item=>item.status==='pending'||item.status==='dispatching')) {
+      const evidence=new Evidence(owner.path,item.target.runId);try{evidence.append('control.receipt',{requestId:item.requestId,status:'frozen',reason:'Reopened control state requires a source-bound explicit decision; no automatic dispatch'});}finally{evidence.close();}
+    }
+    const items=queueItems(owner.path),pending=items.filter(item=>item.status==='frozen');
+    const report={status:pending.length?'needs-decision':'settled',exitCode:pending.length?75:0,items,options:['inspect','withdraw','reattach completed-source follow-up','explicitly submit old text as a new task'],reason:'Closing a view does not release any execution restriction'};
+    if(items.length){const evidence=new Evidence(owner.path,items[0].target.runId);try{evidence.append('control.report',report);}finally{evidence.close();}}
+    return report;
+  }finally{await owner.release();}
+}
+
+/** Headless/TUI source-bound queue decision. Reattachment runs the same checked runtime. */
+export async function decideQueue(options:RecoveryOptions & {decision:QueueDecision;transport?:typeof fetch;apiKey?:string;signal?:AbortSignal;cancellation?:'stop'|'exit';control?:TaskControl;onObservation?:ReadTaskOptions['onObservation']}) : Promise<QueueItemFact|RunResult> {
+  const decision=structuredClone(options.decision);validControlId(decision.id);
+  const owner=await acquireOwner(options.dataRoot,()=>{});let dispatch:{item:QueueItemFact;context:ContextSnapshot}|undefined;
+  try {
+    const item=findQueueItem(owner.path,decision.requestId);if(!item)throw Error('CONTROL_NOT_FOUND');
+    if(JSON.stringify(item.target)!==JSON.stringify(decision.target)||options.runId!==item.target.runId)throw Error('CONTROL_TARGET_CHANGED');
+    if(previousQueueDecision(owner.path,decision))return item;
+    if(item.receipt.seq!==decision.receiptSeq)throw Error('STALE_CONTROL_DECISION');
+    const evidence=new Evidence(owner.path,item.target.runId);
+    try {
+      if(decision.action==='withdraw') {
+        evidence.append('control.decision',{decision});
+        if(item.status!=='applied'&&item.status!=='withdrawn')evidence.append('control.receipt',{requestId:item.requestId,status:'withdrawn',reason:'Explicit host withdrawal; any old durable inbox stays frozen behind recovery checks'});
+        return findQueueItem(owner.path,item.requestId)!;
+      }
+      if(decision.action!=='reattach'||item.kind!=='follow-up'||item.status!=='frozen')throw Error('QUEUE_REATTACH_NOT_APPLICABLE: frozen independent follow-up only; old steer text requires explicit new submission');
+      if(queueItems(owner.path).some(other=>other.acceptedSeq<item.acceptedSeq&&other.target.sessionId===item.target.sessionId&&other.kind!=='steer'&&['pending','dispatching','frozen'].includes(other.status)))throw Error('QUEUE_PREDECESSOR_UNRESOLVED: finish or explicitly withdraw earlier independent/management work');
+      if(!options.authorization)throw Error('CURRENT_AUTHORIZATION_REQUIRED');
+      const source=recoveryRecords(owner.path,item.target.runId);
+      const original=source.findLast(record=>record.kind==='run.closed')?.data as RunResult|undefined;
+      if(original?.status!=='completed'||original.cleanup!=='confirmed')throw Error('QUEUE_SOURCE_NOT_COMPLETED: resolve old work and explicitly submit text as new work; stopped tasks never revive');
+      if(source.some(record=>record.kind==='task.accepted'&&(record.data as any).queueRequestId===item.requestId))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
+      // Search every execution identity: a missing linking receipt never permits duplicate work.
+      if(recoveryRecords(owner.path).some(record=>record.kind==='task.accepted'&&(record.data as any).queueRequestId===item.requestId))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
+      verifyArtifact(owner.path,source.find(record=>record.seq===item.executionVersion.artifactSeq)!.data as ReturnType<typeof captureArtifact>);
+      const accepted=source.find(record=>record.kind==='task.accepted')!.data as any;
+      const auth=options.authorization;
+      if(await realpath(auth.workspace)!==item.target.workspace||auth.mode!==accepted.mode||JSON.stringify([...auth.tools].sort())!==JSON.stringify([...accepted.authorization.tools].sort()))throw Error('QUEUE_AUTHORIZATION_CHANGED');
+      const config=source.find(record=>record.seq===item.executionVersion.configSeq)!.data as any;
+      const expected=executionConfig(accepted.authorization.execution==='trusted-local-coding',auth.mode,auth.toolEnvironment);
+      if(Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('QUEUE_EXECUTION_CONFIGURATION_CHANGED');
+      await preflight(owner);
+      const snapshot=source.findLast(record=>record.kind==='context.snapshot');if(!snapshot)throw Error('QUEUE_CONTEXT_UNAVAILABLE');
+      const context={...(snapshot.data as Omit<ContextSnapshot,'receiptSeq'>),receiptSeq:snapshot.seq};readObject(owner.path,context.messages);
+      evidence.append('control.decision',{decision,authorization:{workspace:auth.workspace,mode:auth.mode,tools:auth.tools}});
+      evidence.append('control.receipt',{requestId:item.requestId,status:'pending',reason:`Explicit compatible reattachment decision ${decision.id}`});
+      dispatch={item:findQueueItem(owner.path,item.requestId)!,context};
+    }finally{evidence.close();}
+  }finally{await owner.release();}
+  const auth=options.authorization!;
+  try {return await executeTask({...options,workspace:auth.workspace,input:dispatch!.item.input,mode:auth.mode,toolEnvironment:auth.toolEnvironment,get cancellation(){return options.cancellation;}},auth.tools.includes('write'),undefined,dispatch,{});}
+  catch(error){await freezeQueued(options.dataRoot,[dispatch!.item],`Reattachment blocked: ${String(error)}`);throw error;}
+}
+
+async function executeTask(options: CodingTaskOptions, coding: boolean, recovery?: RecoveryPlan,queued?:{item:QueueItemFact;context:ContextSnapshot},handoff?:RunHandoff): Promise<RunResult> {
   if (options.signal?.aborted) throw new Error(`RUN_CANCELLED_BEFORE_ACCEPTANCE: ${options.cancellation ?? 'exit'}`);
   const cleanupTimeoutMs = options.cleanupTimeoutMs ?? 10000;
   if (!Number.isSafeInteger(cleanupTimeoutMs) || cleanupTimeoutMs < 1 || cleanupTimeoutMs > 300000) throw new Error('INVALID_CLEANUP_TIMEOUT: provide 1–300000 milliseconds');
@@ -122,7 +224,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
   const requestedRoot = await validateDataRoot(options.dataRoot, workspaceRoot);
   await mkdir(requestedRoot, { recursive: true, mode: 0o700 });
   const dataRoot = await validateDataRoot(requestedRoot, workspaceRoot);
-  const runId = recovery?.accepted.runId ?? randomUUID(), sessionId = recovery?.accepted.sessionId ?? randomUUID(), taskId = recovery?.accepted.taskId ?? randomUUID();
+  const runId = recovery?.accepted.runId ?? randomUUID(), sessionId = recovery?.accepted.sessionId ?? randomUUID(), taskId = recovery?.accepted.taskId ?? queued?.item.taskId ?? randomUUID();
   const controller = new AbortController();
   let failure: string | undefined;
   let originalLoss = false;
@@ -142,6 +244,8 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
   let evidence: Evidence | undefined;
   let closePromise: Promise<void> | undefined;
   let cleanup: 'confirmed' | 'unknown' = 'confirmed';
+  let controls:RunControls|undefined;
+  let freezing:Promise<void>|undefined;
   let notifyStop!: () => void;
   const stopping = new Promise<'stopped'>(resolve => { notifyStop = () => resolve('stopped'); });
   const safeError = (error: unknown) => (error instanceof Error ? error.message : String(error)).split(apiKey).join('[credential redacted]');
@@ -178,6 +282,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       if (accepted) record('lifecycle.processing', { action: cancellation, admission: 'closed', dispatch: 'closed' });
     } catch { /* Earlier records remain authoritative. */ }
     controller.abort();
+    if(controls)freezing=controls.freeze(`Application ${cancellation}; original target remains bound`).catch(fatal);
     notifyStop();
   };
   options.signal?.addEventListener('abort', stop, { once: true });
@@ -196,6 +301,18 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     }
     await chmod(dataRoot, 0o700);
     const inspected = recovery ? [] : await preflight(owner);
+    if(queued) {
+      const source=recoveryRecords(dataRoot,queued.item.target.runId);
+      const artifact=source.find(record=>record.seq===queued.item.executionVersion.artifactSeq)?.data as ReturnType<typeof captureArtifact>;
+      const config=source.find(record=>record.seq===queued.item.executionVersion.configSeq)?.data as Record<string,unknown>;
+      verifyArtifact(dataRoot,artifact);
+      const expected=executionConfig(coding,options.mode,options.toolEnvironment);
+      if(workspace!==queued.item.target.workspace||!config||Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('QUEUE_EXECUTION_VERSION_OR_AUTHORIZATION_CHANGED');
+      const current=findQueueItem(dataRoot,queued.item.requestId);
+      if(current?.status!=='pending')throw Error('QUEUE_NOT_PENDING');
+      const sourceEvidence=new Evidence(dataRoot,queued.item.target.runId,options.fault);
+      try {sourceEvidence.append('control.receipt',{requestId:queued.item.requestId,status:'dispatching',reason:'Saved independent run dispatch intent; original target and context retained'});}finally{sourceEvidence.close();}
+    }
     if (stopped) throw new Error(`RUN_CANCELLED_BEFORE_ACCEPTANCE: ${options.cancellation ?? 'exit'}`);
     guard();
     evidence = new Evidence(dataRoot, runId, options.fault);
@@ -203,17 +320,19 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     else record('recovery.started', { decisionId: recovery.decision.id, snapshotId: recovery.report.snapshotId, capabilities: recovery.readOnly ? ['read'] : recovery.accepted.authorization.tools, previousRequests: requests, previousUsageUnknown: recovery.previousUsageUnknown, originalStatus: (recovery.report.original as {status:string}).status });
     guard();
     accepted = true;
-    if (!recovery) record('task.accepted', { taskId, runId, sessionId, input: options.input, workspace, mode: options.mode, authorization: { tools: coding ? ['read', 'write', 'edit', 'bash'] : ['read'], execution: coding ? 'trusted-local-coding' : 'trusted-local-read-only', requestLimit: 8, fileLimitBytes: 256 * 1024, replay: 'unsafe' }, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } });
+    const authorization={ tools: coding ? ['read', 'write', 'edit', 'bash'] : ['read'], execution: coding ? 'trusted-local-coding' : 'trusted-local-read-only', requestLimit: 8, fileLimitBytes: 256 * 1024, replay: 'unsafe' };
+    if (!recovery) record('task.accepted', { taskId, runId, sessionId, input: options.input, workspace, mode: options.mode, ...(queued?{queueRequestId:queued.item.requestId,sourceTarget:queued.item.target}:{}), authorization, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } });
     record('ownership.acquired', { dataRoot: {path:owner.path,claim:owner.claim}, ...(workspaceOwner ? {workspace:{path:workspaceOwner.path,claim:workspaceOwner.claim}}:{}) });
     if (workspaceOwner && !recovery) record('workspace.owner', { root: workspaceOwner.root, workspace, scope: 'protocol participants only; external editors, shared Git metadata and external resources are not isolated' });
-    if (!recovery) record('execution.artifact', captureArtifact(evidence, workspace));
+    const artifact=recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:captureArtifact(evidence,workspace);
+    const artifactSeq=recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.seq:record('execution.artifact',artifact);
     const models = createModels({ authContext: { env: async name => name === 'DEEPSEEK_API_KEY' ? apiKey : undefined, fileExists: async () => false } });
     models.setProvider(deepseekProvider());
     const model = models.getModel('deepseek', 'deepseek-flash');
     if (!model || model.api !== 'openai-completions' || model.baseUrl !== 'https://api.deepseek.com') throw new Error('MODEL_CONFIGURATION_MISMATCH');
     const configuration = executionConfig(coding,options.mode,options.toolEnvironment);
     const settings = configuration.settings;
-    if (!recovery) record('execution.config', { cleanupTimeoutMs, ...configuration, recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
+    const configSeq=recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.config')!.seq:record('execution.config', { cleanupTimeoutMs, ...configuration, recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
     const actualStream = models.streamSimple.bind(models);
     const capturedModels: Models = Object.assign(models, {
       streamSimple: ((requestedModel, context, streamOptions) => {
@@ -325,8 +444,22 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       const capture = (kind: string, acquired: unknown) => record(kind, { toolAttempt: toolContext.getStore(), acquired });
       return coding && !recovery?.readOnly ? codingEnvironment(workspace, shellEnvironment!, guard, capture, state => { if (state === 'started') shellsStarted++; else shellsSettled++; }, observedFiles) : readEnvironment(workspace, guard, capture);
     } }, CTX);
+    if(recovery)for(const frozen of recovery.frozenSubmissions??[]) {
+      const pending=await harness.submission(frozen.id,CTX);
+      if(!pending)throw Error('RECOVERY_QUEUE_SUBMISSION_MISSING');
+      const outcome=await pending.abort(CTX); // Public passive withdrawal; never enables scheduling.
+      if(outcome!=='aborted'&&outcome!=='settled')throw Error('RECOVERY_QUEUE_PLACEMENT_CHANGED');
+      const item=findQueueItem(dataRoot,frozen.requestId);
+      if(item?.status!=='withdrawn')record('control.receipt',{requestId:frozen.requestId,status:'frozen',reason:'Recovery retained this old pending steer; continuing the run does not reattach it',upstream:{submissionId:frozen.id,status:(await pending.status(CTX)).status}});
+    }
     conversation = recovery ? await harness.conversation(recovery.started.conversationId,CTX) : await harness.root(CTX, { agent: { model: { provider: 'deepseek', modelId: 'deepseek-flash' }, cwd: workspace, instructions } });
     if (!conversation) throw new Error('RECOVERY_CONVERSATION_MISSING');
+    if(queued) {
+      const messages=JSON.parse(readObject(dataRoot,queued.context.messages).toString());
+      // A passive, exactly retained model context import. No source run is opened or resumed.
+      record('context.imported',{source:queued.context,target:queued.item.target,policy:'full acquired Pi model context; new independent run and usage'});
+      await conversation.commit(tx=>tx.appendEntry(conversation!.id,{kind:'durio.follow-up-context',model:messages}),CTX);
+    }
     if (!recovery) record('run.started', { taskId, sessionId, conversationId: conversation.id });
     guard();
     if (recovery) {
@@ -337,14 +470,28 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     const submission = recovery ? await harness.submission(recovery.submissionId,CTX) : await conversation.submit({ type: 'input', content: options.input, requestId: taskId }, CTX);
     if (!submission) throw new Error('RECOVERY_SUBMISSION_MISSING');
     if (!recovery) record('submission.accepted', { requestId: taskId, submissionId: submission.id });
+    if(queued) {
+      const sourceEvidence=new Evidence(dataRoot,queued.item.target.runId,options.fault);
+      try{sourceEvidence.append('control.receipt',{requestId:queued.item.requestId,status:'applied',reason:'New independent run and Pi input submission committed',execution:{runId,sessionId},upstream:{submissionId:submission.id,status:(await submission.status(CTX)).status}});}finally{sourceEvidence.close();}
+    }
+    if(options.control) {
+      controls=new RunControls({root:dataRoot,target:{workspace,sessionId,taskId,runId},version:{artifactId:artifact.id,artifactSeq,configSeq},authorization,conversation,harness,guard,record,failure:fatal});options.control.attach(controls);
+      record('control.ready',{target:controls.target,admission:'open'});
+    }
     guard(); // wait is an implicit scheduler entry; it cannot bypass the same owner/capability admission.
     const settled = await Promise.race([submission.wait(CTX), stopping]);
     if (settled !== 'stopped') {
+      if(settled.status==='done'&&controls)await Promise.race([controls.settleSteers(),stopping]);
+      if(stopped)throw Error('RUN_STOPPING');
       finalizing = true;
       record('submission.settled', settled);
       const view = await conversation.viewState(CTX);
       try { usage = structuredClone(view.value.docs['pi.usage']) as UsageState; } finally { view.dispose(); }
       const context = await conversation.context(CTX);
+      if(handoff) {
+        handoff.pending=controls?.pending()??[];
+        if(options.control){const messages=evidence.blob(JSON.stringify(context.messages));const receiptSeq=record('context.snapshot',{sourceRunId:runId,sourceSessionId:sessionId,sourceConversationId:conversation.id,messages});handoff.context={sourceRunId:runId,sourceSessionId:sessionId,sourceConversationId:conversation.id,messages,receiptSeq};}
+      }
       const last = context.messages.findLast((m): m is AssistantMessage => m.role === 'assistant');
       if (last) answer = last.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
       if (settled.status !== 'done') failure ??= httpStatus === 401 || httpStatus === 403 ? 'AUTH_REJECTED: DeepSeek rejected credentials; no provider fallback' : 'TASK_UNANSWERED';
@@ -355,6 +502,12 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     options.signal?.removeEventListener('abort', stop);
     finalizing = true;
     controller.abort();
+    if(controls) {
+      options.control?.detach(controls);
+      try {await freezing;if(failure||stopped)await controls.freeze(failure??`Application ${cancellation??'interrupted'}`);await controls.drain();}
+      catch(error){originalLoss=true;failure??=safeError(error);}
+      controls.close();
+    }
     const deadline = new AbortController();
     let timedOut = false;
     const timer = setTimeout(() => { timedOut = true; deadline.abort(new Error('CLEANUP_TIMEOUT: cleanup remains unconfirmed; inspect residual work before releasing ownership')); }, cleanupTimeoutMs);
@@ -388,6 +541,11 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
         lifecycle: { intent: cancellation ?? null, disposition: originalLoss || cleanup === 'unknown' ? 'needs-recovery' : failure ? 'failed' : cancellation === 'stop' ? 'aborted' : cancellation === 'exit' ? 'resumable' : 'completed', cleanupTimeoutMs, storage: storage ? (storageClosed ? 'closed' : 'unknown') : 'not-opened', owner: cleanup === 'confirmed' ? 'release-after-host-close' : 'retained', remoteTermination: 'unknown' },
         ...(coding ? { executionCleanup: { managedCommands: shellsStarted === shellsSettled ? 'settled' as const : 'unknown' as const, started: shellsStarted, settled: shellsSettled, externalProcesses: 'unknown' as const } } : {}),
         usage: { source: 'pi.usage', scope: `session:${sessionId}`, completeness: cleanup === 'confirmed' && usageReports === requests && requests > 0 ? 'known' : usageReports ? 'partial' : 'unknown', value: usageReports && cleanup === 'confirmed' ? usage : null, cost: { kind: 'estimate', currency: 'USD', source: '@earendil-works/pi-ai@1.1.0 model price catalog', observedAt: new Date().toISOString() } } };
+      if(result.status!=='completed')for(const item of handoff?.inheritedPending??[]) {
+        const current=findQueueItem(dataRoot,item.requestId);if(!current||!['pending','dispatching'].includes(current.status))continue;
+        const source=new Evidence(dataRoot,item.target.runId,options.fault);
+        try{source.append('control.receipt',{requestId:item.requestId,status:'frozen',reason:`Preceding run ${runId} ${result.status}; explicit source-bound decision required`});}catch(error){result.status='unknown';result.reason=safeError(error);}finally{source.close();}
+      }
       try { record(recovery ? 'recovery.closed' : 'run.closed', recovery ? { decisionId: recovery.decision.id, result, originalStatus: (recovery.report.original as {status:string}).status, previousUsageUnknown: recovery.previousUsageUnknown } : result); } catch { result.status = 'unknown'; result.reason = 'EVIDENCE_FAILURE: close receipt could not be saved'; }
       if (timedOut) {
         // The caller may stop waiting, but active writers still own their storage.

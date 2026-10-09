@@ -2,7 +2,7 @@ import type { RunResult } from './runtime.js';
 
 /** Flush the machine-readable receipt before a bounded, unconfirmed host exit. */
 export function writeHeadlessResult(result: RunResult) {
-  process.exitCode = result.status === 'completed' ? 0 : result.status === 'aborted' ? 130 : result.status === 'unknown' ? 75 : 1;
+  process.exitCode = result.status === 'completed' ? result.controls?.exitCode??0 : result.status === 'aborted' ? 130 : result.status === 'unknown' ? 75 : 1;
   process.stdout.write(JSON.stringify(result, null, 2) + '\n');
   exitHostIfUnconfirmed(result);
 }
