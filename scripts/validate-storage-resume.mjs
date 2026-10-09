@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { mkdir, realpath, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+const [output,installation]=process.argv.slice(2);if(!output||!installation)throw Error('Usage: validate-storage-resume.mjs NEW_OUTPUT INSTALLED_PACKAGE_ROOT');
+await mkdir(resolve(output),{mode:0o700});const base=await realpath(output),install=await realpath(installation);
+const load=name=>import(pathToFileURL(join(install,'dist/src',name+'.js')).href);
+const {runReadTask}=await load('runtime'),{scriptedTransport}=await load('offline'),{Evidence}=await load('evidence');
+const {records,decode}=await load('history'),{previewCleanup,commitCleanup}=await load('storage'),{exists,hashFile}=await load('storage-files');
+const dataRoot=join(base,'data'),workspace=join(base,'project');await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Owned installed-package resume fixture\n');
+const transport=scriptedTransport([]),run=await runReadTask({dataRoot,workspace,input:'Return the deterministic offline result.',mode:'offline',transport:transport.fetch});assert.equal(run.status,'completed');
+const artifact=decode(dataRoot,[...records(dataRoot,{runId:run.runId,kinds:['execution.artifact']})][0]);
+const file=name=>artifact.files.find(f=>f.path===`dist/src/${name}.js`),one=file('runtime'),two=file('query'),three=file('history');assert.ok(one&&two&&three);
+const p=await previewCleanup(dataRoot,{id:'installed-resume',units:[`object:${one.sha256}`,`object:${two.sha256}`,`session:${run.sessionId}`],reason:'own installed-package regression fixture'});
+const failed=await commitCleanup(dataRoot,{id:p.plan.id,identity:p.identity},{fault:(point,path)=>{if(point==='before-delete'&&path===`objects/${two.sha256}`)throw Object.assign(Error('intentional later part failure'),{code:'EIO'});}});
+assert.deepEqual(failed.parts.map(part=>part.status),['completed','failed','not-run']);await writeFile(join(base,'first-failure.json'),JSON.stringify(failed,null,2));
+const resumed=await commitCleanup(dataRoot,{id:p.plan.id,identity:p.identity});assert.equal(resumed.status,'completed');
+for(const unit of p.plan.units)for(const file of unit.files)assert.equal(await exists(join(dataRoot,file.path)),false);
+const drift=await previewCleanup(dataRoot,{id:'unrelated-reference',units:[`object:${three.sha256}`],reason:'unrelated reference must invalidate old preview'}),before=await hashFile(join(dataRoot,'objects',three.sha256));
+const e=new Evidence(dataRoot,run.runId);e.append('check.result',{payload:three,reason:'new independent source after preview'});e.close();
+await assert.rejects(commitCleanup(dataRoot,{id:drift.plan.id,identity:drift.identity}),/STALE_MANAGEMENT_PREVIEW/);assert.deepEqual(await hashFile(join(dataRoot,'objects',three.sha256)),before);
+const result={result:'PASS',base,install,runId:run.runId,sessionId:run.sessionId,cases:['completed part plus later failure resumes remaining same-operation session','unrelated new source still invalidates preview without deleting content'],parts:resumed.parts,deletedBytes:p.plan.bytes,paidCalls:0,provider:'explicit offline fixture'};
+await writeFile(join(base,'result.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
