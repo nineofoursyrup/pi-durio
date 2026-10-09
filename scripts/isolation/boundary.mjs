@@ -28,7 +28,10 @@ async function cli(executable, args, timeout = 30_000) {
 // Trusted callers supply image identity and staged input, never candidate data.
 // Each call creates a new VM, new HOME/cache/tmp, and a private writable mount.
 export async function runRestricted({ image, inputDir, runDir, command,
-  timeoutMs, model, signal, protocolLimits, dependenciesDir, containerExecutable = '/opt/homebrew/bin/container' }) {
+  timeoutMs, model, signal, protocolLimits, dependenciesDir, resourceProfile = 'default', containerExecutable = '/opt/homebrew/bin/container' }) {
+  if (!['default','typescript-build'].includes(resourceProfile)) throw new Error('invalid_resource_profile');
+  if(resourceProfile==='typescript-build'&&model)throw new Error('build_profile_model_denied');
+  const resources={profile:resourceProfile,cpus:1,memoryBytes:resourceProfile==='typescript-build'?1073741824:536870912,nodeHeapMiB:resourceProfile==='typescript-build'?768:null};
   if (!/^[^\s]+@sha256:[a-f0-9]{64}$/.test(image)) throw new Error('immutable_image_required');
   if (!Array.isArray(command) || !command.length || command.some(s => typeof s !== 'string' || s.includes('\0'))) throw new Error('invalid_command');
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 100 || timeoutMs > 300_000) throw new Error('invalid_timeout');
@@ -45,7 +48,7 @@ export async function runRestricted({ image, inputDir, runDir, command,
   const workDir = join(runDir, 'work');
   const stagedInput = join(runDir, 'input');
   const boundaryDir = join(runDir, 'boundary');
-  const result = { id, image, status: 'invalid', started: false, terminated: false,
+  const result = { id, image, resources, observedResources:null, status: 'invalid', started: false, terminated: false,
     reason: null, modelRequests: [], control: [], stdout: '', stderr: '' };
   const record = async (name, args) => {
     const response = await cli(containerExecutable, args);
@@ -77,7 +80,7 @@ export async function runRestricted({ image, inputDir, runDir, command,
     const mounts = [[stagedInput, '/input', true], [workDir, '/work', false], [boundaryDir, '/boundary', true]];
     if(dependenciesDir) mounts.push([await realpath(dependenciesDir), '/deps', true]);
     if (mounts.some(([path]) => /[,\n\r]/.test(path))) throw new Error('unsupported_mount_path');
-    const args = ['create', '--name', id, '--platform', 'linux/arm64', '--cpus', '1', '--memory', '512M',
+    const args = ['create', '--name', id, '--platform', 'linux/arm64', '--cpus', '1', '--memory', resourceProfile==='typescript-build'?'1024M':'512M',
       '--read-only', '--no-dns', '--cap-drop', 'ALL', '--cap-add', 'SYS_ADMIN', '--cap-add', 'SETUID',
       '--cap-add', 'SETGID', '--cap-add', 'SETPCAP', '--ulimit', 'nofile=128:128', '--ulimit', 'nproc=64:64',
       '--ulimit', 'fsize=8388608:8388608', '--workdir', '/work', '--interactive',
@@ -88,14 +91,16 @@ export async function runRestricted({ image, inputDir, runDir, command,
     args.push(image, '--net', '--', '/usr/bin/setpriv', '--reuid=1000', '--regid=1000', '--clear-groups',
       '--bounding-set=-all', '--inh-caps=-all', '--ambient-caps=-all', '--no-new-privs',
       '/usr/bin/env', '-i', 'PATH=/usr/local/bin:/usr/bin:/bin', 'HOME=/work/home', 'TMPDIR=/work/tmp',
-      'XDG_CACHE_HOME=/work/cache', '/usr/bin/python3', '-I', '/boundary/restrict.py', ...command);
-    await writeFile(join(runDir, 'plan.json'), json({ id, image, command, timeoutMs, mounts,
+      'XDG_CACHE_HOME=/work/cache', ...(resourceProfile==='typescript-build'?['NODE_OPTIONS=--max-old-space-size=768']:[]), '/usr/bin/python3', '-I', '/boundary/restrict.py', ...command);
+    await writeFile(join(runDir, 'plan.json'), json({ id, image, command, timeoutMs, mounts, resources,
       model: model ? { maxRequests: model.maxRequests, maxOutputTokens: model.maxOutputTokens } : null, args }), { flag: 'wx' });
     const created = await record('create', args);
     if (created.code !== 0) { result.reason = 'container_create_failed'; return result; }
     const configuration = await record('configuration', ['inspect', id]);
     if (configuration.code !== 0) throw new Error('configuration_unknown');
     const config = JSON.parse(configuration.stdout)[0]?.configuration;
+    if(config?.resources?.memoryInBytes!==resources.memoryBytes||config.resources.cpus!==resources.cpus||resourceProfile==='typescript-build'&&!config.initProcess?.arguments?.includes('NODE_OPTIONS=--max-old-space-size=768'))throw new Error('resource_configuration_mismatch');
+    result.observedResources={memoryBytes:config.resources.memoryInBytes,cpus:config.resources.cpus,nodeHeapMiB:resources.nodeHeapMiB};
     if (!config?.readOnly || config.ssh || config.virtualization || config.publishedSockets?.length || config.publishedPorts?.length ||
         config.image?.descriptor?.digest !== image.split('@')[1] ||
         mounts.some(([source,destination,readonly])=>!config.mounts?.some(m=>m.source===source&&m.destination===destination&&Boolean(m.options?.includes('ro'))===readonly))) {

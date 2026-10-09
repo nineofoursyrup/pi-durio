@@ -1,3 +1,4 @@
+import {regularFiles} from '../file-inventory.js';
 import {readdirSync,readFileSync,lstatSync,mkdirSync,writeFileSync} from 'node:fs';
 import {join,dirname,relative} from 'node:path';
 import {Evidence,readObject,openHostReadonly,type BlobRef,digest} from '../evidence.js';
@@ -5,11 +6,8 @@ export interface ContentFile {path:string;ref:BlobRef;mode?:number}
 export interface EvalFact {seq:number;at:string;kind:string;data:any;source:string}
 export function evalFacts(root:string,id?:string):EvalFact[]{const db=openHostReadonly(root);try{return db.prepare(`SELECT * FROM records WHERE kind LIKE 'eval.%' AND kind!='eval.content' ${id?'AND run_id=?':''} ORDER BY seq`).all(...id?[id]:[]).map(row=>{const ref=JSON.parse(String(row.body));return{seq:Number(row.seq),at:String(row.at),kind:String(row.kind),data:JSON.parse(readObject(root,ref).toString()),source:`e1:${row.seq}:${ref.sha256}`};});}finally{db.close();}}
 export function appendFact(e:Evidence,kind:string,data:unknown){const seq=e.append(kind,data);return `e1:${seq}:${digest(JSON.stringify(data))}`;}
-export function regularFiles(root:string,prefix='',singleLink=true):string[]{
- const result:string[]=[];
- for(const entry of readdirSync(join(root,prefix),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const path=join(prefix,entry.name),stat=lstatSync(join(root,path));if(stat.isDirectory()&&!stat.isSymbolicLink())result.push(...regularFiles(root,path,singleLink));else if(stat.isFile()&&!stat.isSymbolicLink()&&(stat.nlink===1||!singleLink))result.push(path);else throw Error(`EVAL_UNSAFE_FILE: ${path}`);if(result.length>20000)throw Error('EVAL_FILE_LIMIT');}
- return result;
-}
+export {regularFiles} from '../file-inventory.js';
+
 export function captureFiles(e:Evidence,root:string,names:readonly string[]){
  const files:ContentFile[]=[];let bytes=0;
  for(const path of names){const content=readFileSync(join(root,path));bytes+=content.length;if(bytes>134217728)throw Error('EVAL_CONTENT_LIMIT');files.push({path,ref:e.blob(content),mode:lstatSync(join(root,path)).mode&0o777});}

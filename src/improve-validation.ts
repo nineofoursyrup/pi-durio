@@ -4,9 +4,10 @@ import {join,dirname} from 'node:path';
 import {Evidence,digest,readObject} from './evidence.js';
 import type {ImproveCandidate} from './improve.js';
 import {verifiedImage,prepareEval,runEval,type PrepareEvalOptions,type PrepareComparison} from './eval/runner.js';
-import {installedRuntimeFiles,captureFiles,regularFiles} from './eval/store.js';
+import {installedRuntimeFiles,captureFiles,regularFiles,materialize} from './eval/store.js';
 import type {DefaultChange,TaskType,DefaultScope} from './improve-defaults.js';
 import {effectiveProfileChanges,type EffectiveProfileChange} from './improve-profile-validation.js';
+import {prepareImproveBuild,verifyImproveBuild,buildFiles,ImproveBuildFailure,type ImproveBuildPair} from './improve-build.js';
 
 export interface ContentChange {targetId:string;path:string;content:string}
 export type BenefitRole='required'|'diagnostic';
@@ -19,12 +20,12 @@ export interface FreshCheck {
  comparison:Omit<PrepareComparison,'sides'>;
 }
 export type ImproveCheck=DirectCheck|FreshCheck;
-export interface ValidationGroup {id:string;candidateIds:string[];changes:ContentChange[];checks:ImproveCheck[];profileScope?:DefaultScope;basis?:{impact:'no-behavior'|'deterministic-fix'|'model-behavior'|'unknown';reason:string;checkIndices:number[];equivalence?:'exact'|'trim-instructions-end';expectedProfiles?:EffectiveProfileChange[]}}
+export interface ValidationGroup {id:string;candidateIds:string[];changes:ContentChange[];checks:ImproveCheck[];build?:{targetId:string;timeoutMs:number};profileScope?:DefaultScope;basis?:{impact:'no-behavior'|'deterministic-fix'|'model-behavior'|'unknown';reason:string;checkIndices:number[];equivalence?:'exact'|'trim-instructions-end';expectedProfiles?:EffectiveProfileChange[]}}
 export function describeImproveRuntime(installation:string){
  const files=installedRuntimeFiles(installation).map(path=>{const bytes=readFileSync(join(installation,path));return {path,ref:{sha256:digest(bytes),bytes:bytes.length},mode:lstatSync(join(installation,path)).mode&0o777};});
  return digest(JSON.stringify(files));
 }
-export function groupReservation(group:ValidationGroup){return group.checks.reduce((n,c)=>({checks:n.checks+1,requests:n.requests+(c.kind==='fresh'?c.options.budget.maxRequests:0),tokens:n.tokens+(c.kind==='fresh'?c.options.budget.maxTokens:0)}),{checks:0,requests:0,tokens:0});}
+export function groupReservation(group:ValidationGroup){return group.checks.reduce((n,c)=>({checks:n.checks+1,requests:n.requests+(c.kind==='fresh'?c.options.budget.maxRequests:0),tokens:n.tokens+(c.kind==='fresh'?c.options.budget.maxTokens:0)}),{checks:group.build?1:0,requests:0,tokens:0});}
 /** All declared checks are necessary. A later success never replaces an earlier
  * failed protection, unknown check or unmet benefit. Activation still needs its
  * own exact contract in #25; this projection grants no write/enable authority. */
@@ -40,8 +41,10 @@ export function summarizeImproveValidation(checks:{kind:string;state:string;effe
 }
 const safePath=(path:unknown)=>typeof path==='string'&&/^[a-zA-Z0-9_@+.,=-]+(?:\/[a-zA-Z0-9_@+.,=-]+)*$/.test(path)&&!path.split('/').some(p=>p==='.'||p==='..'||p==='.git'||p==='node_modules');
 export function validateGroup(group:ValidationGroup,candidates:ImproveCandidate[],deadline:string){
- if(!group||!/^[-\w.]{1,64}$/.test(group.id)||['.','..'].includes(group.id)||!Array.isArray(group.candidateIds)||!group.candidateIds.length||new Set(group.candidateIds).size!==group.candidateIds.length||group.candidateIds.some(id=>!candidates.some(c=>c.id===id))||!Array.isArray(group.changes)||group.changes.length>80||!Array.isArray(group.checks)||!group.checks.length||group.checks.length>32||!Object.keys(group).every(k=>['id','candidateIds','changes','checks','basis','profileScope'].includes(k)))throw Error('IMPROVE_GROUP_INVALID');
+ if(!group||!/^[-\w.]{1,64}$/.test(group.id)||['.','..'].includes(group.id)||!Array.isArray(group.candidateIds)||!group.candidateIds.length||new Set(group.candidateIds).size!==group.candidateIds.length||group.candidateIds.some(id=>!candidates.some(c=>c.id===id))||!Array.isArray(group.changes)||group.changes.length>80||!Array.isArray(group.checks)||!group.checks.length||group.checks.length>32||!Object.keys(group).every(k=>['id','candidateIds','changes','checks','basis','profileScope','build'].includes(k)))throw Error('IMPROVE_GROUP_INVALID');
  const selected=candidates.filter(c=>group.candidateIds.includes(c.id));
+ if(selected.some(c=>c.target.kind==='self-source')&&!group.build)throw Error('IMPROVE_SELF_BUILD_REQUIRED');
+ if(group.build&&(!selected.every(c=>c.target.kind==='self-source'&&c.target.id===group.build!.targetId)||!Number.isSafeInteger(group.build.timeoutMs)||group.build.timeoutMs<100||group.build.timeoutMs>300000||!Object.keys(group.build).every(k=>['targetId','timeoutMs'].includes(k))))throw Error('IMPROVE_SELF_BUILD_SCOPE_DENIED');
  if(selected.some(c=>!safePath(c.target.id)))throw Error('IMPROVE_TARGET_PATH_ID_INVALID');
  const names=new Set<string>();let bytes=0;
  for(const change of group.changes){
@@ -90,6 +93,9 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
  record('improve.prepared',{groupId:group.id,construction,scope:'temporary copies only; formal target/default unchanged'});
  const checks:any[]=[];let effect='direct-checks-passed',state='completed',reason:string|null=null;
  const engine=await import(new URL('../execution/isolation/boundary.mjs',import.meta.url).href);
+ let build:ImproveBuildPair|undefined;
+ if(group.build)try{build=await prepareImproveBuild({evidence:e,target:targets.find(t=>t.id===group.build!.targetId)!,changes:group.changes,directory:join(directory,'build'),timeoutMs:group.build.timeoutMs,deadline:options.deadline,signal:options.signal,groupId:group.id,record,guard});checks.push({index:'build',kind:'build',state:'completed',buildId:build.candidate.id,execution:build.execution,startup:build.startup});}
+ catch(error){state=options.signal.aborted?'cancelled':error instanceof ImproveBuildFailure?error.state:'unknown';reason=String(error);checks.push({index:'build',kind:'build',state,reason});record('improve.check',{groupId:group.id,...checks.at(-1)});}
  for(let index=0;index<group.checks.length;index++){
   const check=group.checks[index],benefit=['fresh','resource'].includes(check.kind)?{benefit:check.benefit??'required'}:{};
   if(state!=='completed'){checks.push({index,kind:check.kind,...benefit,state:'not-run',reason});continue;}
@@ -115,6 +121,7 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
     checks.push({index,kind:check.kind,state,reason,effect,kindSource:'eval',dataRoot,planId:id,sourceId:link,reportDocument:e.blob(JSON.stringify(report)),reportOrigin:{dataRoot,planId:id,asOf:report.asOf,scope:'Child evidence references inside this opaque document belong only to dataRoot; parent fixing retains the snapshot, not child attachments.'},requests:report.cost.requests,tokens:report.cost.knownTokens});
    }else{
     const input=join(checkDirectory,'input');await mkdir(input);
+    if(build){verifyImproveBuild(root,build.candidate);materialize(root,buildFiles(root,build.candidate),join(input,'build'));}
     for(const [key,bytes]of [...[...content].map(([k,v])=>[`targets/${k}`,v] as const),...[...baseline].map(([k,v])=>[`baseline/${k}`,v] as const)]){const path=join(input,key);await mkdir(dirname(path),{recursive:true});await writeFile(path,bytes,{flag:'wx',mode:0o444});}
     await writeFile(join(input,'check.mjs'),check.program,{flag:'wx',mode:0o444});
     if(profiles.length)await writeFile(join(input,'effective-profiles.json'),JSON.stringify(profiles),{flag:'wx',mode:0o444});
@@ -139,7 +146,8 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
      effect=!resource.protectionsPassed||delta<=-check.resource!.delta?'退化':delta>=check.resource!.delta?'改善':'无明显差异';
      if(!resource.protectionsPassed){state='failed';reason='Declared resource protection failed';}
     }
-    checks.push({index,kind:check.kind,state,reason,effect:check.kind==='resource'?effect:state==='completed'?'direct-checks-passed':'direct-checks-failed',execution,executionRef:e.blob(JSON.stringify(execution)),artifacts,resource,...(profiles.length?{profileInput:construction.effectiveProfiles,fullProfileAssertions:checkedProfiles}:{} )});
+    if(build)verifyImproveBuild(root,build.candidate);
+    checks.push({index,kind:check.kind,state,reason,effect:check.kind==='resource'?effect:state==='completed'?'direct-checks-passed':'direct-checks-failed',execution,executionRef:e.blob(JSON.stringify(execution)),artifacts,resource,...(build?{buildId:build.candidate.id}:{}),...(profiles.length?{profileInput:construction.effectiveProfiles,fullProfileAssertions:checkedProfiles}:{} )});
    }
   }catch(error){state=options.signal.aborted?'cancelled':'unknown';reason=String(error);checks.push({index,kind:check.kind,state,reason});}
   Object.assign(checks.at(-1),benefit);
@@ -147,5 +155,5 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
  }
  const conclusion=summarizeImproveValidation(checks);
  if(state==='completed'&&conclusion.effect==='证据不足'&&!conclusion.allRequiredBenefitsMet){state='unknown';reason='Declared combined benefits remain insufficient; remaining work frozen.';}
- return {state,reason,construction,checks,effect:conclusion.effect,conclusion,scope:'Only the selected combination, fixed contents and restricted checks; no per-candidate causal credit or host-performance claim.',writeback:'not-written',activation:'not-enabled'};
+ return {state,reason,construction,checks,build,effect:conclusion.effect,conclusion,scope:'Only the selected combination, fixed contents and restricted checks; no per-candidate causal credit or host-performance claim.',writeback:'not-written',activation:'not-enabled'};
 }
