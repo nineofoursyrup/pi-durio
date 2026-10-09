@@ -1,5 +1,6 @@
 import type {EvalPlan,EvalTrial} from './plan.js';
 import {PersistentBudget,dispatchProvider,type RequestPurpose} from '../provider-boundary.js';
+import {readObject} from '../evidence.js';
 /** Guest JSON cannot choose a provider, URL, key, purpose, attempt identity or settle usage. */
 export function evalMediator(plan:EvalPlan,trial:EvalTrial,budget:PersistentBudget,transport?:typeof fetch,assertHeld:()=>void=()=>{}){
  if(plan.mode==='live'&&transport)throw Error('LIVE_TRANSPORT_OVERRIDE_DENIED');
@@ -9,6 +10,15 @@ export function evalMediator(plan:EvalPlan,trial:EvalTrial,budget:PersistentBudg
   async request({input,maxOutputTokens,signal}:{input:string;maxOutputTokens:number;signal:AbortSignal}){
    try{
     assertHeld();
+    if(plan.comparison){
+      // Reuse the one host ledger. This limit is per independent trial, so a noisy
+      // first side cannot spend the second side's pre-authorized allowance.
+      const facts=budget.evidence.db.prepare("SELECT kind,body FROM records WHERE run_id=? AND kind IN ('budget.reserve','budget.settle') ORDER BY seq").all(budget.evidence.runId).map(row=>({kind:String(row.kind),...JSON.parse(readObject(budget.evidence.root,JSON.parse(String(row.body))).toString())}));
+      const reservations=facts.filter(f=>f.kind==='budget.reserve'&&f.budgetId===budget.id&&f.operationId===trial.id);
+      if(reservations.length>=plan.comparison.trialBudget.maxRequests)throw Error('BUDGET_TRIAL_REQUEST_LIMIT');
+      const spent=reservations.reduce((sum,reservation)=>sum+(facts.find(f=>f.kind==='budget.settle'&&f.id===reservation.id)?.tokens??plan.budget.unknownUpperBound?.tokens??reservation.tokens),0);
+      if(spent+(plan.budget.unknownUpperBound?.tokens??plan.budget.maxRequestTokens)>plan.comparison.trialBudget.maxTokens)throw Error('BUDGET_TRIAL_TOKEN_LIMIT');
+    }
     if(plan.mode==='live'){
       const upper=1_048_576+plan.maxOutputTokens;
       if(!plan.budget.unknownUpperBound||plan.budget.unknownUpperBound.tokens<upper||plan.budget.maxRequestTokens<upper||!plan.budget.unknownUpperBound.source.startsWith('https://api-docs.deepseek.com/'))throw Error('EVAL_UNPROVEN_PROVIDER_TOKEN_BOUND');
