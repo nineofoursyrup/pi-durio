@@ -35,3 +35,6 @@ interfaces. Writing a judgment persists host-derived `assessment` in that same
 Evidence fact alongside the exact submitted input and request identity. There
 is no report-side grader execution. Package/source-build and improve ownership
 remain with #23; merges must retain both origin metadata and improve context.
+
+`readRun` keeps its established `result` shape; the appended raw result clock
+is exposed separately as `resultClock`. Raw Evidence still retains the clock.

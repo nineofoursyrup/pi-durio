@@ -11,7 +11,7 @@ const installed=resolve(process.argv[2]),out=resolve(process.argv[3]);
 mkdirSync(out,{recursive:false,mode:0o700});
 const require=createRequire(join(installed,'package.json'));
 const load=async name=>import(pathToFileURL(require.resolve(name)).href);
-const {runCodingTask}=await load('pi-durio');
+const {runCodingTask,analyzeImprove}=await load('pi-durio');
 const {scriptedTransport}=await load('pi-durio/offline');
 const {queryEvidence,readEvidence}=await load('pi-durio/query');
 const {recordAcceptance,queryTaskMetrics}=await load('pi-durio/metrics');
@@ -38,9 +38,12 @@ for(const fail of [false,true]){
  const artifact=queryEvidence(dataRoot,result.runId,{kinds:['execution.artifact']}).items[0];
  outcomes.push({runId:result.runId,taskId,status:result.status,check:check.id,artifact:artifact.id,artifactId:body(artifact).id,sourceClass:'synthetic',requests:localCalls});
 }
+const improveScript=scriptedTransport([]),improveAnswer={summary:'No supported changes in this controlled fixture.',candidates:[],gaps:['Offline fixture only']};
+const improve=await analyzeImprove({dataRoot,workspace,targetRunId:outcomes[0].runId,mode:'offline',request:{id:'excluded-improve',purpose:'Verify actual improve remains outside coding metrics',limits:{maxRequests:2,maxTokens:512,maxRequestTokens:256,maxDurationMs:30000,maxOutputTokens:128}},transport:async(url,init)=>{calls++;const response=await improveScript.fetch(url,init);return new Response((await response.text()).replace('Controlled response: inspect actual tool evidence for acceptance.',JSON.stringify(improveAnswer).replaceAll('\\','\\\\').replaceAll('"','\\"')),{headers:{'content-type':'text/event-stream'}});}});
+assert.equal(improve.improve?.state,'complete');
 assert.equal(readFileSync(join(workspace,'result.txt'),'utf8'),'ready');
 const scope={from:'2000-01-01T00:00:00Z',to:'2100-01-01T00:00:00Z',asOf:new Date().toISOString(),source:'synthetic'};
-const report=queryTaskMetrics(dataRoot,scope);assert.deepEqual(report.counts,{N:2,B:2,C:1,G:2,S:1,terminated:2});save('report-original.json',report);
+const report=queryTaskMetrics(dataRoot,scope);assert.ok(report.excluded.some(t=>t.reasons.includes('separate improve work')));assert.deepEqual(report.counts,{N:2,B:2,C:1,G:2,S:1,terminated:2});save('report-original.json',report);
 const content=report=>{const{generatedAt,...rest}=report;return rest;};
 const cliPath=join(installed,'node_modules','pi-durio','dist','src','cli.js');
 const cli=args=>{const result=spawnSync(process.execPath,[cliPath,...args,'--data-root',dataRoot],{encoding:'utf8'});assert.equal(result.status,0,result.stderr);return result.stdout;};
@@ -58,5 +61,5 @@ save('correction-input.json',correction);cli(['acceptance','--spec',join(out,'co
 const revised=queryTaskMetrics(dataRoot,{...scope,asOf:new Date().toISOString(),revisionOf:report.id});assert.equal(revised.counts.G,1);assert.equal(revised.counts.S,0);save('report-revised.json',revised);
 assert.equal(queryTaskMetrics(dataRoot,{...scope,through:report.scope.through}).id,report.id);
 assert.deepEqual(content(JSON.parse(readFileSync(exported,'utf8'))),content(report));assert.equal(calls,beforeCalls);
-save('result.json',{status:'PASS',node:process.version,platform:process.platform,arch:process.arch,installed,publicExports:['pi-durio','pi-durio/offline','pi-durio/query','pi-durio/metrics','pi-durio/tui'],outcomes,counts:report.counts,revisedCounts:revised.counts,requests:calls,readonly:{hostHashBefore:before,hostHashAfterQueries:afterQueries,additionalProviderCalls:0},notRun:['paid/live provider','native macOS Terminal product acceptance','daily-use acceptance'],interpretation:'Real public runtime and local tools under an explicit controlled offline provider; separate from the 10/8/6/5/4 known-fact arithmetic fixture.'});
+save('result.json',{status:'PASS',node:process.version,platform:process.platform,arch:process.arch,installed,publicExports:['pi-durio','pi-durio/offline','pi-durio/query','pi-durio/metrics','pi-durio/tui'],outcomes,improveExclusion:{runId:improve.runId,state:improve.improve.state,requestCount:improveScript.calls.length},counts:report.counts,revisedCounts:revised.counts,requests:calls,readonly:{hostHashBefore:before,hostHashAfterQueries:afterQueries,additionalProviderCalls:0},notRun:['paid/live provider','native macOS Terminal product acceptance','daily-use acceptance'],interpretation:'Real public runtime and local tools under an explicit controlled offline provider; separate from the 10/8/6/5/4 known-fact arithmetic fixture.'});
 console.log(JSON.stringify({status:'PASS',evidence:out,counts:report.counts,requests:calls}));

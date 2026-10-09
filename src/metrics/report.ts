@@ -61,7 +61,7 @@ export function queryTaskMetrics(root:string,input:MetricsScope={}) {
  const seen=new Map<string,AcceptedTaskFact>();
  function member(task:AcceptedTaskFact,admission:MetricFact,identity:ReturnType<typeof origin>,facts:MetricFact[],runId:string|null,version:string|null) {
   const state=taskState(facts,admission,task,receipts);
-  const acceptance=selectAcceptance(root,task.taskId,runId,through,scope.asOf);
+  const acceptance=selectAcceptance(root,task.taskId,runId,through,scope.asOf,admission.ref.runId);
   if(facts.some(f=>f.missing)){acceptance.outcome='unknown';acceptance.firstValid=null;acceptance.reasons.push('original source content unavailable');}
   return{taskId:task.taskId,requestId:task.requestId,runId:state.started?runId:null,evidenceRunId:runId??admission.ref.runId,project:admission.data.projectId??task.workspace,workspace:task.workspace,kind:identity.kind,sourceClass:identity.source,taskType:identity.taskType,parentTaskId:identity.parentTaskId,trialId:identity.trialId,version,expectedVersion:task.executionVersion?.artifactId??null,acceptedAt:task.acceptedAt,acceptedSource:admission.ref.id,startedSource:state.started?.ref.id??null,terminationSource:state.ended?.ref.id??null,status:state.status,reason:state.reason,normalCompleted:state.normal,terminated:!!state.ended,terminationScope:state.terminationScope,acceptance,clocks:taskClocks(admission,[...facts,...receipts.filter(r=>r.data.requestId===task.requestId)],state.started,state.ended,acceptance,scope.asOf),missing:facts.filter(f=>f.missing||f.ref.kind==='evidence.gap').map(f=>({source:f.ref.id,reason:f.missing??f.data.reason??'collection gap'})),sources:facts.map(f=>f.ref.id)};
  }

@@ -95,6 +95,9 @@ TUI 的 `/acceptance JSON` 和 `recordAcceptance(root, input)` 使用同一
 必要要求/结果来源、所用检查/人工来源引用及原始输入 `submitted`。
 用户传入同名 assessment 不受信任。查看报告只投影这份保存的判断，
 并核对内容是否仍可取得；不重跑 shell、调用模型或新建判断。
+保存的依赖包含实际采用的 shell.started/end、要求/结果及其原来源。
+缺失或损坏的验收原件按原 admission run 保守降为 unknown，保留原
+引用与精确 task 归属未知；其他 admission run 的完好任务仍可查看。
 PASS 需要全部必要要求覆盖；一项可靠必要失败足以 FAIL。缺失、故障、
 污染或不足保持 unknown。
 
@@ -122,7 +125,9 @@ unknown/resumable、冻结或恢复核对不是终止。验收时钟从受理到
 报告保留每段原始来源与端点。只有完整可测的已结束时长进入均值和
 nearest-rank 分位数；open waiting、缺端点、不可比较时钟都列 valid/
 missing/pending，已知局部不冒充完整总量。终止范围为受控产品执行，
-原本未知的远端或外部进程结果继续未知。
+原本未知的远端或外部进程结果继续未知。首个宿主判断优先按同进程
+单调时钟选择；跨进程仅保留取得顺序，报称发生时间仅保留墙钟估计，
+判断发生时间不可互比时明确列 unverified，验收精确时长不计入均值。
 
 ## 给 #28/#29 的只读接口
 

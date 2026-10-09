@@ -58,6 +58,7 @@ test('public failed run can be gradable FAIL from an actual fixed check; missing
  assert.deepEqual(report.counts,{N:1,B:1,C:0,G:1,S:0,terminated:1});assert.equal(report.tasks[0].acceptance.outcome,'FAIL');assert.equal(report.tasks[0].acceptance.judgments[0].findings[0].outcome,'FAIL');assert.equal(report.tasks[0].clocks.acceptanceOutcome,'FAIL');
  // The original claimed PASS was never trusted over the acquired exit result.
  const original=decode(f.dataRoot,[...records(f.dataRoot,{kinds:['acceptance.judgment']})][0]);assert.equal(original.findings[0].outcome,'PASS');assert.equal(original.assessment.outcome,'FAIL');assert.equal(original.assessment.ruleVersion,'literal-check-v1');assert.equal(original.assessment.method,'necessary-requirements-v1/fixed-shell-exit-v1');assert.ok(original.assessment.sourceRefs.includes(f.shell.id));
+ const started=[...records(f.dataRoot,{runId:f.result.runId,kinds:['shell.started']})][0];unlinkSync(join(f.dataRoot,'objects',started.ref.sha256));const missingStart=queryTaskMetrics(f.dataRoot,scope);assert.equal(missingStart.counts.G,0);assert.ok(original.assessment.sourceRefs.includes(started.id));assert.match(missingStart.tasks[0].acceptance.reasons.join(' '),/unavailable/);
  unlinkSync(join(f.dataRoot,'objects',f.shell.ref.sha256));const missing=queryTaskMetrics(f.dataRoot,scope);assert.equal(missing.counts.G,0);assert.match(missing.tasks[0].acceptance.reasons.join(' '),/unavailable/);
  assert.equal(readAcceptedTasks(f.dataRoot).tasks.length,1);
 });

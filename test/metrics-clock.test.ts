@@ -51,3 +51,13 @@ test('unstarted withdrawn follow-up remains in N and has an execution endpoint; 
  const report=queryTaskMetrics(root,scope);assert.deepEqual(report.counts,{N:1,B:0,C:0,G:0,S:0,terminated:1});assert.equal(report.tasks[0].clocks.execution.milliseconds,3*60000);assert.equal(report.tasks[0].version,null);assert.equal(report.rates.success.state,'N/A');assert.equal(report.rates.coverage.value,0);
  const filtered=queryTaskMetrics(root,{...scope,version:'expected-only'});assert.equal(filtered.counts.N,0);assert.ok(filtered.excluded[0].reasons.includes('unknown actual execution version'));assert.equal(filtered.rates.coverage.state,'N/A');
 });
+
+test('first host judgment survives wall rollback, while incomparable reported occurrences keep acceptance time unknown',()=>{
+ for(const reported of [false,true]){const{root,e}=fixture();admit(e);fact(e,'run.started',1);const evidence=fact(e,'run.closed',2,{status:'completed',cleanup:'confirmed'}),source={kind:'human',actor:'fixture user',statement:'Explicit necessary result judgment',refs:[]};
+  const base={taskId:'task',source,requestIdentity:'fixture',receivedAt:'2026-01-01T09:03:00Z',occurredAt:'2026-01-01T09:03:00Z',timeSource:'host-receipt'};
+  fact(e,'acceptance.requirements',3,{...base,type:'requirements',id:'req',ruleVersion:'v1',necessary:[{id:'goal',description:'Required result'}]});fact(e,'acceptance.result',3,{...base,type:'result',id:'result',requirementsId:'req',evidence:[evidence]});
+  const a=fact(e,'acceptance.judgment',10,{...base,receivedAt:'2026-01-01T09:10:00Z',occurredAt:'2026-01-01T09:10:00Z',type:'judgment',id:'first',requirementsId:'req',resultId:'result',validity:'valid',findings:[{requirementId:'goal',outcome:'PASS',evidence:[evidence]}]},'fixture-process',600000);
+  fact(e,'acceptance.judgment',5,{...base,receivedAt:'2026-01-01T09:05:00Z',occurredAt:'2026-01-01T09:05:00Z',timeSource:reported?'reported-occurrence':'host-receipt',type:'judgment',id:'later',requirementsId:'req',resultId:'result',validity:'valid',findings:[{requirementId:'goal',outcome:'FAIL',evidence:[evidence]}]},'fixture-process',900000);e.close();
+  const result=queryTaskMetrics(root,scope).tasks[0];assert.equal(result.acceptance.outcome,'FAIL');if(reported){assert.equal(result.clocks.acceptance.state,'unknown');assert.equal((result.acceptance as any).firstValidOrder.reliability,'unverified');}else{assert.equal(result.acceptance.firstValid?.source,a);assert.equal(result.clocks.acceptance.milliseconds,600000);assert.equal(result.clocks.acceptanceOutcome,'PASS');}
+ }
+});

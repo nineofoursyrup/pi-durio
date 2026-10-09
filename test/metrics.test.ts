@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync} from 'node:fs';
+import {mkdtempSync,unlinkSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {Evidence} from '../src/evidence.js';
@@ -69,4 +69,11 @@ test('a later reliable failure changes the aggregate outcome but does not move a
  const r=root();accepted(r,0,true,'completed');const first=await judgment(r,0,'PASS'),evidence=[...records(r,{runId:'run-0',kinds:['run.closed']})][0].id;
  recordAcceptance(r,{type:'judgment',id:'later-failure',taskId:'task-0',source:{kind:'human',actor:'user',statement:'Reliable necessary failure found in the same unchanged final result',refs:[]},requirementsId:'req-0',resultId:'result-0',findings:[{requirementId:'goal',outcome:'FAIL',evidence:[evidence]}],validity:'valid'});
  const task=queryTaskMetrics(r,scope).tasks[0];assert.equal(task.acceptance.outcome,'FAIL');assert.equal(task.acceptance.conflict,true);assert.equal(task.acceptance.firstValid?.source,first.source);assert.equal(task.clocks.acceptanceOutcome,'PASS');
+});
+
+test('missing or corrupt acceptance originals affect their admission run conservatively without hiding other tasks',async()=>{
+ for(const mode of ['missing','corrupt']){const r=root();for(const n of [0,1]){accepted(r,n,true,'completed');await judgment(r,n,'PASS');}
+  const original=[...records(r,{runId:'run-0',kinds:['acceptance.judgment']})][0],path=join(r,'objects',original.ref.sha256);if(mode==='missing')unlinkSync(path);else writeFileSync(path,'corrupt original');
+  const report=queryTaskMetrics(r,scope);assert.deepEqual(report.counts,{N:2,B:2,C:2,G:1,S:1,terminated:2});assert.equal(report.tasks[0].acceptance.outcome,'unknown');assert.ok((report.tasks[0].acceptance as any).missingSources.some((m:any)=>m.source===original.id&&m.taskAttribution==='unknown'));assert.equal(report.tasks[1].acceptance.outcome,'PASS');
+ }
 });

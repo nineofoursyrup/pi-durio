@@ -16,9 +16,18 @@ export const acceptanceKinds=['acceptance.requirements','acceptance.result','acc
 const nonempty=(value:unknown,max=4096):value is string=>typeof value==='string'&&!!value.trim()&&value.length<=max;
 function ensure(condition:unknown,message:string):asserts condition {if(!condition)throw Error(`INVALID_ACCEPTANCE: ${message}`);}
 export function readAcceptance(root:string,taskId:string,through=watermark(root)):AcceptanceFact[] {
- const facts:AcceptanceFact[]=[];
- for(const ref of records(root,{through,kinds:acceptanceKinds})){const data=decode(root,ref);if(data.taskId===taskId)facts.push({ref,data});}
- return facts;
+ const state=acceptanceState(root,taskId,through);
+ ensure(!state.missing.length,'acceptance original unavailable in admission run; new revisions require original evidence');
+ return state.facts;
+}
+function acceptanceState(root:string,taskId:string,through:number,admissionRunId?:string) {
+ if(!admissionRunId){const admitted=task(root,taskId);admissionRunId=[...records(root,{after:admitted.acceptedSeq-1,through:admitted.acceptedSeq})][0].runId;}
+ const facts:AcceptanceFact[]=[],missing:{source:string;runId:string;taskAttribution:'unknown';scope:string;reason:string}[]=[];
+ for(const ref of records(root,{runId:admissionRunId,through,kinds:acceptanceKinds})){
+  try{const data=decode(root,ref);if(data.taskId===taskId)facts.push({ref,data});}
+  catch(error){missing.push({source:ref.id,runId:ref.runId,taskAttribution:'unknown',scope:'admission run; unavailable content prevents exact task attribution',reason:String(error)});}
+ }
+ return{facts,missing};
 }
 function task(root:string,taskId:string) {
  let after:number|undefined,through:number|undefined;
@@ -32,7 +41,7 @@ export function recordAcceptance(root:string,input:AcceptanceInput) {
  ensure(input&&nonempty(input.id,128)&&nonempty(input.taskId,128),'identity required');
  ensure(['requirements','result','judgment','withdraw','dispute'].includes(input.type),'unsupported operation');
  ensure(input.source&&['human','checks','unverified'].includes(input.source.kind)&&nonempty(input.source.actor,256)&&nonempty(input.source.statement)&&Array.isArray(input.source.refs),'explicit source required');
- ensure(!input.occurredAt||Number.isFinite(Date.parse(input.occurredAt)),'invalid occurrence time');
+ ensure(input.occurredAt===undefined||typeof input.occurredAt==='string'&&Number.isFinite(Date.parse(input.occurredAt)),'invalid occurrence time');
  const admitted=task(root,input.taskId),admission=[...records(root,{after:admitted.acceptedSeq-1,through:admitted.acceptedSeq})][0];
  const evidence=new Evidence(root,admission.runId);
  evidence.db.exec('BEGIN IMMEDIATE');
@@ -73,20 +82,21 @@ export function recordAcceptance(root:string,input:AcceptanceInput) {
   if(input.type==='judgment'){
    const prospective={ref:{id:'uncommitted',runId:admission.runId,seq:0,kind:'acceptance.judgment',at:clock.wallTime,ref:{sha256:'',bytes:0}},data} as AcceptanceFact;
    const assessed=assess(root,prospective,get(input.requirementsId,'requirements'),get(input.resultId,'result'),admitted.runId??admission.runId,watermark(root),true);
-   stored={...data,assessment:{method:'necessary-requirements-v1/fixed-shell-exit-v1',ruleVersion:(get(input.requirementsId,'requirements').data as Extract<AcceptanceInput,{type:'requirements'}>).ruleVersion,requirementsSource:get(input.requirementsId,'requirements').ref.id,resultSource:get(input.resultId,'result').ref.id,basisThrough:watermark(root),sourceRefs:[...new Set([...input.source.refs,...input.findings.flatMap(f=>f.evidence)])],outcome:assessed.outcome,findings:assessed.findings,reasons:assessed.reasons,reliableFailures:assessed.reliableFailures}};
+   stored={...data,assessment:{method:'necessary-requirements-v1/fixed-shell-exit-v1',ruleVersion:(get(input.requirementsId,'requirements').data as Extract<AcceptanceInput,{type:'requirements'}>).ruleVersion,requirementsSource:get(input.requirementsId,'requirements').ref.id,resultSource:get(input.resultId,'result').ref.id,basisThrough:watermark(root),sourceRefs:assessed.sourceRefs,outcome:assessed.outcome,findings:assessed.findings,reasons:assessed.reasons,reliableFailures:assessed.reliableFailures}};
   }
   const seq=evidence.append(`acceptance.${input.type}`,stored);evidence.db.exec('COMMIT');
   return{source:[...records(root,{after:seq-1,through:seq})][0].id,repeated:false};
  }catch(error){evidence.db.exec('ROLLBACK');throw error;}finally{evidence.close();}
 }
 
-export interface Assessed {id:string;source:string;outcome:Verdict;reasons:string[];reliableFailures:string[];occurredAt:string;receivedAt:string;clock:FactClock|null;findings:{requirementId:string;outcome:Verdict;evidence:string[];reason:string|null}[]}
+export interface Assessed {id:string;source:string;sourceRefs:string[];outcome:Verdict;reasons:string[];reliableFailures:string[];occurredAt:string;receivedAt:string;clock:FactClock|null;findings:{requirementId:string;outcome:Verdict;evidence:string[];reason:string|null}[]}
 function available(root:string,id:string,through:number) {
  try {const ref=resolveEvidence(root,id);if(ref.seq>through)return null;decode(root,ref);return ref;}catch{return null;}
 }
 function assess(root:string,fact:AcceptanceFact,requirements:AcceptanceFact,result:AcceptanceFact,runId:string|null,through:number,evaluateChecks=false):Assessed {
  const judgment=fact.data as AcceptanceFact['data']&Extract<AcceptanceInput,{type:'judgment'}>,rule=requirements.data as AcceptanceFact['data']&Extract<AcceptanceInput,{type:'requirements'}>,product=result.data as AcceptanceFact['data']&Extract<AcceptanceInput,{type:'result'}>;
  const findings:Assessed['findings']=[],reasons:string[]=[];
+ const sourceRefs=new Set([requirements.ref.id,result.ref.id,...rule.source.refs,...product.source.refs,...product.evidence,...judgment.source.refs,...judgment.findings.flatMap(f=>f.evidence),...judgment.assessment?.sourceRefs??[]]);
  const sourceValid=judgment.source.kind==='human'||judgment.source.kind==='checks';
  for(const finding of judgment.findings) {
   const supported=judgment.assessment?.method==='necessary-requirements-v1/fixed-shell-exit-v1';
@@ -94,6 +104,7 @@ function assess(root:string,fact:AcceptanceFact,requirements:AcceptanceFact,resu
   let outcome=retained?.outcome??finding.outcome,reason:string|null=retained?.reason??null;
   const requirement=rule.necessary.find(r=>r.id===finding.requirementId)!;
   if(judgment.assessment&&!supported&&!evaluateChecks){outcome='unknown';reason='unsupported retained assessment method';}
+  else if(!evaluateChecks&&judgment.assessment?.sourceRefs.some(id=>!available(root,id,through))){outcome='unknown';reason='retained assessment source unavailable';}
   else if(judgment.validity!=='valid'||!sourceValid){outcome='unknown';reason=judgment.validity==='valid'?'unverified source':judgment.validity;}
   else if(!finding.evidence.length||finding.evidence.some(id=>!available(root,id,through))||judgment.source.refs.some(id=>!available(root,id,through))){outcome='unknown';reason='missing judgment evidence';}
   else if(judgment.source.kind==='checks'&&!evaluateChecks) {
@@ -108,6 +119,7 @@ function assess(root:string,fact:AcceptanceFact,requirements:AcceptanceFact,resu
     const data=decode(root,end),acquired=data.acquired??data;
     const start=[...records(root,{runId:end.runId,through:end.seq-1,kinds:['shell.started']})].findLast(ref=>{const d=decode(root,ref);return typeof data.toolAttempt?.attemptId==='string'&&d.toolAttempt?.attemptId===data.toolAttempt.attemptId&&d.toolAttempt?.durableTaskId===data.toolAttempt.durableTaskId;});
     if(!start||start.seq<=requirements.ref.seq)continue;
+    sourceRefs.add(start.id);
     const started=decode(root,start).acquired??decode(root,start);
     if(started.command!==requirement.check.command||acquired.managedCommand!=='settled'||acquired.completeness!=='complete'||!Number.isInteger(acquired.exitCode))continue;
     if(requirement.check.failExitCodes.includes(acquired.exitCode)){outcome='FAIL';reason=null;break;}
@@ -119,25 +131,27 @@ function assess(root:string,fact:AcceptanceFact,requirements:AcceptanceFact,resu
  const failures=findings.filter(f=>f.outcome==='FAIL').map(f=>f.requirementId);
  const complete=rule.necessary.every(r=>findings.some(f=>f.requirementId===r.id&&f.outcome==='PASS'));
  if(!complete&&!failures.length)reasons.push('necessary requirements incompletely verified');
- return{id:judgment.id,source:fact.ref.id,outcome:failures.length?'FAIL':complete?'PASS':'unknown',reasons,reliableFailures:failures,occurredAt:judgment.occurredAt,receivedAt:judgment.receivedAt,clock:judgment.timeSource==='host-receipt'?judgment.clock:null,findings};
+ return{id:judgment.id,source:fact.ref.id,sourceRefs:[...sourceRefs],outcome:failures.length?'FAIL':complete?'PASS':'unknown',reasons,reliableFailures:failures,occurredAt:judgment.occurredAt,receivedAt:judgment.receivedAt,clock:judgment.timeSource==='host-receipt'?judgment.clock:null,findings};
 }
 
 /** Recompute from retained revisions; never select a favorable judgment. */
-export function selectAcceptance(root:string,taskId:string,runId:string|null,through:number,asOf:string) {
- const history=readAcceptance(root,taskId,through).filter(f=>Date.parse(f.data.receivedAt)<=Date.parse(asOf)&&Date.parse(f.data.occurredAt)<=Date.parse(asOf));
+export function selectAcceptance(root:string,taskId:string,runId:string|null,through:number,asOf:string,admissionRunId?:string) {
+ const state=acceptanceState(root,taskId,through,admissionRunId);
+ const history=state.facts.filter(f=>Date.parse(f.data.receivedAt)<=Date.parse(asOf)&&Date.parse(f.data.occurredAt)<=Date.parse(asOf));
  const withdrawn=new Set<string>(),disputed=new Set<string>();
  for(const f of history){if(f.data.type==='withdraw')for(const id of f.data.targets)withdrawn.add(id);if(f.data.type==='dispute')for(const id of f.data.targets)disputed.add(id);}
  const active=history.filter(f=>!withdrawn.has(f.data.id));
  const terminal=(type:'requirements'|'result')=>{const facts=active.filter(f=>f.data.type===type);const replaced=new Set(history.filter(f=>f.data.type===type).flatMap(f=>'revisionOf'in f.data&&f.data.revisionOf?[f.data.revisionOf]:[]));return facts.filter(f=>!replaced.has(f.data.id));};
  const rules=terminal('requirements'),results=terminal('result'),reasons:string[]=[];
  const historyView=history.map(f=>({id:f.data.id,type:f.data.type,source:f.ref.id,occurredAt:f.data.occurredAt,receivedAt:f.data.receivedAt,withdrawn:withdrawn.has(f.data.id),disputed:disputed.has(f.data.id),revisionOf:'revisionOf'in f.data?f.data.revisionOf??null:null,supersedes:'supersedes'in f.data?f.data.supersedes??[]:[],reason:f.data.reason??null}));
- const base={history:historyView,requirements:rules.map(f=>({id:f.data.id,source:f.ref.id,ruleVersion:(f.data as any).ruleVersion})),results:results.map(f=>({id:f.data.id,source:f.ref.id,evidence:(f.data as any).evidence})),judgments:[] as Assessed[],firstValid:null as Assessed|null,conflict:false,requirementsChanged:history.some(f=>f.data.type==='requirements'&&!!f.data.revisionOf),outcome:'unknown' as Verdict,reasons};
+ const base={history:historyView,missingSources:state.missing,requirements:rules.map(f=>({id:f.data.id,source:f.ref.id,ruleVersion:(f.data as any).ruleVersion})),results:results.map(f=>({id:f.data.id,source:f.ref.id,evidence:(f.data as any).evidence})),judgments:[] as Assessed[],firstValid:null as Assessed|null,firstValidOrder:{method:'none',reliability:'unknown',reason:null as string|null},conflict:false,requirementsChanged:history.some(f=>f.data.type==='requirements'&&!!f.data.revisionOf),outcome:'unknown' as Verdict,reasons};
+ if(state.missing.length){reasons.push('acceptance original unavailable; task attribution within the admission run is unknown');return base;}
  if(rules.length!==1||results.length!==1){reasons.push(rules.length>1||results.length>1?'unresolved requirement/result revision branches':'missing or withdrawn requirements/final result');return base;}
  const rule=rules[0],result=results[0];
  if((result.data as any).requirementsId!==rule.data.id){reasons.push('final result belongs to replaced requirements; incomparable');return base;}
  if(disputed.has(rule.data.id)||disputed.has(result.data.id)||rule.data.source.kind==='unverified'||result.data.source.kind==='unverified'){reasons.push('requirement/result validity disputed');return base;}
  const product=result.data as Extract<AcceptanceInput,{type:'result'}>;
- if(product.evidence.some(id=>!available(root,id,through))){reasons.push('final result evidence unavailable');return base;}
+ if([...product.evidence,...rule.data.source.refs,...product.source.refs].some(id=>!available(root,id,through))){reasons.push('requirement/final result evidence unavailable');return base;}
  const judgments=active.filter(f=>f.data.type==='judgment'&&(f.data as any).requirementsId===rule.data.id&&(f.data as any).resultId===result.data.id);
  const superseded=new Set(history.filter(f=>f.data.type==='judgment').flatMap(f=>(f.data as Extract<AcceptanceInput,{type:'judgment'}>).supersedes??[]));
  base.judgments=judgments.map(f=>assess(root,f,rule,result,runId,through));
@@ -151,6 +165,12 @@ export function selectAcceptance(root:string,taskId:string,runId:string|null,thr
  if(base.conflict)reasons.push('conflicting determinate judgments; reliable necessary failure retained');
  // Earliest still-valid determinate judgment of the selected product/rule, not
  // the first eventual PASS. Revisions/withdrawals may remove its current validity.
- base.firstValid=determinate.toSorted((a,b)=>Date.parse(a.occurredAt)-Date.parse(b.occurredAt)||Number(a.source.split(':')[1])-Number(b.source.split(':')[1]))[0]??null;
+ if(determinate.length){
+  const hostClocks=determinate.every(j=>j.clock&&Number.isFinite(j.clock.monotonicMs)),comparable=hostClocks&&determinate.every(j=>j.clock!.processId===determinate[0].clock!.processId);
+  const sequence=(a:Assessed,b:Assessed)=>Number(a.source.split(':')[1])-Number(b.source.split(':')[1]);
+  base.firstValid=determinate.toSorted(comparable?(a,b)=>a.clock!.monotonicMs-b.clock!.monotonicMs||sequence(a,b):hostClocks?sequence:(a,b)=>Date.parse(a.occurredAt)-Date.parse(b.occurredAt)||sequence(a,b))[0];
+  base.firstValidOrder={method:comparable?'process-monotonic':hostClocks?'acquisition-sequence':'reported-wall-estimate',reliability:comparable?'known':'unverified',reason:comparable?null:'judgment occurrence clocks are not mutually comparable; first occurrence and duration are unverified'};
+  if(!comparable)base.firstValid={...base.firstValid,clock:null};
+ }
  return base;
 }
