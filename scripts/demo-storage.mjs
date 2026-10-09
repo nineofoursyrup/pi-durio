@@ -21,7 +21,7 @@ const save=async(name,value)=>writeFile(join(base,name+'.json'),JSON.stringify(v
 const transport=scriptedTransport([{name:'bash',args:{command:`'${process.execPath}' check.cjs`}}]);
 const run=await runCodingTask({dataRoot,workspace,input:'Run the provided failing check once; retain its output.',mode:'offline',transport:transport.fetch});
 assert.equal(run.status,'completed'); // Shell check failure is retained even when this fixture's assistant returns normally.
-const check=[...records(dataRoot,{runId:run.runId,kinds:['tool.result']})][0];assert.equal(decode(dataRoot,check).result.isError,true);
+const check=[...records(dataRoot,{runId:run.runId,kinds:['shell.completed']})][0];assert.equal(decode(dataRoot,check).acquired.exitCode,7);
 const original=await treeFiles(dataRoot);await save('runtime-result',run);await save('runtime-source-manifest',original);
 const archive=await archiveStorage(dataRoot,{destination:join(base,'archive'),scope:'whole-root'});await save('archive',archive);
 const restored=await restoreArchive(archive.archive,join(base,'restored'));assert.deepEqual(await treeFiles(restored.destination),original);await save('restore',restored);
