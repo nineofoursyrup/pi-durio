@@ -1,0 +1,36 @@
+{
+  "status": "PREPARATION ONLY; no live plan or provider authorization",
+  "preparedAt": "2026-10-09T19:16:35.926596+00:00",
+  "purpose": "One actual improve analysis over a small known deterministic project defect; no performance winner required.",
+  "files": {
+    "package.json": "{\"name\":\"durio-live-improve-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}\n",
+    "clamp.ts": "export const clamp = (value: number, lower: number, upper: number) => Math.min(upper, Math.min(lower, value));\n",
+    "README.md": "User draft: preserve this exact note.\nClamp a number to the inclusive lower and upper bounds; lower is never greater than upper.\n",
+    "check.mjs": "import assert from 'node:assert/strict';\nimport {clamp} from './clamp.ts';\nconst cases = [[-4,0,10,0],[0,0,10,0],[6,0,10,6],[14,0,10,10],[-3,-5,-1,-3],[-9,-5,-1,-5]];\nfor (const [value,lower,upper,expected] of cases) assert.equal(clamp(value,lower,upper), expected, JSON.stringify({value,lower,upper}));\nconsole.log('All declared clamp requirements pass');\n"
+  },
+  "allowedWriteback": [
+    "clamp.ts"
+  ],
+  "protected": [
+    "README.md",
+    "package.json",
+    "check.mjs"
+  ],
+  "baselineExpectation": "Declared check is expected to fail for in-range and upper-bound cases; actual first failure is captured before real analysis, not asserted executed here.",
+  "analysisScope": "Register project source clamp.ts, check.mjs and README.md; actual model must inspect registered source and provide its own structured candidate. No prefilled candidate.",
+  "selection": "After actual report, present exact candidate revision, target baseline, content proposal, deterministic check and writeback scope for human structured selection. Paid-batch grant alone does not select a future candidate.",
+  "validation": "Run fixed project check against prepared candidate; verify protected bytes and real output. No fresh model behavior claim or paid validation required for this directly testable local function bug.",
+  "openConditions": [
+    "Freeze actual installed product after #25; bind source/build/install identities.",
+    "Capture actual seed task facts with explicitly controlled provenance; synthetic seed is not live evidence.",
+    "Fix exact request/trial identities and user-paid authorization before any real provider request.",
+    "Keep zero-candidate/invalid reports and first failures; no implicit extra calls.",
+    "Reopen actual decision/writeback records and verify final protected contents; do not imply performance improvement."
+  ],
+  "fileHashes": {
+    "package.json": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+    "clamp.ts": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+    "README.md": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+    "check.mjs": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d"
+  }
+}
