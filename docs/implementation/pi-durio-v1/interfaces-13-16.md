@@ -13,3 +13,5 @@
 2026-10-09 补充：#16 独占新增宿主共用 `src/query.ts`，提供 records 元数据/BlobRef 的分页与原文片段读取；流式 hash/长度验证中同时取得目标片段，仅在身份核对后返回。UI 不直接散布 SQLite 读逻辑。#13 保持 records schema、BlobRef、openHostReadonly 接缝兼容，有必要变更先协调。现有 readRun 默认行为保留。
 
 实际环境缺口：#16 调用 cua.getApp("Terminal") 被工具安全规则拒绝：Computer Use is not allowed to use the app 'com.apple.Terminal' for safety reasons. 禁止换 AppleScript/其他工具绕过。#16 继续独立实现并准备绑定候选的人工 Terminal 验证脚本；真实 Terminal 证据到达前不记 integrated-accepted、不解除后继依赖。协调者待具体候选/脚本就绪后向用户请求实际操作。
+
+2026-10-09 续：#13 在原 tool.result 保存成功后追加有界派生 tool.summary，提供 attemptId/tool/isError（未知 null）和必要上游 diagnostics/truncation 与原文关联；最终字段由 #13 直接交接 #16。原 tool.result 保持完整。summary 缺失/失败使展示 unknown/degraded，不重跑工具、不改变权威结果。#16 不通过截断正文猜测成功或原文完整性，不为此增加 JSON 流解析器。

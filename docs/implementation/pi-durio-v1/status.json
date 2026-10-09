@@ -10,8 +10,10 @@
       "number": 11,
       "title": "首个 headless 只读任务与持久记录",
       "state": "open",
-      "assignees": [],
-      "comments": 0,
+      "assignees": [
+        "nineofoursyrup"
+      ],
+      "comments": 1,
       "blocked_by": [],
       "body_matches": true,
       "dependencies_match": true,
@@ -27,14 +29,17 @@
       "agent": "/root/issue11",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "T01 offline real Pi runtime acceptance passed; source/compiled/evidence/install identities verified. Paid provider NOT RUN."
+      "note": "T01 offline real Pi runtime acceptance passed; source/compiled/evidence/install identities verified. Paid provider NOT RUN.",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-11.json"
     },
     "12": {
       "number": 12,
       "title": "受限执行与可信评分探查",
       "state": "open",
-      "assignees": [],
-      "comments": 0,
+      "assignees": [
+        "nineofoursyrup"
+      ],
+      "comments": 1,
       "blocked_by": [],
       "body_matches": true,
       "dependencies_match": true,
@@ -50,29 +55,36 @@
       "agent": "/root/issue12",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "Ticket acceptance and merge identity verified. Formal product eval remains #21; issue remains OPEN."
+      "note": "Ticket acceptance and merge identity verified. Formal product eval remains #21; issue remains OPEN.",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-12.json"
     },
     "13": {
       "number": 13,
       "title": "可写 coding、工作区所有权与完整输出",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         11
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-13",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "9d230e4f2c0eaa3ca771e954bbdf279f6f71176a",
+      "integrated_sha": "ae7454b226f7298cb8f0885e32b071c8b3ed3fe9",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-13/README.md",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-13/merge-integration-readback.json"
+      ],
       "branch": "codex/pi-durio-v1-issue-13",
       "agent": "/root/issue13",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "Fresh gpt-6-astra/xhigh implementer; runtime/coding ownership fixed in interfaces-13-16.md."
+      "note": "T03 local/offline applicable acceptance passed. Source/compiled/evidence identities and original materials verified; complete lifecycle/recovery/Terminal/provider remain later obligations.",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-13.json"
     },
     "14": {
       "number": 14,
@@ -85,7 +97,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
@@ -112,7 +124,9 @@
       "number": 16,
       "title": "真实 Terminal 请求往返与可靠输入",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         11
@@ -128,7 +142,9 @@
       "agent": "/root/issue16",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "Terminal CUA safety denial: no alternate-tool bypass. Continue implementation; candidate-bound manual Terminal evidence required before ticket acceptance. Owns new src/query.ts bounded reads."
+      "note": "Partial TUI commit; local checks passed. Main conversation presentation correction and merge of #13 tool.summary pending. Real Terminal human observations still NOT RUN; no dependency unlock.",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-16.json",
+      "local_checkpoint": "ee6d8bd"
     },
     "17": {
       "number": 17,
@@ -417,9 +433,11 @@
       "evidence": []
     }
   },
-  "frontier": [],
+  "frontier": [
+    14
+  ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "0261d0f5872a96a0727d2b2564ee0c504480ea87",
+  "integration_tip": "ae7454b226f7298cb8f0885e32b071c8b3ed3fe9",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -429,9 +447,9 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T10:10:39.331437+00:00",
+  "updated_at": "2026-10-09T10:39:38.667483+00:00",
   "last_remote_readback": {
-    "headRefOid": "0261d0f5872a96a0727d2b2564ee0c504480ea87",
+    "headRefOid": "fe6382fd3992135569547d8f51f0a2c5c442f040",
     "isDraft": true,
     "closingIssuesReferences": [],
     "url": "https://github.com/nineofoursyrup/pi-durio/pull/33"
