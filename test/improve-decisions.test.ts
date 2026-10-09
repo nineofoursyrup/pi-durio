@@ -8,6 +8,7 @@ import {captureImproveSources} from '../src/improve-source.js';
 import {submitImproveDecision,readImproveDecision,previewImproveDecision,resumeImproveDecision,suppressionMatch,listImproveSuppressions,restoreImproveSuggestion,type ImproveMode,type ImproveDecision} from '../src/improve-decisions.js';
 import {scopedImproveDecisions} from '../src/improve-history.js';
 import {ImproveSelectionView} from '../src/tui/improve-selection.js';
+import {summarizeImproveValidation,scopedImproveSource} from '../src/improve-validation.js';
 
 async function fixture(){
  const directory=await realpath(await mkdtemp(join(tmpdir(),'durio-decisions-'))),workspace=join(directory,'project'),dataRoot=join(directory,'data');
@@ -38,7 +39,7 @@ test('validate-only constructs and checks real restricted content while preservi
  const f=await fixture(),d={...decision(f,'validate-only'),directory:join(f.directory,'validation'),groups:[{id:'math',candidateIds:[f.candidate.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',program:"import assert from 'node:assert/strict'; const {add}=await import('/work/targets/project/math.mjs'); assert.equal(add(2,3),5); assert.equal(add(2,-3),-1); console.log('addition passed');",timeoutMs:30000}]}],limits:{...decision(f).limits,maxChecks:1}};
  const submitted=structuredClone(d);
  const outcome=await submitImproveDecision({dataRoot:f.dataRoot,decision:d as any,fault:kind=>{if(kind==='improve.decision'){d.groups[0].changes[0].content='caller mutated after dispatch';d.groups[0].checks[0].program='throw Error("must not execute changed input")';}}});
- assert.equal(outcome.state,'completed',JSON.stringify(outcome));assert.equal(outcome.groups[0].state,'completed');
+ assert.equal(outcome.state,'completed',JSON.stringify(outcome));assert.equal(outcome.groups[0].state,'completed');assert.equal(outcome.groups[0].reason,null);
  assert.equal(outcome.groups[0].result.checks[0].execution.terminated,true);
  assert.equal(outcome.groups[0].result.effect,'direct-checks-passed');
  assert.equal(await readFile(join(f.workspace,'math.mjs'),'utf8'),'export const add=(a,b)=>a-b;\n');
@@ -60,7 +61,8 @@ test('deferral needs relevant content change; revision, baseline, dependencies, 
  const f=await fixture(),d=decision(f);await submitImproveDecision({dataRoot:f.dataRoot,decision:d});
  assert.equal(suppressionMatch(f.dataRoot,f.candidate as any).blocked,true);
  const changed={...f.candidate,target:{...f.candidate.target,files:f.candidate.target.files.map(x=>({...x,sha256:'changed-content'}))}};
- const renewed=suppressionMatch(f.dataRoot,changed as any);assert.equal(renewed.blocked,false);assert.match(renewed.matches[0].reason,/target content changed/);
+ assert.equal(suppressionMatch(f.dataRoot,changed as any).blocked,true,'bytes alone are not a substantive reconsideration');
+ const renewed=suppressionMatch(f.dataRoot,{...changed,reconsideration:{sourceId:listImproveSuppressions(f.dataRoot)[0].sourceId,reason:'The actual numeric operation changed; new source demonstrates the affected behavior',evidence:['acquired-new-source']}} as any);assert.equal(renewed.blocked,false);assert.match(renewed.matches[0].reason,/target content changed/);
  await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...d,id:'old-report',reportRevision:'old'}}),/REPORT_REVISION_DRIFT/);
  await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...d,id:'old-candidate',selections:[{...d.selections[0],candidateRevision:'old'}]}}),/CANDIDATE_REVISION_DRIFT/);
  await writeFile(join(f.workspace,'math.mjs'),'user edit\n');
@@ -120,4 +122,40 @@ test('unselected dependencies, explicit conflicts, shared-target split and insuf
  assert.throws(()=>previewImproveDecision(f.dataRoot,f.d),/COMBINATION_REQUIRED/);
  const only={...f.d,selections:f.d.selections.slice(0,1),groups:f.d.groups.slice(0,1),limits:{...f.d.limits,maxChecks:0}};
  assert.throws(()=>previewImproveDecision(f.dataRoot,only),/TOTAL_BUDGET_EXCEEDED/);
+});
+test('combination projection keeps every necessary protection and benefit, rather than taking the last check',()=>{
+ const improve={kind:'fresh',state:'completed',effect:'改善'},same={kind:'resource',state:'completed',effect:'无明显差异'};
+ for(const ordered of [[improve,same],[same,improve]]){assert.equal(summarizeImproveValidation(ordered).effect,'证据不足');assert.equal(summarizeImproveValidation(ordered).allDeclaredBenefitsMet,false);}
+ assert.equal(summarizeImproveValidation([{...same,effect:'退化'},improve,{kind:'direct',state:'unknown'}]).effect,'退化');
+ assert.equal(summarizeImproveValidation([improve,{kind:'regression',state:'failed'}]).effect,'direct-checks-failed');
+ assert.equal(summarizeImproveValidation([improve,{...improve,kind:'resource'}]).allDeclaredBenefitsMet,true);
+});
+
+test('child source identity is root-qualified without parent-local evidence or blob syntax',()=>{
+ const digest='a'.repeat(64),reference=scopedImproveSource('/child',`e1:3:${digest}`);
+ assert.deepEqual(reference,{scope:'child-data-root',dataRoot:'/child',sequence:3,digest});
+ assert.equal(Object.values(reference).some(v=>typeof v==='string'&&/^e1:/.test(v)),false);
+ assert.equal('sha256' in reference,false);
+});
+
+test('explicit exact validation basis permits config formatting equivalence, catches a semantic change and never infers safety from Markdown or model labels',async()=>{
+ const f=await fixture();await writeFile(join(f.workspace,'config.json'),' {"mode":"strict","budget":4} \n');await writeFile(join(f.workspace,'instructions.md'),'Answer truthfully.\n');
+ let e=new Evidence(f.dataRoot,'analysis-1');const targets=captureImproveSources(e,f.workspace,[{id:'config',kind:'agent-config',paths:['config.json']},{id:'prompt',kind:'prompt-skill',paths:['instructions.md']}],'test-version').targets;
+ const config={...f.candidate,id:'config-choice',revision:'config-revision',target:targets[0],scope:['config.json'],objective:'maintenance'},prompt={...f.candidate,id:'prompt-choice',revision:'prompt-revision',target:targets[1],scope:['instructions.md'],objective:'maintenance'};f.report.candidates=[config,prompt];e.append('improve.report',f.report);e.close();
+ const group:any={id:'format',candidateIds:[config.id],basis:{impact:'no-behavior',reason:'JSON parse equivalence proves the effective configuration is unchanged; formatting is the entire change',checkIndices:[0]},changes:[{targetId:'config',path:'config.json',content:'{\n  "mode": "strict",\n  "budget": 4\n}\n'}],checks:[{kind:'direct',program:"import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';assert.deepEqual(JSON.parse(readFileSync('/input/baseline/config/config.json')),JSON.parse(readFileSync('/work/targets/config/config.json')));",timeoutMs:30000},{kind:'direct',program:'console.log("necessary follow-up")',timeoutMs:30000}]};
+ const d:any={...decision(f,'validate-only'),id:'formatting',selections:[{candidateId:config.id,candidateRevision:config.revision,target:config.target,steps:config.steps,mode:'validate-only'}],directory:join(f.directory,'formatting'),groups:[group],limits:{...decision(f).limits,maxChecks:2}};
+ assert.throws(()=>previewImproveDecision(f.dataRoot,{...d,groups:[{...group,basis:undefined}]}),/BEHAVIOR_FRESH_REQUIRED/);
+ const good=await submitImproveDecision({dataRoot:f.dataRoot,decision:d});assert.equal(good.state,'completed');
+ const bad=await submitImproveDecision({dataRoot:f.dataRoot,decision:{...d,id:'semantics',directory:join(f.directory,'semantics'),groups:[{...group,changes:[{targetId:'config',path:'config.json',content:'{"mode":"permissive","budget":4}\n'}]}]}});assert.equal(bad.state,'frozen');assert.deepEqual(bad.groups[0].result.checks.map((c:any)=>c.state),['failed','not-run']);assert.equal(await readFile(join(f.workspace,'config.json'),'utf8'),' {"mode":"strict","budget":4} \n');
+ const behavior={...d,id:'markdown',directory:join(f.directory,'markdown'),selections:[{candidateId:prompt.id,candidateRevision:prompt.revision,target:prompt.target,steps:prompt.steps,mode:'validate-only'}],groups:[{id:'prompt',candidateIds:[prompt.id],changes:[{targetId:'prompt',path:'instructions.md',content:'Always answer confidently.\n'}],checks:[{kind:'direct',program:'console.log("lint passes")',timeoutMs:30000}]}]};
+ assert.throws(()=>previewImproveDecision(f.dataRoot,behavior),/BEHAVIOR_FRESH_REQUIRED/);
+ assert.throws(()=>previewImproveDecision(f.dataRoot,{...behavior,groups:[{...behavior.groups[0],basis:{impact:'unknown',reason:'Changed Markdown instructions could affect model behavior',checkIndices:[0]}}]}),/BEHAVIOR_FRESH_REQUIRED/);
+});
+test('narrow selection viewport keeps the current candidate title and mode visible while navigating wrapped choices',async()=>{
+ const f=await fixture();f.report.candidates=Array.from({length:5},(_,i)=>({...f.candidate,id:`candidate:${i}`,revision:`revision:${i}`,display:`R${i+1}`,title:`Choice ${i+1} 中文`,validation:{...f.candidate.validation,checks:['A deliberately long declared necessary check whose wrapped text must not conceal the next selectable choice']}}));
+ const e=new Evidence(f.dataRoot,'analysis-1');e.append('improve.report',f.report);e.close();
+ const view=new ImproveSelectionView(f.dataRoot,decision(f),async()=>{throw Error('navigation does not submit');});
+ for(let i=0;i<5;i++){if(i)await view.handleInput('\x1b[B');await view.handleInput('d');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('[defer]'),screen);}
+ const resized=view.render(32,8).join('\n');assert.ok(resized.includes('Choice 5'),resized);
+ for(let i=3;i>=0;i--){await view.handleInput('\x1b[A');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('[defer]'),screen);}
 });

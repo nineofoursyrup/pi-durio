@@ -8,7 +8,7 @@ import {acquireWorkspaceOwner,resolveWorkspaceRoot} from './workspace-ownership.
 import {readImproveReport,type ImproveCandidate} from './improve.js';
 import {sourceBytes,verifySelfSource,type SourceTarget} from './improve-source.js';
 import {appendFact} from './eval/store.js';
-import {improveFacts,readImproveDecision,problemIdentity,conditionIdentity,listImproveSuppressions} from './improve-history.js';
+import {improveFacts,readImproveDecision,problemIdentity,conditionIdentity,conditionFiles,listImproveSuppressions} from './improve-history.js';
 import {validateGroup,validateImproveGroup,groupReservation,type ValidationGroup} from './improve-validation.js';
 export {readImproveDecision,scopedImproveDecisions,suppressionMatch,listImproveSuppressions} from './improve-history.js';
 
@@ -93,7 +93,7 @@ async function executeGroups(options:SubmitOptions,evidence:Evidence,sourceId:st
    if(spent.checks+reserved.checks>d.limits.maxChecks||spent.requests+reserved.requests>d.limits.maxRequests||spent.tokens+reserved.tokens>d.limits.maxTokens)throw Error('IMPROVE_TOTAL_BUDGET_EXCEEDED');
    record('improve.group-started',{groupId:group.id,reserved,directory:join(d.directory!,group.id)});
    let result=await validateImproveGroup({evidence,decisionSource:sourceId,decisionId:d.id,group,candidates,directory:join(d.directory!,group.id),deadline:d.limits.deadline,signal:options.signal??new AbortController().signal,record,guard});
-   try{for(const c of candidates)checkImproveBaseline(c.target);}catch(error){result={...result,state:'failed',reason:String(error),effect:'证据不足'};}
+   try{for(const c of candidates)checkImproveBaseline(c.target);}catch(error){result={...result,state:'failed',reason:String(error),effect:'证据不足',conclusion:{...result.conclusion,effect:'证据不足',allChecksPassed:false,allDeclaredBenefitsMet:false}};}
    record('improve.validation',{groupId:group.id,state:result.state,reason:result.reason,result});
    if(result.state!=='completed'){stopped=result.reason??result.state;break;}
   }
@@ -118,7 +118,7 @@ export async function submitImproveDecision(options:SubmitOptions){
   const guard=()=>{owner.assertHeld();for(const lease of leases)lease.assertHeld();};
   evidence=new Evidence(dataRoot,report.runId,kind=>{guard();options.fault?.(kind);});
   const executionVersion=currentVersion();
-  const sourceId=appendFact(evidence,'improve.decision',{id:decision.id,workspace:report.target.workspace,requestDigest,executionVersion,decision,decisions:decision.selections.map(s=>{const c=report.candidates.find(c=>c.id===s.candidateId)!;return {candidateId:c.id,mode:s.mode,problem:problemIdentity(c),condition:conditionIdentity(c)};})});
+  const sourceId=appendFact(evidence,'improve.decision',{id:decision.id,workspace:report.target.workspace,requestDigest,executionVersion,decision,decisions:decision.selections.map(s=>{const c=report.candidates.find(c=>c.id===s.candidateId)!;return {candidateId:c.id,mode:s.mode,problem:problemIdentity(c),condition:conditionIdentity(c),conditionFiles:conditionFiles(c)};})});
   await executeGroups({...options,signal},evidence,sourceId,decision.groups,executionVersion,guard);
  }finally{evidence?.close();for(const lease of leases.reverse())await lease.release();await owner.release();}
  return readImproveDecision(dataRoot,decision.id);
