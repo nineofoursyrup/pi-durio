@@ -1,3 +1,4 @@
+import {withOwnerSync} from '../ownership.js';
 import {Evidence,digest,readAcceptedTasks} from '../evidence.js';
 import {factClock,type FactClock} from '../fact-clock.js';
 import {records,decode,resolveEvidence,watermark,type EvidenceReference} from '../history.js';
@@ -35,9 +36,12 @@ function task(root:string,taskId:string) {
  throw Error('ACCEPTANCE_TASK_NOT_FOUND');
 }
 /** Explicit host/user management input, never registered as a candidate tool.
- * Only appends to the original Evidence store. A short SQLite transaction makes
- * duplicate IDs/revisions atomic even while the execution owner writes facts. */
+ * Acquires or verifies the data-root owner before opening Evidence; the short
+ * SQLite transaction also keeps duplicate IDs/revisions atomic. */
 export function recordAcceptance(root:string,input:AcceptanceInput) {
+ return withOwnerSync(root,root=>recordAcceptanceOwned(root,input));
+}
+function recordAcceptanceOwned(root:string,input:AcceptanceInput) {
  ensure(input&&nonempty(input.id,128)&&nonempty(input.taskId,128),'identity required');
  ensure(['requirements','result','judgment','withdraw','dispute'].includes(input.type),'unsupported operation');
  ensure(input.source&&['human','checks','unverified'].includes(input.source.kind)&&nonempty(input.source.actor,256)&&nonempty(input.source.statement)&&Array.isArray(input.source.refs),'explicit source required');
