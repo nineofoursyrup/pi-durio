@@ -432,7 +432,9 @@
       "acceptance": {
         "at": "2026-10-09T16:01:57.590085+00:00",
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/reopen-repair/acceptance-r2.json"
-      }
+      },
+      "acceptance_comment": "https://github.com/nineofoursyrup/pi-durio/issues/17#issuecomment-6084574781",
+      "acceptance_publication": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/reopen-repair/publication/readback.json"
     },
     "18": {
       "number": 18,
@@ -477,7 +479,9 @@
       "number": 19,
       "title": "自动与主动上下文压缩",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         18,
@@ -485,11 +489,18 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-19",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-19",
+      "agent": "/root/issue19",
+      "base_commit": "4ffa16e926e2d5bc3cd34a45b76ea40019b951b2",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T155256Z/issue-19.json",
+      "note": "Fresh implementer dispatched after #17/#18 applicable acceptance; public durable compaction with shared provider boundary from checked seam commits."
     },
     "20": {
       "number": 20,
@@ -544,35 +555,54 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-21",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "87eb35e40f62db0285c88399c58be112f27f72a9",
+      "integrated_sha": "c99360ff412b51c10041e6cea3a94d7b90213f8d",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-21/README.md",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/handoff.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/coordinator-premerge.json",
+        "docs/implementation/pi-durio-v1/issue-21/coordinator-acceptance.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/merge-integration-readback.json"
+      ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T145831Z/issue-21.json",
-      "note": "Fresh-context implementer dispatched; #12/#15/#18 accepted, real restricted product runtime with controlled provider; paid model work separate.",
+      "note": "T11 applicable controlled-provider restricted runtime, budget, independent grading and installed readonly evidence accepted; paired comparison and paid model acceptance remain separate.",
       "branch": "codex/pi-durio-v1-issue-21",
       "agent": "/root/issue21",
       "base_commit": "fc01fc4fc21f92a65fa11f9677f9686008ba9fc7",
       "model_requested": "gpt-6-astra",
-      "reasoning_requested": "xhigh"
+      "reasoning_requested": "xhigh",
+      "product_commit": "a06e266c946e24c529b5bd344b98a1f0f6b61cb1",
+      "acceptance": {
+        "at": "2026-10-09T16:22:38.570901+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/coordinator-acceptance.json"
+      }
     },
     "22": {
       "number": 22,
       "title": "fresh 对照与限定范围改善报告",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         21
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
-      "worktree": null,
+      "status": "dispatching",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-22",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-22",
+      "agent": "/root/issue22",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T161054Z/issue-22.json",
+      "note": "Claimed after #21 accepted and integrated; fresh implementer dispatch in progress."
     },
     "23": {
       "number": 23,
@@ -754,12 +784,11 @@
     }
   },
   "frontier": [
-    19,
     23,
     27
   ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "cc8fd2d6aaee811382fe48cf35519f559ee4f842",
+  "integration_tip": "c99360ff412b51c10041e6cea3a94d7b90213f8d",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -769,9 +798,9 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T16:01:57.590085+00:00",
+  "updated_at": "2026-10-09T16:23:06.364157+00:00",
   "last_remote_readback": {
-    "headRefOid": "4c54807d518aa4b7086cb340c9a49cc603fca1f0",
+    "headRefOid": "4ffa16e926e2d5bc3cd34a45b76ea40019b951b2",
     "isDraft": true,
     "state": "OPEN",
     "closingIssuesReferences": []
