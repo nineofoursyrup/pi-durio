@@ -29,6 +29,8 @@
 
 首跑记录保留：`transport-first-failure.log` 是新增模块尚未实现的编译失败；`product-first-run.log` 的失败是测试原先错误假设 StdinBuffer 会把普通字符串作为一个事件，实际按字符拆分，收据原文未丢；`context-barrier-first-run.log` 暴露检查辅助函数把 ASCII 错误提示误当稳定产品帧，且未在超时后显式重试。改为检测完整产品 caret 帧和明确完成状态后，相关检查通过。没有删除或替换第一份记录。
 
+候选源码固定为 `e4571452a1ebf712cd60282ded0161640670d70e`；[完整候选指针](candidate-r5.json)。独立安装包 smoke 和源码字节绑定通过。安装 smoke 第一次脚本错误地只解析 CLI JSON 的第一行；产品运行本身已 completed/cleanup confirmed。保留原运行 stdout 和 `candidate-r5/smoke-first-failure.{mjs,json}` 后，修正解析并复用原运行完成 headless 读回，没有覆盖原执行或再次制造模型调用。
+
 ## 人工入口
 
 固定 r5 manifest 由候选脚本生成，单一 runner 先运行 `cursor` 的三项短复测（原样 caret、首见新 Unicode、缩小再恢复）。FAIL/UNKNOWN 或机器恢复失败立即停止，其他场景保持 NOT RUN。短复测通过后再集中运行 normal/stop/esc/exit/fault。观察按明确编号填写 P/F/U，raw/stty、按键、clipboard 读回和同 run headless 结果自动记录。
