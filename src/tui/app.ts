@@ -1,3 +1,5 @@
+import {ImproveView} from './improve.js';
+import {validateImproveRequest,type ImproveRequest} from '../improve.js';
 import { readCompactions } from '../compaction.js';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -5,7 +7,7 @@ import { realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiAltScreen, VStack, matchesKey, isKeyRelease, isKeyRepeat, stripTerminalSequences, truncateToWidth, wrapTextWithAnsi, type Component, type AutocompleteProvider, type Terminal } from '@earendil-works/pi-tui';
-import { runReadTask, runCodingTask, compactContext, TaskControl, readQueue, decideQueue, checkRecovery, recoverRun, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
+import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, checkRecovery, recoverRun, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
 import type { QueueItemFact } from '../evidence.js';
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
@@ -17,7 +19,7 @@ import { TerminalWidthGate } from './width-gate.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
-const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实']] as const;
+const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实'],['improve','受限分析（需声明范围和预算）'],['improves','查看 improve 报告（只读）']] as const;
 const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed','compaction.generated','compaction.finished'];
 const completion:AutocompleteProvider={
   triggerCharacters:['/'],
@@ -84,9 +86,10 @@ export class ReadOnlyTui {
   private lastText='';
   private confirmation?:{key:string;at:number};
   private followChord=false;
-  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
+  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
   private historyView?:HistoryView;
   private evalView?:EvalView;
+  private improveView?:ImproveView;
   private storageView?:StorageView;
   private hidePanel?:()=>void;
   private pendingRefresh=false;
@@ -251,7 +254,7 @@ export class ReadOnlyTui {
     if(this.phase!=='idle') {this.editor.setText(text);this.lastText=text;this.notice='当前正在清理；草稿保留，未受理';this.tui.requestRender();return;}
     if(followUp){this.editor.setText(text);this.lastText=text;this.notice='当前没有运行任务；文本保留，按普通 Enter 明确提交新任务';this.tui.requestRender();return;}
     if(this.result?.status==='unknown'||this.result?.cleanup==='unknown') {this.editor.setText(text);this.lastText=text;this.notice='旧工作存在未知；只读查看，不能由 TUI 绕过恢复核对';this.tui.requestRender();return;}
-    const contextRunId=this.result?.status==='completed'&&this.result.cleanup==='confirmed'?this.result.runId:undefined;
+    const contextRunId=this.result?.status==='completed'&&this.result.improve?.runId!==this.result.runId&&this.result.cleanup==='confirmed'?this.result.runId:undefined;
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
     this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.summaries.clear();this.historyWindow=false;this.scroll.scrollToEnd();
     this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.notice='任务正在受理；忙时 Enter 补充当前任务，Ctrl+X → Enter 后续请求';this.rebuild();
@@ -287,9 +290,21 @@ export class ReadOnlyTui {
     else if(command.startsWith('/decide ')){try{void this.recoveryDecision(JSON.parse(command.slice(8)));}catch(error){this.notice=`决定 JSON 无效：${String(error)}`;}}
     else if(command==='/compact')void this.compact();
     else if(command==='/compactions')this.openPanel('compaction');
-    else if(command==='/improve'){if(this.phase==='running'&&!this.historyWindow&&!this.viewingRecovery)this.enqueue(command.slice(1),command.slice(1) as 'compact'|'improve');else this.notice='管理请求须绑定活动任务；历史或恢复视图不能执行';}
+    else if(command==='/improves'||command.startsWith('/improves ')){try{this.improveView=new ImproveView(this.options.dataRoot,command.slice(10).trim()||undefined);this.openPanel('improve');}catch(error){this.notice=`improve 报告不可读取：${String(error)}`;}}
+    else if(command==='/improve'||command.startsWith('/improve '))void this.improve(command.slice(8).trim());
     else return false;
     return true;
+  }
+  private async improve(input:string) {
+    if(this.historyWindow||this.viewingRecovery){this.notice='只读历史/恢复视图不能发起分析；返回活动目标并完成核对';this.tui.requestRender();return;}
+    if(!input){this.notice='尚未启动。使用 /improve JSON 明确 purpose、limits（maxRequests/maxTokens/maxRequestTokens/maxDurationMs/maxOutputTokens）及 sources；/improves 只读查看报告';this.tui.requestRender();return;}
+    let request:ImproveRequest;try{const parsed=JSON.parse(input);request=validateImproveRequest({...parsed,id:parsed.id??randomUUID()},this.options.mode);}catch(error){this.notice=`尚未启动：${String(error)}`;this.tui.requestRender();return;}
+    if(this.phase==='running'){const target=this.control.target();if(!target){this.notice='当前在收尾或分析中；未受理新的管理请求';this.tui.requestRender();return;}try{const item=await this.control.submit({id:request.id,kind:'improve',input:JSON.stringify(request),target});this.notice=`improve ${item.status} · ${item.requestId} → 原 run ${target.runId}`;this.loadQueue();}catch(error){this.notice=`未接入：${String(error)}`;}this.tui.requestRender();return;}
+    if(this.phase!=='idle'||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前仍在清理或结果未知；尚未启动分析，先完成恢复核对';this.tui.requestRender();return;}
+    if(!this.runId){this.notice='尚无活动任务；先完成一项工作再针对其证据分析';this.tui.requestRender();return;}
+    const targetRunId=this.result?.improve?.runId===this.runId?this.result.improve.target.runId:this.runId;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
+    this.notice=`improve 分析中 · 目标 ${targetRunId}；默认不选中任何候选`;
+    this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);this.notice=`improve ${result.improve?.state??result.status} · ${request.id}；/improves 查看；没有执行候选`;}).catch(error=>{this.notice=`分析未完成：${String(error)}`;}).finally(()=>this.finished());this.tui.requestRender();
   }
   private async compact() {
     if(this.historyWindow||this.viewingRecovery){this.notice='只读历史/恢复视图不能压缩；先返回活动会话并完成恢复核对';this.tui.requestRender();return;}
@@ -314,7 +329,7 @@ export class ReadOnlyTui {
   private applyResult(result:RunResult) {
     this.result=result;this.sessionId=result.sessionId;this.runId=result.runId;
     this.viewingRecovery=result.status==='unknown'||result.cleanup==='unknown';
-    this.notice=result.controls?'队列已冻结；/queue 查看目标与原因，普通输入不会接入旧项':result.cleanup==='confirmed'?`清理已确认；run ${result.runId}`:'清理未知；原工作保留，/recover 核对';
+    this.notice=result.controls?'队列已冻结；/queue 查看目标与原因，普通输入不会接入旧项':result.improve?`improve ${result.improve.state} · ${result.improve.id}；/improves 查看；没有执行候选`:result.cleanup==='confirmed'?`清理已确认；run ${result.runId}`:'清理未知；原工作保留，/recover 核对';
   }
   private finished() {
     this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting')this.phase='idle';this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
@@ -514,13 +529,13 @@ export class ReadOnlyTui {
     this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
     this.openPanel('detail',record);
   }
-  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction',ref?:RecordReference) {
+  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve',ref?:RecordReference) {
     this.closePanel();this.confirmation=undefined;
     this.panel={kind,ref,offset:0,previous:[],line:0,raw:'',next:null};
     if(kind==='detail')this.loadDetail();
     const component:Component={invalidate(){},render:width=>this.panelLines(width),handleInput:data=>this.panelInput(data),handleMouse:event=>{
       if(!this.panel)return;
-      if(event.type==='wheel'){if(this.panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else this.panel.line=Math.max(0,this.panel.line+(event.wheelDelta??0));return {handled:true};}
+      if(event.type==='wheel'){if(this.panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else this.panel.line=Math.max(0,this.panel.line+(event.wheelDelta??0));return {handled:true};}
       if(event.type==='click'&&this.panel.kind==='actions'){
         const index=event.y+this.panel.line-1;
         if(commands[index]){const command=commands[index][0];this.closePanel();this.command(`/${command}`);return {handled:true};}
@@ -530,12 +545,13 @@ export class ReadOnlyTui {
   }
   private panelLines(width:number) {
     const panel=this.panel;if(!panel)return[];
+    if(panel.kind==='improve'){const lines=this.improveView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval'){const lines=this.evalView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='storage') {const lines=this.storageView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='history') {const lines=this.historyView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     let text:string;
     if(panel.kind==='actions')text='操作菜单（保留输入草稿）\n'+commands.map(([name,description],index)=>`${panel.offset===index?'›':' '} /${name}  ${description}`).join('\n');
-    else if(panel.kind==='help')text='帮助\nEnter 新任务；忙时 Enter 补充当前任务\nCtrl+X → Enter 后续请求\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 活动会话\n/older /newer 只读窗口；/restore 草稿\n/eval 固定评估报告（只读）\n/history 历史查询（只读）\n/compact 压缩当前上下文；/compactions 查看结果\n/queue 队列，w 撤回，r 明确重新接入\n/recover [runId] 恢复面板，e 结束旧工作\n/decide JSON 与 headless 同一结构化决定\n/stop 中止；/exit 退出；Esc 关闭弹层';
+    else if(panel.kind==='help')text='帮助\nEnter 新任务；忙时 Enter 补充当前任务\nCtrl+X → Enter 后续请求\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 活动会话\n/older /newer 只读窗口；/restore 草稿\n/improve JSON 范围与预算受限分析；/improves 只读报告\n/eval 固定评估报告（只读）\n/history 历史查询（只读）\n/compact 压缩当前上下文；/compactions 查看结果\n/queue 队列，w 撤回，r 明确重新接入\n/recover [runId] 恢复面板，e 结束旧工作\n/decide JSON 与 headless 同一结构化决定\n/stop 中止；/exit 退出；Esc 关闭弹层';
     else if(panel.kind==='compaction')text=this.compactionText();
     else if(panel.kind==='queue')text=this.queueText();
     else if(panel.kind==='recovery')text=this.recoveryText();
@@ -553,6 +569,7 @@ export class ReadOnlyTui {
     if(matchesKey(data,'escape')||matchesKey(data,'ctrl+o')) {if(panel.kind==='storage'&&this.storageView?.inProgress)return;this.closePanel();return;}
     if(matchesKey(data,'ctrl+l')){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
     if(matchesKey(data,'ctrl+c')||matchesKey(data,'ctrl+d'))return;
+    if(panel.kind==='improve'){this.improveView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='eval'){this.evalView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='storage') {void this.storageView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='compaction'){if(data==='n'&&panel.next!==null){panel.previous.push(panel.offset);panel.offset=panel.next;panel.line=0;}else if(data==='p'&&panel.previous.length){panel.offset=panel.previous.pop()!;panel.line=0;}else if(data==='c')void this.cancelLatestCompaction();}
