@@ -32,6 +32,7 @@ export interface RecoveryReport {
   runId: string; snapshotId: string; status: 'completed' | 'needs-decision' | 'blocked' | 'ended'; exitCode: 0 | 75;
   reasons: string[]; options: string[]; original: unknown;
   tools: RecoveryTool[]; unknownModelAttempts: string[]; remainingModelAttempts: number;
+  compactions?:{taskId:number;reason:string;status:string;submissionId?:number;submissionStatus?:string;entryId?:number}[];
   session?: { id: string; sourceFiles: {path:string;sha256:string}[]; pending: {kind:string;id:number;status:string}[]; taskCount:number; submissionCount:number };
   persistence?: 'saved' | 'not-requested' | 'owner-blocked' | 'saved-separate-owner-report';
   ownerClaims?: OwnerClaim[];
@@ -101,6 +102,10 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   const submission = session.submissions.find(item => item.type === 'input' && item.requestId === accepted.taskId && item.conversationId === started?.conversationId);
   const steerIds=new Set(records.filter(record=>record.kind==='control.accepted'&&(record.data as any).kind==='steer'&&(record.data as any).target?.runId===options.runId&&(record.data as any).taskId===accepted.taskId).map(record=>(record.data as any).requestId));
   const ownedSubmissions=session.submissions.filter(item=>item.conversationId===started?.conversationId&&(item.id===submission?.id||item.type==='input'&&steerIds.has(item.requestId)));
+  const compactIds=new Set(records.filter(r=>r.kind==='compaction.task').map(r=>(r.data as any).taskId));
+  const compactTasks=session.tasks.filter(t=>t.kind==='pi.compaction'&&t.version===1&&t.conversationId===started?.conversationId&&compactIds.has(t.id));
+  const compactions=compactTasks.map(t=>{const result=t.state.status==='terminal'&&t.state.outcome.status==='completed'?t.state.outcome.result:undefined;const summary=session.submissions.find(s=>s.id===result?.submissionId&&s.type==='write'&&s.requestId===`compaction:${t.id}`);return {taskId:t.id,reason:t.input.reason,status:t.state.status==='terminal'?t.state.outcome.status:t.state.status,...(summary?{submissionId:summary.id,submissionStatus:summary.status,entryId:summary.entry}:{}),...(result?.entryId!==undefined?{entryId:result.entryId}:{})};});
+  const compactSubmissionIds=new Set(compactions.flatMap(c=>c.submissionId===undefined?[]:[c.submissionId]));
   const ownedSubmissionIds=new Set(ownedSubmissions.map(item=>item.id));
   const unknownModelAttempts = records.filter(r => r.kind === 'model.intent' && !records.some(response => response.kind === 'model.response' && (response.data as any).attemptId === (r.data as any).attemptId && (response.data as any).usage === 'reported')).map(r => (r.data as any).attemptId as string);
   const remainingModelAttempts = Math.max(0, 8 - records.filter(r => r.kind === 'model.intent').length);
@@ -123,13 +128,15 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   }
   // No raw Harness escapes this boundary. Every live task/submission in the whole store must belong to this run.
   if (!started || !submission) reasons.push('CROSS_STORE_GAP: missing run/conversation/submission identity; never resend an unknown admission');
-  if (session.submissions.some(item => (item.status === 'queued' || item.status === 'placed') && !ownedSubmissionIds.has(item.id))) reasons.push('OTHER_PENDING_SUBMISSION');
-  if (pending.some(task => task.conversationId !== started?.conversationId || task.background || !['pi.generation','pi.tool'].includes(task.kind) || task.version !== 1)) reasons.push('OTHER_PENDING_TASK_OR_UNSUPPORTED_DEFINITION');
+  if (session.submissions.some(item => (item.status === 'queued' || item.status === 'placed') && !ownedSubmissionIds.has(item.id)&&!compactSubmissionIds.has(item.id))) reasons.push('OTHER_PENDING_SUBMISSION');
+  const executionPending=pending.filter(task=>!compactTasks.some(c=>c.id===task.id));
+  if(compactions.some(c=>c.status!=='completed'&&c.status!=='failed'&&c.status!=='aborted'||c.submissionStatus==='queued'))reasons.push('COMPACTION_FROZEN: automatic/manual tasks and unapplied summaries remain quarantined; explicitly end this source before new work');
+  if (executionPending.some(task => task.conversationId !== started?.conversationId || task.background || !['pi.generation','pi.tool'].includes(task.kind) || task.version !== 1)) reasons.push('OTHER_PENDING_TASK_OR_UNSUPPORTED_DEFINITION');
   const live=session.live.find(item=>item.conversationId===started?.conversationId)?.value;
   const controlledRun=live?.run?.inputs.length&&live.run.inputs.every(id=>ownedSubmissionIds.has(id)) ? live.run.taskId : undefined;
-  if (pending.some(task=>task.kind==='pi.generation' ? task.id!==controlledRun : task.owner!==controlledRun)) reasons.push('OTHER_PENDING_TASK_OUTSIDE_ACCEPTED_RUN');
-  if (pending.some(task=>task.abortRequested)) reasons.push('DURABLE_ABORT_INTENT_PRESERVED');
-  if (pending.some(task=>'checkpoint' in task.state && (task.kind==='pi.tool' ? !['call','execute'].includes(task.state.checkpoint?.phase)||task.state.checkpoint?.phase==='execute'&&task.state.checkpoint.replay!=='unsafe' : !['prepare','request','retry','tools'].includes(task.state.checkpoint?.phase)))) reasons.push('UNSUPPORTED_EXECUTION_CHECKPOINT');
+  if (executionPending.some(task=>task.kind==='pi.generation' ? task.id!==controlledRun : task.owner!==controlledRun)) reasons.push('OTHER_PENDING_TASK_OUTSIDE_ACCEPTED_RUN');
+  if (executionPending.some(task=>task.abortRequested)) reasons.push('DURABLE_ABORT_INTENT_PRESERVED');
+  if (executionPending.some(task=>'checkpoint' in task.state && (task.kind==='pi.tool' ? !['call','execute'].includes(task.state.checkpoint?.phase)||task.state.checkpoint?.phase==='execute'&&task.state.checkpoint.replay!=='unsafe' : !['prepare','request','retry','tools'].includes(task.state.checkpoint?.phase)))) reasons.push('UNSUPPORTED_EXECUTION_CHECKPOINT');
   for (const dir of await readdir(join(owner.path,'sessions'), {withFileTypes:true})) {
     if (!dir.isDirectory()) { reasons.push('SESSION_STORAGE_ALIAS'); continue; }
     if (dir.name === accepted.sessionId) continue;
@@ -138,6 +145,7 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
     const otherAccepted = allRecords.find(r => r.kind === 'task.accepted' && (r.data as any).sessionId === dir.name);
     if (!otherAccepted) reasons.push(`SESSION_WITHOUT_HOST_IDENTITY:${dir.name}`);
   }
+  for(const start of records.filter(r=>r.kind==='compaction.started')){const requestId=(start.data as any).requestId;const closed=records.findLast(r=>r.kind==='compaction.closed'&&(r.data as any).requestId===requestId)?.data as any;if(!closed||closed.result?.status==='unknown'||closed.result?.cleanup!=='confirmed')reasons.push(`COMPACTION_OUTCOME_UNKNOWN:${requestId}: original maintenance fact requires explicit disposition`);}
   const ended = sessionWasEnded(records, accepted.sessionId, session.sourceFiles);
   const settled = !session.pending.length && submission?.status === 'done';
   const config = last(records,'execution.config');
@@ -165,7 +173,7 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   }
   const snapshotId = digest(JSON.stringify({ source:session.sourceFiles, facts:records.filter(r => !r.kind.startsWith('recovery.')||r.kind==='recovery.decision').map(r => [r.seq,r.kind,r.data]), authorization:authorizationIdentity(options.authorization), reasons }));
   const status: RecoveryReport['status'] = ended ? 'ended' : reasons.length ? 'blocked' : settled ? 'completed' : 'needs-decision';
-  const report: RecoveryReport = { runId:options.runId,snapshotId,status,exitCode:status === 'completed'||status === 'ended'?0:75,reasons,options:status === 'completed'||status === 'ended'?[]:reasons.length?['inspect','end']:['inspect','continue','end'],original,tools,unknownModelAttempts,remainingModelAttempts,session:{id:accepted.sessionId,sourceFiles:session.sourceFiles,pending:session.pending,taskCount:session.tasks.length,submissionCount:session.submissions.length},persistence:'not-requested' };
+  const report: RecoveryReport = { runId:options.runId,snapshotId,status,exitCode:status === 'completed'||status === 'ended'?0:75,reasons,options:status === 'completed'||status === 'ended'?[]:reasons.length?['inspect','end']:['inspect','continue','end'],original,tools,compactions,unknownModelAttempts,remainingModelAttempts,session:{id:accepted.sessionId,sourceFiles:session.sourceFiles,pending:session.pending,taskCount:session.tasks.length,submissionCount:session.submissions.length},persistence:'not-requested' };
   if(reasons.some(reason=>/OTHER_PENDING|OTHER_SESSION|SESSION_WITHOUT|ALIAS/.test(reason))) report.options=['inspect','external-verification'];
   if(report.exitCode===75) report.needsInput={reason:reasons.length?reasons.join('; '):'Explicit continuation or ending is required',options:report.options,risks:[...tools.filter(tool=>tool.fact==='unknown').map(tool=>`Tool ${tool.taskId} (${tool.tool}) may already have changed files or external resources; a retry may duplicate its effects. Resolve with retry, skip, completed, or end.`),...(unknownModelAttempts.length?['A new model request may add fees; earlier unknown/partial usage stays unknown/partial.']:[])]};
   return { report, records, session, accepted, started, submission, ownedSubmissions, config, coding };
@@ -191,6 +199,7 @@ export async function checkRecovery(options: RecoveryOptions): Promise<RecoveryR
     try {
       freezePendingControls(evidence,recoveryRecords(owner.path,options.runId));
       const {report}=await inspectOwnedRecovery(options,owner);
+      if(report.compactions?.length)evidence.append('recovery.compaction-frozen',{snapshotId:report.snapshotId,compactions:report.compactions,reason:'Recovery check never opens Harness; no pending summary is admitted'});
       report.persistence='saved'; evidence.append('recovery.report',report);return report;
     }
     finally { evidence.close(); }
