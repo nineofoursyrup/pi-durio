@@ -48,6 +48,8 @@ source kinds 为 `project`、`agent-config`、`prompt-skill`、`self-source`、`
 
 `self-source` 必须提供显式 root。构建脚本先取得源码/测试/脚本/锁/配置/vendor 输入与实际 TypeScript 编译器字节身份，再清理生成目录并编译，完成后确认输入未变才写 `dist/execution/source-build.json`；清单只含相对路径和内容身份、无时间戳。核对要求登记 checkout 的输入、实际 compiler 和 build 输出对应安装包中的清单与输出。package 名称、remote 或同名目录均不构成核对。缺失/不符只保留 gap，无源码视图；不会搜索目录或修改安装包。统一 execution artifact 同时保留/核验此清单。
 
+固定 eval runtime 的文件名单也包含该 execution 清单，保证 materialize 后的 runtime 能取得相同构建身份；host runner/grader 源码仍不进入 guest。该集成点以独立安装包的一项真实 restricted trial 验证，旧 eval outcome 不充当本次新增依赖的执行证据。
+
 ## 报告合同与后续接口
 
 宿主保存 `improve.started/source/summary/derived/report` 到已有 Evidence。报告有稳定请求 ID、完整内容 revision、分析 run、原目标、cutoff/deadline、预算、覆盖缺失和明确 selected=[]。最多五候选，零候选正常；无效 JSON、缺 schema、超量/未取得引用、越界 scope 或不足合同产生 incomplete，原模型输出与 attempts 仍保留。
