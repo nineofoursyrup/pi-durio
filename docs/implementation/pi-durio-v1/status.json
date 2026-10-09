@@ -382,7 +382,9 @@
         "docs/implementation/pi-durio-v1/issue-17/README.md",
         "docs/implementation/pi-durio-v1/issue-17/candidate-r1.json",
         "docs/implementation/pi-durio-v1/issue-17/integration-partial.json",
-        "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/merge-integration-readback.json"
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/merge-integration-readback.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/native-r1-attempt1-feedback.json",
+        "docs/implementation/pi-durio-v1/issue-17/terminal-r1-first-attempt.json"
       ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-17.json",
       "branch": "codex/pi-durio-v1-issue-17",
@@ -400,7 +402,8 @@
       "handoff_tip": "8eeb3b35e831fad276ce3dd884e17a23799c5981",
       "candidate_manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/manifest.json",
       "candidate_manifest_sha256": "38742960c17164ed1c66970c67e5ff60ce73cccd7556828fae28e092b15d7474",
-      "native_acceptance": "NOT RUN; frozen candidate r1, first-stage operator request pending"
+      "native_acceptance": "First attempt incomplete: observed wait, one follow-up due Enter-before-CtrlX; failed attempt preserved; split retry requested",
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/17#issuecomment-6083615308"
     },
     "18": {
       "number": 18,
@@ -711,7 +714,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "fc01fc4fc21f92a65fa11f9677f9686008ba9fc7",
+  "integration_tip": "0557d08c8a6dda6d96a08c0ef77948a7e91bbc5b",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -721,16 +724,12 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T15:06:47.167355+00:00",
+  "updated_at": "2026-10-09T15:16:27.618678+00:00",
   "last_remote_readback": {
-    "at": "2026-10-09T14:57:02.573039+00:00",
-    "prHead": "1558066370085ca63ab7b6eede8e2cd8713d1e5d",
-    "bodyExact": true,
+    "headRefOid": "0557d08c8a6dda6d96a08c0ef77948a7e91bbc5b",
     "isDraft": true,
     "state": "OPEN",
-    "closingIssuesReferences": [],
-    "commentUrl": "https://github.com/nineofoursyrup/pi-durio/issues/18#issuecomment-6083399178",
-    "commentBodyExact": true
+    "closingIssuesReferences": []
   },
   "shared_interfaces": {
     "accepted_task_queue": {
