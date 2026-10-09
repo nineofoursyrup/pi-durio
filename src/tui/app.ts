@@ -9,7 +9,7 @@ import { realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiAltScreen, VStack, matchesKey, isKeyRelease, isKeyRepeat, stripTerminalSequences, truncateToWidth, wrapTextWithAnsi, type Component, type AutocompleteProvider, type Terminal } from '@earendil-works/pi-tui';
-import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, checkRecovery, recoverRun, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
+import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, inspectRecovery, checkRecovery, recoverRun, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
 import type { QueueItemFact } from '../evidence.js';
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
@@ -295,7 +295,7 @@ export class ReadOnlyTui {
     else if(command==='/copy')void this.copyOutput();
     else if(command==='/stop')this.stop();
     else if(command==='/queue'){this.loadQueue();this.openPanel('queue');}
-    else if(command==='/recover'||command.startsWith('/recover ')){const run=command.slice(9).trim()||this.runId;if(run)void this.openRecovery(run);else this.notice='暂无需核对的 run';}
+    else if(command==='/recover'||command.startsWith('/recover ')){const [requested,offset,snapshotId]=command.slice(9).trim().split(/\s+/);const run=requested||this.runId;if(run)void this.openRecovery(run,offset?Number(offset):undefined,snapshotId);else this.notice='暂无需核对的 run';}
     else if(command==='/follow-up'){const draft=this.editor.getExpandedText();if(draft)this.submit(draft,true);else this.notice='输入后按 Ctrl+X → Enter，明确排到下一任务';}
     else if(command.startsWith('/withdraw '))void this.queueDecision(command.slice(10).trim(),'withdraw');
     else if(command.startsWith('/reattach '))void this.queueDecision(command.slice(10).trim(),'reattach');
@@ -405,18 +405,20 @@ export class ReadOnlyTui {
     }catch(error){this.notice=`队列决定未执行：${safe(String(error))}`;}
     finally{this.loadQueue();this.tui.requestRender();}
   }
-  private async openRecovery(runId:string) {
+  private async openRecovery(runId:string,offset?:number,snapshotId?:string) {
     if(this.phase!=='idle'){this.notice=`正在执行 ${this.control.target()?.runId??this.runId}；先停止或退出后核对`;this.tui.requestRender();return;}
     this.viewingRecovery=true;this.runId=runId;
-    const inspect=()=>checkRecovery({dataRoot:this.options.dataRoot,runId,authorization:this.authorization()});
+    const inspect=()=>offset!==undefined?inspectRecovery({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),page:{offset,snapshotId}}):checkRecovery({dataRoot:this.options.dataRoot,runId,authorization:this.authorization()});
     try {this.recovery=await (this.widths?this.widths.withoutQueries(inspect):inspect());if(this.stopped||this.exiting)return;this.pendingRefresh=true;this.refresh();this.openPanel('recovery');}
     catch(error){this.notice=`恢复核对受阻：${safe(String(error))}`;this.tui.requestRender();}
   }
   private recoveryText() {
     const report=this.recovery;if(!report)return '恢复事实暂不可取得；关闭面板不解除限制';
     const original=report.original as Partial<RunResult>;
+    const details=report.details;const next=details?Object.values({tools:details.tools,compactions:details.compactions,reasons:details.reasons,pending:details.pending,unknown:details.unknownModelAttempts}).find(detail=>detail.next!==null)?.next:undefined;
+    const pageText=details?`全部工具 ${details.tools.count}，未处置未知 ${details.unresolvedTools}；本页起点 ${details.tools.offset}\nn 下一页 / p 上一页；${next!==undefined?`Esc 后 /recover ${report.runId} ${next} ${report.snapshotId}`:'已到最后一页'}\n本页决定模板仅包含可见工具；继续前仍核对全部未知。`:'';
     const template={id:'choose-a-new-decision-id',snapshotId:report.snapshotId,action:'continue',acceptAdditionalModelAttempts:true,resolutions:report.tools.filter(tool=>tool.fact==='unknown'&&!tool.resolution).map(tool=>({taskId:tool.taskId,choice:'CHOOSE retry/skip/completed',reason:'提供依据'}))};
-    return `恢复核对 · ${report.status}\n工作 ${report.runId}\n原状态 ${original.status??'unknown'}；清理 ${original.cleanup??'unknown'}\n最后确认：${report.tools.filter(tool=>tool.fact==='committed').map(tool=>`tool ${tool.taskId}`).join(', ')||'无已确认工具结果'}\n未知模型 attempts：${report.unknownModelAttempts.length}\n${report.tools.map(tool=>`tool ${tool.taskId} ${tool.tool}: ${tool.fact}，证据 #${tool.evidence.join(',')||'缺失'}`).join('\n')}\n原因：${report.reasons.join('; ')||'需明确决定'}\n影响：${report.needsInput?.risks.join('\n')||'原事实保留，不重计量'}\n动作：${report.options.join(', ')}\ne 明确结束旧工作：不回滚、不宣称外部副作用未发生\nc 继续：仅全部工具无需未知处置时；可能新增模型费用\n有未知时 Esc 后 /decide ${JSON.stringify(template)}\n恢复与 headless 使用同一 snapshot/decision；Esc 仅返回查看`;
+    return `恢复核对 · ${report.status}\n工作 ${report.runId}\n原状态 ${original.status??'unknown'}；清理 ${original.cleanup??'unknown'}\n最后确认：${report.tools.filter(tool=>tool.fact==='committed').map(tool=>`tool ${tool.taskId}`).join(', ')||'无已确认工具结果'}\n未知模型 attempts：${details?.unknownModelAttempts.count??report.unknownModelAttempts.length}\n${pageText}\n${report.tools.map(tool=>`tool ${tool.taskId} ${tool.tool}: ${tool.fact}，证据 #${tool.evidence.join(',')||'缺失'}`).join('\n')}\n原因：${report.reasons.join('; ')||'需明确决定'}\n影响：${report.needsInput?.risks.join('\n')||'原事实保留，不重计量'}\n动作：${report.options.join(', ')}\ne 明确结束旧工作：不回滚、不宣称外部副作用未发生\nc 继续：仅全部工具无需未知处置时；可能新增模型费用\n有未知时 Esc 后 /decide ${JSON.stringify(template)}\n恢复与 headless 使用同一 snapshot/decision；Esc 仅返回查看`;
   }
   private async recoveryDecision(decision:RecoveryDecision) {
     if(this.phase!=='idle'||!this.recovery){this.notice='先 /recover 获取当前核对事实';return;}
@@ -624,8 +626,14 @@ export class ReadOnlyTui {
       if(data==='n'&&this.queueNext!==null){this.queuePrevious.push(this.queueAfter);this.queueAfter=this.queueNext;panel.offset=0;panel.line=0;this.loadQueue();}
       if(data==='p'&&this.queuePrevious.length){this.queueAfter=this.queuePrevious.pop();panel.offset=0;panel.line=0;this.loadQueue();}
     }
+    if(panel.kind==='recovery'&&this.recovery?.details&&(data==='n'||data==='p')) {
+      const details=this.recovery.details;
+      const next=[details.tools,details.compactions,details.reasons,details.pending,details.unknownModelAttempts].find(detail=>detail.next!==null)?.next;
+      if(data==='p'&&details.tools.offset>0)void this.openRecovery(this.recovery.runId,Math.max(0,details.tools.offset-32),this.recovery.snapshotId);
+      if(data==='n'&&next!==undefined&&next!==null)void this.openRecovery(this.recovery.runId,next,this.recovery.snapshotId);
+    }
     if(panel.kind==='recovery'&&data==='e'&&this.recovery?.options.includes('end'))void this.recoveryDecision({id:randomUUID(),snapshotId:this.recovery.snapshotId,action:'end'});
-    if(panel.kind==='recovery'&&data==='c'&&this.recovery?.options.includes('continue')&&!this.recovery.tools.some(tool=>tool.fact==='unknown'&&!tool.resolution))void this.recoveryDecision({id:randomUUID(),snapshotId:this.recovery.snapshotId,action:'continue',acceptAdditionalModelAttempts:true});
+    if(panel.kind==='recovery'&&data==='c'&&this.recovery?.options.includes('continue')&&(this.recovery.details?this.recovery.details.unresolvedTools===0:!this.recovery.tools.some(tool=>tool.fact==='unknown'&&!tool.resolution)))void this.recoveryDecision({id:randomUUID(),snapshotId:this.recovery.snapshotId,action:'continue',acceptAdditionalModelAttempts:true});
     if(panel.kind==='detail') {
       if(data==='n'&&panel.next!==null){panel.previous.push(panel.offset);panel.offset=panel.next;panel.line=0;this.loadDetail();}
       if(data==='p'){panel.offset=panel.previous.pop()??0;panel.line=0;this.loadDetail();}

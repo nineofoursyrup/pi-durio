@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { Evidence, openHostReadonly, readObject, readQueue, type BlobRef } from './evidence.js';
 import { records, decode, type EvidenceReference } from './history.js';
 import { iterateFixedDependencies, unfixedEvidence } from './fixed-evidence.js';
-import { inspectSession } from './preflight.js';
+import { forEachDirectory, inspectStorageState } from './storage-projection.js';
 import type { OwnerLease } from './ownership.js';
 import { exists, treeFiles, hashFile, type StoredFile } from './storage-files.js';
 
@@ -88,10 +88,11 @@ export async function retentionState(root:string,owner:OwnerLease,options:{skipS
     after=page.next??undefined;
   }while(after!==undefined);
   const units:StorageUnit[]=[];
-  const sessionDirs=await readdir(join(root,'sessions'),{withFileTypes:true}).catch((error:NodeJS.ErrnoException)=>{if(error.code==='ENOENT')return [];throw error;});
-  for(const dir of sessionDirs) {
-    if(!dir.isDirectory()){blockers.push('unexpected-session-entry');continue;}
-    if(options.skipSessions?.has(dir.name))continue;
+  let sessionCount=0,projectionBytes=0;
+  await forEachDirectory(join(root,'sessions'),async dir=>{
+    if(++sessionCount>50000)throw Error('RETENTION_SESSION_LIMIT');
+    if(!dir.isDirectory){blockers.push('unexpected-session-entry');return;}
+    if(options.skipSessions?.has(dir.name))return;
     const id=`session:${dir.name}`,runIds=[...runSessions].filter(([,session])=>session===dir.name).map(([run])=>run);
     const protectedBy:string[]=[],sessionPath=join(root,'sessions',dir.name);
     if(!runIds.length)protectedBy.push('session-without-host-identity');
@@ -101,15 +102,17 @@ export async function retentionState(root:string,owner:OwnerLease,options:{skipS
       files=(await treeFiles(sessionPath)).map(file=>({...file,path:`sessions/${dir.name}/${file.path}`}));
       if(files.some(file=>!['durable.sqlite','durable.sqlite-wal','durable.sqlite-shm'].includes(file.path.split('/').at(-1)!)))protectedBy.push('unknown-session-file');
       if(!protectedBy.includes('unresolved-session-owner')) {
-        const report=await inspectSession(join(sessionPath,'durable.sqlite'),owner);
+        const report=await inspectStorageState(join(sessionPath,'durable.sqlite'),owner);
         if(!report.conversations.length)protectedBy.push('unknown-or-empty-session-format');
-        inspection={conversations:report.conversations.map(c=>c.id),tasks:report.tasks.length,submissions:report.submissions.length,pending:report.pending.length,sourceFiles:report.sourceFiles};
-        if(report.pending.length)protectedBy.push('durable-pending-in-whole-session');
+        inspection={conversations:report.conversations,tasks:report.taskCount,submissions:report.submissionCount,pending:report.pendingCount,sourceFiles:report.sourceFiles};
+        if(report.pendingCount)protectedBy.push('durable-pending-in-whole-session');
       }
     }catch(error){protectedBy.push(`session-unreadable:${String(error).slice(0,300)}`);}
     for(const run of runIds)for(const reason of protectedBy)addRun(run,reason);
-    units.push({id,kind:'session',bytes:files.reduce((n,f)=>n+f.bytes,0),files,runIds,sources:runIds.flatMap(run=>byRun.get(run)??[]),protectedBy,inspection});
-  }
+    const unit:StorageUnit={id,kind:'session',bytes:files.reduce((n,f)=>n+f.bytes,0),files,runIds,sources:runIds.flatMap(run=>byRun.get(run)??[]),protectedBy,inspection};
+    projectionBytes+=Buffer.byteLength(JSON.stringify(unit));if(projectionBytes>16*1024*1024)throw Error('RETENTION_PROJECTION_LIMIT');
+    units.push(unit);
+  });
   // A dependent unresolved/fixed source protects its explicitly linked evidence scope too.
   const pending=[...protectedRuns.keys()],visited=new Set<string>();
   while(pending.length){const run=pending.shift()!;if(visited.has(run))continue;visited.add(run);

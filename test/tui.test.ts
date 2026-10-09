@@ -312,3 +312,18 @@ test('improve is reachable with explicit limits; report navigation and ordinary 
  key('/older');key('\r');key('/improve {}');key('\r');assert.match(f.screen(),/只读历史\/恢复视图不能发起分析/);assert.equal(listImproveReports(join(f.root,'data')).items.length,1);
  }finally{await f.app.exit();}
 });
+
+test('recovery pages expose all unknown counts and navigate with one snapshot; a partial visible page cannot enable continue', async () => {
+  const { recoveryFixture, uncertainTools } = await import('./fixtures/recovery-projection.js');
+  const f = await recoveryFixture(true); await uncertainTools(f, 40);
+  const terminal = new TestTerminal(), transport = scriptedTransport([]);
+  const app = new ReadOnlyTui({ workspace: f.workspace, dataRoot: f.dataRoot, runId: f.result.runId, draftRoot: join(f.root, 'drafts'), mode: 'offline', transport: transport.fetch, terminal, widthCalibration: false });
+  app.start(); const key = (value: string) => terminal.input(value), screen = () => app.screen().map(stripTerminalSequences).join('\n');
+  try {
+    await until(() => screen().includes('全部工具 40'));
+    assert.match(screen(), /未处置未知 40/); assert.match(screen(), /本页起点 0/);
+    key('n'); await until(() => screen().includes('本页起点 32'));
+    key('c'); await tick(); assert.equal(transport.calls.length, 0); assert.match(screen(), /未处置未知 40/);
+    key('p'); await until(() => screen().includes('本页起点 0'));
+  } finally { await app.exit(); }
+});

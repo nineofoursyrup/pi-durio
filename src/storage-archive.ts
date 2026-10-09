@@ -1,11 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, mkdtemp, rm, realpath, readdir } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, realpath } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { digest } from './evidence.js';
 import { records, decode } from './history.js';
 import { acquireOwner, type OwnerLease } from './ownership.js';
-import { inspectSession } from './preflight.js';
+import { DetailPage } from './detail-page.js';
+import { forEachDirectory, inspectStorageState } from './storage-projection.js';
 import { iterateFixedDependencies } from './fixed-evidence.js';
 import { appendManagement, blobReferences, validateHostFormat } from './retention.js';
 import { compressFile, expandFile, exists, hashFile, treeFiles, syncDir, saveJson, newDestination, publishDirectory, readJson, safeRelative, type StoredFile } from './storage-files.js';
@@ -14,8 +15,7 @@ import type { ManagementFault } from './storage.js';
 interface ArchiveManifest {format:'pi-durio.archive';version:1;scope:'whole-root'|'attachments';sourceRoot:string;createdAt:string;files:StoredFile[];bytes:number;policy:string}
 function excluded(path:string){return path==='owner.json'||path.endsWith('-shm');}
 async function assertNoOwners(root:string) {
-  const sessions=await readdir(join(root,'sessions'),{withFileTypes:true}).catch((e:NodeJS.ErrnoException)=>{if(e.code==='ENOENT')return [];throw e;});
-  for(const entry of sessions)if(!entry.isDirectory()||await exists(join(root,'sessions',entry.name,'owner.json'))||await exists(join(root,'sessions',`${entry.name}.lock`)))throw Error('ARCHIVE_UNRESOLVED_SESSION_OWNER');
+  await forEachDirectory(join(root,'sessions'),async entry=>{if(!entry.isDirectory||await exists(join(root,'sessions',entry.name,'owner.json'))||await exists(join(root,'sessions',`${entry.name}.lock`)))throw Error('ARCHIVE_UNRESOLVED_SESSION_OWNER');});
   if(await exists(join(root,'management-trash'))&&(await treeFiles(join(root,'management-trash'))).length)throw Error('ARCHIVE_INCOMPLETE_CLEANUP');
 }
 async function validateRoot(root:string,owner:OwnerLease) {
@@ -31,13 +31,13 @@ async function validateRoot(root:string,owner:OwnerLease) {
     for(const blob of blobReferences(data)){const actual=await hashFile(join(root,'objects',blob.sha256));if(actual.sha256!==blob.sha256||actual.bytes!==blob.bytes)throw Error('ARCHIVE_DEPENDENCY_CORRUPT');}
   }
   for(const blob of iterateFixedDependencies(root)){const actual=await hashFile(join(root,'objects',blob.sha256));if(actual.sha256!==blob.sha256||actual.bytes!==blob.bytes)throw Error('ARCHIVE_FIXED_CORRUPT');}
-  const sessions=[];
-  for(const entry of await readdir(join(root,'sessions'),{withFileTypes:true}).catch((e:NodeJS.ErrnoException)=>{if(e.code==='ENOENT')return [];throw e;})) {
-    const session=await inspectSession(join(root,'sessions',entry.name,'durable.sqlite'),owner);
-    if(!session.conversations.length)throw Error('UNSUPPORTED_OR_EMPTY_DURABLE_FORMAT');
-    sessions.push({sessionId:entry.name,conversations:session.conversations.map(c=>c.id),tasks:session.tasks.length,submissions:session.submissions.length,pending:session.pending.length});
-  }
-  return {hostRecords:count,declaredUnavailable,sessions,execution:'Readability only. No Harness opened; pending execution still requires original-version and authorization recovery checks.'};
+  const sessions=new DetailPage<{sessionId:string;conversations:number[];conversationCount:number;conversationIdSha256:string;tasks:number;submissions:number;pending:number}>();
+  await forEachDirectory(join(root,'sessions'),async entry=>{
+    const session=await inspectStorageState(join(root,'sessions',entry.name,'durable.sqlite'),owner,{conversationLimit:32,failOnLimit:false});
+    if(!session.conversationCount)throw Error('UNSUPPORTED_OR_EMPTY_DURABLE_FORMAT');
+    sessions.add({sessionId:entry.name,conversations:session.conversations,conversationCount:session.conversationCount,conversationIdSha256:session.conversationIdSha256,tasks:session.taskCount,submissions:session.submissionCount,pending:session.pendingCount});
+  });
+  return {hostRecords:count,declaredUnavailable,sessions:sessions.items,sessionSummary:sessions.summary(),detailSource:'Every session is retained in the verified manifest and restored public Storage; sessions is a bounded display page',execution:'Readability only. No Harness opened; pending execution still requires original-version and authorization recovery checks.'};
 }
 async function readManifest(archive:string):Promise<{manifest:ArchiveManifest;identity:string}> {
   const envelope=await readJson(join(archive,'manifest.json')),manifest=envelope.manifest as ArchiveManifest;

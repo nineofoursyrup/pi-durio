@@ -8,7 +8,7 @@ import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context';
 import { openNodeSqliteStorage } from '@earendil-works/pi-durable/storage/sqlite/node';
 import { digest } from './evidence.js';
 import { records, decode, watermark } from './history.js';
-import type { Cursor, TaskRecord, EntryRecord, SubmissionRecord, ConversationRecord, JsonObject, LiveState } from '@earendil-works/pi-durable';
+import type { Storage, Cursor } from '@earendil-works/pi-durable';
 import type { OwnerLease } from './ownership.js';
 import { sessionRemovalVerified } from './storage-disposition.js';
 
@@ -22,7 +22,7 @@ async function hashFile(path: string) {
  * Copy a quiescent main+WAL pair, verify source/copy bytes, then touch ONLY the copy through SQLite/public storage.
  * This is not a live-backup API; active/uncertain writers must be blocked before calling it.
  */
-async function inspectSnapshot<T>(path: string, owner: OwnerLease, inspect: (storage: Awaited<ReturnType<typeof openNodeSqliteStorage>>) => Promise<T>) {
+export async function inspectSnapshot<T>(path: string, owner: OwnerLease, inspect: (storage: Omit<Storage, 'commit' | 'mintId' | 'close'>) => Promise<T>) {
   owner.assertHeld();
   path = await realpath(path);
   const rel = relative(owner.path, path);
@@ -55,63 +55,6 @@ async function inspectSnapshot<T>(path: string, owner: OwnerLease, inspect: (sto
       return { source: path, method: 'owner-fenced-quiescent-main-plus-wal-copy/public-storage-scan', snapshotSha256, sourceFiles, ...details };
     } finally { await storage.close(BACKGROUND_CONTEXT); }
   } finally { await rm(dir, { recursive: true, force: true }); }
-}
-
-/** Full inspection remains available to recovery and storage management consumers. */
-export async function inspectSession(path: string, owner: OwnerLease) {
-  return inspectSnapshot(path, owner, async storage => {
-      const pending: { kind: string; id: number; status: string }[] = [];
-      const tasks: TaskRecord<any, any, any>[] = [];
-      const submissions: SubmissionRecord[] = [];
-      const entries: EntryRecord[] = [];
-      const conversations: ConversationRecord[] = [];
-      const agents: { conversationId: number; value: JsonObject }[] = [];
-      const live: { conversationId: number; value: LiveState }[] = [];
-      let cursor: Cursor | undefined;
-      do {
-        const page = await storage.scanTasks({}, 100, cursor, BACKGROUND_CONTEXT);
-        for (const task of page.items) {
-          tasks.push(task);
-          if (task.state.status !== 'terminal') pending.push({ kind: task.kind, id: task.id, status: task.state.status });
-        }
-        cursor = page.next;
-      } while (cursor);
-      do {
-        const page = await storage.scanSubmissions({}, 100, cursor, BACKGROUND_CONTEXT);
-        for (const item of page.items) {
-          submissions.push(item);
-          if (item.status === 'queued' || item.status === 'placed') pending.push({ kind: 'submission', id: item.id, status: item.status });
-        }
-        cursor = page.next;
-      } while (cursor);
-      const usage = [];
-      do {
-        const page = await storage.scanConversations({}, 100, cursor, BACKGROUND_CONTEXT);
-        for (const conversation of page.items) {
-          conversations.push(conversation);
-          let entryCursor: Cursor | undefined;
-          do {
-            const entriesPage = await storage.scanEntries({ conversationId: conversation.id }, 100, entryCursor, BACKGROUND_CONTEXT);
-            entries.push(...entriesPage.items);
-            entryCursor = entriesPage.next;
-          } while (entryCursor);
-          const agent = await storage.findDocument({ kind: 'pi.agent', scope: { kind: 'conversation', conversationId: conversation.id } }, 'current', BACKGROUND_CONTEXT);
-          if (agent) {
-            const content = await storage.document(agent.id, 'current', BACKGROUND_CONTEXT);
-            if (content) agents.push({ conversationId: conversation.id, value: content.value });
-          }
-          const run = await storage.findDocument({ kind: 'pi.live', scope: {kind:'conversation',conversationId:conversation.id} },'current',BACKGROUND_CONTEXT);
-          if (run) {const content=await storage.document(run.id,'current',BACKGROUND_CONTEXT);if(content)live.push({conversationId:conversation.id,value:content.value as LiveState});}
-          const doc = await storage.findDocument({ kind: 'pi.usage', scope: { kind: 'conversation', conversationId: conversation.id } }, 'current', BACKGROUND_CONTEXT);
-          if (doc) {
-            const content = await storage.document(doc.id, 'current', BACKGROUND_CONTEXT);
-            if (content) usage.push({ conversationId: conversation.id, documentId: doc.id, value: content.value });
-          }
-        }
-        cursor = page.next;
-      } while (cursor);
-      return { pending, usage, tasks, submissions, entries, conversations, agents, live };
-  });
 }
 
 /** Admission needs every task/submission state, not their history or message bodies.

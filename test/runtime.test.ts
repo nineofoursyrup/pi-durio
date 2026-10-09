@@ -159,7 +159,7 @@ test('second process using an alias is rejected before any writable storage open
 
 test('read-only snapshot inspection never changes original DB and separate runs never repeat earlier usage', async () => {
   const { stat } = await import('node:fs/promises');
-  const { inspectSession } = await import('../src/preflight.js');
+  const { inspectClosedSession } = await import('../src/storage-projection.js');
   const dataRoot = await mkdtemp(join(tmpdir(), 'durio-inspect-'));
   const transport = demoTransport();
   const options = { dataRoot, workspace: resolve('test/fixtures/project'), input: 'Read README.md', mode: 'offline' as const, transport: transport.fetch };
@@ -169,10 +169,10 @@ test('read-only snapshot inspection never changes original DB and separate runs 
   const mtime = (await stat(path)).mtimeMs;
   const { acquireOwner } = await import('../src/ownership.js');
   const owner = await acquireOwner(dataRoot, error => { throw error; });
-  const snapshot = await inspectSession(path, owner);
+  const snapshot = await inspectClosedSession(path, owner, () => {});
   await owner.release();
   assert.equal(snapshot.pending.length, 0);
-  assert.equal(snapshot.usage.length, 1);
+  assert.equal(snapshot.usageCount, 1);
   assert.deepEqual(await readFile(path), bytes);
   assert.equal((await stat(path)).mtimeMs, mtime);
   const second = await runReadTask(options);
@@ -206,7 +206,7 @@ test('model tool requests cannot acquire write capabilities', async () => {
 test('show and preflight do not create or change source files, including SQLite sidecars', async () => {
   const { readdir, stat } = await import('node:fs/promises');
   const { createHash } = await import('node:crypto');
-  const { inspectSession } = await import('../src/preflight.js');
+  const { inspectClosedSession } = await import('../src/storage-projection.js');
   const { acquireOwner } = await import('../src/ownership.js');
   const dataRoot = await mkdtemp(join(tmpdir(), 'durio-readonly-tree-'));
   const transport = demoTransport();
@@ -224,7 +224,7 @@ test('show and preflight do not create or change source files, including SQLite 
   const before = await tree(dataRoot);
   await readRun(dataRoot, result.runId);
   const owner = await acquireOwner(dataRoot, error => { throw error; });
-  try { await inspectSession(join(dataRoot, 'sessions', result.sessionId, 'durable.sqlite'), owner); } finally { await owner.release(); }
+  try { await inspectClosedSession(join(dataRoot, 'sessions', result.sessionId, 'durable.sqlite'), owner, () => {}); } finally { await owner.release(); }
   assert.deepEqual(await tree(dataRoot), before);
   assert.equal(transport.calls.length, 2);
 });
