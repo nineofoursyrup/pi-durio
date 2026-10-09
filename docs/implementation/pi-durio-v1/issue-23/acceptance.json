@@ -1,0 +1,318 @@
+{
+  "ticket": 23,
+  "state": "IMPLEMENTED_AND_LOCALLY_VERIFIED_FOR_COORDINATOR_REVIEW",
+  "at": "2026-10-09T17:41:19.754921+00:00",
+  "spec": "PI-DURIO-V1-SPEC-r1 I1 I2 I3 E10 T4 T5; analysis/report only",
+  "productCommit": "401a1b533b5242c0338ffc611f3e4241417e610f",
+  "productTree": "31a3d40bc546f775be2dec0fa9cdb8493c3e394c",
+  "integrationBase": "e07a2d547eb12e7fbabdf359094a451def0c3147",
+  "branch": "codex/pi-durio-v1-issue-23",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-23",
+  "implementationCommits": [
+    "f4612be",
+    "c26298f",
+    "fadc2fa",
+    "8a187fd",
+    "401a1b5"
+  ],
+  "checks": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/21-full-check.log",
+      "sha256": "4b3042a96f416187cdf5d8133f5e1e439558bcfebdf76fa861ef6636fb4e3a92",
+      "pass": 141,
+      "fail": 0,
+      "applicability": "Full check before issue22 integration; unchanged behavior reused, later changes verified below"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/28-final-improve-tests.log",
+      "sha256": "356fe3e06d328c8ca188a58fbf7ea7871a5eb766a998f551018ba3be61960199",
+      "pass": 7,
+      "fail": 0,
+      "applicability": "Improvement runtime including extra JS option isolation, stop intent, budgets and readonly behavior"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/30-merged-focused-tests.log",
+      "sha256": "4a7c7054d4fdfd7d4a61df744e4ef9abdf245baa90d159c477397d6611cbafe1",
+      "pass": 22,
+      "fail": 0,
+      "applicability": "After issue22 merge: improve plus eval and comparison; required source/build composition"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/31-merged-tui-test.log",
+      "sha256": "2953656426c00f88de5b8357be7c439e389139599fdf7568175c59425089abdf",
+      "pass": 1,
+      "fail": 0,
+      "applicability": "Actual TUI improve command routing and readonly report navigation"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/36-eval-manifest-green.log",
+      "sha256": "5f89bd10ca8e4d0bbf32b404bafdd18ae1c66e384b4959121274ac8b991af9e3",
+      "pass": 1,
+      "fail": 0,
+      "applicability": "Fixed guest runtime carries source-build manifest and excludes host runner; materialize roundtrip"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/38-real-output-green.log",
+      "sha256": "b5a0f56be919bc36b1a140695a36047ae76e0932718cbb67c35ca8eb7650704d",
+      "pass": 1,
+      "fail": 0,
+      "applicability": "Real shell output, scoped summary and conservative derived withholding; source/candidate contract"
+    }
+  ],
+  "build": {
+    "scriptSha256": "66f2fbd07167bc833a4cc1f402d40754fd9d75871ce8b9a167964de7f2716cdc",
+    "reproducibleAndStaleRemovalEvidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r1/build-behavior.json",
+    "scope": "same unchanged build script, fixed pre/post inputs and actual compiler, no timestamp/absolute path; final identity rebound separately",
+    "finalSourceBuild": {
+      "path": "dist/execution/source-build.json",
+      "sha256": "15b31d2bf7a28dc125f98445d8d7b543991c147d7ff849255278752f7a710335",
+      "inputs": 108,
+      "compiler": 132,
+      "outputs": 153
+    }
+  },
+  "identity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/candidate-identity.json",
+    "sha256": "b178274882cddfe1ab6ef45099c4e445fc2d998e4ab4e7b0b90f6bb18b6adc91",
+    "sourceFiles": 109,
+    "compiledFiles": 214,
+    "packageFiles": 12813,
+    "installedEntries": 12817,
+    "packageSha256": "6c99898e3ada50b1a2982e26410fc3fd287d38c09f9933a6ff43e80c34ed3cf0",
+    "archive": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/source.tar.gz",
+      "bytes": 2200751,
+      "sha256": "07215ec3be931b93c0f0c9887b9810c9b231007d47b268e4e01a0a277b26dc21"
+    },
+    "packageFileBytesExactMatch": true,
+    "declaredNpmBinLinks": [
+      {
+        "path": "node_modules/.bin/anthropic-ai-sdk",
+        "type": "symlink",
+        "target": "../@anthropic-ai/sdk/bin/cli"
+      },
+      {
+        "path": "node_modules/.bin/esbuild",
+        "type": "symlink",
+        "target": "../esbuild/bin/esbuild"
+      },
+      {
+        "path": "node_modules/.bin/marked",
+        "type": "symlink",
+        "target": "../marked/bin/marked.js"
+      },
+      {
+        "path": "node_modules/.bin/pi-ai",
+        "type": "symlink",
+        "target": "../@earendil-works/pi-ai/dist/cli.js"
+      }
+    ],
+    "installedCompiledMatch": true
+  },
+  "installedDemo": {
+    "status": "PASS",
+    "method": "Independently installed public exports and cold CLI; actual public durable loop with controlled offline transport",
+    "useful": {
+      "runId": "b8ba0656-f9a0-41f1-8dae-143fa55a7d6e",
+      "revision": "05f29562d78abddf6890caadd7d18426f2d6c9fa2a32bc06b4e8d88606b834fb",
+      "candidates": 1,
+      "selected": [],
+      "selfSource": "verified"
+    },
+    "zeroCandidates": 0,
+    "mismatchState": "incomplete",
+    "queue": [
+      {
+        "stop": false,
+        "dataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/data",
+        "originalTarget": {
+          "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/project",
+          "sessionId": "fcdfe060-a46a-4d4a-99ee-db2cf92899af",
+          "taskId": "eda2c0ba-230c-4845-89db-12aa7d255375",
+          "runId": "dbd6cf0a-472c-4051-8d38-c719e3e01da8"
+        },
+        "receipt": "applied",
+        "dispatches": 2
+      },
+      {
+        "stop": true,
+        "dataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/stop-data",
+        "originalTarget": {
+          "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/project",
+          "sessionId": "d13f2863-cc1d-4d3e-b44d-2710707fa37f",
+          "taskId": "5fe8b633-9d62-49c0-9be8-6432a12cb340",
+          "runId": "5d2ee144-c71b-4164-8de9-80862272b88b"
+        },
+        "receipt": "frozen",
+        "dispatches": 0
+      }
+    ],
+    "budget": [
+      {
+        "which": "requests",
+        "dataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/budget-requests",
+        "state": "incomplete",
+        "reason": "BUDGET_REQUEST_LIMIT",
+        "dispatches": 1
+      },
+      {
+        "which": "tokens",
+        "dataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/budget-tokens",
+        "state": "incomplete",
+        "reason": "BUDGET_TOKEN_LIMIT",
+        "dispatches": 1
+      },
+      {
+        "which": "unknown",
+        "dataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/budget-unknown",
+        "state": "incomplete",
+        "reason": "BUDGET_UNKNOWN_USAGE",
+        "dispatches": 1
+      },
+      {
+        "which": "time",
+        "dataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/budget-time",
+        "state": "incomplete",
+        "reason": "BUDGET_DEADLINE",
+        "dispatches": 1
+      }
+    ],
+    "cliAnalysis": "complete",
+    "readonlyUnchanged": true,
+    "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/report.json",
+    "reportSha256": "63647fc2ae473ba6d0448483cfd5a2f92414db960664ccf93f57d7ac9fa65c55",
+    "payloads": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/actual-analysis-payloads.json",
+    "readonlyInventory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r4/installed-demo/readonly-inventory.json"
+  },
+  "actualRestrictedTrial": {
+    "verification": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r3/restricted-trial/verification.json",
+    "verificationSha256": "4dc7a66bb6c6756a7f9239c2cfa498ac72192d145ab60e435d4d7e03bfb3d5c3",
+    "result": {
+      "status": "PASS",
+      "kind": "actual fresh VM trial of independently installed product; explicit controlled provider",
+      "product": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r3/install/node_modules/pi-durio",
+      "linux": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r3/linux-runtime",
+      "planId": "issue23-source-identity-runtime",
+      "fixedBuild": {
+        "path": "dist/execution/source-build.json",
+        "ref": {
+          "sha256": "81c968cd26faa128f40e32c2f3bd8d550ed01e684616130667b48b0e492ce571",
+          "bytes": 66400
+        },
+        "mode": 420
+      },
+      "counts": {
+        "planned": 1,
+        "started": 1,
+        "completed": 1,
+        "gradable": 1,
+        "passed": 1,
+        "passRate": 1,
+        "completionRate": 1,
+        "coverageRate": 1
+      },
+      "requests": 4,
+      "knownTokens": 56,
+      "runId": "e6752fc6-6b1c-49f6-a6b1-0bca7e69f6c4",
+      "sessionId": "8f9f2e79-57c4-4c07-936f-0ae1cccfa54c",
+      "runtimeVm": "durio-i12-3aedd57f-fdfc-482b-82dc-9f0ef7581878",
+      "graderVm": "durio-i12-add71183-6d00-41da-b553-f26cbba7e193",
+      "allTerminated": true,
+      "graderSourcesInGuest": false,
+      "reusedOutcome": false,
+      "paidCalls": 0
+    },
+    "finalPackageApplicability": {
+      "status": "PASS",
+      "r3Product": "8a187fdc9e5c085c20d99d5f3ec964e31bc5696f",
+      "r4Product": "401a1b533b5242c0338ffc611f3e4241417e610f",
+      "installedChangedFiles": [
+        "dist/execution/source-build.json"
+      ],
+      "sourceBuildChangedInputs": [
+        {
+          "before": {
+            "path": "scripts/demo-improve.mjs",
+            "sha256": "8223a81e600ffc00314bbd807a7cb666a3446bd371056f513b117dbbb775c757",
+            "bytes": 13866
+          },
+          "after": {
+            "path": "scripts/demo-improve.mjs",
+            "sha256": "b0f6f2a0ff9e5ef14d00f37dd1f389b44f0541974ca91e135c4a9000505dc541",
+            "bytes": 14222
+          }
+        }
+      ],
+      "compiledOutputsByteIdentical": true,
+      "actualCompilerByteIdentical": true,
+      "scope": "r3 fresh restricted trial remains applicable to unchanged runtime, artifact, guest, eval/store and isolation code; r4 only isolates deliberately interrupted demo data roots; source-build identity itself is rebound by final installed improve self-source verification"
+    },
+    "previousFreshTrialAlsoRetained": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r2/restricted-trial/verification.json",
+    "linuxDependencies": "12631 files each verified before/after copy against accepted issue22 fixed actual-trial manifest; no previous runtime outcome reused"
+  },
+  "firstFailures": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/01-first-red.log",
+      "kind": "public API absent at first RED"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/03-zero-red.log",
+      "kind": "restricted runtime lacked valid no-ExecutionEnv path"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/08-source-test.log",
+      "kind": "canonical macOS /var path test oracle corrected"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/10-queue-red.log",
+      "kind": "management handler absent"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/14-budget-red.log",
+      "kind": "provider gate reason lost behind unanswered task"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/17-budget-green.log",
+      "kind": "timeout reason lost behind transport cancellation"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/23-hardening-improve.log",
+      "kind": "test oracle expected undefined instead of actual unattached-control null"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/25-demo-syntax-first-failure.log",
+      "kind": "initial demo function closing brace"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/checks/34-eval-manifest-first-failure.log",
+      "kind": "fixed eval guest omitted newly required source-build execution manifest"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r2/identity-check.log",
+      "kind": "identity helper had not accounted for npm generated declared bin links; all package bytes already matched"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r2/installed-demo.log",
+      "kind": "summary omitted real tool.output and only listed empty public tool.result; fixed bounded real-source listing"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/r3/installed-demo.log",
+      "kind": "intentional stopped pending session correctly blocks cold analysis; demo now isolates interruption stores without changing recovery fence"
+    }
+  ],
+  "limitations": {
+    "realProvider": "NOT RUN; controlled fixtures prove mechanics only, true generated candidate/execution loop belongs to issue30",
+    "nativeTerminal": "NOT RUN; existing component routing is not native Terminal acceptance; aggregate issue31",
+    "userDailyAcceptance": "NOT RUN; issue32",
+    "selectionExecution": "No selection, persistent suppression, candidate mutation, validation execution, writeback or activation in issue23; issues24-26",
+    "redaction": "Conservative known-pattern detector, not universal secret detection; raw chunks have incomplete boundary context and remain withheld",
+    "semanticClaims": "Host checks schema/acquired references/declared scope; model factual conclusions and proposed benefits remain unverified",
+    "sourceProvenance": "Local source/compiler/build content correspondence, not remote provenance or hermetic-build attestation"
+  },
+  "model": {
+    "requested": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "actualBackendIdentity": "not attestable through available tools"
+  },
+  "authority": "Local implementation, tests, necessary dependencies, commits and merge latest integration only. No push, remote issue mutation, main merge, release, closeout or paid provider calls."
+}
