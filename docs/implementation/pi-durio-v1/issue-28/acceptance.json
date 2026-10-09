@@ -1,0 +1,196 @@
+{
+  "ticket": 28,
+  "status": "Applicable local acceptance PASS; ready for coordinator review and serial integration",
+  "productCommit": "fa84c81f8a1b4b149bb09e0b81ad21b2de809212",
+  "productTree": "8f7a30b66e66829b1b6e1c7826ad261f299b6d01",
+  "integrationBase": "3316841271c0181425795a26de51474bdbfaa37b",
+  "metadataOnly": "This document is appended after the frozen r3 product/package. It does not change product sources or replace the original package/source archive.",
+  "candidateIdentity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/candidate-r3.json",
+    "sha256": "fb595e287c6fe00ad884e05ed5a3234bdf798c544a0ffaf1f84afe230240ee7c"
+  },
+  "sourceArchive": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/source-r3.tar.gz",
+    "sha256": "a283af247ed177da697949528b0776165785a499ffe46548484b0707c3fa19e9"
+  },
+  "package": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/package-r3/pi-durio-0.1.0.tgz",
+    "sha256": "6b27df32f5ce335abb1c8abea0eb3093e52820c82514e85af6fe06cd524ec2ba",
+    "npmSha1": "c55a7e2fd2f854d8b2d6c8917b147a5e8e452580",
+    "integrity": "sha512-adWp2ZiLUGOkXc70ra7SzEbX9ZLMicTC2jzkbbzko069hIY8dAFSzGidZtZFB9PFnegmGVtgFKLple94b58Wcg=="
+  },
+  "installation": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/install-r3/node_modules/pi-durio",
+    "packageJsonSha256": "d22043c6a2be45ac40012d896f0d6157c05652fa1bf720de03e2d141989c4829",
+    "sourceBuildSha256": "1f026edb04ae4a596002f8a397d2e2f5b6a1ac1bbc0102332c98d8ade7758a53",
+    "verifiedPackageEntries": 12849,
+    "inventorySha256": "d9e6c7a9177032f03f282eb6a126fe0953340a248d16a9f5124a3866c920a274",
+    "npmGeneratedSymlinks": [
+      {
+        "path": "node_modules/.bin/marked",
+        "generatedSymlink": "../marked/bin/marked.js",
+        "targetSha256": "dc015672ddc613210a6fae6ab123b9295a670a4e7044a8170b41ccf4d8f5af06"
+      },
+      {
+        "path": "node_modules/.bin/pi-ai",
+        "generatedSymlink": "../@earendil-works/pi-ai/dist/cli.js",
+        "targetSha256": "15efe3d849331391ced3f38e55f53609a7952e8359229c8b65c1172e8e9608a5"
+      },
+      {
+        "path": "node_modules/.bin/esbuild",
+        "generatedSymlink": "../esbuild/bin/esbuild",
+        "targetSha256": "183d6ead2dbc3af51aec767d5395f86fe54fbbc2d2aa8e54feb4e31d76a62f7e"
+      },
+      {
+        "path": "node_modules/.bin/anthropic-ai-sdk",
+        "generatedSymlink": "../@anthropic-ai/sdk/bin/cli",
+        "targetSha256": "622a4596e0f48c53dcc84ce83e6cb5b2be384ab847a778ee5ece70d5a95ad19c"
+      }
+    ]
+  },
+  "acceptance": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/acceptance-r3.json",
+    "sha256": "b9d36abc91483d92e87be5ebc698a5cf8cbf01f71794259845215b3758adc883"
+  },
+  "localAcceptance": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/local-acceptance-r3.json",
+    "sha256": "32acca6b5209f2db0d56156b636b5a215ebc0818cfc8191d62e9cda191abc434"
+  },
+  "originalArtifactVerification": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/artifact-verification-r3.json",
+    "sha256": "73d0ea2d79e464c430496eee0479d65b376bbc7b9f8d1993eea198707bd38943"
+  },
+  "actual": {
+    "producerCommit": "ab74b1f4b9b430d9e1cbc77c5972255427260b98",
+    "producerInstall": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/install-r1/node_modules/pi-durio",
+    "originalWorkspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/actual-acceptance-r1/project",
+    "originalDataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/actual-acceptance-r1/data",
+    "readerCommit": "fa84c81f8a1b4b149bb09e0b81ad21b2de809212",
+    "readerInstall": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/install-r3/node_modules/pi-durio",
+    "readbackResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/actual-readback-r3/result.json",
+      "sha256": "8dc52d655ced1236ea614c0b46602c70e3981873787adef3098bc919c09a805f"
+    },
+    "lineage": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/actual-readback-r3/reuse-lineage.json",
+      "sha256": "9a14dae3c7c7fc35df5d7e6536c3e774812390544b289b64bbd836315b899c0e"
+    },
+    "producerDispatches": 14,
+    "readerAdditionalRuntimeCalls": 0,
+    "explanation": "r1 performed five public-runtime tasks and manual/automatic compaction; r3 reused an exact copy of originals to continue explicit pricing and query verification. Only cost/fault projections changed; runtime/provider/compaction/tool outputs are identical. Original r1 root and first failure remain unchanged.",
+    "counts": {
+      "N": 5,
+      "B": 5,
+      "C": 3,
+      "G": 2,
+      "S": 1,
+      "terminated": 5
+    },
+    "faults": {
+      "B": 5,
+      "F": 2,
+      "Zf": 3,
+      "Uf": 0,
+      "faultTerminated": 1
+    }
+  },
+  "ownedChild": {
+    "result": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/owned-child-readback-r3/result.json",
+      "sha256": "94ce193240eb024ee656a0c4d71123e69a279cd381d4cc8e1090947d5dfa9833"
+    },
+    "parentDataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/data",
+    "childDataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/fresh-work/prompt/check-0/eval-data",
+    "planId": "improve-5060e162d8d085282185ace4",
+    "parentThrough": 733,
+    "childThrough": 329,
+    "originalOuterRequests": 8,
+    "noAdditionalDispatches": true,
+    "bothRootInventoriesUnchanged": true,
+    "scope": "Read-only interoperability with final issue24 producer facts; issue24 branch code has not yet been merged into this branch."
+  },
+  "knownFacts": {
+    "result": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/known-example-r3/result.json",
+      "sha256": "6b94abd31ad6186a8478849d166ab45122e6bbd483bb125d5539e5f86c78e8f2"
+    },
+    "costReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/known-example-r3/report-1.json",
+      "sha256": "c90e7823643fd9dae0d998fd7d7bf4690cba72aa0fa627b03b840d19755f6678"
+    },
+    "faultReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/known-example-r3/report-2.json",
+      "sha256": "355aa63a31f527b1a85117b4aa36095c3ca50bd3e315a2dd199455ed880c05f9"
+    },
+    "roots": [
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/known-example-r3/data-1",
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/known-example-r3/data-2"
+    ],
+    "source": "Explicit host-appended controlled fixtures; not runtime or daily acceptance",
+    "verified": [
+      "CNY80/current S4 = CNY20; period CNY118",
+      "B8=F2+Zf5+Uf1; fault-terminated1/8; model errors2/10 and tool errors1/6",
+      "Missing usage, unassigned/shared allocation, S0, revisions and original snapshot retained"
+    ]
+  },
+  "checks": {
+    "full": {
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/full-check-1.log",
+        "sha256": "998d5adf95c337cfa31f35dfa3de6d88a048f49aa336304f4b0e5328c831ac7b"
+      },
+      "passed": 171,
+      "failed": 3,
+      "applicability": "Unchanged deterministic runtime/compaction/provider/tool/recovery cases reused. Three failed cases retested after source freeze. New projection code covered by following checks."
+    },
+    "frozenRegression": {
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/frozen-regressions-1.log",
+        "sha256": "7724071c52248abe45a1fa069b067456ae53006040981c4b51ddaf1def3c9909"
+      },
+      "passed": 3,
+      "cause": "Two first failures explicitly reported package/source identity changes during concurrent edits. The third recovery blocked result disappeared after freezing without recovery-code changes; shared source mutation is the supported explanation, not separately isolated."
+    },
+    "metricsSuite": {
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/frozen-metrics-2.log",
+        "sha256": "4363743e55519ce22f79ea7bc77210ad695bec4976f19e2eea5bea622041745d"
+      },
+      "passed": 21
+    },
+    "finalCostFault": {
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/business-exit-tests.log",
+        "sha256": "755b7e77d3f78b30f0fb2bdf1327ea991bbf59cb35546b0d15055fe4b08fad19"
+      },
+      "passed": 7,
+      "after": "Latest missing-usage and business-exit changes; final source frozen"
+    },
+    "build": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/business-exit-build.log",
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281"
+    },
+    "packageAndInstallation": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/verify-candidate-r3.log",
+      "sha256": "08debc57b49fae4ee8ae32999282e414a50110c6521c3028738a1b80a359b724"
+    },
+    "artifact": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/artifact-verification-r3.log",
+      "sha256": "6a124dc5d0a6ead1c7113d625f5e6df86b568e03576657458a0e34a4c16d1543"
+    }
+  },
+  "firstFailuresRetained": true,
+  "notRun": [
+    "paid/live DeepSeek (#30)",
+    "native macOS Terminal whole-product acceptance (#31)",
+    "human daily-use acceptance (#32)",
+    "formal VM rerun by #28 (accepted existing producer facts will be queried)"
+  ],
+  "remainingOwnership": {
+    "coordinator": "Independent aggregate review and serial integration; merge accepted issue24 integration into this branch if needed, apply only affected build/readback bindings",
+    "issue30": "Explicitly authorized paid DeepSeek validation",
+    "issue31": "Whole-product native Terminal and measurements",
+    "issue32": "Human daily-use acceptance"
+  },
+  "authority": "Local source and metadata commits only; no push, remote mutation, closure, product main merge, paid call or release."
+}

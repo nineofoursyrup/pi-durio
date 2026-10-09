@@ -8,3 +8,7 @@ export {recordFeedback} from './feedback.js';
 export type {FeedbackInput,FeedbackSource} from './feedback.js';
 export {queryFeedbackMetrics,formatFeedbackMetrics} from './feedback-report.js';
 export type {FeedbackMetricsReport} from './feedback-report.js';
+export {queryOperationsMetrics,formatOperationsMetrics} from './operations.js';
+export type {OperationsMetricsReport} from './operations.js';
+export {recordCostEstimate} from './costs.js';
+export type {CostEstimateInput} from './costs.js';
