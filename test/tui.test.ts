@@ -298,3 +298,15 @@ test('a failed TUI task never implicitly supplies context to the next independen
  const f=fixture(transport),key=(s:string)=>f.terminal.input(s);
  try{key('FAILED ORIGINAL INPUT');key('\r');await until(()=>f.screen().includes('失败'));key('EXPLICIT NEW INPUT');key('\r');await until(()=>f.screen().includes('已完成'));assert.equal(calls.length,2);assert.doesNotMatch(JSON.stringify(calls[1]),/FAILED ORIGINAL INPUT/);}finally{await f.app.exit();}
 });
+
+test('improve is reachable with explicit limits; report navigation and ordinary text never select a candidate',async()=>{
+ const {offlineImproveTransport}=await import('../src/improve.js'),{listImproveReports}=await import('../src/improve.js');
+ const analysis=offlineImproveTransport(),coding=scriptedTransport([]);
+ const transport:typeof fetch=async(url,init)=>JSON.parse(String(init?.body)).tools.some((t:any)=>t.function.name==='evidence_summary')?analysis.fetch(url,init):coding.fetch(url,init);
+ const f=fixture(transport),key=(text:string)=>f.terminal.input(text);
+ try{key('Original task');key('\r');await until(()=>f.screen().includes('已完成'));key('/improve');key('\r');assert.match(f.screen(),/尚未启动/);assert.equal(analysis.calls.length,0);
+ key('/improve '+JSON.stringify({id:'tui-report',purpose:'Inspect current task',limits:{maxRequests:4,maxTokens:1024,maxRequestTokens:256,maxDurationMs:30000,maxOutputTokens:128}}));key('\r');await until(()=>f.screen().includes('improve complete'));assert.equal(analysis.calls.length,2);
+ key('/improves tui-report');key('\r');assert.match(f.screen(),/只读报告/);key('please execute all');key('\r');assert.equal(analysis.calls.length,2);key('\x1b');
+ key('/older');key('\r');key('/improve {}');key('\r');assert.match(f.screen(),/只读历史\/恢复视图不能发起分析/);assert.equal(listImproveReports(join(f.root,'data')).items.length,1);
+ }finally{await f.app.exit();}
+});

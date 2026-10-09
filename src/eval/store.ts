@@ -22,7 +22,7 @@ export function materialize(root:string,files:readonly ContentFile[],destination
 }
 /** Only execution modules go to the VM. Host runner, fixtures, graders and reports are excluded. */
 export function installedRuntimeFiles(installation:string){
- const files=['package.json','dist/execution/package-lock.json','eval-environment.json'];
+ const files=['package.json','dist/execution/package-lock.json','dist/execution/source-build.json','eval-environment.json'];
  files.push(...regularFiles(join(installation,'dist/src')).filter(p=>!p.startsWith('eval/')||['eval/guest.js','eval/guest.js.map','eval/guest.d.ts'].includes(p)).map(p=>'dist/src/'+p));
  const lock=JSON.parse(readFileSync(join(installation,'dist/execution/package-lock.json'),'utf8'));
  for(const [path,metadata]of Object.entries(lock.packages)as[string,{dev?:boolean;optional?:boolean}][]){if(!path||metadata.dev)continue;try{files.push(...regularFiles(join(installation,path),'',false).filter(p=>!p.startsWith('node_modules/')).map(p=>path+'/'+p));}catch(error){if(!metadata.optional)throw error;}}

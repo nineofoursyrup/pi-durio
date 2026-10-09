@@ -630,7 +630,9 @@
       "acceptance": {
         "at": "2026-10-09T17:17:30.617729+00:00",
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/coordinator-acceptance.json"
-      }
+      },
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/22#issuecomment-6085768287",
+      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/publication/readback.json"
     },
     "23": {
       "number": 23,
@@ -646,18 +648,32 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-23",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "ea0c1ed70a28240214a740a4c543e91a6d00291f",
+      "integrated_sha": "ee33413ab9e6af1af5bc98a51536149433098625",
+      "evidence": [
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/handoff.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/coordinator-premerge.json",
+        "docs/implementation/pi-durio-v1/issue-23/README.md",
+        "docs/implementation/pi-durio-v1/issue-23/coordinator-acceptance.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/merge-integration-readback.json"
+      ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T165127Z/issue-23.json",
       "branch": "codex/pi-durio-v1-issue-23",
       "agent": "/root/issue23",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "Fresh gpt-6-astra/xhigh implementer active on scoped improve analysis/report; claim readback verified.",
-      "base_commit": "6b6b5f64f817a724d15f0bae554f4c008d5bc0eb"
+      "note": "T13 explicit restricted improve analysis/report accepted with controlled-provider and installed-product evidence; execution/paid/native remain later gates.",
+      "base_commit": "6b6b5f64f817a724d15f0bae554f4c008d5bc0eb",
+      "local_checkpoint": "fadc2fa",
+      "checkpoint": "Applicable acceptance inspected and direct evidence hashes verified; serial merger owns root.",
+      "product_commit": "401a1b533b5242c0338ffc611f3e4241417e610f",
+      "handoff": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/handoff.json",
+      "acceptance": {
+        "at": "2026-10-09T17:48:47.038990+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/coordinator-acceptance.json"
+      }
     },
     "24": {
       "number": 24,
@@ -671,12 +687,12 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "dispatching",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T171238Z/issue-24.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T174316Z/issue-24.json"
     },
     "25": {
       "number": 25,
@@ -716,7 +732,9 @@
       "number": 27,
       "title": "任务验收三率与执行、验收双时钟",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         17,
@@ -724,12 +742,20 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "dispatching",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-27",
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T171238Z/issue-27.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T171238Z/issue-27.json",
+      "branch": "codex/pi-durio-v1-issue-27",
+      "agent": "/root/issue27",
+      "base_commit": "e07a2d547eb12e7fbabdf359094a451def0c3147",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "note": "Fresh implementer active on accepted-task metrics and dual clocks; claim readback verified. Shared runtime/build seam remains owned by #23.",
+      "local_checkpoint": "81ebadbc3d2bcf563c502ee94a06214b9ddc9883",
+      "checkpoint": "Known-fact acceptance/clock/runtime tests pass; installed final evidence pending. Host clock spoof and withdrawn revision resurrection repaired; current first-valid clock versus conflict outcome contract branch under check."
     },
     "28": {
       "number": 28,
@@ -824,7 +850,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "291a5fc5a6d49e2b6e785122c437106575f3c4f7",
+  "integration_tip": "ee33413ab9e6af1af5bc98a51536149433098625",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -834,9 +860,9 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T17:17:30.739144+00:00",
+  "updated_at": "2026-10-09T17:48:47.038990+00:00",
   "last_remote_readback": {
-    "headRefOid": "6b6b5f64f817a724d15f0bae554f4c008d5bc0eb",
+    "headRefOid": "e07a2d547eb12e7fbabdf359094a451def0c3147",
     "state": "OPEN",
     "isDraft": true,
     "closingIssuesReferences": []
@@ -869,6 +895,18 @@
       ],
       "scope": "Internal API coordination only; neither #21 nor #19 acceptance",
       "followup_commit": "fe57347b0d44c628f80044e16277be49358c5a26"
+    },
+    "task_clock_source": {
+      "owner": 27,
+      "consumer": [
+        23,
+        28,
+        29
+      ],
+      "status": "Initial seam checkpoint and 3 tests inspected; non-whitelisted payload clock must not set acquisition timestamp, correction requested; full ticket pending",
+      "record": "/Users/nineofour/pi-durio-v1-run/interfaces-23-27.md",
+      "scope": "Explicit Evidence.append kind whitelist host clock, per-process UUID/monotonic/wall; host task source, actual artifact identity, legacy unknown; no new state machine or ledger",
+      "checkpoint": "81ebadbc3d2bcf563c502ee94a06214b9ddc9883"
     }
   },
   "root_write_owner": "coordinator"

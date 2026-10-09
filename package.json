@@ -18,13 +18,14 @@
     "scripts/isolation",
     "docs/implementation/pi-durio-v1/issue-21/README.md",
     "docs/implementation/pi-durio-v1/issue-22/README.md",
-    "docs/implementation/pi-durio-v1/issue-27"
+    "docs/implementation/pi-durio-v1/issue-27",
+    "docs/implementation/pi-durio-v1/issue-23/README.md"
   ],
   "engines": {
     "node": ">=22.19.0"
   },
   "scripts": {
-    "build": "tsc && node scripts/build-artifact.mjs",
+    "build": "node scripts/build-artifact.mjs",
     "test": "node --test dist/test/*.test.js",
     "check": "npm run build && npm test",
     "prepack": "npm run build && node scripts/prepare-pack.mjs"
@@ -49,7 +50,8 @@
     "./eval": "./dist/src/eval/runner.js",
     "./storage": "./dist/src/storage.js",
     "./compaction": "./dist/src/compaction.js",
-    "./metrics": "./dist/src/metrics/index.js"
+    "./metrics": "./dist/src/metrics/index.js",
+    "./improve": "./dist/src/improve.js"
   },
   "bundleDependencies": [
     "@earendil-works/pi-ai",

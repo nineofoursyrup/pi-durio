@@ -32,6 +32,7 @@ export function captureArtifact(evidence: Evidence, workspace: string) {
   const save = (path: string, label: string) => files.push({ path: label, ...evidence.blob(readFileSync(path)) });
   save(join(root, 'package.json'), 'package.json');
   save(join(root, 'dist', 'execution', 'package-lock.json'), 'package-lock.json');
+  save(join(root, 'dist', 'execution', 'source-build.json'), 'dist/execution/source-build.json');
   const walk = (path: string) => { for (const entry of readdirSync(path, { withFileTypes: true })) { const child = join(path, entry.name); if (entry.isDirectory()) walk(child); else save(child, relative(root, child)); } };
   walk(join(root, 'dist', 'src'));
   const dependencies = ['@earendil-works/pi-ai', '@earendil-works/pi-durable', '@earendil-works/chord'].map(name => {
