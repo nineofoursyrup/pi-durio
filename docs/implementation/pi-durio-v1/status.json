@@ -100,34 +100,45 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-14",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "c0350714439dfc272f7c53759129e0dc6d2e182f",
+      "integrated_sha": "5c3d9c754dc41b0d0bb1fb8e89661a31bbe50fcd",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-14/README.md",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/merge-integration-readback.json"
+      ],
       "branch": "codex/pi-durio-v1-issue-14",
       "agent": "/root/issue14",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T103610Z/issue-14.json",
-      "note": "Fresh gpt-6-astra/xhigh implementer; lifecycle/CLI scope and #16 compatibility fixed in interfaces-14-16.md."
+      "note": "T04 applicable acceptance passed: 44/44 combined checks and 9/9 independent lifecycle cases; all artifacts verified. Real Terminal human gate remains separate."
     },
     "15": {
       "number": 15,
       "title": "只读重开与恢复核对",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         14
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-15",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-15",
+      "agent": "/root/issue15",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T110901Z/issue-15.json",
+      "note": "Fresh gpt-6-astra/xhigh implementer on accepted issue14 integration; recovery core only. Issue16 cursor repair parallel with disjoint ownership."
     },
     "16": {
       "number": 16,
@@ -136,13 +147,13 @@
       "assignees": [
         "nineofoursyrup"
       ],
-      "comments": 0,
+      "comments": 1,
       "blocked_by": [
         11
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "integrated-awaiting-terminal",
+      "status": "integrated-terminal-failed",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
       "commit": "004266e9e6c1a3b639a44c31096511efe71c5d61",
       "integrated_sha": "d62441c9b6752f1e90739a29e92d995a846b14a5",
@@ -150,15 +161,32 @@
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/handoff.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/manifest.json",
         "docs/implementation/pi-durio-v1/issue-16/candidate-r3.json",
-        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/merge-integration-readback.json"
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/merge-integration-readback.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/user-feedback-r3.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/human-observation-r3-derived.json"
       ],
       "branch": "codex/pi-durio-v1-issue-16",
       "agent": "/root/issue16",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "Partial implementation integrated; r3 unchanged and human Terminal evidence requested. Do not unlock successors until actual applicable Terminal acceptance passes.",
+      "note": "User reported disappearing/flickering/multiple cursor on r3 real Terminal; preserve FAIL, investigate and repair before human revalidation. Successors blocked.",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-16.json",
-      "local_checkpoint": "e98fef9"
+      "local_checkpoint": "e98fef9",
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6079513003",
+      "human_evidence_request": {
+        "candidate": "004266e9e6c1a3b639a44c31096511efe71c5d61",
+        "status": "FAIL cursor; other observations pending",
+        "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/terminal-validation.mjs",
+        "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/manifest.json",
+        "observed_partial_runs": [
+          "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/manual/2026-10-09T10-52-54-467Z",
+          "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/manual/2026-10-09T10-55-54-824Z"
+        ],
+        "operator_observations": "Cursor FAIL; combining character initially reported FAIL, clarified as unsuccessful input/paste, editor behavior NOT VERIFIED; IME candidate Enter and scroll/focus PASS; busy Enter UNKNOWN."
+      },
+      "repair_worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-cursor",
+      "repair_branch": "codex/pi-durio-v1-issue-16-cursor",
+      "repair_agent": "/root/issue16_cursor"
     },
     "17": {
       "number": 17,
@@ -449,7 +477,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "d62441c9b6752f1e90739a29e92d995a846b14a5",
+  "integration_tip": "5c3d9c754dc41b0d0bb1fb8e89661a31bbe50fcd",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -459,9 +487,9 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T10:57:02.571306+00:00",
+  "updated_at": "2026-10-09T11:12:31.735608+00:00",
   "last_remote_readback": {
-    "headRefOid": "8021923a6163d7e815beabb6a05a38eff5dd3bbf",
+    "headRefOid": "372fcf3038b5b5e7ad6a41b41ac946be5c95009b",
     "isDraft": true,
     "state": "OPEN",
     "closingIssuesReferences": [],
