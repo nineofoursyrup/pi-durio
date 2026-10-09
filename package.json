@@ -49,7 +49,10 @@
     "./eval": "./dist/src/eval/runner.js",
     "./storage": "./dist/src/storage.js",
     "./compaction": "./dist/src/compaction.js",
-    "./improve": "./dist/src/improve.js"
+    "./improve": "./dist/src/improve.js",
+    "./improve-decisions": "./dist/src/improve-decisions.js",
+    "./improve-validation": "./dist/src/improve-validation.js",
+    "./improve-selection": "./dist/src/tui/improve-selection.js"
   },
   "bundleDependencies": [
     "@earendil-works/pi-ai",
