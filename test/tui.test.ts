@@ -24,7 +24,7 @@ async function until(predicate:()=>boolean) { for(let i=0;i<200;i++) { if(predic
 function fixture(override?: typeof fetch) {
   const root=mkdtempSync(join(tmpdir(),'durio-tui-')); const workspace=join(root,'project'); mkdirSync(workspace); writeFileSync(join(workspace,'README.md'),'Fixture 中文 👩‍💻 é\n');
   const terminal=new TestTerminal(); const transport=demoTransport();
-  const app=new ReadOnlyTui({ workspace, dataRoot:join(root,'data'), draftRoot:join(root,'drafts'), mode:'offline', transport:override??transport.fetch, terminal, copy:async()=>true });
+  const app=new ReadOnlyTui({ workspace, dataRoot:join(root,'data'), draftRoot:join(root,'drafts'), mode:'offline', transport:override??transport.fetch, terminal, widthCalibration:false, copy:async()=>true });
   const screen=()=>app.screen().map(stripTerminalSequences).join('\n'); app.start();
   return {root,workspace,terminal,transport,app,screen};
 }

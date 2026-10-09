@@ -9,8 +9,11 @@
   "files": [
     "dist/src",
     "dist/execution",
+    "vendor/pi-tui",
     "docs/implementation/pi-durio-v1/issue-11/README.md",
-    "docs/implementation/pi-durio-v1/issue-16/README.md"
+    "docs/implementation/pi-durio-v1/issue-16/README.md",
+    "docs/implementation/pi-durio-v1/issue-16/width-repair-r5.md",
+    "docs/implementation/pi-durio-v1/issue-16/width-exception-authorization.json"
   ],
   "engines": {
     "node": ">=22.19.0"
@@ -25,7 +28,7 @@
     "@earendil-works/chord": "1.1.0",
     "@earendil-works/pi-ai": "1.1.0",
     "@earendil-works/pi-durable": "1.1.0",
-    "@earendil-works/pi-tui": "1.1.0",
+    "@earendil-works/pi-tui": "file:vendor/pi-tui/pi-tui-1.1.0-durio-width.1.tgz",
     "proper-lockfile": "4.1.2"
   },
   "devDependencies": {

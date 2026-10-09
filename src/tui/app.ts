@@ -7,6 +7,7 @@ import { runReadTask, type ReadTaskOptions, type RunResult } from '../runtime.js
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
+import { TerminalWidthGate } from './width-gate.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
@@ -26,8 +27,10 @@ function label(result?:RunResult) { return result ? ({completed:'已完成',fail
 export interface TuiOptions {
   workspace:string; dataRoot:string; mode:'live'|'offline'; transport?:typeof fetch;
   terminal?:Terminal; draftRoot?:string; copy?:(text:string)=>Promise<boolean|string>;
+  /** Only deterministic injected-terminal tests may skip native measurement. */
+  widthCalibration?:false;
 }
-export interface TuiExit { result?:RunResult; error?:string; draftSaved:boolean; }
+export interface TuiExit { result?:RunResult; error?:string; draftSaved:boolean; widthCalibration?:ReturnType<TerminalWidthGate['snapshot']>; }
 
 /** macOS clipboard adapter: exit code acknowledges the actual clipboard write. No shell or OSC 52 fallback. */
 export async function copyToMacClipboard(text:string):Promise<boolean|string> {
@@ -79,8 +82,11 @@ export class ReadOnlyTui {
   private removeInput?:()=>void;
   private restoreTerminalWrite?:()=>void;
   private removeSignals:Array<()=>void>=[];
+  private widths?:TerminalWidthGate;
+  private displaySources:string[]=[];
 
   constructor(private readonly options:TuiOptions) {
+    if(options.widthCalibration===false&&!options.terminal)throw Error('WIDTH_CALIBRATION_TEST_TERMINAL_REQUIRED');
     options.workspace=realpathSync(options.workspace);
     options.dataRoot=resolve(options.dataRoot);
     this.terminal=options.terminal??new ProcessTerminal();
@@ -142,7 +148,19 @@ export class ReadOnlyTui {
     const rejection=(reason:unknown)=>fault(reason instanceof Error?reason:new Error(String(reason)));
     process.on('unhandledRejection',rejection); this.removeSignals.push(()=>process.off('unhandledRejection',rejection));
     this.restoreTerminalWrite=hideCursorDuringPaint(this.terminal);
+    if(this.options.widthCalibration!==false)this.widths=new TerminalWidthGate({terminal:this.terminal,tui:this.tui,
+      sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,...this.displaySources],
+      priorityInput:data=>{
+        // Preserve the normal modal/focus order. A nonempty Ctrl+D is still editor deletion.
+        if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+d')&&!matchesKey(data,'escape')&&!matchesKey(data,'ctrl+l')&&data!=='\x1b[I'&&data!=='\x1b[O')return false;
+        return this.input(data)?.consume===true;
+      },
+      context:()=>JSON.stringify({phase:this.phase,run:this.runId??null,panel:this.panel?.kind??null,editorFocused:this.editor.focused,overlay:this.tui.hasOverlay(),completion:this.editor.isShowingAutocomplete()}),
+      ready:()=>{if(this.pendingRefresh)this.refresh();},
+      retain:(inputs,reason)=>{this.drafts.savePending(inputs,reason);this.notice='显示更新期间的部分输入未应用，已保留；请确认当前画面后重新操作';}
+    });
     this.tui.start();
+    this.widths?.inspect();
     this.terminal.write('\x1b[?1004h'); // Focus reports invalidate any pending exit confirmation.
     this.timer=setInterval(()=>{if(this.pendingRefresh) this.refresh();},75);
     this.tui.requestRender();
@@ -171,7 +189,7 @@ export class ReadOnlyTui {
       else this.editor.handleInput(data);
       this.tui.requestRender(); return {consume:true};
     }
-    if(matchesKey(data,'ctrl+l')) {this.tui.requestRender(true);return {consume:true};}
+    if(matchesKey(data,'ctrl+l')) {if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return {consume:true};}
     if(matchesKey(data,'f2')) {this.openPanel('actions');return {consume:true};}
     if(matchesKey(data,'ctrl+o')) {this.openDetail(this.records.at(-1));return {consume:true};}
     if(matchesKey(data,'ctrl+x')) {this.followChord=true;this.notice='follow-up 尚未接入；文本保留为草稿，不会执行';this.tui.requestRender();return {consume:true};}
@@ -185,6 +203,7 @@ export class ReadOnlyTui {
       // Ctrl+D during a request still asks for controlled exit; it never drops the runtime.
       if(this.confirmation?.key===key && Date.now()-this.confirmation.at<=800) {this.confirmation=undefined;void this.exit();return {consume:true};}
       if(ctrlC) {
+        this.widths?.retainPending('ctrl-c-preserve-unapplied-input');
         const text=this.editor.getExpandedText();
         if(text) {this.drafts.save(text);this.savedDraft=text;this.editor.setText('');this.lastText='';}
         this.notice='草稿已保留；/restore 恢复。800ms 内再按 Ctrl+C 退出';
@@ -229,9 +248,11 @@ export class ReadOnlyTui {
   private stop() {
     this.confirmation=undefined;
     if(this.phase!=='running')return;
+    this.widths?.retainPending('stop-preserve-unapplied-input');
     this.cancellation='stop';this.phase='stopping';this.notice=`请求中止 run ${this.runId??'受理中'}；等待 runtime 确认`;this.controller?.abort();this.tui.requestRender();
   }
   private refresh() {
+    if(this.widths?.blocked){this.pendingRefresh=true;return;}
     this.pendingRefresh=false;
     if(!this.runId||this.stopped)return;
     try {
@@ -320,15 +341,21 @@ export class ReadOnlyTui {
   }
   private rebuild() {
     this.transcript.clear();this.summaries.clear();
-    if(!this.records.length) this.transcript.addChild(new Text(`在输入区发起一个只读项目请求。\n${this.options.mode==='offline'?'offline-demo：真实 runtime + README.md 固定传输；没有模型推理。':'DeepSeek 凭据从环境读取；没有自动 fallback。'}\nCtrl+J / Shift+Enter / 反斜杠后 Enter 换行。\n拖选自动复制；/copy 提供键盘入口。`,0,0));
+    this.displaySources=[];
+    if(!this.records.length) {
+      const text=`在输入区发起一个只读项目请求。\n${this.options.mode==='offline'?'offline-demo：真实 runtime + README.md 固定传输；没有模型推理。':'DeepSeek 凭据从环境读取；没有自动 fallback。'}\nCtrl+J / Shift+Enter / 反斜杠后 Enter 换行。\n拖选自动复制；/copy 提供键盘入口。`;
+      this.displaySources.push(text);this.transcript.addChild(new Text(text,0,0));
+    }
     if(this.records.length&&this.records[0].kind!=='task.accepted')this.transcript.addChild(new Text('当前内容窗口 · /older 查看更早内容\n',0,0));
     for(const entry of this.projectConversation()) {
       const clipped=entry.limited||(entry.role!=='assistant'&&entry.text.length>500);
       const text=safe(entry.role==='assistant'?entry.text:entry.text.slice(0,500));
       const summary=`${entry.title}\n${text}${clipped?'… [显示截断，详情可继续阅读]':''}\n`;
+      this.displaySources.push(summary);
       this.summaries.set(entry.ref.seq,summary);this.latestText=text;
       this.transcript.addChild(new MouseRegion(new Text(summary,0,0),event=>{if(event.type==='press'||event.type==='drag')this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});if(event.type==='click'){this.openDetail(entry.ref);return {handled:true};}}));
     }
+    this.widths?.inspect(this.displaySources);
     this.tui.requestRender();
   }
   private bottom() {
@@ -366,6 +393,7 @@ export class ReadOnlyTui {
     else if(panel.kind==='help')text='帮助（本阶段只读）\nEnter 新任务；忙时文本保留为草稿\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 操作菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 跟随\n/older /newer 持久记录窗口\n/restore 恢复草稿；/copy 复制输出\n/stop 中止；/exit 退出\n菜单 Tab/方向键/Enter 选择；Esc 关闭\n队列、恢复执行、可写工具尚未接入。';
     else if(panel.kind==='exit')text='退出并保留草稿？\nEnter：保存文本，取消在途请求并等待清理\nEsc：返回；不改变任务状态';
     else text=`原文 #${panel.ref?.seq} ${panel.ref?.kind}\n字节 ${panel.offset} / ${panel.ref?.ref.bytes}；源 JSON，显示有界\n${panel.error??safe(panel.raw)}\n${panel.next===null?'本原文已到末尾':'还有下一片（n）'}`;
+    this.widths?.inspect([text]);
     const lines=wrapTextWithAnsi(text,Math.max(1,width-2));
     const height=Math.max(2,Math.floor(this.terminal.rows*0.9)-2);
     const maxLine=Math.max(0,lines.length-height);panel.line=Math.min(panel.line,maxLine);
@@ -375,7 +403,7 @@ export class ReadOnlyTui {
     const panel=this.panel;if(!panel)return;
     this.confirmation=undefined;
     if(matchesKey(data,'escape')||matchesKey(data,'ctrl+o')) {this.closePanel();return;}
-    if(matchesKey(data,'ctrl+l')){this.tui.requestRender(true);return;}
+    if(matchesKey(data,'ctrl+l')){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
     if(matchesKey(data,'ctrl+c')||matchesKey(data,'ctrl+d'))return;
     if(panel.kind==='actions') {
       if(matchesKey(data,'up')) panel.offset=(panel.offset+commands.length-1)%commands.length;
@@ -422,19 +450,21 @@ export class ReadOnlyTui {
   }
   private async finishExit():Promise<TuiExit> {
     this.phase='exiting';this.confirmation=undefined;this.notice='退出中；等待 runtime 清理与 storage 关闭';this.tui.requestRender();
+    try {this.widths?.beginClose();}catch(error){this.failure=`待处理输入保存失败：${String(error)}`;}
     if(!this.controller?.signal.aborted)this.cancellation='exit';this.controller?.abort();
     let draftSaved=false;
     try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
     try {await this.active;} finally {
       this.stopped=true;if(this.timer)clearInterval(this.timer);this.removeInput?.();for(const remove of this.removeSignals)remove();
       if(this.started) {
+        try {if(this.widths&&!await this.widths.settle())this.failure??='WIDTH_QUERY_BOUNDARY_UNKNOWN: terminal drain is bounded';}catch(error){this.failure??=`字宽清理失败：${String(error)}`;}
         try {await this.terminal.drainInput(150,30);} catch(error){this.failure??=`终端 drain 失败：${String(error)}`;}
         try {this.terminal.write('\x1b[?1004l');this.tui.stop({preserveScreen:true});}
         catch(error){this.failure??=`终端清理失败：${String(error)}`;try{this.terminal.stop();}catch{/* Preserve the cleanup failure. */}}
-        finally {try{this.terminal.showCursor();}catch{/* Earlier failure remains visible in the exit result. */}this.restoreTerminalWrite?.();}
+        finally {try{this.terminal.showCursor();}catch{/* Earlier failure remains visible in the exit result. */}this.widths?.dispose();this.restoreTerminalWrite?.();}
       }
     }
-    const result={result:this.result,error:this.failure,draftSaved};
+    const result={result:this.result,error:this.failure,draftSaved,widthCalibration:this.widths?.snapshot()};
     this.resolveClosed(result);return result;
   }
 }

@@ -1,6 +1,6 @@
 # #16：全屏只读 TUI（真实 Terminal 验收待完成）
 
-实现状态为 **PARTIAL / Terminal acceptance BLOCKED**，不是 #16 整票通过，也不解除 #17/#18 及其后继的依赖。`@earendil-works/pi-tui@1.1.0` 已从当前官方 npm registry 核对、精确安装并纳入 lock 与生产打包。使用公开 `Editor`、`TuiAltScreen`、`ScrollView`、`MouseRegion`、`VStack` 与 `ProcessTerminal`；没有私有 demo 导入、fork 或 UI 持有 Harness。
+实现状态为 **PARTIAL / Terminal acceptance BLOCKED**，不是 #16 整票通过，也不解除 #17/#18 及其后继的依赖。r3/r4 使用官方 `@earendil-works/pi-tui@1.1.0`；真实宽度失败定位后，用户明确授权了限定依赖补丁例外。当前使用 `1.1.0-durio-width.1` 的共享字宽配置入口及当前 Terminal 自动校准，详见 [r5 实现与验收边界](width-repair-r5.md)。继续复用 `Editor`、`TuiAltScreen`、`ScrollView`、`MouseRegion`、`VStack` 与 `ProcessTerminal`，没有 UI 持有 Harness。
 
 ## 运行
 
