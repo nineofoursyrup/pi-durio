@@ -1,7 +1,7 @@
 export interface EvalCase {
  id:string;category:'local-fix'|'multi-file'|'regression'|'no-change';visibility:'public-development';input:string;
  files:Record<string,string>;writable:string[];dirty:Record<string,string>;dependencyLock:string;
- grader:{version:string;program:string;expectedStdout:string;required:string[]};
+ grader:{version:string;program:string;expectedStdout:string;required:string[];observations?:{name:string;path:(string|number)[];expected:unknown}[]};
 }
 const packageFile=JSON.stringify({name:'durio-eval-fixture',version:'1.0.0',private:true,type:'module'});
 const base={'package.json':packageFile,'README.md':'Public Node/TypeScript fixture. No network or package installation required.\n'};
