@@ -93,6 +93,7 @@ export function waitForRun(run: Promise<RunResult>, signal?: AbortSignal): Promi
 
 /** Explicit recovery is a checked reopening of the same run, not a new scheduler or task loop. */
 export async function recoverRun(options: RecoveryOptions & { decision: RecoveryDecision; transport?: typeof fetch; apiKey?: string; signal?: AbortSignal; cancellation?: 'stop' | 'exit'; onObservation?: ReadTaskOptions['onObservation']; fault?: FaultInjector; control?:TaskControl }): Promise<RunResult | RecoveryReport> {
+  if(options.decision.action==='continue'&&recoveryRecords(options.dataRoot,options.runId).some(record=>record.kind==='execution.config'&&(record.data as any).providerBoundary))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED: original dispatch capability cannot be reconstructed by this recovery entry; inspect or end old work, never resume with an unbudgeted provider');
   const stable = { ...options, authorization: options.authorization && structuredClone(options.authorization), decision: structuredClone(options.decision) };
   const prepared = await prepareRecovery(stable);
   if (!prepared || typeof prepared !== 'object' || !('owner' in prepared)) return prepared as RunResult | RecoveryReport;
@@ -198,6 +199,7 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
       const auth=options.authorization;
       if(await realpath(auth.workspace)!==item.target.workspace||auth.mode!==accepted.mode||JSON.stringify([...auth.tools].sort())!==JSON.stringify([...accepted.authorization.tools].sort()))throw Error('QUEUE_AUTHORIZATION_CHANGED');
       const config=source.find(record=>record.seq===item.executionVersion.configSeq)!.data as any;
+      if(config.providerBoundary)throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED: queued work cannot drop the original dispatch boundary');
       const expected=executionConfig(accepted.authorization.execution==='trusted-local-coding',auth.mode,auth.toolEnvironment);
       if(Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('QUEUE_EXECUTION_CONFIGURATION_CHANGED');
       await preflight(owner);
@@ -338,7 +340,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     if (!model || model.api !== 'openai-completions' || model.baseUrl !== 'https://api.deepseek.com') throw new Error('MODEL_CONFIGURATION_MISMATCH');
     const configuration = executionConfig(coding,options.mode,options.toolEnvironment);
     const settings = options.verificationCompaction ? {...configuration.settings,compaction:{enabled:true,...options.verificationCompaction}} : configuration.settings;
-    const configSeq=recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.config')!.seq:record('execution.config', { cleanupTimeoutMs, ...configuration, settings, ...(options.verificationCompaction?{verificationCompaction:options.verificationCompaction}:{}), recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
+    const configSeq=recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.config')!.seq:record('execution.config', { cleanupTimeoutMs, ...configuration, settings, ...(options.providerBoundary?{providerBoundary:{kind:'trusted-dispatch-capability',operationId:options.providerBoundary.operationId,budget:options.providerBoundary.budget?{id:options.providerBoundary.budget.id,root:options.providerBoundary.budget.evidence.root,runId:options.providerBoundary.budget.evidence.runId,limits:options.providerBoundary.budget.limits}:null,recovery:'requires-original-capability; this entry supports readonly or explicit end only'}}:{}), ...(options.verificationCompaction?{verificationCompaction:options.verificationCompaction}:{}), recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
     const actualStream = models.streamSimple.bind(models);
     const actualComplete = models.completeSimple.bind(models);
     // In the fixed Pi Harness, completeSimple is used by the compaction task.
@@ -355,7 +357,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
           if(responseRecorded)return;responseRecorded=true;responses++;if(hasUsage)usageReports++;
           record('model.response', { attemptId, message: { ...message, ...(message.errorMessage ? { errorMessage: safeError(message.errorMessage) } : {}) }, completeness: message.stopReason==='error'||message.stopReason==='aborted'?'partial':'complete', usage: hasUsage ? 'reported' : 'unknown', remoteTermination: message.stopReason==='error'||message.stopReason==='aborted'?'unknown':'response-returned' });
         };
-        record('model.intent', { attemptId, durableTaskId: generationTaskId, ordinal: requests, model: { provider: requestedModel.provider, id: requestedModel.id }, context, purpose, boundary: 'Models.streamSimple', options: { maxRetries: streamOptions?.maxRetries, timeoutMs: streamOptions?.timeoutMs, reasoning: streamOptions?.reasoning, sessionId: streamOptions?.sessionId } });
+        record('model.intent', { attemptId, durableTaskId: purpose==='compaction'?null:generationTaskId, ...(purpose==='compaction'?{durableTaskSource:'unknown: Models.completeSimple exposes no owning compaction task ID'}:{}), ordinal: requests, model: { provider: requestedModel.provider, id: requestedModel.id }, context, purpose, boundary: 'Models.streamSimple', options: { maxRetries: streamOptions?.maxRetries, timeoutMs: streamOptions?.timeoutMs, reasoning: streamOptions?.reasoning, sessionId: streamOptions?.sessionId } });
         const stream = actualStream(requestedModel, context, {
           ...streamOptions, apiKey, fetch: async (url, init) => {
             guard();
