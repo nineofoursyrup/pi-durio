@@ -2,17 +2,18 @@ import {readFile} from 'node:fs/promises';
 import {analyzeImprove} from './runtime.js';
 import {listImproveReports,readImproveReport,formatImproveReport,offlineImproveTransport} from './improve.js';
 import {exitHostIfUnconfirmed} from './headless-lifecycle.js';
-import {previewImproveDecision,submitImproveDecision,readImproveDecision,resumeImproveDecision,listImproveSuppressions,restoreImproveSuggestion} from './improve-decisions.js';
+import {previewImproveDecision,submitImproveDecision,readImproveDecision,resumeImproveDecision,listImproveSuppressions,restoreImproveSuggestion,rollbackImproveDecision,readImproveDefaults} from './improve-decisions.js';
 
 export async function improveCommand(action:string|undefined,dataRoot:string,values:Record<string,string|boolean|undefined>) {
  if(action==='decision'){if(typeof values.id!=='string')throw Error('USAGE: improve decision --id ID');console.log(JSON.stringify(readImproveDecision(dataRoot,values.id),null,2));return;}
  if(action==='suppressions'){console.log(JSON.stringify(listImproveSuppressions(dataRoot,typeof values.workspace==='string'?values.workspace:undefined),null,2));return;}
- if(['preview','submit','continue','restore-suggestion'].includes(action??'')){
+ if(action==='defaults'){if(typeof values.workspace!=='string')throw Error('USAGE: improve defaults --workspace ABSOLUTE_PATH');console.log(JSON.stringify(['read','coding'].map(t=>readImproveDefaults(dataRoot,values.workspace as string,t as 'read'|'coding')),null,2));return;}
+ if(['preview','submit','continue','restore-suggestion','rollback'].includes(action??'')){
   if(typeof values.spec!=='string')throw Error('USAGE: improve preview|submit|continue|restore-suggestion --spec FILE');
   const spec=JSON.parse(await readFile(values.spec,'utf8'));
   if(action==='preview'){console.log(JSON.stringify(previewImproveDecision(dataRoot,spec),null,2));return;}
   const controller=new AbortController(),stop=()=>controller.abort();process.on('SIGINT',stop);process.on('SIGTERM',stop);
-  try{const result=action==='submit'?await submitImproveDecision({dataRoot,decision:spec,signal:controller.signal}):action==='continue'?await resumeImproveDecision({...spec,dataRoot,signal:controller.signal}):await restoreImproveSuggestion({...spec,dataRoot});console.log(JSON.stringify(result,null,2));if('state'in result&&result.state!=='completed')process.exitCode=result.state==='frozen'?75:1;}
+  try{const result=action==='submit'?await submitImproveDecision({dataRoot,decision:spec,signal:controller.signal}):action==='continue'?await resumeImproveDecision({...spec,dataRoot,signal:controller.signal}):action==='rollback'?await rollbackImproveDecision({...spec,dataRoot,signal:controller.signal}):await restoreImproveSuggestion({...spec,dataRoot});console.log(JSON.stringify(result,null,2));if('state'in result&&result.state!=='completed'&&!(action==='rollback'&&'groups'in result&&result.groups.filter((g:any)=>spec.groupIds.includes(g.id)).every((g:any)=>g.rollback?.state==='completed')))process.exitCode=result.state==='frozen'?75:1;}
   finally{process.off('SIGINT',stop);process.off('SIGTERM',stop);}return;
  }
  if(action==='list'){const result=listImproveReports(dataRoot,{after:values.after?Number(values.after):undefined,limit:values.limit?Number(values.limit):undefined});console.log(JSON.stringify(result,null,2));return;}

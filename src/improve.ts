@@ -43,7 +43,7 @@ export function readImproveReport(root:string,id:string) {
  let report:ImproveReport|undefined,result:any;
  for(const ref of records(root,{runId:start.source.runId,kinds:['improve.report','run.closed']})){const data=decode(root,ref);if(ref.kind==='improve.report')report=data;else result=data;}
  const decisions=improveFacts(root).filter(f=>f.kind==='improve.decision'&&f.data.decision.reportId===id).map(f=>readImproveDecision(root,f.data.id));
- return {id,runId:start.source.runId,report:report??null,state:report?.state??'interrupted-or-running',started:start.data,result:result??null,selected:[],execution:decisions.length?'see-decisions':'not-started',activation:'not-enabled',effect:decisions.length?'see-combination-results':'unverified',decisions,availability:(report?.evidence??[]).map(id=>{try{return{id,state:readEvidence(root,id,{limit:128}).state};}catch(error){return{id,state:'unavailable',reason:String(error)};}})};
+ return {id,runId:start.source.runId,report:report??null,state:report?.state??'interrupted-or-running',started:start.data,result:result??null,selected:[],execution:decisions.length?'see-decisions':'not-started',activation:decisions.length?'see-decision-phases':'not-enabled',effect:decisions.length?'see-combination-results':'unverified',decisions,availability:(report?.evidence??[]).map(id=>{try{return{id,state:readEvidence(root,id,{limit:128}).state};}catch(error){return{id,state:'unavailable',reason:String(error)};}})};
 }
 export function listImproveReports(root:string,options:{after?:number;limit?:number}={}) {
  const limit=options.limit??20;if(!Number.isSafeInteger(limit)||limit<1||limit>50)throw Error('INVALID_QUERY_RANGE');

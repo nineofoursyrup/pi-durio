@@ -33,7 +33,7 @@ test('explicit non-executing decision persists exact identities and duplicate re
  assert.deepEqual(await submitImproveDecision({dataRoot:f.dataRoot,decision:d}),first);
  assert.deepEqual(readImproveDecision(f.dataRoot,d.id),first);assert.equal(digest(await readFile(join(f.dataRoot,'host.sqlite'))),before);
  await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...d,selections:[{...d.selections[0],mode:'do-not-suggest'}]}}),/DECISION_ID_REUSED/);
- await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...decision(f,'execute-declared-scope'),id:'execute'}}),/EXECUTE_UNSUPPORTED/);
+ await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...decision(f,'execute-declared-scope'),id:'execute'}}),/FORMAL_AUTHORITY_REQUIRED/);
 });
 test('validate-only constructs and checks real restricted content while preserving the formal non-Git target',async()=>{
  const f=await fixture(),d={...decision(f,'validate-only'),directory:join(f.directory,'validation'),groups:[{id:'math',candidateIds:[f.candidate.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',program:"import assert from 'node:assert/strict'; const {add}=await import('/work/targets/project/math.mjs'); assert.equal(add(2,3),5); assert.equal(add(2,-3),-1); console.log('addition passed');",timeoutMs:30000}]}],limits:{...decision(f).limits,maxChecks:1}};
@@ -158,4 +158,10 @@ test('narrow selection viewport keeps the current candidate title and mode visib
  for(let i=0;i<5;i++){if(i)await view.handleInput('\x1b[B');await view.handleInput('d');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('[defer]'),screen);}
  const resized=view.render(32,8).join('\n');assert.ok(resized.includes('Choice 5'),resized);
  for(let i=3;i>=0;i--){await view.handleInput('\x1b[A');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('[defer]'),screen);}
+});
+
+test('diagnostic effects remain visible beside required results and cannot hide missing necessary evidence',()=>{
+ const required={kind:'resource',state:'completed',effect:'改善'},diagnostic={kind:'fresh',benefit:'diagnostic' as const,state:'completed',effect:'无明显差异'};
+ const both=summarizeImproveValidation([required,diagnostic]);assert.equal(both.effect,'证据不足');assert.equal(both.allDeclaredBenefitsMet,false);assert.equal(both.allRequiredBenefitsMet,true);assert.equal(both.requiredBenefitCount,1);assert.equal(both.diagnosticBenefitCount,1);
+ const missing=summarizeImproveValidation([required,{...diagnostic,state:'unknown',effect:'证据不足'}]);assert.equal(missing.allRequiredBenefitsMet,false);assert.equal(missing.allChecksPassed,false);
 });

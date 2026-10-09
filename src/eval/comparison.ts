@@ -1,4 +1,5 @@
 import type {BlobRef} from '../evidence.js';
+import {validateTaskProfile,type EffectiveTask} from '../task-profile.js';
 
 export type Metric='requests'|'tokens'|'cost'|'taskMs'|'task-pass';
 export interface RuntimeContent {id:string;manifest:BlobRef;bytes:number}
@@ -9,7 +10,7 @@ export interface ComparisonPlan {
  objective:{metric:Metric;direction:'lower'|'higher';delta:number|null;basis:string};
  protections:({id:string;kind:'hard';check:string;cases:string[]}|{id:string;kind:'soft';metric:Exclude<Metric,'task-pass'>;direction:'lower'|'higher';tolerance:number;basis:string;cases:string[]})[];
  trialBudget:{maxRequests:number;maxTokens:number};
- sides:Record<'baseline'|'candidate',{runtime:RuntimeContent;instructions:string}>;
+ sides:Record<'baseline'|'candidate',{runtime:RuntimeContent;instructions:string;effectiveTask?:EffectiveTask}>;
 }
 export interface ComparisonTrial {
  id:string;caseId:string;repeat:number;side:string;pair:string|null;version:string;
@@ -25,6 +26,8 @@ export function validateComparison(plan:ComparisonPlan,caseIds:string[],trials:{
  if(!plan.protections.length||new Set(plan.protections.map(p=>p.id)).size!==plan.protections.length)throw Error('INVALID_COMPARISON_PROTECTIONS');
  for(const p of plan.protections)if(!p.id||!p.cases.length||new Set(p.cases).size!==p.cases.length||p.cases.some(id=>!caseIds.includes(id))||!(p.kind==='hard'?typeof p.check==='string'&&p.check.length>0:p.kind==='soft'&&metrics.includes(p.metric)&&String(p.metric)!=='task-pass'&&['lower','higher'].includes(p.direction)&&known(p.tolerance)))throw Error('INVALID_COMPARISON_PROTECTION');
  for(const side of ['baseline','candidate'] as const)if(!plan.sides[side].runtime.id||!plan.sides[side].runtime.manifest||typeof plan.sides[side].instructions!=='string')throw Error('INVALID_COMPARISON_SIDE');
+ for(const side of ['baseline','candidate'] as const){const e=plan.sides[side].effectiveTask;if(e){if(!['read','coding'].includes(e.type)||Object.keys(e).some(k=>!['type','profile'].includes(k)))throw Error('INVALID_EFFECTIVE_TASK');validateTaskProfile(e.profile);}}
+ if(plan.sides.baseline.effectiveTask?.type!==plan.sides.candidate.effectiveTask?.type)throw Error('COMPARISON_TASK_TYPE_CHANGED');
  if(![plan.trialBudget.maxRequests,plan.trialBudget.maxTokens].every(n=>Number.isSafeInteger(n)&&n>0)||budget.maxRequests<plan.trialBudget.maxRequests*trials.length||budget.maxTokens<plan.trialBudget.maxTokens*trials.length)throw Error('COMPARISON_REQUIRES_FULL_PER_TRIAL_BUDGET');
  const schedule=pairedTrials('validation',caseIds,plan.repetitions);
  if(trials.length!==schedule.length||trials.some((t,i)=>t.caseId!==schedule[i].caseId||t.repeat!==schedule[i].repeat||t.side!==schedule[i].side||!t.pair))throw Error('INVALID_COMPARISON_ORDER');

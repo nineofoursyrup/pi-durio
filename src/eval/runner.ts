@@ -78,7 +78,9 @@ export async function runEval(options:RunEvalOptions){
    if(!stopReason){try{budget.check();}catch(error){stopReason=String(error);}}
    if(stopReason){outcome.reason=stopReason;appendFact(e,'eval.outcome',outcome);continue;}
    const inputDir=join(options.directory,`${trial.id}-input`);await mkdir(inputDir);
-   const guest={trialId:trial.id,mode:plan.mode,prompt:[plan.comparison?.sides[trial.side as 'baseline'|'candidate'].instructions,fixture.input].filter(Boolean).join('\n\n'),files:{...fixture.files,'package-lock.json':fixture.dependencyLock},dirty:fixture.dirty,maxOutputTokens:plan.maxOutputTokens,...(trial.scenario==='original-error'?{originalFailure:true}:{}),...(trial.scenario==='auto-compaction'?{verificationCompaction:{reserveTokens:999999,keepRecentTokens:1}}:{})};
+   const effectiveTask=plan.comparison?.sides[trial.side as 'baseline'|'candidate'].effectiveTask;
+   if(effectiveTask&&trial.scenario==='auto-compaction')throw Error('EVAL_PROFILE_OVERRIDE_DENIED');
+   const guest={...(effectiveTask?{effectiveTask}:{}),trialId:trial.id,mode:plan.mode,prompt:[plan.comparison?.sides[trial.side as 'baseline'|'candidate'].instructions,fixture.input].filter(Boolean).join('\n\n'),files:{...fixture.files,'package-lock.json':fixture.dependencyLock},dirty:fixture.dirty,maxOutputTokens:plan.maxOutputTokens,...(trial.scenario==='original-error'?{originalFailure:true}:{}),...(trial.scenario==='auto-compaction'?{verificationCompaction:{reserveTokens:999999,keepRecentTokens:1}}:{})};
    await writeFile(join(inputDir,'trial.json'),JSON.stringify(guest));
    const probe=trial.scenario==='boundary'?await prepareProbe(inputDir):undefined;
    const mediator=evalMediator(plan,trial,budget,options.transportForTrial?.(trial)??controlled(plan,trial),()=>owner.assertHeld());

@@ -20,7 +20,11 @@ import { readEnvironment } from './read-environment.js';
 import { captureArtifact, verifyArtifact } from './artifact.js';
 import { codingEnvironment, toolEnvironment, type ToolEnvironmentConfig, type ObservedFile } from './coding-environment.js';
 import { acquireWorkspaceOwner, resolveWorkspaceRoot } from './workspace-ownership.js';
-import { executionConfig, READ_INSTRUCTIONS, CODING_INSTRUCTIONS } from './execution-config.js';
+import { executionConfig,retainedExecutionConfig, READ_INSTRUCTIONS, CODING_INSTRUCTIONS } from './execution-config.js';
+import {applyTaskProfile,validateTaskProfile,type TaskProfile} from './task-profile.js';
+import {readImproveDefaults,type DefaultSnapshot} from './improve-defaults.js';
+import {improveFacts} from './improve-history.js';
+import {assertWorkspaceUnfenced} from './workspace-fence.js';
 import { prepareRecovery, recoveryRecords, sessionWasEnded, type RecoveryAuthorization, type RecoveryOptions, type RecoveryDecision, type RecoveryPlan, type RecoveryReport } from './recovery.js';
 export { readRun, readObject, readAcceptedTasks, readQueue } from './evidence.js';
 export { TaskControl } from './control.js';
@@ -41,6 +45,8 @@ export interface ReadTaskOptions {
   providerBoundary?: ProviderBoundary;
   /** Offline controlled validation of the same public compaction path. */
   verificationCompaction?: { reserveTokens:number; keepRecentTokens:number };
+  /** Fixed eval profile; requires the trusted provider dispatch capability. */
+  verificationProfile?:TaskProfile;
   signal?: AbortSignal;
   /** stop persists abort intent; exit preserves unfinished work and closes. */
   cancellation?: 'stop' | 'exit';
@@ -129,7 +135,7 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
   const latch = () => { firstIntent ??= options.cancellation ?? 'exit'; };
   options.signal?.addEventListener('abort', latch, { once: true });
   if (options.signal?.aborted) latch();
-  const stable={...options,toolEnvironment:options.toolEnvironment&&structuredClone(options.toolEnvironment),get cancellation(){return firstIntent??options.cancellation;}};
+  const stable={...options,verificationProfile:options.verificationProfile&&structuredClone(options.verificationProfile),toolEnvironment:options.toolEnvironment&&structuredClone(options.toolEnvironment),get cancellation(){return firstIntent??options.cancellation;}};
   try {
     let handoff:RunHandoff={},result=await executeTask(stable,coding,undefined,undefined,handoff);
     const pending=[...(handoff.pending??[])];
@@ -277,7 +283,7 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
       if(await realpath(auth.workspace)!==item.target.workspace||auth.mode!==accepted.mode||JSON.stringify([...auth.tools].sort())!==JSON.stringify([...accepted.authorization.tools].sort()))throw Error('QUEUE_AUTHORIZATION_CHANGED');
       const config=source.find(record=>record.seq===item.executionVersion.configSeq)!.data as any;
       if(config.providerBoundary)throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED: queued work cannot drop the original dispatch boundary');
-      const expected=executionConfig(accepted.authorization.execution==='trusted-local-coding',auth.mode,auth.toolEnvironment);
+      const expected=retainedExecutionConfig(owner.path,accepted.authorization.execution==='trusted-local-coding',auth.mode,auth.toolEnvironment,config);
       if(Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('QUEUE_EXECUTION_CONFIGURATION_CHANGED');
       await preflight(owner);
       let contextSource=source,contextRunId=item.target.runId;
@@ -307,6 +313,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
   if (!Number.isSafeInteger(cleanupTimeoutMs) || cleanupTimeoutMs < 1 || cleanupTimeoutMs > 300000) throw new Error('INVALID_CLEANUP_TIMEOUT: provide 1–300000 milliseconds');
   if (!options.input.trim() || Buffer.byteLength(options.input) > 32 * 1024) throw new Error('INPUT_LIMIT: provide 1–32768 bytes');
   if (options.verificationCompaction && (options.mode !== 'offline' || !options.providerBoundary || !Object.values(options.verificationCompaction).every(n=>Number.isSafeInteger(n)&&n>0) || options.verificationCompaction.keepRecentTokens > 32768 || options.verificationCompaction.reserveTokens > 1_048_576)) throw new Error('INVALID_VERIFICATION_COMPACTION');
+  if(options.verificationProfile&&(!options.providerBoundary||options.verificationCompaction))throw Error('IMPROVE_PROFILE_CAPABILITY_OR_OVERRIDE_DENIED');
   if (options.mode === 'offline' && !options.transport) throw new Error('OFFLINE_TRANSPORT_REQUIRED');
   if (options.mode === 'live' && options.transport) throw new Error('LIVE_TRANSPORT_OVERRIDE_DENIED');
   const apiKey = options.mode === 'offline' ? 'offline-transport-placeholder' : (options.apiKey ?? process.env.DEEPSEEK_API_KEY);
@@ -314,7 +321,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
   const workspace = await realpath(options.workspace);
   const workspaceRoot = coding ? await resolveWorkspaceRoot(workspace) : workspace;
   const shellEnvironment = coding ? toolEnvironment(options.toolEnvironment) : undefined;
-  const instructions = improve ? IMPROVE_INSTRUCTIONS : coding ? CODING_INSTRUCTIONS : INSTRUCTIONS;
+  let instructions = improve ? IMPROVE_INSTRUCTIONS : coding ? CODING_INSTRUCTIONS : INSTRUCTIONS;
   const requestedRoot = await validateDataRoot(options.dataRoot, workspaceRoot);
   await mkdir(requestedRoot, { recursive: true, mode: 0o700 });
   const dataRoot = await validateDataRoot(requestedRoot, workspaceRoot);
@@ -356,6 +363,9 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
   let workspaceOwner: Awaited<ReturnType<typeof acquireWorkspaceOwner>> | undefined;
   let result: RunResult | undefined;
   let analysis:ReturnType<typeof prepareImprove>|undefined,analysisTimer:ReturnType<typeof setTimeout>|undefined;
+  let defaults:DefaultSnapshot|undefined;
+  let defaultsObserved=false;
+  let configuration=executionConfig(coding,options.mode,options.toolEnvironment);
   let providerBoundary=options.providerBoundary;
   const guard = () => { owner.assertHeld(); sessionOwner?.assertHeld(); workspaceOwner?.assertHeld(); if (stopped || finalizing || controller.signal.aborted) throw new Error(failure ?? 'RUN_STOPPING'); };
   const record = (kind: string, data: unknown) => {
@@ -403,7 +413,15 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       if (workspaceOwner.root !== workspaceRoot) throw new Error('WORKSPACE_IDENTITY_CHANGED: project root changed before acceptance');
     }
     await chmod(dataRoot, 0o700);
+    if(!recovery?.readOnly&&!improve)assertWorkspaceUnfenced(workspace);
     const inspected = recovery ? [] : await preflight(owner);
+    const savedConfiguration=recovery?.config??(maintenance?maintenanceRecords.find(r=>r.kind==='execution.config')?.data:queued?recoveryRecords(dataRoot,queued.item.target.runId).find(r=>r.seq===queued.item.executionVersion.configSeq)?.data:undefined) as any;
+    if(!improve){
+      if(savedConfiguration){configuration=retainedExecutionConfig(dataRoot,coding,options.mode,options.toolEnvironment,savedConfiguration);defaults=savedConfiguration.improveDefaults;}
+      else if(options.verificationProfile)configuration=applyTaskProfile(configuration,validateTaskProfile(options.verificationProfile));
+      else {const current=readImproveDefaults(dataRoot,workspace,coding?'coding':'read');if(current.files.length){defaults=current;configuration=applyTaskProfile(configuration,current.profile);}}
+      instructions=configuration.instructions;
+    }else configuration={...configuration,instructions};
     let continued:ContextSnapshot|undefined;
     if(options.contextRunId&&!maintenance&&!queued&&!recovery){
       const prior=recoveryRecords(dataRoot,options.contextRunId),accepted=prior.find(r=>r.kind==='task.accepted')?.data as any;
@@ -412,7 +430,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       if(queueItems(dataRoot).some(i=>i.target.sessionId===accepted.sessionId&&['pending','dispatching','frozen'].includes(i.status)))throw Error('QUEUE_PREDECESSOR_UNRESOLVED');
       verifyArtifact(dataRoot,prior.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>);
       const config=prior.find(r=>r.kind==='execution.config')?.data as any;
-      const expected=executionConfig(coding,options.mode,options.toolEnvironment);
+      const expected=configuration;
       if(accepted.workspace!==workspace||Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('CONTEXT_EXECUTION_CONFIGURATION_CHANGED');
       if(config.providerBoundary)throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
       if(inspected.find(r=>r.source===join(dataRoot,'sessions',accepted.sessionId,'durable.sqlite'))?.pending.length||prior.some(r=>r.kind==='recovery.ended'))throw Error('CONTEXT_SOURCE_FROZEN');
@@ -422,7 +440,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     if(maintenance){
       verifyArtifact(dataRoot,maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>);
       const config=maintenanceRecords.find(r=>r.kind==='execution.config')?.data as any;
-      const expected=executionConfig(coding,options.mode,options.toolEnvironment);
+      const expected=retainedExecutionConfig(dataRoot,coding,options.mode,options.toolEnvironment,config);
       if(maintenanceRecords.some(r=>r.kind==='recovery.ended'))throw Error('COMPACTION_SOURCE_ENDED');
       if(workspace!==sourceAccepted.workspace||Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('COMPACTION_EXECUTION_CONFIGURATION_CHANGED');
       if(config.providerBoundary&&(providerBoundary?.operationId!==config.providerBoundary.operationId||providerBoundary?.budget?.id!==config.providerBoundary.budget?.id))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
@@ -438,7 +456,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       const artifact=source.find(record=>record.seq===queued.item.executionVersion.artifactSeq)?.data as ReturnType<typeof captureArtifact>;
       const config=source.find(record=>record.seq===queued.item.executionVersion.configSeq)?.data as Record<string,unknown>;
       verifyArtifact(dataRoot,artifact);
-      const expected=executionConfig(coding,options.mode,options.toolEnvironment);
+      const expected=retainedExecutionConfig(dataRoot,coding,options.mode,options.toolEnvironment,config);
       if(workspace!==queued.item.target.workspace||!config||Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('QUEUE_EXECUTION_VERSION_OR_AUTHORIZATION_CHANGED');
       const current=findQueueItem(dataRoot,queued.item.requestId);
       if(current?.status!=='pending')throw Error('QUEUE_NOT_PENDING');
@@ -471,9 +489,8 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     models.setProvider(deepseekProvider());
     const model = models.getModel('deepseek', 'deepseek-flash');
     if (!model || model.api !== 'openai-completions' || model.baseUrl !== 'https://api.deepseek.com') throw new Error('MODEL_CONFIGURATION_MISMATCH');
-    const configuration = {...executionConfig(coding,options.mode,options.toolEnvironment),instructions};
     const settings = improve ? {...configuration.settings,toolExecution:'sequential' as const,stream:{...configuration.settings.stream,maxTokens:improve.request.limits.maxOutputTokens,timeoutMs:improve.request.limits.maxDurationMs}} : options.verificationCompaction ? {...configuration.settings,compaction:{enabled:true,...options.verificationCompaction}} : configuration.settings;
-    const configSeq=maintenance?maintenanceRecords.find(r=>r.kind==='execution.config')!.seq:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.config')!.seq:record('execution.config', { cleanupTimeoutMs, ...configuration, settings, ...(providerBoundary?{providerBoundary:{kind:'trusted-dispatch-capability',operationId:providerBoundary.operationId,budget:providerBoundary.budget?{id:providerBoundary.budget.id,root:providerBoundary.budget.evidence.root,runId:providerBoundary.budget.evidence.runId,limits:providerBoundary.budget.limits}:null,recovery:'requires-original-capability; this entry supports readonly or explicit end only'}}:{}), ...(options.verificationCompaction?{verificationCompaction:options.verificationCompaction}:{}), recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
+    const configSeq=maintenance?maintenanceRecords.find(r=>r.kind==='execution.config')!.seq:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.config')!.seq:record('execution.config', { cleanupTimeoutMs, ...configuration, settings,...(defaults?{improveDefaults:defaults}:{}),...(options.verificationProfile?{verificationProfile:options.verificationProfile}:{}), ...(providerBoundary?{providerBoundary:{kind:'trusted-dispatch-capability',operationId:providerBoundary.operationId,budget:providerBoundary.budget?{id:providerBoundary.budget.id,root:providerBoundary.budget.evidence.root,runId:providerBoundary.budget.evidence.runId,limits:providerBoundary.budget.limits}:null,recovery:'requires-original-capability; this entry supports readonly or explicit end only'}}:{}), ...(options.verificationCompaction?{verificationCompaction:options.verificationCompaction}:{}), recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
     if(maintenance){
       if(!maintenance.item){
         record('control.accepted',{requestId:maintenance.requestId,kind:'compact',input:'compact',taskId:null,target:{workspace,sessionId,taskId,runId},executionVersion:{artifactId:artifact.id,artifactSeq,configSeq},authorization});
@@ -512,6 +529,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
               // Preserve the actual entry even for a synchronous transport failure. Intent bytes were saved before this call.
               void pending.catch(()=>{});
               record('model.dispatch',{...request,transportEntered:true,boundary:'configured host transport entered; provider wire dispatch is not proven here'});
+              if(defaults&&!defaultsObserved&&!recovery&&!maintenance){defaultsObserved=true;for(const fact of improveFacts(dataRoot).filter(f=>f.kind==='improve.activation'&&(f.data.defaults??[]).some((d:any)=>d.current.revision===defaults!.revision)))record('improve.default-observed',{id:fact.data.id,groupId:fact.data.groupId,activationSource:fact.sourceId,revision:defaults.revision,profileId:defaults.profileId,runId,taskId,configSeq,attemptId,scope:'Actual new task entered configured transport with its fixed profile; not proof of causal improvement'});}
               return pending;
             };
             let response:Response;

@@ -6,7 +6,7 @@ import { Evidence, digest, openHostReadonly, readObject, type EvidenceRecord, ty
 import { acquireOwner, type OwnerLease } from './ownership.js';
 import { inspectSession } from './preflight.js';
 import { verifyArtifact } from './artifact.js';
-import { executionConfig } from './execution-config.js';
+import { retainedExecutionConfig } from './execution-config.js';
 import { resolveWorkspaceRoot } from './workspace-ownership.js';
 import type { ToolEnvironmentConfig } from './coding-environment.js';
 import type { SubmissionId } from '@earendil-works/pi-durable';
@@ -164,7 +164,7 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
         const previous = last(records,'workspace.owner');
         if (!previous || previous.root !== await resolveWorkspaceRoot(workspace)) reasons.push('WORKSPACE_ROOT_CHANGED');
       }
-      const expected = executionConfig(coding,auth.mode,auth.toolEnvironment);
+      const expected = retainedExecutionConfig(owner.path,coding,auth.mode,auth.toolEnvironment,config);
       if (!config || config.recoveryProtocol !== 1 || Object.entries(expected).some(([key,value]) => JSON.stringify(config[key]) !== JSON.stringify(value))) reasons.push('EXECUTION_CONFIGURATION_CHANGED');
       const agent = session.agents.find(agent => agent.conversationId === started?.conversationId)?.value as any;
       if (!agent || agent.cwd !== accepted.workspace || agent.instructions !== expected.instructions || agent.model?.provider !== 'deepseek' || agent.model?.modelId !== 'deepseek-flash' || agent.tools !== undefined || agent.extensions !== undefined || agent.thinkingLevel !== undefined) reasons.push('DURABLE_AGENT_CHANGED');
