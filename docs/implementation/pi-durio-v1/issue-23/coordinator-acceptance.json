@@ -1,0 +1,43 @@
+{
+  "issue": 23,
+  "acceptedAt": "2026-10-09T17:48:47.038990+00:00",
+  "status": "integrated-accepted",
+  "scope": "T13 applicable explicit restricted improve analysis/report acceptance; controlled provider mechanics only",
+  "productSource": "401a1b533b5242c0338ffc611f3e4241417e610f",
+  "ticketTip": "ea0c1ed70a28240214a740a4c543e91a6d00291f",
+  "integrationMerge": "ee33413ab9e6af1af5bc98a51536149433098625",
+  "mergeTree": "01a1981211f343d853bcc174b296d2a66b90e96e",
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/merge-integration-readback.json",
+    "sha256": "0775078b0d821ca4dc6cc19cb4d2c72bece50c315c5fdbf8a8eb490bc8fa77f3"
+  },
+  "criteria": {
+    "explicitAnalysis": "PASS: same public Pi loop, only scoped evidence_summary/evidence_read/source_view, fixed original target/cutoff/limits, no coding-context inheritance",
+    "report": "PASS: zero/useful reports, maximum and schema enforcement, fixed source citations/revisions/target baselines, facts/hypotheses/gaps; selected remains empty",
+    "limitsQueue": "PASS: request/token/unknown/time stop, retained incomplete reports, repeat identity no reset; original-target queue, stop freeze and explicit withdrawal",
+    "sourceIdentity": "PASS: explicit registration, content/compiler/build correspondence and mismatch gaps; no name search or installation edits",
+    "readonly": "PASS: installed cold CLI reports, duplicate request and TUI renderer preserve original report and complete primary data-root inventory",
+    "evalCompatibility": "PASS: fixed guest carries new source-build identity; one new actual runtime/grader VM trial, 4 dispatches / 56 tokens, both VMs terminated",
+    "identity": "PASS: 109 source/214 workspace dist/154 installed dist, 12813 package files plus4links; 795 demo records and170 trial records/12930 objects bound"
+  },
+  "checks": {
+    "full": "141/141 before issue22 merge with stated applicability",
+    "affected": "7 improve hardening;22 merged improve/eval/comparison;1 TUI;1 eval materialization;1 real shell output regression",
+    "integration": "Same delivered tree, no conflict or executable change; existing applicable evidence reused"
+  },
+  "preserved": [
+    "All first failures and unknown usage",
+    "r2 actual-output listing failure fixed without loosening redaction",
+    "r3 correct recovery-fence rejection retained; independent interrupted demo stores in r4",
+    "162 original files, 4 untracked originals and839 protected files unchanged"
+  ],
+  "remaining": [
+    "#24-26 selection/suppression/validation/writeback/activation",
+    "#27-29 daily metrics",
+    "#30 real DeepSeek and improve loop, paid authorization NOT GRANTED",
+    "#31 native aggregate acceptance and measurements",
+    "#32 explicit human daily-use acceptance",
+    "Final fixed-candidate independent review"
+  ],
+  "rootDist": "Old ignored root dist preserved; current validated independent installation is issue-23/r4/install"
+}
