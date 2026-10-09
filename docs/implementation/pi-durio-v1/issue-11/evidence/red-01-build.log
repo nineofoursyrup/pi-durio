@@ -1,0 +1,10 @@
+
+> pi-durio@0.1.0 build
+> tsc
+
+test/runtime.test.ts(6,38): error TS2307: Cannot find module '../src/runtime.js' or its corresponding type declarations.
+test/runtime.test.ts(7,31): error TS2307: Cannot find module '../src/offline.js' or its corresponding type declarations.
+test/runtime.test.ts(24,32): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/runtime.test.ts(25,41): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/runtime.test.ts(27,32): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/runtime.test.ts(28,32): error TS7006: Parameter 'r' implicitly has an 'any' type.

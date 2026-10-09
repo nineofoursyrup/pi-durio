@@ -1,0 +1,44 @@
+{
+  "mode": "offline",
+  "networkModelCalls": 0,
+  "runId": "03ff7f1f-9de0-4c2e-ad2d-1a6dbf761f38",
+  "sessionId": "eb44f740-eeb2-47b3-91ff-5598fa5ce278",
+  "runStatus": "completed",
+  "showExit": 0,
+  "missingAuthExit": 78,
+  "originalFailureStatus": "unknown",
+  "originalFailureRequests": 1,
+  "secondWriterExit": 73,
+  "ownerCleanup": "confirmed",
+  "usage": {
+    "source": "pi.usage",
+    "scope": "session:eb44f740-eeb2-47b3-91ff-5598fa5ce278",
+    "completeness": "known",
+    "value": {
+      "models": {
+        "deepseek/deepseek-flash": {
+          "input": 20,
+          "output": 8,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 28,
+          "cost": {
+            "input": 0.000006,
+            "output": 0.0000096,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.0000156
+          }
+        }
+      },
+      "tools": {}
+    },
+    "cost": {
+      "kind": "estimate",
+      "currency": "USD",
+      "source": "@earendil-works/pi-ai@1.1.0 model price catalog",
+      "observedAt": "2026-10-09T09:57:55.040Z"
+    }
+  }
+}
