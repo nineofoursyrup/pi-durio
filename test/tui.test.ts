@@ -1,14 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { CURSOR_MARKER, TuiAltScreen, stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
 import { HardwareCursorEditor } from '../src/tui/cursor.js';
-import { demoTransport } from '../src/offline.js';
-import { readRun } from '../src/runtime.js';
+import { demoTransport, scriptedTransport } from '../src/offline.js';
+import { readRun, readQueue, readAcceptedTasks, runReadTask } from '../src/runtime.js';
 
 class TestTerminal implements Terminal {
   columns = 80; rows = 24; kittyProtocolActive = false; writes: string[] = []; stopped = false;
@@ -21,10 +21,10 @@ class TestTerminal implements Terminal {
 }
 const tick = () => new Promise(r => setTimeout(r,30));
 async function until(predicate:()=>boolean) { for(let i=0;i<200;i++) { if(predicate()) return; await tick(); } throw Error('condition timed out'); }
-function fixture(override?: typeof fetch) {
+function fixture(override?: typeof fetch,coding=false) {
   const root=mkdtempSync(join(tmpdir(),'durio-tui-')); const workspace=join(root,'project'); mkdirSync(workspace); writeFileSync(join(workspace,'README.md'),'Fixture 中文 👩‍💻 é\n');
   const terminal=new TestTerminal(); const transport=demoTransport();
-  const app=new ReadOnlyTui({ workspace, dataRoot:join(root,'data'), draftRoot:join(root,'drafts'), mode:'offline', transport:override??transport.fetch, terminal, widthCalibration:false, copy:async()=>true });
+  const app=new ReadOnlyTui({ workspace, dataRoot:join(root,'data'), draftRoot:join(root,'drafts'), mode:'offline', transport:override??transport.fetch, terminal, widthCalibration:false, copy:async()=>true,coding });
   const screen=()=>app.screen().map(stripTerminalSequences).join('\n'); app.start();
   return {root,workspace,terminal,transport,app,screen};
 }
@@ -33,7 +33,42 @@ test('non-terminal CLI rejection does not emit terminal modes into a pipeline', 
   const child=spawnSync(process.execPath,['dist/src/cli.js','tui','--workspace','test/fixtures/project','--offline-demo'],{encoding:'utf8'});
   assert.equal(child.status,1);assert.match(child.stderr,/TUI_REQUIRES_TERMINAL/);assert.equal(child.stdout,'');
   const coding=spawnSync(process.execPath,['dist/src/cli.js','tui','--workspace','test/fixtures/project','--offline-demo','--coding'],{encoding:'utf8'});
-  assert.equal(coding.status,1);assert.match(coding.stderr,/currently grants read only/);assert.equal(coding.stdout,'');
+  assert.equal(coding.status,1);assert.match(coding.stderr,/TUI_REQUIRES_TERMINAL/);assert.equal(coding.stdout,'');
+});
+
+test('coding UI delivers busy Enter and Ctrl+X Enter to authoritative queue facts, supports withdrawal and keeps history readonly',async()=>{
+  const script=scriptedTransport([{name:'bash',args:{command:`'${process.execPath}' hold.cjs`}}]);
+  const f=fixture(script.fetch,true),key=(data:string)=>f.terminal.input(data),root=join(f.root,'data');
+  writeFileSync(join(f.workspace,'hold.cjs'),"require('node:fs').writeFileSync('started.txt','started');console.log('holding');setTimeout(()=>console.log('released'),1800);");
+  try {
+    key('Run local coding tool');key('\r');await until(()=>existsSync(join(f.workspace,'started.txt')));
+    key('Keep this original task');key('\r');await until(()=>readQueue(root).items.length===1);
+    key('Follow-up to withdraw');key('\x18');key('\r');await until(()=>readQueue(root).items.length===2);
+    assert.equal(readAcceptedTasks(root).tasks.length,2);assert.equal(readAcceptedTasks(root).tasks[1].runId,null);
+    key('/queue');key('\r');key('\x1b[C');key('w');await until(()=>readQueue(root).items[1].status==='withdrawn');
+    key('\x1b');key('Follow-up to execute');key('\x18');key('\r');await until(()=>readQueue(root).items.length===3);
+    await until(()=>f.screen().includes('已完成'));
+    assert.equal(script.calls.length,3);assert.doesNotMatch(JSON.stringify(script.calls),/Follow-up to withdraw/);assert.match(JSON.stringify(script.calls.at(-1)),/Keep this original task/);
+    key('/older');key('\r');key('readonly history input');key('\r');assert.match(f.screen(),/只读历史/);assert.equal(script.calls.length,3);
+    key('\x03');key('\x03');const exit=await f.app.closed;assert.equal(exit.result?.status,'completed');
+  }finally{await f.app.exit();}
+});
+
+test('closing the recovery panel cannot unlock execution; explicit end preserves original unknown before a new task',async()=>{
+  const root=mkdtempSync(join(tmpdir(),'durio-tui-recovery-')),workspace=join(root,'project'),dataRoot=join(root,'data');mkdirSync(workspace);writeFileSync(join(workspace,'README.md'),'recovery fixture');
+  const controller=new AbortController();
+  const original=await runReadTask({workspace,dataRoot,input:'Interrupted task',mode:'offline',signal:controller.signal,cancellation:'exit',transport:async(_url,init)=>new Promise((_resolve,reject)=>{init!.signal!.addEventListener('abort',()=>reject(Error('interrupted')));controller.abort();})});
+  const terminal=new TestTerminal(),transport=demoTransport();
+  const app=new ReadOnlyTui({workspace,dataRoot,runId:original.runId,draftRoot:join(root,'drafts'),mode:'offline',transport:transport.fetch,terminal,widthCalibration:false});app.start();
+  const key=(data:string)=>terminal.input(data),screen=()=>app.screen().map(stripTerminalSequences).join('\n');
+  try {
+    await until(()=>screen().includes('恢复核对 ·'));
+    key('\x1b');key('must not run');key('\r');assert.match(screen(),/只读历史\/恢复/);assert.equal(transport.calls.length,0);
+    key('\x03');key('/bottom');key('\r');assert.match(screen(),/恢复限制仍生效/);
+    key('/recover');key('\r');await until(()=>screen().includes('恢复核对 ·'));key('e');await until(()=>screen().includes('恢复决定：ended'));
+    assert.equal(transport.calls.length,0);assert.equal(((await readRun(dataRoot,original.runId)).result as {status:string}).status,'unknown');
+    key('New explicit task');key('\r');await until(()=>screen().includes('已完成'));assert.equal(transport.calls.length,2);
+  }finally{await app.exit();}
 });
 
 test('editor keeps graphemes, multiline and recoverable drafts; overlays consume exits and double-key confirmation expires', async () => {

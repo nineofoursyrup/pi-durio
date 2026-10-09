@@ -43,6 +43,13 @@ export function recoveryRecords(root: string, runId?: string): EvidenceRecord[] 
   try { return db.prepare(`SELECT seq,kind,at,body FROM records ${runId ? 'WHERE run_id=?' : ''} ORDER BY seq`).all(...(runId ? [runId] : [])).map(row => ({ seq: Number(row.seq), kind: String(row.kind), at: String(row.at), data: JSON.parse(readObject(root, JSON.parse(String(row.body)) as BlobRef).toString()) })); }
   finally { db.close(); }
 }
+function freezePendingControls(evidence:Evidence,records:EvidenceRecord[]) {
+  for(const record of records.filter(record=>record.kind==='control.accepted')) {
+    const admission=record.data as any;
+    const state=records.findLast(record=>record.kind==='control.receipt'&&(record.data as any).requestId===admission.requestId)?.data as any;
+    if(!state||state.status==='pending'||state.status==='dispatching')evidence.append('control.receipt',{requestId:admission.requestId,status:'frozen',reason:'Recovery check freezes unapplied inputs; closing the panel or continuing old work never reattaches them'});
+  }
+}
 interface OwnerClaim { path:string; markerSha256:string; claim:{pid:number;host:string;token?:string}; lock:{ino:number;mtimeMs:number}|null }
 async function ownerClaims(root:string,records:EvidenceRecord[]):Promise<OwnerClaim[]> {
   const acquired=last(records,'ownership.acquired');
@@ -92,6 +99,9 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   const tools: RecoveryTool[] = [];
   const pending = session.tasks.filter(t => t.state.status !== 'terminal');
   const submission = session.submissions.find(item => item.type === 'input' && item.requestId === accepted.taskId && item.conversationId === started?.conversationId);
+  const steerIds=new Set(records.filter(record=>record.kind==='control.accepted'&&(record.data as any).kind==='steer'&&(record.data as any).target?.runId===options.runId&&(record.data as any).taskId===accepted.taskId).map(record=>(record.data as any).requestId));
+  const ownedSubmissions=session.submissions.filter(item=>item.conversationId===started?.conversationId&&(item.id===submission?.id||item.type==='input'&&steerIds.has(item.requestId)));
+  const ownedSubmissionIds=new Set(ownedSubmissions.map(item=>item.id));
   const unknownModelAttempts = records.filter(r => r.kind === 'model.intent' && !records.some(response => response.kind === 'model.response' && (response.data as any).attemptId === (r.data as any).attemptId && (response.data as any).usage === 'reported')).map(r => (r.data as any).attemptId as string);
   const remainingModelAttempts = Math.max(0, 8 - records.filter(r => r.kind === 'model.intent').length);
   for (const task of session.tasks.filter(t => t.kind === 'pi.tool')) {
@@ -113,10 +123,10 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   }
   // No raw Harness escapes this boundary. Every live task/submission in the whole store must belong to this run.
   if (!started || !submission) reasons.push('CROSS_STORE_GAP: missing run/conversation/submission identity; never resend an unknown admission');
-  if (session.submissions.some(item => (item.status === 'queued' || item.status === 'placed') && item.id !== submission?.id)) reasons.push('OTHER_PENDING_SUBMISSION');
+  if (session.submissions.some(item => (item.status === 'queued' || item.status === 'placed') && !ownedSubmissionIds.has(item.id))) reasons.push('OTHER_PENDING_SUBMISSION');
   if (pending.some(task => task.conversationId !== started?.conversationId || task.background || !['pi.generation','pi.tool'].includes(task.kind) || task.version !== 1)) reasons.push('OTHER_PENDING_TASK_OR_UNSUPPORTED_DEFINITION');
   const live=session.live.find(item=>item.conversationId===started?.conversationId)?.value;
-  const controlledRun=live?.run?.inputs.length===1&&live.run.inputs[0]===submission?.id ? live.run.taskId : undefined;
+  const controlledRun=live?.run?.inputs.length&&live.run.inputs.every(id=>ownedSubmissionIds.has(id)) ? live.run.taskId : undefined;
   if (pending.some(task=>task.kind==='pi.generation' ? task.id!==controlledRun : task.owner!==controlledRun)) reasons.push('OTHER_PENDING_TASK_OUTSIDE_ACCEPTED_RUN');
   if (pending.some(task=>task.abortRequested)) reasons.push('DURABLE_ABORT_INTENT_PRESERVED');
   if (pending.some(task=>'checkpoint' in task.state && (task.kind==='pi.tool' ? !['call','execute'].includes(task.state.checkpoint?.phase)||task.state.checkpoint?.phase==='execute'&&task.state.checkpoint.replay!=='unsafe' : !['prepare','request','retry','tools'].includes(task.state.checkpoint?.phase)))) reasons.push('UNSUPPORTED_EXECUTION_CHECKPOINT');
@@ -158,7 +168,7 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   const report: RecoveryReport = { runId:options.runId,snapshotId,status,exitCode:status === 'completed'||status === 'ended'?0:75,reasons,options:status === 'completed'||status === 'ended'?[]:reasons.length?['inspect','end']:['inspect','continue','end'],original,tools,unknownModelAttempts,remainingModelAttempts,session:{id:accepted.sessionId,sourceFiles:session.sourceFiles,pending:session.pending,taskCount:session.tasks.length,submissionCount:session.submissions.length},persistence:'not-requested' };
   if(reasons.some(reason=>/OTHER_PENDING|OTHER_SESSION|SESSION_WITHOUT|ALIAS/.test(reason))) report.options=['inspect','external-verification'];
   if(report.exitCode===75) report.needsInput={reason:reasons.length?reasons.join('; '):'Explicit continuation or ending is required',options:report.options,risks:[...tools.filter(tool=>tool.fact==='unknown').map(tool=>`Tool ${tool.taskId} (${tool.tool}) may already have changed files or external resources; a retry may duplicate its effects. Resolve with retry, skip, completed, or end.`),...(unknownModelAttempts.length?['A new model request may add fees; earlier unknown/partial usage stays unknown/partial.']:[])]};
-  return { report, records, session, accepted, started, submission, config, coding };
+  return { report, records, session, accepted, started, submission, ownedSubmissions, config, coding };
 }
 
 /** No source database changes, model, tool, migration, or ordinary Harness open. Owner markers are temporary coordination only. */
@@ -177,11 +187,13 @@ export async function checkRecovery(options: RecoveryOptions): Promise<RecoveryR
   let owner: OwnerLease | undefined;
   try {
     owner = await acquireOwner(options.dataRoot, () => {});
-    const {report} = await inspectOwnedRecovery(options,owner);
     const evidence = new Evidence(owner.path,options.runId);
-    try { report.persistence='saved'; evidence.append('recovery.report',report); }
+    try {
+      freezePendingControls(evidence,recoveryRecords(owner.path,options.runId));
+      const {report}=await inspectOwnedRecovery(options,owner);
+      report.persistence='saved'; evidence.append('recovery.report',report);return report;
+    }
     finally { evidence.close(); }
-    return report;
   } catch (error) {
     if (String(error).includes('OWNER_CONFLICT')) {const report=await inspectRecovery(options);report.persistence='saved-separate-owner-report';await saveOwnerReport(options.dataRoot,report);return report;}
     throw error;
@@ -232,6 +244,7 @@ export interface RecoveryPlan {
   owner: OwnerLease; report: RecoveryReport; records: EvidenceRecord[]; accepted: any; started: any; config: any; coding: boolean;
   submissionId: SubmissionId; decision: RecoveryDecision; readOnly: boolean; previousRequests: number; previousUsageUnknown: boolean;
   adopted?:boolean;
+  frozenSubmissions?:{id:SubmissionId;requestId:string}[];
 }
 export async function prepareRecovery(options: RecoveryOptions & {decision:RecoveryDecision}) : Promise<RecoveryPlan | RecoveryReport | RunResult> {
   let owner:OwnerLease;
@@ -252,7 +265,7 @@ export async function prepareRecovery(options: RecoveryOptions & {decision:Recov
     }
     if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(options.decision.id)) throw new Error('INVALID_DECISION_ID');
     const inspected = await inspectOwnedRecovery(options,owner);
-    const {report,session,accepted,started,submission,config,coding} = inspected;
+    const {report,session,accepted,started,submission,ownedSubmissions,config,coding} = inspected;
     if (options.decision.snapshotId !== report.snapshotId) throw new Error('STALE_RECOVERY_DECISION');
     const evidence = new Evidence(owner.path,options.runId);
     try {
@@ -264,6 +277,7 @@ export async function prepareRecovery(options: RecoveryOptions & {decision:Recov
         // Host quarantine never opens the old store or starts an unrelated pending task.
         // Unknown ownership/extra work cannot be silently ended on behalf of a different run.
         if (report.reasons.some(reason => /OTHER_PENDING|OTHER_SESSION|SESSION_WITHOUT|ALIAS/.test(reason))) return report;
+        freezePendingControls(evidence,inspected.records);
         evidence.append('recovery.decision',{decision:options.decision,authorization:authorizationIdentity(options.authorization),originalStatus:(report.original as any).status,classification:'user-choice; does not establish past success or cleanup'});
         const ended: RecoveryReport = {...report,status:'ended',exitCode:0,options:[],decisionId:options.decision.id,persistence:'saved'};
         evidence.append('recovery.ended',{decisionId:options.decision.id,sessionId:accepted.sessionId,sourceId:identity(session.sourceFiles),report:ended,disposition:'host-quarantined; durable originals and unknown facts retained; this store will never be scheduled'});
@@ -274,10 +288,12 @@ export async function prepareRecovery(options: RecoveryOptions & {decision:Recov
       if (!options.decision.acceptAdditionalModelAttempts) report.reasons.push('ADDITIONAL_MODEL_ATTEMPTS_REQUIRE_EXPLICIT_ACCEPTANCE: retries may incur new costs; previous unknown usage remains unknown');
       for (const tool of report.tools.filter(tool => tool.fact === 'unknown'&&!tool.resolution)) if (!resolutions.some(r => r.taskId === tool.taskId)) report.reasons.push(`TOOL_OUTCOME_UNKNOWN:${tool.taskId}: retry may duplicate external effects; choose retry, skip, completed, or end`);
       if (report.reasons.length) { report.persistence='saved'; evidence.append('recovery.report',report); return report; }
+      freezePendingControls(evidence,inspected.records);
       evidence.append('recovery.decision',{decision:options.decision,authorization:authorizationIdentity(options.authorization),originalStatus:(report.original as any).status,classification:'user-choice; does not establish past success or cleanup'});
       const readOnly = report.tools.some(tool => tool.fact === 'completed-uncommitted'||tool.resolution&&tool.resolution.choice!=='retry') || resolutions.some(r => r.choice !== 'retry');
       transfer=true;
-      return {owner,report,records:inspected.records,accepted,started,submissionId:submission!.id,config,coding,decision:options.decision,readOnly,previousRequests:8-report.remainingModelAttempts,previousUsageUnknown:report.unknownModelAttempts.length>0};
+      return {owner,report,records:inspected.records,accepted,started,submissionId:(ownedSubmissions.find(item=>item.status==='placed')??submission)!.id,config,coding,decision:options.decision,readOnly,previousRequests:8-report.remainingModelAttempts,previousUsageUnknown:report.unknownModelAttempts.length>0,
+        frozenSubmissions:ownedSubmissions.filter(item=>item.status==='queued'&&item.id!==submission!.id).map(item=>({id:item.id,requestId:item.requestId!}))};
     } finally { evidence.close(); }
   } finally { if (!transfer) await owner.release(); }
 }
