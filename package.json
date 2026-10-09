@@ -18,6 +18,7 @@
     "scripts/isolation",
     "docs/implementation/pi-durio-v1/issue-21/README.md",
     "docs/implementation/pi-durio-v1/issue-22/README.md",
+    "docs/implementation/pi-durio-v1/issue-27",
     "docs/implementation/pi-durio-v1/issue-23/README.md"
   ],
   "engines": {
@@ -49,6 +50,7 @@
     "./eval": "./dist/src/eval/runner.js",
     "./storage": "./dist/src/storage.js",
     "./compaction": "./dist/src/compaction.js",
+    "./metrics": "./dist/src/metrics/index.js",
     "./improve": "./dist/src/improve.js"
   },
   "bundleDependencies": [
