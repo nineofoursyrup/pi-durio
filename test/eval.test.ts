@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,unlinkSync,readFileSync} from 'node:fs';
+import {mkdtempSync,unlinkSync,readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {Evidence,digest} from '../src/evidence.js';
@@ -8,12 +8,20 @@ import {fixEvidence} from '../src/fixed-evidence.js';
 import {representativeCases} from '../src/eval/fixtures.js';
 import {verifiedImage,validatePlan,type EvalPlan} from '../src/eval/plan.js';
 import {evalReport,formatEvalReport} from '../src/eval/runner.js';
-import {appendFact,evalFacts} from '../src/eval/store.js';
+import {appendFact,evalFacts,installedRuntimeFiles,captureFiles,materialize} from '../src/eval/store.js';
 import {PersistentBudget} from '../src/provider-boundary.js';
 import {evalMediator} from '../src/eval/mediator.js';
 import {EvalView} from '../src/tui/eval.js';
 import {pairedTrials} from '../src/eval/comparison.js';
 function plan(e:Evidence):EvalPlan{return{id:'plan',purpose:'test fixed reporting',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:{id:'content-v1',manifest:e.blob('[]'),bytes:2},cases:representativeCases,trials:['good','failure','grader-error','not-run'].map(id=>({id,caseId:'local-fix',version:'content-v1',side:'candidate',repeat:1,pair:null})),budget:{maxRequests:8,maxTokens:1000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null},trialTimeoutMs:1000,gradingTimeoutMs:1000,maxOutputTokens:32,requestRetryLimit:0,price:{version:'test',source:'controlled',currency:'USD',perMillionTokens:0},authorization:{scope:'run-all-listed-trials',paid:false},environment:{node:'v24.8.0',isolation:'fixture only',writable:'new',cache:'empty'},mainObjective:'requirements',protection:['originals'],improvementConclusion:'not-evaluated'};}
+
+test('fixed eval runtime carries execution source identity but excludes host graders when materialized',()=>{
+ const root=mkdtempSync(join(tmpdir(),'durio-eval-build-')),installation=join(root,'installation');mkdirSync(join(installation,'dist/src/eval'),{recursive:true});mkdirSync(join(installation,'dist/execution'),{recursive:true});
+ const identity='{"version":1,"claim":"retained source-build identity"}';
+ for(const [path,content]of Object.entries({'package.json':'{}','dist/execution/package-lock.json':'{"packages":{}}','eval-environment.json':'{}','dist/execution/source-build.json':identity,'dist/src/runtime.js':'runtime','dist/src/eval/guest.js':'guest','dist/src/eval/runner.js':'host-only grader'}))writeFileSync(join(installation,path),content);
+ const files=installedRuntimeFiles(installation);assert.ok(files.includes('dist/execution/source-build.json'));assert.ok(!files.includes('dist/src/eval/runner.js'));
+ const evidence=new Evidence(join(root,'data'),'fixed-runtime'),fixed=captureFiles(evidence,installation,files);evidence.close();materialize(join(root,'data'),fixed.files,join(root,'guest'));assert.equal(readFileSync(join(root,'guest/dist/execution/source-build.json'),'utf8'),identity);
+});
 
 test('a started trial without final host duration is unknown time rather than a zero-duration total',async()=>{
  const root=mkdtempSync(join(tmpdir(),'durio-eval-time-gap-')),e=new Evidence(root,'plan');const source=appendFact(e,'eval.plan',plan(e));e.close();await fixEvidence(root,{id:'eval-plan:plan',sources:[source],purpose:'fixed time-gap fixture'});

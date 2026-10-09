@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {Evidence,readObject} from './evidence.js';
 
-export type RequestPurpose='generation'|'compaction'|'grading'|'eval-runtime';
+export type RequestPurpose='generation'|'compaction'|'grading'|'eval-runtime'|'improve';
 export interface BudgetLimits {
  maxRequests:number; maxTokens:number; maxRequestTokens:number; deadline:string;
  /** A trusted, fixed upper bound with provenance. Null means any unreported usage blocks continuation. */
