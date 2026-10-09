@@ -94,7 +94,7 @@ test('completed-source follow-up requires an explicit compatible decision after 
   let actions:Promise<void>|undefined;
   const result=await runCodingTask({...paths,input:'Complete before a management barrier.',mode:'offline',transport:script.fetch,control,onObservation:event=>{
     if(event.kind!=='tool.output'||actions)return;
-    actions=(async()=>{const target=control.target()!;await control.submit({id:'management','kind':'compact',input:'compact',target});await control.submit({id:'reopen-follow',kind:'follow-up',input:'Read the preceding result, without repeating its tool.',target});})();
+    actions=(async()=>{const target=control.target()!;await control.submit({id:'management','kind':'improve',input:'improve',target});await control.submit({id:'reopen-follow',kind:'follow-up',input:'Read the preceding result, without repeating its tool.',target});})();
   }});await actions;assert.equal(result.status,'completed');
   const report=await checkQueue(paths.dataRoot),item=report.items.find(item=>item.requestId==='reopen-follow')!;
   const authorization={workspace:paths.workspace,mode:'offline' as const,tools:['read','write','edit','bash'] as const};

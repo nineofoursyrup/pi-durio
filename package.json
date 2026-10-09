@@ -45,7 +45,8 @@
     "./tui": "./dist/src/tui/app.js",
     "./query": "./dist/src/query.js",
     "./eval": "./dist/src/eval/runner.js",
-    "./storage": "./dist/src/storage.js"
+    "./storage": "./dist/src/storage.js",
+    "./compaction": "./dist/src/compaction.js"
   },
   "bundleDependencies": [
     "@earendil-works/pi-ai",

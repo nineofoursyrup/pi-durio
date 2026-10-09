@@ -1,0 +1,266 @@
+{
+  "schema": "pi-durio-v1-issue19-acceptance-v1",
+  "createdAt": "2026-10-09T16:52:06.327012+00:00",
+  "issue": 19,
+  "status": "ready-for-coordinator-integration; issue remains open",
+  "productCommit": "b556530dcbac6a93255cdbc07e31f9b43b08acdd",
+  "productTree": "0ff14aa20395ee2091967bb990b424e77409b4d1",
+  "acceptedIntegration": "0782fe35e941567d94d05ef71da5e45857c4e57c",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-19",
+  "branch": "codex/pi-durio-v1-issue-19",
+  "checks": [
+    {
+      "id": "merged-required-check",
+      "command": "npm run check",
+      "sourceCommit": "46689f5",
+      "result": "PASS",
+      "tests": 129,
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/check-merged.log",
+        "sha256": "dda4bcbcb6bb0247a1567bea534bca3092fc92d4a564dc0f1bdf19e682832eec",
+        "bytes": 15828
+      },
+      "applicability": "Accepted #21 merge, original #19 behavior; later changed paths separately revalidated."
+    },
+    {
+      "id": "core-final-required-check",
+      "command": "npm run check",
+      "sourceCommit": "4aeb3b6a2d20d41d0172fc45287de6fe2fdead68",
+      "result": "PASS",
+      "tests": 133,
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/check-final.log",
+        "sha256": "c21215f6f29066d40bdc2f8456748821a77acbe207ef6be8efa5343e5dce8be5",
+        "bytes": 16276
+      },
+      "applicability": "Final runtime/control/compaction/provider/usage/TUI/CLI behavior before only readonly history/recovery projection follow-up."
+    },
+    {
+      "id": "readonly-projections",
+      "command": "node --test dist/test/history.test.js dist/test/recovery.test.js dist/test/query.test.js",
+      "sourceCommit": "b556530dcbac6a93255cdbc07e31f9b43b08acdd",
+      "result": "PASS",
+      "tests": 20,
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/projections.log",
+        "sha256": "00e641eb94ecfa38b2b31d042abfd950083496ab03d1d10a2584addd7b66b976",
+        "bytes": 2689
+      }
+    },
+    {
+      "id": "actual-budget-projections",
+      "command": "node --test --test-name-pattern='exhausted persistent budget' dist/test/compaction.test.js",
+      "sourceCommit": "b556530dcbac6a93255cdbc07e31f9b43b08acdd",
+      "result": "PASS",
+      "tests": 1,
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/projections-budget.log",
+        "sha256": "454beee975d1190d69b31bed502f14a16a5f5a50183caae630a869b9ca4c02d5",
+        "bytes": 226
+      },
+      "observed": "One admitted original request; manual attempt blocked before transport; original BUDGET_REQUEST_LIMIT retained; same budget requests=1/knownTokens=14; actual runtime/usage/trace dispatches do not increase; no false unknown model request in recovery."
+    },
+    {
+      "id": "independent-installed-public-api-and-cli",
+      "sourceCommit": "b556530dcbac6a93255cdbc07e31f9b43b08acdd",
+      "result": "PASS",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/installed-demo/report.json",
+        "sha256": "92899e731e70e6d7daf1d4a7a93571141cae2cf5bfd06bc3d8bbaaab88fc609c",
+        "bytes": 595438
+      },
+      "runner": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/demo-compaction.mjs",
+        "sha256": "9f2eea671272ecb1d1d6615975af28ec8ad3c57a054b032948ecd29ba1fb4410",
+        "bytes": 6147
+      },
+      "output": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/installed-demo.log",
+        "sha256": "f928e124e18b3459fc1b0f58c13057cca115f61463a45f277df200e767d3ed5e",
+        "bytes": 198
+      },
+      "observed": [
+        "API real long-source summary applied",
+        "same request id did not dispatch again",
+        "cold CLI noop",
+        "readonly CLI inspect preserved durable SQLite hash",
+        "next independent task payload contains summary and next request; prior source is not reimported into model context",
+        "full original long response still readable",
+        "separate CLI real summary applied with no new coding sample"
+      ],
+      "actualNextPayload": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/installed-demo/actual-next-payload.json",
+        "sha256": "dabc6256b6282a53655e94037661149725013a76616163faa04d0f1e4bd62c78",
+        "bytes": 95769
+      },
+      "actualSummaryPayload": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/installed-demo/actual-summary-payload.json",
+        "sha256": "9257da61a588003adbe59ec6525ffd68fe1c0c044d572b8bd8f4d4dc066de861",
+        "bytes": 1839
+      }
+    }
+  ],
+  "installation": {
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/manifest.json",
+      "sha256": "5c1bdb7bbbd20cd69552302435cd306dc6b70a4b1aeb62fca09cb354dbb5acc1",
+      "bytes": 3304078
+    },
+    "pack": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/pi-durio-0.1.0.tgz",
+      "sha256": "84bc499e1e32452e041455f28e0334d1d59582ad3201ec90cfb1ce6da1695524",
+      "bytes": 23259003
+    },
+    "sourceFiles": 251,
+    "compiledFiles": 138,
+    "installedFiles": 12802,
+    "node": {
+      "version": "v26.8.2",
+      "path": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+      "realPath": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+      "sha256": "3e401401d90e7f0367b7737a613801242c9a6b2966fb50c2e48eb1c45d701c6a"
+    },
+    "npm": "11.19.1",
+    "equivalence": {
+      "compiledFilesMatchInstalled": true,
+      "packageAndLockMatchInstalled": true
+    },
+    "installLog": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/install.log",
+      "sha256": "10b6682cb5cc329b80c6b707fdc72f846b4e82b19f6fa4c107b27749bb74790d",
+      "bytes": 24
+    },
+    "packLog": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/pack.log",
+      "sha256": "d51094576880983f881c77ad065d7233292f59d9958939d68ea96c157a17873a",
+      "bytes": 10627
+    }
+  },
+  "firstFailuresAndFollowups": [
+    {
+      "result": "FAIL",
+      "explanation": "Initial busy duplicate was not coalesced; before the first frozen product checkpoint. Exact earlier working-tree bytes were not fully frozen.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/first-red.log",
+        "sha256": "c84dbdf8238c8434dca71fcf525996c107bd977f6a9541ae3439eb91f3bdaf70",
+        "bytes": 1104
+      }
+    },
+    {
+      "result": "FAIL",
+      "explanation": "Recovery report self-invalidated the compaction snapshot; fixed distinct recovery event name.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/expanded-1.log",
+        "sha256": "a7e166462834f04fd00927ff24b3f1984943e80fda86a81e0a56d0acbaa9c665",
+        "bytes": 1583
+      }
+    },
+    {
+      "result": "FAIL",
+      "explanation": "Existing queue barrier fixture used compact as unimplemented; updated it to still-unimplemented improve without changing the queue behavior under test.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/combined-1.log",
+        "sha256": "df76da4807982b1e09f607fd83593dfd17583e6ea79a79339bfef8de2a7f87c0",
+        "bytes": 6805
+      }
+    },
+    {
+      "result": "FAIL",
+      "explanation": "Compile-time InboxDoc token kind mismatch; used public committed document kind.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/build-late-cancel.log",
+        "sha256": "2290b4c0c780c07c716bc8eb9f9692f0929df53df1431598449fd51f0f20d48d",
+        "bytes": 181
+      }
+    },
+    {
+      "result": "FAIL 0/2",
+      "explanation": "Actual frozen compact used old admission source and could skip a failed dispatched follow-up.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/reattach-red.log",
+        "sha256": "aaa215d3c8d70438162fe76697422722d89e4627cdae5ee476ae223b02609bc0",
+        "bytes": 1770
+      }
+    },
+    {
+      "result": "FAIL 23/25",
+      "explanation": "Name does not imply pass: corrected source was already applied, but test incorrectly demanded a keepRecent assistant in summary; SDK-normalized error was not the original budget reason.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/reattach-green.log",
+        "sha256": "cd43e1c78ed23a8a78584b964fa8646a13d784a62ab1bb732dbc449b17c3c4ee",
+        "bytes": 28448
+      }
+    },
+    {
+      "result": "PASS 3/3",
+      "explanation": "Narrow assertion corrections; later stronger budget dispatch assertions and final full check supersede this result.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/reattach-assertions.log",
+        "sha256": "f30eb1fd8166e7eef7eea651a239b97903b5ff1fdd3eab6d448315a9f08fd718",
+        "bytes": 442
+      }
+    },
+    {
+      "result": "FAIL 0/1",
+      "explanation": "Actual transport calls stayed one but model.dispatch had two entries; captured the real miscount before fixing runtime and projections.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/dispatch-boundary-red.log",
+        "sha256": "7dd0f5e0ad9cf504005f28c35452b10eed9b8acc0bf831a6f8f2c0143ec95859",
+        "bytes": 922
+      }
+    },
+    {
+      "result": "FAIL 0/1",
+      "explanation": "Duplicate accepted during active manual generation did not preserve alias input identity; fixed same durable coalescing path.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r1/running-alias-red.log",
+        "sha256": "25b42387255448b19ec42b081e973d57b3d96725c4781009ebdaf095f1bccedf",
+        "bytes": 878
+      }
+    },
+    {
+      "result": "FAIL",
+      "explanation": "Demo runner omitted macOS TMPDIR, so genuine execution configuration mismatch correctly blocked cold CLI compact; runner now preserves it.",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r2/installed-demo.log",
+        "sha256": "ce7303576dd0aff4be4220a33e4e52af22b5d03148bbaa2d4271b209cf709fad",
+        "bytes": 606
+      }
+    }
+  ],
+  "mergeOwnership": {
+    "provider-boundary.ts": "Exact bytes from accepted 0782fe35; no reserve/settle/raw/onDispatch modification",
+    "runtime.ts": "Preserved #21 dispatch gate and completeSimple delegation; added #19 maintenance/context/facts and transport-entry capture",
+    "cli-tui-exports": "Both eval/storage and compaction retained",
+    "laterReadonlyProjectionChanges": [
+      "src/history.ts",
+      "src/recovery.ts"
+    ],
+    "finalHandoffMetadata": "Any commit after productCommit changes delivery documentation only; executable package remains the manifest-bound product."
+  },
+  "boundaries": {
+    "nativeTerminal": "NOT RUN here; complete integrated compact interaction belongs to issue 31 per coordinator authorization",
+    "paidProvider": "NOT RUN; only explicit deterministic offline transport",
+    "actualBackendIdentity": "Not independently proven; requested gpt-6-astra / xhigh",
+    "historicalLegacyDispatches": "Unverified intents stay separate; original records unchanged",
+    "interruptedSummary": "Frozen whole-Harness check; explicit end quarantine, then new operation; ordinary open never resumes old pending",
+    "cost": "Acquired request usage and latest committed pi.usage remain separate; estimates are not invoices; entered transport failures remain unknown",
+    "eval": "Runtime transport may be mediation; formal provider count/usage remain trusted outer #21 facts"
+  },
+  "authorizationPerformed": [
+    "local implementation",
+    "local tests",
+    "local dependency install and pack",
+    "local commits",
+    "merge provided integration"
+  ],
+  "notPerformed": [
+    "push",
+    "main merge",
+    "release",
+    "issue close or body edit",
+    "paid inference",
+    "native GUI acceptance"
+  ],
+  "memoryContext": "Original retention versus model-context compaction was checked against the live project contracts; no unverified memory status is used as acceptance."
+}

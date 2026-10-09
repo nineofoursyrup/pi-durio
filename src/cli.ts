@@ -1,10 +1,11 @@
 #!/usr/bin/env node
+import { readCompactions } from './compaction.js';
 import { parseArgs } from 'node:util';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline';
-import { runReadTask, runCodingTask, readRun, readQueue, checkQueue, decideQueue, TaskControl, inspectRecovery, checkRecovery, recoverRun, settleRecoveryOwners, type ToolEnvironmentConfig, type RecoveryAuthorization } from './runtime.js';
+import { runReadTask, runCodingTask, compactContext, readRun, readQueue, checkQueue, decideQueue, TaskControl, inspectRecovery, checkRecovery, recoverRun, settleRecoveryOwners, type ToolEnvironmentConfig, type RecoveryAuthorization } from './runtime.js';
 import { writeHeadlessResult, exitHostIfUnconfirmed } from './headless-lifecycle.js';
 import { demoTransport } from './offline.js';
 import { historyCommand } from './history-cli.js';
@@ -21,7 +22,7 @@ function lifecycleSignals() {
 async function main() {
   const { values, positionals } = parseArgs({ allowPositionals: true, options: {
     spec: { type: 'string' }, directory: { type: 'string' }, workspace: { type: 'string' }, 'data-root': { type: 'string' }, prompt: { type: 'string' },
-    run: { type: 'string' }, 'offline-demo': { type: 'boolean' }, originals: { type: 'boolean' },
+    run: { type: 'string' }, 'context-run':{type:'string'}, 'offline-demo': { type: 'boolean' }, originals: { type: 'boolean' },
     after: { type: 'string' }, limit: { type: 'string' }, help: { type: 'boolean' },
     coding: { type: 'boolean' }, 'tool-env-config': { type: 'string' }, 'cleanup-timeout-ms': { type: 'string' },
     filter: { type: 'string' }, cursor: { type: 'string' }, snapshot: { type: 'string' }, evidence: { type: 'string' },
@@ -34,6 +35,7 @@ async function main() {
   if (values.help || !command) {
     console.log('pi-durio run --workspace PATH --prompt TEXT [--data-root PATH] [--offline-demo] [--coding] [--tool-env-config PATH] [--cleanup-timeout-ms N]\npi-durio tui --workspace PATH [--data-root PATH] [--offline-demo] [--coding] [--run UUID]\npi-durio show --run UUID [--data-root PATH] [--originals] [--after SEQ] [--limit N]\nrun defaults to DeepSeek/deepseek-flash at https://api.deepseek.com; DEEPSEEK_API_KEY is required.\n--offline-demo uses a deterministic README.md fixture transport, with no network or model inference.\nDefault run grants read only; --coding explicitly grants read/write/edit/bash for the stated task. Trusted local bash is not an OS sandbox. File tools support files up to 256 KiB; at most 8 provider attempts.\n--tool-env-config supplies JSON {version,variables} for coding only; values are not added to configuration records. Model API keys are not inherited. Old pending work blocks new execution.\nSIGINT persists stop intent; SIGTERM exits and preserves unfinished work. The first intent is retained. Both show processing and await cleanup (default 10000 ms); timeout leaves unknown and owner evidence for recovery. Cancellation does not undo changes or refund costs.');
     console.log('pi-durio recover --run UUID [--data-root PATH] [--inspect] [--authorization FILE] [--decision FILE] [--offline-demo]\n--inspect reads facts without changing source databases. Default recover saves a separate report and exits 75 when input is needed. Authorization JSON declares {workspace,mode,tools,toolEnvironment?}; decision JSON binds {id,snapshotId,action,acceptAdditionalModelAttempts?,resolutions?}. Actions: continue, end, confirm-cleanup. A decision never changes the original unknown facts.\npi-durio control --workspace PATH --prompt TEXT [--coding] [--offline-demo]: NDJSON stdin controls; ready event supplies immutable target. Inputs {action:steer|follow-up|compact|improve,id,input,target}; withdrawal {action:withdraw,decision:{id,requestId,action:withdraw,target,receiptSeq}}; {action:stop|exit}.\npi-durio queue [--inspect] [--data-root PATH] [--run SOURCE_UUID --decision FILE --authorization FILE --offline-demo]: readonly inspect or saved recovery/queue decisions; unresolved queue exits 75.\npi-durio tui --workspace PATH [--coding] [--run UUID]: coding uses the same runtime; --run opens recovery facts without auto continuation.');
+    console.log('pi-durio compact --run UUID --id REQUEST_ID --authorization FILE [--data-root PATH] [--offline-demo]; compact --inspect --run UUID is read-only. Compaction retains originals and records generation separately from application. run --context-run UUID imports a verified completed context into a new independent task.');
     console.log('Eval: eval plan --spec FILE; eval run --id PLAN --directory NEW_DIR; eval report --id PLAN [--format text|json]; eval grade --id PLAN --spec REVISION --directory NEW_DIR; eval list. All accept --data-root. Plans fix runtime/fixtures/graders, ordering, deadline, request/token budgets and price before execution. Offline controlled provider is explicit; live plans require a paid authorization and proven request token bound.');
     console.log('History: history --filter JSON [--cursor JSON]; evidence --run ID or --evidence ID [--offset N --limit N --decoded]; trace --run ID; usage --run IDs; derive --run IDs --evidence IDs --purpose TEXT; export adds --destination FILE; fix --id ID --evidence IDs --purpose TEXT [--dependencies IDs]; fixed --evidence ID; estimate --id ID --run IDs --price JSON. All accept --data-root and --format json|text. Only fix/estimate write management facts; export requires an explicit new destination. Queries never execute.');
     console.log('Storage: storage usage; storage preview --id ID --units session:ID,object:SHA --reason TEXT; storage commit --id ID --confirm PREVIEW_IDENTITY; storage status --id ID; storage archive --scope whole-root|attachments [--objects SHAS] --destination NEW_PATH; storage restore --archive PATH --destination NEW_PATH; storage verify --archive PATH; storage migrate --backup NEW_ARCHIVE_PATH --destination NEW_ROOT; storage unfix --id ID --evidence FIXED_ID --reason TEXT. All accept --data-root and --format json|text. Whole-root archive includes every project. Archive/migrate retain the source; cleanup requires its own preview and explicit commit.');
@@ -55,6 +57,14 @@ async function main() {
     process.exitCode = exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : result?.controls?.exitCode??0;
     exitHostIfUnconfirmed(result);
     return;
+  }
+  if(command==='compact'){
+    if(!values.run)throw Error('USAGE: compact requires --run');
+    if(values.inspect){console.log(JSON.stringify(readCompactions(dataRoot,values.run,{after:values.after?Number(values.after):undefined,limit:values.limit?Number(values.limit):undefined}),null,2));return;}
+    if(!values.id||!values.authorization)throw Error('USAGE: compact requires --id and --authorization');
+    const authorization=JSON.parse(await readFile(values.authorization,'utf8')),lifecycle=lifecycleSignals();
+    let result;try{result=await compactContext({dataRoot,runId:values.run,requestId:values.id,authorization,transport:values['offline-demo']?demoTransport().fetch:undefined,signal:lifecycle.signal,get cancellation(){return lifecycle.cancellation;}});}finally{lifecycle.close();}
+    console.log(JSON.stringify({compaction:result.compaction??null,runId:result.runId,status:result.status,cleanup:result.cleanup,usage:result.usage}));process.exitCode=result.status==='completed'?0:result.status==='unknown'?75:result.status==='aborted'?130:1;exitHostIfUnconfirmed(result);return;
   }
   if(command==='queue') {
     if(values.inspect&&values.decision)throw Error('USAGE: --inspect cannot execute a decision');
@@ -104,13 +114,13 @@ async function main() {
       const request=JSON.parse(line);
       if(request.action==='stop'){stop();return;}
       if(request.action==='exit'){exit();return;}
-      const receipt=request.action==='withdraw'?await control!.withdraw(request.decision):await control!.submit({id:request.id,kind:request.action,input:request.input,target:request.target});
+      const receipt=request.action==='cancel-compact'?await control!.cancelCompaction(request.decision):request.action==='withdraw'?await control!.withdraw(request.decision):await control!.submit({id:request.id,kind:request.action,input:request.input,target:request.target});
       console.log(JSON.stringify({control:receipt}));
     }catch(error){console.log(JSON.stringify({controlError:String(error)}));}
   });});
   try {
     const run = values.coding ? runCodingTask : runReadTask;
-    const result = await run({ dataRoot, workspace: values.workspace, input: values.prompt, ...(toolEnvironment ? { toolEnvironment } : {}),
+    const result = await run({ dataRoot, contextRunId:values['context-run'],workspace: values.workspace, input: values.prompt, ...(toolEnvironment ? { toolEnvironment } : {}),
       mode: values['offline-demo'] ? 'offline' : 'live', transport: values['offline-demo'] ? demoTransport().fetch : undefined,control,
       signal: controller.signal, get cancellation() { return cancellation; },
       cleanupTimeoutMs: values['cleanup-timeout-ms'] === undefined ? undefined : Number(values['cleanup-timeout-ms']),

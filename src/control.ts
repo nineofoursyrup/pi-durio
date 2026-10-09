@@ -9,6 +9,9 @@ export function findQueueItem(root:string,id:string):QueueItemFact|undefined {
   let after:number|undefined,through:number|undefined;
   do {const page=readQueue(root,{after,through,limit:200});const found=page.items.find(item=>item.requestId===id);if(found)return found;after=page.next??undefined;through=page.through;}while(after);
 }
+export function findCoalescedControl(root:string,id:string):{id:string;requestId:string;input:ControlInput}|undefined {
+  const db=openHostReadonly(root);try{for(const row of db.prepare("SELECT body FROM records WHERE kind='control.coalesced' ORDER BY seq").iterate()){const data=JSON.parse(readObject(root,JSON.parse(String(row.body))).toString());if(data.id===id)return data;}return undefined;}finally{db.close();}
+}
 export function validControlId(value:string) {if(!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(value))throw Error('INVALID_CONTROL_ID');}
 const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
 export function previousQueueDecision(root:string,decision:QueueDecision) {
@@ -19,15 +22,19 @@ export function previousQueueDecision(root:string,decision:QueueDecision) {
   }return false;}finally{db.close();}
 }
 
+export interface CompactionCancellation {id:string;taskId:number;target:ControlTarget}
+export interface ControlBinding {cancelCompaction?(input:CompactionCancellation):Promise<unknown>; readonly target:ControlTarget; submit(input:ControlInput):Promise<QueueItemFact>; withdraw(decision:QueueDecision):Promise<QueueItemFact> }
+
 /** Public host controller: no writable storage, Conversation or Harness handle escapes. */
 export class TaskControl {
-  private binding?:RunControls;
+  private binding?:ControlBinding;
   target():ControlTarget|null {return this.binding?structuredClone(this.binding.target):null;}
   submit(input:ControlInput):Promise<QueueItemFact> {if(!this.binding)return Promise.reject(Error('CONTROL_NOT_RUNNING'));return this.binding.submit(structuredClone(input));}
   withdraw(decision:QueueDecision):Promise<QueueItemFact> {if(!this.binding)return Promise.reject(Error('CONTROL_NOT_RUNNING'));return this.binding.withdraw(structuredClone(decision));}
+  cancelCompaction(input:CompactionCancellation):Promise<unknown>{if(!this.binding?.cancelCompaction)return Promise.reject(Error('COMPACTION_NOT_RUNNING'));return this.binding.cancelCompaction(structuredClone(input));}
   /** @internal Runtime ownership only. */
-  attach(binding:RunControls) {if(this.binding)throw Error('CONTROL_ALREADY_ATTACHED');this.binding=binding;}
-  /** @internal */ detach(binding:RunControls) {if(this.binding===binding)this.binding=undefined;}
+  attach(binding:ControlBinding) {if(this.binding)throw Error('CONTROL_ALREADY_ATTACHED');this.binding=binding;}
+  /** @internal */ detach(binding:ControlBinding) {if(this.binding===binding)this.binding=undefined;}
 }
 
 /** Host admission boundary around the public Pi submission API, never an agent loop. */
@@ -37,7 +44,7 @@ export class RunControls {
   private remove:()=>void;
   private closedReason?:string;
   readonly target:ControlTarget;
-  constructor(private readonly options:{root:string;target:ControlTarget;version:ControlAdmission['executionVersion'];authorization:unknown;conversation:Conversation;harness:Harness;guard:()=>void;record:(kind:string,data:unknown)=>number;failure:(error:unknown)=>void}) {
+  constructor(private readonly options:{root:string;target:ControlTarget;version:ControlAdmission['executionVersion'];authorization:unknown;conversation:Conversation;harness:Harness;guard:()=>void;record:(kind:string,data:unknown)=>number;failure:(error:unknown)=>void;cancelCompaction?:(taskId:number)=>Promise<unknown>}) {
     this.target=structuredClone(options.target);
     this.remove=options.harness.subscribeCommits(publication=>{
       try {for(const change of publication.changes)if(change.type==='submission'&&change.value.requestId&&this.items.has(change.value.requestId))this.observe(change.value);}
@@ -58,9 +65,11 @@ export class RunControls {
     validControlId(input.id);
     if(!input.input.trim()||Buffer.byteLength(input.input)>32768)throw Error('INPUT_LIMIT: provide 1–32768 bytes');
     if(!['steer','follow-up','compact','improve'].includes(input.kind))throw Error('INVALID_CONTROL_KIND');
+    const alias=findCoalescedControl(this.options.root,input.id);if(alias){if(!same(alias.input,input))throw Error('CONTROL_ID_CONFLICT');return this.fact(alias.requestId);}
     const existing=findQueueItem(this.options.root,input.id);
     if(existing){if(existing.kind!==input.kind||existing.input!==input.input||!same(existing.target,input.target))throw Error('CONTROL_ID_CONFLICT');return existing;}
     if(!same(input.target,this.target))throw Error('CONTROL_TARGET_CHANGED');
+    if(input.kind==='compact'){const equivalent=[...this.items.values()].find(item=>item.admission.kind==='compact'&&['pending','dispatching'].includes(item.status));if(equivalent){this.options.record('control.coalesced',{id:input.id,requestId:equivalent.admission.requestId,input});return this.fact(equivalent.admission.requestId);}}
     if(input.id===this.target.taskId)throw Error('CONTROL_ID_CONFLICT');
     if(this.closedReason)throw Error(`CONTROL_FROZEN: ${this.closedReason}`);
     this.options.guard();
@@ -78,6 +87,7 @@ export class RunControls {
     }
     return this.fact(input.id);
   });}
+  cancelCompaction(input:CompactionCancellation){return this.serial(async()=>{validControlId(input.id);if(!same(input.target,this.target)||!this.options.cancelCompaction)throw Error('CONTROL_TARGET_CHANGED');this.options.record('compaction.cancel-decision',input);return this.options.cancelCompaction(input.taskId);});}
   withdraw(decision:QueueDecision) {return this.serial(async()=>{
     validControlId(decision.id);
     if(decision.action!=='withdraw'||!same(decision.target,this.target))throw Error('CONTROL_TARGET_CHANGED');

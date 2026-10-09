@@ -1,10 +1,11 @@
+import { readCompactions } from '../compaction.js';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiAltScreen, VStack, matchesKey, isKeyRelease, isKeyRepeat, stripTerminalSequences, truncateToWidth, wrapTextWithAnsi, type Component, type AutocompleteProvider, type Terminal } from '@earendil-works/pi-tui';
-import { runReadTask, runCodingTask, TaskControl, readQueue, decideQueue, checkRecovery, recoverRun, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
+import { runReadTask, runCodingTask, compactContext, TaskControl, readQueue, decideQueue, checkRecovery, recoverRun, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
 import type { QueueItemFact } from '../evidence.js';
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
@@ -16,8 +17,8 @@ import { TerminalWidthGate } from './width-gate.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
-const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务']] as const;
-const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed'];
+const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实']] as const;
+const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed','compaction.generated','compaction.finished'];
 const completion:AutocompleteProvider={
   triggerCharacters:['/'],
   async getSuggestions(lines,line,col) {
@@ -83,7 +84,7 @@ export class ReadOnlyTui {
   private lastText='';
   private confirmation?:{key:string;at:number};
   private followChord=false;
-  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
+  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
   private historyView?:HistoryView;
   private evalView?:EvalView;
   private storageView?:StorageView;
@@ -250,11 +251,12 @@ export class ReadOnlyTui {
     if(this.phase!=='idle') {this.editor.setText(text);this.lastText=text;this.notice='当前正在清理；草稿保留，未受理';this.tui.requestRender();return;}
     if(followUp){this.editor.setText(text);this.lastText=text;this.notice='当前没有运行任务；文本保留，按普通 Enter 明确提交新任务';this.tui.requestRender();return;}
     if(this.result?.status==='unknown'||this.result?.cleanup==='unknown') {this.editor.setText(text);this.lastText=text;this.notice='旧工作存在未知；只读查看，不能由 TUI 绕过恢复核对';this.tui.requestRender();return;}
+    const contextRunId=this.result?.status==='completed'&&this.result.cleanup==='confirmed'?this.result.runId:undefined;
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
     this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.summaries.clear();this.historyWindow=false;this.scroll.scrollToEnd();
     this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.notice='任务正在受理；忙时 Enter 补充当前任务，Ctrl+X → Enter 后续请求';this.rebuild();
     const self=this;
-    const options:CodingTaskOptions={workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}};
+    const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}};
     const run=this.options.coding?runCodingTask:runReadTask;
     this.active=run(options).then(result=>this.applyResult(result)).catch(error=>{this.failure=String(error);this.notice=`未完成：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();
@@ -283,9 +285,31 @@ export class ReadOnlyTui {
     else if(command.startsWith('/withdraw '))void this.queueDecision(command.slice(10).trim(),'withdraw');
     else if(command.startsWith('/reattach '))void this.queueDecision(command.slice(10).trim(),'reattach');
     else if(command.startsWith('/decide ')){try{void this.recoveryDecision(JSON.parse(command.slice(8)));}catch(error){this.notice=`决定 JSON 无效：${String(error)}`;}}
-    else if(command==='/compact'||command==='/improve'){if(this.phase==='running'&&!this.historyWindow&&!this.viewingRecovery)this.enqueue(command.slice(1),command.slice(1) as 'compact'|'improve');else this.notice='管理请求须绑定活动任务；历史或恢复视图不能执行';}
+    else if(command==='/compact')void this.compact();
+    else if(command==='/compactions')this.openPanel('compaction');
+    else if(command==='/improve'){if(this.phase==='running'&&!this.historyWindow&&!this.viewingRecovery)this.enqueue(command.slice(1),command.slice(1) as 'compact'|'improve');else this.notice='管理请求须绑定活动任务；历史或恢复视图不能执行';}
     else return false;
     return true;
+  }
+  private async compact() {
+    if(this.historyWindow||this.viewingRecovery){this.notice='只读历史/恢复视图不能压缩；先返回活动会话并完成恢复核对';this.tui.requestRender();return;}
+    if(this.phase==='running'){this.enqueue('compact','compact');return;}
+    if(this.phase!=='idle'||this.result?.status!=='completed'||this.result.cleanup!=='confirmed'){this.notice='压缩需要已完成且清理确认的活动会话';this.tui.requestRender();return;}
+    const runId=this.result.runId;this.controller=new AbortController();this.cancellation='exit';this.phase='running';this.notice='正在压缩当前上下文；原文保留，摘要生成与接入分别记录';const self=this;
+    this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:()=>{this.pendingRefresh=true;}}).then(result=>{
+      this.result=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；/compactions 查看源范围、摘要与接入事实；磁盘原文保留`;
+    }).catch(error=>{this.notice=`压缩未执行：${safe(String(error))}`;}).finally(()=>this.finished());
+    this.tui.requestRender();await this.active;
+  }
+  private compactionText() {
+    if(!this.runId)return '暂无活动会话；未调用模型';
+    try {const page=readCompactions(this.options.dataRoot,this.runId,{after:this.panel?.offset,limit:20});if(this.panel)this.panel.next=page.next;
+      return `上下文压缩 · run ${this.runId}\n原文始终保留；token 变化不代表磁盘释放\n`+page.items.map(item=>{const d=item.data as any;return `${item.seq} ${item.kind}\n${safe(JSON.stringify(item.kind==='compaction.source'?{taskId:d.taskId,trigger:d.trigger,firstKept:d.firstKept,sourceEntryIds:d.entries?.map((e:any)=>e.id)}:d).slice(0,3000))}`;}).join('\n')+'\n/queue 可撤回手动请求；c 取消最新压缩任务（已接入不能回滚）\nn/p 分页；摘要全文及请求/用量来源见原文详情';
+    }catch(error){return `压缩事实不可取得：${safe(String(error))}`;}
+  }
+  private async cancelLatestCompaction(){
+    const target=this.control.target();if(!target||!this.runId){this.notice='当前没有可取消的活动压缩；重开先恢复核对';return;}
+    try{let after:number|undefined,taskId:number|undefined;do{const page=readCompactions(this.options.dataRoot,this.runId,{after,limit:200});for(const item of page.items)if(item.kind==='compaction.task')taskId=(item.data as any).taskId;after=page.next??undefined;}while(after);if(taskId===undefined)throw Error('尚无压缩任务；排队项请在 /queue 撤回');const result=await this.control.cancelCompaction({id:randomUUID(),taskId,target});this.notice=`取消结果 ${safe(JSON.stringify(result))}`;}catch(error){this.notice=`取消未执行：${safe(String(error))}`;}this.tui.requestRender();
   }
   private applyResult(result:RunResult) {
     this.result=result;this.sessionId=result.sessionId;this.runId=result.runId;
@@ -314,7 +338,7 @@ export class ReadOnlyTui {
     const item=this.queue[this.panel?.offset??0];
     if(!item)return '队列：当前窗口没有受理项\nEsc 返回；不改变执行限制';
     const status={pending:'已受理、待接入',dispatching:'接入意图已保存、结果待核对',applied:'已接入，不能撤回已发生的操作',withdrawn:'已撤回',frozen:'已冻结，普通输入不会执行'}[item.status];
-    return `队列 ${this.panel!.offset+1}/${this.queue.length} · ${item.kind}\n${item.requestId}\n${status}\n目标 ${item.target.workspace}\n原 session ${item.target.sessionId}\n原 task ${item.target.taskId}\n原 run ${item.target.runId}\n新 run ${item.kind==='follow-up'?(item.runId??'尚未开始'):item.runId??'无'}\n内容：${safe(item.input.slice(0,4096))}${item.input.length>4096?' [显示截断]':''}\n原因：${safe(item.reason)}\n←→/Tab 选项 n/p 窗口；w 撤回未接入项\nr 明确重新接入：仅已完成源的冻结 follow-up；重新执行可能收费\n旧 steer 或停止任务的文本需明确重新提交新任务\nEsc 返回，不解除冻结`;
+    return `队列 ${this.panel!.offset+1}/${this.queue.length} · ${item.kind}\n${item.requestId}\n${status}\n目标 ${item.target.workspace}\n原 session ${item.target.sessionId}\n原 task ${item.target.taskId}\n原 run ${item.target.runId}\n新 run ${item.kind==='follow-up'?(item.runId??'尚未开始'):item.runId??'无'}\n内容：${safe(item.input.slice(0,4096))}${item.input.length>4096?' [显示截断]':''}\n原因：${safe(item.reason)}\n←→/Tab 选项 n/p 窗口；w 撤回未接入项\nr 明确重新接入：仅已完成源的冻结 follow-up / 未执行 compact；重新执行可能收费\n旧 steer 或停止任务的文本需明确重新提交新任务\nEsc 返回，不解除冻结`;
   }
   private authorization():RecoveryAuthorization {return {workspace:this.options.workspace,mode:this.options.mode,tools:this.options.coding?['read','write','edit','bash']:['read'],toolEnvironment:this.options.toolEnvironment};}
   private async queueDecision(requestId:string,action:'withdraw'|'reattach') {
@@ -440,12 +464,14 @@ export class ReadOnlyTui {
         const entry=tool(ref,value);entry.title='读取 · 失败';entry.text=value?.error??'错误详情不可取得';
       } else if(ref.kind==='model.provider-event'){
         const text=value?.event?.choices?.map((choice:{delta?:{content?:string}})=>choice.delta?.content??'').join('')??'';
-        if(text){const entry=assistant(ref,value);const combined=entry.text+text;entry.limited=entry.limited||combined.length>4000;entry.text=combined.slice(-4000);}
+        if(text&&value.purpose!=='compaction'){const entry=assistant(ref,value);const combined=entry.text+text;entry.limited=entry.limited||combined.length>4000;entry.text=combined.slice(-4000);}
         // A large event is kept as a reference; it is never printed as transport JSON.
       } else if(ref.kind==='model.response'){
         const text=value?.message?.content?.filter((item:{type?:string})=>item.type==='text').map((item:{text:string})=>item.text).join('\n');
+        if(text&&value.purpose==='compaction'){entries.push({ref,role:'notice',title:'压缩摘要（生成记录；接入见 /compactions）',text:text.slice(0,800),limited:text.length>800});continue;}
         if(text){const entry=assistant(ref,value);entry.text=text.slice(0,4000);entry.limited=text.length>4000;entry.title=value.completeness==='partial'?'助手（未完成的响应）':'助手';}
-      } else if(ref.kind==='run.abort-intent'&&!this.result)entries.push({ref,role:'notice',title:'正在中止',text:'等待 runtime 确认清理；当前未接入草稿不会执行。'});
+      } else if(ref.kind==='compaction.generated'||ref.kind==='compaction.finished')entries.push({ref,role:'notice',title:ref.kind==='compaction.generated'?'压缩摘要已生成':`上下文压缩 ${value?.state??'未知'}`,text:'原文保留；/compactions 查看覆盖范围、摘要与接入事实'});
+      else if(ref.kind==='run.abort-intent'&&!this.result)entries.push({ref,role:'notice',title:'正在中止',text:'等待 runtime 确认清理；当前未接入草稿不会执行。'});
       else if(ref.kind==='run.exit-intent'&&!this.result)entries.push({ref,role:'notice',title:'正在退出',text:'等待执行清理和存储关闭。'});
     }
     if(this.result?.answer&&!this.historyWindow) {
@@ -488,7 +514,7 @@ export class ReadOnlyTui {
     this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
     this.openPanel('detail',record);
   }
-  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage',ref?:RecordReference) {
+  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction',ref?:RecordReference) {
     this.closePanel();this.confirmation=undefined;
     this.panel={kind,ref,offset:0,previous:[],line:0,raw:'',next:null};
     if(kind==='detail')this.loadDetail();
@@ -509,7 +535,8 @@ export class ReadOnlyTui {
     if(panel.kind==='history') {const lines=this.historyView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     let text:string;
     if(panel.kind==='actions')text='操作菜单（保留输入草稿）\n'+commands.map(([name,description],index)=>`${panel.offset===index?'›':' '} /${name}  ${description}`).join('\n');
-    else if(panel.kind==='help')text='帮助\nEnter 新任务；忙时 Enter 补充当前任务\nCtrl+X → Enter 后续请求\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 活动会话\n/older /newer 只读窗口；/restore 草稿\n/eval 固定评估报告（只读）\n/history 历史查询（只读）\n/queue 队列，w 撤回，r 明确重新接入\n/recover [runId] 恢复面板，e 结束旧工作\n/decide JSON 与 headless 同一结构化决定\n/stop 中止；/exit 退出；Esc 关闭弹层';
+    else if(panel.kind==='help')text='帮助\nEnter 新任务；忙时 Enter 补充当前任务\nCtrl+X → Enter 后续请求\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 活动会话\n/older /newer 只读窗口；/restore 草稿\n/eval 固定评估报告（只读）\n/history 历史查询（只读）\n/compact 压缩当前上下文；/compactions 查看结果\n/queue 队列，w 撤回，r 明确重新接入\n/recover [runId] 恢复面板，e 结束旧工作\n/decide JSON 与 headless 同一结构化决定\n/stop 中止；/exit 退出；Esc 关闭弹层';
+    else if(panel.kind==='compaction')text=this.compactionText();
     else if(panel.kind==='queue')text=this.queueText();
     else if(panel.kind==='recovery')text=this.recoveryText();
     else if(panel.kind==='exit')text='退出并保留草稿？\nEnter：保存文本，取消在途请求并等待清理\nEsc：返回；不改变任务状态';
@@ -528,6 +555,7 @@ export class ReadOnlyTui {
     if(matchesKey(data,'ctrl+c')||matchesKey(data,'ctrl+d'))return;
     if(panel.kind==='eval'){this.evalView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='storage') {void this.storageView?.handleInput(data);this.tui.requestRender();return;}
+    if(panel.kind==='compaction'){if(data==='n'&&panel.next!==null){panel.previous.push(panel.offset);panel.offset=panel.next;panel.line=0;}else if(data==='p'&&panel.previous.length){panel.offset=panel.previous.pop()!;panel.line=0;}else if(data==='c')void this.cancelLatestCompaction();}
     if(panel.kind==='history') {this.historyView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='actions') {
       if(matchesKey(data,'up')) panel.offset=(panel.offset+commands.length-1)%commands.length;
