@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** Human-run macOS Terminal acceptance. This never drives Terminal.app or synthesizes UI input. */
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync, mkdirSync, openSync, writeSync, closeSync, lstatSync, readlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, openSync, writeSync, closeSync, lstatSync, readlinkSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -12,6 +12,12 @@ if(!values.manifest)throw Error('Usage: node scripts/terminal-validation.mjs --m
 const manifest=JSON.parse(readFileSync(resolve(values.manifest),'utf8'));
 const sha=value=>createHash('sha256').update(value).digest('hex');
 if(sha(readFileSync(new URL(import.meta.url)))!==manifest.runnerSha256)throw Error('CANDIDATE_RUNNER_CHANGED');
+const actualPaths=[];
+function inventory(relative=''){for(const name of readdirSync(join(manifest.packageRoot,relative))){const path=join(relative,name),stat=lstatSync(join(manifest.packageRoot,path));if(stat.isDirectory())inventory(path);else if(stat.isFile()||stat.isSymbolicLink())actualPaths.push(path);else throw Error(`CANDIDATE_UNEXPECTED_FILE_TYPE: ${path}`);}}
+inventory();
+const expectedPaths=new Set(manifest.files.map(entry=>entry.path)),actualSet=new Set(actualPaths);
+const missing=[...expectedPaths].filter(path=>!actualSet.has(path)),extra=actualPaths.filter(path=>!expectedPaths.has(path));
+if(missing.length||extra.length||expectedPaths.size!==manifest.files.length)throw Error(`CANDIDATE_FILE_SET_CHANGED: missing ${JSON.stringify(missing)}; extra ${JSON.stringify(extra)}`);
 for(const entry of manifest.files){const file=join(manifest.packageRoot,entry.path);const stat=lstatSync(file);const actual=stat.isSymbolicLink()?`link:${readlinkSync(file)}`:sha(readFileSync(file));if(actual!==entry.sha256)throw Error(`CANDIDATE_CHANGED: ${entry.path}`);}
 if(values['verify-only']){console.log(JSON.stringify({verified:true,commit:manifest.commit,files:manifest.files.length,packageRoot:manifest.packageRoot}));process.exit(0);}
 if(process.platform!=='darwin'||process.arch!=='arm64'||process.env.TERM_PROGRAM!=='Apple_Terminal'||!process.stdin.isTTY||!process.stdout.isTTY)throw Error('REAL_MACOS_TERMINAL_REQUIRED: 在 macOS Terminal.app 中运行本命令；其他终端不作为本票验收');

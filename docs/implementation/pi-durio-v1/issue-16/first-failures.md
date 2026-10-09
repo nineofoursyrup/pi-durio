@@ -8,3 +8,4 @@
 
 - `candidate-r1` 是 ee6d8bd 的首次独立安装 smoke，仅保留历史，不交给使用者作为正式验收候选。协调者发现原主会话暴露底层事件和重复回答；后续收口为自然对话/工具状态投影，原始字段留在详情。`tui-conversation-first.log` 与 `tui-conversation-r2.log` 保留修订后 6/6 通过，补了不泄露事件标签/重复同一回复的断言。
 - r1 独立安装的非 TTY 启动正确拒绝，但 stdout 泄出了 28 字节终端恢复控制码。`non-tty-first-failure.log` 固定了回归失败；修复为仅对已开始的终端进行恢复，`non-tty-fixed.log` 通过且管道 stdout 为空。原 r1 制品与失败输出保留。
+- r2 校验最初只校验列出的文件；`candidate-set-first-failure.log` 显示新增解析候选文件未被拒绝。收口为先比较完整实际文件集合（新增/缺失/重复 manifest 条目均拒绝），再校验每项类型/内容；`candidate-set-fixed.log` 覆盖新增、缺失及内容改变。r2 原包与 manifest 保留，修正版另存 r3。
