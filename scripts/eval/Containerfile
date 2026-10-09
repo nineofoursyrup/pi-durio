@@ -1,0 +1,3 @@
+FROM pi-durio-isolation@sha256:998e7dbfb5f4f7abfb8ada97a6706bb6fe0f0a1b98a789873b4d2b6a7b78f62b
+# Product workspace identity uses real Git even for a non-Git fixture.
+RUN apt-get update && apt-get install -y --no-install-recommends git=1:2.39.5-0+deb12u3 && rm -rf /var/lib/apt/lists/*

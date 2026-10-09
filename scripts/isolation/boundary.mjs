@@ -28,13 +28,17 @@ async function cli(executable, args, timeout = 30_000) {
 // Trusted callers supply image identity and staged input, never candidate data.
 // Each call creates a new VM, new HOME/cache/tmp, and a private writable mount.
 export async function runRestricted({ image, inputDir, runDir, command,
-  timeoutMs, model, containerExecutable = '/opt/homebrew/bin/container' }) {
+  timeoutMs, model, signal, protocolLimits, dependenciesDir, containerExecutable = '/opt/homebrew/bin/container' }) {
   if (!/^[^\s]+@sha256:[a-f0-9]{64}$/.test(image)) throw new Error('immutable_image_required');
   if (!Array.isArray(command) || !command.length || command.some(s => typeof s !== 'string' || s.includes('\0'))) throw new Error('invalid_command');
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 100 || timeoutMs > 300_000) throw new Error('invalid_timeout');
   if (model && (!Number.isSafeInteger(model.maxRequests) || model.maxRequests < 1 || model.maxRequests > 100 ||
       !Number.isSafeInteger(model.maxOutputTokens) || model.maxOutputTokens < 1 || model.maxOutputTokens > 16384 ||
       typeof model.request !== 'function')) throw new Error('invalid_model_budget');
+  const limits = protocolLimits ?? { inputBytes:4096, responseBytes:16384, lineBytes:16384, totalBytes:1048576 };
+  if (Object.keys(limits).sort().join(',') !== 'inputBytes,lineBytes,responseBytes,totalBytes' ||
+    Object.values(limits).some(n => !Number.isSafeInteger(n) || n < 1) || limits.inputBytes > 262144 || limits.responseBytes > 1048576 || limits.lineBytes > 1048576 || limits.totalBytes > 8388608) throw new Error('invalid_protocol_limits');
+  if (signal?.aborted) throw new Error('cancelled_before_start');
   await mkdir(runDir, { mode: 0o700 }); // Exclusive: old/uncertain spaces are never reused.
   runDir = await realpath(runDir);
   const id = `durio-i12-${randomUUID()}`;
@@ -71,6 +75,7 @@ export async function runRestricted({ image, inputDir, runDir, command,
     await mkdir(boundaryDir);
     await copyFile(policy, join(boundaryDir, 'restrict.py'));
     const mounts = [[stagedInput, '/input', true], [workDir, '/work', false], [boundaryDir, '/boundary', true]];
+    if(dependenciesDir) mounts.push([await realpath(dependenciesDir), '/deps', true]);
     if (mounts.some(([path]) => /[,\n\r]/.test(path))) throw new Error('unsupported_mount_path');
     const args = ['create', '--name', id, '--platform', 'linux/arm64', '--cpus', '1', '--memory', '512M',
       '--read-only', '--no-dns', '--cap-drop', 'ALL', '--cap-add', 'SYS_ADMIN', '--cap-add', 'SETUID',
@@ -92,7 +97,8 @@ export async function runRestricted({ image, inputDir, runDir, command,
     if (configuration.code !== 0) throw new Error('configuration_unknown');
     const config = JSON.parse(configuration.stdout)[0]?.configuration;
     if (!config?.readOnly || config.ssh || config.virtualization || config.publishedSockets?.length || config.publishedPorts?.length ||
-        config.image?.descriptor?.digest !== image.split('@')[1]) {
+        config.image?.descriptor?.digest !== image.split('@')[1] ||
+        mounts.some(([source,destination,readonly])=>!config.mounts?.some(m=>m.source===source&&m.destination===destination&&Boolean(m.options?.includes('ro'))===readonly))) {
       throw new Error('configuration_mismatch');
     }
     result.started = true;
@@ -116,6 +122,9 @@ export async function runRestricted({ image, inputDir, runDir, command,
         child.kill('SIGKILL');
       };
       const timer = setTimeout(() => halt('timeout'), timeoutMs);
+      const onAbort = () => halt('cancelled');
+      signal?.addEventListener('abort',onAbort,{once:true});
+      if(signal?.aborted)onAbort();
       child.stdin.on('error', () => {});
       child.on('error', () => halt('execution_start_failed'));
       child.stderr.on('data', chunk => {
@@ -124,7 +133,7 @@ export async function runRestricted({ image, inputDir, runDir, command,
       });
       child.stdout.on('data', chunk => {
         stdout += chunk; pending += chunk;
-        if (stdout.length > 1_048_576 || pending.length > 16_384) return halt('output_limit');
+        if (Buffer.byteLength(stdout) > limits.totalBytes || Buffer.byteLength(pending) > limits.lineBytes) return halt('output_limit');
         let end;
         while ((end = pending.indexOf('\n')) !== -1) {
           const line = pending.slice(0, end); pending = pending.slice(end + 1);
@@ -136,7 +145,7 @@ export async function runRestricted({ image, inputDir, runDir, command,
             if (closed || reason) return;
             if (!model || Object.keys(request).sort().join(',') !== 'id,input,kind,maxOutputTokens' ||
                 !Number.isSafeInteger(request.id) || request.id !== accepted + 1 ||
-                typeof request.input !== 'string' || request.input.length > 4096 ||
+                typeof request.input !== 'string' || Buffer.byteLength(request.input) > limits.inputBytes ||
                 !Number.isSafeInteger(request.maxOutputTokens) || request.maxOutputTokens < 1 ||
                 request.maxOutputTokens > model.maxOutputTokens || accepted >= model.maxRequests) return halt('model_request_denied');
             accepted += 1;
@@ -147,7 +156,7 @@ export async function runRestricted({ image, inputDir, runDir, command,
               // credential, path, model selection, shell command or method is accepted.
               const response = await model.request({ input: request.input, maxOutputTokens: request.maxOutputTokens, signal: abort.signal });
               if (closed || reason) return;
-              if (typeof response !== 'string' || response.length > 16_384) throw new Error('invalid_provider_response');
+              if (typeof response !== 'string' || Buffer.byteLength(response) > limits.responseBytes) throw new Error('invalid_provider_response');
               attempt.status = 'completed';
               if (!closed && !reason) child.stdin.write(JSON.stringify({ kind: 'model.response', id: request.id, output: response }) + '\n');
             } catch { if (!closed) { attempt.status = 'unknown'; halt('model_provider_error'); } }
@@ -155,11 +164,11 @@ export async function runRestricted({ image, inputDir, runDir, command,
         }
       });
       child.on('close', code => {
-        closed = true; clearTimeout(timer);
+        closed = true; clearTimeout(timer); signal?.removeEventListener('abort',onAbort);
         abort.abort('execution_ended');
         for (const attempt of result.modelRequests) if (attempt.status === 'started') attempt.status = 'unknown';
         // A stuck provider must not prevent the boundary from terminating the VM.
-        resolve({ code, reason, stdout: stdout.slice(0, 1_048_576), stderr: stderr.slice(0, 1_048_576) });
+        resolve({ code, reason, stdout: stdout.slice(0, limits.totalBytes), stderr: stderr.slice(0, 1_048_576) });
       });
     });
     Object.assign(result, execution);
@@ -186,7 +195,7 @@ export async function runRestricted({ image, inputDir, runDir, command,
   return result;
 }
 
-export async function exportStopped(execution, names, destination) {
+export async function exportStopped(execution, names, destination, limits) {
   if (!stopped.has(execution) || execution.status === 'invalid') throw new Error('termination_not_verified');
-  return exportRegularFiles(stopped.get(execution), names, destination);
+  return exportRegularFiles(stopped.get(execution), names, destination, limits?.maxBytes, limits?.maxFiles);
 }
