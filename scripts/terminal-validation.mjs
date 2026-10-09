@@ -63,7 +63,7 @@ for(const scenario of scenarios){
   const clipboard=[];
   const copy=async text=>{const copied=await copyToMacClipboard(text);const readback=copied===true?spawnSync('/usr/bin/pbpaste',[],{encoding:'utf8'}):undefined;const observed={copied,bytes:Buffer.byteLength(text),sha256:sha(text),readbackEqual:readback?.status===0&&readback.stdout===text};clipboard.push(observed);event({event:'clipboard',...observed});return copied;};
   let result;
-  try{const app=new ReadOnlyTui({workspace,dataRoot,mode:'offline',transport,terminal,copy,draftRoot:join(root,'drafts')});app.start();result=await app.closed;}
+  try{const app=new ReadOnlyTui({workspace,dataRoot,mode:'offline',transport,terminal,copy,draftRoot:join(root,'drafts')});try{app.start();result=await app.closed;}finally{await app.exit();}}
   finally{for(const timer of timers)clearTimeout(timer);process.stdout.write=originalWrite;closeSync(screenFd);}
   const after={raw:!!process.stdin.isRaw,stty:stty(),columns:process.stdout.columns,rows:process.stdout.rows};
   let readback;

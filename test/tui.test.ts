@@ -31,6 +31,8 @@ function fixture(override?: typeof fetch) {
 test('non-terminal CLI rejection does not emit terminal modes into a pipeline', () => {
   const child=spawnSync(process.execPath,['dist/src/cli.js','tui','--workspace','test/fixtures/project','--offline-demo'],{encoding:'utf8'});
   assert.equal(child.status,1);assert.match(child.stderr,/TUI_REQUIRES_TERMINAL/);assert.equal(child.stdout,'');
+  const coding=spawnSync(process.execPath,['dist/src/cli.js','tui','--workspace','test/fixtures/project','--offline-demo','--coding'],{encoding:'utf8'});
+  assert.equal(coding.status,1);assert.match(coding.stderr,/currently grants read only/);assert.equal(coding.stdout,'');
 });
 
 test('editor keeps graphemes, multiline and recoverable drafts; overlays consume exits and double-key confirmation expires', async () => {
@@ -134,4 +136,23 @@ test('streaming preserves a paused viewport, fixed draft and bounded windows acr
     source!.enqueue(new TextEncoder().encode('data: {"id":"stream","model":"deepseek-flash","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n'));source!.close();
     await until(()=>f.screen().includes('已完成'));
   } finally {await f.app.exit();}
+});
+
+test('real read tools show source truncation and failure while folded without exposing raw record plumbing', async () => {
+  for(const kind of ['truncated','failed']) {
+    const demo=demoTransport();let calls=0,release:()=>void=()=>{};
+    const transport:typeof fetch=async(url,init)=>{
+      calls++;
+      if(calls===2)await new Promise<void>((resolve,reject)=>{release=resolve;init!.signal!.addEventListener('abort',()=>reject(new Error('cancelled')),{once:true});});
+      return demo.fetch(url,init);
+    };
+    const f=fixture(transport),key=(s:string)=>f.terminal.input(s);
+    writeFileSync(join(f.workspace,'README.md'),kind==='truncated'?'long readable text 中文\n'.repeat(3000):Buffer.from([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82]));
+    try {
+      key('Read README');key('\r');await until(()=>calls===2);
+      await until(()=>f.screen().includes(kind==='truncated'?'源输出截断':'读取 · 失败'));
+      assert.doesNotMatch(f.screen(),/tool\.summary|tool\.result|attemptId/);
+      release();await until(()=>f.screen().includes('已完成'));
+    } finally {release();await f.app.exit();}
+  }
 });

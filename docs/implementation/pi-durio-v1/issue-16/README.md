@@ -16,7 +16,7 @@ node dist/src/cli.js tui --workspace /absolute/project --data-root /absolute/dat
 
 `src/query.ts` 是共用只读宿主查询边界：`readRunRecords` 仅返回元数据与 `BlobRef`，不打开 Harness 或 writable storage；`readObjectRange` 在同一次完整流式 hash/长度校验中取得有界片段，拒绝损坏；`readTextPage` 对连续翻页保持普通 UTF-8/字符簇边界。没有把 SQLite 读取散入 TUI。旧 `readRun` 行为保持兼容。
 
-`tool.summary` 消费器接受 #13 的有界派生摘要；失败和上游源截断可在折叠时显示，原始结果仍在 `tool.result`。当前候选若尚未含 #13 的记录生成，显示缺失/unknown，不能把未报告截断当成完整。`显示截断`、`未完成的响应`、`原文不可取得` 分别标记；运行结束只来自 runtime 的结果。
+`tool.summary` 消费器接受 #13 的有界派生摘要；失败和上游源截断可在折叠时显示，原始结果仍在 `tool.result`。#13 已在 merge 11f1e7a 合入；实际 read 大文件截断与图片不支持失败均在折叠状态显示，并通过真实 Harness 行为测试。若派生摘要缺失仍显示 unknown，不能把未报告截断当成完整。`显示截断`、`未完成的响应`、`原文不可取得` 分别标记；运行结束只来自 runtime 的结果。
 
 ## 输入与退出
 
@@ -51,4 +51,4 @@ reset
 
 `scripts/terminal-validation.mjs` 是供使用者在实际 Terminal.app 启动的候选验收入口，不控制 Terminal.app、不合成键盘输入。它先核对固定安装候选全部文件与 runner hash，然后分正常、Ctrl+C、Esc、退出和可捕获故障五个场景运行实际 TUI。自动保存环境、原始 ANSI、输入/resize、复制后 pbpaste 对照、raw/stty 前后、运行结果与同一 run 的 headless 读回。IME/字符格/视觉恢复由操作者单独报告，不自动填写 PASS。每次新建证据目录和独立数据根，保留第一次失败。具体 manifest 与复制启动命令由候选交接记录提供。
 
-完整日志及独立候选位于 `/Users/nineofour/pi-durio-v1-run/evidence/issue-16/`。后续 #13 集成变化须按影响补验 folded tool.summary；真实 Terminal 证据取得前不得标记整票完成。历史会话列表、完整队列、可写中止/恢复、长期查询和首版整体验收仍由后续切片完成。
+完整日志及独立候选位于 `/Users/nineofour/pi-durio-v1-run/evidence/issue-16/`。当前候选已补验 #13 的实际只读工具摘要；真实 Terminal 证据取得前不得标记整票完成。历史会话列表、完整队列、可写中止/恢复、长期查询和首版整体验收仍由后续切片完成。
