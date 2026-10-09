@@ -1,5 +1,6 @@
 import {readFileSync,lstatSync,existsSync,realpathSync} from 'node:fs';
 import {mkdir,writeFile} from 'node:fs/promises';
+import {retainExecutionOutput} from './execution-output.js';
 import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {isDeepStrictEqual} from 'node:util';
@@ -67,6 +68,7 @@ export async function prepareImproveBuild(o:{evidence:Evidence;target:SourceTarg
  record('improve.build-started',{groupId:o.groupId,targetId:target.id,sourceRoot:source,baseline,recipe:'Unmodified registered scripts/build-artifact.mjs; exact TypeScript compiler; no npm install or lifecycle hooks',resources:{profile:'typescript-build',memoryBytes:1073741824,nodeHeapMiB:768},image:verifiedImage});
  const engine=await import(new URL('../execution/isolation/boundary.mjs',import.meta.url).href);
  const execution=await engine.runRestricted({image:verifiedImage,inputDir:input,runDir:join(o.directory,'execution'),command:['node','/input/bootstrap.mjs'],resourceProfile:'typescript-build',timeoutMs:Math.max(100,Math.min(o.timeoutMs,Date.parse(o.deadline)-Date.now())),signal:o.signal});guard();
+ retainExecutionOutput(e,execution,{groupId:o.groupId,phase:'build',executionId:execution.id});
  const executionRef=e.blob(JSON.stringify(execution));record('improve.build-execution',{groupId:o.groupId,execution:executionRef,state:!execution.terminated||execution.status==='invalid'?'unknown':execution.code===0?'completed':'failed'});
  if(!execution.terminated||execution.status==='invalid'||execution.code!==0)throw new ImproveBuildFailure(!execution.terminated||execution.status==='invalid'?'unknown':'failed',`IMPROVE_BUILD_FAILED:${execution.reason??execution.stderr??execution.code}`);
  const outputRoot=join(o.directory,'execution/work/source'),names=regularFiles(join(outputRoot,'dist')).filter(p=>p.startsWith('src/')||p.startsWith('execution/')).map(p=>`source/dist/${p}`),destination=join(o.directory,'export');
@@ -82,6 +84,7 @@ export async function prepareImproveBuild(o:{evidence:Evidence;target:SourceTarg
  const candidate=retained(e,candidateFiles,join(o.directory,'candidate'));
  const smokeInput=join(o.directory,'startup-input');await mkdir(smokeInput,{mode:0o755});materialize(e.root,candidateFiles,join(smokeInput,'build'));
  const startup=await engine.runRestricted({image:verifiedImage,inputDir:smokeInput,runDir:join(o.directory,'startup'),command:['node','/input/build/dist/src/cli.js','--help'],timeoutMs:Math.max(100,Math.min(o.timeoutMs,Date.parse(o.deadline)-Date.now())),signal:o.signal});guard();
+ retainExecutionOutput(e,startup,{groupId:o.groupId,phase:'startup',executionId:startup.id});
  const startupRef=e.blob(JSON.stringify(startup));record('improve.build-startup',{groupId:o.groupId,buildId:candidate.id,execution:startupRef,state:!startup.terminated||startup.status==='invalid'?'unknown':startup.code===0?'completed':'failed'});
  if(!startup.terminated||startup.status==='invalid'||startup.code!==0)throw new ImproveBuildFailure(!startup.terminated||startup.status==='invalid'?'unknown':'failed',`IMPROVE_BUILD_STARTUP_FAILED:${startup.reason??startup.stderr??startup.code}`);
  const pair:ImproveBuildPair={state:'completed',targetId:target.id,sourceRoot:source,baseline,candidate,execution:executionRef,startup:startupRef,environment:{image:verifiedImage,compiler:digest(JSON.stringify(original.compiler))},scope:'TypeScript source change built in the existing restricted VM. Native dependency bytes are retained from the registered host installation; subsequent launch rechecks host Node/platform/arch. No running process replaced.'};

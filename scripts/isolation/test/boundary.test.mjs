@@ -6,6 +6,45 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { runRestricted, exportStopped } from '../boundary.mjs';
 
+// A controller protocol fixture exercises host byte acquisition/teardown only.
+// It does not claim VM isolation; the real VM checks below remain separate.
+async function outputController(root, stream, payload, failStop = false, keepAlive = true) {
+ const executable=join(root,'controller');
+ await writeFile(executable,`#!${process.execPath}\nconst fs=require('node:fs');const a=process.argv.slice(2),state=${JSON.stringify(join(root,'state.json'))};
+ if(a[0]==='--version')console.log('version 1.4.1 ');
+ else if(a[0]==='image')console.log(JSON.stringify([{configuration:{descriptor:{digest:'sha256:'+'a'.repeat(64)}}}]));
+ else if(a[0]==='create'){const mounts=a.flatMap((v,i)=>v==='--mount'?[Object.fromEntries(a[i+1].split(',').map(p=>p.split('=')))]:[]);fs.writeFileSync(state,JSON.stringify({readOnly:true,resources:{memoryInBytes:536870912,cpus:1},image:{descriptor:{digest:'sha256:'+'a'.repeat(64)}},mounts:mounts.map(m=>({source:m.source,destination:m.target,options:m.readonly===undefined?['ro']:[]}))}));}
+ else if(a[0]==='inspect'){const configuration=JSON.parse(fs.readFileSync(state));configuration.mounts.forEach(m=>m.options=m.destination==='/work'?[]:['ro']);console.log(JSON.stringify([{configuration,status:{state:'stopped'}}]));}
+ else if(a[0]==='start'){process.${stream}.write(Buffer.from(${JSON.stringify(payload.subarray(0, payload.length-2).toString('base64'))},'base64'));setTimeout(()=>{process.${stream}.write(Buffer.from(${JSON.stringify(payload.subarray(-2).toString('base64'))},'base64'));if(${keepAlive})setInterval(()=>{},1000);},50);}
+ else if(a[0]==='stop'&&${failStop})process.exit(72);
+ else if(a[0]==='list')console.log('[]');
+ `,{mode:0o700});return executable;
+}
+
+test('output limit preserves the complete acquired threshold event in both byte streams',async()=>{
+ for(const stream of ['stdout','stderr']){
+  const root=await mkdtemp(join(tmpdir(),'durio-output-bytes-')),input=join(root,'input');await mkdir(input);
+  const cap=stream==='stdout'?16:1048576,payload=Buffer.concat([Buffer.alloc(cap-1,97),Buffer.from([0xff,0x80])]);
+  const result=await runRestricted({image:'unused@sha256:'+'a'.repeat(64),inputDir:input,runDir:join(root,'run'),command:['unused'],timeoutMs:5000,protocolLimits:{inputBytes:16,responseBytes:16,lineBytes:1048576,totalBytes:16},containerExecutable:await outputController(root,stream,payload)});
+  assert.equal(result.reason,'output_limit');assert.equal(result.terminated,true);
+  assert.deepEqual(Buffer.concat(result.output[stream].chunks.map(chunk=>Buffer.from(chunk,'base64'))),payload);
+  assert.equal(result.output[stream].bytes,payload.length);assert.equal(result.output[stream].displayTruncated,true);
+  const reopened=JSON.parse(await readFile(join(root,'run/outcome.json'),'utf8'));
+  assert.deepEqual(reopened.output,result.output);
+ }
+});
+
+test('split UTF-8 decoding preserves protocol text while teardown uncertainty does not erase acquired bytes',async()=>{
+ for(const failStop of [false,true]){
+  const root=await mkdtemp(join(tmpdir(),'durio-output-utf8-')),input=join(root,'input');await mkdir(input);
+  const payload=Buffer.from('A🙂文');
+  const result=await runRestricted({image:'unused@sha256:'+'a'.repeat(64),inputDir:input,runDir:join(root,'run'),command:['unused'],timeoutMs:5000,containerExecutable:await outputController(root,'stdout',payload,failStop,false)});
+  assert.equal(result.stdout,'A🙂文');assert.deepEqual(Buffer.from(result.output.stdout.chunks[0],'base64'),payload);
+  assert.equal(result.terminated,!failStop);assert.equal(result.reason,failStop?'termination_unconfirmed':null);
+  if(failStop)await assert.rejects(exportStopped(result,[],join(root,'denied')),/termination_not_verified/);
+ }
+});
+
 test('an unavailable isolation executable fails closed before candidate execution', async () => {
   const root = await mkdtemp(join(tmpdir(), 'durio-unavailable-'));
   const input = join(root, 'input');

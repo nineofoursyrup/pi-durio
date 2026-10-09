@@ -6,6 +6,7 @@ import {randomUUID} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
 import {compareTrials,type ComparisonTrial} from './comparison.js';
 import {Evidence,readObject,openHostReadonly,type BlobRef} from '../evidence.js';
+import {retainExecutionOutput} from '../execution-output.js';
 import {acquireOwner} from '../ownership.js';
 import {fixEvidence,verifyFixed} from '../fixed-evidence.js';
 import {PersistentBudget} from '../provider-boundary.js';
@@ -90,7 +91,7 @@ export async function runEval(options:RunEvalOptions){
    const taskAt=performance.now();let execution:RestrictedResult|undefined;
    try{
     execution=await engine.runRestricted({image:plan.image,inputDir,runDir,dependenciesDir:dependencies.get(plan.comparison?trial.side:'candidate'),command:['node','/deps/dist/src/eval/guest.js'],timeoutMs:Math.max(100,Math.min(plan.trialTimeoutMs,Date.parse(plan.budget.deadline)-Date.now())),model:mediator,signal,protocolLimits});
-    owner.assertHeld();outcome.started=execution.started;outcome.timing.taskMs=performance.now()-taskAt;outcome.isolation=e.blob(JSON.stringify(execution));
+    owner.assertHeld();retainExecutionOutput(e,execution,{trialId:trial.id,phase:'eval-runtime',executionId:execution.id});outcome.started=execution.started;outcome.timing.taskMs=performance.now()-taskAt;outcome.isolation=e.blob(JSON.stringify(execution));
     if(probe&&execution.terminated){const verification=await probe.verify(join(runDir,'work'),e);appendFact(e,'eval.boundary-check',{trialId:trial.id,...verification});if(!verification.valid){execution.status='invalid';execution.reason='actual_boundary_probe_failed';}}
     if(execution.terminated&&execution.status!=='invalid'){
      const work=join(runDir,'work'),names:string[]=[];
@@ -136,7 +137,7 @@ async function gradeOutcome(e:Evidence,plan:EvalPlan,trial:EvalTrial,fixture:Eva
   gradingProbe=trial.scenario==='boundary'?await prepareProbe(input,false):undefined;
   await writeFile(join(input,'check.mjs'),(gradingProbe?"import '/input/runtime-probe.mjs';\n":'')+fixture.grader.program);
   const execution=await engine.runRestricted({image:plan.image,inputDir:input,runDir:join(directory,`${trial.id}-grading-${grade.id}`),command:['node','/input/check.mjs'],timeoutMs:Math.min(plan.gradingTimeoutMs,Math.floor(remaining)),signal});
-  grade.execution=e.blob(JSON.stringify(execution));
+  retainExecutionOutput(e,execution,{trialId:trial.id,phase:'grader',executionId:execution.id});grade.execution=e.blob(JSON.stringify(execution));
   let checkOutput=execution.stdout;
   if(gradingProbe){if(!execution.terminated)throw Error('grading termination unknown');const verification=await gradingProbe.verify(join(directory,`${trial.id}-grading-${grade.id}`,'work'),e);appendFact(e,'eval.grading-boundary-check',{trialId:trial.id,...verification});if(!verification.valid){grade.reason='isolation: grading boundary invalid';return grade;}checkOutput=checkOutput.split('\n').slice(1).join('\n');}
   if(!execution.terminated||execution.status==='invalid'){grade.reason=`isolation: ${execution.reason}`;return grade;}
