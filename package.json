@@ -9,7 +9,8 @@
   "files": [
     "dist/src",
     "dist/execution",
-    "docs/implementation/pi-durio-v1/issue-11/README.md"
+    "docs/implementation/pi-durio-v1/issue-11/README.md",
+    "docs/implementation/pi-durio-v1/issue-16/README.md"
   ],
   "engines": {
     "node": ">=22.19.0"
@@ -21,24 +22,28 @@
     "prepack": "npm run build && node scripts/prepare-pack.mjs"
   },
   "dependencies": {
+    "@earendil-works/chord": "1.1.0",
     "@earendil-works/pi-ai": "1.1.0",
     "@earendil-works/pi-durable": "1.1.0",
-    "@earendil-works/chord": "1.1.0",
+    "@earendil-works/pi-tui": "1.1.0",
     "proper-lockfile": "4.1.2"
   },
   "devDependencies": {
-    "typescript": "5.9.3",
     "@types/node": "24.10.1",
-    "@types/proper-lockfile": "4.1.4"
+    "@types/proper-lockfile": "4.1.4",
+    "typescript": "5.9.3"
   },
   "exports": {
     ".": "./dist/src/runtime.js",
-    "./offline": "./dist/src/offline.js"
+    "./offline": "./dist/src/offline.js",
+    "./tui": "./dist/src/tui/app.js",
+    "./query": "./dist/src/query.js"
   },
   "bundleDependencies": [
     "@earendil-works/pi-ai",
     "@earendil-works/pi-durable",
     "@earendil-works/chord",
-    "proper-lockfile"
+    "proper-lockfile",
+    "@earendil-works/pi-tui"
   ]
 }
