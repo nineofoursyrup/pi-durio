@@ -1,6 +1,6 @@
 # #16：全屏只读 TUI（真实 Terminal 验收待完成）
 
-实现状态为 **PARTIAL / Terminal acceptance BLOCKED**，不是 #16 整票通过，也不解除 #17/#18 及其后继的依赖。`@earendil-works/pi-tui@1.1.0` 已从当前官方 npm registry 核对、精确安装并纳入 lock 与生产打包。使用公开 `Editor`、`TuiAltScreen`、`ScrollView`、`MouseRegion`、`VStack` 与 `ProcessTerminal`；没有私有 demo 导入、fork 或 UI 持有 Harness。
+实现状态为 **PARTIAL / Terminal acceptance BLOCKED**，不是 #16 整票通过，也不解除 #17/#18 及其后继的依赖。r3/r4 使用官方 `@earendil-works/pi-tui@1.1.0`；真实宽度失败定位后，用户明确授权了限定依赖补丁例外。当前使用 `1.1.0-durio-width.1` 的共享字宽配置入口及当前 Terminal 自动校准，详见 [r5 实现与验收边界](width-repair-r5.md)。继续复用 `Editor`、`TuiAltScreen`、`ScrollView`、`MouseRegion`、`VStack` 与 `ProcessTerminal`，没有 UI 持有 Harness。
 
 ## 运行
 
@@ -56,3 +56,7 @@ reset
 ## 固定人工候选 r3
 
 候选 commit `004266e9e6c1a3b639a44c31096511efe71c5d61`；[候选身份、安装与启动指针](candidate-r3.json)。全部 12,681 个文件的集合和内容已核对，新增/缺失/改字节拒绝检查通过。r1/r2 原件与首败保留。实现以部分状态合入 `d62441c9b6752f1e90739a29e92d995a846b14a5`，与候选只相差协调状态文档；产品、package/lock 和 runner 字节未变。实际 Terminal 观察仍待用户完成，不能借此解除依赖；这也不是 #32 日用接受。
+
+## 固定人工候选 r5
+
+字宽修复候选 commit `e4571452a1ebf712cd60282ded0161640670d70e`；[候选身份与单一启动指针](candidate-r5.json)。独立 offline 装包和同 run headless 读回通过；12,704 个候选文件核对通过，59 份产品/lock/package 构建文件与源码工作区逐字节一致。runner 先做三项短复测，未全部通过立即停止。r3/r4 首次真人失败、r5 尚未运行的真人项目和 #32 日用接受分别保留，不能互相替代。

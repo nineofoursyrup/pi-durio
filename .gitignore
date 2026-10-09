@@ -8,3 +8,5 @@ dist/
 coverage/
 *.tsbuildinfo
 *.tgz
+!vendor/pi-tui/*.tgz
+!vendor/pi-tui/upstream/*.tgz

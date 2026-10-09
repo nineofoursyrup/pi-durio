@@ -1,0 +1,26 @@
+{
+  "name": "@earendil-works/pi-tui",
+  "version": "1.1.0-durio-width.1",
+  "upstream": {
+    "filename": "upstream/earendil-works-pi-tui-1.1.0.tgz",
+    "integrity": "sha512-v7wkS0y2ErZvZkSfemqd9RrBZJ5x6p8Ujsv7NdJj01IXJyFM0kNL6rMdcKcvTe7EVTd6ugvDB9VPZSoaBF9QxQ==",
+    "sha256": "5d0f9dfb31c06f27d1fb2b05d166fc0d33430f53ece0a3ff3f69d55950f1430b"
+  },
+  "patch": {
+    "filename": "width-overrides.patch",
+    "sha256": "4af10fd879dd0ec955f711d7b2605df567cd9d89c34270ce56d596f009bcbc1e"
+  },
+  "build": {
+    "typescript": "5.9.3",
+    "scriptSha256": "257b74eafb80cf0f326503ce5a4f5a30e67f169a96400345a202bd6f7597d166"
+  },
+  "artifact": {
+    "filename": "pi-tui-1.1.0-durio-width.1.tgz",
+    "integrity": "sha512-U1OWa0IMjVbFAiitcrNOH+QJzT9zb+EkbZSu3DL3lSHnnRHJSrkP6IX5KAreMPsJvXzcBWvG0u/dq0jJs0pGaQ==",
+    "sha256": "90a1f855d1e5f30d9b97c8733ca0a1c3a05ce07d5e95af4e2fed6f553e34f62a"
+  },
+  "modifiedUpstreamSources": [
+    "packages/tui/src/utils.ts",
+    "packages/tui/src/index.ts"
+  ]
+}

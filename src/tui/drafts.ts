@@ -20,6 +20,15 @@ export class Drafts {
     renameSync(temp,path);
     const dir=openSync(this.root,'r'); try { fsyncSync(dir); } finally { closeSync(dir); }
   }
+  /** Raw input events that never reached the editor. Never restored or replayed as commands. */
+  savePending(inputs:Array<{data:string;context:string}>,reason:string) {
+    if(!inputs.length)return;
+    const root=join(this.root,'pending-input');mkdirSync(root,{recursive:true,mode:0o700});
+    const path=join(root,`${this.prefix}-${Date.now()}-${randomUUID()}.json`);
+    const fd=openSync(path,'wx',0o600);
+    try {writeFileSync(fd,JSON.stringify({state:'not_applied',reason,inputs,savedAt:new Date().toISOString(),automaticReplay:false}));fsyncSync(fd);}finally{closeSync(fd);}
+    const dir=openSync(root,'r');try{fsyncSync(dir);}finally{closeSync(dir);}
+  }
   latest(): string | undefined {
     let names:string[];
     try { names=readdirSync(this.root); } catch(error) { if((error as NodeJS.ErrnoException).code==='ENOENT') return; throw error; }
