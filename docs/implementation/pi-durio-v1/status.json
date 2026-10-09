@@ -167,13 +167,15 @@
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/human-observation-r3-derived.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/cursor-repair/handoff-r4.json",
         "docs/implementation/pi-durio-v1/issue-16/candidate-r4.json",
-        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/cursor-repair/merge-integration-readback.json"
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/cursor-repair/merge-integration-readback.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/user-feedback-r4.json",
+        "docs/implementation/pi-durio-v1/issue-16/terminal-r4-feedback.json"
       ],
       "branch": "codex/pi-durio-v1-issue-16",
       "agent": "/root/issue16",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "R3 cursor FAIL preserved. R4 repair integrated; 48/48 plus installed smoke/identity passed. Human r4 cursor revalidation pending; remaining real Terminal criteria remain open. Do not unlock successors.",
+      "note": "R3 cursor FAIL and R4 emoji spacing/caret-position FAIL both preserved; investigate actual Terminal cell widths. Successors remain blocked.",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-16.json",
       "local_checkpoint": "e98fef9",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6079513003",
@@ -195,7 +197,7 @@
       "repair_commit": "aff8b09224780f5938dce311580fc30822fb6ecf",
       "repair_candidate": "42ff424757f83c8578949d2a31f31eafca8ad486",
       "human_revalidation_r4": {
-        "status": "requested-pending",
+        "status": "FAIL emoji spacing and caret before B",
         "candidate": "42ff424757f83c8578949d2a31f31eafca8ad486",
         "scenario": "cursor",
         "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r4/terminal-validation.mjs",
@@ -205,7 +207,8 @@
         "observed_partial_runs": [
           "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/manual/2026-10-09T11-19-18-936Z",
           "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/manual/2026-10-09T11-20-14-120Z"
-        ]
+        ],
+        "feedback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/user-feedback-r4.json"
       },
       "integration_history": [
         {
@@ -220,7 +223,10 @@
           "candidate": "r4",
           "acceptance": "pending human revalidation"
         }
-      ]
+      ],
+      "width_repair_agent": "/root/issue16_width",
+      "width_repair_worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-width",
+      "width_repair_branch": "codex/pi-durio-v1-issue-16-width"
     },
     "17": {
       "number": 17,
@@ -511,7 +517,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "afd14225862bb2339b008f912beff208caf7d579",
+  "integration_tip": "9bf2ffa03263a17a2ed5bec0078477f9002bafb3",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -521,7 +527,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T11:24:33.536374+00:00",
+  "updated_at": "2026-10-09T11:26:26.147950+00:00",
   "last_remote_readback": {
     "headRefOid": "afcfe83f5faf17519796b560fb161bd440e57d50",
     "isDraft": true,
