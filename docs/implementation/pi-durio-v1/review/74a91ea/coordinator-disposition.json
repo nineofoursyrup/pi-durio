@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-09T23:08:46.751771+00:00",
+  "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+  "spec": "PASS_SCOPED_REVIEW_COMPLETED_BEFORE_COMBINED_FAILURE",
+  "standards": "FAIL_STD04",
+  "combined": {
+    "tests": 251,
+    "pass": 250,
+    "fail": 1,
+    "skipped": 0
+  },
+  "priorFindings": {
+    "SPEC-01": "resolved",
+    "SPEC-02": "resolved",
+    "STD-01": "resolved",
+    "STD-02": "resolved",
+    "STD-03": "resolved"
+  },
+  "newFinding": "STD-04 deadline admission and subsequent failed artifact classification",
+  "tickets15and27": "Applicable checks and both review axes resolve their original repair; accepted again for internal dependencies only",
+  "ticket26": "New bounded repair in isolated worktree; no whole acceptance",
+  "ticket30": "Preparation repaired; real paid batch still NOT AUTHORIZED / NOT RUN",
+  "ticket31": "Partial old-candidate measurements only; final local/native/provider completeness pending",
+  "ticket32": "NOT RUN; user explicit daily-use acceptance required",
+  "immutableHistory": "Original first reviews, first failures, 74a full-suite failure and source/build identity retained"
+}

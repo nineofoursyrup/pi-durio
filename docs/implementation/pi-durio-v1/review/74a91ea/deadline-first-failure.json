@@ -1,0 +1,192 @@
+{
+  "at": "2026-10-09T23:02:52.784055+00:00",
+  "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+  "status": "CONFIRMED_DEADLINE_ADMISSION_AND_RESULT_MASKING_DEFECT",
+  "originalFixture": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7",
+  "originalTest": "test 68: selected source produces a content-bound executable and only an explicit new process observes it",
+  "originalTestRuntimeMs": 350166.185542,
+  "originalError": "frozen / group unknown / ENOENT scandir check-0/execution/work/targets",
+  "events": [
+    {
+      "seq": 4,
+      "kind": "improve.decision",
+      "at": "2026-10-09T22:54:24.345Z",
+      "body": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/5711b21e66f92589237fb84e3d6a79ecf0ffac27f968149d6ca729d4d93a40ad",
+        "bytes": 22466,
+        "sha256": "5711b21e66f92589237fb84e3d6a79ecf0ffac27f968149d6ca729d4d93a40ad"
+      },
+      "selected": {
+        "deadline": "2026-10-09T22:59:18.890Z"
+      }
+    },
+    {
+      "seq": 7,
+      "kind": "improve.prepared",
+      "at": "2026-10-09T22:54:27.050Z",
+      "body": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/438fbc0c3ec2ab8c249a7c107c6159ffde85dbe02bcb70293feabcb7f7ceec18",
+        "bytes": 581,
+        "sha256": "438fbc0c3ec2ab8c249a7c107c6159ffde85dbe02bcb70293feabcb7f7ceec18"
+      },
+      "selected": {
+        "state": null,
+        "reason": null
+      }
+    },
+    {
+      "seq": 140,
+      "kind": "improve.build-started",
+      "at": "2026-10-09T22:58:14.798Z",
+      "body": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/48d311d67fd792767b696763b103836c0d27ef27496ea41aecffe39b7962f168",
+        "bytes": 1017,
+        "sha256": "48d311d67fd792767b696763b103836c0d27ef27496ea41aecffe39b7962f168"
+      },
+      "selected": {
+        "state": null,
+        "reason": null
+      }
+    },
+    {
+      "seq": 148,
+      "kind": "improve.build",
+      "at": "2026-10-09T22:59:13.628Z",
+      "body": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/0d938e72f4bca950a215c0b5af8e518ee6b03d62e0bb8cee7bbeb93d67da0564",
+        "bytes": 1897,
+        "sha256": "0d938e72f4bca950a215c0b5af8e518ee6b03d62e0bb8cee7bbeb93d67da0564"
+      },
+      "selected": {
+        "state": "completed",
+        "reason": null
+      }
+    },
+    {
+      "seq": 149,
+      "kind": "improve.check-started",
+      "at": "2026-10-09T22:59:13.643Z",
+      "body": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/45132e114fe970a22594c0751ada5164cb63feeb70f00a68c1e7b4379b686940",
+        "bytes": 200,
+        "sha256": "45132e114fe970a22594c0751ada5164cb63feeb70f00a68c1e7b4379b686940"
+      },
+      "selected": {
+        "state": null,
+        "reason": null
+      }
+    },
+    {
+      "seq": 151,
+      "kind": "improve.check",
+      "at": "2026-10-09T22:59:35.297Z",
+      "body": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/3495cfcfed47a11ce9bd672d161878d2b50213ed6da1e150fc59858e6d63c06b",
+        "bytes": 290,
+        "sha256": "3495cfcfed47a11ce9bd672d161878d2b50213ed6da1e150fc59858e6d63c06b"
+      },
+      "selected": {
+        "state": "unknown",
+        "reason": "Error: ENOENT: no such file or directory, scandir '/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/work/targets'"
+      }
+    }
+  ],
+  "deadline": "2026-10-09T22:59:18.890Z",
+  "phases": [
+    {
+      "phase": "build/execution",
+      "plan": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/execution/plan.json",
+        "bytes": 2715,
+        "sha256": "c61b32e01fd7d364797b04bcb4d8c6151006afba1f3c67ae6f4e81b387f91774"
+      },
+      "outcome": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/execution/outcome.json",
+        "bytes": 26832,
+        "sha256": "8bf41c8e3169e0f425a64071c9c29e73e642deffb7d6e38d47ec88476e4e8744"
+      },
+      "timeoutMs": 64078,
+      "createdAt": "2026-10-09T22:58:23Z",
+      "state": {
+        "id": "durio-i12-2f9d4c02-5956-4622-b826-6a93aabd3316",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "reason": null,
+        "code": 0,
+        "sourceEnd": "eof"
+      },
+      "workChildren": [
+        "home",
+        "cache",
+        "source",
+        "tmp"
+      ]
+    },
+    {
+      "phase": "build/startup",
+      "plan": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/startup/plan.json",
+        "bytes": 2692,
+        "sha256": "17a2b309298008b51a5786473c48e2c61b88a071f15e6d9a7765263e884acbb8"
+      },
+      "outcome": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/startup/outcome.json",
+        "bytes": 41799,
+        "sha256": "7965768ff986671b5eccaebc0ac98e4f6bb69c5a7241f0eb01a8c517bdba37a6"
+      },
+      "timeoutMs": 23210,
+      "createdAt": "2026-10-09T22:59:04Z",
+      "state": {
+        "id": "durio-i12-60310930-0864-425e-890f-b75fdbdcef54",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "reason": null,
+        "code": 0,
+        "sourceEnd": "eof"
+      },
+      "workChildren": [
+        "home",
+        "cache",
+        "tmp"
+      ]
+    },
+    {
+      "phase": "check-0/execution",
+      "plan": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/plan.json",
+        "bytes": 2670,
+        "sha256": "b1cb11ab79e65040d2ce23caec5fbcbf4432a94094c6b78263e029258a8e9f4b"
+      },
+      "outcome": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/outcome.json",
+        "bytes": 26374,
+        "sha256": "3ef9865ce9208e67784154c16a2844472a67a19c458e479b0eb3cddef032ac6d"
+      },
+      "timeoutMs": 100,
+      "createdAt": "2026-10-09T22:59:35Z",
+      "state": {
+        "id": "durio-i12-a44be661-a5be-454c-9b4c-a624ac0f75c7",
+        "status": "failed",
+        "started": true,
+        "terminated": true,
+        "reason": "timeout",
+        "code": null,
+        "sourceEnd": "stopped-before-eof"
+      },
+      "workChildren": [
+        "home",
+        "cache",
+        "tmp"
+      ]
+    }
+  ],
+  "cause": "Check admitted before content materialization, deadline expired during preparation, remaining time clamped to 100ms. Container created after absolute deadline; known confirmed-terminated timeout then masked by unconditional targets enumeration ENOENT.",
+  "scope": "Prior original fixes are not erased; this is a newly exposed actual combination failure, no provider involved. Root code unchanged and full suite still running.",
+  "requiredRepair": [
+    "Do not create/start new affected restricted work after the absolute authorization deadline, including boundary preparation delays. Preserve cancellation checks at actual admission.",
+    "Preserve actual failed/cancelled/timeout execution reason and acquired output when no target artifacts exist; missing output must not mask confirmed timeout or imply success.",
+    "Do not extend a user decision deadline or silently raise budget; retain happy-path test first failure. A new separately declared test deadline may be appropriate only after correct cutoff behavior is independently verified."
+  ]
+}

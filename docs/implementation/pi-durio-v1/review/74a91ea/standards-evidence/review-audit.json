@@ -1,0 +1,1139 @@
+{
+  "identity": {
+    "baseline": "25d311616136766b37c0274f3f490ec1105f9592",
+    "previousCandidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+    "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+    "tree": "e3089debbbbc34a3a4ba48980087cf9bbd12589d",
+    "status": "?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png\n?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json",
+    "checkedAt": "2026-10-09T23:04:05.720090+00:00"
+  },
+  "priorStandardsReports": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/standards-review.md",
+      "bytes": 2410,
+      "sha256": "2ab3fd72bf0381de31ddd6d013b8eb8f1f415a10b872c4aa350e5fc724881b9d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/standards-review.json",
+      "bytes": 15827,
+      "sha256": "2075ce42f5281d748a81ad170692a46809c3199e6df821cd86d2cee87bfe5227"
+    }
+  ],
+  "sourceBuildAudits": {
+    "repair-15-target-session": {
+      "manifest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/source-build-final.json",
+        "bytes": 91832,
+        "sha256": "95fa0768cb040f4c0668d78aa2a18bcea31c1ded599e38ad75d12ddfd3ced037"
+      },
+      "groups": {
+        "inputs": {
+          "files": 165,
+          "mismatches": [
+            {
+              "path": "src/eval/runner.ts",
+              "recorded": "ebb3f31e78bed0d0dfb4d8d08005f80c6362b00ffdc8c7ee83e795676b93348b",
+              "current": "6a7a882ddfa37e77f94f158c0966592c096bc797f98e4511b2e1add535908c9c"
+            },
+            {
+              "path": "src/improve-build.ts",
+              "recorded": "416ea5b940743ee240dd6d17522bb3e07204374657557815b62d8c81daf20b1e",
+              "current": "85000cfd3345e73407f91224d50e60d7d843c056c839e32b3bd334c105e90354"
+            },
+            {
+              "path": "src/improve-process.ts",
+              "recorded": "3181ae213fcc546cd400210af5d1ead6cb2ec343fb3d09837fb2468aebf39baa",
+              "current": "a69273530257aa683043485000b5f4bbc727d38b677868b1890979aee5232602"
+            },
+            {
+              "path": "src/improve-validation.ts",
+              "recorded": "466c2304f3af146e7795e6cb922b3204cccc3ed39ac2e4cb3b099b8683c894f6",
+              "current": "e7f071c4a4f76386185a3eae7916ce63256c6276fbf0260ca24a38e532fd9061"
+            },
+            {
+              "path": "src/metrics/acceptance.ts",
+              "recorded": "b110cd1d4941a941413d155daa9665cf34b2cc6c2fde3a75610187a8cf0138ea",
+              "current": "0e70a9c405ad752ca3a076e799dfb18bc54e63a0c2c7af30962b5c3cea2614ce"
+            },
+            {
+              "path": "src/metrics/costs.ts",
+              "recorded": "b307af4bb7baa95217a910ccdbe946d4259cbe1e60b28e3ab9387444fde24fa7",
+              "current": "405f8b33d272c95d9e5193b38dfb68cea7766d594e01105254d3ae94a01bd6fc"
+            },
+            {
+              "path": "src/metrics/feedback.ts",
+              "recorded": "6757a7f47b4cc5eaf4cc6b872c31599d7fd65ba220e18a0ab91fcecc6ff186ac",
+              "current": "5d4038f2c371a9de43ae2450dc8b0129208c8bbe09afdcd28789c64f48cc0c19"
+            },
+            {
+              "path": "src/ownership.ts",
+              "recorded": "9a1c68596226c3cc78a8fbadd6542081811ae2a1139b419def722c1d55b3a973",
+              "current": "7079a570e16721a58a9e30778c8ca9eb488f77e8a54358c2b3d6d1d3a24c3f25"
+            },
+            {
+              "path": "test/improve-decisions.test.ts",
+              "recorded": "f26eec4b74b10755bc42fb9ebbfa1aa012b78256d9fc088ef1e6d7be1cc4516f",
+              "current": "b10d1331cfdf59c8bdcbc25b624d2eb630f79de38e612f88b4d668e8dc216ad9"
+            },
+            {
+              "path": "test/metrics-runtime.test.ts",
+              "recorded": "90b47a8c2689db5fdf9435c9ab192762f4a4b2230272a9eccd5c80d08d4762f3",
+              "current": "b25f581896806c241578bcfdb3c1fd6a9468ce68633004304b2bde49c84bd289"
+            },
+            {
+              "path": "scripts/isolation/boundary.mjs",
+              "recorded": "bffaa64f03635775d6277cdc082f97f766e9d6ae40ae29560d7b3147a03f6e8c",
+              "current": "5d5a55c490372edf64ff5567e59afbd93e1b1b942644fbd7bc2304d753a1995f"
+            },
+            {
+              "path": "scripts/isolation/test/boundary.test.mjs",
+              "recorded": "1d8d61351f38f7c4e514de015f6f4058380d86891ce63e55c347095e62aae087",
+              "current": "679fd66f58d649019ef2bc4f310bcbfb11dc4bd70573eed12053ab7c59c41af4"
+            }
+          ]
+        },
+        "compiler": {
+          "files": 140,
+          "mismatches": []
+        },
+        "outputs": {
+          "files": 243,
+          "mismatches": [
+            {
+              "path": "dist/src/eval/runner.js",
+              "recorded": "357f03daf559128549ba92ea713d4b1261cbc4db6572f4d2d93031ed643ecf29",
+              "current": "4d8d3dcf1426f4519edea96038c4e4a45f088457d0910ccad0a9faec85a86f5c"
+            },
+            {
+              "path": "dist/src/eval/runner.js.map",
+              "recorded": "2280cf2a60581fcddea0cb5bb4f05fd07fe60a22be8469400714a9730b33cc93",
+              "current": "db842975186ad8fb7002860ceed60c471187640dd5b013c932215ca02c2bd51c"
+            },
+            {
+              "path": "dist/src/improve-build.js",
+              "recorded": "c1da09e74133ebcf82a5cbcd9b1a26d3ff4cc4a5592d16bd2aaa5bd76241dc4e",
+              "current": "38e7651c631cf501a2f34de89a2adb6ae6fc817c50ffcc557992a25d92247eed"
+            },
+            {
+              "path": "dist/src/improve-build.js.map",
+              "recorded": "5951a5fec24ae7ef33198835b7023b094cc7e149e8b5ad05487f0beae5c865bc",
+              "current": "0bfc85cfe8ee008d250850619722910f390cae0d4320051aaff7908a04293b32"
+            },
+            {
+              "path": "dist/src/improve-process.d.ts",
+              "recorded": "8d591f6bc602241f453a54fe7436151cfc0cf66de4e826785055a597c917f967",
+              "current": "2ac1623750ae9188f1785c725a8a81105b5c493225f033c34f9891dcb111c77e"
+            },
+            {
+              "path": "dist/src/improve-process.js",
+              "recorded": "3d07dca34dba5bc67131d2eac843e2802aeb818762ec899e71224eb0d2290d51",
+              "current": "f6192cdb05ddbe158fce491ebb1c6a514bdff8812d60c1664de8bec6c0ddbd73"
+            },
+            {
+              "path": "dist/src/improve-process.js.map",
+              "recorded": "eb723ac1642d3c00f36ccddcbff43023b0a7ca863131306e39327cabe1760f0e",
+              "current": "8ed14ed68a7b38c3a706ccf869b6f392200746022beee75c3c86dfb609e94a97"
+            },
+            {
+              "path": "dist/src/improve-validation.js",
+              "recorded": "e0caaeb8b3d3dff183706e637433c4ec443202f4302da9b762a89523d2461e12",
+              "current": "567a1fe2be49487c3ef9759185b135b23fa00cb9a5dff72fbea03072aadf9724"
+            },
+            {
+              "path": "dist/src/improve-validation.js.map",
+              "recorded": "0b28b4c259e72da116dc41c0a07ae54839bd6f06d83edd375e16b6b062ede1d5",
+              "current": "fc81fed510f95dde4fad2b702d38a7e88bee722caefcb3813abd8e0040e26d23"
+            },
+            {
+              "path": "dist/src/metrics/acceptance.d.ts",
+              "recorded": "d316d86add8115074ef732e20cedc42e447ddd02a732f8d254c4bc97781d9042",
+              "current": "cf5d08b5a2f73a030af1205884996b49c9ac5bb018996514dafed585b8eca3ff"
+            },
+            {
+              "path": "dist/src/metrics/acceptance.js",
+              "recorded": "02133f64278b8f8fa1858e7cb2df39ca1f6d4d1b5c3ba39eadab297b76eff08e",
+              "current": "20c932c9468819ab09644d1095eb535c14bb9a5ea6ba88a47730eb185bc81305"
+            },
+            {
+              "path": "dist/src/metrics/acceptance.js.map",
+              "recorded": "c3db661e42f04c24bd89329e25d8dc544af05a9169eeada1ca4fcab350d1ffd5",
+              "current": "87eb1745c6d0b7411b8ab6f024dea31afac121c874e7536ba538e2e5f7e0afe6"
+            },
+            {
+              "path": "dist/src/metrics/costs.js",
+              "recorded": "9d47fc04ab66675a6a650caa42eca6de700d73d56a842e0af0f6106a9763a83c",
+              "current": "0f0c3cd7a1b9af5be4664e48ef9fc88fb22624ab81d05d9f19521f7d4eb8ce4e"
+            },
+            {
+              "path": "dist/src/metrics/costs.js.map",
+              "recorded": "5602c46842e6607e6d0ec8228d90b142ef15aecb81aa111dba1cedce756229b4",
+              "current": "736c788e16018161d9581e36df61e87b3a16c21be90453a0c3bef9365034747e"
+            },
+            {
+              "path": "dist/src/metrics/feedback.js",
+              "recorded": "832e5f946cfb644ef8f3bb0d441dd31942177a9385627be8fbf84b2e0eb0c2f1",
+              "current": "3ef9c6fa2a2cd053d772d49bcded9eedeec97345eb3cd531de6dd41f7687f949"
+            },
+            {
+              "path": "dist/src/metrics/feedback.js.map",
+              "recorded": "62d613f9d57f8410e56654dd779eabbd0cb200fe7a703fecb4c6d4d85f2b3a01",
+              "current": "f143d41c0f7e45898b61dfececdfbfbb1b951827b99beebbdad99f4ef6314a68"
+            },
+            {
+              "path": "dist/src/ownership.d.ts",
+              "recorded": "6abdb182c5018d407694cbcaec1086cee838ba2bcb960a10b54b5075c2b42c5e",
+              "current": "c71e0fd3695cdd843605578f6899a32cd261c113d2b9c6d59c79a92e583d740e"
+            },
+            {
+              "path": "dist/src/ownership.js",
+              "recorded": "715a7e0d375d5ec2bc6d38e1e0e1a30d5a4badbf7ac431d36c64c11bc65c1cf0",
+              "current": "4aa219211efc65b363c8537c62e5abb297f61d2d2f9130a8add29a0965684404"
+            },
+            {
+              "path": "dist/src/ownership.js.map",
+              "recorded": "df752ea39677489d7e1067c43687c57255afb2b509c9cf1c922d7726446e2698",
+              "current": "3136e711808aba752b1565da5d0cf0d35d5ff235a7d4a013fd7041a7a57521aa"
+            },
+            {
+              "path": "dist/src/workspace-ownership.d.ts",
+              "recorded": "6da1b12d587cfbd96478f66d092c92bc4bbb0097766f905a669445bb15df4f18",
+              "current": "5722075ed2be9df8545d16dd4536e59d4f52302b5688f4884b61f443b5a9486d"
+            },
+            {
+              "path": "dist/execution/isolation/boundary.mjs",
+              "recorded": "bffaa64f03635775d6277cdc082f97f766e9d6ae40ae29560d7b3147a03f6e8c",
+              "current": "5d5a55c490372edf64ff5567e59afbd93e1b1b942644fbd7bc2304d753a1995f"
+            }
+          ]
+        }
+      }
+    },
+    "repair-26-output": {
+      "manifest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/source-build.json",
+        "bytes": 89227,
+        "sha256": "a1e6dd2975aa3f346e1bf43fccbce308a5d702eebf6e73205d763ea5ecb4410e"
+      },
+      "groups": {
+        "inputs": {
+          "files": 158,
+          "mismatches": [
+            {
+              "path": "src/cli.ts",
+              "recorded": "cb1bf9b0916e3cc4b806c40cc002c7694b262f5388440e60281387d1106ae558",
+              "current": "bb6796c073004eb6cf6a6a329f1a374fdf5a1b023dd3cb11d984a6f5736d5fcc"
+            },
+            {
+              "path": "src/metrics/acceptance.ts",
+              "recorded": "b110cd1d4941a941413d155daa9665cf34b2cc6c2fde3a75610187a8cf0138ea",
+              "current": "0e70a9c405ad752ca3a076e799dfb18bc54e63a0c2c7af30962b5c3cea2614ce"
+            },
+            {
+              "path": "src/metrics/costs.ts",
+              "recorded": "b307af4bb7baa95217a910ccdbe946d4259cbe1e60b28e3ab9387444fde24fa7",
+              "current": "405f8b33d272c95d9e5193b38dfb68cea7766d594e01105254d3ae94a01bd6fc"
+            },
+            {
+              "path": "src/metrics/feedback.ts",
+              "recorded": "6757a7f47b4cc5eaf4cc6b872c31599d7fd65ba220e18a0ab91fcecc6ff186ac",
+              "current": "5d4038f2c371a9de43ae2450dc8b0129208c8bbe09afdcd28789c64f48cc0c19"
+            },
+            {
+              "path": "src/ownership.ts",
+              "recorded": "9a1c68596226c3cc78a8fbadd6542081811ae2a1139b419def722c1d55b3a973",
+              "current": "7079a570e16721a58a9e30778c8ca9eb488f77e8a54358c2b3d6d1d3a24c3f25"
+            },
+            {
+              "path": "src/preflight.ts",
+              "recorded": "3d627b70c4aacc6ec264f4a3a631cd07b82df8309ac4985156bd3834b7754f3d",
+              "current": "6caa4570098241bcac97f0c2fad9a8ea98b9aa653d9181aab0e8b2b7bd59c51b"
+            },
+            {
+              "path": "src/recovery.ts",
+              "recorded": "12cb3d683eb77c662785840c0e8fdb7d393cadcf2091f12d4532b535d4d3d1cb",
+              "current": "700dffc819dabe8cfbce62edd30abed1bbef6b8844782ed891f2042baa212a0a"
+            },
+            {
+              "path": "src/retention.ts",
+              "recorded": "640d90dcdd31a97eb7057a2f257f1ebae2322a03e1952001a439b99da728e318",
+              "current": "e6146534ae65945fddaa46af4344a8b212fbd9c00c25dab5d54fb86ab31fff80"
+            },
+            {
+              "path": "src/runtime.ts",
+              "recorded": "b727489b18a66a0952afcbb6db7827b83ed5fa1fc779d57d8365c13651e89ac4",
+              "current": "42001c5350161fb152ee8ec501b1f03e01475043effb972920be086593b06476"
+            },
+            {
+              "path": "src/storage-archive.ts",
+              "recorded": "6be68105aaf43e75d86be47623359f97be3cf5cc1507a1b5f4a17905eb32ce33",
+              "current": "e3274a6e536140283d1d668083309917c0d47af5cb728f4ee63804fa9813fbd1"
+            },
+            {
+              "path": "src/storage-disposition.ts",
+              "recorded": "afc765c60e3264479b00bb33082ad6bd9fafcbdff9c0cdcfb0471dbf8ae0e776",
+              "current": "5ae759c7fffb3ffc693d2d3095fdf5e53184deb4daf7435eeea09c48acf4dbda"
+            },
+            {
+              "path": "src/tui/app.ts",
+              "recorded": "01a7087b39232e60f8c82ffde17d0867f70b0f97077c7089491c74904d3c27dc",
+              "current": "d377dc3903da9249ec59a564827bb8f2e83b5d99f25be8324abb11df0b4374a2"
+            },
+            {
+              "path": "test/metrics-runtime.test.ts",
+              "recorded": "90b47a8c2689db5fdf9435c9ab192762f4a4b2230272a9eccd5c80d08d4762f3",
+              "current": "b25f581896806c241578bcfdb3c1fd6a9468ce68633004304b2bde49c84bd289"
+            },
+            {
+              "path": "test/runtime.test.ts",
+              "recorded": "cce1ec70ae1ac1c3d7b1176e9c6c40f8f9b48a24643cbc9cc907b3a4cb496e81",
+              "current": "4161d423e3ff4538d98c31dc1d75e0d96ffe6a79446b1565ae994e0ea10ebc5e"
+            },
+            {
+              "path": "test/storage.test.ts",
+              "recorded": "c58e18aae286fc7fd53e94b6ab29936de4d5768165d22fd6d2b7c78bbde94a7c",
+              "current": "0c72aa8017f32a6217ccacde961760e663f6cd5e8ecfa9696a613e3b0b490602"
+            },
+            {
+              "path": "test/tui.test.ts",
+              "recorded": "4d3b9aa509a223eaa6297b78331ea22764c78eef0aa9de9e50db1d88e394bc88",
+              "current": "b9367a7863fcebd57c49c0ba335449432a846b78a2add66bac617a4089d61e6e"
+            },
+            {
+              "path": "scripts/live-batch/run.mjs",
+              "recorded": "3f0c77a0e13bcc7f52a9fc27b6685af76e922ad964d53b488918d2b02259c2b9",
+              "current": "aa0cb70081fedfb584d0f8ff156ad6af8647bd353203d6c383a89c1de6a9f041"
+            }
+          ]
+        },
+        "compiler": {
+          "files": 140,
+          "mismatches": []
+        },
+        "outputs": {
+          "files": 234,
+          "mismatches": [
+            {
+              "path": "dist/src/cli.js",
+              "recorded": "fb9949e13eaebca1dd7b9fafabeec9f235f06bd843965f4d130795f22c3e44d4",
+              "current": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b"
+            },
+            {
+              "path": "dist/src/cli.js.map",
+              "recorded": "ab134da93729fae4701b951b37f7315b90b832be0eebcd40641b7d12e66004f1",
+              "current": "d9830ff900e0f9bb8d1ccb68644c95ef5aa46630b5676cd8873e372a289af625"
+            },
+            {
+              "path": "dist/src/metrics/acceptance.d.ts",
+              "recorded": "d316d86add8115074ef732e20cedc42e447ddd02a732f8d254c4bc97781d9042",
+              "current": "cf5d08b5a2f73a030af1205884996b49c9ac5bb018996514dafed585b8eca3ff"
+            },
+            {
+              "path": "dist/src/metrics/acceptance.js",
+              "recorded": "02133f64278b8f8fa1858e7cb2df39ca1f6d4d1b5c3ba39eadab297b76eff08e",
+              "current": "20c932c9468819ab09644d1095eb535c14bb9a5ea6ba88a47730eb185bc81305"
+            },
+            {
+              "path": "dist/src/metrics/acceptance.js.map",
+              "recorded": "c3db661e42f04c24bd89329e25d8dc544af05a9169eeada1ca4fcab350d1ffd5",
+              "current": "87eb1745c6d0b7411b8ab6f024dea31afac121c874e7536ba538e2e5f7e0afe6"
+            },
+            {
+              "path": "dist/src/metrics/costs.js",
+              "recorded": "9d47fc04ab66675a6a650caa42eca6de700d73d56a842e0af0f6106a9763a83c",
+              "current": "0f0c3cd7a1b9af5be4664e48ef9fc88fb22624ab81d05d9f19521f7d4eb8ce4e"
+            },
+            {
+              "path": "dist/src/metrics/costs.js.map",
+              "recorded": "5602c46842e6607e6d0ec8228d90b142ef15aecb81aa111dba1cedce756229b4",
+              "current": "736c788e16018161d9581e36df61e87b3a16c21be90453a0c3bef9365034747e"
+            },
+            {
+              "path": "dist/src/metrics/feedback.js",
+              "recorded": "832e5f946cfb644ef8f3bb0d441dd31942177a9385627be8fbf84b2e0eb0c2f1",
+              "current": "3ef9c6fa2a2cd053d772d49bcded9eedeec97345eb3cd531de6dd41f7687f949"
+            },
+            {
+              "path": "dist/src/metrics/feedback.js.map",
+              "recorded": "62d613f9d57f8410e56654dd779eabbd0cb200fe7a703fecb4c6d4d85f2b3a01",
+              "current": "f143d41c0f7e45898b61dfececdfbfbb1b951827b99beebbdad99f4ef6314a68"
+            },
+            {
+              "path": "dist/src/ownership.d.ts",
+              "recorded": "6abdb182c5018d407694cbcaec1086cee838ba2bcb960a10b54b5075c2b42c5e",
+              "current": "c71e0fd3695cdd843605578f6899a32cd261c113d2b9c6d59c79a92e583d740e"
+            },
+            {
+              "path": "dist/src/ownership.js",
+              "recorded": "715a7e0d375d5ec2bc6d38e1e0e1a30d5a4badbf7ac431d36c64c11bc65c1cf0",
+              "current": "4aa219211efc65b363c8537c62e5abb297f61d2d2f9130a8add29a0965684404"
+            },
+            {
+              "path": "dist/src/ownership.js.map",
+              "recorded": "df752ea39677489d7e1067c43687c57255afb2b509c9cf1c922d7726446e2698",
+              "current": "3136e711808aba752b1565da5d0cf0d35d5ff235a7d4a013fd7041a7a57521aa"
+            },
+            {
+              "path": "dist/src/preflight.d.ts",
+              "recorded": "2cb951897aa0a294f8b44817929efff61951d63245fdcd945f29c26fb52c5919",
+              "current": "4e4ea2351fe7c0dcca4a264407402f694fb76686cfeef0cad7715adb166fa850"
+            },
+            {
+              "path": "dist/src/preflight.js",
+              "recorded": "f810efdd0e8f540bba042d0a360e4ad2be51f5ef25ea9caa1886fc62d6d77855",
+              "current": "a34c8b4856a23e4e94e34eb218acb73c08703f702bfbcf7f59b31ddf88b537d4"
+            },
+            {
+              "path": "dist/src/preflight.js.map",
+              "recorded": "adc364f1556bcda4f9a1c530f47a5ce1028bcf2c2265c016ca50a94e6cfb1e69",
+              "current": "5abc010d73c93f8123d3138d8240ecdd494cfd3480a9137f3b702ef8e7997e8b"
+            },
+            {
+              "path": "dist/src/recovery.d.ts",
+              "recorded": "49123332d41d651d7eaacff5064a8e2aab7afb207e21bc83f7d609596b6d3b49",
+              "current": "ab32fae78e1928272566f2b93d5d51160dfc7398a20c2a51e343c51323d3842b"
+            },
+            {
+              "path": "dist/src/recovery.js",
+              "recorded": "04537d6b329eed5741353cd87f603fcd1862fa6b1cc420bc46059c8197de7d31",
+              "current": "eea33333e604ef2df1b3eec4758aabad978cb229c7c1b8332ae60c7e7de18124"
+            },
+            {
+              "path": "dist/src/recovery.js.map",
+              "recorded": "898d0ff8902dd4b2cd367b16bd053fe6aae144b79a02beaa1bbc689af9d91a28",
+              "current": "07af6f992118a59f51e4d6390f8393796c801eacb65ede1f132851637ff4f736"
+            },
+            {
+              "path": "dist/src/retention.js",
+              "recorded": "2dd1c91531a25782bb26757cf84a3c88c6725e67faa407679a3cf4032a548b52",
+              "current": "ddf7f001ef64018830d85432b561666bdab95f3527331ffeac36f9087c8c7bb3"
+            },
+            {
+              "path": "dist/src/retention.js.map",
+              "recorded": "3caa49306d9895f93ad469ee82c10f4a048b0745b98c7203c49faabb3cc2e2d5",
+              "current": "fa14f55ce789f5bf1ba5feaf570b334822d8f2cee75f7f79fec0aa233fc0cfd2"
+            },
+            {
+              "path": "dist/src/runtime.d.ts",
+              "recorded": "bfb492801d3660a5d1089a28cc4337cc2a94d6a27a1f9482f1e968019f14f199",
+              "current": "b2ae362ac09c94eebba48d8948df81882dd65f7fdd915c2c9ef6af9a5c145b2b"
+            },
+            {
+              "path": "dist/src/runtime.js",
+              "recorded": "41af3e22a9f1777a0114ba2d816353dff06fc982b6289098869c8540df640e01",
+              "current": "36e1439f09a08043627a47c656cc92e201a9b228d2bcca698eda530426220378"
+            },
+            {
+              "path": "dist/src/runtime.js.map",
+              "recorded": "80f50d797b9e2d1a65fe0072adf996df374fd6834fb756e0635588e017d27ecc",
+              "current": "d844ecda4d2a225a49464834ae47c3f92727cf08cf67528a00af2cfafc1b50f8"
+            },
+            {
+              "path": "dist/src/storage-archive.d.ts",
+              "recorded": "0151c1af353f37731b57253b5dd15fea1de16f33808cc48782fa4ab684c0c409",
+              "current": "bff7b559bdeab22f2532f289c4760a65749b100524dd9bf78d134db7ef598c3a"
+            },
+            {
+              "path": "dist/src/storage-archive.js",
+              "recorded": "c1f0e50e6ee839bc102a768035ebc29e70f8342e99bb774c185c42956a597f29",
+              "current": "34d48035ad78da97c0087b8e37be09d0ab07b25f1d184abccc357b87871c0550"
+            },
+            {
+              "path": "dist/src/storage-archive.js.map",
+              "recorded": "7abb37f5013fad568651fb0669511c526e4ac85fe279560545479e96e256399b",
+              "current": "003daf4063a2f4fe2ecff8ddd3ac296e3dbf6fb00f5ff670c0024c972ed35ae7"
+            },
+            {
+              "path": "dist/src/storage-disposition.d.ts",
+              "recorded": "fafbe5608ef3740173cbd6536a37639ac09b9a49baeb42db0613a884979d9d5a",
+              "current": "a08089a995500734e98bb8f7c2c48ff5b0735ed6ffc580e646ec4a7e22ab0c76"
+            },
+            {
+              "path": "dist/src/storage-disposition.js",
+              "recorded": "4c3678447ea1a9bef54244a2aba406b7e729bdcfc4d98f684e71921d0dd24dbb",
+              "current": "119469f563ca3805112c07964fefb310d5400655be628ae5fa4fe04d42aec72a"
+            },
+            {
+              "path": "dist/src/storage-disposition.js.map",
+              "recorded": "eb3cc65603a6fd9cd1d32a2b3d65b90ff5dc89559eea48f66effd692034066d4",
+              "current": "2b31252627c34c4c3cf385180d9737021ce5b5599e8441f72dd7e49a15776a85"
+            },
+            {
+              "path": "dist/src/tui/app.js",
+              "recorded": "d7ba05b1531d3c468de2799ee39f29f2cb960ea0bb3d671ec5a4eb8eabedd4cf",
+              "current": "459612fbb00b0f8563de718227ea2f66a4913cbecc8266fb56c9485ab0d9b4bb"
+            },
+            {
+              "path": "dist/src/tui/app.js.map",
+              "recorded": "108f617783a83b9e143b1f098543396e69d4424af1b50e11608828f96cafd3df",
+              "current": "d0dd973b0766cafa0f9d870e30f3a60304320f773a2fe88329d0461d3de5e6cb"
+            },
+            {
+              "path": "dist/src/workspace-ownership.d.ts",
+              "recorded": "6da1b12d587cfbd96478f66d092c92bc4bbb0097766f905a669445bb15df4f18",
+              "current": "5722075ed2be9df8545d16dd4536e59d4f52302b5688f4884b61f443b5a9486d"
+            }
+          ]
+        }
+      }
+    },
+    "repair-27-owner": {
+      "manifest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-27-owner/source-build.json",
+        "bytes": 88735,
+        "sha256": "1daa604888618d96843da4e8811d2dd37b9cee0a35221f704bc8ced0b4846443"
+      },
+      "groups": {
+        "inputs": {
+          "files": 158,
+          "mismatches": [
+            {
+              "path": "src/cli.ts",
+              "recorded": "cb1bf9b0916e3cc4b806c40cc002c7694b262f5388440e60281387d1106ae558",
+              "current": "bb6796c073004eb6cf6a6a329f1a374fdf5a1b023dd3cb11d984a6f5736d5fcc"
+            },
+            {
+              "path": "src/eval/runner.ts",
+              "recorded": "ebb3f31e78bed0d0dfb4d8d08005f80c6362b00ffdc8c7ee83e795676b93348b",
+              "current": "6a7a882ddfa37e77f94f158c0966592c096bc797f98e4511b2e1add535908c9c"
+            },
+            {
+              "path": "src/improve-build.ts",
+              "recorded": "416ea5b940743ee240dd6d17522bb3e07204374657557815b62d8c81daf20b1e",
+              "current": "85000cfd3345e73407f91224d50e60d7d843c056c839e32b3bd334c105e90354"
+            },
+            {
+              "path": "src/improve-process.ts",
+              "recorded": "3181ae213fcc546cd400210af5d1ead6cb2ec343fb3d09837fb2468aebf39baa",
+              "current": "a69273530257aa683043485000b5f4bbc727d38b677868b1890979aee5232602"
+            },
+            {
+              "path": "src/improve-validation.ts",
+              "recorded": "466c2304f3af146e7795e6cb922b3204cccc3ed39ac2e4cb3b099b8683c894f6",
+              "current": "e7f071c4a4f76386185a3eae7916ce63256c6276fbf0260ca24a38e532fd9061"
+            },
+            {
+              "path": "src/preflight.ts",
+              "recorded": "3d627b70c4aacc6ec264f4a3a631cd07b82df8309ac4985156bd3834b7754f3d",
+              "current": "6caa4570098241bcac97f0c2fad9a8ea98b9aa653d9181aab0e8b2b7bd59c51b"
+            },
+            {
+              "path": "src/recovery.ts",
+              "recorded": "12cb3d683eb77c662785840c0e8fdb7d393cadcf2091f12d4532b535d4d3d1cb",
+              "current": "700dffc819dabe8cfbce62edd30abed1bbef6b8844782ed891f2042baa212a0a"
+            },
+            {
+              "path": "src/retention.ts",
+              "recorded": "640d90dcdd31a97eb7057a2f257f1ebae2322a03e1952001a439b99da728e318",
+              "current": "e6146534ae65945fddaa46af4344a8b212fbd9c00c25dab5d54fb86ab31fff80"
+            },
+            {
+              "path": "src/runtime.ts",
+              "recorded": "b727489b18a66a0952afcbb6db7827b83ed5fa1fc779d57d8365c13651e89ac4",
+              "current": "42001c5350161fb152ee8ec501b1f03e01475043effb972920be086593b06476"
+            },
+            {
+              "path": "src/storage-archive.ts",
+              "recorded": "6be68105aaf43e75d86be47623359f97be3cf5cc1507a1b5f4a17905eb32ce33",
+              "current": "e3274a6e536140283d1d668083309917c0d47af5cb728f4ee63804fa9813fbd1"
+            },
+            {
+              "path": "src/storage-disposition.ts",
+              "recorded": "afc765c60e3264479b00bb33082ad6bd9fafcbdff9c0cdcfb0471dbf8ae0e776",
+              "current": "5ae759c7fffb3ffc693d2d3095fdf5e53184deb4daf7435eeea09c48acf4dbda"
+            },
+            {
+              "path": "src/tui/app.ts",
+              "recorded": "01a7087b39232e60f8c82ffde17d0867f70b0f97077c7089491c74904d3c27dc",
+              "current": "d377dc3903da9249ec59a564827bb8f2e83b5d99f25be8324abb11df0b4374a2"
+            },
+            {
+              "path": "test/improve-decisions.test.ts",
+              "recorded": "f26eec4b74b10755bc42fb9ebbfa1aa012b78256d9fc088ef1e6d7be1cc4516f",
+              "current": "b10d1331cfdf59c8bdcbc25b624d2eb630f79de38e612f88b4d668e8dc216ad9"
+            },
+            {
+              "path": "test/runtime.test.ts",
+              "recorded": "cce1ec70ae1ac1c3d7b1176e9c6c40f8f9b48a24643cbc9cc907b3a4cb496e81",
+              "current": "4161d423e3ff4538d98c31dc1d75e0d96ffe6a79446b1565ae994e0ea10ebc5e"
+            },
+            {
+              "path": "test/storage.test.ts",
+              "recorded": "c58e18aae286fc7fd53e94b6ab29936de4d5768165d22fd6d2b7c78bbde94a7c",
+              "current": "0c72aa8017f32a6217ccacde961760e663f6cd5e8ecfa9696a613e3b0b490602"
+            },
+            {
+              "path": "test/tui.test.ts",
+              "recorded": "4d3b9aa509a223eaa6297b78331ea22764c78eef0aa9de9e50db1d88e394bc88",
+              "current": "b9367a7863fcebd57c49c0ba335449432a846b78a2add66bac617a4089d61e6e"
+            },
+            {
+              "path": "scripts/isolation/boundary.mjs",
+              "recorded": "bffaa64f03635775d6277cdc082f97f766e9d6ae40ae29560d7b3147a03f6e8c",
+              "current": "5d5a55c490372edf64ff5567e59afbd93e1b1b942644fbd7bc2304d753a1995f"
+            },
+            {
+              "path": "scripts/isolation/test/boundary.test.mjs",
+              "recorded": "1d8d61351f38f7c4e514de015f6f4058380d86891ce63e55c347095e62aae087",
+              "current": "679fd66f58d649019ef2bc4f310bcbfb11dc4bd70573eed12053ab7c59c41af4"
+            }
+          ]
+        },
+        "compiler": {
+          "files": 140,
+          "mismatches": []
+        },
+        "outputs": {
+          "files": 231,
+          "mismatches": [
+            {
+              "path": "dist/src/cli.js",
+              "recorded": "fb9949e13eaebca1dd7b9fafabeec9f235f06bd843965f4d130795f22c3e44d4",
+              "current": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b"
+            },
+            {
+              "path": "dist/src/cli.js.map",
+              "recorded": "ab134da93729fae4701b951b37f7315b90b832be0eebcd40641b7d12e66004f1",
+              "current": "d9830ff900e0f9bb8d1ccb68644c95ef5aa46630b5676cd8873e372a289af625"
+            },
+            {
+              "path": "dist/src/eval/runner.js",
+              "recorded": "357f03daf559128549ba92ea713d4b1261cbc4db6572f4d2d93031ed643ecf29",
+              "current": "4d8d3dcf1426f4519edea96038c4e4a45f088457d0910ccad0a9faec85a86f5c"
+            },
+            {
+              "path": "dist/src/eval/runner.js.map",
+              "recorded": "2280cf2a60581fcddea0cb5bb4f05fd07fe60a22be8469400714a9730b33cc93",
+              "current": "db842975186ad8fb7002860ceed60c471187640dd5b013c932215ca02c2bd51c"
+            },
+            {
+              "path": "dist/src/improve-build.js",
+              "recorded": "c1da09e74133ebcf82a5cbcd9b1a26d3ff4cc4a5592d16bd2aaa5bd76241dc4e",
+              "current": "38e7651c631cf501a2f34de89a2adb6ae6fc817c50ffcc557992a25d92247eed"
+            },
+            {
+              "path": "dist/src/improve-build.js.map",
+              "recorded": "5951a5fec24ae7ef33198835b7023b094cc7e149e8b5ad05487f0beae5c865bc",
+              "current": "0bfc85cfe8ee008d250850619722910f390cae0d4320051aaff7908a04293b32"
+            },
+            {
+              "path": "dist/src/improve-process.d.ts",
+              "recorded": "8d591f6bc602241f453a54fe7436151cfc0cf66de4e826785055a597c917f967",
+              "current": "2ac1623750ae9188f1785c725a8a81105b5c493225f033c34f9891dcb111c77e"
+            },
+            {
+              "path": "dist/src/improve-process.js",
+              "recorded": "3d07dca34dba5bc67131d2eac843e2802aeb818762ec899e71224eb0d2290d51",
+              "current": "f6192cdb05ddbe158fce491ebb1c6a514bdff8812d60c1664de8bec6c0ddbd73"
+            },
+            {
+              "path": "dist/src/improve-process.js.map",
+              "recorded": "eb723ac1642d3c00f36ccddcbff43023b0a7ca863131306e39327cabe1760f0e",
+              "current": "8ed14ed68a7b38c3a706ccf869b6f392200746022beee75c3c86dfb609e94a97"
+            },
+            {
+              "path": "dist/src/improve-validation.js",
+              "recorded": "e0caaeb8b3d3dff183706e637433c4ec443202f4302da9b762a89523d2461e12",
+              "current": "567a1fe2be49487c3ef9759185b135b23fa00cb9a5dff72fbea03072aadf9724"
+            },
+            {
+              "path": "dist/src/improve-validation.js.map",
+              "recorded": "0b28b4c259e72da116dc41c0a07ae54839bd6f06d83edd375e16b6b062ede1d5",
+              "current": "fc81fed510f95dde4fad2b702d38a7e88bee722caefcb3813abd8e0040e26d23"
+            },
+            {
+              "path": "dist/src/preflight.d.ts",
+              "recorded": "2cb951897aa0a294f8b44817929efff61951d63245fdcd945f29c26fb52c5919",
+              "current": "4e4ea2351fe7c0dcca4a264407402f694fb76686cfeef0cad7715adb166fa850"
+            },
+            {
+              "path": "dist/src/preflight.js",
+              "recorded": "f810efdd0e8f540bba042d0a360e4ad2be51f5ef25ea9caa1886fc62d6d77855",
+              "current": "a34c8b4856a23e4e94e34eb218acb73c08703f702bfbcf7f59b31ddf88b537d4"
+            },
+            {
+              "path": "dist/src/preflight.js.map",
+              "recorded": "adc364f1556bcda4f9a1c530f47a5ce1028bcf2c2265c016ca50a94e6cfb1e69",
+              "current": "5abc010d73c93f8123d3138d8240ecdd494cfd3480a9137f3b702ef8e7997e8b"
+            },
+            {
+              "path": "dist/src/recovery.d.ts",
+              "recorded": "49123332d41d651d7eaacff5064a8e2aab7afb207e21bc83f7d609596b6d3b49",
+              "current": "ab32fae78e1928272566f2b93d5d51160dfc7398a20c2a51e343c51323d3842b"
+            },
+            {
+              "path": "dist/src/recovery.js",
+              "recorded": "04537d6b329eed5741353cd87f603fcd1862fa6b1cc420bc46059c8197de7d31",
+              "current": "eea33333e604ef2df1b3eec4758aabad978cb229c7c1b8332ae60c7e7de18124"
+            },
+            {
+              "path": "dist/src/recovery.js.map",
+              "recorded": "898d0ff8902dd4b2cd367b16bd053fe6aae144b79a02beaa1bbc689af9d91a28",
+              "current": "07af6f992118a59f51e4d6390f8393796c801eacb65ede1f132851637ff4f736"
+            },
+            {
+              "path": "dist/src/retention.js",
+              "recorded": "2dd1c91531a25782bb26757cf84a3c88c6725e67faa407679a3cf4032a548b52",
+              "current": "ddf7f001ef64018830d85432b561666bdab95f3527331ffeac36f9087c8c7bb3"
+            },
+            {
+              "path": "dist/src/retention.js.map",
+              "recorded": "3caa49306d9895f93ad469ee82c10f4a048b0745b98c7203c49faabb3cc2e2d5",
+              "current": "fa14f55ce789f5bf1ba5feaf570b334822d8f2cee75f7f79fec0aa233fc0cfd2"
+            },
+            {
+              "path": "dist/src/runtime.d.ts",
+              "recorded": "bfb492801d3660a5d1089a28cc4337cc2a94d6a27a1f9482f1e968019f14f199",
+              "current": "b2ae362ac09c94eebba48d8948df81882dd65f7fdd915c2c9ef6af9a5c145b2b"
+            },
+            {
+              "path": "dist/src/runtime.js",
+              "recorded": "41af3e22a9f1777a0114ba2d816353dff06fc982b6289098869c8540df640e01",
+              "current": "36e1439f09a08043627a47c656cc92e201a9b228d2bcca698eda530426220378"
+            },
+            {
+              "path": "dist/src/runtime.js.map",
+              "recorded": "80f50d797b9e2d1a65fe0072adf996df374fd6834fb756e0635588e017d27ecc",
+              "current": "d844ecda4d2a225a49464834ae47c3f92727cf08cf67528a00af2cfafc1b50f8"
+            },
+            {
+              "path": "dist/src/storage-archive.d.ts",
+              "recorded": "0151c1af353f37731b57253b5dd15fea1de16f33808cc48782fa4ab684c0c409",
+              "current": "bff7b559bdeab22f2532f289c4760a65749b100524dd9bf78d134db7ef598c3a"
+            },
+            {
+              "path": "dist/src/storage-archive.js",
+              "recorded": "c1f0e50e6ee839bc102a768035ebc29e70f8342e99bb774c185c42956a597f29",
+              "current": "34d48035ad78da97c0087b8e37be09d0ab07b25f1d184abccc357b87871c0550"
+            },
+            {
+              "path": "dist/src/storage-archive.js.map",
+              "recorded": "7abb37f5013fad568651fb0669511c526e4ac85fe279560545479e96e256399b",
+              "current": "003daf4063a2f4fe2ecff8ddd3ac296e3dbf6fb00f5ff670c0024c972ed35ae7"
+            },
+            {
+              "path": "dist/src/storage-disposition.d.ts",
+              "recorded": "fafbe5608ef3740173cbd6536a37639ac09b9a49baeb42db0613a884979d9d5a",
+              "current": "a08089a995500734e98bb8f7c2c48ff5b0735ed6ffc580e646ec4a7e22ab0c76"
+            },
+            {
+              "path": "dist/src/storage-disposition.js",
+              "recorded": "4c3678447ea1a9bef54244a2aba406b7e729bdcfc4d98f684e71921d0dd24dbb",
+              "current": "119469f563ca3805112c07964fefb310d5400655be628ae5fa4fe04d42aec72a"
+            },
+            {
+              "path": "dist/src/storage-disposition.js.map",
+              "recorded": "eb3cc65603a6fd9cd1d32a2b3d65b90ff5dc89559eea48f66effd692034066d4",
+              "current": "2b31252627c34c4c3cf385180d9737021ce5b5599e8441f72dd7e49a15776a85"
+            },
+            {
+              "path": "dist/src/tui/app.js",
+              "recorded": "d7ba05b1531d3c468de2799ee39f29f2cb960ea0bb3d671ec5a4eb8eabedd4cf",
+              "current": "459612fbb00b0f8563de718227ea2f66a4913cbecc8266fb56c9485ab0d9b4bb"
+            },
+            {
+              "path": "dist/src/tui/app.js.map",
+              "recorded": "108f617783a83b9e143b1f098543396e69d4424af1b50e11608828f96cafd3df",
+              "current": "d0dd973b0766cafa0f9d870e30f3a60304320f773a2fe88329d0461d3de5e6cb"
+            },
+            {
+              "path": "dist/execution/isolation/boundary.mjs",
+              "recorded": "bffaa64f03635775d6277cdc082f97f766e9d6ae40ae29560d7b3147a03f6e8c",
+              "current": "5d5a55c490372edf64ff5567e59afbd93e1b1b942644fbd7bc2304d753a1995f"
+            }
+          ]
+        }
+      }
+    },
+    "final-combined-r1": {
+      "manifest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/source-build.json",
+        "bytes": 92815,
+        "sha256": "ccd9ac5775ebe6e5f75a74e10cc7f41873ac804662d4e3975b9b4bdc07ac3850"
+      },
+      "groups": {
+        "inputs": {
+          "files": 168,
+          "mismatches": []
+        },
+        "compiler": {
+          "files": 140,
+          "mismatches": []
+        },
+        "outputs": {
+          "files": 246,
+          "mismatches": []
+        }
+      }
+    }
+  },
+  "evidenceFiles": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/handoff.md",
+      "bytes": 3870,
+      "sha256": "2f4c96f0fb31e8d94fe20609229c884e039b6b26dc3966d539590da189d8c15a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/remaining-scope.md",
+      "bytes": 4439,
+      "sha256": "fbc59a1a52c31bbe2b2257cedff09c8535a00363967ac9381063ce055b030f32"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/affected-07.log",
+      "bytes": 7365,
+      "sha256": "29ba24bcb195d70cfd6905bdd2f5c008daee37dee0ec0fe8f6166ba87ca8efd0"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-gc-results.json",
+      "bytes": 4306,
+      "sha256": "449b8cedb77864111f1fe380762dcaf3ba6d36fd58e338456fd42b24d1ba6791"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/checks.json",
+      "bytes": 4623,
+      "sha256": "f7bea438493044c65ccf07d6b600131c2541604ee99f388a12f1089afe252502"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/affected-r1.log",
+      "bytes": 5449,
+      "sha256": "6c70a8da437475ab4ac4d91aa0f8d72ba9dca7deb52518d707fe4178408e0ce6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/affected-r2.log",
+      "bytes": 4804,
+      "sha256": "a95f8f5d157fa7f538a74dfc1465a478bd331cfad902b3dada03841be74bf95b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/navigation-final.log",
+      "bytes": 381,
+      "sha256": "2f032889e8ecba82134f45df87630047e35490365c44a3bc2a44c7b784c0a8b9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/validation.json",
+      "bytes": 2637,
+      "sha256": "fa7f89e53b580af5967f1286b96d3aac4aade7978a092369f4db3ecde893d24c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/output-final.log",
+      "bytes": 1393,
+      "sha256": "244e908dfc0a7d95a385c086f16cac593da1aae3c25b658ea95cafbcb7c8e44e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-output-acquired.log",
+      "bytes": 483,
+      "sha256": "207f5dd017409e5615ee6d5782c1b5f760d36d012498464fcbdafafe0f36cefb"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/maximum-output-result.json",
+      "bytes": 714,
+      "sha256": "22463631f229ec168770b761b6068aa6a9b19a69190df130a2ff8f98a4bf41e9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-27-owner/handoff-manifest.json",
+      "bytes": 7260,
+      "sha256": "5192612d5f52a227e10a49fb9697deabaeea1e986098d7c2258bdf7ae30d7762"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-27-owner/08-targeted-tests.log",
+      "bytes": 8161,
+      "sha256": "d022d1f968da354332622b34f9a18bf90d5ebda01222a6e3c2e92111cc1890be"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-27-owner/09-runtime-tests.log",
+      "bytes": 1398,
+      "sha256": "0b80e8063c85eaad68c9292fb7b0de96c380238fc3fac3900c2668602405ff0f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/start.json",
+      "bytes": 1435,
+      "sha256": "f7c957c123464ac788ab7c0c8c0f00cc14159a5d3540740c0f8f2d9b16be8382"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/test-start.json",
+      "bytes": 25016,
+      "sha256": "30efbb71ca200554f8d12b2ee0ad0026368decebeabbd2f515573ebfca87cf96"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/build-result.json",
+      "bytes": 302,
+      "sha256": "3af08f9a483ca1354955d567c4bf4bd0fecddc471f60010486d3b7df40650635"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/build.log",
+      "bytes": 59,
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281"
+    }
+  ],
+  "combined": {
+    "runState": "FINISHED",
+    "observedTestFailure": true,
+    "verdict": "FAIL",
+    "testsTapObserved": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tests.tap",
+      "bytesObserved": 68731,
+      "sha256OfObservedBytes": "c06dac95445e929c15820467f785742fe5823501c9865e1d1fe3062abddc5d4e"
+    },
+    "failureExcerpt": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/74a91ea/standards-evidence/combined-first-failure.tap",
+      "bytes": 1046,
+      "sha256": "53163ac42fb07e33b5d28700647f5e0287070268746716b96c736f53869e0a8e"
+    },
+    "fixture": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7",
+    "plansAndOutcomes": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/execution/plan.json",
+        "bytes": 2715,
+        "sha256": "c61b32e01fd7d364797b04bcb4d8c6151006afba1f3c67ae6f4e81b387f91774",
+        "mtimeUTC": "2026-10-09T22:58:23.786440+00:00",
+        "selected": {
+          "id": "durio-i12-2f9d4c02-5956-4622-b826-6a93aabd3316",
+          "timeoutMs": 64078
+        }
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/execution/outcome.json",
+        "bytes": 26832,
+        "sha256": "8bf41c8e3169e0f425a64071c9c29e73e642deffb7d6e38d47ec88476e4e8744",
+        "mtimeUTC": "2026-10-09T22:58:40.288035+00:00",
+        "selected": {
+          "id": "durio-i12-2f9d4c02-5956-4622-b826-6a93aabd3316",
+          "status": "completed",
+          "started": true,
+          "terminated": true,
+          "reason": null,
+          "code": 0,
+          "sourceEnd": "eof"
+        }
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/startup/plan.json",
+        "bytes": 2692,
+        "sha256": "17a2b309298008b51a5786473c48e2c61b88a071f15e6d9a7765263e884acbb8",
+        "mtimeUTC": "2026-10-09T22:59:04.109723+00:00",
+        "selected": {
+          "id": "durio-i12-60310930-0864-425e-890f-b75fdbdcef54",
+          "timeoutMs": 23210
+        }
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/startup/outcome.json",
+        "bytes": 41799,
+        "sha256": "7965768ff986671b5eccaebc0ac98e4f6bb69c5a7241f0eb01a8c517bdba37a6",
+        "mtimeUTC": "2026-10-09T22:59:06.468982+00:00",
+        "selected": {
+          "id": "durio-i12-60310930-0864-425e-890f-b75fdbdcef54",
+          "status": "completed",
+          "started": true,
+          "terminated": true,
+          "reason": null,
+          "code": 0,
+          "sourceEnd": "eof"
+        }
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/plan.json",
+        "bytes": 2670,
+        "sha256": "b1cb11ab79e65040d2ce23caec5fbcbf4432a94094c6b78263e029258a8e9f4b",
+        "mtimeUTC": "2026-10-09T22:59:34.981406+00:00",
+        "selected": {
+          "id": "durio-i12-a44be661-a5be-454c-9b4c-a624ac0f75c7",
+          "timeoutMs": 100
+        }
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/outcome.json",
+        "bytes": 26374,
+        "sha256": "3ef9865ce9208e67784154c16a2844472a67a19c458e479b0eb3cddef032ac6d",
+        "mtimeUTC": "2026-10-09T22:59:35.283911+00:00",
+        "selected": {
+          "id": "durio-i12-a44be661-a5be-454c-9b4c-a624ac0f75c7",
+          "status": "failed",
+          "started": true,
+          "terminated": true,
+          "reason": "timeout",
+          "code": null,
+          "sourceEnd": "stopped-before-eof"
+        }
+      }
+    ],
+    "hostFacts": [
+      {
+        "seq": 4,
+        "kind": "improve.decision",
+        "at": "2026-10-09T22:54:24.345Z",
+        "body": {
+          "sha256": "5711b21e66f92589237fb84e3d6a79ecf0ffac27f968149d6ca729d4d93a40ad",
+          "bytes": 22466
+        },
+        "selected": {
+          "id": "source-execution",
+          "limits": {
+            "deadline": "2026-10-09T22:59:18.890Z",
+            "maxChecks": 2,
+            "maxRequests": 0,
+            "maxTokens": 0
+          }
+        }
+      },
+      {
+        "seq": 141,
+        "kind": "execution.output",
+        "at": "2026-10-09T22:58:40.313Z",
+        "body": {
+          "sha256": "dd169a7d8a07433d935d16644fc47d982f73cd85593135ee0d192436952b6f85",
+          "bytes": 615
+        },
+        "selected": {
+          "groupId": "build",
+          "execution": {
+            "status": "completed",
+            "terminated": true,
+            "code": 0,
+            "reason": null
+          }
+        }
+      },
+      {
+        "seq": 146,
+        "kind": "execution.output",
+        "at": "2026-10-09T22:59:06.519Z",
+        "body": {
+          "sha256": "bc21d3858faccee5d932a4029942cf63ec47f19c3094b9321d99607df763a40d",
+          "bytes": 710
+        },
+        "selected": {
+          "groupId": "build",
+          "execution": {
+            "status": "completed",
+            "terminated": true,
+            "code": 0,
+            "reason": null
+          }
+        }
+      },
+      {
+        "seq": 149,
+        "kind": "improve.check-started",
+        "at": "2026-10-09T22:59:13.643Z",
+        "body": {
+          "sha256": "45132e114fe970a22594c0751ada5164cb63feeb70f00a68c1e7b4379b686940",
+          "bytes": 200
+        },
+        "selected": {
+          "id": "source-execution",
+          "groupId": "build",
+          "index": 0
+        }
+      },
+      {
+        "seq": 150,
+        "kind": "execution.output",
+        "at": "2026-10-09T22:59:35.284Z",
+        "body": {
+          "sha256": "61943d3d7d9ebae84181b7053554fe68201444aba9932483d802491f41b23c5b",
+          "bytes": 570
+        },
+        "selected": {
+          "groupId": "build",
+          "index": 0,
+          "execution": {
+            "status": "failed",
+            "terminated": true,
+            "code": null,
+            "reason": "timeout"
+          }
+        }
+      },
+      {
+        "seq": 151,
+        "kind": "improve.check",
+        "at": "2026-10-09T22:59:35.297Z",
+        "body": {
+          "sha256": "3495cfcfed47a11ce9bd672d161878d2b50213ed6da1e150fc59858e6d63c06b",
+          "bytes": 290
+        },
+        "selected": {
+          "id": "source-execution",
+          "groupId": "build",
+          "index": 0,
+          "state": "unknown",
+          "reason": "Error: ENOENT: no such file or directory, scandir '/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/work/targets'"
+        }
+      },
+      {
+        "seq": 152,
+        "kind": "improve.validation",
+        "at": "2026-10-09T22:59:40.475Z",
+        "body": {
+          "sha256": "a00c07ba69bbeb1efa0409825465813282e09e69528e7b485d06de61017be4b1",
+          "bytes": 4210
+        },
+        "selected": {
+          "id": "source-execution",
+          "groupId": "build",
+          "state": "unknown",
+          "reason": "Error: ENOENT: no such file or directory, scandir '/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/work/targets'"
+        }
+      },
+      {
+        "seq": 153,
+        "kind": "improve.batch",
+        "at": "2026-10-09T22:59:40.498Z",
+        "body": {
+          "sha256": "3136250f093a15a01c760b05f48f208f26c159efbf58cfdc61d0d4df0a65efbc",
+          "bytes": 245
+        },
+        "selected": {
+          "id": "source-execution",
+          "state": "frozen",
+          "reason": "Error: ENOENT: no such file or directory, scandir '/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/work/targets'"
+        }
+      }
+    ],
+    "testResult": {
+      "at": "2026-10-09T23:04:08.910667+00:00",
+      "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+      "exitCode": 1,
+      "elapsedSeconds": 764.3097188750398,
+      "summary": [
+        "# tests 251",
+        "# pass 250",
+        "# fail 1",
+        "# cancelled 0",
+        "# skipped 0",
+        "# todo 0",
+        "# duration_ms 764164.730459"
+      ],
+      "headUnchanged": true,
+      "trackedSourceUnchanged": true,
+      "sourceBuildUnchanged": true,
+      "identity": {
+        "checked": 554,
+        "mismatches": []
+      },
+      "compiledTestsAndFixturesUnchanged": true,
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tests.tap",
+        "bytes": 72079,
+        "sha256": "c16faf0ca5218e555ff82bdbd216c4cf3a0dba87ad4592e28f6ecbbae7dd9d6f"
+      },
+      "load": [
+        13.4462890625,
+        17.39404296875,
+        21.400390625
+      ],
+      "scope": "Complete compiled test suite on fixed combined source; external paid/native/human acceptance not implied"
+    },
+    "testsTapFinal": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tests.tap",
+      "bytes": 72079,
+      "sha256": "c16faf0ca5218e555ff82bdbd216c4cf3a0dba87ad4592e28f6ecbbae7dd9d6f"
+    }
+  },
+  "note": "Read-only hash/source/evidence inspection only. No product tests, VM, Terminal, provider or paid execution invoked by this reviewer. Historical per-stage outcomes are not additive and do not override the observed combined failure.",
+  "finalIdentity": {
+    "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+    "tree": "e3089debbbbc34a3a4ba48980087cf9bbd12589d",
+    "status": "?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png\n?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json",
+    "checkedAt": "2026-10-09T23:06:41.552665+00:00"
+  }
+}
