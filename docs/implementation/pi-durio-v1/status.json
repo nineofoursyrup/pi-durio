@@ -673,13 +673,17 @@
       "acceptance": {
         "at": "2026-10-09T17:48:47.038990+00:00",
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/coordinator-acceptance.json"
-      }
+      },
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/23#issuecomment-6086269422",
+      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/publication/readback.json"
     },
     "24": {
       "number": 24,
       "title": "improve 结构化选择、仅验证与建议抑制",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         22,
@@ -687,12 +691,18 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "dispatching",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-24",
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T174316Z/issue-24.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T174316Z/issue-24.json",
+      "base_commit": "23dca71d36ad289f335f3dc45111cd1f14c41ce1",
+      "branch": "codex/pi-durio-v1-issue-24",
+      "agent": "/root/issue24",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "checkpoint": "Actual restricted VM candidate construction/regression PASS, non-Git original bytes preserved, duplicate decision readonly; history/TUI/fresh eval/install acceptance pending. Parent improve.eval links child declared dataRoot/plan and original IDs for #28."
     },
     "25": {
       "number": 25,
@@ -742,20 +752,32 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-27",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "0d292488cef06eedf917cf032d7c8417a9db3584",
+      "integrated_sha": "716aab74832e781c4652246671893430699808ea",
+      "evidence": [
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/handoff.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/coordinator-premerge.json",
+        "docs/implementation/pi-durio-v1/issue-27/README.md",
+        "docs/implementation/pi-durio-v1/issue-27/coordinator-acceptance.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/merge-integration-readback.json"
+      ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T171238Z/issue-27.json",
       "branch": "codex/pi-durio-v1-issue-27",
       "agent": "/root/issue27",
       "base_commit": "e07a2d547eb12e7fbabdf359094a451def0c3147",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "Fresh implementer active on accepted-task metrics and dual clocks; claim readback verified. Shared runtime/build seam remains owned by #23.",
+      "note": "T17 task acceptance rates/dual clocks accepted; final native/provider/daily acceptance separate.",
       "local_checkpoint": "81ebadbc3d2bcf563c502ee94a06214b9ddc9883",
-      "checkpoint": "Known-fact acceptance/clock/runtime tests pass; installed final evidence pending. Host clock spoof and withdrawn revision resurrection repaired; current first-valid clock versus conflict outcome contract branch under check."
+      "checkpoint": "Frozen 0d292488, installed actual2/2/1/2/1 plus improve exclusion/readonly/revision PASS, final boundaries15/15 PASS; 36 direct evidence hashes verified. Merger owns root for serial integration.",
+      "product_commit": "0d292488cef06eedf917cf032d7c8417a9db3584",
+      "handoff": "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/handoff.json",
+      "acceptance": {
+        "at": "2026-10-09T18:13:40.864837+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/coordinator-acceptance.json"
+      }
     },
     "28": {
       "number": 28,
@@ -768,11 +790,12 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "dispatching",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T175937Z/issue-28.json"
     },
     "29": {
       "number": 29,
@@ -785,11 +808,12 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T175937Z/issue-29.json"
     },
     "30": {
       "number": 30,
@@ -848,9 +872,11 @@
       "evidence": []
     }
   },
-  "frontier": [],
+  "frontier": [
+    29
+  ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "ee33413ab9e6af1af5bc98a51536149433098625",
+  "integration_tip": "716aab74832e781c4652246671893430699808ea",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -860,13 +886,8 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T17:48:47.038990+00:00",
-  "last_remote_readback": {
-    "headRefOid": "e07a2d547eb12e7fbabdf359094a451def0c3147",
-    "state": "OPEN",
-    "isDraft": true,
-    "closingIssuesReferences": []
-  },
+  "updated_at": "2026-10-09T18:13:40.864837+00:00",
+  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-23/publication/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
       "commit": "01f2d3a562b12a9917b3db1dc8111ea2717d386f",
@@ -907,7 +928,8 @@
       "record": "/Users/nineofour/pi-durio-v1-run/interfaces-23-27.md",
       "scope": "Explicit Evidence.append kind whitelist host clock, per-process UUID/monotonic/wall; host task source, actual artifact identity, legacy unknown; no new state machine or ledger",
       "checkpoint": "81ebadbc3d2bcf563c502ee94a06214b9ddc9883"
-    }
+    },
+    "improve_selection_metrics": "/Users/nineofour/pi-durio-v1-run/interfaces-24-27.md"
   },
   "root_write_owner": "coordinator"
 }

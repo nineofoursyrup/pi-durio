@@ -18,6 +18,7 @@
     "scripts/isolation",
     "docs/implementation/pi-durio-v1/issue-21/README.md",
     "docs/implementation/pi-durio-v1/issue-22/README.md",
+    "docs/implementation/pi-durio-v1/issue-27",
     "docs/implementation/pi-durio-v1/issue-23/README.md"
   ],
   "engines": {
@@ -52,7 +53,8 @@
     "./improve": "./dist/src/improve.js",
     "./improve-decisions": "./dist/src/improve-decisions.js",
     "./improve-validation": "./dist/src/improve-validation.js",
-    "./improve-selection": "./dist/src/tui/improve-selection.js"
+    "./improve-selection": "./dist/src/tui/improve-selection.js",
+    "./metrics": "./dist/src/metrics/index.js"
   },
   "bundleDependencies": [
     "@earendil-works/pi-ai",

@@ -1,3 +1,4 @@
+import {type TaskOrigin} from './fact-clock.js';
 import {prepareImprove,validateImproveRequest,priorImprove,readImproveReport,IMPROVE_INSTRUCTIONS,type ImproveRequest,type ImproveReport} from './improve.js';
 import { CompactionFacts, type CompactionResultFact } from './compaction.js';
 import { dispatchProvider, type ProviderBoundary } from './provider-boundary.js';
@@ -32,6 +33,8 @@ const INSTRUCTIONS = READ_INSTRUCTIONS;
 export interface ReadTaskOptions {
   dataRoot: string; workspace: string; input: string;
   mode: 'live' | 'offline';
+  /** Trusted embedding host only; never accepted from candidate messages or tools. */
+  taskOrigin?: TaskOrigin;
   /** Explicit offline transport boundary. Never silently fall back from a live provider. */
   transport?: typeof fetch;
   /** Trusted host dispatch capability; never accepted from model/tool data. */
@@ -357,7 +360,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
   const guard = () => { owner.assertHeld(); sessionOwner?.assertHeld(); workspaceOwner?.assertHeld(); if (stopped || finalizing || controller.signal.aborted) throw new Error(failure ?? 'RUN_STOPPING'); };
   const record = (kind: string, data: unknown) => {
     let seq: number;
-    try { seq = evidence!.append(kind, data); } catch (error) {
+    try { seq = evidence!.append(kind, kind==='control.accepted'&&data&&typeof data==='object'?{...data,origin:options.taskOrigin??{kind:'coding',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'}}:data); } catch (error) {
       originalLoss = true; fatal(error);
       try { evidence!.append('evidence.gap', { failedKind: kind, reason: safeError(error), completeness: 'unknown', disposition: 'stopped; no side-effect replay to repair evidence' }); } catch { /* A failed disk may not retain even its gap marker. */ }
       throw error;
@@ -459,7 +462,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     accepted = true;
     if(improve){analysis=prepareImprove(evidence,improve.request,improve.target,guard);providerBoundary={budget:analysis.budget,purpose:'improve',operationId:`improve:${improve.request.id}`};analysisTimer=setTimeout(()=>fatal(Error('BUDGET_DEADLINE')),Math.max(1,Date.parse(analysis.deadline)-Date.now()));}
     const authorization={ tools: improve ? ['evidence_summary','evidence_read','source_view'] : coding ? ['read', 'write', 'edit', 'bash'] : ['read'], execution: improve ? 'scoped-improve-analysis' : coding ? 'trusted-local-coding' : 'trusted-local-read-only', requestLimit: improve?improve.request.limits.maxRequests:8, fileLimitBytes: 256 * 1024, replay: 'unsafe' };
-    if (!recovery&&!maintenance) record('task.accepted', { taskId, runId, sessionId, ...(improve?{kind:'improve',improveRequestId:improve.request.id,sourceTarget:improve.target}:{}), input: options.input, workspace, mode: options.mode, ...(queued?{queueRequestId:queued.item.requestId,sourceTarget:queued.item.target}:{}), authorization, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } });
+    if (!recovery&&!maintenance) record('task.accepted', { taskId, runId, sessionId, ...(improve?{kind:'improve',improveRequestId:improve.request.id,sourceTarget:improve.target}:{}), input: options.input, workspace, mode: options.mode, origin: improve ? {kind:'improve',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'} : options.taskOrigin ?? {kind:'coding',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'}, ...(queued?{queueRequestId:queued.item.requestId,sourceTarget:queued.item.target}:{}), authorization, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } });
     record('ownership.acquired', { dataRoot: {path:owner.path,claim:owner.claim}, ...(workspaceOwner ? {workspace:{path:workspaceOwner.path,claim:workspaceOwner.claim}}:{}) });
     if (workspaceOwner && !recovery) record('workspace.owner', { root: workspaceOwner.root, workspace, scope: 'protocol participants only; external editors, shared Git metadata and external resources are not isolated' });
     const artifact=maintenance?maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:captureArtifact(evidence,workspace);
