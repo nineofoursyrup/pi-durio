@@ -43,7 +43,7 @@
 7. 实际维护请求与 committed usage 分开归因、累计只计一次；真实 provider-boundary/budget 回归保持通过。
 8. TUI 菜单、空闲维护→下一普通输入、历史/失败源禁止隐式操作；这是 adapter 行为检查。
 
-`node scripts/demo-compaction.mjs INSTALL_ROOT NEW_EVIDENCE_ROOT` 用独立安装包的公开 exports 和其 shipped CLI 冷进程执行真实长源维护、重复、noop、只读查询不改 SQLite、下一请求的摘要 payload 和旧原文读回。包包含原固定 production dependencies，manifest 绑定每个安装文件、源码 Git tree、编译文件、pack SHA-256 与 lock。
+`node scripts/demo-compaction.mjs INSTALL_ROOT NEW_EVIDENCE_ROOT` 用独立安装包的公开 exports 和其 shipped CLI 冷进程执行API 与 CLI 的真实长源维护、重复、冷重开 noop、只读查询不改 SQLite、下一请求的摘要 payload 和旧原文读回。包包含原固定 production dependencies，manifest 绑定每个安装文件、源码 Git tree、编译文件、pack SHA-256 与 lock。
 
 首红日志始终保留：最初去重断言、恢复报告自失效、旧队列 barrier fixture、编译错误及冻结重接来源错误都不覆盖。修正后新增日志另存，不改写过去结果。
 

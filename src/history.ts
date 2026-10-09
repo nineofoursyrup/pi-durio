@@ -113,13 +113,14 @@ export function queryEvidence(root:string,runId:string,options:{after?:number;sn
 export function queryAttempts(root:string,runId:string,options:{after?:number;snapshot?:number;limit?:number}={}) {
   const page=queryEvidence(root,runId,{...options,kinds:['model.intent','tool.intent']});
   const items=page.items.map(source=>{
-    const intent=decode(root,source);const related:EvidenceReference[]=[],requests:EvidenceReference[]=[],gaps:string[]=[];let terminal:EvidenceReference|undefined,terminalData:any,dispatches=0,omitted=0;
+    const intent=decode(root,source);const related:EvidenceReference[]=[],requests:EvidenceReference[]=[],gaps:string[]=[];let terminal:EvidenceReference|undefined,terminalData:any,dispatches=0,unverifiedDispatchIntents=0,notDispatched=false,dispatchFailure:{source:EvidenceReference;reason:string}|undefined,omitted=0;
     for(const ref of records(root,{runId,through:page.snapshot,after:source.seq})){
       let data:any;try{data=decode(root,ref);}catch{if(gaps.length<32)gaps.push(ref.id);continue;}if(data.attemptId!==intent.attemptId&&data.toolAttempt?.attemptId!==intent.attemptId)continue;
       if(related.length<32)related.push(ref);else omitted++;
-      if(ref.kind==='model.dispatch'||ref.kind==='tool.dispatch'){dispatches++;if(requests.length<50)requests.push(ref);}
+      if(ref.kind==='model.dispatch'||ref.kind==='tool.dispatch'){if(ref.kind==='tool.dispatch'||data.transportEntered===true){dispatches++;if(requests.length<50)requests.push(ref);}else unverifiedDispatchIntents++;}
+      if(ref.kind==='model.dispatch-failed'){dispatchFailure={source:ref,reason:data.reason};if(data.dispatched===false&&data.attemptDispatched===false)notDispatched=true;}
       if(['model.response','tool.result','tool.error'].includes(ref.kind)){terminal=ref;terminalData=data;}
     }
-    return {id:intent.attemptId,source,kind:source.kind==='model.intent'?'model':'tool',purpose:intent.purpose??null,durableTaskId:intent.durableTaskId??null,model:intent.model??null,tool:intent.tool??null,startedAt:source.at,endedAt:terminal?.at??null,terminal:terminal??null,status:terminal?terminalData.message?.stopReason==='aborted'?'cancelled':terminal.kind==='tool.error'||terminalData.message?.errorMessage||terminalData.result?.isError?'failed':'returned':'unknown',observableRequests:dispatches,requests,requestIdentity:'dispatch record ID; SDK-internal requests not exposed here remain unknown',usage:terminalData?.usage??'unknown',related,omitted,gaps,nextRelated:omitted?related.at(-1)?.seq:null};
+    return {id:intent.attemptId,source,kind:source.kind==='model.intent'?'model':'tool',purpose:intent.purpose??null,durableTaskId:intent.durableTaskId??null,model:intent.model??null,tool:intent.tool??null,startedAt:source.at,endedAt:terminal?.at??null,terminal:terminal??null,status:terminal?terminalData.message?.stopReason==='aborted'?'cancelled':terminal.kind==='tool.error'||terminalData.message?.errorMessage||terminalData.result?.isError?'failed':'returned':'unknown',observableRequests:dispatches,unverifiedDispatchIntents,dispatchState:dispatches?'dispatched':notDispatched?'not-dispatched':'unknown',dispatchFailure:dispatchFailure??null,requests,requestIdentity:'configured transport entry record ID; eval provider dispatch requires outer trusted evidence; legacy unproven intents stay separate',usage:!dispatches&&notDispatched?'not-applicable':terminalData?.usage??'unknown',related,omitted,gaps,nextRelated:omitted?related.at(-1)?.seq:null};
   });return {...page,items};
 }

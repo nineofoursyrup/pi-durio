@@ -197,6 +197,8 @@ test('manual maintenance keeps the original dispatch capability and exhausted pe
  const denied=facts.findLast(r=>r.kind==='model.dispatch-failed')?.data as any;assert.equal(denied.dispatched,false);assert.equal(denied.reason,'BUDGET_REQUEST_LIMIT');
  const {queryUsage}=await import('../src/usage-query.js');const usage=queryUsage(paths.dataRoot,[initial.runId]);assert.equal(usage.items[0].requestCoverage?.dispatches,1);assert.equal(usage.items[0].completeness,'known');
  const allocation=usage.requestAllocations.find(a=>a.maintenanceRequestId==='budget-maintenance') as any;assert.equal(allocation.dispatchState,'not-dispatched');assert.equal(allocation.completeness,'not-applicable');assert.equal(allocation.dispatchFailure.reason,'BUDGET_REQUEST_LIMIT');
+ const {queryAttempts}=await import('../src/history.js');const trace=queryAttempts(paths.dataRoot,initial.runId).items.find(a=>a.purpose==='compaction')!;assert.equal(trace.observableRequests,0);assert.equal(trace.dispatchState,'not-dispatched');assert.equal(trace.usage,'not-applicable');assert.equal(trace.dispatchFailure?.reason,'BUDGET_REQUEST_LIMIT');
+ const {inspectRecovery}=await import('../src/runtime.js');const report=await inspectRecovery({...paths,runId:initial.runId,authorization:{workspace:paths.workspace,mode:'offline',tools:['read','write','edit','bash']}});assert.equal(report.unknownModelAttempts.length,0);
  }finally{ledger.close();}
 });
 

@@ -107,7 +107,9 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   const compactions=compactTasks.map(t=>{const result=t.state.status==='terminal'&&t.state.outcome.status==='completed'?t.state.outcome.result:undefined;const summary=session.submissions.find(s=>s.id===result?.submissionId&&s.type==='write'&&s.requestId===`compaction:${t.id}`);return {taskId:t.id,reason:t.input.reason,status:t.state.status==='terminal'?t.state.outcome.status:t.state.status,...(summary?{submissionId:summary.id,submissionStatus:summary.status,entryId:summary.entry}:{}),...(result?.entryId!==undefined?{entryId:result.entryId}:{})};});
   const compactSubmissionIds=new Set(compactions.flatMap(c=>c.submissionId===undefined?[]:[c.submissionId]));
   const ownedSubmissionIds=new Set(ownedSubmissions.map(item=>item.id));
-  const unknownModelAttempts = records.filter(r => r.kind === 'model.intent' && !records.some(response => response.kind === 'model.response' && (response.data as any).attemptId === (r.data as any).attemptId && (response.data as any).usage === 'reported')).map(r => (r.data as any).attemptId as string);
+  const notDispatched=new Set(records.filter(r=>r.kind==='model.dispatch-failed'&&(r.data as any).dispatched===false&&(r.data as any).attemptDispatched===false).map(r=>(r.data as any).attemptId));
+  for(const r of records)if(r.kind==='model.dispatch'&&(r.data as any).transportEntered===true)notDispatched.delete((r.data as any).attemptId);
+  const unknownModelAttempts = records.filter(r => r.kind === 'model.intent' && !notDispatched.has((r.data as any).attemptId) && !records.some(response => response.kind === 'model.response' && (response.data as any).attemptId === (r.data as any).attemptId && (response.data as any).usage === 'reported')).map(r => (r.data as any).attemptId as string);
   const remainingModelAttempts = Math.max(0, 8 - records.filter(r => r.kind === 'model.intent').length);
   for (const task of session.tasks.filter(t => t.kind === 'pi.tool')) {
     const input = task.input as { assistant:number;callId:string };
