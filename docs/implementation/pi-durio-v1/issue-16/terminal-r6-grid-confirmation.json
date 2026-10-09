@@ -1,0 +1,72 @@
+{
+  "at": "2026-10-09T14:03:52.611723+00:00",
+  "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+  "directUserFollowup": "确认，是 40×12，文字和菜单都正常",
+  "questionContext": "Explicitly asked whether the visually successful xyz/F2/Esc sequence was at 40x12; no rerun requested.",
+  "reportedGrid": {
+    "columns": 40,
+    "rows": 12
+  },
+  "humanVisualRating": {
+    "id": "GRID_INPUT",
+    "label": "在所报尺寸亲眼看清 xyz，F2 菜单可见，Esc 返回后 xyz 仍可见",
+    "status": "PASS",
+    "answer": "P"
+  },
+  "machine": {
+    "calls": 0,
+    "rawRestored": true,
+    "sttyRestored": true,
+    "gridSequences": [
+      {
+        "columns": 40,
+        "rows": 12,
+        "text": "xyz",
+        "typedAt": [
+          "2026-10-09T13:59:37.683Z",
+          "2026-10-09T13:59:38.292Z",
+          "2026-10-09T13:59:38.600Z"
+        ],
+        "menuAt": "2026-10-09T13:59:46.824Z",
+        "closedAt": "2026-10-09T13:59:48.885Z"
+      }
+    ]
+  },
+  "priorObservationPreserved": {
+    "minimumAnswer": "P",
+    "minimumStatus": "UNKNOWN",
+    "summaryStatus": "UNKNOWN",
+    "note": "Original size field P and original summary remain unchanged; this is a separate direct human correction bound to the exact recorded sequence."
+  },
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/manual/2026-10-09T13-59-08-535Z/summary.json",
+      "sha256": "a5ec8384b1fe9823c5e7f05729ee1b2497298ae108a040bac92f94c28e54f848"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/manual/2026-10-09T13-59-08-535Z/operator-observation.json",
+      "sha256": "98e7ae8d90326ce9e286fdd6acf21594fdec8a37b554eb194cc392c1377b56da"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/manual/2026-10-09T13-59-08-535Z/machine.json",
+      "sha256": "14631bf813784ec6bbfffd068c21d892483a7c5fecd9b5e1fe77a85d2b93752c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/manual/2026-10-09T13-59-08-535Z/events.jsonl",
+      "sha256": "8399c40bb428b6ef30ca220b7c6fa84ba108318401724ec54008a2deafe7ac89"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/manual/2026-10-09T13-59-08-535Z/terminal-output.ansi",
+      "sha256": "c8528c80cd52555e280a853be76539d748a67f0643261a77865b0b858884bdc9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/manual/2026-10-09T13-59-08-535Z/identity.json",
+      "sha256": "4df87ea8765364015fb7c0ad818ec8436c8cdbbf67ccbc63953db55326f75a16"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/manual/2026-10-09T13-59-08-535Z/environment.json",
+      "sha256": "7e63f4fba56fa942146f36ba4c72e03fc7863c28816ce2240c9c6406c1283d2d"
+    }
+  ],
+  "acceptance": "PASS at explicitly confirmed 40x12; normal completion and smaller-window behavior retain their separate evidence"
+}

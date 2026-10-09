@@ -158,7 +158,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "integrated-native-partial",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-width",
       "commit": "231f206e859f0ed889a69d943b9c17f92a20cf79",
       "integrated_sha": "f17ddfbe9fb8b07a6ddde46a42cb35560b07687c",
@@ -187,14 +187,16 @@
         "docs/implementation/pi-durio-v1/issue-16/terminal-r6-feedback.md",
         "docs/implementation/pi-durio-v1/issue-16/terminal-r5-exit-failure.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-confirmation/merge-integration-readback.json",
-        "docs/implementation/pi-durio-v1/issue-16/terminal-r6-supplement-partial.json"
+        "docs/implementation/pi-durio-v1/issue-16/terminal-r6-supplement-partial.json",
+        "docs/implementation/pi-durio-v1/issue-16/acceptance-r6.md",
+        "docs/implementation/pi-durio-v1/issue-16/acceptance-r6.json"
       ],
       "branch": "codex/pi-durio-v1-issue-16-width",
       "agent": "/root/issue16_width",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "r6 native first-pair C/D, fault, normal completed and smaller-window recovery passed. User marked minimum input/menu observation U (forgot to inspect xyz); single grid-only supplement being prepared. Dependencies remain blocked.",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T122309Z/issue-16.json",
+      "note": "T06 applicable acceptance complete: inherited unchanged native C/N/STOP/ESC plus r6 first-pair C/D, fault, completed and explicit 40x12 input/menu. Original FAIL/UNKNOWN retained; final v1 acceptance and paid provider remain separate.",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-16.json",
       "local_checkpoint": "e98fef9",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6079513003",
       "human_evidence_request": {
@@ -324,30 +326,37 @@
       "r6_product_commit": "231f206e859f0ed889a69d943b9c17f92a20cf79",
       "r6_handoff_tip": "b256a70ee18337bddca09ae5adb079eee1adbb78",
       "human_revalidation_r6": {
-        "status": "EXIT_FIRST_PAIR, IDLE_C_FIRST_PAIR, FAULT, S1 completion and S3 smaller-window recovery PASS. Only S2 input/menu at explicit minimum UNKNOWN.",
+        "status": "All applicable native gates satisfied; exact 40x12 explicitly confirmed after invalid format, original UNKNOWN retained",
         "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
         "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json",
         "manifestSha256": "5e33c0c52eb80c2a6e5c57b0c85dd03ae37b249d2c5ed874b6cf3238f7e17e91",
         "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/terminal-validation.mjs",
         "runnerSha256": "f6241325c635eb0518625c0d7f3292da35d073d1ca0643176c62566e925e37d9",
         "coordinatorVerifyOnly": "PASS 12704 exact files; manifest/runner/handoff hashes matched",
-        "current_requested_scenario": "grid-only xyz/F2/Esc visual confirmation at 40x12",
+        "current_requested_scenario": null,
         "command": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json' --scenario exit-first-pair",
         "interaction_mode": "One scenario per invocation and popup with complete steps",
         "requestAt": "2026-10-09T13:32:34.298160+00:00",
-        "remainingNative": [
-          "S2 explicit minimum grid with input/menu visual observation"
-        ],
+        "remainingNative": [],
         "idle_d_partial": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-idle-d-partial.json",
         "exit_first_pair_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-exit-first-pair-pass.json",
         "idle_c_first_pair_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-idle-c-first-pair-pass.json",
         "fault_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-fault-pass.json",
         "supplement_entry": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-supplement/terminal-supplement.mjs' --binding '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-supplement/binding.json'",
         "supplement_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-supplement-partial.json",
-        "grid_only_entry": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/terminal-grid-only.mjs' --binding '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/binding.json'"
+        "grid_only_entry": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/terminal-grid-only.mjs' --binding '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/binding.json'",
+        "grid_visual_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-grid-visual-pass-size-pending.json",
+        "grid_confirmation": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-acceptance/native-grid-confirmed.json"
       },
       "r6_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6082098323",
-      "r6_publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/readback.json"
+      "r6_publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/readback.json",
+      "r6_native_partial_publication": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-partial-2/readback.json",
+      "acceptance": {
+        "status": "ACCEPTED_FOR_INTERNAL_DEPENDENCIES",
+        "at": "2026-10-09T14:03:52.611723+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-acceptance/acceptance.json",
+        "recordSha256": "4c60fd3dd5476bf1bbeb869b4fbc97c849a63073d47ce087631421d693089365"
+      }
     },
     "17": {
       "number": 17,
@@ -361,11 +370,12 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-17.json"
     },
     "18": {
       "number": 18,
@@ -379,11 +389,12 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-18.json"
     },
     "19": {
       "number": 19,
@@ -636,9 +647,12 @@
       "evidence": []
     }
   },
-  "frontier": [],
+  "frontier": [
+    17,
+    18
+  ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "0d4fdfc648f268037ba9c36e1a20e50c3286e089",
+  "integration_tip": "32d36f45adafe72035c2a8b68ac4aed37053c91f",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -648,9 +662,9 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T13:58:00.012542+00:00",
+  "updated_at": "2026-10-09T14:03:52.690682+00:00",
   "last_remote_readback": {
-    "headRefOid": "0d4fdfc648f268037ba9c36e1a20e50c3286e089",
+    "headRefOid": "32d36f45adafe72035c2a8b68ac4aed37053c91f",
     "isDraft": true,
     "state": "OPEN",
     "closingIssuesReferences": []

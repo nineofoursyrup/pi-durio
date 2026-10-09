@@ -13,3 +13,9 @@
 - 正常完成 S1 和更小窗口恢复 S3 均人工 P；实际结果 completed、`Fruit count: 7`、cleanup confirmed、raw/stty 和 headless 一致。S2 填 U 并说明“忘了看 xyz”，minimumGrid 也填 U。日志虽在 40×12 收到 xyz/F2/Esc，不能据此推断视觉可用或最小尺寸通过：[部分读回](terminal-r6-supplement-partial.json)。
 
 只剩 S2 的明确尺寸输入/菜单视觉观察待补，已准备只测该项的外部入口。r5 的原 EXIT F、本轮 S2 UNKNOWN 和所有旧记录不改写。此前适用证据及 OS 窗口焦点附加探查 UNKNOWN 见 [修复适用性说明](confirmation-repair-r6.md)。#16 未完成验收，不解锁后续票。
+
+## 最小尺寸补充确认
+
+单项 GRID_INPUT 已由用户填 P，日志在同一 40×12 尺寸记录完整 xyz→F2→Esc，零任务请求、raw/stty 恢复且无校准错误。尺寸字段误填 P 的原件及 UNKNOWN 汇总保持原样。用户随后明确补充“确认，是 40×12，文字和菜单都正常”，独立绑定于本次记录：[补充确认](terminal-r6-grid-confirmation.json)。因此已实测确认本环境下 40×12 可完成输入与菜单操作。
+
+#16 的适用验收现已满足，可解锁内部后继依赖；原 Issue 保持 OPEN。[候选与完整验收索引](acceptance-r6.md)。此前段落描述的是当时的未完成状态，历史 F/U 和原文件均保留。
