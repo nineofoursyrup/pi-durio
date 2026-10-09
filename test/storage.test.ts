@@ -58,7 +58,7 @@ test('preview is immutable and explicit commit cannot expand scope or ignore lat
 test('whole-session removal preserves facts and permits a later new task only with complete matching removal evidence',async()=>{
   const f=await fixture(),p=await preview(f.root,'session',[`session:${f.sessionId}`]);assert.equal(p.plan.units.length,1);assert.ok(p.plan.units[0].inspection!.conversations.length);
   const originalBody=await readFile(join(f.root,'objects',f.source.ref.sha256));
-  const done=await commitCleanup(f.root,{id:'session',identity:p.identity});assert.equal(done.status,'completed');assert.equal(await exists(join(f.root,'sessions',f.sessionId)),false);assert.deepEqual(await admitted(f.root),[]);
+  const done=await commitCleanup(f.root,{id:'session',identity:p.identity});assert.equal(done.status,'completed');assert.equal(await exists(join(f.root,'sessions',f.sessionId)),false);assert.equal((await admitted(f.root)).sessionCount,0);
   assert.deepEqual(await readFile(join(f.root,'objects',f.source.ref.sha256)),originalBody);assert.equal(readEvidence(f.root,f.source.id).state,'complete');
   assert.equal((await commitCleanup(f.root,{id:'session',identity:p.identity})).status,'completed');
   const e=new Evidence(f.root,f.runId);e.append('control.accepted',{requestId:'late',kind:'compact',input:'compact',target:{workspace:'/fixture',sessionId:f.sessionId,taskId:'task-a',runId:f.runId}});e.close();
@@ -83,14 +83,14 @@ test('partial cleanup preserves every part and resumes same operation after dele
   assert.equal(readEvidence(f.root,f.source.id).state,'cleaned');assert.match(JSON.stringify([...records(f.root,{kinds:['management.file-result']})].map(r=>decode(f.root,r))),/absent-after-recorded-intent/);
   const g=await fixture(),session=await preview(g.root,'interrupted-session',[`session:${g.sessionId}`]);
   const stopped=await commitCleanup(g.root,{id:'interrupted-session',identity:session.identity},{fault:point=>{if(point==='after-stage')throw Error('simulated interrupt');}});assert.equal(stopped.status,'partial');await assert.rejects(admitted(g.root),/missing|incomplete/);
-  assert.equal((await commitCleanup(g.root,{id:'interrupted-session',identity:session.identity})).status,'completed');assert.deepEqual(await admitted(g.root),[]);
+  assert.equal((await commitCleanup(g.root,{id:'interrupted-session',identity:session.identity})).status,'completed');assert.equal((await admitted(g.root)).sessionCount,0);
 });
 
 test('completed attachment parts do not invalidate the same operation remaining session preview after a later part fails',async()=>{
   const f=await fixture(),p=await preview(f.root,'partially-complete',[`object:${f.payload.sha256}`,`object:${f.second.sha256}`,`session:${f.sessionId}`]);
   const stopped=await commitCleanup(f.root,{id:p.plan.id,identity:p.identity},{fault:(point,file)=>{if(point==='before-delete'&&file===`objects/${f.second.sha256}`)throw Object.assign(Error('disk fault'),{code:'EIO'});}});
   assert.deepEqual(stopped.parts.map(part=>part.status),['completed','failed','not-run']);
-  const resumed=await commitCleanup(f.root,{id:p.plan.id,identity:p.identity});assert.equal(resumed.status,'completed');assert.deepEqual(await admitted(f.root),[]);
+  const resumed=await commitCleanup(f.root,{id:p.plan.id,identity:p.identity});assert.equal(resumed.status,'completed');assert.equal((await admitted(f.root)).sessionCount,0);
 });
 
 test('lossless whole-root and attachment archives verify actual restore and preserve source identities',async()=>{
