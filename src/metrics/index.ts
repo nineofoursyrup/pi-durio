@@ -4,3 +4,7 @@ export {queryTaskMetrics,formatTaskMetrics} from './report.js';
 export type {MetricsScope,TaskMetricsReport} from './report.js';
 export {duration,durationSummary} from './clocks.js';
 export type {TimePoint,Duration} from './clocks.js';
+export {queryOperationsMetrics,formatOperationsMetrics} from './operations.js';
+export type {OperationsMetricsReport} from './operations.js';
+export {recordCostEstimate} from './costs.js';
+export type {CostEstimateInput} from './costs.js';
