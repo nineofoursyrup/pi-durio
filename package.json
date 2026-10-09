@@ -40,7 +40,8 @@
     ".": "./dist/src/runtime.js",
     "./offline": "./dist/src/offline.js",
     "./tui": "./dist/src/tui/app.js",
-    "./query": "./dist/src/query.js"
+    "./query": "./dist/src/query.js",
+    "./storage": "./dist/src/storage.js"
   },
   "bundleDependencies": [
     "@earendil-works/pi-ai",
