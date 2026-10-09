@@ -331,7 +331,7 @@ export class ReadOnlyTui {
     if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery)throw Error('IMPROVE_SELECTION_CURRENT_STATE_BLOCKED');
     this.phase='running';this.controller=new AbortController();this.cancellation='exit';
     const promise=submitImproveDecision({dataRoot:this.options.dataRoot,decision,signal:this.controller.signal});
-    this.active=promise.then(value=>{this.notice=`决定 ${value.id} · ${value.state}；正式目标未写回、未启用`}).catch(error=>{this.notice=`决定未完成：${String(error)}`;}).finally(()=>this.finished());
+    this.active=promise.then(value=>{this.notice=`决定 ${value.id} · ${value.state}；具体写回/启用见结果`}).catch(error=>{this.notice=`决定未完成：${String(error)}`;}).finally(()=>{const notice=this.notice;this.finished();this.notice=notice;this.tui.requestRender();});
     return promise;
   }
   private async compact() {
