@@ -15,7 +15,8 @@ import { openNodeSqliteStorage } from '@earendil-works/pi-durable/storage/sqlite
 import { Evidence, readObject, readQueue, type BlobRef, type QueueItemFact, type ControlTarget, type FaultInjector } from './evidence.js';
 import { TaskControl, RunControls, findQueueItem, findCoalescedControl, validControlId, previousQueueDecision, type QueueDecision, type ControlBinding } from './control.js';
 import { acquireOwner } from './ownership.js';
-import { preflight, inspectSession } from './preflight.js';
+import { preflight } from './preflight.js';
+import { inspectClosedSession, inspectCompaction } from './storage-projection.js';
 import { readEnvironment } from './read-environment.js';
 import { captureArtifact, verifyArtifact } from './artifact.js';
 import { codingEnvironment, toolEnvironment, type ToolEnvironmentConfig, type ObservedFile } from './coding-environment.js';
@@ -29,7 +30,7 @@ import { prepareRecovery, recoveryRecords, sessionWasEnded, type RecoveryAuthori
 export { readRun, readObject, readAcceptedTasks, readQueue } from './evidence.js';
 export { TaskControl } from './control.js';
 export type { ControlInput, QueueDecision } from './control.js';
-export { inspectRecovery, checkRecovery, settleRecoveryOwners } from './recovery.js';
+export { readRecoveryDetail, inspectRecovery, checkRecovery, settleRecoveryOwners } from './recovery.js';
 export type { RecoveryOptions, RecoveryDecision, RecoveryReport, RecoveryAuthorization } from './recovery.js';
 
 const CTX = BACKGROUND_CONTEXT;
@@ -254,10 +255,8 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
           const operation=recoveryRecords(owner.path).findLast(r=>r.kind==='compaction.started'&&(r.data as any).requestId===item.requestId)?.data as any;
           if(operation){
             const facts=recoveryRecords(owner.path,operation.source.sourceRunId),taskFact=facts.findLast(r=>r.kind==='compaction.task'&&(r.data as any).requestId===item.requestId)?.data as any;
-            const snapshot=await inspectSession(join(owner.path,'sessions',operation.source.sourceSessionId,'durable.sqlite'),owner);
-            const task=snapshot.tasks.find(t=>t.id===taskFact?.taskId);const outcome=task?.state.status==='terminal'?task.state.outcome:undefined;
-            const result=outcome?.status==='completed'?outcome.result:undefined;
-            const summary=snapshot.submissions.find(s=>s.id===result?.submissionId);
+            const snapshot=await inspectCompaction(join(owner.path,'sessions',operation.source.sourceSessionId,'durable.sqlite'),owner,taskFact?.taskId);
+            const {outcome,result,summary}=snapshot;
             if(result?.entryId!==undefined||summary?.entry!==undefined||outcome?.status==='completed'&&!result?.submissionId){evidence.append('control.receipt',{requestId:item.requestId,status:'applied',reason:'Public durable snapshot proves summary applied or noop; late cancellation cannot roll it back'});return findQueueItem(owner.path,item.requestId)!;}
             if((!outcome||summary?.status==='queued')&&!sessionWasEnded(facts,operation.source.sourceSessionId,snapshot.sourceFiles))throw Error('COMPACTION_RECOVERY_REQUIRED: this specific task or unplaced summary is frozen; inspect and explicitly end source before resolving the request');
           }
@@ -643,13 +642,15 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       return coding && !recovery?.readOnly ? codingEnvironment(workspace, shellEnvironment!, guard, capture, state => { if (state === 'started') shellsStarted++; else shellsSettled++; }, observedFiles) : readEnvironment(workspace, guard, capture);
     } }, CTX);
     compactions.attach(harness);
-    if(recovery)for(const frozen of recovery.frozenSubmissions??[]) {
+    if(recovery)for(const requestId of recovery.frozenRequests??[]) {
+      const frozen=await harness.commit(tx=>tx.submissionByRequest(recovery.started.conversationId,requestId),CTX);
+      if(!frozen||frozen.status!=='queued'||frozen.id===recovery.submissionId)continue;
       const pending=await harness.submission(frozen.id,CTX);
       if(!pending)throw Error('RECOVERY_QUEUE_SUBMISSION_MISSING');
       const outcome=await pending.abort(CTX); // Public passive withdrawal; never enables scheduling.
       if(outcome!=='aborted'&&outcome!=='settled')throw Error('RECOVERY_QUEUE_PLACEMENT_CHANGED');
-      const item=findQueueItem(dataRoot,frozen.requestId);
-      if(item?.status!=='withdrawn')record('control.receipt',{requestId:frozen.requestId,status:'frozen',reason:'Recovery retained this old pending steer; continuing the run does not reattach it',upstream:{submissionId:frozen.id,status:(await pending.status(CTX)).status}});
+      const item=findQueueItem(dataRoot,requestId);
+      if(item?.status!=='withdrawn')record('control.receipt',{requestId,status:'frozen',reason:'Recovery retained this old pending steer; continuing the run does not reattach it',upstream:{submissionId:frozen.id,status:(await pending.status(CTX)).status}});
     }
     conversation = maintenance ? await harness.conversation(maintenance.source.sourceConversationId as any,CTX) : recovery ? await harness.conversation(recovery.started.conversationId,CTX) : await harness.root(CTX, { agent: { model: { provider: 'deepseek', modelId: 'deepseek-flash' }, cwd: workspace, instructions } });
     if (!conversation) throw new Error('RECOVERY_CONVERSATION_MISSING');
@@ -688,7 +689,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     } else {
     if (recovery) {
       // Public passive commit does not enable scheduling. Preserve upstream interrupted entries; append host facts separately.
-      const summary = JSON.stringify({ decision: recovery.decision, tools: recovery.report.tools, capabilities: recovery.readOnly ? ['read'] : recovery.accepted.authorization.tools, warning: 'Original unknown and usage remain unknown. Committed/completed operations must not be redone. Only explicitly retry-selected or proven not-dispatched operations may be attempted again.' });
+      const summary = JSON.stringify({ decision: recovery.decision, toolFacts: {snapshotId:recovery.report.snapshotId,sourceFiles:recovery.report.session?.sourceFiles,counts:recovery.report.details?.toolCounts}, visibleTools: recovery.report.tools, capabilities: recovery.readOnly ? ['read'] : recovery.accepted.authorization.tools, warning: 'Original unknown and usage remain unknown. Committed/completed operations must not be redone. Only explicitly retry-selected or proven not-dispatched operations may be attempted again.' });
       await conversation.commit(tx => tx.appendEntry(conversation!.id,{kind:'durio.recovery',model:[{role:'user',content:summary,timestamp:Date.now()}]}),CTX);
     } else record('submission.intent', { requestId: taskId, conversationId: conversation.id, input: options.input });
     const submission = recovery ? await harness.submission(recovery.submissionId,CTX) : await conversation.submit({ type: 'input', content: options.input, requestId: taskId }, CTX);
@@ -762,9 +763,8 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     if (shellsStarted !== shellsSettled) { cleanup = 'unknown'; failure ??= 'SHELL_TERMINATION_UNKNOWN'; }
     if (evidence && sessionOwner && cleanup === 'confirmed') {
       try {
-        const snapshot = await inspectSession(join(sessionOwner.path, 'durable.sqlite'), owner);
-        if (snapshot.usage[0]) usage = snapshot.usage[0].value as UsageState;
-        record('durable.closed-snapshot', snapshot);
+        const snapshot = await inspectClosedSession(join(sessionOwner.path, 'durable.sqlite'), owner, value => record('durable.closed-snapshot', value));
+        if (snapshot.firstUsage) usage = snapshot.firstUsage as UsageState;
       } catch (error) { originalLoss = true; failure ??= safeError(error); }
     }
     if (analysisTimer)clearTimeout(analysisTimer);

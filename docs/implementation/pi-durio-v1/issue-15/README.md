@@ -57,7 +57,7 @@ pi-durio recover --run UUID --data-root PATH --authorization auth.json --decisio
 
 ## 整个 Harness 与调度入口
 
-在可写 storage/Harness open 前，持 data-root owner 对 quiescent main+WAL 做稳定副本，并只在副本上用公开 Storage API 扫描全部 conversations、tasks、submissions、entries、`pi.agent`、`pi.live`、`pi.usage`。检查完整 main/WAL 文件集合和前后 byte hashes，源库不创建 sidecar、执行迁移或被普通 SQLite/Harness 打开。临时 owner markers 是协调行为，与 source DB 只读保证分开。
+在可写 storage/Harness open 前，持 data-root owner 对 quiescent main+WAL 做稳定副本，并只在副本上用公开 Storage API 分页检查全部 tasks/submissions 的身份和状态，按目标 conversation 与工具 Entry ID 读取所需文档和原文。检查完整 main/WAL 文件集合和前后 byte hashes，源库不创建 sidecar、执行迁移或被普通 SQLite/Harness 打开。临时 owner markers 是协调行为，与 source DB 只读保证分开。
 
 只有与接受记录、原 requestId 和公开 `LiveDoc.run` 归属一致的完整任务集可获准。额外 conversation、同 conversation 的第二个 generation、background/未知 task、其他未处置 session、未知提交都会阻断。具体原因包含 `OTHER_PENDING_TASK_OUTSIDE_ACCEPTED_RUN`、`OTHER_PENDING_SUBMISSION`、`OTHER_SESSION_PENDING:<session>` 等；给用户的选项为 `inspect` / `external-verification`，退出 75。**此时 end 也不会假装解决其他工作。** 这类来源不是正常单任务 runtime 产生的可归属状态：须在产品外核实原写入者、工作归属及残留效果，保存可信证据并恢复合法一致状态；本入口不能替未知工作代为授权、取消或放行，不建议删锁/换 dataRoot 绕过它。
 
@@ -87,3 +87,5 @@ pi-durio recover --run UUID --data-root PATH --authorization auth.json --decisio
 一手合同核对：[Pi 1.1.0 README](https://github.com/earendil-works/pi/blob/abe508e1b89912adde45528136c3221eb69acdd7/packages/durable/README.md)、[ToolTask recovery](https://github.com/earendil-works/pi/blob/abe508e1b89912adde45528136c3221eb69acdd7/packages/durable/src/harness/tool.ts)，并阅读本次实际安装的公开 `.d.ts` 和发布 `.js`。使用的 Storage scans、LiveDoc、ToolTask/GenerationTask checkpoint 是公开导出合同，不读取 durable 私有 SQL schema。
 
 2026-10-10 的 SPEC-01 有界 host/admission 修复、验证范围与目标 session 恢复的后续边界见 [preflight-memory-repair.md](preflight-memory-repair.md)。原验收与首败文件保持历史身份，不以新候选覆盖。
+
+目标 session、普通关闭、压缩撤回和存储管理的后续有界投影与分页接口见 [target-session-projection-repair.md](target-session-projection-repair.md)。
