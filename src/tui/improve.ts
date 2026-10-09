@@ -1,9 +1,10 @@
 import {matchesKey,stripTerminalSequences,wrapTextWithAnsi,truncateToWidth} from '@earendil-works/pi-tui';
 import {listImproveReports,readImproveReport,formatImproveReport} from '../improve.js';
+import {listImproveSuppressions} from '../improve-history.js';
 /** Report viewer has no runtime, provider, selection or write capability. */
 export class ImproveView {
  private page:ReturnType<typeof listImproveReports>;private after=0;private previous:number[]=[];private selected=0;private line=0;private content:string|null=null;
- constructor(private root:string,id?:string){this.page=listImproveReports(root,{limit:10});if(id)this.content=formatImproveReport(readImproveReport(root,id));}
+ constructor(private root:string,id?:string,suppressions=false){this.page=listImproveReports(root,{limit:10});if(suppressions)this.content=JSON.stringify(listImproveSuppressions(root),null,2);else if(id)this.content=formatImproveReport(readImproveReport(root,id));}
  scroll(delta:number){this.line=Math.max(0,this.line+delta);}
  handleInput(data:string){if(data==='b'){this.content=null;this.line=0;return;}if(this.content){if(matchesKey(data,'down'))this.line++;if(matchesKey(data,'up'))this.line=Math.max(0,this.line-1);if(matchesKey(data,'pageDown'))this.line+=10;if(matchesKey(data,'pageUp'))this.line=Math.max(0,this.line-10);return;}
   if(matchesKey(data,'up'))this.selected=Math.max(0,this.selected-1);if(matchesKey(data,'down'))this.selected=Math.min(this.page.items.length-1,this.selected+1);

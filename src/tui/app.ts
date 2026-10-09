@@ -1,4 +1,6 @@
 import {ImproveView} from './improve.js';
+import {ImproveSelectionView} from './improve-selection.js';
+import {submitImproveDecision,resumeImproveDecision,restoreImproveSuggestion,type ImproveDecision} from '../improve-decisions.js';
 import {validateImproveRequest,type ImproveRequest} from '../improve.js';
 import { readCompactions } from '../compaction.js';
 import { homedir } from 'node:os';
@@ -21,7 +23,7 @@ import { TerminalWidthGate } from './width-gate.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
-const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['metrics','任务验收与双时钟（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实'],['improve','受限分析（需声明范围和预算）'],['improves','查看 improve 报告（只读）']] as const;
+const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['metrics','任务验收与双时钟（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实'],['improve','受限分析（需声明范围和预算）'],['improves','查看 improve 报告（只读）'],['improve-select','结构化逐项选择与汇总提交'],['improve-suppressions','查看建议抑制'],['improve-restore','JSON明确恢复建议'],['improve-continue','JSON明确继续独立未跑项']] as const;
 const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed','compaction.generated','compaction.finished'];
 const completion:AutocompleteProvider={
   triggerCharacters:['/'],
@@ -88,11 +90,12 @@ export class ReadOnlyTui {
   private lastText='';
   private confirmation?:{key:string;at:number};
   private followChord=false;
-  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'metrics';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
+  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
   private historyView?:HistoryView;
   private metricsView?:MetricsView;
   private evalView?:EvalView;
   private improveView?:ImproveView;
+  private improveSelectionView?:ImproveSelectionView;
   private storageView?:StorageView;
   private hidePanel?:()=>void;
   private pendingRefresh=false;
@@ -300,6 +303,15 @@ export class ReadOnlyTui {
     else if(command==='/compact')void this.compact();
     else if(command==='/compactions')this.openPanel('compaction');
     else if(command==='/improves'||command.startsWith('/improves ')){try{this.improveView=new ImproveView(this.options.dataRoot,command.slice(10).trim()||undefined);this.openPanel('improve');}catch(error){this.notice=`improve 报告不可读取：${String(error)}`;}}
+    else if(command==='/improve-suppressions'){try{this.improveView=new ImproveView(this.options.dataRoot,undefined,true);this.openPanel('improve');}catch(error){this.notice=String(error);}}
+    else if(command.startsWith('/improve-restore ')||command.startsWith('/improve-continue ')){
+      if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许新决定';return true;}
+      try{const action=command.startsWith('/improve-restore ')?'restore':'continue',spec=JSON.parse(command.slice(command.indexOf(' ')+1));this.phase='running';this.controller=new AbortController();this.cancellation='exit';const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:this.options.dataRoot}):resumeImproveDecision({...spec,dataRoot:this.options.dataRoot,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
+    }
+    else if(command==='/improve-select'||command.startsWith('/improve-select ')){
+      if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';return true;}
+      try{const template=JSON.parse(command.slice(16).trim()) as ImproveDecision;this.improveSelectionView=new ImproveSelectionView(this.options.dataRoot,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
+    }
     else if(command==='/improve'||command.startsWith('/improve '))void this.improve(command.slice(8).trim());
     else return false;
     return true;
@@ -314,6 +326,13 @@ export class ReadOnlyTui {
     const targetRunId=this.result?.improve?.runId===this.runId?this.result.improve.target.runId:this.runId;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
     this.notice=`improve 分析中 · 目标 ${targetRunId}；默认不选中任何候选`;
     this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);this.notice=`improve ${result.improve?.state??result.status} · ${request.id}；/improves 查看；没有执行候选`;}).catch(error=>{this.notice=`分析未完成：${String(error)}`;}).finally(()=>this.finished());this.tui.requestRender();
+  }
+  private async submitImproveChoice(decision:ImproveDecision){
+    if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery)throw Error('IMPROVE_SELECTION_CURRENT_STATE_BLOCKED');
+    this.phase='running';this.controller=new AbortController();this.cancellation='exit';
+    const promise=submitImproveDecision({dataRoot:this.options.dataRoot,decision,signal:this.controller.signal});
+    this.active=promise.then(value=>{this.notice=`决定 ${value.id} · ${value.state}；正式目标未写回、未启用`}).catch(error=>{this.notice=`决定未完成：${String(error)}`;}).finally(()=>this.finished());
+    return promise;
   }
   private async compact() {
     if(this.historyWindow||this.viewingRecovery){this.notice='只读历史/恢复视图不能压缩；先返回活动会话并完成恢复核对';this.tui.requestRender();return;}
@@ -538,13 +557,13 @@ export class ReadOnlyTui {
     this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
     this.openPanel('detail',record);
   }
-  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'metrics',ref?:RecordReference) {
+  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics',ref?:RecordReference) {
     this.closePanel();this.confirmation=undefined;
     this.panel={kind,ref,offset:0,previous:[],line:0,raw:'',next:null};
     if(kind==='detail')this.loadDetail();
     const component:Component={invalidate(){},render:width=>this.panelLines(width),handleInput:data=>this.panelInput(data),handleMouse:event=>{
       if(!this.panel)return;
-      if(event.type==='wheel'){if(this.panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else this.panel.line=Math.max(0,this.panel.line+(event.wheelDelta??0));return {handled:true};}
+      if(event.type==='wheel'){if(this.panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else this.panel.line=Math.max(0,this.panel.line+(event.wheelDelta??0));return {handled:true};}
       if(event.type==='click'&&this.panel.kind==='actions'){
         const index=event.y+this.panel.line-1;
         if(commands[index]){const command=commands[index][0];this.closePanel();this.command(`/${command}`);return {handled:true};}
@@ -554,6 +573,7 @@ export class ReadOnlyTui {
   }
   private panelLines(width:number) {
     const panel=this.panel;if(!panel)return[];
+    if(panel.kind==='improve-selection'){const lines=this.improveSelectionView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='improve'){const lines=this.improveView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval'){const lines=this.evalView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='storage') {const lines=this.storageView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
@@ -561,7 +581,7 @@ export class ReadOnlyTui {
     if(panel.kind==='history') {const lines=this.historyView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     let text:string;
     if(panel.kind==='actions')text='操作菜单（保留输入草稿）\n'+commands.map(([name,description],index)=>`${panel.offset===index?'›':' '} /${name}  ${description}`).join('\n');
-    else if(panel.kind==='help')text='帮助\nEnter 新任务；忙时 Enter 补充当前任务\nCtrl+X → Enter 后续请求\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 活动会话\n/older /newer 只读窗口；/restore 草稿\n/improve JSON 范围与预算受限分析；/improves 只读报告\n/eval 固定评估报告（只读）\n/history 历史查询（只读）\n/metrics [JSON] 三率与双时钟（只读）\n/acceptance JSON 可选明确补记/纠正\n/compact 压缩当前上下文；/compactions 查看结果\n/queue 队列，w 撤回，r 明确重新接入\n/recover [runId] 恢复面板，e 结束旧工作\n/decide JSON 与 headless 同一结构化决定\n/stop 中止；/exit 退出；Esc 关闭弹层';
+    else if(panel.kind==='help')text='帮助\nEnter 新任务；忙时 Enter 补充当前任务\nCtrl+X → Enter 后续请求\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 活动会话\n/older /newer 只读窗口；/restore 草稿\n/improve JSON 范围与预算受限分析；/improves 只读报告\n/improve-select JSON 逐项选择、s汇总、Enter提交\n/eval 固定评估报告（只读）\n/history 历史查询（只读）\n/metrics [JSON] 三率与双时钟（只读）\n/acceptance JSON 可选明确补记/纠正\n/compact 压缩当前上下文；/compactions 查看结果\n/queue 队列，w 撤回，r 明确重新接入\n/recover [runId] 恢复面板，e 结束旧工作\n/decide JSON 与 headless 同一结构化决定\n/stop 中止；/exit 退出；Esc 关闭弹层';
     else if(panel.kind==='compaction')text=this.compactionText();
     else if(panel.kind==='queue')text=this.queueText();
     else if(panel.kind==='recovery')text=this.recoveryText();
@@ -576,9 +596,10 @@ export class ReadOnlyTui {
   private panelInput(data:string) {
     const panel=this.panel;if(!panel)return;
     this.confirmation=undefined;
-    if(matchesKey(data,'escape')||matchesKey(data,'ctrl+o')) {if(panel.kind==='storage'&&this.storageView?.inProgress)return;this.closePanel();return;}
+    if(matchesKey(data,'escape')||matchesKey(data,'ctrl+o')) {if(panel.kind==='storage'&&this.storageView?.inProgress)return;if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
     if(matchesKey(data,'ctrl+l')){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
-    if(matchesKey(data,'ctrl+c')||matchesKey(data,'ctrl+d'))return;
+    if(matchesKey(data,'ctrl+c')||matchesKey(data,'ctrl+d')){if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
+    if(panel.kind==='improve-selection'){void this.improveSelectionView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='improve'){this.improveView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='eval'){this.evalView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='storage') {void this.storageView?.handleInput(data);this.tui.requestRender();return;}

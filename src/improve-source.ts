@@ -17,7 +17,7 @@ export function redactAnalysisText(text:string) {
 function inside(root:string,path:string){const rel=relative(root,path);return rel!==''&&!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith(`..${sep}`);}
 /** Open only declared ordinary files, with bounded reads and alias checks before/after acquisition.
  * The model has no filesystem capability: all acquired views are frozen before scheduling. */
-function sourceBytes(root:string,path:string,max=262144,compiler=false) {
+export function sourceBytes(root:string,path:string,max=262144,compiler=false) {
  if(isAbsolute(path)||!path||path.split(/[\\/]/).some(p=>p==='..'||p==='.'||!p)||/(^|\/)\.git(?:\/|$)/.test(path)||!compiler&&/(^|\/)node_modules(?:\/|$)/.test(path))throw Error('IMPROVE_SOURCE_PATH_DENIED');
  const absolute=join(root,path);if(!inside(root,absolute))throw Error('IMPROVE_SOURCE_PATH_DENIED');
  let part=root;for(const segment of path.split('/')){part=join(part,segment);if(lstatSync(part).isSymbolicLink())throw Error('IMPROVE_SOURCE_ALIAS_DENIED');}
@@ -25,7 +25,7 @@ function sourceBytes(root:string,path:string,max=262144,compiler=false) {
  const fd=openSync(absolute,constants.O_RDONLY|constants.O_NOFOLLOW);
  try {const before=fstatSync(fd);if(!before.isFile()||before.size>max)throw Error('IMPROVE_SOURCE_SIZE_OR_TYPE_DENIED');const bytes=readFileSync(fd),after=fstatSync(fd),named=lstatSync(absolute);if(bytes.length>max||before.size!==after.size||before.mtimeMs!==after.mtimeMs||named.dev!==after.dev||named.ino!==after.ino||realpathSync(absolute)!==absolute)throw Error('IMPROVE_SOURCE_CHANGED');return bytes;}finally{closeSync(fd);}
 }
-function verifySelfSource(root:string) {
+export function verifySelfSource(root:string) {
  const raw=readFileSync(join(installation,'dist/execution/source-build.json'));
  const manifest=JSON.parse(raw.toString());
  if(manifest.version!==1||!Array.isArray(manifest.inputs)||!manifest.inputs.length||!Array.isArray(manifest.outputs)||!manifest.outputs.length||!Array.isArray(manifest.compiler)||!manifest.compiler.length||manifest.inputs.length>10000||manifest.outputs.length>10000||manifest.compiler.length>10000)throw Error('SELF_SOURCE_BUILD_MANIFEST_INVALID');
