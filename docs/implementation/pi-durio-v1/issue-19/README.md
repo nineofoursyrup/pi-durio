@@ -48,3 +48,9 @@
 首红日志始终保留：最初去重断言、恢复报告自失效、旧队列 barrier fixture、编译错误及冻结重接来源错误都不覆盖。修正后新增日志另存，不改写过去结果。
 
 付费 provider 未运行；真实模型推理能力未验证。最终完整 macOS Terminal compact 交互由 #31 聚合，本票不将 synthetic TUI 或 CLI 示范称为人工原生验收。用户指定 agent 配置为 `gpt-6-astra` / `xhigh`；可记录请求配置，后端实际服务身份无法由 agent 自证。
+
+### Dispatch 事实补充
+
+`model.fetch-intent` 保存 SDK 交给 host gate 的 payload；`model.dispatch` 仅在实际进入所配置 transport 后保存 `transportEntered=true`。预算或 guard 在入口前拒绝时，`model.dispatch-failed` 保存原始宿主原因和明确未派发事实，即使 Pi 将异常规范化为 `Connection error` 也不丢失原因。`requestAllocations` 对该请求标记 `not-dispatched` / `not-applicable`，不会制造一笔未报告的实际调用；进入 transport 后失败仍 unknown。
+
+旧版无 `transportEntered` 的记录保持原文，以 `unverifiedDispatchIntents` 暴露不确定性。Runtime 的 transport 可能是 eval 中介通道，其入口事实不证明外层 provider 已派发；正式 eval 请求/费用仍由 #21 可信外层记录计算。中止发生在原文保留阶段的检查现在使用真实的 `model.fetch-intent` 边界，既有 stop 语义没有变宽。

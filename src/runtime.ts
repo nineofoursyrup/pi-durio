@@ -11,7 +11,7 @@ import { Harness, createRegistry, defineExtension, GenerationTask, hook, type Co
 import { createReadTool, createWriteTool, createEditTool, createBashTool } from '@earendil-works/pi-durable/tools';
 import { openNodeSqliteStorage } from '@earendil-works/pi-durable/storage/sqlite/node';
 import { Evidence, readObject, readQueue, type BlobRef, type QueueItemFact, type ControlTarget, type FaultInjector } from './evidence.js';
-import { TaskControl, RunControls, findQueueItem, validControlId, previousQueueDecision, type QueueDecision, type ControlBinding } from './control.js';
+import { TaskControl, RunControls, findQueueItem, findCoalescedControl, validControlId, previousQueueDecision, type QueueDecision, type ControlBinding } from './control.js';
 import { acquireOwner } from './ownership.js';
 import { preflight, inspectSession } from './preflight.js';
 import { readEnvironment } from './read-environment.js';
@@ -359,8 +359,9 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     if (evidence) try { record(kind, data); } catch { /* Keep cleanup running after original-record failure. */ }
   };
   let requests = recovery?.previousRequests ?? 0, responses = 0, usageReports = 0;
+  const notDispatchedAttempts=new Set<string>();
   const previousUsage=maintenanceRecords.findLast(r=>r.kind==='usage.projection')?.data as any;
-  const completeness=()=>{const current=usageReports===requests?'known':usageReports?'partial':'unknown';if(!maintenance)return current;if(previousUsage?.completeness==='known'&&current==='known')return 'known';return previousUsage?.completeness==='known'||previousUsage?.completeness==='partial'||usageReports?'partial':'unknown';};
+  const completeness=()=>{const current=usageReports===requests-notDispatchedAttempts.size?'known':usageReports?'partial':'unknown';if(!maintenance)return current;if(previousUsage?.completeness==='known'&&current==='known')return 'known';return previousUsage?.completeness==='known'||previousUsage?.completeness==='partial'||usageReports?'partial':'unknown';};
   let httpStatus: number | undefined;
   let usage: UsageState = { models: {}, tools: {} };
   let answer: string | undefined;
@@ -449,7 +450,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
         guard();
         if (++requests > 8) { requests--; throw new Error('REQUEST_LIMIT: this task permits eight provider attempts'); }
         const attemptId = randomUUID();
-        let hasUsage = false, responseRecorded = false;
+        let hasUsage = false, responseRecorded = false, attemptDispatched = false;
         const purpose=requestPurpose.getStore()??'generation';
         const completed=(message:AssistantMessage)=>{
           if(responseRecorded)return;responseRecorded=true;responses++;if(hasUsage)usageReports++;
@@ -459,11 +460,30 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
         const stream = actualStream(requestedModel, context, {
           ...streamOptions, apiKey, fetch: async (url, init) => {
             guard();
-            record('model.dispatch', { attemptId, url: String(url), method: init?.method, body: typeof init?.body === 'string' ? init.body : null, boundary: 'fetch JSON request body; authentication headers excluded' });
-            guard();
-            const response = options.providerBoundary
-              ? await dispatchProvider({ ...options.providerBoundary, purpose, ...(maintenance?{operationId:`maintenance:${maintenance.requestId}`} :{}),transport: options.transport ?? options.providerBoundary.transport }, url, init)
-              : await (options.transport ?? globalThis.fetch)(url, init);
+            const request={attemptId,purpose,url:String(url),method:init?.method,body:typeof init?.body==='string'?init.body:null};
+            record('model.fetch-intent',{...request,boundary:'SDK fetch intent before host admission; not evidence of dispatch'});
+            let entered=false;
+            const transport:typeof fetch=async(target,requestInit)=>{
+              guard();entered=true;attemptDispatched=true;notDispatchedAttempts.delete(attemptId);
+              let pending:Promise<Response>;
+              try {pending=(options.transport??options.providerBoundary?.transport??globalThis.fetch)(target,requestInit);}
+              catch(error){record('model.dispatch',{...request,transportEntered:true,boundary:'configured host transport entered; provider wire dispatch is not proven here'});throw error;}
+              // Preserve the actual entry even for a synchronous transport failure. Intent bytes were saved before this call.
+              void pending.catch(()=>{});
+              record('model.dispatch',{...request,transportEntered:true,boundary:'configured host transport entered; provider wire dispatch is not proven here'});
+              return pending;
+            };
+            let response:Response;
+            try {
+              guard();
+              response=options.providerBoundary
+                ?await dispatchProvider({...options.providerBoundary,purpose,...(maintenance?{operationId:`maintenance:${maintenance.requestId}`} :{}),transport},url,init)
+                :await transport(url,init);
+            }catch(error){
+              if(!attemptDispatched)notDispatchedAttempts.add(attemptId);
+              record('model.dispatch-failed',{...request,dispatched:entered,attemptDispatched,reason:safeError(error),boundary:entered?'configured transport entered; external outcome unknown':'trusted host failed before configured transport entry'});
+              throw error;
+            }
             httpStatus = response.status;
             record('model.http', { attemptId, status: response.status });
             return response;
@@ -584,7 +604,13 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     if(maintenance){
       if(maintenance.item){const receipt=(status:QueueItemFact['status'],reason:string)=>{const source=new Evidence(dataRoot,maintenance.item!.target.runId,options.fault);try{source.append('control.receipt',{requestId:maintenance.requestId,status,reason});}finally{source.close();}};
         receipt('dispatching','Saved compaction dispatch; actual source is fixed at execution');
-        compactBinding={target:maintenance.item.target,cancelCompaction:async input=>{validControlId(input.id);if(JSON.stringify(input.target)!==JSON.stringify(maintenance.item!.target)||input.taskId!==compactTask)throw Error('CONTROL_TARGET_CHANGED');record('compaction.cancel-decision',input);return compactions!.cancel(compactTask);},submit:async input=>{if(input.kind==='compact'&&JSON.stringify(input.target)===JSON.stringify(maintenance.item!.target))return findQueueItem(dataRoot,maintenance.requestId)!;throw Error('COMPACTION_BUSY');},withdraw:async decision=>{
+        compactBinding={target:maintenance.item.target,cancelCompaction:async input=>{validControlId(input.id);if(JSON.stringify(input.target)!==JSON.stringify(maintenance.item!.target)||input.taskId!==compactTask)throw Error('CONTROL_TARGET_CHANGED');record('compaction.cancel-decision',input);return compactions!.cancel(compactTask);},submit:async input=>{
+          validControlId(input.id);if(!input.input.trim()||Buffer.byteLength(input.input)>32768)throw Error('INPUT_LIMIT: provide 1–32768 bytes');
+          const alias=findCoalescedControl(dataRoot,input.id);if(alias){if(JSON.stringify(alias.input)!==JSON.stringify(input))throw Error('CONTROL_ID_CONFLICT');return findQueueItem(dataRoot,alias.requestId)!;}
+          const existing=findQueueItem(dataRoot,input.id);if(existing){if(existing.kind!==input.kind||existing.input!==input.input||JSON.stringify(existing.target)!==JSON.stringify(input.target))throw Error('CONTROL_ID_CONFLICT');return existing;}
+          if(input.kind!=='compact'||JSON.stringify(input.target)!==JSON.stringify(maintenance.item!.target))throw Error('COMPACTION_BUSY');
+          guard();record('control.coalesced',{id:input.id,requestId:maintenance.requestId,input});return findQueueItem(dataRoot,maintenance.requestId)!;
+        },withdraw:async decision=>{
           const current=findQueueItem(dataRoot,maintenance.requestId)!;if(decision.action!=='withdraw'||decision.requestId!==maintenance.requestId||JSON.stringify(decision.target)!==JSON.stringify(current.target))throw Error('CONTROL_TARGET_CHANGED');
           if(current.receipt.seq!==decision.receiptSeq)throw Error('STALE_CONTROL_DECISION');record('control.decision',{decision});
           if(compactTask){const state=await compactions!.cancel(compactTask);receipt(state?.state==='applied'?'applied':'withdrawn',state?.state==='applied'?'Summary already committed; no rollback':'Cancelled only this compaction task or unplaced summary');}
@@ -638,7 +664,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       const last = context.messages.findLast((m): m is AssistantMessage => m.role === 'assistant');
       if (last) answer = last.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
 
-      record('usage.projection', { source: 'pi.usage', conversationId: conversation.id, value: usage, reportedAttempts: usageReports, requests, completeness: completeness(), ...(maintenance?{maintenanceRequestId:maintenance.requestId,allocation:'session-cumulative; manual attempts are maintenance'}:{}) });
+      record('usage.projection', { source: 'pi.usage', conversationId: conversation.id, value: usage, reportedAttempts: usageReports, requests:requests-notDispatchedAttempts.size, attempts:requests, notDispatchedAttempts:[...notDispatchedAttempts], completeness: completeness(), ...(maintenance?{maintenanceRequestId:maintenance.requestId,allocation:'session-cumulative; manual attempts are maintenance'}:{}) });
     }
   } catch (error) { if (!stopped || failure) failure ??= safeError(error); }
   finally {

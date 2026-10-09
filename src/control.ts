@@ -9,7 +9,7 @@ export function findQueueItem(root:string,id:string):QueueItemFact|undefined {
   let after:number|undefined,through:number|undefined;
   do {const page=readQueue(root,{after,through,limit:200});const found=page.items.find(item=>item.requestId===id);if(found)return found;after=page.next??undefined;through=page.through;}while(after);
 }
-function coalesced(root:string,id:string):{id:string;requestId:string;input:ControlInput}|undefined {
+export function findCoalescedControl(root:string,id:string):{id:string;requestId:string;input:ControlInput}|undefined {
   const db=openHostReadonly(root);try{for(const row of db.prepare("SELECT body FROM records WHERE kind='control.coalesced' ORDER BY seq").iterate()){const data=JSON.parse(readObject(root,JSON.parse(String(row.body))).toString());if(data.id===id)return data;}return undefined;}finally{db.close();}
 }
 export function validControlId(value:string) {if(!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(value))throw Error('INVALID_CONTROL_ID');}
@@ -65,7 +65,7 @@ export class RunControls {
     validControlId(input.id);
     if(!input.input.trim()||Buffer.byteLength(input.input)>32768)throw Error('INPUT_LIMIT: provide 1–32768 bytes');
     if(!['steer','follow-up','compact','improve'].includes(input.kind))throw Error('INVALID_CONTROL_KIND');
-    const alias=coalesced(this.options.root,input.id);if(alias){if(!same(alias.input,input))throw Error('CONTROL_ID_CONFLICT');return this.fact(alias.requestId);}
+    const alias=findCoalescedControl(this.options.root,input.id);if(alias){if(!same(alias.input,input))throw Error('CONTROL_ID_CONFLICT');return this.fact(alias.requestId);}
     const existing=findQueueItem(this.options.root,input.id);
     if(existing){if(existing.kind!==input.kind||existing.input!==input.input||!same(existing.target,input.target))throw Error('CONTROL_ID_CONFLICT');return existing;}
     if(!same(input.target,this.target))throw Error('CONTROL_TARGET_CHANGED');

@@ -73,6 +73,7 @@ test('cancelling only the running manual task preserves the completed source and
  assert.equal(result.compaction?.state,'cancelled');assert.equal(calls,1);assert.equal(readAcceptedTasks(paths.dataRoot).tasks.length,1);
  const facts=recoveryRecords(paths.dataRoot,initial.runId);assert.equal((facts.find(r=>r.kind==='run.closed')!.data as any).status,'completed');assert.ok(facts.some(r=>r.kind==='model.response'&&(r.data as any).completeness==='partial'));
  assert.equal(readQueue(paths.dataRoot).items.find(i=>i.requestId==='cancel-idle')!.status,'withdrawn');
+ const {queryUsage}=await import('../src/usage-query.js');const allocation=queryUsage(paths.dataRoot,[initial.runId]).requestAllocations.find(a=>a.maintenanceRequestId==='cancel-idle')!;assert.equal(allocation.dispatchState,'dispatched');assert.equal(allocation.completeness,'unknown');
 });
 
 test('manual interruption is frozen across reopen and ending its source never wakes the old task',async()=>{
@@ -169,7 +170,7 @@ test('frozen unexecuted compact reattaches to the proven completed follow-up con
  assert.equal(item.status,'frozen');assert.notEqual(done.runId,item.target.runId);
  await decideQueue({...paths,runId:barrier.target.runId,decision:{id:'remove-reattach-barrier',requestId:barrier.requestId,target:barrier.target,receiptSeq:barrier.receipt.seq,action:'withdraw'}});
  const summary=scriptedTransport([]),request={...paths,runId:item.target.runId,authorization:{workspace:paths.workspace,mode:'offline' as const,tools:['read','write','edit','bash'] as const},decision:{id:'explicit-reattach-compact',requestId:item.requestId,target:item.target,receiptSeq:item.receipt.seq,action:'reattach' as const},transport:summary.fetch};
- const result=await decideQueue(request);assert.equal(result.status,'completed');assert.ok('compaction' in result&&result.compaction?.state==='applied');assert.ok('runId' in result&&result.runId===done.runId);assert.match(JSON.stringify(summary.calls),/REATTACHED FOLLOWUP/);
+ const result=await decideQueue(request);assert.equal(result.status,'completed');assert.ok('compaction' in result&&result.compaction?.state==='applied');assert.ok('runId' in result&&result.runId===done.runId);assert.match(JSON.stringify(summary.calls),/\[User\]: FIRST/);
  assert.equal((await decideQueue(request)).status,'applied');assert.equal(summary.calls.length,1);assert.equal(readAcceptedTasks(paths.dataRoot).tasks.length,2);
 });
 
@@ -191,6 +192,17 @@ test('manual maintenance keeps the original dispatch capability and exhausted pe
  const summary=scriptedTransport([]),result=await compactContext({...paths,runId:initial.runId,requestId:'budget-maintenance',authorization:{workspace:paths.workspace,mode:'offline',tools:['read','write','edit','bash']},transport:summary.fetch,providerBoundary});
  assert.equal(result.status,'failed');assert.equal(summary.calls.length,0);assert.equal(dispatched,1);assert.equal(budget.snapshot().requests,1);
  const facts=recoveryRecords(paths.dataRoot,initial.runId),operation=facts.findLast(r=>r.kind==='compaction.started')!.data as any;
- assert.equal(operation.providerOperation.parentOperationId,'original-operation');assert.equal(operation.providerOperation.operationId,'maintenance:budget-maintenance');assert.equal(operation.providerOperation.budgetId,'original-budget');assert.match(JSON.stringify(facts),/BUDGET_REQUEST_LIMIT/);
+ assert.equal(operation.providerOperation.parentOperationId,'original-operation');assert.equal(operation.providerOperation.operationId,'maintenance:budget-maintenance');assert.equal(operation.providerOperation.budgetId,'original-budget');assert.throws(()=>budget.check(),/BUDGET_REQUEST_LIMIT/);assert.equal(budget.snapshot().knownTokens,14);
+ assert.equal(facts.filter(r=>r.kind==='model.dispatch').length,1,'a denied attempt never reaches the actual transport');
+ const denied=facts.findLast(r=>r.kind==='model.dispatch-failed')?.data as any;assert.equal(denied.dispatched,false);assert.equal(denied.reason,'BUDGET_REQUEST_LIMIT');
+ const {queryUsage}=await import('../src/usage-query.js');const usage=queryUsage(paths.dataRoot,[initial.runId]);assert.equal(usage.items[0].requestCoverage?.dispatches,1);assert.equal(usage.items[0].completeness,'known');
+ const allocation=usage.requestAllocations.find(a=>a.maintenanceRequestId==='budget-maintenance') as any;assert.equal(allocation.dispatchState,'not-dispatched');assert.equal(allocation.completeness,'not-applicable');assert.equal(allocation.dispatchFailure.reason,'BUDGET_REQUEST_LIMIT');
  }finally{ledger.close();}
+});
+
+test('duplicates admitted during manual summary generation retain their stable alias and input identity',async()=>{
+ const {compactContext}=await import('../src/runtime.js');const paths=await fixture(),initial=await longSource(paths),control=new TaskControl(),summary=scriptedTransport([]);let duplicate:Promise<void>|undefined;
+ const transport:typeof fetch=async(url,init)=>{duplicate=(async()=>{const target=control.target()!,input={id:'running-duplicate',kind:'compact' as const,input:'compact',target};assert.equal((await control.submit(input)).requestId,'running-canonical');assert.equal((await control.submit(input)).requestId,'running-canonical');await assert.rejects(control.submit({...input,input:'conflicting retry'}),/CONTROL_ID_CONFLICT/);})();await duplicate;return summary.fetch(url,init);};
+ const result=await compactContext({...paths,runId:initial.runId,requestId:'running-canonical',authorization:{workspace:paths.workspace,mode:'offline',tools:['read','write','edit','bash']},control,transport});await duplicate;assert.equal(result.compaction?.state,'applied');assert.equal(summary.calls.length,1);
+ assert.equal(recoveryRecords(paths.dataRoot,initial.runId).filter(r=>r.kind==='control.coalesced'&&(r.data as any).id==='running-duplicate').length,1);assert.equal(readQueue(paths.dataRoot).items.filter(i=>i.kind==='compact').length,1);
 });
