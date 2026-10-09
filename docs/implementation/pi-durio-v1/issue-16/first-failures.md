@@ -7,3 +7,4 @@
 - 真实 Terminal 自动入口首次失败：`cua.getApp("Terminal")` 被安全策略拒绝。保留完整拒绝文本；无替代工具绕过，IME/复制/键位/缩放/退出恢复仍 BLOCKED。人工 runner 没有填写用户观察。
 
 - `candidate-r1` 是 ee6d8bd 的首次独立安装 smoke，仅保留历史，不交给使用者作为正式验收候选。协调者发现原主会话暴露底层事件和重复回答；后续收口为自然对话/工具状态投影，原始字段留在详情。`tui-conversation-first.log` 与 `tui-conversation-r2.log` 保留修订后 6/6 通过，补了不泄露事件标签/重复同一回复的断言。
+- r1 独立安装的非 TTY 启动正确拒绝，但 stdout 泄出了 28 字节终端恢复控制码。`non-tty-first-failure.log` 固定了回归失败；修复为仅对已开始的终端进行恢复，`non-tty-fixed.log` 通过且管道 stdout 为空。原 r1 制品与失败输出保留。

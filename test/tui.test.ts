@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import { stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
 import { demoTransport } from '../src/offline.js';
@@ -27,12 +28,18 @@ function fixture(override?: typeof fetch) {
   return {root,workspace,terminal,transport,app,screen};
 }
 
+test('non-terminal CLI rejection does not emit terminal modes into a pipeline', () => {
+  const child=spawnSync(process.execPath,['dist/src/cli.js','tui','--workspace','test/fixtures/project','--offline-demo'],{encoding:'utf8'});
+  assert.equal(child.status,1);assert.match(child.stderr,/TUI_REQUIRES_TERMINAL/);assert.equal(child.stdout,'');
+});
+
 test('editor keeps graphemes, multiline and recoverable drafts; overlays consume exits and double-key confirmation expires', async () => {
   const f=fixture(); const key=(s:string)=>f.terminal.input(s);
   try {
     key('A👩‍💻中B'); key('\x01'); key('\x1b[C'); key('\x04');
     assert.match(f.screen(),/A中B/);
     key('\x03'); assert.match(f.screen(),/草稿已保留/);
+    key('暂不受理');key('\x18');key('\r');assert.equal(f.transport.calls.length,0);assert.match(f.screen(),/暂不受理/);key('\x03');
     key('x'); key('\x03'); assert.equal(f.terminal.stopped,false);
     key('/restore'); key('\r'); assert.match(f.screen(),/x/);
     key('\x03'); key('/help'); key('\r'); key('\x04'); key('\x04'); assert.equal(f.terminal.stopped,false);

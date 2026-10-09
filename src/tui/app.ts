@@ -65,6 +65,7 @@ export class ReadOnlyTui {
   private savedDraft?:string;
   private lastText='';
   private confirmation?:{key:string;at:number};
+  private followChord=false;
   private panel?:{kind:'help'|'exit'|'detail'|'actions';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
   private hidePanel?:()=>void;
   private pendingRefresh=false;
@@ -118,6 +119,7 @@ export class ReadOnlyTui {
     this.terminal.start=(input,resize)=>originalStart(data=>{
       // Runs before pi-tui's own viewport listener, which consumes mouse/focus/page keys.
       if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+d')) this.confirmation=undefined;
+      if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+x')&&!matchesKey(data,'enter'))this.followChord=false;
       input(data);
     },()=>{this.confirmation=undefined;resizeLayout();resize();});
     resizeLayout();
@@ -154,6 +156,7 @@ export class ReadOnlyTui {
   private input(data:string) {
     const ctrlC=matchesKey(data,'ctrl+c'),ctrlD=matchesKey(data,'ctrl+d');
     if(isKeyRelease(data)||((ctrlC||ctrlD)&&isKeyRepeat(data)))return {consume:true};
+    if(this.followChord&&matchesKey(data,'enter')){this.followChord=false;this.notice='后续请求尚未接入；草稿保留，未受理也不会执行';this.tui.requestRender();return {consume:true};}
     if(!ctrlC&&!ctrlD) this.confirmation=undefined;
     if(data==='\x1b[I'||data==='\x1b[O') {this.confirmation=undefined;return {consume:true};}
     if(this.panel) {this.panelInput(data);return {consume:true};}
@@ -168,7 +171,7 @@ export class ReadOnlyTui {
     if(matchesKey(data,'ctrl+l')) {this.tui.requestRender(true);return {consume:true};}
     if(matchesKey(data,'f2')) {this.openPanel('actions');return {consume:true};}
     if(matchesKey(data,'ctrl+o')) {this.openDetail(this.records.at(-1));return {consume:true};}
-    if(matchesKey(data,'ctrl+x')) {this.notice='follow-up 尚未接入；文本保留为草稿，不会执行';this.tui.requestRender();return {consume:true};}
+    if(matchesKey(data,'ctrl+x')) {this.followChord=true;this.notice='follow-up 尚未接入；文本保留为草稿，不会执行';this.tui.requestRender();return {consume:true};}
     if(matchesKey(data,'escape')) {if(this.phase==='running')this.stop();return {consume:true};}
     if(ctrlC||ctrlD) {
       const key=ctrlC?'ctrl+c':'ctrl+d';
@@ -421,10 +424,12 @@ export class ReadOnlyTui {
     try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
     try {await this.active;} finally {
       this.stopped=true;if(this.timer)clearInterval(this.timer);this.removeInput?.();for(const remove of this.removeSignals)remove();
-      try {await this.terminal.drainInput(150,30);} catch(error){this.failure??=`终端 drain 失败：${String(error)}`;}
-      try {this.terminal.write('\x1b[?1004l');this.tui.stop({preserveScreen:true});}
-      catch(error){this.failure??=`终端清理失败：${String(error)}`;try{this.terminal.stop();}catch{/* Preserve the cleanup failure. */}}
-      finally {try{this.terminal.showCursor();}catch{/* Earlier failure remains visible in the exit result. */}}
+      if(this.started) {
+        try {await this.terminal.drainInput(150,30);} catch(error){this.failure??=`终端 drain 失败：${String(error)}`;}
+        try {this.terminal.write('\x1b[?1004l');this.tui.stop({preserveScreen:true});}
+        catch(error){this.failure??=`终端清理失败：${String(error)}`;try{this.terminal.stop();}catch{/* Preserve the cleanup failure. */}}
+        finally {try{this.terminal.showCursor();}catch{/* Earlier failure remains visible in the exit result. */}}
+      }
     }
     const result={result:this.result,error:this.failure,draftSaved};
     this.resolveClosed(result);return result;

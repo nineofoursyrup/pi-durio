@@ -23,7 +23,7 @@ async function main() {
     const exit = await runTui({ dataRoot, workspace: values.workspace, mode: values['offline-demo'] ? 'offline' : 'live', transport: values['offline-demo'] ? demoTransport().fetch : undefined });
     const result = exit.result;
     console.log(JSON.stringify({ tui: 'closed', runId: result?.runId, sessionId: result?.sessionId, status: result?.status ?? 'no-task', cleanup: result?.cleanup, usage: result?.usage.completeness ?? 'unknown', draftSaved: exit.draftSaved, error: exit.error?.slice(0,1024) }));
-    if (result) console.log(`Read back: pi-durio show --data-root ${JSON.stringify(dataRoot)} --run ${result.runId}`);
+    if (result) console.log(`Read back: pi-durio show --data-root '${dataRoot.replaceAll("'", "'\\''")}' --run ${result.runId}`);
     process.exitCode = exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : 0;
     return;
   }
