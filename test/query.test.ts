@@ -3,8 +3,46 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { Evidence } from '../src/evidence.js';
+import { spawn } from 'node:child_process';
+import { Evidence, openHostReadonly, readRun } from '../src/evidence.js';
 import { readRunRecords, readObjectRange, readTextPage } from '../src/query.js';
+
+test('a concurrent readonly viewer does not lose the next host evidence append', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'durio-query-writer-'));
+  const initial = new Evidence(root, 'initial');
+  initial.append('fixture', { initialized: true });
+  initial.close();
+  const reader = openHostReadonly(root);
+  reader.exec('BEGIN');
+  reader.prepare('SELECT seq FROM records').all();
+  const child = spawn(process.execPath, ['--input-type=module', '-e', `
+    import { Evidence } from ${JSON.stringify(new URL('../src/evidence.js', import.meta.url).href)};
+    process.stdout.write('attempting\\n');
+    const evidence = new Evidence(process.argv[1], 'writer');
+    evidence.append('probe', { accepted: true });
+    evidence.close();
+  `, root], { stdio: ['ignore', 'pipe', 'pipe'] });
+  let stderr = '';
+  child.stderr.on('data', chunk => { stderr += chunk; });
+  const completed = new Promise<number | null>((resolve, reject) => {
+    child.once('error', reject);
+    child.once('exit', resolve);
+  });
+  const timeout = setTimeout(() => child.kill('SIGKILL'), 5000);
+  try {
+    await new Promise<void>(resolve => child.stdout.once('data', () => resolve()));
+    // Another process is attempting to write while this readonly query still owns
+    // the short-lived shared lock. Keep the overlap explicit, not timing luck.
+    await new Promise(resolve => setTimeout(resolve, 150));
+    reader.exec('ROLLBACK');
+    assert.equal(await completed, 0, stderr);
+    assert.deepEqual((await readRun(root, 'writer')).records.map(row => row.data), [{ accepted: true }]);
+  } finally {
+    clearTimeout(timeout);
+    reader.close();
+    if (child.exitCode === null) child.kill('SIGKILL');
+  }
+});
 
 test('metadata windows and bounded originals preserve readonly identity, ordering and corruption errors', () => {
   const root = mkdtempSync(join(tmpdir(), 'durio-query-'));
