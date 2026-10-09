@@ -13,10 +13,20 @@ async function main() {
   } });
   const command = positionals[0];
   if (values.help || !command) {
-    console.log('pi-durio run --workspace PATH --prompt TEXT [--data-root PATH] [--offline-demo]\npi-durio show --run UUID [--data-root PATH] [--originals] [--after SEQ] [--limit N]\nrun defaults to DeepSeek/deepseek-flash at https://api.deepseek.com; DEEPSEEK_API_KEY is required.\n--offline-demo uses a deterministic README.md fixture transport, with no network or model inference.\nThis slice grants read only, files up to 256 KiB, at most 8 provider attempts. Old pending work blocks new execution.');
+    console.log('pi-durio run --workspace PATH --prompt TEXT [--data-root PATH] [--offline-demo]\npi-durio tui --workspace PATH [--data-root PATH] [--offline-demo]\npi-durio show --run UUID [--data-root PATH] [--originals] [--after SEQ] [--limit N]\nrun defaults to DeepSeek/deepseek-flash at https://api.deepseek.com; DEEPSEEK_API_KEY is required.\n--offline-demo uses a deterministic README.md fixture transport, with no network or model inference.\nThis slice grants read only, files up to 256 KiB, at most 8 provider attempts. Old pending work blocks new execution.');
     return;
   }
   const dataRoot = values['data-root'] ?? join(homedir(), 'Library', 'Application Support', 'pi-durio');
+  if (command === 'tui') {
+    if (!values.workspace || values.prompt) throw new Error('USAGE: tui requires --workspace; enter requests in the input area');
+    const { runTui } = await import('./tui/app.js');
+    const exit = await runTui({ dataRoot, workspace: values.workspace, mode: values['offline-demo'] ? 'offline' : 'live', transport: values['offline-demo'] ? demoTransport().fetch : undefined });
+    const result = exit.result;
+    console.log(JSON.stringify({ tui: 'closed', runId: result?.runId, sessionId: result?.sessionId, status: result?.status ?? 'no-task', cleanup: result?.cleanup, usage: result?.usage.completeness ?? 'unknown', draftSaved: exit.draftSaved, error: exit.error?.slice(0,1024) }));
+    if (result) console.log(`Read back: pi-durio show --data-root ${JSON.stringify(dataRoot)} --run ${result.runId}`);
+    process.exitCode = exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : 0;
+    return;
+  }
   if (command === 'show') {
     if (!values.run) throw new Error('USAGE: show requires --run');
     const page = await readRun(dataRoot, values.run, { after: values.after ? Number(values.after) : undefined, limit: values.limit ? Number(values.limit) : undefined });
