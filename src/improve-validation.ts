@@ -5,11 +5,13 @@ import {Evidence,digest,readObject} from './evidence.js';
 import type {ImproveCandidate} from './improve.js';
 import {verifiedImage,prepareEval,runEval,type PrepareEvalOptions,type PrepareComparison} from './eval/runner.js';
 import {installedRuntimeFiles,captureFiles,regularFiles} from './eval/store.js';
+import type {DefaultChange,TaskType} from './improve-defaults.js';
 
 export interface ContentChange {targetId:string;path:string;content:string}
 export interface DirectCheck {kind:'direct'|'regression'|'resource';program:string;timeoutMs:number;resource?:{direction:'lower'|'higher';delta:number;unit:string;basis:string}}
 export interface FreshCheck {
  kind:'fresh';installation:string;runtimeIdentity:string;
+ effectiveTask?:TaskType;
  files:{targetId:string;path:string}[];
  options:Omit<PrepareEvalOptions,'dataRoot'|'id'|'installation'|'comparison'|'image'>;
  comparison:Omit<PrepareComparison,'sides'>;
@@ -50,7 +52,7 @@ export function validateGroup(group:ValidationGroup,candidates:ImproveCandidate[
    if(!check.installation?.startsWith('/')||describeImproveRuntime(check.installation)!==check.runtimeIdentity)throw Error('IMPROVE_RUNTIME_CONTENT_DRIFT');
    const o=check.options;if(!o||!['offline','live'].includes(o.mode??'')||!o.budget||!['maxRequests','maxTokens','maxRequestTokens'].every(k=>Number.isSafeInteger((o.budget as any)[k])&&(o.budget as any)[k]>0)||Date.parse(o.budget.deadline)>Date.parse(deadline)||!Number.isFinite(Date.parse(o.budget.deadline))||!check.comparison||'sides' in check.comparison||!Array.isArray(check.files)||!check.files.length)throw Error('IMPROVE_FRESH_PLAN_INVALID');
    if(!Object.keys(o).every(k=>['purpose','mode','budget','trialTimeoutMs','gradingTimeoutMs','maxOutputTokens','cases','trials','paid','price'].includes(k)))throw Error('IMPROVE_FRESH_SCOPE_DENIED');
-   if(!Object.keys(check).every(k=>['kind','installation','runtimeIdentity','files','options','comparison'].includes(k)))throw Error('IMPROVE_FRESH_SCOPE_DENIED');
+   if(!Object.keys(check).every(k=>['kind','installation','runtimeIdentity','files','options','comparison','effectiveTask'].includes(k))||check.effectiveTask!==undefined&&!['coding','read'].includes(check.effectiveTask))throw Error('IMPROVE_FRESH_SCOPE_DENIED');
    for(const file of check.files)if(!group.changes.some(p=>p.targetId===file.targetId&&p.path===file.path)||!selected.some(c=>c.target.id===file.targetId&&['prompt-skill','agent-config'].includes(c.target.kind)))throw Error('IMPROVE_FRESH_BINDING_REQUIRED: fresh instructions must come from the declared temporary prompt/config content');
    if(group.changes.some(p=>!check.files.some(f=>f.targetId===p.targetId&&f.path===p.path)))throw Error('IMPROVE_FRESH_COMBINATION_BINDING_REQUIRED: every changed part of this combination must enter both fixed comparison sides');
    if(selected.some(c=>c.target.kind==='eval-asset'))throw Error('IMPROVE_GRADER_CANDIDATE_COMPARISON_DENIED');
@@ -71,7 +73,7 @@ export function validateGroup(group:ValidationGroup,candidates:ImproveCandidate[
 
 /** Host constructs only declared bytes; all candidate/check code runs in the
  * existing single VM boundary. Formal paths are never mounted into that VM. */
-export async function validateImproveGroup(options:{evidence:Evidence;decisionSource:string;decisionId:string;group:ValidationGroup;candidates:ImproveCandidate[];directory:string;deadline:string;signal:AbortSignal;record:(kind:string,data:unknown)=>string;guard:()=>void}){
+export async function validateImproveGroup(options:{evidence:Evidence;decisionSource:string;decisionId:string;group:ValidationGroup;candidates:ImproveCandidate[];defaults?:DefaultChange[];directory:string;deadline:string;signal:AbortSignal;record:(kind:string,data:unknown)=>string;guard:()=>void}){
  const {evidence:e,group,directory,record,guard}=options,root=e.root;
  await mkdir(directory,{recursive:false,mode:0o700});
  const candidates=options.candidates.filter(c=>group.candidateIds.includes(c.id)),targets=[...new Map(candidates.map(c=>[c.target.id,c.target])).values()];
@@ -93,7 +95,10 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
     if(describeImproveRuntime(check.installation)!==check.runtimeIdentity)throw Error('IMPROVE_RUNTIME_CONTENT_DRIFT');
     const instructions=(files:Map<string,Buffer>)=>check.files.map(f=>`[${f.targetId}/${f.path}]\n${files.get(`${f.targetId}/${f.path}`)!.toString('utf8')}`).join('\n\n');
     const dataRoot=join(checkDirectory,'eval-data'),id=`improve-${digest(`${options.decisionId}/${group.id}/${index}`).slice(0,24)}`;
-    const prepared=await prepareEval({...check.options,dataRoot,id,installation:check.installation,image:verifiedImage,comparison:{...check.comparison,sides:{baseline:{installation:check.installation,instructions:instructions(baseline)},candidate:{installation:check.installation,instructions:instructions(content)}}}});
+    const defaults=check.effectiveTask?options.defaults?.find(d=>d.current.taskType===check.effectiveTask):undefined;
+    if(check.effectiveTask&&!defaults)throw Error('IMPROVE_EFFECTIVE_PROFILE_SCOPE_REQUIRED');
+    const side=(which:'baseline'|'candidate')=>({installation:check.installation,instructions:defaults?'':instructions(which==='baseline'?baseline:content),...(defaults?{effectiveTask:{type:check.effectiveTask!,profile:which==='baseline'?defaults.previous.profile:defaults.current.profile}}:{})});
+    const prepared=await prepareEval({...check.options,dataRoot,id,installation:check.installation,image:verifiedImage,comparison:{...check.comparison,sides:{baseline:side('baseline'),candidate:side('candidate')}}});
     if(prepared.plan.runtime.id!==check.runtimeIdentity)throw Error('IMPROVE_RUNTIME_CONTENT_DRIFT');
     const link=record('improve.eval',{groupId:group.id,index,kind:'eval',dataRoot,planId:id,planSource:scopedImproveSource(dataRoot,prepared.source),parent:{dataRoot:root,decisionSource:options.decisionSource,decisionId:options.decisionId},attribution:'improve validation; nested eval facts keep original kind/run/trial/attempt IDs; do not count as daily coding'});
     const report=await runEval({dataRoot,id,directory:join(checkDirectory,'execution'),signal:options.signal});

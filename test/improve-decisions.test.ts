@@ -33,7 +33,7 @@ test('explicit non-executing decision persists exact identities and duplicate re
  assert.deepEqual(await submitImproveDecision({dataRoot:f.dataRoot,decision:d}),first);
  assert.deepEqual(readImproveDecision(f.dataRoot,d.id),first);assert.equal(digest(await readFile(join(f.dataRoot,'host.sqlite'))),before);
  await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...d,selections:[{...d.selections[0],mode:'do-not-suggest'}]}}),/DECISION_ID_REUSED/);
- await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...decision(f,'execute-declared-scope'),id:'execute'}}),/EXECUTE_UNSUPPORTED/);
+ await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...decision(f,'execute-declared-scope'),id:'execute'}}),/FORMAL_AUTHORITY_REQUIRED/);
 });
 test('validate-only constructs and checks real restricted content while preserving the formal non-Git target',async()=>{
  const f=await fixture(),d={...decision(f,'validate-only'),directory:join(f.directory,'validation'),groups:[{id:'math',candidateIds:[f.candidate.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',program:"import assert from 'node:assert/strict'; const {add}=await import('/work/targets/project/math.mjs'); assert.equal(add(2,3),5); assert.equal(add(2,-3),-1); console.log('addition passed');",timeoutMs:30000}]}],limits:{...decision(f).limits,maxChecks:1}};

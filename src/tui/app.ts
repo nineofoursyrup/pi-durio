@@ -1,6 +1,6 @@
 import {ImproveView} from './improve.js';
 import {ImproveSelectionView} from './improve-selection.js';
-import {submitImproveDecision,resumeImproveDecision,restoreImproveSuggestion,type ImproveDecision} from '../improve-decisions.js';
+import {submitImproveDecision,resumeImproveDecision,restoreImproveSuggestion,rollbackImproveDecision,type ImproveDecision} from '../improve-decisions.js';
 import {validateImproveRequest,type ImproveRequest} from '../improve.js';
 import { readCompactions } from '../compaction.js';
 import { homedir } from 'node:os';
@@ -23,7 +23,7 @@ import { TerminalWidthGate } from './width-gate.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
-const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['metrics','任务验收与双时钟（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实'],['improve','受限分析（需声明范围和预算）'],['improves','查看 improve 报告（只读）'],['improve-select','结构化逐项选择与汇总提交'],['improve-suppressions','查看建议抑制'],['improve-restore','JSON明确恢复建议'],['improve-continue','JSON明确继续独立未跑项']] as const;
+const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['metrics','任务验收与双时钟（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实'],['improve','受限分析（需声明范围和预算）'],['improves','查看 improve 报告（只读）'],['improve-select','结构化逐项选择与汇总提交'],['improve-suppressions','查看建议抑制'],['improve-restore','JSON明确恢复建议'],['improve-continue','JSON明确继续独立未跑项'],['improve-rollback','JSON明确回退本批精确产物']] as const;
 const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed','compaction.generated','compaction.finished'];
 const completion:AutocompleteProvider={
   triggerCharacters:['/'],
@@ -304,9 +304,9 @@ export class ReadOnlyTui {
     else if(command==='/compactions')this.openPanel('compaction');
     else if(command==='/improves'||command.startsWith('/improves ')){try{this.improveView=new ImproveView(this.options.dataRoot,command.slice(10).trim()||undefined);this.openPanel('improve');}catch(error){this.notice=`improve 报告不可读取：${String(error)}`;}}
     else if(command==='/improve-suppressions'){try{this.improveView=new ImproveView(this.options.dataRoot,undefined,true);this.openPanel('improve');}catch(error){this.notice=String(error);}}
-    else if(command.startsWith('/improve-restore ')||command.startsWith('/improve-continue ')){
+    else if(command.startsWith('/improve-restore ')||command.startsWith('/improve-continue ')||command.startsWith('/improve-rollback ')){
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许新决定';return true;}
-      try{const action=command.startsWith('/improve-restore ')?'restore':'continue',spec=JSON.parse(command.slice(command.indexOf(' ')+1));this.phase='running';this.controller=new AbortController();this.cancellation='exit';const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:this.options.dataRoot}):resumeImproveDecision({...spec,dataRoot:this.options.dataRoot,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
+      try{const action=command.startsWith('/improve-restore ')?'restore':command.startsWith('/improve-rollback ')?'rollback':'continue',spec=JSON.parse(command.slice(command.indexOf(' ')+1));this.phase='running';this.controller=new AbortController();this.cancellation='exit';const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:this.options.dataRoot}):action==='rollback'?rollbackImproveDecision({...spec,dataRoot:this.options.dataRoot,signal:this.controller.signal}):resumeImproveDecision({...spec,dataRoot:this.options.dataRoot,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
     }
     else if(command==='/improve-select'||command.startsWith('/improve-select ')){
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';return true;}

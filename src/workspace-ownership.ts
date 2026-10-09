@@ -7,7 +7,8 @@ import { digest } from './evidence.js';
 import { acquireOwner, type OwnerLease } from './ownership.js';
 
 // Shared by all product data roots/sessions for this OS user; not a run-controlled option.
-const registry = join(homedir(), 'Library', 'Application Support', 'pi-durio', 'workspace-owners');
+export const workspaceOwnerRegistry = join(homedir(), 'Library', 'Application Support', 'pi-durio', 'workspace-owners');
+const registry = workspaceOwnerRegistry;
 const contains = (parent: string, child: string) => {
   const path = relative(parent, child);
   return !path || (!isAbsolute(path) && path !== '..' && !path.startsWith('../'));
