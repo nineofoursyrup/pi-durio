@@ -11,7 +11,8 @@ function deliveryFacts(root:string,task:Task,through:number){
  const start=facts.find(f=>f.ref.id===task.startedSource),normal=facts.filter(f=>{const d=f.data.result??f.data;return start&&f.ref.seq>start.ref.seq&&['run.closed','recovery.closed'].includes(f.ref.kind)&&d.status==='completed'&&d.cleanup==='confirmed'&&typeof d.answer==='string'&&!!d.answer.trim();});
  const first=normal[0],uncertain=missing.some(m=>!first||Number(m.source.split(':')[1])<first.ref.seq);
  const delivery=first&&!uncertain?{source:first.ref.id,at:first.ref.at,answerSource:first.ref.id,clock:first.data.clock??null,definition:'first host normal completion with retained result/conclusion; acceptance is separate'}:null;
- const terminal=facts.find(f=>start&&f.ref.seq>start.ref.seq&&(f.ref.kind==='recovery.ended'||['completed','failed','aborted','cancelled','timed-out'].includes((f.data.result??f.data).status)&&(f.data.result??f.data).cleanup==='confirmed'));
+ // #27 owns termination/recovery state. A prior failure cannot close a legally resumed phase.
+ const terminal=facts.find(f=>f.ref.id===task.terminationSource);
  const end=first&&(!terminal||first.ref.seq<=terminal.ref.seq)?first:terminal;
  return{delivery,redeliveries:normal.slice(1).map(f=>({source:f.ref.id,at:f.ref.at})),start:start?{source:start.ref.id,at:start.ref.at}:null,end:end?{source:end.ref.id,at:end.ref.at}:null,missing,uncertain};
 }
@@ -46,7 +47,7 @@ function rates(positive:number,negative:number,unknown:number){const n=positive+
  * first-delivery population, including tasks admitted before the window. */
 export function queryFeedbackMetrics(root:string,input:MetricsScope={}){
  const sample=queryTaskMetrics(root,input),scope=sample.scope;
- const deliverySample=queryTaskMetrics(root,{...scope,from:'1970-01-01T00:00:00.000Z',to:scope.asOf});
+ const deliverySample=queryTaskMetrics(root,{...scope,from:'1970-01-01T00:00:00.000Z',to:new Date(Math.min(8.64e15,Date.parse(scope.asOf)+1)).toISOString()});
  const all=[...new Map([...sample.tasks,...deliverySample.tasks].map(t=>[t.taskId,t])).values()];
  const details=all.map(task=>({taskId:task.taskId,runId:task.runId,version:task.version,project:task.project,acceptedSource:task.acceptedSource,acceptedAt:task.acceptedAt,acceptance:task.acceptance.outcome,requirementsChanged:task.acceptance.requirementsChanged,requirements:task.acceptance.requirements,results:task.acceptance.results,...deliveryFacts(root,task,scope.through),feedback:assessments(root,task,scope.through,scope.asOf)}));
  const select=(detail:typeof details[number],dimension:'intervention'|'rework',from:string|null,to:string|null)=>detail.feedback.items.filter(e=>e.active&&e.input.dimension===dimension).map(e=>{
