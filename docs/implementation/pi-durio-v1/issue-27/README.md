@@ -89,7 +89,12 @@ TUI 的 `/acceptance JSON` 和 `recordAcceptance(root, input)` 使用同一
 不会信任输入自称 PASS。检查命令及覆盖面由可信宿主/用户声明；它不
 自动证明命令未检查的需求，也不把任意非零退出泛化为验收 FAIL。
 宿主可在 `task.accepted` 的 observation 回调中预先保存要求；此路径
-已用公开 runtime 验证。验收输入只写短 SQLite 事务，不接管执行 owner。
+已用公开 runtime 验证，保存要求在首次模型派发前同步完成。
+验收、反馈、费用估算写入先获取 data-root owner，或复用本模块真实
+取得且仍有效的同进程 lease；短 SQLite 事务继续保护重复 ID/修订。
+第二写入进程（包括同根别名）在可写打开库前收到 `OWNER_CONFLICT`；
+释放中、丢失或清理失败的 owner 不可复用。只读报告无需获取写入 owner。
+详见 [STD-03 修复说明](owner-repair.md)。
 
 宿主在写入 judgment 时生成 `assessment`，保留规则版本、方法版本、
 必要要求/结果来源、所用检查/人工来源引用及原始输入 `submitted`。

@@ -1,0 +1,558 @@
+{
+  "at": "2026-10-09T22:27:04.670184+00:00",
+  "status": "LOCAL_REVIEW_REPAIR_INTEGRATED_PENDING_COMBINED_GATE_AND_REVIEW",
+  "issue": 26,
+  "finding": "STD-02",
+  "base": "30478e315f433ec28dab1b846a87ae70934277a1",
+  "originalCandidate": {
+    "commit": "04c10387b4d17aed4cd3274b1d356aae39264e6a",
+    "tree": "61f6b42074a3dbe2dc862a4185e3d04d32f70232",
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/manifest.json",
+      "bytes": 22245,
+      "sha256": "c312f10cc021c4e138f12877b0c22a59e910364ac2d8bb6edd943cbe031f7e10"
+    }
+  },
+  "combinedCandidate": {
+    "commit": "843ed79708e46ea5ad24bdb2e9b39ef22cbd6a63",
+    "tree": "f4e7700745fb3b1d523e3a83bffe2235a01e999e",
+    "parents": [
+      "04c10387b4d17aed4cd3274b1d356aae39264e6a",
+      "30478e315f433ec28dab1b846a87ae70934277a1"
+    ]
+  },
+  "rootMerge": {
+    "commit": "6a8c1aba3fd6a4938875357ecf9996ea4b169391",
+    "tree": "f4e7700745fb3b1d523e3a83bffe2235a01e999e",
+    "parents": [
+      "30478e315f433ec28dab1b846a87ae70934277a1",
+      "843ed79708e46ea5ad24bdb2e9b39ef22cbd6a63"
+    ],
+    "treeEqualsCombinedCandidate": true,
+    "conflicts": [],
+    "trackedClean": true
+  },
+  "changedFiles": [
+    "docs/implementation/pi-durio-v1/issue-26/README.md",
+    "scripts/isolation/boundary.mjs",
+    "scripts/isolation/test/boundary.test.mjs",
+    "src/eval/runner.ts",
+    "src/execution-output.ts",
+    "src/improve-build.ts",
+    "src/improve-process.ts",
+    "src/improve-validation.ts",
+    "test/execution-output.test.ts",
+    "test/improve-decisions.test.ts"
+  ],
+  "rootFilesSynced": [
+    "docs/implementation/pi-durio-v1/issue-15/README.md",
+    "docs/implementation/pi-durio-v1/issue-15/preflight-memory-repair.md",
+    "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-handoff.json",
+    "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-merge-integration-readback.json",
+    "docs/implementation/pi-durio-v1/issue-15/preflight-repair-stage1-remaining-scope.md",
+    "docs/implementation/pi-durio-v1/issue-27/README.md",
+    "docs/implementation/pi-durio-v1/issue-27/owner-repair.md",
+    "docs/implementation/pi-durio-v1/issue-30/README.md",
+    "docs/implementation/pi-durio-v1/issue-30/review-repair/handoff.json",
+    "docs/implementation/pi-durio-v1/issue-30/review-repair/merge-integration-readback.json",
+    "docs/implementation/pi-durio-v1/review/1be8e282/coordinator-disposition.json",
+    "docs/implementation/pi-durio-v1/review/1be8e282/standards-evidence/appendix.md",
+    "docs/implementation/pi-durio-v1/review/1be8e282/standards-review.json",
+    "docs/implementation/pi-durio-v1/review/1be8e282/standards-review.md",
+    "docs/implementation/pi-durio-v1/status.json",
+    "docs/implementation/pi-durio-v1/status.md",
+    "scripts/live-batch/run.mjs",
+    "src/metrics/acceptance.ts",
+    "src/metrics/costs.ts",
+    "src/metrics/feedback.ts",
+    "src/ownership.ts",
+    "src/preflight.ts",
+    "src/recovery-facts.ts",
+    "src/recovery.ts",
+    "src/runtime.ts",
+    "src/storage-disposition.ts",
+    "test/live-batch.test.ts",
+    "test/metrics-ownership.test.ts",
+    "test/metrics-runtime.test.ts",
+    "test/preflight.test.ts",
+    "test/recovery-facts.test.ts",
+    "test/storage.test.ts"
+  ],
+  "originalIdentity": {
+    "sourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/source-build.json",
+      "bytes": 89227,
+      "sha256": "a1e6dd2975aa3f346e1bf43fccbce308a5d702eebf6e73205d763ea5ecb4410e"
+    },
+    "counts": {
+      "inputs": 158,
+      "compiler": 140,
+      "outputs": 234
+    },
+    "all158InputsBoundToOriginalGitCandidate": true,
+    "compiledFiles": 337,
+    "productionOutputSetExact": true,
+    "finalRebuildIdentity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/final-rebuild-identity.json",
+      "bytes": 292,
+      "sha256": "6421d51f820694411d1ec17b67b6b21575305d6d0085fc10471ed4e47562dbff"
+    },
+    "firstFreezeSourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/source-build-first-freeze.json",
+      "bytes": 89227,
+      "sha256": "49a0a8a74b5828f9dc595024b3ae561320f75cfd3dcc0131130c283eedcce443"
+    },
+    "all234ProductionOutputsAnd140CompilerFilesUnchanged": true,
+    "finalTestOnlyChange": [
+      "test/improve-decisions.test.ts"
+    ],
+    "manifestFilesVerified": 114
+  },
+  "actualEvidenceReadback": {
+    "summary": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-summary.json",
+      "bytes": 5563,
+      "sha256": "734e0ce3b526a8992eb4a78c9e38fd902f3bdb7aec352d97a7894e5874ad177c"
+    },
+    "vmOutcomesVerified": 7,
+    "allSevenStartedAndTerminated": true,
+    "originalStopDeleteAbsenceResultsVerified": true,
+    "savedContainersAfterIds": [
+      "buildkit"
+    ],
+    "controllerSnapshotScope": "Saved original termination/absence evidence; no controller operation or new live VM run during merge.",
+    "retainedOutputFacts": [
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/maximum-output-data",
+        "seq": 1,
+        "executionId": "bounded-maximum",
+        "launchId": null,
+        "streams": {
+          "stdout": {
+            "bytes": 8388609,
+            "sha256": "1b3340f64797fd7c19200f59225543951b6c5e22ed93aba11a1dfa2942be3395",
+            "chunks": 129
+          },
+          "stderr": {
+            "bytes": 1048576,
+            "sha256": "f5fb04aa5b882706b9309e885f19477261336ef76a150c3b4d3489dfac3953ec",
+            "chunks": 16
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-build-execution-qoTKkg/data",
+        "seq": 141,
+        "executionId": "durio-i12-117eadc1-ed42-4008-8564-71889889b4e4",
+        "launchId": null,
+        "streams": {
+          "stdout": {
+            "bytes": 103,
+            "sha256": "961844f9aaa532a578f41930008cc5c4b148fb0aaaa36bad28f321f39c879b4d",
+            "chunks": 1
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "chunks": 0
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-build-execution-qoTKkg/data",
+        "seq": 146,
+        "executionId": "durio-i12-14d8e9f9-2dc3-407a-82fe-7d89a207faa2",
+        "launchId": null,
+        "streams": {
+          "stdout": {
+            "bytes": 6189,
+            "sha256": "ba5db7e5791d6419afb023aa693a2c2ac97d7ac1d175b6342acc3e9b32e233e3",
+            "chunks": 1
+          },
+          "stderr": {
+            "bytes": 165,
+            "sha256": "cc85ed3ff1b6bb61112132dd5e3ca7a6d367ba82df483a939919a6f3df8d8eb5",
+            "chunks": 1
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-build-execution-qoTKkg/data",
+        "seq": 150,
+        "executionId": "durio-i12-c7c0d92e-63af-420e-a131-4c9ccf8a8546",
+        "launchId": null,
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "chunks": 0
+          },
+          "stderr": {
+            "bytes": 166,
+            "sha256": "9288dc6d1347f8b0dea5f35facd043eaeb4742ab21724e92f424a2358ce4b345",
+            "chunks": 1
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-build-execution-qoTKkg/data",
+        "seq": 162,
+        "executionId": null,
+        "launchId": "new-process",
+        "streams": {
+          "stdout": {
+            "bytes": 6189,
+            "sha256": "ba5db7e5791d6419afb023aa693a2c2ac97d7ac1d175b6342acc3e9b32e233e3",
+            "chunks": 1
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "chunks": 0
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-build-execution-qoTKkg/data",
+        "seq": 189,
+        "executionId": null,
+        "launchId": "old-pending-denied",
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "chunks": 0
+          },
+          "stderr": {
+            "bytes": 132,
+            "sha256": "f2abffd95f85661df5b15a0cb3e66760290ff444c9152e42e91c6cf010885ac5",
+            "chunks": 1
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-build-execution-qoTKkg/data",
+        "seq": 198,
+        "executionId": null,
+        "launchId": "baseline-after-rollback",
+        "streams": {
+          "stdout": {
+            "bytes": 6179,
+            "sha256": "2bee17a5677b5142dfb9ca001dab4d04707be5a8d0249fae9ce3bb7bdc01eaaa",
+            "chunks": 1
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "chunks": 0
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-decisions-7NHSSO/data",
+        "seq": 11,
+        "executionId": "durio-i12-0ea6c863-3bcd-4443-b8ae-03146efa828a",
+        "launchId": null,
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "chunks": 0
+          },
+          "stderr": {
+            "bytes": 333,
+            "sha256": "3bea10fa7f23c6929099247488e453efce9ae80af59fd2927f1873d9421b2251",
+            "chunks": 1
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-decisions-CtgOYp/data",
+        "seq": 9,
+        "executionId": "durio-i12-236bffe5-6582-47f4-9e03-af6bede4ae2b",
+        "launchId": null,
+        "streams": {
+          "stdout": {
+            "bytes": 81920,
+            "sha256": "ccb1ad460f94aeae9df787f0b90c8e48354d51a68eb8cecf9346380bf9619354",
+            "chunks": 2
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "chunks": 0
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-decisions-kTVS8R/data",
+        "seq": 9,
+        "executionId": "durio-i12-f353f4fb-e943-40f1-84f3-ceb9efcbd4da",
+        "launchId": null,
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "chunks": 0
+          },
+          "stderr": {
+            "bytes": 1048577,
+            "sha256": "42f5ac78f964249685e2145eea4f298333c02dd0b820c22586871968e8f13337",
+            "chunks": 17
+          }
+        }
+      },
+      {
+        "root": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-decisions-tCNrup/data",
+        "seq": 9,
+        "executionId": "durio-i12-87838939-1b7d-4acd-a4d3-9bea961a22b2",
+        "launchId": null,
+        "streams": {
+          "stdout": {
+            "bytes": 81920,
+            "sha256": "ccb1ad460f94aeae9df787f0b90c8e48354d51a68eb8cecf9346380bf9619354",
+            "chunks": 2
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "chunks": 0
+          }
+        }
+      }
+    ],
+    "successfulAcquiredOutput": [
+      {
+        "stream": "stdout",
+        "bytes": 81920,
+        "sha256": "ccb1ad460f94aeae9df787f0b90c8e48354d51a68eb8cecf9346380bf9619354",
+        "chunks": 2,
+        "executionId": "durio-i12-87838939-1b7d-4acd-a4d3-9bea961a22b2"
+      },
+      {
+        "stream": "stderr",
+        "bytes": 1048577,
+        "sha256": "42f5ac78f964249685e2145eea4f298333c02dd0b820c22586871968e8f13337",
+        "chunks": 17,
+        "executionId": "durio-i12-f353f4fb-e943-40f1-84f3-ceb9efcbd4da"
+      }
+    ],
+    "rawOutcomeBase64EqualsDurableOutputBlocks": true,
+    "maximumOutputResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/maximum-output-result.json",
+      "bytes": 714,
+      "sha256": "22463631f229ec168770b761b6068aa6a9b19a69190df130a2ff8f98a4bf41e9"
+    },
+    "maximumOutputRawBlocksReadBack": true,
+    "selectedHostFactsVerified": 27,
+    "rowsInSelectedDataRoots": 254,
+    "selectionScope": "Output facts and raw blocks, check execution references/previews, build/startup output, process result/rollback, and failed/not-run next-check state. This does not claim a fresh full inventory of all historical build objects.",
+    "observedProcesses": [
+      {
+        "launchId": "new-process",
+        "pid": 59216,
+        "parentPid": 53208,
+        "state": "completed",
+        "code": 0
+      },
+      {
+        "launchId": "old-pending-denied",
+        "pid": 59357,
+        "parentPid": 53208,
+        "state": "failed",
+        "code": 75
+      },
+      {
+        "launchId": "baseline-after-rollback",
+        "pid": 59516,
+        "parentPid": 53208,
+        "state": "completed",
+        "code": 0
+      }
+    ],
+    "rollbackBytesVerified": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-tmp/durio-build-execution-qoTKkg/source/src/cli.ts",
+        "sha256": "cb1bf9b0916e3cc4b806c40cc002c7694b262f5388440e60281387d1106ae558"
+      }
+    ]
+  },
+  "combinedIdentityDelta": {
+    "originalInputCount": 158,
+    "combinedInputCount": 163,
+    "added": [
+      "src/recovery-facts.ts",
+      "test/live-batch.test.ts",
+      "test/metrics-ownership.test.ts",
+      "test/preflight.test.ts",
+      "test/recovery-facts.test.ts"
+    ],
+    "modified": [
+      "scripts/live-batch/run.mjs",
+      "src/metrics/acceptance.ts",
+      "src/metrics/costs.ts",
+      "src/metrics/feedback.ts",
+      "src/ownership.ts",
+      "src/preflight.ts",
+      "src/recovery.ts",
+      "src/runtime.ts",
+      "src/storage-disposition.ts",
+      "test/metrics-runtime.test.ts",
+      "test/storage.test.ts"
+    ],
+    "removed": [],
+    "rootAndTicketInputsEqual": true,
+    "originalManifestBytePreserved": true,
+    "originalCompiledOutputsBytePreserved": true,
+    "originalBuildRelabeled": false,
+    "meaning": "Original 158-input candidate and its compiled output remain unchanged. The combined 163-input candidate also includes #30 cancellation, #15 stage 1 and #27 ownership repairs; integration of their behavior still requires the coordinated final build/check.",
+    "rootDist": {
+      "manifestSha256": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+      "bytePreserved": true,
+      "currentMergedProductBuild": false,
+      "note": "Prior #26 da7c2b producer remains unchanged and stale for the accumulated merged repairs."
+    }
+  },
+  "validationReuse": {
+    "checks": [
+      {
+        "log": "focused-2.log",
+        "passed": 36,
+        "skipped": 4,
+        "scope": "eval/history/storage and output/controller; unchanged applicable results reused"
+      },
+      {
+        "log": "output-final.log",
+        "passed": 9,
+        "skipped": 4,
+        "scope": "final production output implementation; only later new VM test fixture changed"
+      },
+      {
+        "log": "vm-integration.log",
+        "passed": 2,
+        "failed": 1,
+        "scope": "registered build/startup/explicit launch/rollback and cancelled/record-failed batch passed; new fixture precondition failure retained"
+      },
+      {
+        "log": "vm-output-acquired.log",
+        "passed": 1,
+        "failed": 0,
+        "scope": "corrected fixture; stdout and stderr actual acquisition preserved in product Evidence"
+      },
+      {
+        "result": "maximum-output-result.json",
+        "status": "PASS",
+        "scope": "maximum configured bounded acquisition and durable reference pagination"
+      }
+    ],
+    "newBuilds": 0,
+    "newTestRuns": 0,
+    "newVmStarts": 0,
+    "newProviderRequests": 0,
+    "newNativeRuns": 0,
+    "combinedGate": "NOT RUN by explicit coordination; final composition build/check belongs to coordinator.",
+    "preflight": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/merge-preflight.json",
+      "bytes": 202385,
+      "sha256": "2561d0a2db97ef300c1a8807e71ad0259aee044e35bdd09d68292a0cf8844b6d"
+    },
+    "postflight": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/merge-postflight.json",
+      "bytes": 1394,
+      "sha256": "a548af6d35e98e0de430cb6c33e50336a573f91cd2b2ac7a83dd63f016960acb"
+    },
+    "verifier": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/merge-verifier.py",
+      "bytes": 11869,
+      "sha256": "922a6364154ac5f992d39f8fddd9e91a7556052a29be6d580aa3db94c99bd3d4"
+    },
+    "verifierFailures": [],
+    "preliminaryReadCorrection": "An initial read-only Python inspection command had a syntax typo before execution; corrected without source/data mutation."
+  },
+  "preservation": {
+    "protectedFilesUnchanged": 1184,
+    "originalsUnchanged": 162,
+    "untrackedUnchanged": [
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+      "docs/wayfinder-proposal.md",
+      "docs/wayfinder-readback-2026-10-09.json"
+    ],
+    "originalFirstFailures": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/red-boundary.log",
+        "bytes": 756,
+        "sha256": "140304fc526340a9159522951a7cbbc61656db0532200dfc76028e6e5ceaec75"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/red-process-build.log",
+        "bytes": 1112,
+        "sha256": "b3886fb506b922a226dfc511e46b4f0369bbe331b594f55172241a9c20c63e26"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-integration.log",
+        "bytes": 1534,
+        "sha256": "8c0a7a7877a52e6c08e953660d2ef0465593c19dd7cb500797cdbd3b1395f701"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-output-fixed-fixture.log",
+        "bytes": 1286,
+        "sha256": "23210d78b634a5906060e8f1553f57483537521452fc3973ccaf03385d779ad9"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-output-final.log",
+        "bytes": 319,
+        "sha256": "a390d8df3048ea7dd9bd7057f2115eb60b77307b204831da8c33940f20143e04"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-output-assumption-failure.json",
+        "bytes": 792,
+        "sha256": "19dfb32932f0a36c9113c5cf0b3ebf4ef05c356691a7f9e6744f404f028687da"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-output-exit.json",
+        "bytes": 337,
+        "sha256": "5bf74d3800df3174ea46d5d3c62a1cf226fa6c1f1204336d1e633d42619a1855"
+      }
+    ],
+    "originalVmInitialRun": "2 PASS / 1 fixture precondition FAIL; not all passed.",
+    "laterFailures": "Second fixture regression precondition failure and the emitted-versus-acquired byte assumption failure remain recorded.",
+    "failedWorkerExit": {
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/vm-output-exit.json",
+        "bytes": 337,
+        "sha256": "5bf74d3800df3174ea46d5d3c62a1cf226fa6c1f1204336d1e633d42619a1855"
+      },
+      "testExitCode": 1,
+      "exactCause": "UNKNOWN; terse runner does not establish it",
+      "attemptedStop": "ESRCH; process already exited; no process terminated by that attempt"
+    },
+    "oldEvidenceAnchor": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-27-owner/merge-integration-readback.json",
+      "bytes": 12345,
+      "sha256": "5f4d975ef4fbc772f1c00c74e97a5a44121edf231b626fdd2159d80c80ab6304"
+    },
+    "historicalWholeInventoryRescanned": false
+  },
+  "limits": [
+    "Retention covers every byte actually delivered to host data events; unacquired remote/process/pipe bytes remain unknown.",
+    "Fixed configured limits plus the first crossing data event bound acquisition; text encoding and JSON may require constant-factor copies. No measured peak RSS claim.",
+    "Output-limit outcomes remain failed; successful byte preservation does not imply task acceptance.",
+    "STD-02 independent review and combined gate remain pending."
+  ],
+  "boundaries": {
+    "findingClosed": false,
+    "issueAccepted": false,
+    "stateJsonModified": false,
+    "pushed": false,
+    "githubChanges": false,
+    "mainChanged": false,
+    "release": false,
+    "paid": "NOT RUN",
+    "otherWorktreesTouched": false
+  },
+  "requestedModel": "gpt-6-astra",
+  "requestedEffort": "xhigh",
+  "actualBackendAttestation": "NOT_ATTESTED",
+  "ownership": "Root write ownership returned to coordinator immediately after this record was finalized."
+}
