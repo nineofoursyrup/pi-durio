@@ -1,6 +1,6 @@
 import {mkdir,writeFile} from 'node:fs/promises';
 import {retainExecutionOutput,executionPreview} from './execution-output.js';
-import {readFileSync,lstatSync} from 'node:fs';
+import {readFileSync,lstatSync,existsSync} from 'node:fs';
 import {join,dirname} from 'node:path';
 import {Evidence,digest,readObject} from './evidence.js';
 import type {ImproveCandidate} from './improve.js';
@@ -96,13 +96,14 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
  const engine=await import(new URL('../execution/isolation/boundary.mjs',import.meta.url).href);
  let build:ImproveBuildPair|undefined;
  if(group.build)try{build=await prepareImproveBuild({evidence:e,target:targets.find(t=>t.id===group.build!.targetId)!,changes:group.changes,directory:join(directory,'build'),timeoutMs:group.build.timeoutMs,deadline:options.deadline,signal:options.signal,groupId:group.id,record,guard});checks.push({index:'build',kind:'build',state:'completed',buildId:build.candidate.id,execution:build.execution,startup:build.startup});}
- catch(error){state=options.signal.aborted?'cancelled':error instanceof ImproveBuildFailure?error.state:'unknown';reason=String(error);checks.push({index:'build',kind:'build',state,reason});record('improve.check',{groupId:group.id,...checks.at(-1)});}
+ catch(error){state=error instanceof ImproveBuildFailure?error.state:options.signal.aborted?'cancelled':'unknown';reason=String(error);checks.push({index:'build',kind:'build',state,reason});record('improve.check',{groupId:group.id,...checks.at(-1)});}
  for(let index=0;index<group.checks.length;index++){
   const check=group.checks[index],benefit=['fresh','resource'].includes(check.kind)?{benefit:check.benefit??'required'}:{};
   if(state!=='completed'){checks.push({index,kind:check.kind,...benefit,state:'not-run',reason});continue;}
   guard();if(options.signal.aborted||Date.now()>=Date.parse(options.deadline)){state=options.signal.aborted?'cancelled':'failed';reason=options.signal.aborted?'cancelled':'IMPROVE_DEADLINE';checks.push({index,kind:check.kind,...benefit,state,reason});continue;}
   const checkDirectory=join(directory,`check-${index}`);await mkdir(checkDirectory,{mode:0o700});
   record('improve.check-started',{groupId:group.id,index,kind:check.kind,...benefit,directory:checkDirectory});
+  let retainedExecution:Record<string,unknown>={};
   try{
    if(check.kind==='fresh'){
     if(describeImproveRuntime(check.installation)!==check.runtimeIdentity)throw Error('IMPROVE_RUNTIME_CONTENT_DRIFT');
@@ -131,14 +132,18 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
     const profileAssertion=checkedProfiles?"const assert=(await import('node:assert/strict')).default;assert.deepEqual(JSON.parse(await readFile('/input/effective-profiles.json','utf8')),JSON.parse(await readFile('/input/expected-profiles.json','utf8')),'Declared complete effective profile regression');":"";
     const bootstrap="import {cp,chmod,readFile} from 'node:fs/promises'; await cp('/input/targets','/work/targets',{recursive:true}); await chmod('/work/targets',0o755); process.chdir('/work/targets'); "+profileAssertion+"await import('/input/check.mjs');";
     await writeFile(join(input,'bootstrap.mjs'),bootstrap,{flag:'wx',mode:0o444});
-    const execution=await engine.runRestricted({image:verifiedImage,inputDir:input,runDir:join(checkDirectory,'execution'),command:['node','/input/bootstrap.mjs'],timeoutMs:Math.max(100,Math.min(check.timeoutMs,Date.parse(options.deadline)-Date.now())),signal:options.signal});
-    guard();retainExecutionOutput(e,execution,{decisionId:options.decisionId,groupId:group.id,index,executionId:execution.id});let artifacts:any[]=[];
-    if(execution.terminated&&execution.status!=='invalid'){
-     const names=regularFiles(join(checkDirectory,'execution/work/targets')).map(p=>`targets/${p}`),destination=join(checkDirectory,'export');
+    const execution=await engine.runRestricted({image:verifiedImage,inputDir:input,runDir:join(checkDirectory,'execution'),command:['node','/input/bootstrap.mjs'],timeoutMs:check.timeoutMs,deadline:options.deadline,signal:options.signal});
+    guard();retainExecutionOutput(e,execution,{decisionId:options.decisionId,groupId:group.id,index,executionId:execution.id});
+    retainedExecution={execution:executionPreview(execution),executionRef:e.blob(JSON.stringify(execution))};
+    const notStarted=execution.status==='not-started'&&!execution.started;
+    state=execution.status==='invalid'||!execution.terminated&&!notStarted?'unknown':execution.reason==='cancelled'?'cancelled':execution.status==='completed'&&execution.code===0?'completed':'failed';reason=execution.reason;
+    let artifacts:any[]=[],artifactError:string|null=null;
+    if(execution.terminated&&execution.status!=='invalid')try{
+     const targetRoot=join(checkDirectory,'execution/work/targets');
+     const names=state!=='completed'&&!existsSync(targetRoot)?[]:regularFiles(targetRoot).map(p=>`targets/${p}`),destination=join(checkDirectory,'export');
      await engine.exportStopped(execution,names,destination,{maxFiles:200,maxBytes:4194304});artifacts=captureFiles(e,destination,names).files;
-     for(const [key,bytes]of content)if(!artifacts.some(f=>f.path===`targets/${key}`&&f.ref.sha256===digest(bytes)))throw Error('IMPROVE_CHECK_CHANGED_CANDIDATE: checks may not replace the fixed content under validation');
-    }
-    state=!execution.terminated||execution.status==='invalid'?'unknown':execution.reason==='cancelled'?'cancelled':execution.code===0?'completed':'failed';reason=execution.reason;
+     if(state==='completed')for(const [key,bytes]of content)if(!artifacts.some(f=>f.path===`targets/${key}`&&f.ref.sha256===digest(bytes)))throw Error('IMPROVE_CHECK_CHANGED_CANDIDATE: checks may not replace the fixed content under validation');
+    }catch(error){if(state==='completed')throw error;artifactError=String(error);}
     let resource:any=null;
     if(check.kind==='resource'&&state==='completed'){
      resource=JSON.parse(execution.stdout.trim());
@@ -147,10 +152,10 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
      effect=!resource.protectionsPassed||delta<=-check.resource!.delta?'退化':delta>=check.resource!.delta?'改善':'无明显差异';
      if(!resource.protectionsPassed){state='failed';reason='Declared resource protection failed';}
     }
-    if(build)verifyImproveBuild(root,build.candidate);
-    checks.push({index,kind:check.kind,state,reason,effect:check.kind==='resource'?effect:state==='completed'?'direct-checks-passed':'direct-checks-failed',execution:executionPreview(execution),executionRef:e.blob(JSON.stringify(execution)),artifacts,resource,...(build?{buildId:build.candidate.id}:{}),...(profiles.length?{profileInput:construction.effectiveProfiles,fullProfileAssertions:checkedProfiles}:{} )});
+    if(build&&state==='completed')verifyImproveBuild(root,build.candidate);
+    checks.push({index,kind:check.kind,state,reason,effect:check.kind==='resource'?effect:state==='completed'?'direct-checks-passed':'direct-checks-failed',...retainedExecution,artifacts,artifactError,resource,...(build?{buildId:build.candidate.id}:{}),...(profiles.length?{profileInput:construction.effectiveProfiles,fullProfileAssertions:checkedProfiles}:{} )});
    }
-  }catch(error){state=options.signal.aborted?'cancelled':'unknown';reason=String(error);checks.push({index,kind:check.kind,state,reason});}
+  }catch(error){state=options.signal.aborted?'cancelled':'unknown';reason=String(error);checks.push({index,kind:check.kind,state,reason,...retainedExecution});}
   Object.assign(checks.at(-1),benefit);
   record('improve.check',{groupId:group.id,...checks.at(-1)});
  }

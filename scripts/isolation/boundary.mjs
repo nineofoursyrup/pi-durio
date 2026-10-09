@@ -56,20 +56,21 @@ async function cli(executable, args, timeout = 30_000) {
 // Trusted callers supply image identity and staged input, never candidate data.
 // Each call creates a new VM, new HOME/cache/tmp, and a private writable mount.
 export async function runRestricted({ image, inputDir, runDir, command,
-  timeoutMs, model, signal, protocolLimits, dependenciesDir, resourceProfile = 'default', containerExecutable = '/opt/homebrew/bin/container' }) {
+  timeoutMs, deadline, model, signal, protocolLimits, dependenciesDir, resourceProfile = 'default', containerExecutable = '/opt/homebrew/bin/container' }) {
   if (!['default','typescript-build'].includes(resourceProfile)) throw new Error('invalid_resource_profile');
   if(resourceProfile==='typescript-build'&&model)throw new Error('build_profile_model_denied');
   const resources={profile:resourceProfile,cpus:1,memoryBytes:resourceProfile==='typescript-build'?1073741824:536870912,nodeHeapMiB:resourceProfile==='typescript-build'?768:null};
   if (!/^[^\s]+@sha256:[a-f0-9]{64}$/.test(image)) throw new Error('immutable_image_required');
   if (!Array.isArray(command) || !command.length || command.some(s => typeof s !== 'string' || s.includes('\0'))) throw new Error('invalid_command');
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 100 || timeoutMs > 300_000) throw new Error('invalid_timeout');
+  const cutoff = deadline === undefined ? Infinity : Date.parse(deadline);
+  if (!Number.isFinite(cutoff) && deadline !== undefined) throw new Error('invalid_deadline');
   if (model && (!Number.isSafeInteger(model.maxRequests) || model.maxRequests < 1 || model.maxRequests > 100 ||
       !Number.isSafeInteger(model.maxOutputTokens) || model.maxOutputTokens < 1 || model.maxOutputTokens > 16384 ||
       typeof model.request !== 'function')) throw new Error('invalid_model_budget');
   const limits = protocolLimits ?? { inputBytes:4096, responseBytes:16384, lineBytes:16384, totalBytes:1048576 };
   if (Object.keys(limits).sort().join(',') !== 'inputBytes,lineBytes,responseBytes,totalBytes' ||
     Object.values(limits).some(n => !Number.isSafeInteger(n) || n < 1) || limits.inputBytes > 262144 || limits.responseBytes > 1048576 || limits.lineBytes > 1048576 || limits.totalBytes > 8388608) throw new Error('invalid_protocol_limits');
-  if (signal?.aborted) throw new Error('cancelled_before_start');
   await mkdir(runDir, { mode: 0o700 }); // Exclusive: old/uncertain spaces are never reused.
   runDir = await realpath(runDir);
   const id = `durio-i12-${randomUUID()}`;
@@ -84,7 +85,16 @@ export async function runRestricted({ image, inputDir, runDir, command,
     await writeFile(join(runDir, `${name}.json`), json(response), { flag: 'wx' });
     return response;
   };
+  // Not starting work is separate from confirming that a created VM stopped.
+  const denied = phase => {
+    const at = Date.now(), reason = signal?.aborted ? 'cancelled' : at >= cutoff ? 'deadline' : null;
+    if (!reason) return false;
+    result.status = 'not-started'; result.reason = reason;
+    result.admission = { phase, reason, at: new Date(at).toISOString(), deadline: deadline ?? null };
+    return true;
+  };
   try {
+    if (denied('before-preparation')) return result;
     const version = await record('version', ['--version']);
     if (version.code !== 0 || !version.stdout.includes('version 1.4.1 ')) {
       result.reason = 'isolation_unavailable';
@@ -120,8 +130,9 @@ export async function runRestricted({ image, inputDir, runDir, command,
       '--bounding-set=-all', '--inh-caps=-all', '--ambient-caps=-all', '--no-new-privs',
       '/usr/bin/env', '-i', 'PATH=/usr/local/bin:/usr/bin:/bin', 'HOME=/work/home', 'TMPDIR=/work/tmp',
       'XDG_CACHE_HOME=/work/cache', ...(resourceProfile==='typescript-build'?['NODE_OPTIONS=--max-old-space-size=768']:[]), '/usr/bin/python3', '-I', '/boundary/restrict.py', ...command);
-    await writeFile(join(runDir, 'plan.json'), json({ id, image, command, timeoutMs, mounts, resources,
+    await writeFile(join(runDir, 'plan.json'), json({ id, image, command, timeoutMs, deadline: deadline ?? null, mounts, resources,
       model: model ? { maxRequests: model.maxRequests, maxOutputTokens: model.maxOutputTokens } : null, args }), { flag: 'wx' });
+    if (denied('before-create')) return result;
     const created = await record('create', args);
     if (created.code !== 0) { result.reason = 'container_create_failed'; return result; }
     const configuration = await record('configuration', ['inspect', id]);
@@ -134,6 +145,10 @@ export async function runRestricted({ image, inputDir, runDir, command,
         mounts.some(([source,destination,readonly])=>!config.mounts?.some(m=>m.source===source&&m.destination===destination&&Boolean(m.options?.includes('ro'))===readonly))) {
       throw new Error('configuration_mismatch');
     }
+    if (denied('before-start')) return result;
+    const executionTimeoutMs = Math.min(timeoutMs, cutoff - Date.now());
+    // Recheck after the clock sample; no minimum duration extends authorization.
+    if (denied('before-start')) return result;
     result.started = true;
     const execution = await new Promise(resolve => {
       const child = spawn(containerExecutable, ['start', '--attach', '--interactive', id], {
@@ -155,7 +170,7 @@ export async function runRestricted({ image, inputDir, runDir, command,
         // Killing the client is not termination confirmation; stop/delete below is mandatory.
         child.kill('SIGKILL');
       };
-      const timer = setTimeout(() => halt('timeout'), timeoutMs);
+      const timer = setTimeout(() => halt('timeout'), executionTimeoutMs);
       const onAbort = () => halt('cancelled');
       signal?.addEventListener('abort',onAbort,{once:true});
       if(signal?.aborted)onAbort();

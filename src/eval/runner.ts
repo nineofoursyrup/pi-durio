@@ -31,7 +31,7 @@ function verifyBoundaryContent(root:string,plan:EvalPlan){if(!plan.environment.h
 function outcomeProtection(root:string,id:string,through:number){if(!through)return 'no-outcomes';const db=openHostReadonly(root);let failure='not-fixed';try{for(const row of db.prepare("SELECT seq,body FROM records WHERE run_id=? AND kind='evidence.fixed' ORDER BY seq DESC").iterate(id)){const ref=JSON.parse(String(row.body)),fact=JSON.parse(readObject(root,ref).toString());if(fact.snapshot<through)continue;const result=verifyFixed(root,`e1:${row.seq}:${ref.sha256}`);if(result.state==='protected')return 'protected';failure=result.state;}return failure;}finally{db.close();}}
 function snapshot(e:Evidence,budget:PersistentBudget,trialId:string){const result=budget.snapshot();e.append('eval.budget-snapshot',{trialId,...result});return result;}
 function classify(result:RestrictedResult,error:string|null,guest:any):TrialStatus{
- if(result.status==='invalid'||!result.terminated)return 'invalid';if(result.reason==='cancelled')return'cancelled';if(error?.includes('BUDGET_'))return'budget-stopped';if(result.reason==='timeout')return'timeout';if(error)return'service-error';if(guest?.reason?.includes('CONTROLLED_ORIGINAL_WRITE_FAILURE'))return'original-error';return result.code===0&&guest?.status==='completed'?'completed':'error';
+ if(result.status==='invalid'||!result.terminated&&result.status!=='not-started')return 'invalid';if(result.reason==='deadline')return'budget-stopped';if(result.reason==='cancelled')return'cancelled';if(error?.includes('BUDGET_'))return'budget-stopped';if(result.reason==='timeout')return'timeout';if(error)return'service-error';if(guest?.reason?.includes('CONTROLLED_ORIGINAL_WRITE_FAILURE'))return'original-error';return result.code===0&&guest?.status==='completed'?'completed':'error';
 }
 function initial(fixture:EvalCase):Record<string,string>{return {...fixture.files,...fixture.dirty,'package-lock.json':fixture.dependencyLock};}
 function controlled(plan:EvalPlan,trial:EvalTrial){
@@ -90,10 +90,11 @@ export async function runEval(options:RunEvalOptions){
    outcome.started=true;outcome.timing.preparationMs=performance.now()-preparedAt;
    const taskAt=performance.now();let execution:RestrictedResult|undefined;
    try{
-    execution=await engine.runRestricted({image:plan.image,inputDir,runDir,dependenciesDir:dependencies.get(plan.comparison?trial.side:'candidate'),command:['node','/deps/dist/src/eval/guest.js'],timeoutMs:Math.max(100,Math.min(plan.trialTimeoutMs,Date.parse(plan.budget.deadline)-Date.now())),model:mediator,signal,protocolLimits});
+    execution=await engine.runRestricted({image:plan.image,inputDir,runDir,dependenciesDir:dependencies.get(plan.comparison?trial.side:'candidate'),command:['node','/deps/dist/src/eval/guest.js'],timeoutMs:plan.trialTimeoutMs,deadline:plan.budget.deadline,model:mediator,signal,protocolLimits});
     owner.assertHeld();retainExecutionOutput(e,execution,{trialId:trial.id,phase:'eval-runtime',executionId:execution.id});outcome.started=execution.started;outcome.timing.taskMs=performance.now()-taskAt;outcome.isolation=e.blob(JSON.stringify(execution));
-    if(probe&&execution.terminated){const verification=await probe.verify(join(runDir,'work'),e);appendFact(e,'eval.boundary-check',{trialId:trial.id,...verification});if(!verification.valid){execution.status='invalid';execution.reason='actual_boundary_probe_failed';}}
-    if(execution.terminated&&execution.status!=='invalid'){
+    if(probe&&execution.started&&execution.terminated){const verification=await probe.verify(join(runDir,'work'),e);appendFact(e,'eval.boundary-check',{trialId:trial.id,...verification});if(!verification.valid){execution.status='invalid';execution.reason='actual_boundary_probe_failed';}}
+    if(execution.status==='not-started'&&!execution.started){outcome.status=classify(execution,mediator.lastError,null);outcome.reason=execution.reason;outcome.valid=false;}
+    else if(execution.terminated&&execution.status!=='invalid'){
      const work=join(runDir,'work'),names:string[]=[];
      // These are the fixed export scopes; filenames are inspected by the trusted host after VM teardown.
      for(const prefix of ['project','data'])if(existsSync(join(work,prefix)))names.push(...regularFiles(join(work,prefix)).map(name=>`${prefix}/${name}`));
@@ -104,7 +105,7 @@ export async function runEval(options:RunEvalOptions){
      const guestResult=result?JSON.parse(readObject(options.dataRoot,result.ref).toString()):null;
      const boundaryError=mediator.lastError??(execution.reason==='timeout'&&Date.now()>=Date.parse(plan.budget.deadline)?'BUDGET_DEADLINE':null);
      outcome.status=classify(execution,boundaryError,guestResult);if(boundaryError)outcome.reason=boundaryError;outcome.valid=outcome.status!=='original-error';
-     if(!guestResult&&(retained.files.some(f=>f.path==='product-error.json')||!retained.files.some(f=>f.path==='data/host.sqlite'))){outcome.status='preparation-error';outcome.valid=false;outcome.reason='Product failed before returning an accepted runtime result; infrastructure excluded from formal evaluation';}
+     if(!['timeout','cancelled','budget-stopped'].includes(outcome.status)&&!guestResult&&(retained.files.some(f=>f.path==='product-error.json')||!retained.files.some(f=>f.path==='data/host.sqlite'))){outcome.status='preparation-error';outcome.valid=false;outcome.reason='Product failed before returning an accepted runtime result; infrastructure excluded from formal evaluation';}
     }else{outcome.status='invalid';outcome.reason=execution.reason;}
     outcome.reason??=mediator.lastError??execution.reason;
    }catch(error){outcome.status=execution?.terminated?'original-error':'invalid';outcome.reason=String(error);outcome.timing.taskMs=performance.now()-taskAt;outcome.valid=false;}finally{await probe?.close();}
@@ -136,9 +137,10 @@ async function gradeOutcome(e:Evidence,plan:EvalPlan,trial:EvalTrial,fixture:Eva
   if(outcome.runtimeResult)await writeFile(join(input,'product-result.json'),readObject(e.root,outcome.runtimeResult));
   gradingProbe=trial.scenario==='boundary'?await prepareProbe(input,false):undefined;
   await writeFile(join(input,'check.mjs'),(gradingProbe?"import '/input/runtime-probe.mjs';\n":'')+fixture.grader.program);
-  const execution=await engine.runRestricted({image:plan.image,inputDir:input,runDir:join(directory,`${trial.id}-grading-${grade.id}`),command:['node','/input/check.mjs'],timeoutMs:Math.min(plan.gradingTimeoutMs,Math.floor(remaining)),signal});
+  const execution=await engine.runRestricted({image:plan.image,inputDir:input,runDir:join(directory,`${trial.id}-grading-${grade.id}`),command:['node','/input/check.mjs'],timeoutMs:plan.gradingTimeoutMs,deadline,signal});
   retainExecutionOutput(e,execution,{trialId:trial.id,phase:'grader',executionId:execution.id});grade.execution=e.blob(JSON.stringify(execution));
   let checkOutput=execution.stdout;
+  if(execution.status==='not-started'&&!execution.started){grade.reason=`grader ${execution.reason} before start; no deterministic judgment`;return grade;}
   if(gradingProbe){if(!execution.terminated)throw Error('grading termination unknown');const verification=await gradingProbe.verify(join(directory,`${trial.id}-grading-${grade.id}`,'work'),e);appendFact(e,'eval.grading-boundary-check',{trialId:trial.id,...verification});if(!verification.valid){grade.reason='isolation: grading boundary invalid';return grade;}checkOutput=checkOutput.split('\n').slice(1).join('\n');}
   if(!execution.terminated||execution.status==='invalid'){grade.reason=`isolation: ${execution.reason}`;return grade;}
   if(execution.reason==='timeout'||execution.reason==='cancelled'){grade.reason=`grader ${execution.reason}; no deterministic judgment`;return grade;}

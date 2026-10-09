@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, chmod } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
+import fs, { existsSync } from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
 import { join } from 'node:path';
 import { runRestricted, exportStopped } from '../boundary.mjs';
 
@@ -158,4 +160,38 @@ test('fixed build resources and unchanged default resources are inspected before
   assert.equal(result.status,'completed',JSON.stringify(result));assert.equal(result.terminated,true);assert.equal(result.resources.memoryBytes,bytes);assert.equal(result.observedResources.memoryBytes,bytes);
   const observed=JSON.parse(result.stdout);if(profile==='typescript-build'){assert.equal(observed.options,'--max-old-space-size=768');assert.ok(observed.heap>=768*1024*1024&&observed.heap<850*1024*1024);}else assert.equal(observed.options,null);
  }
+});
+
+// No VM runs in these admission regressions. The actual boundary stages input,
+// invokes a protocol controller and performs its normal cleanup sequence.
+for(const phase of ['staging','create','configuration'])for(const trigger of ['deadline','cancelled'])test(`absolute admission: ${trigger} during ${phase} prevents the next side effect`,async t=>{
+ const root=await mkdtemp(join(tmpdir(),'durio-admission-')),input=join(root,'input');await mkdir(input);await writeFile(join(input,'fixed'),'fixed');
+ const controller=await outputController(root,'stdout',Buffer.from('should not start'),false,false),marker=join(root,'cutoff');
+ let source=await readFile(controller,'utf8');
+ source=source.replace("const fs=require('node:fs');",`const fs=require('node:fs');if(process.argv[2]===${JSON.stringify(phase==='create'?'create':'inspect')})fs.writeFileSync(${JSON.stringify(marker)},'cutoff');`);
+ await writeFile(controller,source);
+ const abort=new AbortController(),now=Date.now(),deadline=new Date(now+60000).toISOString(),copy=fs.promises.cp;
+ let expired=false;
+ const trip=()=>{expired=true;if(trigger==='cancelled')abort.abort('test cancellation during preparation');};
+ t.mock.method(Date,'now',()=>{if(phase!=='staging'&&existsSync(marker))trip();return now+(trigger==='deadline'&&expired?60001:0);});
+ t.mock.method(fs.promises,'cp',async(...args)=>{const result=await copy(...args);if(phase==='staging')trip();return result;});syncBuiltinESMExports();
+ t.after(()=>{t.mock.restoreAll();syncBuiltinESMExports();});
+ const result=await runRestricted({image:'unused@sha256:'+'a'.repeat(64),inputDir:input,runDir:join(root,'run'),command:['unused'],timeoutMs:5000,deadline,signal:abort.signal,containerExecutable:controller});
+ assert.equal(result.status,'not-started');assert.equal(result.started,false);assert.equal(result.reason,trigger);
+ assert.equal(result.admission.phase,phase==='staging'?'before-create':'before-start');
+ assert.equal(result.terminated,phase!=='staging','no create must not claim external termination');
+ assert.equal(result.control.some(c=>c.name==='create'),phase!=='staging');
+ if(phase!=='staging')assert.deepEqual(result.control.slice(-4).map(c=>c.name),['stop','stopped','delete','absence']);
+ const saved=JSON.parse(await readFile(join(root,'run/outcome.json'),'utf8'));assert.deepEqual(saved,result);
+ await assert.rejects(exportStopped(result,['missing'],join(root,'export')));
+});
+
+test('absolute deadline truncates execution time without extending a sub-100ms remainder',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'durio-admission-timer-')),input=join(root,'input');await mkdir(input);
+ const controller=await outputController(root,'stdout',Buffer.from('x'),false,true),now=Date.now();
+ // Advance only once the configuration exists, leaving 20ms at actual start.
+ t.mock.method(Date,'now',()=>now+(existsSync(join(root,'state.json'))?980:0));
+ const start=performance.now();
+ const result=await runRestricted({image:'unused@sha256:'+'a'.repeat(64),inputDir:input,runDir:join(root,'run'),command:['unused'],timeoutMs:5000,deadline:new Date(now+1000).toISOString(),containerExecutable:controller});
+ assert.equal(result.reason,'timeout');assert.equal(result.started,true);assert.equal(result.terminated,true);assert.ok(performance.now()-start<3000,'5s relative timeout must be shortened by the absolute deadline');
 });
