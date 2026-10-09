@@ -1,0 +1,2022 @@
+{
+  "ticket": 21,
+  "state": "ready-for-independent-review",
+  "sourceCommit": "a06e266c946e24c529b5bd344b98a1f0f6b61cb1",
+  "sourceTree": "0abd70151bbdfa3eb38b7d8561035f231ce1aa90",
+  "integrationBase": "cc8fd2d6aaee811382fe48cf35519f559ee4f842",
+  "sourceIdentity": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/candidate-identity-01.json",
+  "mode": "controlled transport through actual restricted product runtime; no model inference",
+  "image": "pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c",
+  "kernel": {
+    "path": "/Users/nineofour/Library/Application Support/com.apple.container/kernels/vmlinux-6.18.35-197-debug",
+    "bytes": 30423552,
+    "sha256": "fb2cfb79eb1ae19447a85d75682d7fa5cfec97e24beb2609a492b806e8072c8d"
+  },
+  "oci": {
+    "bytes": 128483328,
+    "sha256": "5bf960aeb9248258b352862a16b1ba56e6bd584ded83274214efc8e2724d9e96"
+  },
+  "linuxRuntime": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/linux-runtime-05",
+  "reports": [
+    {
+      "id": "final-matrix-03",
+      "counts": {
+        "planned": 7,
+        "started": 7,
+        "completed": 7,
+        "gradable": 6,
+        "passed": 5,
+        "passRate": 0.8333333333333334,
+        "completionRate": 1,
+        "coverageRate": 0.8571428571428571
+      },
+      "planSource": "e1:2293:eaee796e223a99dd37dfcf86966500c54a24727f646bd3e266ba957e7c3a1517",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/final-matrix-03-final-readback.json",
+      "budget": {
+        "requests": 24,
+        "knownTokens": 336,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "deadline": "2026-10-09T16:37:17.255Z",
+        "limits": {
+          "maxRequests": 48,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:37:17.255Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 24,
+        "knownTokens": 336,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "bySide": {
+          "candidate": {
+            "requests": 24,
+            "knownTokens": 336,
+            "knownValue": 0,
+            "missing": 0,
+            "completeness": "known"
+          }
+        },
+        "failed": {
+          "requests": 1,
+          "knownTokens": 14,
+          "knownValue": 0,
+          "missing": 0,
+          "completeness": "known"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 2228.362791999998,
+        "taskMs": 48920.971584000006,
+        "gradingMs": 9955.53983199999,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "final-matrix-03-trial-1",
+          "caseId": "local-fix",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:2326:4bdc2f2e3b6778789e0ef3ce8603060692748cbeebe56b53021990d72228b48e",
+          "grade": {
+            "source": "e1:2328:224e522f225edea329a805161f2c7834393a47406d04d08cf8cbcb3e0567cc40",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:2328:224e522f225edea329a805161f2c7834393a47406d04d08cf8cbcb3e0567cc40",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "final-matrix-03-trial-2",
+          "caseId": "multi-file",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:2364:29e3915225639ea3137288ddd021f0608bc966c94378cac25ecde2df099445fc",
+          "grade": {
+            "source": "e1:2366:c6ffb1d81d24fda7cf8eda3e94a15c729b37804c627ba341d1f6c24ab46f7183",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:2366:c6ffb1d81d24fda7cf8eda3e94a15c729b37804c627ba341d1f6c24ab46f7183",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "final-matrix-03-trial-3",
+          "caseId": "regression",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:2389:45658980251a7343944c0d114e1ea56e71d3c52559d01a8b1d4a43642abcdcbe",
+          "grade": {
+            "source": "e1:2391:a6caca1f87364f9508ec48fa84587f3ffd5442defadc6360e5bdf4970a7ce1f0",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:2391:a6caca1f87364f9508ec48fa84587f3ffd5442defadc6360e5bdf4970a7ce1f0",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "final-matrix-03-trial-4",
+          "caseId": "no-change",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:2408:8cc235ec751764ae84fdd9e19ad48c49345d9ef9c469e46407ac03eeca9b9f5f",
+          "grade": {
+            "source": "e1:2410:32e934e8f45aff68f130c57c7a4dc7546e946114529a9456c520b120ae3d3b16",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "analysis-check-v2"
+          },
+          "history": [
+            {
+              "source": "e1:2410:32e934e8f45aff68f130c57c7a4dc7546e946114529a9456c520b120ae3d3b16",
+              "judgment": "PASS",
+              "version": "analysis-check-v2"
+            }
+          ]
+        },
+        {
+          "id": "final-matrix-03-trial-5",
+          "caseId": "local-fix",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:2447:3dd2f582199899410fcea311698f20f740e427dcafab849ea3b66620f6c75588",
+          "grade": {
+            "source": "e1:2450:9aad67c125321420334d547c8cb3caa40c97a1e7a72d05ebeca6eaa60f95ed74",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:2450:9aad67c125321420334d547c8cb3caa40c97a1e7a72d05ebeca6eaa60f95ed74",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "final-matrix-03-trial-6",
+          "caseId": "local-fix",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:2461:f33d07cae017f9df568ab04a753c34aad9643e957fcffaf50afe506bfcbad8e7",
+          "grade": {
+            "source": "e1:2463:e6bc210f12951d563aaf0c285aca29a2d11a3d866546a11a3ec3b80cb05524ea",
+            "judgment": "FAIL",
+            "reason": "Fixed necessary Node check failed",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:2463:e6bc210f12951d563aaf0c285aca29a2d11a3d866546a11a3ec3b80cb05524ea",
+              "judgment": "FAIL",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "final-matrix-03-trial-7",
+          "caseId": "local-fix",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:2493:f8e8f141f64646c9f6eb57751ed3ee23ff033ea8796c2d24bc86ddddc9f02071",
+          "grade": {
+            "source": "e1:2495:b04bc04860e64c5123ef12b5165ff4e6f9fde3cc66e0cb7c338b37f4d33acd7c",
+            "judgment": "unknown",
+            "reason": "Error: CONTROLLED_GRADER_CRASH",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:2495:b04bc04860e64c5123ef12b5165ff4e6f9fde3cc66e0cb7c338b37f4d33acd7c",
+              "judgment": "unknown",
+              "version": "node-check-v1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "final-original-03",
+      "counts": {
+        "planned": 2,
+        "started": 1,
+        "completed": 0,
+        "gradable": 0,
+        "passed": 0,
+        "passRate": null,
+        "completionRate": 0,
+        "coverageRate": 0
+      },
+      "planSource": "e1:2630:0b6db03df3c47f476f4e2aad3113dcab6d4004bc7c6cbe99e8e2864b19a07daa",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/final-original-03-final-readback.json",
+      "budget": {
+        "requests": 1,
+        "knownTokens": 14,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "deadline": "2026-10-09T16:38:32.154Z",
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:38:32.154Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 1,
+        "knownTokens": 14,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "bySide": {
+          "candidate": {
+            "requests": 1,
+            "knownTokens": 14,
+            "knownValue": 0,
+            "missing": 0,
+            "completeness": "known"
+          }
+        },
+        "failed": {
+          "requests": 1,
+          "knownTokens": 14,
+          "knownValue": 0,
+          "missing": 0,
+          "completeness": "known"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 2094.9268750000047,
+        "taskMs": 6202.690499999997,
+        "gradingMs": 0,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "final-original-03-trial-1",
+          "caseId": "local-fix",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "original-error",
+          "valid": false,
+          "reason": "execution_error",
+          "outcome": "e1:2644:8d985aba439fc8b9eda41609b0ee48b14ab20a9fd26a9f9a9c413f95d8063fb5",
+          "grade": null,
+          "history": []
+        },
+        {
+          "id": "final-original-03-trial-2",
+          "caseId": "no-change",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "not-run",
+          "valid": false,
+          "reason": "execution_error",
+          "outcome": "e1:2646:ab80b15337c73e554ca5a30a54e83442b80b1790d621fa2fd20d8fcbaec6d5b4",
+          "grade": null,
+          "history": []
+        }
+      ]
+    },
+    {
+      "id": "final-unknown-03",
+      "counts": {
+        "planned": 2,
+        "started": 1,
+        "completed": 0,
+        "gradable": 1,
+        "passed": 0,
+        "passRate": 0,
+        "completionRate": 0,
+        "coverageRate": 0.5
+      },
+      "planSource": "e1:2780:a28bf8cabe5071d7c5bcabdb96981f7a1793fb00a90f4703b9d89b81fa462138",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/final-unknown-03-final-readback.json",
+      "budget": {
+        "requests": 1,
+        "knownTokens": 0,
+        "knownValue": 0,
+        "missing": 1,
+        "completeness": "unknown",
+        "deadline": "2026-10-09T16:38:45.400Z",
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:38:45.400Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 1,
+        "knownTokens": 0,
+        "knownValue": 0,
+        "missing": 1,
+        "completeness": "unknown",
+        "bySide": {
+          "candidate": {
+            "requests": 1,
+            "knownTokens": 0,
+            "knownValue": 0,
+            "missing": 1,
+            "completeness": "unknown"
+          }
+        },
+        "failed": {
+          "requests": 1,
+          "knownTokens": 0,
+          "knownValue": 0,
+          "missing": 1,
+          "completeness": "unknown"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 2081.063916999992,
+        "taskMs": 6957.627208000005,
+        "gradingMs": 1609.9630409999954,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "final-unknown-03-trial-1",
+          "caseId": "local-fix",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "budget-stopped",
+          "valid": true,
+          "reason": "Error: BUDGET_UNKNOWN_USAGE",
+          "outcome": "e1:2794:515578f8cb4e5655e26c8cea0bbf216625fae887c30ae91f870602745d943b2c",
+          "grade": {
+            "source": "e1:2796:a4f1f22e705de08e608d7193cfa6e01c21f866fa477f98f03203c90c7df0593e",
+            "judgment": "FAIL",
+            "reason": "Fixed necessary Node check failed",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:2796:a4f1f22e705de08e608d7193cfa6e01c21f866fa477f98f03203c90c7df0593e",
+              "judgment": "FAIL",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "final-unknown-03-trial-2",
+          "caseId": "no-change",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "not-run",
+          "valid": false,
+          "reason": "Error: BUDGET_UNKNOWN_USAGE",
+          "outcome": "e1:2798:984c244d75869931da842b6331fe394a3df56a132d5c816157122ed7b688e23c",
+          "grade": null,
+          "history": []
+        }
+      ]
+    },
+    {
+      "id": "final-compaction-03",
+      "counts": {
+        "planned": 2,
+        "started": 1,
+        "completed": 0,
+        "gradable": 1,
+        "passed": 0,
+        "passRate": 0,
+        "completionRate": 0,
+        "coverageRate": 0.5
+      },
+      "planSource": "e1:2932:0ece7ee90081ee4d2bb8f28d14c9a72d99bbb9649adaefc508ba947f81330d90",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/final-compaction-03-final-readback.json",
+      "budget": {
+        "requests": 2,
+        "knownTokens": 28,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "deadline": "2026-10-09T16:38:59.645Z",
+        "limits": {
+          "maxRequests": 2,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:38:59.645Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 2,
+        "knownTokens": 28,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "bySide": {
+          "candidate": {
+            "requests": 2,
+            "knownTokens": 28,
+            "knownValue": 0,
+            "missing": 0,
+            "completeness": "known"
+          }
+        },
+        "failed": {
+          "requests": 2,
+          "knownTokens": 28,
+          "knownValue": 0,
+          "missing": 0,
+          "completeness": "known"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 2080.2472500000003,
+        "taskMs": 10181.756625000009,
+        "gradingMs": 1583.8164580000011,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "final-compaction-03-trial-1",
+          "caseId": "local-fix",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "budget-stopped",
+          "valid": true,
+          "reason": "Error: BUDGET_REQUEST_LIMIT",
+          "outcome": "e1:2952:925ddb44a9e7aac281af8f0aa2cfb057028621a67995f4e88352b2d18a2cebb8",
+          "grade": {
+            "source": "e1:2954:b7000565801b81422bccdb0974c6500e2060f4ab7b26422adac26094225af4c2",
+            "judgment": "FAIL",
+            "reason": "Fixed necessary Node check failed",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:2954:b7000565801b81422bccdb0974c6500e2060f4ab7b26422adac26094225af4c2",
+              "judgment": "FAIL",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "final-compaction-03-trial-2",
+          "caseId": "no-change",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "not-run",
+          "valid": false,
+          "reason": "Error: BUDGET_REQUEST_LIMIT",
+          "outcome": "e1:2956:fc50f50e0fbf9b187edf173dedb563bbc55b234a569e525565746d8f9ade6ee4",
+          "grade": null,
+          "history": []
+        }
+      ]
+    },
+    {
+      "id": "final-deadline-03",
+      "counts": {
+        "planned": 2,
+        "started": 1,
+        "completed": 0,
+        "gradable": 0,
+        "passed": 0,
+        "passRate": null,
+        "completionRate": 0,
+        "coverageRate": 0
+      },
+      "planSource": "e1:3090:98402981e009a11a5b0dea28210c50b3e8aeafc2ab6a75788dc84046fa7440df",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/final-deadline-03-final-readback.json",
+      "budget": {
+        "requests": 1,
+        "knownTokens": 14,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "deadline": "2026-10-09T16:09:42.173Z",
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:09:42.173Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 1,
+        "knownTokens": 14,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "bySide": {
+          "candidate": {
+            "requests": 1,
+            "knownTokens": 14,
+            "knownValue": 0,
+            "missing": 0,
+            "completeness": "known"
+          }
+        },
+        "failed": {
+          "requests": 1,
+          "knownTokens": 14,
+          "knownValue": 0,
+          "missing": 0,
+          "completeness": "known"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 2134.1781670000055,
+        "taskMs": 22367.778583000007,
+        "gradingMs": 0.019041999999899417,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "final-deadline-03-trial-1",
+          "caseId": "local-fix",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "budget-stopped",
+          "valid": true,
+          "reason": "BUDGET_DEADLINE",
+          "outcome": "e1:3104:edb086100fda53d2cf9c947349e4d8d67ad94240eed07bba85665843343b9280",
+          "grade": {
+            "source": "e1:3106:5de2e2d45e0ecd7fbb6a8aa579db46a555b519941841dc497048d94c60e15a33",
+            "judgment": "unknown",
+            "reason": "budget deadline before grading; no deterministic judgment",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:3106:5de2e2d45e0ecd7fbb6a8aa579db46a555b519941841dc497048d94c60e15a33",
+              "judgment": "unknown",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "final-deadline-03-trial-2",
+          "caseId": "no-change",
+          "version": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+          "status": "not-run",
+          "valid": false,
+          "reason": "BUDGET_DEADLINE",
+          "outcome": "e1:3108:fde43ddfa38fbc26443ef9d287ab884db33cda0caa060f09e51f3b236f070fa0",
+          "grade": null,
+          "history": []
+        }
+      ]
+    },
+    {
+      "id": "service-failure-02",
+      "counts": {
+        "planned": 2,
+        "started": 1,
+        "completed": 0,
+        "gradable": 1,
+        "passed": 0,
+        "passRate": 0,
+        "completionRate": 0,
+        "coverageRate": 0.5
+      },
+      "planSource": "e1:1831:1eb357146543f965b231be363e1f0ca1c4b81fb3a89d1af18d2a32b64324e580",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/service-failure-02-final-readback.json",
+      "budget": {
+        "requests": 1,
+        "knownTokens": 0,
+        "knownValue": 0,
+        "missing": 1,
+        "completeness": "unknown",
+        "deadline": "2026-10-09T16:21:33.079Z",
+        "limits": {
+          "maxRequests": 12,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:21:33.079Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 1,
+        "knownTokens": 0,
+        "knownValue": 0,
+        "missing": 1,
+        "completeness": "unknown",
+        "bySide": {
+          "candidate": {
+            "requests": 1,
+            "knownTokens": 0,
+            "knownValue": 0,
+            "missing": 1,
+            "completeness": "unknown"
+          }
+        },
+        "failed": {
+          "requests": 1,
+          "knownTokens": 0,
+          "knownValue": 0,
+          "missing": 1,
+          "completeness": "unknown"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 27.500332999999955,
+        "taskMs": 6315.604334,
+        "gradingMs": 1520.4492500000051,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "service-failure-02-trial-1",
+          "caseId": "local-fix",
+          "version": "d6089e5ef75ca3ba960759b786cae185c1e7188133ea7ce8e4e6aa9ae6903bd7",
+          "status": "service-error",
+          "valid": true,
+          "reason": "PROVIDER_HTTP_503",
+          "outcome": "e1:1844:8f74f378923973aa80c16a69b377164295d522a1973974b26457dd76a08cb716",
+          "grade": {
+            "source": "e1:1846:d5c341510e02d11ea2f156f88186db0c574306f421752b079edb4264daa19f35",
+            "judgment": "FAIL",
+            "reason": "Fixed necessary Node check failed",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:1846:d5c341510e02d11ea2f156f88186db0c574306f421752b079edb4264daa19f35",
+              "judgment": "FAIL",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "service-failure-02-trial-2",
+          "caseId": "no-change",
+          "version": "d6089e5ef75ca3ba960759b786cae185c1e7188133ea7ce8e4e6aa9ae6903bd7",
+          "status": "not-run",
+          "valid": false,
+          "reason": "Error: BUDGET_UNKNOWN_USAGE",
+          "outcome": "e1:1848:86203e3ead61eae8c44b36c6ae06eccc25e7c4c8e9f1cd76f9454c5a303bd143",
+          "grade": null,
+          "history": []
+        }
+      ]
+    },
+    {
+      "id": "timeout-02",
+      "counts": {
+        "planned": 2,
+        "started": 2,
+        "completed": 0,
+        "gradable": 2,
+        "passed": 0,
+        "passRate": 0,
+        "completionRate": 0,
+        "coverageRate": 1
+      },
+      "planSource": "e1:1980:40064353800b883b5069fc7a9b7e1d595d5dda46b7a7f7f7edd7c5dd0ad4bd85",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/timeout-02-final-readback.json",
+      "budget": {
+        "requests": 1,
+        "knownTokens": 14,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "deadline": "2026-10-09T16:21:47.264Z",
+        "limits": {
+          "maxRequests": 12,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:21:47.264Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 1,
+        "knownTokens": 14,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "bySide": {
+          "candidate": {
+            "requests": 1,
+            "knownTokens": 14,
+            "knownValue": 0,
+            "missing": 0,
+            "completeness": "known"
+          }
+        },
+        "failed": {
+          "requests": 1,
+          "knownTokens": 14,
+          "knownValue": 0,
+          "missing": 0,
+          "completeness": "known"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 50.93412500000704,
+        "taskMs": 14546.243499999997,
+        "gradingMs": 3017.461750000002,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "timeout-02-trial-1",
+          "caseId": "local-fix",
+          "version": "d6089e5ef75ca3ba960759b786cae185c1e7188133ea7ce8e4e6aa9ae6903bd7",
+          "status": "timeout",
+          "valid": true,
+          "reason": "timeout",
+          "outcome": "e1:1987:d412e0edfda37280264abe331e36b00b69591e38ec2dbc0cd92aa7c694eb4dc0",
+          "grade": {
+            "source": "e1:1989:f584567831c95601413d611b23cc985ff46a0880881850f133a82ea444e7086b",
+            "judgment": "FAIL",
+            "reason": "Fixed necessary Node check failed",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:1989:f584567831c95601413d611b23cc985ff46a0880881850f133a82ea444e7086b",
+              "judgment": "FAIL",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "timeout-02-trial-2",
+          "caseId": "no-change",
+          "version": "d6089e5ef75ca3ba960759b786cae185c1e7188133ea7ce8e4e6aa9ae6903bd7",
+          "status": "timeout",
+          "valid": true,
+          "reason": "timeout",
+          "outcome": "e1:2000:f45c38ed56613bf462b7effd6e7a3c650959c87b403875c911bb2ff9f282513d",
+          "grade": {
+            "source": "e1:2002:cc2f81d3ab5f9aec217bb35112e39b54498e8f5edf4d4b26a46525ac1d08036d",
+            "judgment": "FAIL",
+            "reason": "Fixed necessary Node check failed",
+            "version": "analysis-check-v2"
+          },
+          "history": [
+            {
+              "source": "e1:2002:cc2f81d3ab5f9aec217bb35112e39b54498e8f5edf4d4b26a46525ac1d08036d",
+              "judgment": "FAIL",
+              "version": "analysis-check-v2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cancel-02",
+      "counts": {
+        "planned": 2,
+        "started": 1,
+        "completed": 0,
+        "gradable": 0,
+        "passed": 0,
+        "passRate": null,
+        "completionRate": 0,
+        "coverageRate": 0
+      },
+      "planSource": "e1:2135:c4fe71469b2f8ebad726809534473f0fc10b00181e43b892189e32279f7507f6",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/cancel-02-final-readback.json",
+      "budget": {
+        "requests": 1,
+        "knownTokens": 14,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "deadline": "2026-10-09T16:22:11.010Z",
+        "limits": {
+          "maxRequests": 12,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:22:11.010Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 1,
+        "knownTokens": 14,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "bySide": {
+          "candidate": {
+            "requests": 1,
+            "knownTokens": 14,
+            "knownValue": 0,
+            "missing": 0,
+            "completeness": "known"
+          }
+        },
+        "failed": {
+          "requests": 1,
+          "knownTokens": 14,
+          "knownValue": 0,
+          "missing": 0,
+          "completeness": "known"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 25.427959000000556,
+        "taskMs": 10269.281624999996,
+        "gradingMs": 1.5157920000056038,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "cancel-02-trial-1",
+          "caseId": "local-fix",
+          "version": "d6089e5ef75ca3ba960759b786cae185c1e7188133ea7ce8e4e6aa9ae6903bd7",
+          "status": "cancelled",
+          "valid": true,
+          "reason": "cancelled",
+          "outcome": "e1:2148:317134705c68891fd931746e3123e2333798e80212fe2109a552308d5773b405",
+          "grade": {
+            "source": "e1:2150:5a0cbf9d81c9d66552e05f873a8221916b3b96203675f7bb92c241d8a5a6c612",
+            "judgment": "unknown",
+            "reason": "Error: cancelled_before_start",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:2150:5a0cbf9d81c9d66552e05f873a8221916b3b96203675f7bb92c241d8a5a6c612",
+              "judgment": "unknown",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "cancel-02-trial-2",
+          "caseId": "no-change",
+          "version": "d6089e5ef75ca3ba960759b786cae185c1e7188133ea7ce8e4e6aa9ae6903bd7",
+          "status": "not-run",
+          "valid": false,
+          "reason": "cancelled",
+          "outcome": "e1:2152:51e0278423f6c704336fab9ef65d6feecd347b13e5da80777017df555f8e0d8e",
+          "grade": null,
+          "history": []
+        }
+      ]
+    },
+    {
+      "id": "export-refusal-01",
+      "counts": {
+        "planned": 2,
+        "started": 1,
+        "completed": 0,
+        "gradable": 0,
+        "passed": 0,
+        "passRate": null,
+        "completionRate": 0,
+        "coverageRate": 0
+      },
+      "planSource": "e1:1501:7c93cc00e8c859d8633b6b5ed9ff2c760c283c0bf663a71f3bde929f209c0aee",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/export-refusal-01-final-readback.json",
+      "budget": {
+        "requests": 2,
+        "knownTokens": 28,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "deadline": "2026-10-09T16:09:46.442Z",
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:09:46.442Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 2,
+        "knownTokens": 28,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "bySide": {
+          "candidate": {
+            "requests": 2,
+            "knownTokens": 28,
+            "knownValue": 0,
+            "missing": 0,
+            "completeness": "known"
+          }
+        },
+        "failed": {
+          "requests": 2,
+          "knownTokens": 28,
+          "knownValue": 0,
+          "missing": 0,
+          "completeness": "known"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 30.49962499999674,
+        "taskMs": 6825.207334000006,
+        "gradingMs": 0,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "export-refusal-01-trial-1",
+          "caseId": "local-fix",
+          "version": "5e8785f095266b663faec53d1631c9b5676c317353224197a4ee45e2414b198a",
+          "status": "original-error",
+          "valid": false,
+          "reason": "Error: EVAL_UNSAFE_FILE: math.ts",
+          "outcome": "e1:1518:2dccff83d84c538966e32ef349e31fd1bc963a21eaac62073d8111e80ca02fdb",
+          "grade": null,
+          "history": []
+        },
+        {
+          "id": "export-refusal-01-trial-2",
+          "caseId": "no-change",
+          "version": "5e8785f095266b663faec53d1631c9b5676c317353224197a4ee45e2414b198a",
+          "status": "not-run",
+          "valid": false,
+          "reason": "Error: EVAL_UNSAFE_FILE: math.ts",
+          "outcome": "e1:1520:a3825d6f014a9296ff155c68efe1631763b43a3970a7575a2a3d98abde15dea1",
+          "grade": null,
+          "history": []
+        }
+      ]
+    },
+    {
+      "id": "matrix-01",
+      "counts": {
+        "planned": 7,
+        "started": 7,
+        "completed": 7,
+        "gradable": 6,
+        "passed": 5,
+        "passRate": 0.8333333333333334,
+        "completionRate": 1,
+        "coverageRate": 0.8571428571428571
+      },
+      "planSource": "e1:432:2e5c4e39598bff02c825819b544c1d2e95b590a308d974801158aa97a2e698a8",
+      "planAvailability": "protected",
+      "outcomeAvailability": "protected",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/matrix-01-final-readback.json",
+      "budget": {
+        "requests": 23,
+        "knownTokens": 322,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "deadline": "2026-10-09T16:07:27.606Z",
+        "limits": {
+          "maxRequests": 48,
+          "maxTokens": 65536,
+          "maxRequestTokens": 1024,
+          "deadline": "2026-10-09T16:07:27.606Z",
+          "unknownUpperBound": null
+        }
+      },
+      "cost": {
+        "kind": "estimate",
+        "price": {
+          "version": "offline-zero-v1",
+          "source": "deterministic local transport; no model inference or paid network",
+          "currency": "USD",
+          "perMillionTokens": 0
+        },
+        "requests": 23,
+        "knownTokens": 322,
+        "knownValue": 0,
+        "missing": 0,
+        "completeness": "known",
+        "bySide": {
+          "candidate": {
+            "requests": 23,
+            "knownTokens": 322,
+            "knownValue": 0,
+            "missing": 0,
+            "completeness": "known"
+          }
+        },
+        "failed": {
+          "requests": 1,
+          "knownTokens": 14,
+          "knownValue": 0,
+          "missing": 0,
+          "completeness": "known"
+        },
+        "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+      },
+      "timing": {
+        "preparationMs": 161.6344999999983,
+        "taskMs": 46053.01970799999,
+        "gradingMs": 9104.025208000012,
+        "clock": "host monotonic elapsed per stage; plan absolute deadline persists across restarts",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      },
+      "trials": [
+        {
+          "id": "matrix-01-trial-1",
+          "caseId": "local-fix",
+          "version": "5e8785f095266b663faec53d1631c9b5676c317353224197a4ee45e2414b198a",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:463:d9274595d32546795a0431af3992f01bca55f57a88af925cb41ed8c0749b0210",
+          "grade": {
+            "source": "e1:2156:6906472e96e80543e8725eab1ee0373442bd975827bc13a919ae28996a716f4c",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:465:381a33d6507a7b6666ce20dc9e342fd6cde9703b3e85659d508095e4c648d374",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            },
+            {
+              "source": "e1:2156:6906472e96e80543e8725eab1ee0373442bd975827bc13a919ae28996a716f4c",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "matrix-01-trial-2",
+          "caseId": "multi-file",
+          "version": "5e8785f095266b663faec53d1631c9b5676c317353224197a4ee45e2414b198a",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:501:29aba7a62bee88ddb8c10c787f29c5494f3b1629542f1057d28fa414c2623cf0",
+          "grade": {
+            "source": "e1:503:d639ccece7a5ba1240d04527557ea8a60f973100e932df8279d123d4c7a181d3",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:503:d639ccece7a5ba1240d04527557ea8a60f973100e932df8279d123d4c7a181d3",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "matrix-01-trial-3",
+          "caseId": "regression",
+          "version": "5e8785f095266b663faec53d1631c9b5676c317353224197a4ee45e2414b198a",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:520:05691e653c2b335d9f879b78262ba16da894c7b6f21232d715d1114dc4db6071",
+          "grade": {
+            "source": "e1:522:cfc9cf2f9dbd1966697c0eb09f3931ebfc1b3fea15d2f925e3bdecb1cde102dc",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:522:cfc9cf2f9dbd1966697c0eb09f3931ebfc1b3fea15d2f925e3bdecb1cde102dc",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "matrix-01-trial-4",
+          "caseId": "no-change",
+          "version": "5e8785f095266b663faec53d1631c9b5676c317353224197a4ee45e2414b198a",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:539:1066e6a9e8cb0603fb4519933315b21a0e4ba9bb3c7d5479f9493654f9b0924e",
+          "grade": {
+            "source": "e1:2157:17b07747d5f17559886af79fa79b89e82a39af068b6c7c1b77fe92fa32506456",
+            "judgment": "unknown",
+            "reason": "grader execution failed; no deterministic judgment",
+            "version": "analysis-coverage-r2"
+          },
+          "history": [
+            {
+              "source": "e1:541:ab7accdefb0555bfa0e2d9b72695f05e6f0bc8c53b5d3f8894cb60a68c4e23dd",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            },
+            {
+              "source": "e1:2157:17b07747d5f17559886af79fa79b89e82a39af068b6c7c1b77fe92fa32506456",
+              "judgment": "unknown",
+              "version": "analysis-coverage-r2"
+            }
+          ]
+        },
+        {
+          "id": "matrix-01-trial-5",
+          "caseId": "local-fix",
+          "version": "5e8785f095266b663faec53d1631c9b5676c317353224197a4ee45e2414b198a",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:552:9e3f885de3b43d1af097c9d5b861142cd96b40d6fb080b237c20ac463ac2d301",
+          "grade": {
+            "source": "e1:2158:cfde86b0fb7ccde55db2f946fe1aefbc9ce8b7c6f6c9ca075faae684c04b5e05",
+            "judgment": "FAIL",
+            "reason": "Fixed necessary Node check failed",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:554:c3348461780d56f4e4b600a6b5517352e07e0481149b757d9e7a4f178f1f81d4",
+              "judgment": "FAIL",
+              "version": "node-check-v1"
+            },
+            {
+              "source": "e1:2158:cfde86b0fb7ccde55db2f946fe1aefbc9ce8b7c6f6c9ca075faae684c04b5e05",
+              "judgment": "FAIL",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "matrix-01-trial-6",
+          "caseId": "local-fix",
+          "version": "5e8785f095266b663faec53d1631c9b5676c317353224197a4ee45e2414b198a",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:583:79d7e9910573126b31c59d9a4ddc21ca88e1fca0f2930ce345d17457e93925b2",
+          "grade": {
+            "source": "e1:2159:3b9ae4f5e5528e1c08007f58afe78232a170000117c06dc367c2e0a1347451d2",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:585:7ed0c09548c36bdac36d4cc177cadd0e45b92b56ab6c6397ebd28ddeb80883fb",
+              "judgment": "unknown",
+              "version": "node-check-v1"
+            },
+            {
+              "source": "e1:2159:3b9ae4f5e5528e1c08007f58afe78232a170000117c06dc367c2e0a1347451d2",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            }
+          ]
+        },
+        {
+          "id": "matrix-01-trial-7",
+          "caseId": "local-fix",
+          "version": "5e8785f095266b663faec53d1631c9b5676c317353224197a4ee45e2414b198a",
+          "status": "completed",
+          "valid": true,
+          "reason": null,
+          "outcome": "e1:622:259dc30ae54987064a9089ed68b4bbc9f18cbccd93ee3e49d174c2257feba86c",
+          "grade": {
+            "source": "e1:2160:9396c01ad6e582831d0d2cc4f9fe63dc05014fef85673646a0295ff29033359a",
+            "judgment": "PASS",
+            "reason": "All fixed necessary requirements verified",
+            "version": "node-check-v1"
+          },
+          "history": [
+            {
+              "source": "e1:625:0118512ae2be206f75ed35b100b088eabfcd62ada05c047260dfc67e3ce7882f",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            },
+            {
+              "source": "e1:2160:9396c01ad6e582831d0d2cc4f9fe63dc05014fef85673646a0295ff29033359a",
+              "judgment": "PASS",
+              "version": "node-check-v1"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "probes": [
+    {
+      "source": "e1:2443:67abf8e51a9c4064ed473e5111017a2e63fbb137ffa6d02f21dd92d62108558f",
+      "kind": "eval.boundary-check",
+      "trialId": "final-matrix-03-trial-5",
+      "valid": true,
+      "probe": {
+        "sha256": "3b83b01bee3f5669c77d048ef176bfcf1f8006e40ac8638e070ea1beb13bfe3c",
+        "bytes": 4031
+      },
+      "descendant": {
+        "sha256": "f6ed7423630b5320721e917e370156e36bfcc698706ed907fd9383139b103462",
+        "bytes": 2377
+      },
+      "heartbeatStopped": true,
+      "assetsUnchanged": true,
+      "hostSentinelAlive": true,
+      "syntheticAssets": [
+        {
+          "name": "host-home-key",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-RafElz/host-home-key",
+          "sha256": "4ee99c4e862896bd6a041bed0f93825ca92a8a64872dfbaea8898dec2cea9483"
+        },
+        {
+          "name": "other-trial-answer",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-RafElz/other-trial-answer",
+          "sha256": "a742f9820a9995a1eb1cf9f0d131764dc17bf9a8b961aaa3439a6561dc547e69"
+        },
+        {
+          "name": "grader-expected",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-RafElz/grader-expected",
+          "sha256": "e5e6a12f4a622810ebc4463f6e1dcf1f2d5282d352efc02037633c1c01939973"
+        },
+        {
+          "name": "report",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-RafElz/report",
+          "sha256": "24512edba5fef1f632d1a243d01f95a28c3d8e60b1f05d5b08f3adc137e8322d"
+        },
+        {
+          "name": "shared-git",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-RafElz/shared-git",
+          "sha256": "ec2140ee9e916f4512bf0e00c3ce68574d9e76d2bbf607423121313963643f2d"
+        }
+      ],
+      "observed": {
+        "results": [
+          {
+            "name": "host-home-key_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "host-home-key_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "other-trial-answer_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "other-trial-answer_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "grader-expected_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "grader-expected_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "report_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "report_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "shared-git_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "shared-git_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "readonly:/deps/dist/src/runtime.js",
+            "blocked": true,
+            "code": "EACCES"
+          },
+          {
+            "name": "readonly:/deps/node_modules/@earendil-works/pi-ai/package.json",
+            "blocked": true,
+            "code": "EACCES"
+          },
+          {
+            "name": "readonly:/input/trial.json",
+            "blocked": true,
+            "code": "EROFS"
+          },
+          {
+            "name": "readonly:/boundary/restrict.py",
+            "blocked": true,
+            "code": "EROFS"
+          },
+          {
+            "name": "host-process",
+            "blocked": true,
+            "code": "ESRCH"
+          },
+          {
+            "name": "host-control-socket",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "host-credentials",
+            "blocked": true
+          },
+          {
+            "name": "ipv4_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "ipv6_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "vsock_control_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "netlink_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "packet_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "restore_root",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "ptrace_process_channel",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "process_vm_read_channel",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "new_network_namespace",
+            "blocked": true,
+            "code": 1,
+            "stderr": "unshare: unshare failed: Operation not permitted"
+          }
+        ],
+        "evidence": {
+          "results": [
+            {
+              "name": "ipv4_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "ipv6_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "vsock_control_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "netlink_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "packet_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "restore_root",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "ptrace_process_channel",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "process_vm_read_channel",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "new_network_namespace",
+              "blocked": true,
+              "code": 1,
+              "stderr": "unshare: unshare failed: Operation not permitted"
+            }
+          ],
+          "uid": 1000,
+          "gid": 1000,
+          "kernel": "6.18.35",
+          "architecture": "aarch64",
+          "packages": "libseccomp2:arm64\t2.5.4-1+deb12u1\npython3\t3.11.2-1+b1\nutil-linux\t2.38.1-5+deb12u3\n",
+          "status": "Name:\tpython3\nUmask:\t0022\nState:\tR (running)\nTgid:\t28\nNgid:\t0\nPid:\t28\nPPid:\t21\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t \nNStgid:\t28\nNSpid:\t28\nNSpgid:\t21\nNSsid:\t21\nKthread:\t0\nVmPeak:\t   16064 kB\nVmSize:\t   16016 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   10820 kB\nVmRSS:\t   10820 kB\nRssAnon:\t    5380 kB\nRssFile:\t    5440 kB\nRssShmem:\t       0 kB\nVmData:\t    6720 kB\nVmStk:\t     132 kB\nVmExe:\t    5208 kB\nVmLib:\t    2808 kB\nVmPTE:\t      64 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t0\nuntag_mask:\t0xffffffffffffff\nThreads:\t1\nSigQ:\t0/2503\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000000002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t1\nSpeculation_Store_Bypass:\tvulnerable\nSpeculationIndirectBranch:\tunknown\nCpus_allowed:\t3\nCpus_allowed_list:\t0-1\nMems_allowed:\t0001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t51\nnonvoluntary_ctxt_switches:\t2\n",
+          "initCommand": "node /deps/dist/src/eval/guest.js ",
+          "networkDevices": "Inter-|   Receive                                                |  Transmit\n face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed\n    lo:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\n"
+        }
+      },
+      "descendantObserved": {
+        "results": [
+          {
+            "name": "ipv4_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "ipv6_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "vsock_control_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "netlink_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "packet_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "restore_root",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "ptrace_process_channel",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "process_vm_read_channel",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "new_network_namespace",
+            "blocked": true,
+            "code": 1,
+            "stderr": "unshare: unshare failed: Operation not permitted"
+          }
+        ],
+        "uid": 1000,
+        "gid": 1000,
+        "kernel": "6.18.35",
+        "architecture": "aarch64",
+        "packages": "libseccomp2:arm64\t2.5.4-1+deb12u1\npython3\t3.11.2-1+b1\nutil-linux\t2.38.1-5+deb12u3\n",
+        "status": "Name:\tpython3\nUmask:\t0022\nState:\tR (running)\nTgid:\t38\nNgid:\t0\nPid:\t38\nPPid:\t31\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t \nNStgid:\t38\nNSpid:\t38\nNSpgid:\t31\nNSsid:\t31\nKthread:\t0\nVmPeak:\t   16064 kB\nVmSize:\t   16016 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   10808 kB\nVmRSS:\t   10808 kB\nRssAnon:\t    5380 kB\nRssFile:\t    5428 kB\nRssShmem:\t       0 kB\nVmData:\t    6720 kB\nVmStk:\t     132 kB\nVmExe:\t    5208 kB\nVmLib:\t    2808 kB\nVmPTE:\t      64 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t0\nuntag_mask:\t0xffffffffffffff\nThreads:\t1\nSigQ:\t0/2503\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000000002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t1\nSpeculation_Store_Bypass:\tvulnerable\nSpeculationIndirectBranch:\tunknown\nCpus_allowed:\t3\nCpus_allowed_list:\t0-1\nMems_allowed:\t0001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t16\nnonvoluntary_ctxt_switches:\t0\n",
+        "initCommand": "node /deps/dist/src/eval/guest.js ",
+        "networkDevices": "Inter-|   Receive                                                |  Transmit\n face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed\n    lo:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\n"
+      }
+    },
+    {
+      "source": "e1:2449:151fadc8eabcd4d09246b893be8aedaa1800a9cddcdb8caba533b6ec94d0acbd",
+      "kind": "eval.grading-boundary-check",
+      "trialId": "final-matrix-03-trial-5",
+      "valid": true,
+      "probe": {
+        "sha256": "8f4746d7df249164589db72e28fb1597cabfa4847d4eb76b4ddf86d2888dff40",
+        "bytes": 4012
+      },
+      "descendant": null,
+      "heartbeatStopped": true,
+      "assetsUnchanged": true,
+      "hostSentinelAlive": true,
+      "syntheticAssets": [
+        {
+          "name": "host-home-key",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-CdChrd/host-home-key",
+          "sha256": "4ee99c4e862896bd6a041bed0f93825ca92a8a64872dfbaea8898dec2cea9483"
+        },
+        {
+          "name": "other-trial-answer",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-CdChrd/other-trial-answer",
+          "sha256": "a742f9820a9995a1eb1cf9f0d131764dc17bf9a8b961aaa3439a6561dc547e69"
+        },
+        {
+          "name": "grader-expected",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-CdChrd/grader-expected",
+          "sha256": "e5e6a12f4a622810ebc4463f6e1dcf1f2d5282d352efc02037633c1c01939973"
+        },
+        {
+          "name": "report",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-CdChrd/report",
+          "sha256": "24512edba5fef1f632d1a243d01f95a28c3d8e60b1f05d5b08f3adc137e8322d"
+        },
+        {
+          "name": "shared-git",
+          "path": "/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio21-CdChrd/shared-git",
+          "sha256": "ec2140ee9e916f4512bf0e00c3ce68574d9e76d2bbf607423121313963643f2d"
+        }
+      ],
+      "observed": {
+        "results": [
+          {
+            "name": "host-home-key_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "host-home-key_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "other-trial-answer_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "other-trial-answer_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "grader-expected_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "grader-expected_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "report_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "report_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "shared-git_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "shared-git_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "readonly:/deps/dist/src/runtime.js",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "readonly:/deps/node_modules/@earendil-works/pi-ai/package.json",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "readonly:/input/trial.json",
+            "blocked": true,
+            "code": "EROFS"
+          },
+          {
+            "name": "readonly:/boundary/restrict.py",
+            "blocked": true,
+            "code": "EROFS"
+          },
+          {
+            "name": "host-process",
+            "blocked": true,
+            "code": "ESRCH"
+          },
+          {
+            "name": "host-control-socket",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "host-credentials",
+            "blocked": true
+          },
+          {
+            "name": "ipv4_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "ipv6_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "vsock_control_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "netlink_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "packet_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "restore_root",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "ptrace_process_channel",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "process_vm_read_channel",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "new_network_namespace",
+            "blocked": true,
+            "code": 1,
+            "stderr": "unshare: unshare failed: Operation not permitted"
+          }
+        ],
+        "evidence": {
+          "results": [
+            {
+              "name": "ipv4_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "ipv6_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "vsock_control_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "netlink_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "packet_socket",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "restore_root",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "ptrace_process_channel",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "process_vm_read_channel",
+              "blocked": true,
+              "errno": 1
+            },
+            {
+              "name": "new_network_namespace",
+              "blocked": true,
+              "code": 1,
+              "stderr": "unshare: unshare failed: Operation not permitted"
+            }
+          ],
+          "uid": 1000,
+          "gid": 1000,
+          "kernel": "6.18.35",
+          "architecture": "aarch64",
+          "packages": "libseccomp2:arm64\t2.5.4-1+deb12u1\npython3\t3.11.2-1+b1\nutil-linux\t2.38.1-5+deb12u3\n",
+          "status": "Name:\tpython3\nUmask:\t0022\nState:\tR (running)\nTgid:\t8\nNgid:\t0\nPid:\t8\nPPid:\t1\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t \nNStgid:\t8\nNSpid:\t8\nNSpgid:\t1\nNSsid:\t1\nKthread:\t0\nVmPeak:\t   16060 kB\nVmSize:\t   16012 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   10812 kB\nVmRSS:\t   10812 kB\nRssAnon:\t    5372 kB\nRssFile:\t    5440 kB\nRssShmem:\t       0 kB\nVmData:\t    6716 kB\nVmStk:\t     132 kB\nVmExe:\t    5208 kB\nVmLib:\t    2808 kB\nVmPTE:\t      64 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t0\nuntag_mask:\t0xffffffffffffff\nThreads:\t1\nSigQ:\t0/2503\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000000002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t1\nSpeculation_Store_Bypass:\tvulnerable\nSpeculationIndirectBranch:\tunknown\nCpus_allowed:\t3\nCpus_allowed_list:\t0-1\nMems_allowed:\t0001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t50\nnonvoluntary_ctxt_switches:\t1\n",
+          "initCommand": "node /input/check.mjs ",
+          "networkDevices": "Inter-|   Receive                                                |  Transmit\n face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed\n    lo:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\n"
+        }
+      },
+      "descendantObserved": null
+    }
+  ],
+  "compaction": {
+    "guestDataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/final-compaction-03-execution/final-compaction-03-trial-1-export/data",
+    "intents": [
+      {
+        "source": "e1:12:e1c1e2cdbd084e96a41bb3d216ecfaae7e1985206a3bce78107b150557bb4fcb",
+        "attemptId": "7696b3b1-6981-4930-8488-1ea2ac1c453c",
+        "ordinal": 1,
+        "purpose": "generation",
+        "durableTaskId": 9
+      },
+      {
+        "source": "e1:28:3f7fa51a30e37cb1a8baae7ca05e912a49f367b5df8ea660b3015ca243eb006f",
+        "attemptId": "75ffc54c-2075-4ac0-8ea3-557020deffa4",
+        "ordinal": 2,
+        "purpose": "compaction",
+        "durableTaskId": null,
+        "durableTaskSource": "unknown: Models.completeSimple exposes no owning compaction task ID"
+      },
+      {
+        "source": "e1:37:13b159d1993a884b65d85bbed53965beb32c5f440d18a217c0ae9b74b8cbc92d",
+        "attemptId": "86b0f967-05ac-4d5d-b726-98a7eedfc1a9",
+        "ordinal": 3,
+        "purpose": "generation",
+        "durableTaskId": 14
+      }
+    ],
+    "responses": [
+      {
+        "source": "e1:19:d1aea24e6114ee31647d039d0a5772b03eedb4e449fbe3ce1129825c588c2c74",
+        "attemptId": "7696b3b1-6981-4930-8488-1ea2ac1c453c",
+        "completeness": "complete",
+        "usage": "reported"
+      },
+      {
+        "source": "e1:35:5a1e11c1038137f6be2078b7fbce5f0dfd01ba9ec18ddc0f0d8dd227302c998b",
+        "attemptId": "75ffc54c-2075-4ac0-8ea3-557020deffa4",
+        "completeness": "complete",
+        "usage": "reported"
+      },
+      {
+        "source": "e1:41:0d3e48f56e0a2eec6ae44475f2ec2977c17ab5e4950a1701872fbcb1e77737b4",
+        "attemptId": "86b0f967-05ac-4d5d-b726-98a7eedfc1a9",
+        "completeness": "partial",
+        "usage": "unknown"
+      }
+    ],
+    "hostDispatches": 2,
+    "interpretation": "Actual upstream auto compaction; first generation and compaction dispatched (2), third generation intent denied before host dispatch; no stale task ID invented for compaction"
+  },
+  "checks": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/final-check-01.log",
+      "result": "114/114 PASS",
+      "scope": "integrated candidate 586af76; remaining eval-only changes separately covered below"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/final-eval-tests-03.log",
+      "result": "5/5 PASS",
+      "scope": "final eval plan/host protection, readonly reports/source view, incomplete evidence, mediator, wrapped selection"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/shared-eval-tests-05.log",
+      "result": "10/10 PASS",
+      "scope": "provider budgets, acquired offending bytes, real automatic compaction and recovery bypass"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/isolation-tests-01.log",
+      "result": "6/6 PASS",
+      "scope": "unchanged current low-level boundary/export, including actual termination-unconfirmed no-export"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/isolation-probe-01.log",
+      "result": "see retained output",
+      "scope": "new fixed Git image mechanism probe; actual product probes above are separate"
+    }
+  ],
+  "package": {
+    "archive": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/pack-01/pi-durio-0.1.0.tgz",
+      "bytes": 23239771,
+      "sha256": "6be86ea4a6647c063395a0a5009ee6743060017d866e6ceb1268c1c575de6b08"
+    },
+    "installation": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/install-01",
+    "readback": {
+      "readonly": true,
+      "sqliteSha256": "1842cd154746510d0701a399468d4536f55b4f8df40c845a9de7b050fbcb7f0a",
+      "cliJson": true,
+      "cliText": true,
+      "tuiComponentSourcePaging": true,
+      "nativeTerminalAcceptance": false,
+      "evalExport": true,
+      "counts": {
+        "planned": 1,
+        "started": 1,
+        "completed": 0,
+        "gradable": 0,
+        "passed": 0,
+        "passRate": null,
+        "completionRate": 0,
+        "coverageRate": 0
+      }
+    },
+    "note": "npm pack --ignore-scripts after explicit successful build and prepare-pack; offline install --ignore-scripts --omit=dev; no package download"
+  },
+  "firstFailures": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/red-budget-01.log",
+      "scope": "initial TDD missing module"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/response-limit-red-01.log",
+      "scope": "acquired overflow block omitted before fix; 0 bytes records instead of 1"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-01.log",
+      "scope": "trusted esbuild hardlink snapshot preparation failure"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-02",
+      "scope": "image lacked Git before runtime acceptance; original FAIL preserved, additive applicability correction excludes infrastructure"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/report.json",
+      "scope": "Linux mount-boundary non-Git fixture setup failure; G0 preparation, distinct from accepted runtime original-error"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/matrix-01-regrade-report-02.json",
+      "scope": "first no-change PASS lacked explanation coverage; old PASS retained and new unknown appended; original outcome identities unchanged"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/owner-loss-02/report.json",
+      "scope": "intentional actual owner loss leaves unknown/G0; owned synthetic root retains stale owner marker, execution VM termination confirmed in execution/outcome"
+    }
+  ],
+  "remaining": [
+    {
+      "ticket": 22,
+      "scope": "paired fresh comparisons and bounded improvement conclusions",
+      "status": "separate"
+    },
+    {
+      "ticket": 30,
+      "scope": "paid real DeepSeek model results, actual served identity and external usage",
+      "status": "NOT RUN; NOT AUTHORIZED"
+    },
+    {
+      "scope": "full macOS Terminal acceptance of eval panel",
+      "status": "NOT RUN; readonly component/installed CLI tested; no claim from unrelated native gates"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://github.com/earendil-works/pi",
+      "scope": "upstream repository; actual @earendil-works/pi-ai 1.1.0 Models.completeSimple source retained in the fixed Linux runtime dependencies and inspected directly"
+    },
+    {
+      "url": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "scope": "fixed model context upper bound reference; actual billed price is the explicit plan version"
+    },
+    {
+      "url": "https://api-docs.deepseek.com/api/create-chat-completion/",
+      "scope": "max_tokens output bound"
+    }
+  ]
+}
