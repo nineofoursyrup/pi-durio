@@ -264,3 +264,17 @@ test('repainting hides the hardware caret before moving it through display rows'
     assert.match(paint,/\x1b\[20;2H\x1b\[\?25h\x1b\[\?2026l$/,'restore the hardware caret at the actual insertion point');
   } finally {await f.app.exit();}
 });
+
+test('history overlay is reachable and consumes command-like text without changing the active execution target', async () => {
+  const f=fixture(),key=(s:string)=>f.terminal.input(s);
+  try {
+    key('/history {broken');key('\r');assert.match(f.screen(),/历史查询失败/);assert.equal(f.terminal.stopped,false);assert.equal(f.transport.calls.length,0);
+    key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);assert.equal(f.transport.calls.length,0);key('\x1b');
+    key('Read README');key('\r');await until(()=>f.screen().includes('已完成'));
+    const calls=f.transport.calls.length;
+    key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);key('\r');assert.match(f.screen(),/task.accepted/);key('\r');
+    key('/compact');key('\r');key('/exit');key('\r');assert.equal(f.terminal.stopped,false);assert.equal(f.transport.calls.length,calls);
+    key('\x03');key('\x04');assert.equal(f.terminal.stopped,false);key('\x1b');
+    assert.match(f.screen(),/已完成/);assert.equal(f.transport.calls.length,calls);
+  } finally {await f.app.exit();}
+});

@@ -8,12 +8,13 @@ import { runReadTask, runCodingTask, TaskControl, readQueue, decideQueue, checkR
 import type { QueueItemFact } from '../evidence.js';
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
+import { HistoryView } from './history.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
-const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务']] as const;
+const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务']] as const;
 const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed'];
 const completion:AutocompleteProvider={
   triggerCharacters:['/'],
@@ -80,7 +81,8 @@ export class ReadOnlyTui {
   private lastText='';
   private confirmation?:{key:string;at:number};
   private followChord=false;
-  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
+  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
+  private historyView?:HistoryView;
   private hidePanel?:()=>void;
   private pendingRefresh=false;
   private timer?:ReturnType<typeof setInterval>;
@@ -258,6 +260,10 @@ export class ReadOnlyTui {
     else if(command==='/bottom')this.bottom();
     else if(command==='/older')this.window('older');
     else if(command==='/newer')this.window('newer');
+    else if(command==='/history'||command.startsWith('/history ')) {
+      try{this.historyView=new HistoryView(this.options.dataRoot,command==='/history'?{}:JSON.parse(command.slice(9)));this.openPanel('history');}
+      catch(error){this.notice=`历史查询失败（当前工作未改变）：${safe(String(error))}`;this.tui.requestRender();}
+    }
     else if(command==='/details')this.openDetail(this.records.at(-1));
     else if(command==='/copy')void this.copyOutput();
     else if(command==='/stop')this.stop();
@@ -471,13 +477,13 @@ export class ReadOnlyTui {
     this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
     this.openPanel('detail',record);
   }
-  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery',ref?:RecordReference) {
+  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history',ref?:RecordReference) {
     this.closePanel();this.confirmation=undefined;
     this.panel={kind,ref,offset:0,previous:[],line:0,raw:'',next:null};
     if(kind==='detail')this.loadDetail();
     const component:Component={invalidate(){},render:width=>this.panelLines(width),handleInput:data=>this.panelInput(data),handleMouse:event=>{
       if(!this.panel)return;
-      if(event.type==='wheel'){this.panel.line=Math.max(0,this.panel.line+(event.wheelDelta??0));return {handled:true};}
+      if(event.type==='wheel'){if(this.panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else this.panel.line=Math.max(0,this.panel.line+(event.wheelDelta??0));return {handled:true};}
       if(event.type==='click'&&this.panel.kind==='actions'){
         const index=event.y+this.panel.line-1;
         if(commands[index]){const command=commands[index][0];this.closePanel();this.command(`/${command}`);return {handled:true};}
@@ -487,9 +493,10 @@ export class ReadOnlyTui {
   }
   private panelLines(width:number) {
     const panel=this.panel;if(!panel)return[];
+    if(panel.kind==='history') {const lines=this.historyView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     let text:string;
     if(panel.kind==='actions')text='操作菜单（保留输入草稿）\n'+commands.map(([name,description],index)=>`${panel.offset===index?'›':' '} /${name}  ${description}`).join('\n');
-    else if(panel.kind==='help')text='帮助\nEnter 新任务；忙时 Enter 补充当前任务\nCtrl+X → Enter 后续请求\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 活动会话\n/older /newer 只读窗口；/restore 草稿\n/queue 队列，w 撤回，r 明确重新接入\n/recover [runId] 恢复面板，e 结束旧工作\n/decide JSON 与 headless 同一结构化决定\n/stop 中止；/exit 退出；Esc 关闭弹层';
+    else if(panel.kind==='help')text='帮助\nEnter 新任务；忙时 Enter 补充当前任务\nCtrl+X → Enter 后续请求\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 活动会话\n/older /newer 只读窗口；/restore 草稿\n/history 历史查询（只读）\n/queue 队列，w 撤回，r 明确重新接入\n/recover [runId] 恢复面板，e 结束旧工作\n/decide JSON 与 headless 同一结构化决定\n/stop 中止；/exit 退出；Esc 关闭弹层';
     else if(panel.kind==='queue')text=this.queueText();
     else if(panel.kind==='recovery')text=this.recoveryText();
     else if(panel.kind==='exit')text='退出并保留草稿？\nEnter：保存文本，取消在途请求并等待清理\nEsc：返回；不改变任务状态';
@@ -506,6 +513,7 @@ export class ReadOnlyTui {
     if(matchesKey(data,'escape')||matchesKey(data,'ctrl+o')) {this.closePanel();return;}
     if(matchesKey(data,'ctrl+l')){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
     if(matchesKey(data,'ctrl+c')||matchesKey(data,'ctrl+d'))return;
+    if(panel.kind==='history') {this.historyView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='actions') {
       if(matchesKey(data,'up')) panel.offset=(panel.offset+commands.length-1)%commands.length;
       if(matchesKey(data,'down')||matchesKey(data,'tab')) panel.offset=(panel.offset+1)%commands.length;
