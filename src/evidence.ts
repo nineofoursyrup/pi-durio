@@ -91,8 +91,9 @@ export function readAcceptedTasks(root:string,options:FactPageOptions={}) {
         const execution=started?{runId:record.runId,sessionId:data.sessionId}:null;
         fact={taskId:data.taskId,requestId:data.requestId??data.taskId,kind:'task',input:data.input,workspace:data.workspace,target:null,execution,runId:execution?.runId??null,acceptedAt:record.at,acceptedSeq:record.seq,updatedAt:record.at,status:started?'running':'accepted',reason:null,executionVersion:artifact&&config?{artifactId:(artifact.data as any).id,artifactSeq:artifact.seq,configSeq:config.seq}:null,authorization:data.authorization??null,receipt:{seq:record.seq,kind:record.kind,at:record.at}};
       }
-      if(fact.runId) {
-        const closed=db.prepare("SELECT * FROM records WHERE run_id=? AND kind IN ('run.closed','recovery.closed','recovery.ended') AND seq<=? ORDER BY seq DESC LIMIT 1").get(fact.runId,through);
+      const outcomeRunId=fact.runId??(record.kind==='task.accepted'?record.runId:null);
+      if(outcomeRunId) {
+        const closed=db.prepare("SELECT * FROM records WHERE run_id=? AND kind IN ('run.closed','recovery.closed','recovery.ended') AND seq<=? ORDER BY seq DESC LIMIT 1").get(outcomeRunId,through);
         if(closed){const receipt=decodeRecord(root,closed),result=(receipt.data as any).result??receipt.data as any;fact.status=receipt.kind==='recovery.ended'?'ended':result.status;fact.reason=result.reason??null;fact.updatedAt=receipt.at;fact.receipt={seq:receipt.seq,kind:receipt.kind,at:receipt.at};}
       }
       tasks.push(fact);if(tasks.length>limit)break;
