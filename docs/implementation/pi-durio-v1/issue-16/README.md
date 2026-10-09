@@ -12,11 +12,11 @@ node dist/src/cli.js tui --workspace /absolute/project --data-root /absolute/dat
 
 `--offline-demo` 读取目标项目的 `README.md`，使用真实共用 runtime 与固定 provider transport，没有网络或模型推理。省略该参数才使用已配置的真实 DeepSeek；本票没有真实付费调用授权，相关验收为 NOT RUN。TUI 始终使用 `runReadTask`，没有可写 coding、恢复执行或忙时队列入口。忙时 Enter 保留未受理草稿并明确提示；不会把它延迟执行。
 
-底部输入固定，显示真实工作区、会话前缀、模型配置、执行状态和已知/部分/未知用量；费用是 USD 估算。会话显示最多 24 条记录、每条 500 字摘要，完成回答预览最多 4000 字。`/older`、`/newer` 翻持久记录窗口，PageUp/PageDown 或鼠标滚动；上滚后保持当前窗口与草稿，`/bottom` 恢复跟随。Ctrl+O 或点击记录打开原文 JSON 详情；n/p 每次读取约 2 KiB，左右切记录、上下滚动、y 复制当前片段。窗口读取与详情操作不写执行事实或计量。
+底部输入固定，显示真实工作区、会话前缀、模型配置、执行状态和已知/部分/未知用量；费用是 USD 估算。会话只显示“你 / 助手 / 读取 + 状态、失败或源截断”等自然标签；有界窗口最多读取 24 条事实后合并流片段，最终回答替换同一次流式预览，不重复呈现。工具摘要最多 500 字，回答预览最多 4000 字；记录种类、seq、JSON 和 attemptId 只在详情内。`/older`、`/newer` 翻持久记录窗口，PageUp/PageDown 或鼠标滚动；上滚后保持当前窗口与草稿，`/bottom` 恢复跟随。Ctrl+O 或点击记录打开原文 JSON 详情；n/p 每次读取约 2 KiB，左右切记录、上下滚动、y 复制当前片段。窗口读取与详情操作不写执行事实或计量。
 
 `src/query.ts` 是共用只读宿主查询边界：`readRunRecords` 仅返回元数据与 `BlobRef`，不打开 Harness 或 writable storage；`readObjectRange` 在同一次完整流式 hash/长度校验中取得有界片段，拒绝损坏；`readTextPage` 对连续翻页保持普通 UTF-8/字符簇边界。没有把 SQLite 读取散入 TUI。旧 `readRun` 行为保持兼容。
 
-`tool.summary` 消费器接受 #13 的有界派生摘要；失败和上游源截断可在折叠时显示，原始结果仍在 `tool.result`。当前候选若尚未含 #13 的记录生成，显示缺失/unknown，不能把未报告截断当成完整。`显示截断`、`源响应 partial`、`原文不可取得` 分别标记；运行结束只来自 runtime 的结果。
+`tool.summary` 消费器接受 #13 的有界派生摘要；失败和上游源截断可在折叠时显示，原始结果仍在 `tool.result`。当前候选若尚未含 #13 的记录生成，显示缺失/unknown，不能把未报告截断当成完整。`显示截断`、`未完成的响应`、`原文不可取得` 分别标记；运行结束只来自 runtime 的结果。
 
 ## 输入与退出
 

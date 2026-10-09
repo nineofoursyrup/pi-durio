@@ -247,41 +247,81 @@ export class ReadOnlyTui {
       this.tui.requestRender();
     } catch(error) {this.notice=`原文不可取得：${safe(String(error))}；执行结果不会由显示猜测`;this.tui.requestRender();}
   }
-  private summary(record:RecordReference) {
-    try {
-      const page=readObjectRange(this.options.dataRoot,record.ref,{limit:4096});
-      let preview=page.bytes.toString('utf8');
-      let source='';
-      if(page.next===null) {
-        const value=JSON.parse(preview);
-        if(record.kind==='model.provider-event') preview=value.event?.choices?.map((c:{delta?:{content?:string}})=>c.delta?.content??'').join('')||'provider event 已保存';
-        else if(record.kind==='model.response') preview=value.message?.content?.map((c:{text?:string})=>c.text??'').join('\n')||JSON.stringify(value);
-        else if(record.kind==='tool.result')preview=JSON.stringify(value.result);
-        else if(record.kind==='tool.summary') {
-          source=` · ${value.isError===true?'失败':value.isError===false?'工具返回':'错误状态 unknown'}${value.truncation?.truncated||value.diagnostics?.some((d:{code?:string})=>d.code==='truncated')?' · 工具源输出截断':' · 未报告源截断'}`;
-          preview=`${value.tool} · attempt ${value.attemptId}\n${JSON.stringify(value.diagnostics??[])}${value.diagnosticsOmitted?` · 另有 ${value.diagnosticsOmitted} 条诊断，见原文`:''}`;
-        }
-        else if(record.kind==='task.accepted')preview=value.input;
-        else if(record.kind==='run.closed')preview=`${value.status} · cleanup ${value.cleanup} · usage ${value.usage?.completeness??'unknown'}`;
-        else preview=JSON.stringify(value);
-        if(record.kind==='model.response'&&value.completeness==='partial')source+=' · 源响应 partial';
-      }
-      const clipped=preview.length>500||page.next!==null;
-      if(record.kind==='tool.result')source+=' · 状态/源截断见相邻 tool.summary（缺失为 unknown）';
-      return `[${record.seq}] ${record.kind}${/error|failure/.test(record.kind)?' · 失败':''}${clipped?' · 显示截断':''}${source}\n${safe(preview.slice(0,500))}${clipped?'…（点击/Ctrl+O 查看原文分页）':''}`;
-    } catch(error) {return `[${record.seq}] ${record.kind} · 原文不可取得：${safe(String(error))}`;}
+  private projectConversation() {
+    type Entry={ref:RecordReference;role:'user'|'assistant'|'tool'|'notice';title:string;text:string;attempt?:string;limited?:boolean};
+    const entries:Entry[]=[];
+    const decoded=new Map<number,{value?:any;error?:string}>();
+    for(const ref of this.records) {
+      try {
+        const page=readObjectRange(this.options.dataRoot,ref.ref,{limit:4096});
+        decoded.set(ref.seq,page.next===null?{value:JSON.parse(page.bytes.toString())}:{});
+      }catch(error){decoded.set(ref.seq,{error:String(error)});}
+    }
+    const summaries=new Map<number,any>();
+    for(const ref of this.records) {const value=decoded.get(ref.seq)?.value;if(ref.kind==='tool.summary'&&value?.resultSeq)summaries.set(value.resultSeq,value);}
+    const tool=(ref:RecordReference,value:any)=>{
+      const attempt=value?.attemptId;
+      let entry=entries.find(row=>row.role==='tool'&&attempt&&row.attempt===attempt);
+      if(!entry){entry={ref,role:'tool',title:'读取',text:'',attempt};entries.push(entry);}
+      entry.ref=ref;return entry;
+    };
+    const assistant=(ref:RecordReference,value:any)=>{
+      const attempt=value?.attemptId;
+      let entry=entries.find(row=>row.role==='assistant'&&attempt&&row.attempt===attempt);
+      if(!entry){entry={ref,role:'assistant',title:'助手（当前窗口）',text:'',attempt};entries.push(entry);}
+      entry.ref=ref;return entry;
+    };
+    const toolState=(entry:Entry,value:any)=>{
+      const truncated=value.truncation?.truncated||value.diagnostics?.some((d:{code?:string})=>d.code==='truncated');
+      entry.title=`读取 · ${value.isError===true?'失败':value.isError===false?'已返回':'状态未知'}${truncated?' · 源输出截断':''}`;
+      const diagnostics=(value.diagnostics??[]).map((d:{message?:string})=>d.message??'').join('\n');
+      entry.text=[entry.text,diagnostics].filter(Boolean).join('\n').slice(0,500);
+      if(value.diagnosticsOmitted)entry.text+='\n[更多诊断见详情]';
+    };
+    for(const ref of this.records) {
+      const data=decoded.get(ref.seq)!,value=data.value;
+      if(data.error){entries.push({ref,role:'notice',title:'原文暂不可取得',text:safe(data.error)});continue;}
+      if(ref.kind==='task.accepted')entries.push({ref,role:'user',title:'你',text:value?.input??'已受理的长请求（内容见详情）'});
+      else if(ref.kind==='tool.intent'){
+        const entry=tool(ref,value);entry.title='读取 · 进行中';entry.text=typeof value?.args?.path==='string'?value.args.path:'项目文件';
+      } else if(ref.kind==='tool.result'){
+        if(summaries.has(ref.seq))continue;
+        const entry=tool(ref,value);entry.title='读取 · 结果已保存';
+        if(value?.result){const text=value.result.content?.filter((item:{type?:string})=>item.type==='text').map((item:{text:string})=>item.text).join('\n')??'';entry.text=text.slice(0,180);entry.limited=text.length>180;toolState(entry,{isError:typeof value.result.isError==='boolean'?value.result.isError:null,diagnostics:value.result.diagnostics,truncation:value.result.details?.truncation});}
+        else entry.text='输出较长；状态摘要暂不可取得，查看详情核对。';
+      } else if(ref.kind==='tool.summary'){
+        if(!value){entries.push({ref,role:'tool',title:'读取 · 状态未知',text:'摘要不可取得；查看原文。'});continue;}
+        const entry=tool(ref,value);toolState(entry,value);
+        if(value.resultSeq)entry.ref=this.records.find(record=>record.seq===value.resultSeq)??readRunRecords(this.options.dataRoot,this.runId!,{after:value.resultSeq-1,limit:1}).records.find(record=>record.seq===value.resultSeq)??ref;
+        if(!entry.text)entry.text='输出已保存；点击或 Ctrl+O 查看详情。';
+      } else if(ref.kind==='tool.error'){
+        const entry=tool(ref,value);entry.title='读取 · 失败';entry.text=value?.error??'错误详情不可取得';
+      } else if(ref.kind==='model.provider-event'){
+        const text=value?.event?.choices?.map((choice:{delta?:{content?:string}})=>choice.delta?.content??'').join('')??'';
+        if(text){const entry=assistant(ref,value);const combined=entry.text+text;entry.limited=entry.limited||combined.length>4000;entry.text=combined.slice(-4000);}
+        // A large event is kept as a reference; it is never printed as transport JSON.
+      } else if(ref.kind==='model.response'){
+        const text=value?.message?.content?.filter((item:{type?:string})=>item.type==='text').map((item:{text:string})=>item.text).join('\n');
+        if(text){const entry=assistant(ref,value);entry.text=text.slice(0,4000);entry.limited=text.length>4000;entry.title=value.completeness==='partial'?'助手（未完成的响应）':'助手';}
+      } else if(ref.kind==='run.abort-intent'&&!this.result)entries.push({ref,role:'notice',title:'正在中止',text:'等待 runtime 确认清理；当前未接入草稿不会执行。'});
+      else if(ref.kind==='run.exit-intent'&&!this.result)entries.push({ref,role:'notice',title:'正在退出',text:'等待执行清理和存储关闭。'});
+    }
+    if(this.result?.answer&&!this.historyWindow) {
+      const ref=this.records.findLast(record=>record.kind==='run.closed')??this.records.at(-1);
+      if(ref){const entry:Entry=entries.findLast(row=>row.role==='assistant')??{ref,role:'assistant',title:'助手',text:''};if(!entries.includes(entry))entries.push(entry);entry.ref=ref;entry.title='助手';entry.text=this.result.answer.slice(0,4000);entry.limited=this.result.answer.length>4000;}
+    }
+    return entries;
   }
   private rebuild() {
     this.transcript.clear();this.summaries.clear();
     if(!this.records.length) this.transcript.addChild(new Text(`在输入区发起一个只读项目请求。\n${this.options.mode==='offline'?'offline-demo：真实 runtime + README.md 固定传输；没有模型推理。':'DeepSeek 凭据从环境读取；没有自动 fallback。'}\nCtrl+J / Shift+Enter / 反斜杠后 Enter 换行。\n拖选自动复制；/copy 提供键盘入口。`,0,0));
-    for(const record of this.records) {
-      const summary=this.summary(record);this.summaries.set(record.seq,summary);this.latestText=summary;
-      this.transcript.addChild(new MouseRegion(new Text(summary,0,0),event=>{if(event.type==='click'){this.openDetail(record);return {handled:true};}}));
-    }
-    if(this.result?.answer&&!this.historyWindow) {
-      const preview=safe(this.result.answer.slice(0,4000));
-      this.latestText=preview;
-      this.transcript.addChild(new Text(`助手\n${preview}${this.result.answer.length>4000?'\n[显示截断；Ctrl+O 原文分页]':''}`,0,0));
+    if(this.records.length&&this.records[0].kind!=='task.accepted')this.transcript.addChild(new Text('当前内容窗口 · /older 查看更早内容\n',0,0));
+    for(const entry of this.projectConversation()) {
+      const clipped=entry.limited||(entry.role!=='assistant'&&entry.text.length>500);
+      const text=safe(entry.role==='assistant'?entry.text:entry.text.slice(0,500));
+      const summary=`${entry.title}\n${text}${clipped?'… [显示截断，详情可继续阅读]':''}\n`;
+      this.summaries.set(entry.ref.seq,summary);this.latestText=text;
+      this.transcript.addChild(new MouseRegion(new Text(summary,0,0),event=>{if(event.type==='press'||event.type==='drag')this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});if(event.type==='click'){this.openDetail(entry.ref);return {handled:true};}}));
     }
     this.tui.requestRender();
   }
@@ -296,6 +336,7 @@ export class ReadOnlyTui {
   }
   private openDetail(record?:RecordReference) {
     if(!record){this.notice='暂无持久记录';return;}
+    this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
     this.openPanel('detail',record);
   }
   private openPanel(kind:'help'|'exit'|'detail'|'actions',ref?:RecordReference) {

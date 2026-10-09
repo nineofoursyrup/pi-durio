@@ -93,6 +93,8 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     key('\r'); key('保留草稿'); key('\r');
     await until(()=>f.screen().includes('已完成'));
     assert.match(f.screen(),/保留草稿/); assert.equal(f.transport.calls.length,2);
+    assert.doesNotMatch(f.screen(),/model\.provider-event|tool\.summary|attemptId|"runId"/);
+    assert.equal(f.screen().match(/Offline fixture readback/g)?.length,1);
     const runId=f.screen().match(/run ([a-f0-9-]{36})/)?.[1]; assert.ok(runId);
     const before=await readRun(join(f.root,'data'),runId);
     key('\x0f'); key('n'); key('p'); key('\x0c'); key('\x1b'); assert.equal(f.transport.calls.length,2);
