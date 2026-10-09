@@ -1,0 +1,64 @@
+{
+  "at": "2026-10-09T13:43:19.612141+00:00",
+  "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+  "scenario": "idle-c-first-pair",
+  "humanRatings": [
+    {
+      "id": "IDLE_C_FIRST_PAIR",
+      "label": "空闲首次 Ctrl+C 清空并保存草稿，800ms 内第二次退出并恢复终端，未提交任务",
+      "status": "PASS",
+      "answer": "P"
+    }
+  ],
+  "machine": {
+    "calls": 0,
+    "rawRestored": true,
+    "sttyRestored": true,
+    "firstPair": {
+      "expectedControl": "0x03",
+      "controls": [
+        {
+          "at": "2026-10-09T13:42:00.209Z",
+          "code": "0x03"
+        },
+        {
+          "at": "2026-10-09T13:42:00.798Z",
+          "code": "0x03"
+        }
+      ],
+      "firstTwoMatch": true,
+      "intervalMs": 589,
+      "lifecycleIntent": null,
+      "runtimeMatched": true,
+      "note": "Key/timing and runtime facts only; operator feedback and the full input/resize log establish first-pair behavior. A stop intent does not satisfy EXIT_FIRST_PAIR."
+    }
+  },
+  "draft": {
+    "text": "keep this draft",
+    "savedAt": "2026-10-09T13:42:00.799Z",
+    "state": "draft-only"
+  },
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-41-42-970Z/idle-c-first-pair/operator-observation.json",
+      "sha256": "03d6454e8873633cddc8ded024a2cafc0bd34b3fd2c62e47e7ae77dae9ca6f20"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-41-42-970Z/idle-c-first-pair/machine.json",
+      "sha256": "7e3d2b8c25352adb998328cc1165006b3f63cf243e99bb2dcbd501095bc89d9f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-41-42-970Z/idle-c-first-pair/events.jsonl",
+      "sha256": "87bd65b5f47b075c08a3271e3411411eae5c77a5e15d7138bc53b67473df16c5"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-41-42-970Z/idle-c-first-pair/terminal-output.ansi",
+      "sha256": "40b09fafaf058b00439f98ff662182a109e19b53e48a4701387497b443572bb2"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-41-42-970Z/drafts/7c9ca75a1d478748dde5d9056e51ca4dfe273bb9e654999168739ef6f5744ebd-1791553306510-f77466c7-7ad9-400b-a43a-0bdf35ae4512.json",
+      "sha256": "d86cf655fb3667002abaf6e14425735c60eca04be8bd28abff27bc4fbb8da9ef"
+    }
+  ],
+  "acceptance": "PASS only IDLE_C_FIRST_PAIR; draft preserved; no request submitted"
+}

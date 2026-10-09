@@ -6,4 +6,10 @@
 
 随后重新提交 Read README 并等待运行，再首次双按 Ctrl+D（516ms）。用户填 P；原始键码为 0x04，中间只有终端校准协议回包；runtime 记录 intent exit、resumable、cleanup confirmed，raw/stty 恢复，同一 run 的 headless 结果一致：[本项读回](terminal-r6-exit-first-pair.json)。remoteTermination unknown 保持原值，不从本地清理推断远端结束。
 
-这仅使 EXIT_FIRST_PAIR 通过；空闲 Ctrl+C 草稿、可捕获故障、正常 completed 及最小窗口仍待补。r5 的原 EXIT F 和所有旧记录不改写。此前适用证据及 OS 窗口焦点附加探查 UNKNOWN 见 [修复适用性说明](confirmation-repair-r6.md)。#16 未完成验收，不解锁后续票。
+后续原生观察又完成三项补验：
+
+- 空闲首次 Ctrl+C 两次相隔 589ms，人工 P；保存的草稿原文为 `keep this draft`，零请求、raw/stty 恢复：[读回](terminal-r6-idle-c-first-pair.json)。
+- 可捕获测试故障人工 P；错误为预期的 `TERMINAL_VALIDATION_CAPTURED_FAULT`，cleanup confirmed、raw/stty 和同 run headless 一致；原任务 unknown/resumable 保持：[读回](terminal-r6-fault.json)。
+- 正常完成 S1 和更小窗口恢复 S3 均人工 P；实际结果 completed、`Fruit count: 7`、cleanup confirmed、raw/stty 和 headless 一致。S2 填 U 并说明“忘了看 xyz”，minimumGrid 也填 U。日志虽在 40×12 收到 xyz/F2/Esc，不能据此推断视觉可用或最小尺寸通过：[部分读回](terminal-r6-supplement-partial.json)。
+
+只剩 S2 的明确尺寸输入/菜单视觉观察待补，已准备只测该项的外部入口。r5 的原 EXIT F、本轮 S2 UNKNOWN 和所有旧记录不改写。此前适用证据及 OS 窗口焦点附加探查 UNKNOWN 见 [修复适用性说明](confirmation-repair-r6.md)。#16 未完成验收，不解锁后续票。
