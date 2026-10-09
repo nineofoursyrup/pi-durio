@@ -15,15 +15,19 @@
       "blocked_by": [],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-11",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "1aa75e99a7660fe00b97a0da54ee6c9370bf272a",
+      "integrated_sha": "b373e1780444b51c913d438a85daec3a00b1b2a1",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-11/README.md",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-11/merge-integration-readback.json"
+      ],
       "branch": "codex/pi-durio-v1-issue-11",
       "agent": "/root/issue11",
       "model_requested": "gpt-6-astra",
-      "reasoning_requested": "xhigh"
+      "reasoning_requested": "xhigh",
+      "note": "T01 offline real Pi runtime acceptance passed; source/compiled/evidence/install identities verified. Paid provider NOT RUN."
     },
     "12": {
       "number": 12,
@@ -46,7 +50,7 @@
       "agent": "/root/issue12",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "Six ticket criteria verified; merger validating and integrating. Formal product eval awaits #21."
+      "note": "Ticket acceptance and merge identity verified. Formal product eval remains #21; issue remains OPEN."
     },
     "13": {
       "number": 13,
@@ -59,7 +63,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
@@ -110,7 +114,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
@@ -403,9 +407,12 @@
       "evidence": []
     }
   },
-  "frontier": [],
+  "frontier": [
+    13,
+    16
+  ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "dadabad8e602e7f36202a2939e6691653bb495ab",
+  "integration_tip": "b373e1780444b51c913d438a85daec3a00b1b2a1",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -415,7 +422,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T09:51:06.717346+00:00",
+  "updated_at": "2026-10-09T10:05:04.310786+00:00",
   "last_remote_readback": {
     "baseRefName": "main",
     "closingIssuesReferences": [],
