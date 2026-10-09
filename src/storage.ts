@@ -100,11 +100,13 @@ export async function commitCleanup(root:string,request:{id:string;identity:stri
     if(!remaining.length)return readCleanup(root,request.id);
     const skipSessions=new Set<string>();for(const unit of remaining)if(unit.kind==='session'&&intents.has(unit.id)&&!await exists(join(root,'sessions',unit.id.slice(8))))skipSessions.add(unit.id.slice(8));
     const current=await retentionState(root,owner,{skipSessions});if(current.blockers.length)throw Error(`CLEANUP_PROTECTION_UNKNOWN:${current.blockers.join(',')}`);
+    const ownAvailability=new Set<string>();
+    for(const source of records(root,{kinds:['evidence.availability']}))if(decode(root,source).operationId===request.id)ownAvailability.add(source.id);
     // Validate the complete remaining scope before the first destructive action.
     for(const unit of remaining) {
       const now=current.units.find(item=>item.id===unit.id);
       if(now?.protectedBy.length)throw Error(`CLEANUP_PROTECTED:${unit.id}:${now.protectedBy.join(',')}`);
-      if(!intents.has(unit.id)) {if(!now||!sameFiles(unit.files,now.files)||JSON.stringify(unit.sources)!==JSON.stringify(now.sources)||JSON.stringify(unit.runIds)!==JSON.stringify(now.runIds))throw Error('STALE_MANAGEMENT_PREVIEW');await verifyFiles(root,unit.files);}
+      if(!intents.has(unit.id)) {if(!now||!sameFiles(unit.files,now.files)||JSON.stringify(unit.sources)!==JSON.stringify(now.sources.filter(id=>!ownAvailability.has(id)))||JSON.stringify(unit.runIds)!==JSON.stringify(now.runIds))throw Error('STALE_MANAGEMENT_PREVIEW');await verifyFiles(root,unit.files);}
       else if(!now&&unit.kind==='session') {
         // Re-check host/queue/fixed protection after an interrupted staged deletion.
         for(const candidate of current.units)if(candidate.kind==='object'&&candidate.runIds.some(run=>unit.runIds.includes(run))&&candidate.protectedBy.some(reason=>reason!=='host-fact-body'&&reason!=='fixed-decision-manifest'))throw Error('CLEANUP_PROTECTED_AFTER_INTERRUPTION');

@@ -86,6 +86,13 @@ test('partial cleanup preserves every part and resumes same operation after dele
   assert.equal((await commitCleanup(g.root,{id:'interrupted-session',identity:session.identity})).status,'completed');assert.deepEqual(await admitted(g.root),[]);
 });
 
+test('completed attachment parts do not invalidate the same operation remaining session preview after a later part fails',async()=>{
+  const f=await fixture(),p=await preview(f.root,'partially-complete',[`object:${f.payload.sha256}`,`object:${f.second.sha256}`,`session:${f.sessionId}`]);
+  const stopped=await commitCleanup(f.root,{id:p.plan.id,identity:p.identity},{fault:(point,file)=>{if(point==='before-delete'&&file===`objects/${f.second.sha256}`)throw Object.assign(Error('disk fault'),{code:'EIO'});}});
+  assert.deepEqual(stopped.parts.map(part=>part.status),['completed','failed','not-run']);
+  const resumed=await commitCleanup(f.root,{id:p.plan.id,identity:p.identity});assert.equal(resumed.status,'completed');assert.deepEqual(await admitted(f.root),[]);
+});
+
 test('lossless whole-root and attachment archives verify actual restore and preserve source identities',async()=>{
   const f=await fixture(),before=await treeFiles(f.root),archive=await archiveStorage(f.root,{destination:join(f.base,'archive'),scope:'whole-root'});
   assert.equal(archive.verified,true);assert.equal(archive.sourceRetained,true);assert.equal(archive.files,before.length);
