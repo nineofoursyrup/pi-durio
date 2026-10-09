@@ -90,18 +90,26 @@
       "number": 14,
       "title": "中止与退出的可解释收尾",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         13
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-14",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-14",
+      "agent": "/root/issue14",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T103610Z/issue-14.json",
+      "note": "Fresh gpt-6-astra/xhigh implementer; lifecycle/CLI scope and #16 compatibility fixed in interfaces-14-16.md."
     },
     "15": {
       "number": 15,
@@ -433,11 +441,9 @@
       "evidence": []
     }
   },
-  "frontier": [
-    14
-  ],
+  "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "ae7454b226f7298cb8f0885e32b071c8b3ed3fe9",
+  "integration_tip": "75716d843f0c8ae848b822dea70b424f268f30b8",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -447,7 +453,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T10:39:38.667483+00:00",
+  "updated_at": "2026-10-09T10:40:54.908691+00:00",
   "last_remote_readback": {
     "headRefOid": "fe6382fd3992135569547d8f51f0a2c5c442f040",
     "isDraft": true,
