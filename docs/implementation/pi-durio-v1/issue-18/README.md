@@ -24,7 +24,7 @@ pending/frozen/withdrawn follow-up 有独立 taskId、不可变 target 和受理
 
 `queryUsage(root, runIds, through)` 读取原 `usage.projection` 与公开 storage 扫描保存的 `durable.closed-snapshot`，每个 session/conversation 取最新已取得的 committed pi.usage。它不把多个累计快照相加、不对 run 做前后差，也不把 model.response 再加入账本。多个 run 共用范围时 runId=null，作为未归属会话量；原始值及 documentId/来源记录仍可查。
 
-trace 的实际请求以每条 model.dispatch 的证据 ID 计数，同一 stream 包装的多次 fetch 各有身份；HTTP 头不结束流 span。只有真实 model.response/tool.result/tool.error 才有终止时间；丢失终止保持 unknown。provider/SDK 未暴露的内部操作不猜测次数。compaction 的 purpose 和新尝试来自原 intent，没有另写调度器。
+trace 的实际请求以每条 model.dispatch 的证据 ID 计数，同一 stream 包装的多次 fetch 各有身份；HTTP 头不结束流 span。只有真实 model.response/tool.result/tool.error 才有终止时间；丢失终止保持 unknown。provider/SDK 未暴露的内部操作不猜测次数。compaction 的 purpose 和新尝试来自原 intent，没有另写调度器。当前 runtime 的 purpose 仍是 generation；#19 接入真实 compact/completeSimple 时必须通过现有实际请求采集边界一次并保存真实 purpose/operation 归属。本票 compaction 查询记录是合成 fixture，不是实际压缩或其费用验收。
 
 已知 input/output/totalTokens 继续保留，reasoning 是 output 子集，不重加。整次 usage 未取得时数值为 null。Pi 归一化的 cacheRead/cacheWrite 零值，只有相同已提交范围的原 provider usage 事件支持时才输出为已知零；未返回分类保持 null/partial，正的已知部分保留。categorySources、categoryCoverage、requestCoverage 和缺口分别指出依据；这些是分类可见性的核对，没有重新累计原 provider usage。未计入费用的失败/重试请求使覆盖不完整。单次查询限 50 个请求 run、500 个 usage 文档、4 MiB 投影内容、10,000 个关联 run；超过时明确要求缩小范围，不悄悄少算。
 
@@ -47,7 +47,7 @@ pending 的 source 是原 admission/control.accepted 记录（在原 target run 
 
 外部不可变日志与示范目录：`/Users/nineofour/pi-durio-v1-run/evidence/issue-18`。r1 保留编译 KeyId 拼写错误及 USD 浮点严格等值测试首败；修复是使用公开 pageUp/pageDown、以 1e-12 精度验证数值，未四舍五入原始账本。r6 的 40x12 合成导航检查发现进入新详情继承旧滚动位置，修复为视图切换重置局部阅读位置；旧 FAIL 日志保留。
 
-r2：history + 既有 query/TUI 受影响套件 22/22 PASS。r4：seam/pre-start/半开时间窗/脱敏/TUI 定点 5/5 PASS。r5：usage 分类/原文/过滤/trace/脱敏 6/6 PASS。最终窄窗修复检查和安装绑定见 handoff.json；已通过的未受后续修改影响检查复用，没有为收尾重跑全量。
+r2：history + 既有 query/TUI 受影响套件 22/22 PASS。r4：seam/pre-start/半开时间窗/脱敏/TUI 定点 5/5 PASS。r5：usage 分类/原文/过滤/trace/脱敏 6/6 PASS。r7 窄窗修复 1/1 PASS，r8 usage/TUI 3/3 PASS，r9 无效历史筛选隔离为只读错误 1/1 PASS。最终编译、独立安装、5 项只读回读与字节绑定见 handoff.json；已通过的未受后续修改影响检查复用，没有为收尾重跑全量。
 
 真实本机 shell、真实 Pi runtime + 明确离线 transport 的失败示范保存在 `demo-r2`：run `f86d223c-3c4a-42fa-84d8-c950dd4f3c6f`，shell exit 7，产品结果 failed，usage unknown。128 KiB 加失败标记的已取得输出逐页重建 hash 一致，慢消费者每次 3 条引用/16 KiB 原文，无积压队列；原文只读前后 host.sqlite 字节相同。固定源 `e1:31:11b4790ab7076d6955a8fbf0696f508bb5c715540a2858bfe2ef5ec5b98a93ee`，固定事实 `e1:48:6aedcb269bdeb1304435f5f020b64b2ff74f5e0e36c0f998f8e477af066efcdd`。重复查询、固定和显式导出无新请求。原 tmp 与外部副本逐文件 hash 一致，复制的是已关闭的静止数据树。
 
