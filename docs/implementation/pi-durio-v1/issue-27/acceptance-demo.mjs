@@ -38,7 +38,7 @@ for(const fail of [false,true]){
  const artifact=queryEvidence(dataRoot,result.runId,{kinds:['execution.artifact']}).items[0];
  outcomes.push({runId:result.runId,taskId,status:result.status,check:check.id,artifact:artifact.id,artifactId:body(artifact).id,sourceClass:'synthetic',requests:localCalls});
 }
-const improveScript=scriptedTransport([]),improveAnswer={summary:'No supported changes in this controlled fixture.',candidates:[],gaps:['Offline fixture only']};
+const improveScript=scriptedTransport([{name:'evidence_summary',args:{}}]),improveAnswer={summary:'No supported changes in this controlled fixture.',candidates:[],gaps:['Offline fixture only']};
 const improve=await analyzeImprove({dataRoot,workspace,targetRunId:outcomes[0].runId,mode:'offline',request:{id:'excluded-improve',purpose:'Verify actual improve remains outside coding metrics',limits:{maxRequests:2,maxTokens:512,maxRequestTokens:256,maxDurationMs:30000,maxOutputTokens:128}},transport:async(url,init)=>{calls++;const response=await improveScript.fetch(url,init);return new Response((await response.text()).replace('Controlled response: inspect actual tool evidence for acceptance.',JSON.stringify(improveAnswer).replaceAll('\\','\\\\').replaceAll('"','\\"')),{headers:{'content-type':'text/event-stream'}});}});
 assert.equal(improve.improve?.state,'complete');
 assert.equal(readFileSync(join(workspace,'result.txt'),'utf8'),'ready');
