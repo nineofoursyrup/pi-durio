@@ -63,11 +63,16 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-13",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-13",
+      "agent": "/root/issue13",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "note": "Fresh gpt-6-astra/xhigh implementer; runtime/coding ownership fixed in interfaces-13-16.md."
     },
     "14": {
       "number": 14,
@@ -114,11 +119,16 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-16",
+      "agent": "/root/issue16",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "note": "Terminal CUA safety denial: no alternate-tool bypass. Continue implementation; candidate-bound manual Terminal evidence required before ticket acceptance. Owns new src/query.ts bounded reads."
     },
     "17": {
       "number": 17,
@@ -407,12 +417,9 @@
       "evidence": []
     }
   },
-  "frontier": [
-    13,
-    16
-  ],
+  "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "b373e1780444b51c913d438a85daec3a00b1b2a1",
+  "integration_tip": "0261d0f5872a96a0727d2b2564ee0c504480ea87",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -422,15 +429,11 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T10:05:04.310786+00:00",
+  "updated_at": "2026-10-09T10:10:39.331437+00:00",
   "last_remote_readback": {
-    "baseRefName": "main",
-    "closingIssuesReferences": [],
-    "headRefName": "codex/pi-durio-v1",
-    "headRefOid": "dadabad8e602e7f36202a2939e6691653bb495ab",
+    "headRefOid": "0261d0f5872a96a0727d2b2564ee0c504480ea87",
     "isDraft": true,
-    "number": 33,
-    "state": "OPEN",
+    "closingIssuesReferences": [],
     "url": "https://github.com/nineofoursyrup/pi-durio/pull/33"
   }
 }
