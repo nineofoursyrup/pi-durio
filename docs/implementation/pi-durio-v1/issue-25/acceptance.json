@@ -1,0 +1,339 @@
+{
+  "ticket": 25,
+  "state": "IMPLEMENTED_AND_LOCALLY_VERIFIED_FOR_COORDINATOR_REVIEW",
+  "at": "2026-10-09T19:57:08.148695+00:00",
+  "productCommit": "533ab55aa86977ff7a1cbec6b63613940cf99c87",
+  "productTree": "c3f174d2c9bab8cf41e54853d5704539ea0833b9",
+  "integrationBase": "1f9b933a229611c27d1819bfd667935a57a69528",
+  "integrationMerge": "c843a37d3949841ee03abd158216c7560f3aa1b5",
+  "branch": "codex/pi-durio-v1-issue-25",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-25",
+  "scope": "Explicit exact project/config/prompt/skill writeback, subsequent task defaults, full effective-profile validation, preserved old pending configuration, explicit exact rollback and required content retention. Tools/runtime and independent eval assets remain #26.",
+  "implementationCommits": [
+    "1eb1247d5abd613704f02e1e9cd5540dc7d8b10b",
+    "043920ae6a0c338caa5e13fd324a2f8b30cf1f9b",
+    "b34cb22b2bac74f09ab11aed41fb71f728359a79",
+    "c843a37d3949841ee03abd158216c7560f3aa1b5",
+    "533ab55aa86977ff7a1cbec6b63613940cf99c87"
+  ],
+  "checks": [
+    {
+      "name": "Earlier frozen full check before retention/guest/profile-basis increments",
+      "result": "PASS",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/full-check-01.log",
+        "sha256": "9a223e57615fa0df104f4eb9c57789460d7da1e0f15a32073c2115d40abfc3fa",
+        "bytes": 24614
+      },
+      "passCount": 196,
+      "failCount": 0,
+      "binding": "Source frozen during the command at HEAD 043920a plus uncommitted #25 changes. The exact original dirty source/build manifest was not separately archived and cannot be asserted byte-for-byte from the later b34 or 533 snapshots. The nearest retained pre-run checkpoint is 1eb1247/043920a; the later complete snapshot is r1/source.tar.gz for b34, which also includes retention/guest additions. This is not a full final-candidate check. Actual diffs, the final 26 affected checks and scoped r1/r2 installed evidence support bounded reuse."
+    },
+    {
+      "name": "Retention/storage/eval/host-provider boundary increment",
+      "result": "PASS",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/retention-guest-focused.log",
+        "sha256": "651648e58545f5dd32e821ab2b1193da1f17db7ecf744bb495a7dcbfdf631455",
+        "bytes": 3101
+      },
+      "passCount": 24,
+      "failCount": 0
+    },
+    {
+      "name": "Final formal decisions, actual-profile classification/full expectations, old pending and retention increment",
+      "result": "PASS",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/effective-basis-focused.log",
+        "sha256": "d6c75dd055095960b55e40f4e19fe92df4a7e7cfebbb94f219bae8e07248ee3d",
+        "bytes": 3466
+      },
+      "passCount": 26,
+      "failCount": 0,
+      "binding": "Final TypeScript source and tests unchanged after this check; later edits affected README and the independent demo script only. Final source-build and installed compiled outputs verified."
+    },
+    {
+      "name": "Final combined CLI includes improve rollback and #29 feedback surfaces",
+      "result": "PASS",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/combined-help.log",
+        "sha256": "96481c7a2208441f4099f2ff34edd3973b5df48adeb346ce611bcaeb7a2ab1e5",
+        "bytes": 5837
+      }
+    },
+    {
+      "name": "Independent final installation: affected actual activation and rollback paths",
+      "result": "PASS",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/report.json",
+        "sha256": "51ec34fae27a7d518b3d98370b8bd5e9677108ea172eb07d8cd92d87eafe30bd",
+        "bytes": 1461
+      }
+    },
+    {
+      "name": "Actual live-mode guest/runtime to offline controlled host mediator",
+      "result": "PASS_DIAGNOSTIC_REUSED_WITH_IDENTICAL_COMPILED_MODULES",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/live-guest/report.json",
+        "sha256": "b4f24dda82eac30fa79fae64549c7c08ec57bb75fc9fe1f207b2b0578e674de9",
+        "bytes": 4597
+      },
+      "providerCalls": "No real provider calls. Exactly two controlled mediator requests; host live override refusal unchanged; VM termination confirmed."
+    },
+    {
+      "name": "Unchanged earlier independent installed checks, individually scoped",
+      "result": "REUSED_WITH_EXPLICIT_LIMITS",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/reuse-map.json",
+        "sha256": "1b6a0cbc1a82c7e6f42b19284532c37ea3d446b850df499d6b669c75429ce733",
+        "bytes": 12380
+      }
+    }
+  ],
+  "identity": {
+    "evidence": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/candidate-identity.json",
+      "sha256": "48a28d5dfbc7603019f9ba5f043ed084395fc4851558f3eaa9ee4c3965b408e8",
+      "bytes": 5183817
+    },
+    "archive": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/source.tar.gz",
+      "bytes": 2357581,
+      "sha256": "a3dacb6277ae7038e7aa7805b84f9683d8bc2f81add80639b4616132ddc19d45"
+    },
+    "package": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/pack/pi-durio-0.1.0.tgz",
+      "bytes": 23489813,
+      "sha256": "1cbafca341ff763684e696cba5e718e0bf82fb2d3abe72eb0088b7cae50f3db0"
+    },
+    "sourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-25/dist/execution/source-build.json",
+      "bytes": 83071,
+      "sha256": "e64e3194d781725b5ba01ac94ffa2ab9950a7ccf2fa06ce810ff3fd590482d0c"
+    },
+    "sourceBuildCounts": {
+      "inputs": 144,
+      "compiler": 132,
+      "outputs": 219
+    },
+    "sourceFiles": 320,
+    "compiledFiles": 313,
+    "packagedFiles": 12890,
+    "installedEntries": 12894,
+    "sourceArchiveExactMatch": true,
+    "sourceBuildExactMatch": true,
+    "packageFileBytesExactMatch": true,
+    "installedCompiledMatch": true,
+    "pack": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/pack.json",
+      "sha256": "aef0a746a805daa7a526008b0a54e81da37110562e012ba8a6456702165d3c16",
+      "bytes": 1819114
+    },
+    "install": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/install.log",
+      "sha256": "2f58f62fd5738b94b7d6113ef02c12f2eceea053191e6958da7dffcdc763e94d",
+      "bytes": 23
+    }
+  },
+  "linuxPreparation": {
+    "evidence": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/linux-prepare.log",
+      "sha256": "415d8f5dab47c2adc1aab4ec8946d7c298068f7897e771ffb93b3b5f2290a660",
+      "bytes": 1225
+    },
+    "report": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/linux-runtime/preparation-reuse.json",
+      "sha256": "415d8f5dab47c2adc1aab4ec8946d7c298068f7897e771ffb93b3b5f2290a660",
+      "bytes": 1225
+    },
+    "scope": "Only unchanged Linux dependency bytes from the prior verified dependency manifest are reused, verified before and after copy under the identical lock. All current product dist/package/vendor content comes from the final independent installation. No prior runtime outcomes copied into new plans."
+  },
+  "installedActivation": {
+    "result": {
+      "status": "PASS",
+      "phase": "activation-only",
+      "transport": "Controlled synthetic provider through real Pi public runtime; no paid/provider-quality inference",
+      "projectWriteback": "NOT RUN in activation-only mode",
+      "tuiStructuredExecution": "NOT RUN in activation-only mode",
+      "userEditRollback": "NOT RUN in activation-only mode",
+      "postvalidationDrift": "NOT RUN in activation-only mode",
+      "partialWriteAndCrossRootFence": "NOT RUN in activation-only mode",
+      "cleanupRetainsRequiredContent": "PASS; selected active default preview blocks required objects",
+      "effectiveProfile": {
+        "validateOnly": "NOT RUN in activation-only mode",
+        "performanceNoGain": "NOT RUN in activation-only mode",
+        "configDefault": "PASS; complete actual profile expectations reject an incorrect full expectation and load the correct declared setting",
+        "promptSkillDefault": "PASS; first activation uses fresh effective-profile checks, then exact declared whitespace-equivalent cleanup; actual new-task use and preserved prior config",
+        "firstActivationClassification": "PASS; file-only no-behavior and deterministic-fix shortcuts rejected",
+        "rollback": "PASS; later default/user edits protected; old content available"
+      },
+      "reopen": "PASS; cold CLI and identical journal inventory",
+      "remaining": [
+        "Real model-generated chain #30",
+        "Native final composition #31/#32",
+        "Tools/runtime and independent eval-asset execution #26"
+      ]
+    },
+    "wholeProfileFirstFailure": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/whole-profile-first-failure.json",
+      "sha256": "c0744025703c98ccabaf040dc86b64acb58213fbc70de62b13e294bc991545e0",
+      "bytes": 43359
+    },
+    "fileOnlyConfigRejected": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/file-only-config-rejected.json",
+      "sha256": "15c2c1345a0b856e0286fa9309562a3530e92d39c489cfacb2d93c8978689339",
+      "bytes": 3349
+    },
+    "firstSkillNoBehaviorRejected": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/first-skill-no-behavior-rejected.json",
+      "sha256": "2039515779691326497d663eafb2c6959e10e9b7ca94acacbce3eabee09a94ad",
+      "bytes": 3300
+    },
+    "configObserved": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/config-observed.json",
+      "sha256": "26b18b652a615019bed1ab01912d422aabc124fd4a209933dd6736f9d8252439",
+      "bytes": 53123
+    },
+    "skillFirstActivation": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-first-activation.json",
+      "sha256": "1ee11013ae3782b56a6680559e3cfaa53dd54bb3d8503eca94e274ad28d167ac",
+      "bytes": 366655
+    },
+    "skillFreshActualProfiles": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-fresh-actual-profiles.json",
+      "sha256": "a5a97fee37df4afa1d37901b5c0fee56d1fba8587da9423e6c8e739976d85faf",
+      "bytes": 6523
+    },
+    "skillFirstObserved": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-first-observed.json",
+      "sha256": "dcfaff92edf86eae4bc2a2e91129a4a9a8a661fcd23216dc52140dd98c58f976",
+      "bytes": 387342
+    },
+    "equivalentSkillCleanupObserved": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-observed.json",
+      "sha256": "3b94e6553d7fd4e044b9877bc8c71d20523e586dd10c55c941c1274597e37cdc",
+      "bytes": 52531
+    },
+    "activeCleanupProtection": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/cleanup-active-protected.json",
+      "sha256": "a9b8f56227887a9256359d63a43d31374944239c68c0d85dff33d9d177982da8",
+      "bytes": 1961
+    },
+    "rollback": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-cleanup-revert.json",
+        "sha256": "79d39dd66336261662eab518348f3e3ca1566fe563be6f1504e8bec84e352c0e",
+        "bytes": 46368
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-revert.json",
+        "sha256": "cbeccbd9f953a3049b916fc7dbbdc3c700645b6c3014bd0aed1759a77cbc0c5a",
+        "bytes": 366772
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/config-revert.json",
+        "sha256": "6c46a90eb4401828a87fd548103cba9b254ffb0ece871fc0569f05663e35d0c1",
+        "bytes": 47291
+      }
+    ],
+    "readonly": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/readonly-inventory.json",
+      "sha256": "23d8383eeee2845495251739e1472da5ce63e4ca9a81b8ce2bedb699521719bf",
+      "bytes": 114489
+    }
+  },
+  "preservedEarlierCandidate": {
+    "commit": "b34cb22b2bac74f09ab11aed41fb71f728359a79",
+    "identity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/candidate-identity.json",
+      "sha256": "7e5d7410693c5d182ec857e067d9b93db6eb5cbd32b726e4daae7eea9c3dc50f",
+      "bytes": 5175636
+    },
+    "originalReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/installed-demo/report.json",
+      "sha256": "27a5441e51c27b9252a515cdc645668347eedea83ca301101a0716a9e8ea981f",
+      "bytes": 1218
+    },
+    "reuseMap": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/reuse-map.json",
+      "sha256": "1b6a0cbc1a82c7e6f42b19284532c37ea3d446b850df499d6b669c75429ce733",
+      "bytes": 12380
+    },
+    "limitation": "Original report remains immutable. Its first-time no-behavior/file-only deterministic activation classifications are invalidated by the later red regression and are NOT inherited as current acceptance. Exact file-write/partial/fence/rollback behavior, live guest diagnostic and basis-free fresh/no-gain checks are reused only as listed in reuse-map."
+  },
+  "firstFailures": [
+    {
+      "note": "Initial formal execution unsupported before implementation",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-formal-01.log",
+        "sha256": "0df0b47159493627a4c66bb148bee97d8fee08e83602897231ca55e1d448d836",
+        "bytes": 1083
+      }
+    },
+    {
+      "note": "Initial test construction compile errors, then corrected before behavioral run",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-build-02.log",
+        "sha256": "74664580e113ca6a127ffb00c3bec2fd558d9bbea8586f794c1ec52c7f41470f",
+        "bytes": 1473
+      }
+    },
+    {
+      "note": "Cross-data-root fence and actual effective config initially absent",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-profile-fence-03.log",
+        "sha256": "ccfe8c784399e174e3c0567b6715004dc707393e0053cbdd839637c1b96acb5c",
+        "bytes": 2098
+      }
+    },
+    {
+      "note": "Harness initially expected returned error rather than public pre-admission rejection; assertion corrected",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/green-profile-fence-02.log",
+        "sha256": "4274ce176681849c8fbd97f29887a0bcd6e3caca11b743866ff56cdbabd354e1",
+        "bytes": 1789
+      }
+    },
+    {
+      "note": "Ordinary cleanup initially admitted four required formal/default payloads",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-retention.log",
+        "sha256": "f9166814cf92252d77ac88fa928a3f93b1e9872239d235cef222a832a548713a",
+        "bytes": 1011
+      }
+    },
+    {
+      "note": "Original independently installed #24 live guest failed before any controlled mediator request",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-live-guest/report.json",
+        "sha256": "8b6d2673d407d9d3b83d42872ba9e7a1b30fb91e1bb73ca2bcb96c65be6ee54d",
+        "bytes": 401
+      }
+    },
+    {
+      "note": "Both original file-only first-activation classifications incorrectly passed preview",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-effective-basis.log",
+        "sha256": "757f02ac1f3268e50a7b5572b78bf1de704b0563bf35944dd6cc2914a53b3f1a",
+        "bytes": 1780
+      }
+    }
+  ],
+  "interface": "docs/implementation/pi-durio-v1/issue-25/README.md; src/improve-decisions.ts, improve-profile-validation.ts, improve-formal.ts, improve-defaults.ts, improve-rollback.ts; no added execution/cleanup scheduler.",
+  "limits": [
+    "Controlled transports and diagnostic VM mechanics are not real provider or model-quality evidence.",
+    "No performance activation without every predeclared benefit and protection. The fresh skill introduction is a nonperformance maintenance case with all hard checks passed and no improvement claim.",
+    "Complete deterministic profile expectations verify the declared configuration regression, not model improvement.",
+    "Old pending profile evidence is the current real public-runtime regression with a genuinely equivalent first config mapping; no hot migration or missing authorization supplied.",
+    "Explicit rollback restores selected exact local bytes/default snapshots only, preserving later edits/default choices and original unknown facts; external effects are not undone.",
+    "Full final-candidate suite not rerun: earlier required full check and bounded affected checks reused under unchanged inputs."
+  ],
+  "remaining": [
+    "Coordinator independent exact-candidate review and integration acceptance.",
+    "Tools/runtime source/build and independent eval-asset execution #26.",
+    "Real provider-generated improve chain and any authorized paid execution #30.",
+    "Native final composition and human day-to-day acceptance #31/#32.",
+    "No main merge, issue closure, release or paid call performed by this worker."
+  ],
+  "evidenceDirectory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25"
+}
