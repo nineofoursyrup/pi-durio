@@ -1,0 +1,137 @@
+{
+  "ticket": 28,
+  "at": "2026-10-09T19:17:37.791662+00:00",
+  "status": "integrated-accepted",
+  "integrationMerge": "a35cb3b672f412d0e6330b43ad947c24a085b9b1",
+  "integrationTree": "e39f87f8026c16e02357631f9ece4480ba2dec59",
+  "originalProducer": "ab74b1f4b9b430d9e1cbc77c5972255427260b98",
+  "originalReader": "fa84c81f8a1b4b149bb09e0b81ad21b2de809212",
+  "ticketTip": "8cfc0f0fe52efb1bbc2b898c743d0146e274f8c3",
+  "compositeCandidate": "960db7658f6a8afc1c544bd20a4fed2e74184ecf",
+  "compositeIdentity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/candidate-identity.json",
+    "sha256": "758acf07eb59b1f3051830d87d170a0236d5705cb4f45a29b3a2c5ee8203139f",
+    "bytes": 2060
+  },
+  "mergeReadback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/merge-integration-readback.json",
+    "sha256": "8da795a21ba435d041cb1ac30b085a88b8b14a2ab91c454e95b019bc07568461"
+  },
+  "verifiedDirectFiles": {
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/candidate-r3.json": "fb595e287c6fe00ad884e05ed5a3234bdf798c544a0ffaf1f84afe230240ee7c",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/original-reader-dist.tar.gz": "44f39924f7984d5f039f29e20949cb50c69ea65644fe0fb6c253d08d78261c7d",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/candidate-identity.json": "758acf07eb59b1f3051830d87d170a0236d5705cb4f45a29b3a2c5ee8203139f",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/full-check-1.log": "998d5adf95c337cfa31f35dfa3de6d88a048f49aa336304f4b0e5328c831ac7b",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/frozen-regressions-1.log": "7724071c52248abe45a1fa069b067456ae53006040981c4b51ddaf1def3c9909",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/frozen-metrics-2.log": "4363743e55519ce22f79ea7bc77210ad695bec4976f19e2eea5bea622041745d",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/business-exit-tests.log": "755b7e77d3f78b30f0fb2bdf1327ea991bbf59cb35546b0d15055fe4b08fad19",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/business-exit-build.log": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/verify-candidate-r3.log": "08debc57b49fae4ee8ae32999282e414a50110c6521c3028738a1b80a359b724",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/artifact-verification-r3.log": "6a124dc5d0a6ead1c7113d625f5e6df86b568e03576657458a0e34a4c16d1543",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/build.log": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/metrics-operations-tests.log": "55cc7f988114c36719f89f0ddec2bf04f32a51ce6092e49317012315709574e6",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/improve-adapter-tests.log": "75b0b489bb1d17a33d29ec67ed61b0904a6cb3142aa7233e0394a4979926e13e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/pack.json": "cc3b7c0c2ad1f030a314dd1ecbf85ded442386e7777a0cfb7b63b89d80aa84a0",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/install.log": "2f58f62fd5738b94b7d6113ef02c12f2eceea053191e6958da7dffcdc763e94d",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/public-reader-check.log": "7452a02951801132360740bd091a3540922ad3a542387b99398f0731ef2d2ed4",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/public-reader-result.json": "7bdddddf5bdd0d836e624789061d0655311f20ab118493d7176288bd4f0ae540",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/owned-child-readback.log": "b746f363c5f921798e47f80435306cb07f4a97f1eae7ea27fcd51b22991a483e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/owned-child-readback/result.json": "cc84ac250b9385195c6e6527b994bc3f11e5964721a9f3da106d265d842b9e0a",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/merge-integration-readback.json": "877227de74704e03c2ac8f7b015036354c3466de43422db1a6082cdc5d05ffed",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/cost-red-build.log": "e65843376b790d754066057e8b1509a6513df47fedc29629dd6786b57fa7b936",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/boundary-red-tests.log": "ee0d692bc1ff695251a4d553f87ce361586446d93c76563e162f7a83e9c37f95",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/cancellation-red-tests.log": "07a0f4a0976157aa3e9c16c6e9ad15d0266f06def09d68199ad3c3847cf04ecf",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/child-boundary-tests.log": "817b0e5b61c18f6e180fe600dc588c9bc6170af9c60d88c156e30f4865f6610e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/fault-termination-before.json": "49ba3f8ba08b83a3dfe872842c0bfd69a1cd9c8b00a8fcb364bee308916ca59a",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/actual-acceptance-r1.log": "4156af99572d9b42b38379a2a8efc046b83ac9e988fc96717ee2e9c903ae4ca0",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/known-example-r3.log": "e842fad02ca917b8b7dbce67e714a673eaea2692b575aab7cbcdc4100c4019b6",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/merge-verification-first-failure-20261009T191247656088Z.json": "e82e889cfad29a6d6f16c20318bc3a620a38f8a3862a2080c39723bbcff22756",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/merge-28-preflight.py": "35f65f17179e1bdcb6510adf678b6211451d565a969679ed1da15933fc32c370",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/merge-preflight.json": "927d3c666a14408da4d3fde7d88e30f853475ff61dbc37d5399a6be44f3d40a7",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/merge-postflight.json": "f5ad898465bbe0119f6a6a9845af60ec43d438fd46b0dd9af3520d3b9a4f7983",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/coordinator-premerge.json": "0cf8cccf853bd5112ed158f1a46b908d440ca11ec925684f9ec682c946c44621",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/handoff.json": "83f419a551b1619a6b2fe4470c82a21d0bdf106925479df43173642a570cee43",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/verify-composite.py": "54b20ffde6349e8d798b728b3b0677aef9dfe444d88f12af2769721190823c9e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/source.tar.gz": "e9a1dded379bd0a50de57cab33e138f18603933be38e7aa111998eee5821dfc7",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/install/node_modules/pi-durio/dist/execution/source-build.json": "8714bc0ef1318e86b9348d9ef495b2de14a30edfa05048c3240de5af8a2195c1",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/pack/pi-durio-0.1.0.tgz": "699b4876525233b4b434343be9f6d308a314f6925db6971362b8c31d09a396e6",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/composite/installed-inventory.json": "77dcf40a55c8c9f50fdce0bd505d77ad9fa95c6df81c64f998473bad34ab58d7",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/source-r3.tar.gz": "a283af247ed177da697949528b0776165785a499ffe46548484b0707c3fa19e9",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/source-with-metadata.tar.gz": "b444b67339b1e00df82c3a022ba54112155fab8b01293c2fe3e286f8d01c6c25",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/package-r3/pi-durio-0.1.0.tgz": "6b27df32f5ce335abb1c8abea0eb3093e52820c82514e85af6fe06cd524ec2ba",
+    "/Users/nineofour/pi-durio-v1-run/worktrees/issue-28/docs/implementation/pi-durio-v1/issue-28/acceptance.json": "704393aa390546740628d7d5ecfbfe29360124080f7ec033f061fec13546d5f0",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/local-acceptance-r3.json": "32acca6b5209f2db0d56156b636b5a215ebc0818cfc8191d62e9cda191abc434",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/acceptance-r3.json": "b9d36abc91483d92e87be5ebc698a5cf8cbf01f71794259845215b3758adc883",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/package-r1/pi-durio-0.1.0.tgz": "7824bf17a666834d7f35f35fcfd6ba9c2524f23e6f3f57445dd6a8c52f6ed09b",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/actual-readback-r3/result.json": "8dc52d655ced1236ea614c0b46602c70e3981873787adef3098bc919c09a805f",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/actual-readback-r3/reuse-lineage.json": "9a14dae3c7c7fc35df5d7e6536c3e774812390544b289b64bbd836315b899c0e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/artifact-verification-r3.json": "73d0ea2d79e464c430496eee0479d65b376bbc7b9f8d1993eea198707bd38943",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/actual-acceptance-r1/report-original-catalog.json": "c3424cc752f99fe40f7ba0fde5a4133d3bb82415e81be227e72f2285dc5ad679",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/owned-child-readback-r3/result.json": "94ce193240eb024ee656a0c4d71123e69a279cd381d4cc8e1090947d5dfa9833",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/known-example-r3/result.json": "6b94abd31ad6186a8478849d166ab45122e6bbd483bb125d5539e5f86c78e8f2"
+  },
+  "acceptance": {
+    "sample": "Five actual controlled tasks: success, ordinary business failure, recovered model fault, unrecovered model fault, cancellation. N/B=5 C3 G2 S1; actual lifecycle/compaction/provider outputs retained.",
+    "cost": "Actual 14 dispatch records include manual/automatic compaction; known CNY controlled example is an estimate and missing usages/prices remain partial. Paired parent/child queries attribute owned 8 requests once, excluded from coding sample costs.",
+    "fault": "F2 Zf3 Uf0; fault termination1, successful recovery1. Explicit tool business exit remains a task failure without false runtime fault.",
+    "readonly": "Fixed-scope public API/CLI/TUI reports agree. Cold read, parent/child inventories, DB and dispatch counts unchanged.",
+    "reestimate": "A later price estimate is separate from prior retained query; no old report overwritten.",
+    "composition": "Actual new composite built/packed/installed; source tree equals root merge. New build + metrics6 + nonexecuting improve9 pass; prior still-applicable checks retained."
+  },
+  "firstFailures": {
+    "product": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/cost-red-build.log",
+        "sha256": "e65843376b790d754066057e8b1509a6513df47fedc29629dd6786b57fa7b936"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/boundary-red-tests.log",
+        "sha256": "ee0d692bc1ff695251a4d553f87ce361586446d93c76563e162f7a83e9c37f95"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/cancellation-red-tests.log",
+        "sha256": "07a0f4a0976157aa3e9c16c6e9ad15d0266f06def09d68199ad3c3847cf04ecf"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/child-boundary-tests.log",
+        "sha256": "817b0e5b61c18f6e180fe600dc588c9bc6170af9c60d88c156e30f4865f6610e"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/fault-termination-before.json",
+        "sha256": "49ba3f8ba08b83a3dfe872842c0bfd69a1cd9c8b00a8fcb364bee308916ca59a"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/full-check-1.log",
+        "sha256": "998d5adf95c337cfa31f35dfa3de6d88a048f49aa336304f4b0e5328c831ac7b"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/actual-acceptance-r1.log",
+        "sha256": "4156af99572d9b42b38379a2a8efc046b83ac9e988fc96717ee2e9c903ae4ca0"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/known-example-r3.log",
+        "sha256": "e842fad02ca917b8b7dbce67e714a673eaea2692b575aab7cbcdc4100c4019b6"
+      }
+    ],
+    "merger": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/merge-verification-first-failure-20261009T191247656088Z.json",
+        "sha256": "e82e889cfad29a6d6f16c20318bc3a620a38f8a3862a2080c39723bbcff22756",
+        "bytes": 89
+      }
+    ],
+    "mergerCorrection": "Preflight variable source shadowed the archive dictionary with a helper function when assembling its output. All binding assertions had passed; renamed source_files and reused the already-created dist archive after exact tar verification. Corrected preflight and composite/postflight passed. No product failure or original evidence rewrite."
+  },
+  "fullSuiteInterpretation": "171/174 original full run remains FAIL with three frozen regressions passing; unchanged scope reused. No new full-suite or producer/VM replay.",
+  "limits": [
+    "paid/live DeepSeek (#30)",
+    "native macOS Terminal whole-product acceptance (#31)",
+    "human daily-use acceptance (#32)",
+    "formal VM rerun by #28 (accepted existing producer facts will be queried)",
+    "Controlled fixture prices remain estimates, not provider bills.",
+    "Parent/child owned query excludes child eval costs from accepted coding sample, includes exactly 8 once in period costs, keeps missing effectiveAt partial.",
+    "Composite contains accepted #24 integration; formal activation/writeback remains #25 and generic build/deployment remains #26."
+  ],
+  "publication": "Pending coordinator metadata commit/push/readback; all issues stay OPEN and PR stays Draft.",
+  "independentFinalReview": "NOT RUN; whole implementation candidate will receive final independent code-review."
+}
