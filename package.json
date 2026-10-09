@@ -13,7 +13,10 @@
     "docs/implementation/pi-durio-v1/issue-11/README.md",
     "docs/implementation/pi-durio-v1/issue-16/README.md",
     "docs/implementation/pi-durio-v1/issue-16/width-repair-r5.md",
-    "docs/implementation/pi-durio-v1/issue-16/width-exception-authorization.json"
+    "docs/implementation/pi-durio-v1/issue-16/width-exception-authorization.json",
+    "scripts/eval",
+    "scripts/isolation",
+    "docs/implementation/pi-durio-v1/issue-21/README.md"
   ],
   "engines": {
     "node": ">=22.19.0"
@@ -41,6 +44,7 @@
     "./offline": "./dist/src/offline.js",
     "./tui": "./dist/src/tui/app.js",
     "./query": "./dist/src/query.js",
+    "./eval": "./dist/src/eval/runner.js",
     "./storage": "./dist/src/storage.js",
     "./compaction": "./dist/src/compaction.js"
   },

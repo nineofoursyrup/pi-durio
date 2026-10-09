@@ -39,3 +39,13 @@ test('budget rejects expired plans and never sends when acquired original cannot
  const e2=new Evidence(mkdtempSync(join(tmpdir(),'durio-budget-')),'batch');
  const expired=new PersistentBudget(e2,'expired',{...limits,deadline:'2020-01-01T00:00:00.000Z'});assert.throws(()=>expired.reserve('generation','op'),/BUDGET_DEADLINE/);e2.close();
 });
+
+test('response limit preserves the acquired offending bytes and never refunds its dispatch',async()=>{
+ const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-budget-limit-')),'batch'),budget=new PersistentBudget(e,'budget',{maxRequests:5,maxTokens:100,maxRequestTokens:25,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null});
+ const original='data: '+JSON.stringify({choices:[],extra:'x'.repeat(100)})+'\n\n';
+ const response=await dispatchProvider({budget,purpose:'generation',operationId:'trial',maxResponseBytes:16,transport:async()=>new Response(original)},'https://api.deepseek.com/chat/completions',{body:'{}'});
+ await assert.rejects(response.text(),/PROVIDER_RESPONSE_LIMIT/);
+ const rows=e.db.prepare("SELECT body FROM records WHERE kind='provider.bytes'").all();assert.equal(rows.length,1);
+ const {readObject}=await import('../src/evidence.js');const fact=JSON.parse(readObject(e.root,JSON.parse(String(rows[0].body))).toString());assert.equal(readObject(e.root,fact.bytes).toString(),original);
+ assert.equal(budget.snapshot().requests,1);assert.equal(budget.snapshot().unknown,1);assert.throws(()=>budget.check(),/BUDGET_UNKNOWN_USAGE/);e.close();
+});

@@ -54,8 +54,11 @@ export async function dispatchProvider(boundary:ProviderBoundary|undefined,url:P
   const parse=(line:string)=>{if(!line.startsWith('data:'))return;try{const event=JSON.parse(line.slice(5));const usage=event.usage;if(Number.isSafeInteger(usage?.prompt_tokens)&&Number.isSafeInteger(usage?.completion_tokens)&&usage.prompt_tokens>=0&&usage.completion_tokens>=0)tokens=usage.prompt_tokens+usage.completion_tokens;}catch{/* acquired raw bytes remain authoritative */}};
   const body=new ReadableStream<Uint8Array>({
    async pull(controller){try{const next=await reader.read();if(next.done){pending+=decoder.decode();for(const line of pending.split('\n'))parse(line);settle(tokens,response.ok?'returned':'error');controller.close();return;}
+    // The current block has already been acquired: retain it even when it
+    // crosses the consumption limit, then stop without another read.
+    evidence?.append('provider.bytes',{id,bytes:evidence.blob(next.value)});
     total+=next.value.length;if(total>(boundary.maxResponseBytes??1_048_576))throw Error('PROVIDER_RESPONSE_LIMIT');
-    evidence?.append('provider.bytes',{id,bytes:evidence.blob(next.value)});pending+=decoder.decode(next.value,{stream:true});let index;while((index=pending.indexOf('\n'))>=0){parse(pending.slice(0,index));pending=pending.slice(index+1);}if(pending.length>262144)throw Error('PROVIDER_FRAME_LIMIT');controller.enqueue(next.value);
+    pending+=decoder.decode(next.value,{stream:true});let index;while((index=pending.indexOf('\n'))>=0){parse(pending.slice(0,index));pending=pending.slice(index+1);}if(pending.length>262144)throw Error('PROVIDER_FRAME_LIMIT');controller.enqueue(next.value);
    }catch(error){try{settle(null,init?.signal?.aborted?'cancelled':'error',String(error));}finally{await reader.cancel().catch(()=>{});controller.error(error);}}},
    async cancel(reason){try{settle(null,'cancelled',String(reason));}finally{await reader.cancel(reason);}}
   });return new Response(body,{status:response.status,statusText:response.statusText,headers:response.headers});
