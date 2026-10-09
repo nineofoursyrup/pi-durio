@@ -1,0 +1,287 @@
+{
+  "at": "2026-10-09T23:04:42.522122+00:00",
+  "status": "PASS_CLEANUP_ONLY",
+  "outcomes": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-qiifMo/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "5898be18a8e1b8779acaf6aa76e85350c623e106bf9830e022777b5c29eeff31",
+      "id": "durio-i12-2b7e910f-8c7d-4b04-ae65-d4826ab19ffd",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-U43vRS/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "4554a8e9fd45ac2dea05f78ce57a52f6cd8ffd763d47a91155498e5b132037b4",
+      "id": "durio-i12-ad8bc37b-b108-4866-b24a-0ff151a63e1b",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-xcaLcl/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "e25c47aad33ef244508706a08eacd5ae6dc4ecffb6d7456c8847fbe55cf58297",
+      "id": "durio-i12-d685f251-3f67-4e06-a6a0-8b82800d16dd",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-xcaLcl/temporary/fix/check-1/execution/outcome.json",
+      "sha256": "31c09f615e825128390fdeab07fd674386005d9ed2c744154725b3aaedf12e25",
+      "id": "durio-i12-702384c5-f604-482b-9a3b-41b8f795e671",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-hGb18J/output-validation/math/check-0/execution/outcome.json",
+      "sha256": "27a776a93473ecd7f67da323c66c462ebcd2df36eb787d4953669103ae537555",
+      "id": "durio-i12-5248d65c-0f2b-4cfe-9a23-8a0d58fda8ed",
+      "status": "failed",
+      "started": true,
+      "terminated": true,
+      "reason": "output_limit"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/outcome.json",
+      "sha256": "3ef9865ce9208e67784154c16a2844472a67a19c458e479b0eb3cddef032ac6d",
+      "id": "durio-i12-a44be661-a5be-454c-9b4c-a624ac0f75c7",
+      "status": "failed",
+      "started": true,
+      "terminated": true,
+      "reason": "timeout"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/execution/outcome.json",
+      "sha256": "8bf41c8e3169e0f425a64071c9c29e73e642deffb7d6e38d47ec88476e4e8744",
+      "id": "durio-i12-2f9d4c02-5956-4622-b826-6a93aabd3316",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/startup/outcome.json",
+      "sha256": "7965768ff986671b5eccaebc0ac98e4f6bb69c5a7241f0eb01a8c517bdba37a6",
+      "id": "durio-i12-60310930-0864-425e-890f-b75fdbdcef54",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-hm2a8C/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "5ea567b9354deeeb7c8847cbd7f2a75bd8d16552462dcb008c797f2fa0e4c615",
+      "id": "durio-i12-e44d6522-4660-4bbb-a7fa-25cd35c78253",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-assets-4VKzIL/original-grade/candidate-grading-335ff35f-0f9e-4680-b56e-fabe51c55f4d/outcome.json",
+      "sha256": "70c23e0dcfc14e07aaa788095b0635829f3307f1c8a1390f3c2d4eeed421c32f",
+      "id": "durio-i12-3953c188-67dc-42e9-bb71-67832e3f6bd9",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-assets-4VKzIL/original-grade/baseline-grading-b015949a-3735-4bf9-8485-b5ad6c7d0f21/outcome.json",
+      "sha256": "da4a913793f43ead76e2750b497b5803aa97dc683d6b4b768780137941655720",
+      "id": "durio-i12-41539253-dc7e-470e-b8f8-80fa627b74e6",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-assets-4VKzIL/corrected-grade/baseline-grading-43fb4eed-5008-4800-baa6-416143cca299/outcome.json",
+      "sha256": "cf65dccec9c21a9c2c5e3a6600a9fa0b127130d26cf3fa134d071749c66fd7ad",
+      "id": "durio-i12-5131c61d-6986-4b13-971b-58694ae713cb",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-assets-4VKzIL/corrected-grade/candidate-grading-dcb50702-e043-4a9a-ae16-cc68ac2a1403/outcome.json",
+      "sha256": "f1e3a87469da1dafdf18029a13f040af355b2fbe7401d0c47a36f32376707e5b",
+      "id": "durio-i12-ad34e8cb-d0e5-408e-a310-cda8ca450f29",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-assets-4VKzIL/validation/asset/check-0/execution/outcome.json",
+      "sha256": "b8cb7a40fc2aad3424a2bc1f7cf0f1c2877b553d6329149c3612cc4cc6bdd82e",
+      "id": "durio-i12-ae0639f0-f94d-49c3-b288-e66daee56a74",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-assets-4VKzIL/cancelled-grading/baseline-grading-bdaba003-68a7-45ef-a5b5-1e75381b54ca/outcome.json",
+      "sha256": "a290e02787d107539074e08ba0d45b2fee4851046112df2588a79a46646b8ccc",
+      "id": "durio-i12-edf32c6a-d630-4212-95dc-5aac784f2033",
+      "status": "failed",
+      "started": true,
+      "terminated": true,
+      "reason": "cancelled"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-0cXZje/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "50c1406310cdfb33752b1260f38551e212b17d001e0dba483ffdb3daf169f264",
+      "id": "durio-i12-f081efb3-abc7-47f8-ad5f-2a17fb2899e0",
+      "status": "failed",
+      "started": true,
+      "terminated": true,
+      "reason": "execution_error"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-EfAJDe/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "582f6c0ce5638020cc2b6c0f1179524510d2c57788f5bb1a1bd91be868e71ed4",
+      "id": "durio-i12-c1a73b07-b448-4383-ae49-cf619cdc016f",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-q404ov/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "f674b40cd97bfada54488f952842b4026435d6d44c604f68751b9a1ae8dde925",
+      "id": "durio-i12-f1402404-d577-4121-8845-98a3d67ee1ab",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-DQ0oZo/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "684243b0129fdbed3fdc30dfe8bef0befb353e306c2608f6189e0f2a964d65ec",
+      "id": "durio-i12-c24f7124-364a-4f9b-8508-9926f7ffdffd",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-M044Lf/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "8f6f14c9eda804774a1c61cc72dffb7ba55b3dbd1b0ef54bd1473e679b0e66fe",
+      "id": "durio-i12-fc1263c1-0f14-4cd4-abee-743654442e9f",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-QSKgDM/validation/first/check-0/execution/outcome.json",
+      "sha256": "01f797371ba5dee5817dcbbbeb219f91be20d39cba9e54f0a30cdf86bd79e31f",
+      "id": "durio-i12-d4bc3c6e-9986-47bb-afc1-f2b517a0ce85",
+      "status": "failed",
+      "started": true,
+      "terminated": true,
+      "reason": "execution_error"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-QSKgDM/validation/second/check-0/execution/outcome.json",
+      "sha256": "6a1f9d4105cf54235efa69c2a363c96f9a53567b4c9e0ef78721aed7192285f1",
+      "id": "durio-i12-73ccdf7c-9bd9-431e-8b03-ddf1c279f173",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-hAejU2/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "a6081b1cd6711631053c38e347fad64db78a85cfabc6693d5aba76697e9724b8",
+      "id": "durio-i12-e202f613-6d66-422f-ae26-641ca090ffe1",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-C6MnUM/output-validation/math/check-0/execution/outcome.json",
+      "sha256": "5f1afba337e012914adf2a05a1ca434269e063d2816a2b9db7f1c3497299efe1",
+      "id": "durio-i12-fd150321-f0e8-493c-855d-60dae7b8434d",
+      "status": "failed",
+      "started": true,
+      "terminated": true,
+      "reason": "output_limit"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-DlvK33/validation/first/check-0/execution/outcome.json",
+      "sha256": "cfd53ff2fd7095f393c0b605625017fd92a22512e8ddb374028d43b0ff7a329d",
+      "id": "durio-i12-0852735d-55f0-4fa9-aaa6-439b4c87e11e",
+      "status": "failed",
+      "started": true,
+      "terminated": true,
+      "reason": "execution_error"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-N87E7D/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "f80c85f214d24061bd65c277faad2559304a697bdb897a079853d17f3e35746a",
+      "id": "durio-i12-00310470-7ad8-4f3a-a0e7-25adca8651a3",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-iVlPUu/validation/math/check-0/execution/outcome.json",
+      "sha256": "3a23b77d0e075da4ffa4d3c402a5869c1f6a848a0e27e6a1ca543ecd6d45d1f9",
+      "id": "durio-i12-bca7cd3b-b37e-43e9-8863-d64e3ab24303",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-formal-5j4CkL/temporary/fix/check-0/execution/outcome.json",
+      "sha256": "3849005753d3200ad4c60cd334d3f0c59c57d2b4a47926ee9df950b1c2457a96",
+      "id": "durio-i12-a6bcef27-2960-4218-97e6-941e0ec87d8b",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-DJ95LL/semantics/format/check-0/execution/outcome.json",
+      "sha256": "c2d6c09487b7332a8197205f96436ef537d545c76a707cf663d1b50f59d7722f",
+      "id": "durio-i12-4ebd7a6d-35f1-4585-b1f2-42a97dad78fb",
+      "status": "failed",
+      "started": true,
+      "terminated": true,
+      "reason": "execution_error"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-DJ95LL/formatting/format/check-0/execution/outcome.json",
+      "sha256": "1e4d07742a9bd6afaab96a04e968dbd3e22a9934285b3d66bfe217232ce0a0e5",
+      "id": "durio-i12-851c5e7b-a90f-4af6-9fa1-df4b48a0c1f5",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-DJ95LL/formatting/format/check-1/execution/outcome.json",
+      "sha256": "9c3d16d79e11b4dd962dd7a5d6b830c2114092c936ea067377c52df406480ad5",
+      "id": "durio-i12-c9b7a02d-00ce-481d-8fd7-35b6049e1eb9",
+      "status": "completed",
+      "started": true,
+      "terminated": true,
+      "reason": null
+    }
+  ],
+  "startedNotConfirmedTerminated": [],
+  "scope": "Preserved discoverable runRestricted outcome receipts in complete suite fixtures; test pass/fail is separate."
+}
