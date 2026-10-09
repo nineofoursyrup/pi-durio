@@ -1,3 +1,4 @@
+import {withOwnerSync} from '../ownership.js';
 import {Evidence,digest,readObject} from '../evidence.js';
 import {decode,records,resolveEvidence,watermark} from '../history.js';
 import {queryUsage} from '../usage-query.js';
@@ -7,6 +8,9 @@ export interface CostEstimateInput {id:string;requestSource:string;amount:number
 /** An explicit sourced estimate/re-estimate is an original host fact, not a new ledger.
  * Caller supplies the declared tariff/calculation; this does not claim provider billing. */
 export function recordCostEstimate(root:string,input:CostEstimateInput){
+ return withOwnerSync(root,root=>recordCostEstimateOwned(root,input));
+}
+function recordCostEstimateOwned(root:string,input:CostEstimateInput) {
  if(!input||!input.id||input.id.length>256||!input.reason||input.reason.length>4096||!Number.isFinite(input.amount)||input.amount<0||!/^\w{3,12}$/.test(input.currency)||!input.price?.source||!input.price.version||!Number.isFinite(Date.parse(input.price.effectiveAt))||!input.price.provider||!input.price.model||!Array.isArray(input.usageSources)||!input.usageSources.length||input.usageSources.length>500)throw Error('INVALID_COST_ESTIMATE');
  const request=resolveEvidence(root,input.requestSource),data=decode(root,request);
  if(Date.parse(input.price.effectiveAt)>Date.parse(request.at))throw Error('PRICE_NOT_EFFECTIVE_AT_REQUEST');

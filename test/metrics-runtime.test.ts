@@ -22,7 +22,7 @@ async function actualCheck(fail=false) {
  const command=fail?'exit 7':'test "$(cat result.txt)" = ready';
  const script=scriptedTransport(fail?[{name:'bash',args:{command}}]:[{name:'write',args:{path:'result.txt',content:'ready'}},{name:'bash',args:{command}}]);
  let calls=0,taskId='',admissionError:unknown;
- const transport:typeof fetch=async(url,init)=>{calls++;if(fail&&calls>1)return new Response('controlled provider failure',{status:401});return script.fetch(url,init);};
+ const transport:typeof fetch=async(url,init)=>{assert.equal([...records(dataRoot,{kinds:['acceptance.requirements']})].length,1,'the task.accepted callback must synchronously save requirements before the first model dispatch');calls++;if(fail&&calls>1)return new Response('controlled provider failure',{status:401});return script.fetch(url,init);};
  const source={kind:'human' as const,actor:'controlled fixture host',statement:'The necessary requirement and fixed check are declared before execution',refs:[] as string[]};
  const result=await runCodingTask({workspace,dataRoot,input:fail?'Run the known failing check':'Create result.txt containing ready and run the exact check',mode:'offline',transport,onObservation:event=>{
   if(event.kind==='task.accepted'){try{const ref=[...records(dataRoot,{runId:event.runId,kinds:['task.accepted']})][0];taskId=decode(dataRoot,ref).taskId;recordAcceptance(dataRoot,{type:'requirements',id:'req',taskId,source:{...source,refs:[ref.id]},ruleVersion:'literal-check-v1',necessary:[{id:'goal',description:fail?'The fixed business check succeeds':'result.txt contains exactly ready',check:{command,passExitCodes:[0],failExitCodes:[7,1]}}]});}catch(error){admissionError=error;}}

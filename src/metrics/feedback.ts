@@ -1,3 +1,4 @@
+import {withOwnerSync} from '../ownership.js';
 import {Evidence,digest,readAcceptedTasks} from '../evidence.js';
 import {factClock} from '../fact-clock.js';
 import {decode,records,resolveEvidence,watermark,type EvidenceReference} from '../history.js';
@@ -14,6 +15,9 @@ export function feedbackHistory(root:string,runId:string,taskId:string,through:n
 /** Optional explicit host/user input. Existing conversation/action refs and literal
  * statements are retained; no language classifier or model tool is registered. */
 export function recordFeedback(root:string,input:FeedbackInput){
+ return withOwnerSync(root,root=>recordFeedbackOwned(root,input));
+}
+function recordFeedbackOwned(root:string,input:FeedbackInput) {
  ensure(input&&text(input.id,128)&&text(input.taskId,128),'identity required');ensure(['observation','withdraw'].includes(input.type),'operation required');
  ensure(input.source&&['human','action','unverified'].includes(input.source.kind)&&text(input.source.actor,256)&&text(input.source.statement)&&Array.isArray(input.source.refs),'original statement/action required');
  const admitted=task(root,input.taskId),admission=[...records(root,{after:admitted.acceptedSeq-1,through:admitted.acceptedSeq})][0],e=new Evidence(root,admission.runId);
