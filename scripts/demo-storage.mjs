@@ -1,0 +1,57 @@
+import assert from 'node:assert/strict';
+import { mkdir, writeFile, readFile, realpath, cp } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { DatabaseSync } from 'node:sqlite';
+
+// The only writable data is the new explicit output directory created by this invocation.
+const output=process.argv[2];if(!output)throw Error('Usage: node scripts/demo-storage.mjs NEW_OUTPUT [INSTALLED_PACKAGE_ROOT]');
+await mkdir(resolve(output),{mode:0o700});const base=await realpath(resolve(output));
+const install=process.argv[3]?await realpath(process.argv[3]):fileURLToPath(new URL('../',import.meta.url));
+const load=name=>import(pathToFileURL(join(install,'dist/src',name+'.js')).href);
+const {runCodingTask,readRun}=await load('runtime'),{scriptedTransport}=await load('offline');
+const {records,decode,readEvidence}=await load('history'),{fixEvidence,verifyFixed}=await load('fixed-evidence');
+const {archiveStorage,restoreArchive,migrateStorage,previewCleanup,commitCleanup,storageUsage,unfixEvidence}=await load('storage');
+const {treeFiles,hashFile,exists}=await load('storage-files');
+const workspace=join(base,'project'),dataRoot=join(base,'data');await mkdir(workspace);
+await writeFile(join(workspace,'check.cjs'),"process.stdout.write('storage-demo-original\\n'.repeat(4096));process.exitCode=7;\n");
+const started=Date.now(),cases=[];
+const save=async(name,value)=>writeFile(join(base,name+'.json'),JSON.stringify(value,null,2));
+const transport=scriptedTransport([{name:'bash',args:{command:`'${process.execPath}' check.cjs`}}]);
+const run=await runCodingTask({dataRoot,workspace,input:'Run the provided failing check once; retain its output.',mode:'offline',transport:transport.fetch});
+assert.equal(run.status,'completed'); // Shell check failure is retained even when this fixture's assistant returns normally.
+const check=[...records(dataRoot,{runId:run.runId,kinds:['tool.result']})][0];assert.equal(decode(dataRoot,check).result.isError,true);
+const original=await treeFiles(dataRoot);await save('runtime-result',run);await save('runtime-source-manifest',original);
+const archive=await archiveStorage(dataRoot,{destination:join(base,'archive'),scope:'whole-root'});await save('archive',archive);
+const restored=await restoreArchive(archive.archive,join(base,'restored'));assert.deepEqual(await treeFiles(restored.destination),original);await save('restore',restored);
+cases.push({case:'real-offline-coding-and-lossless-root-roundtrip',result:'PASS',providerCalls:transport.calls.length,paidCalls:0,checkExit:7,sourceFiles:original.length,bytes:archive.bytes,identity:archive.identity});
+const fixed=await fixEvidence(dataRoot,{id:'demo-fixed',sources:[check.id],purpose:'explicit storage demo protection'});assert.equal(verifyFixed(dataRoot,fixed.source).state,'protected');
+const artifact=decode(dataRoot,[...records(dataRoot,{runId:run.runId,kinds:['execution.artifact']})][0]);
+const one=artifact.files.find(f=>f.path==='dist/src/runtime.js'),two=artifact.files.find(f=>f.path==='dist/src/query.js');assert.ok(one&&two);
+const units=[`object:${one.sha256}`,`object:${two.sha256}`,`session:${run.sessionId}`];
+const blocked=await previewCleanup(dataRoot,{id:'demo-protected',units,reason:'fixed dependency guard demonstration'});assert.equal(blocked.plan.units.length,0);await save('protected-preview',blocked);
+cases.push({case:'actual-fixed-content-blocks-cleanup',result:'PASS',fixedEvidence:fixed.source,protectedObjects:fixed.objects,blocked:blocked.plan.blocked.map(v=>v.id)});
+await unfixEvidence(dataRoot,{id:'demo-release',fixedEvidenceId:fixed.source,reason:'explicit own-fixture release after recording protected preview'});
+const plan=await previewCleanup(dataRoot,{id:'demo-cleanup',units,reason:'explicit own-fixture deletion of listed closed session and build attachments'});assert.equal(plan.plan.units.length,3);await save('cleanup-preview',plan);
+let failed=false;const partial=await commitCleanup(dataRoot,{id:'demo-cleanup',identity:plan.identity},{fault:point=>{if(point==='after-delete'&&!failed){failed=true;throw Object.assign(Error('simulated ENOSPC after deletion before receipt'),{code:'ENOSPC'});}}});
+assert.equal(partial.status,'partial');await save('cleanup-first-failure',partial);
+const done=await commitCleanup(dataRoot,{id:'demo-cleanup',identity:plan.identity});assert.equal(done.status,'completed');await save('cleanup-completed',done);
+for(const unit of plan.plan.units)for(const file of unit.files)assert.equal(await exists(join(dataRoot,file.path)),false);
+assert.equal((await readRun(dataRoot,run.runId)).result.status,run.status);assert.equal(readEvidence(dataRoot,[...records(dataRoot,{runId:run.runId,kinds:['execution.artifact']})][0].id).state,'cleaned');
+cases.push({case:'preview-exact-deletion-and-partial-resume',result:'PASS',operation:done.id,bytes:plan.plan.bytes,parts:done.parts,originalOutcomeUnchanged:true});
+const faultBefore=await treeFiles(restored.destination);await assert.rejects(archiveStorage(restored.destination,{destination:join(base,'failed-archive'),scope:'whole-root'},{fault:point=>{if(point==='before-archive')throw Object.assign(Error('synthetic disk full'),{code:'ENOSPC'});}}),/disk full/);assert.deepEqual(await treeFiles(restored.destination),faultBefore);
+cases.push({case:'archive-disk-failure-leaves-originals',result:'PASS',simulated:true});
+const unknown=join(base,'unknown-format');await cp(restored.destination,unknown,{recursive:true,errorOnExist:true,force:false});
+const db=new DatabaseSync(join(unknown,'host.sqlite'));db.exec('PRAGMA user_version=999');db.close();const unknownBefore=await treeFiles(unknown);
+await assert.rejects(migrateStorage(unknown,{backup:join(base,'unknown-backup'),destination:join(base,'unknown-target')}),/UNSUPPORTED_HOST_FORMAT/);assert.deepEqual(await treeFiles(unknown),unknownBefore);assert.equal(await exists(join(base,'unknown-target')),false);
+cases.push({case:'unsupported-format-retains-originals',result:'PASS',syntheticHostVersion:999});
+// An exited fixture process leaves a committed, nonempty WAL through public Pi APIs.
+const sessionPath=join(restored.destination,'sessions',run.sessionId,'durable.sqlite');
+const child=spawnSync(process.execPath,['--input-type=module','-e',`import{Harness,createRegistry}from'@earendil-works/pi-durable';import{createModels}from'@earendil-works/pi-ai';import{BACKGROUND_CONTEXT as c}from'@earendil-works/chord/context';import{openNodeSqliteStorage}from'@earendil-works/pi-durable/storage/sqlite/node';const h=await Harness.open(await openNodeSqliteStorage(process.argv[1]),{models:createModels(),registry:createRegistry()},c);await h.createConversation({ownership:{kind:'ownerless'}},c);process.exit(0);`,sessionPath],{cwd:install,encoding:'utf8'});
+assert.equal(child.status,0,child.stderr);const wal=await hashFile(sessionPath+'-wal');assert.ok(wal.bytes>0);
+const migrated=await migrateStorage(restored.destination,{backup:join(base,'wal-backup'),destination:join(base,'migrated')});assert.deepEqual(await hashFile(join(migrated.destination,'sessions',run.sessionId,'durable.sqlite-wal')),wal);assert.equal(migrated.executionAuthorized,false);await save('migration',migrated);
+cases.push({case:'consistent-wal-migration-public-target-readback',result:'PASS',wal,conversations:migrated.readable.sessions[0].conversations,executionAuthorized:false});
+await save('usage',await storageUsage(dataRoot));
+const result={scope:'Only new owned fixtures under this output directory',base,install,node:process.version,platform:process.platform,arch:process.arch,runId:run.runId,sessionId:run.sessionId,cases,elapsedMs:Date.now()-started,paidProvider:'NOT RUN',nativeTerminal:'NOT RUN; final composition remains #31'};
+await save('result',result);console.log(JSON.stringify(result,null,2));

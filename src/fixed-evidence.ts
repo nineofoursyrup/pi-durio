@@ -69,12 +69,34 @@ export async function fixEvidence(root:string,request:FixRequest) {
 }
 export function verifyFixed(root:string,id:string) {
   const source=resolveEvidence(root,id);if(source.kind!=='evidence.fixed')throw Error('NOT_FIXED_EVIDENCE');
+  const release=unfixedEvidence(root,id);if(release)return {source:id,state:'released',release};
   try{const fact=decode(root,source),manifest=fixedManifest(root,fact.manifest);for(const ref of manifest.objects)readObjectRange(root,ref,{limit:1});return {source:id,state:'protected',manifest:fact.manifest,scope:manifest.scope,objects:manifest.objects.length};}
   catch(error){return {source:id,state:String(error).includes('CORRUPT')?'corrupt':'missing',error:String(error)};}
 }
 /** Cleanup implementations consume this closure and must retain the manifest itself too. */
 export function* iterateFixedDependencies(root:string) {
-  for(const source of records(root,{kinds:['evidence.fixed']})){const fact=decode(root,source);yield source.ref;yield fact.manifest as BlobRef;const manifest=fixedManifest(root,fact.manifest);yield* manifest.objects;}
+  for(const source of records(root,{kinds:['evidence.fixed']})){const fact=decode(root,source);yield source.ref;yield fact.manifest as BlobRef;const manifest=fixedManifest(root,fact.manifest);if(!unfixedEvidence(root,source.id))yield* manifest.objects;}
+}
+export function unfixedEvidence(root:string,fixedEvidenceId:string) {
+  for(const source of records(root,{kinds:['evidence.unfixed']})){const data=decode(root,source);if(data.fixedEvidenceId===fixedEvidenceId)return {source:source.id,...data};}
+  return null;
+}
+/** An explicit release affects only this fixation. Other fixed scopes still protect shared content. */
+export async function unfixEvidence(root:string,request:{id:string;fixedEvidenceId:string;reason:string}) {
+  if(!request.id.trim()||request.id.length>128||!request.reason.trim()||request.reason.length>2048)throw Error('UNFIX_SCOPE_REQUIRED');
+  watermark(root);const owner=await acquireOwner(root,()=>{});let evidence:Evidence|undefined;
+  try {
+    const source=resolveEvidence(root,request.fixedEvidenceId);if(source.kind!=='evidence.fixed')throw Error('NOT_FIXED_EVIDENCE');
+    const requestIdentity=digest(JSON.stringify(request));
+    for(const ref of records(root,{kinds:['evidence.unfixed']})){const data=decode(root,ref);if(data.id===request.id){if(data.requestIdentity!==requestIdentity)throw Error('UNFIX_ID_CONFLICT');return {source:ref.id,...data,repeated:true};}}
+    const previous=unfixedEvidence(root,source.id);if(previous)throw Error('FIX_ALREADY_RELEASED');
+    // Keep and validate the original manifest even when some payload is already missing.
+    // A broken manifest cannot be interpreted as an empty protection set.
+    const fact=decode(root,source);fixedManifest(root,fact.manifest);
+    owner.assertHeld();evidence=new Evidence(root,source.runId);evidence.db.exec('BEGIN IMMEDIATE');
+    try{const data={...request,requestIdentity,state:'released'},seq=evidence.append('evidence.unfixed',data);evidence.db.exec('COMMIT');return {source:`e1:${seq}:${digest(JSON.stringify(data))}`,...data,repeated:false};}
+    catch(error){evidence.db.exec('ROLLBACK');throw error;}
+  }finally{evidence?.close();await owner.release();}
 }
 export function fixedDependencies(root:string) {
   const dependencies=new Map<string,BlobRef>();

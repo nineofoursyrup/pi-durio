@@ -7,12 +7,13 @@ import { runReadTask, type ReadTaskOptions, type RunResult } from '../runtime.js
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
 import { HistoryView } from './history.js';
+import { StorageView } from './storage.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
-const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['copy','复制选文或最新可见输出'],['stop','中止当前只读任务']] as const;
+const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止当前只读任务']] as const;
 const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed'];
 const completion:AutocompleteProvider={
   triggerCharacters:['/'],
@@ -71,8 +72,9 @@ export class ReadOnlyTui {
   private lastText='';
   private confirmation?:{key:string;at:number};
   private followChord=false;
-  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'history';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
+  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'history'|'storage';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
   private historyView?:HistoryView;
+  private storageView?:StorageView;
   private hidePanel?:()=>void;
   private pendingRefresh=false;
   private timer?:ReturnType<typeof setInterval>;
@@ -243,6 +245,7 @@ export class ReadOnlyTui {
     else if(command==='/bottom')this.bottom();
     else if(command==='/older')this.window('older');
     else if(command==='/newer')this.window('newer');
+    else if(command==='/storage') {this.storageView=new StorageView(this.options.dataRoot,()=>this.tui.requestRender());this.openPanel('storage');}
     else if(command==='/history'||command.startsWith('/history ')) {
       try{this.historyView=new HistoryView(this.options.dataRoot,command==='/history'?{}:JSON.parse(command.slice(9)));this.openPanel('history');}
       catch(error){this.notice=`历史查询失败（当前工作未改变）：${safe(String(error))}`;this.tui.requestRender();}
@@ -380,13 +383,13 @@ export class ReadOnlyTui {
     this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
     this.openPanel('detail',record);
   }
-  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'history',ref?:RecordReference) {
+  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'history'|'storage',ref?:RecordReference) {
     this.closePanel();this.confirmation=undefined;
     this.panel={kind,ref,offset:0,previous:[],line:0,raw:'',next:null};
     if(kind==='detail')this.loadDetail();
     const component:Component={invalidate(){},render:width=>this.panelLines(width),handleInput:data=>this.panelInput(data),handleMouse:event=>{
       if(!this.panel)return;
-      if(event.type==='wheel'){if(this.panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else this.panel.line=Math.max(0,this.panel.line+(event.wheelDelta??0));return {handled:true};}
+      if(event.type==='wheel'){if(this.panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else this.panel.line=Math.max(0,this.panel.line+(event.wheelDelta??0));return {handled:true};}
       if(event.type==='click'&&this.panel.kind==='actions'){
         const index=event.y+this.panel.line-1;
         if(commands[index]){const command=commands[index][0];this.closePanel();this.command(`/${command}`);return {handled:true};}
@@ -396,6 +399,7 @@ export class ReadOnlyTui {
   }
   private panelLines(width:number) {
     const panel=this.panel;if(!panel)return[];
+    if(panel.kind==='storage') {const lines=this.storageView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='history') {const lines=this.historyView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     let text:string;
     if(panel.kind==='actions')text='操作菜单（保留输入草稿）\n'+commands.map(([name,description],index)=>`${panel.offset===index?'›':' '} /${name}  ${description}`).join('\n');
@@ -411,9 +415,10 @@ export class ReadOnlyTui {
   private panelInput(data:string) {
     const panel=this.panel;if(!panel)return;
     this.confirmation=undefined;
-    if(matchesKey(data,'escape')||matchesKey(data,'ctrl+o')) {this.closePanel();return;}
+    if(matchesKey(data,'escape')||matchesKey(data,'ctrl+o')) {if(panel.kind==='storage'&&this.storageView?.inProgress)return;this.closePanel();return;}
     if(matchesKey(data,'ctrl+l')){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
     if(matchesKey(data,'ctrl+c')||matchesKey(data,'ctrl+d'))return;
+    if(panel.kind==='storage') {void this.storageView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='history') {this.historyView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='actions') {
       if(matchesKey(data,'up')) panel.offset=(panel.offset+commands.length-1)%commands.length;
