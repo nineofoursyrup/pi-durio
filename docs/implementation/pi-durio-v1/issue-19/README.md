@@ -54,3 +54,9 @@
 `model.fetch-intent` 保存 SDK 交给 host gate 的 payload；`model.dispatch` 仅在实际进入所配置 transport 后保存 `transportEntered=true`。预算或 guard 在入口前拒绝时，`model.dispatch-failed` 保存原始宿主原因和明确未派发事实，即使 Pi 将异常规范化为 `Connection error` 也不丢失原因。`requestAllocations` 对该请求标记 `not-dispatched` / `not-applicable`，不会制造一笔未报告的实际调用；进入 transport 后失败仍 unknown。
 
 旧版无 `transportEntered` 的记录保持原文，以 `unverifiedDispatchIntents` 暴露不确定性。Runtime 的 transport 可能是 eval 中介通道，其入口事实不证明外层 provider 已派发；正式 eval 请求/费用仍由 #21 可信外层记录计算。中止发生在原文保留阶段的检查现在使用真实的 `model.fetch-intent` 边界，既有 stop 语义没有变宽。
+
+## 冻结结果
+
+产品源码 `b556530dcbac6a93255cdbc07e31f9b43b08acdd`（tree `0ff14aa20395ee2091967bb990b424e77409b4d1`）已冻结。核心组合 `4aeb3b6` 的全量为 **133/133 PASS**；后续只读投影改动以 **20/20** 相关检查及 **1/1** 真实预算路径验证。最终 `r4/installed-demo/report.json` 为 **PASS**，包括公开 API 与冷进程 CLI 的实际摘要。未因只新增交付文档重复全量检查。
+
+`r4/manifest.json` 绑定 251 个源码文件、138 个编译文件及 12802 个安装文件；编译产物、package 和 lock 与独立安装逐字节一致。最终 pack SHA-256 为 `84bc499e1e32452e041455f28e0334d1d59582ad3201ec90cfb1ce6da1695524`。旧 `r2` 安装示范保留配置拒绝首败，`r3` 是后续只读投影完成前的包，不作为最终安装验收。
