@@ -1,6 +1,6 @@
 # pi-durio
 
-macOS arm64 / Node >=22.19.0 的 coding agent。当前实现阶段是 #11：headless 只读小项目任务、持久原文与只读重开。完整首版仍在实现中。
+macOS arm64 / Node >=22.19.0 的 coding agent。当前提供 headless 只读任务与显式授权的本地 coding、持久原文和只读重开。完整首版仍在实现中。
 
 ```sh
 npm ci
@@ -22,3 +22,7 @@ SIGINT 请求持久化中止并等待；SIGTERM 请求退出、取消在途请�
 分发检查可运行 `npm pack`。使用 npm 原生 `bundleDependencies` 将精确生产依赖一同打包，供当前 macOS arm64 目标独立安装；运行时仍保留 canonical lock 的完整内容。实际 build、lock、配置和取得的 Git 初态随 run 保存；未取得的未跟踪文件、远端模型权重及服务端未返回内容不声称可复现。
 
 [实现、接口、验证与剩余边界](docs/implementation/pi-durio-v1/issue-11/README.md)。
+
+`run --coding` 为所声明任务开放上游 `read/write/edit/bash`；普通 `run` 继续只读。可通过 `--tool-env-config PATH` 显式加载 `{ "version": "project-v1", "variables": { "PROJECT_MODE": "test" } }`，配置记录只保存名称及版本。shell 不继承完整宿主环境，模型 API Key 不默认进入子进程。工作区锁跨 data root/session 检查实际路径、Git 根及登记的重叠目录；不能隔离外部编辑器、共享 Git 或其他本机资源。
+
+可写接线与故障的独立离线演示：`node scripts/demo-coding.mjs /absolute/evidence/directory`。它创建独立 fixture，真实修复代码、运行检查，验证别名冲突、完整大输出与写盘故障；不会调用真实 provider。[#13 接口、证据与限制](docs/implementation/pi-durio-v1/issue-13/README.md)。

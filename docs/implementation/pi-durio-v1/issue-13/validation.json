@@ -1,0 +1,163 @@
+{
+  "issue": 13,
+  "slice": "PI-DURIO-V1-TICKETS-r1:T03",
+  "date": "2026-10-09T10:34:26.019Z",
+  "status": "PASS",
+  "scope": "Applicable local/offline acceptance only",
+  "candidate": {
+    "baseCommit": "fb8a173ee6d3bf224894d2ca119662fe04a331bc",
+    "sources": [
+      {
+        "path": "src/runtime.ts",
+        "sha256": "316c12f286d4bb810fb9f355da23cc1699e3be0febca33ae04b55f64159a38e5"
+      },
+      {
+        "path": "src/cli.ts",
+        "sha256": "68b5cf31b67979386e0b2bd11c57b675c4b31cd71a6730832ac4106ada8b64ef"
+      },
+      {
+        "path": "src/offline.ts",
+        "sha256": "066566d9780fbc18c58c6e8774b7881afd8548bc9878629b771dde224cebfdd0"
+      },
+      {
+        "path": "src/coding-environment.ts",
+        "sha256": "6fdca1eb1f76908708c547a1f6c5051f83c60b6edf8d87bdcf389dd0b0cbad00"
+      },
+      {
+        "path": "src/workspace-ownership.ts",
+        "sha256": "6353bbf4c6e4cb885db0e0d25eb35ba7f4873b44a3284197137b34ea40a9e1af"
+      },
+      {
+        "path": "test/coding.test.ts",
+        "sha256": "ae32b69bda5c2d4a035b374b8bafa19f91d65b092d43d8238153fe99f134ff8e"
+      },
+      {
+        "path": "scripts/demo-coding.mjs",
+        "sha256": "3e4e96fddd80399589b30690b51ddf37d6ae43ca46eb376765ef3726a9305953"
+      },
+      {
+        "path": "package.json",
+        "sha256": "f39ef44b01b69639624cbb7b13432b20f35796d19d9ac0e8858397dfa0b1ec22"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "92a077c44c185ae74439bae1e21d3663c668b0427640f63d0f30a3f7c17a1034"
+      }
+    ],
+    "compiledArtifact": "11419bf67bb4b7b80990443cf47cfa0b10f245ab66c114580da0da2d64ee5cc2",
+    "demo": "/Users/nineofour/pi-durio-v1-run/evidence/issue-13/demo-pfbT6f",
+    "results": {
+      "coding": "d651ca0e-d1a5-4b19-b733-881d4900f03c",
+      "large": "fe9f398b-4fd1-4dc1-aecc-8601a4f74d8f",
+      "fault": "a52319d0-5591-40d2-ae17-2ea7a0428187"
+    },
+    "largeOutput": {
+      "bytes": 8388618,
+      "chunks": 514,
+      "maxChunk": 16384,
+      "sha256": "5f385dd0a5471803ebffae0430e836f27dcb1d137c2492632772a2833ea863cd",
+      "requestBytes": 55191,
+      "rss": {
+        "start": 98729984,
+        "peak": 122454016,
+        "note": "sampled host RSS, not a performance acceptance threshold"
+      }
+    }
+  },
+  "checks": [
+    {
+      "command": "npm ci",
+      "status": "PASS",
+      "packageAndLockChanged": false
+    },
+    {
+      "command": "npm run check",
+      "status": "PASS",
+      "tests": 23,
+      "failed": 0,
+      "log": "check-03-final.log"
+    },
+    {
+      "command": "node --test --test-name-pattern='derived tool summaries' dist/test/coding.test.js",
+      "status": "PASS",
+      "tests": 1,
+      "reason": "Final fixture extension exercises upstream read truncation and bounded summary; product sources unchanged since full check",
+      "log": "summary-truncation-final.log"
+    },
+    {
+      "command": "node scripts/demo-coding.mjs EVIDENCE_DIRECTORY",
+      "status": "PASS",
+      "log": "demo-02-final.log",
+      "directory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-13/demo-pfbT6f"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "evidence": [
+    {
+      "file": "/Users/nineofour/pi-durio-v1-run/evidence/issue-13/npm-ci.log",
+      "sha256": "94f629c78552563c8d8466e97b4647628f6f5db45623384b7cbec6b3268f03c4"
+    },
+    {
+      "file": "/Users/nineofour/pi-durio-v1-run/evidence/issue-13/check-03-final.log",
+      "sha256": "976dbe1ac6e462930b1457764d037e50165e3d7464a5d2fb737305aea74a3146"
+    },
+    {
+      "file": "/Users/nineofour/pi-durio-v1-run/evidence/issue-13/summary-truncation-final.log",
+      "sha256": "e169162fab19ceb5c7983b42d3e1fc6e50576659318c81d671af34a074920b61"
+    },
+    {
+      "file": "/Users/nineofour/pi-durio-v1-run/evidence/issue-13/demo-02-final.log",
+      "sha256": "2ea5f0cfef4bd85ab8e18f523bcb9af972f26b3126f930594a0b7c3d7a6f6874"
+    }
+  ],
+  "acceptance": {
+    "publicToolsAndRealRepair": "PASS",
+    "workspaceIdentityAndConflicts": "PASS",
+    "explicitEnvironment": "PASS",
+    "boundedCompleteAcquiredOutput": "PASS",
+    "controlledOriginalFailureAndDerivedDegradation": "PASS",
+    "independentDemonstrations": "PASS"
+  },
+  "interfaces": {
+    "unchanged": [
+      "runReadTask",
+      "readRun",
+      "readObject",
+      "openHostReadonly",
+      "host records schema",
+      "BlobRef"
+    ],
+    "added": [
+      "runCodingTask",
+      "CodingTaskOptions.toolEnvironment",
+      "RunResult.executionCleanup",
+      "tool.summary",
+      "tool.output",
+      "shell.started/completed",
+      "workspace.owner",
+      "file.write-intent/result",
+      "read.text",
+      "evidence.gap"
+    ],
+    "queryOwnership": "query.ts remains #16-owned",
+    "summaryMaxBytes": 3072
+  },
+  "notRun": [
+    "Real DeepSeek inference/auth validity/billing: no paid-provider grant",
+    "macOS Terminal/TUI: #16 responsibility",
+    "Full exit/stop UX: #14",
+    "Cross-process recovery and old pending resolution: #15",
+    "Eval/improve/full lightweight report/daily acceptance/main merge/release/issue closure"
+  ],
+  "limits": [
+    "Trusted local shell is not an OS sandbox",
+    "Workspace locks cover protocol participants, not external editors/shared Git/resources",
+    "File checks are not an atomic OS compare-and-swap",
+    "Output archive captures all acquired decoded UTF-8, not unavailable pre-decode raw bytes",
+    "Managed exec settlement does not prove external or escaped descendants stopped",
+    "Old pending/unknown still blocks; no automatic replay"
+  ]
+}
