@@ -489,18 +489,29 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-19",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "0dbeb473767d4aa5c5250ae3694b4d4b97c7e75d",
+      "integrated_sha": "cd94ecaf0dc67b68b3d43f9cb50897c965b771f5",
+      "evidence": [
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/r4/handoff.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/coordinator-premerge.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/merge-integration-readback.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/coordinator-acceptance.json"
+      ],
       "branch": "codex/pi-durio-v1-issue-19",
       "agent": "/root/issue19",
       "base_commit": "4ffa16e926e2d5bc3cd34a45b76ea40019b951b2",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T155256Z/issue-19.json",
-      "note": "Fresh implementer dispatched after #17/#18 applicable acceptance; public durable compaction with shared provider boundary from checked seam commits."
+      "note": "T09 applicable public-runtime/installed compaction acceptance complete; native aggregate remains #31; original failures retained.",
+      "local_checkpoint": "4aeb3b6a2d20d41d0172fc45287de6fe2fdead68",
+      "product_commit": "b556530dcbac6a93255cdbc07e31f9b43b08acdd",
+      "acceptance": {
+        "at": "2026-10-09T16:58:57.933461+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/coordinator-acceptance.json"
+      }
     },
     "20": {
       "number": 20,
@@ -577,7 +588,9 @@
       "acceptance": {
         "at": "2026-10-09T16:22:38.570901+00:00",
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/coordinator-acceptance.json"
-      }
+      },
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/21#issuecomment-6084912725",
+      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/publication/readback.json"
     },
     "22": {
       "number": 22,
@@ -592,7 +605,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "dispatching",
+      "status": "implementing",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-22",
       "commit": null,
       "integrated_sha": null,
@@ -602,13 +615,17 @@
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T161054Z/issue-22.json",
-      "note": "Claimed after #21 accepted and integrated; fresh implementer dispatch in progress."
+      "note": "Fixed comparison/report checks pass (15 eval, 4 unchanged provider); final installed fresh VM/regrade demo awaits accepted #19 integration. Not accepted yet.",
+      "base_commit": "0782fe35e941567d94d05ef71da5e45857c4e57c",
+      "local_checkpoint": "c16d5d4"
     },
     "23": {
       "number": 23,
       "title": "improve 受限取证与候选报告",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         17,
@@ -616,11 +633,17 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "dispatching",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-23",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T165127Z/issue-23.json",
+      "branch": "codex/pi-durio-v1-issue-23",
+      "agent": "/root/issue23",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "note": "Claim readback verified; fresh implementer dispatch follows #19 metadata commit."
     },
     "24": {
       "number": 24,
@@ -690,7 +713,8 @@
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T165127Z/issue-27.json"
     },
     "28": {
       "number": 28,
@@ -784,11 +808,10 @@
     }
   },
   "frontier": [
-    23,
     27
   ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "c99360ff412b51c10041e6cea3a94d7b90213f8d",
+  "integration_tip": "cd94ecaf0dc67b68b3d43f9cb50897c965b771f5",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -798,9 +821,9 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T16:23:06.364157+00:00",
+  "updated_at": "2026-10-09T16:58:57.933461+00:00",
   "last_remote_readback": {
-    "headRefOid": "4ffa16e926e2d5bc3cd34a45b76ea40019b951b2",
+    "headRefOid": "0782fe35e941567d94d05ef71da5e45857c4e57c",
     "isDraft": true,
     "state": "OPEN",
     "closingIssuesReferences": []

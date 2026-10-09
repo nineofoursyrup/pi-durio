@@ -1,0 +1,42 @@
+{
+  "issue": 19,
+  "acceptedAt": "2026-10-09T16:58:57.933461+00:00",
+  "status": "integrated-accepted",
+  "scope": "T09 applicable public-runtime controlled-provider compaction acceptance; full native product composition remains #31",
+  "productSource": "b556530dcbac6a93255cdbc07e31f9b43b08acdd",
+  "ticketTip": "0dbeb473767d4aa5c5250ae3694b4d4b97c7e75d",
+  "integrationMerge": "cd94ecaf0dc67b68b3d43f9cb50897c965b771f5",
+  "mergeTree": "8b4fefcefd09fb452a9b1a72ecba32b7e7d1f8d2",
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/merge-integration-readback.json",
+    "sha256": "55fab92335414b540f918507eb2ec9c18d4f54beda898d5f07858b419f66e372"
+  },
+  "criteria": {
+    "publicCompaction": "PASS: actual automatic/background/overflow/manual durable paths, original records and actual summary placement",
+    "queue": "PASS: busy compact/steer, persistent dedup aliases, cancellation races, frozen follow-up context lineage and no implicit reopening",
+    "context": "PASS: verified committed summary imported into subsequent independent task; incompatible or failed source rejected",
+    "accounting": "PASS: manual maintenance keeps original capability/budget; confirmed transport entry distinguished from rejected and legacy unverified attempts",
+    "installed": "PASS: independent package API/cold CLI actual summary, repeated request/noop, original response retained and readonly SQLite unchanged",
+    "identity": "PASS: 251 frozen tracked sources,138 compiled files,12802 exact installed entries,12794 pack files and167 actual demo records bound"
+  },
+  "checks": {
+    "core": "133/133 at 4aeb3b6; unchanged executable core applies",
+    "affected": "20/20 final readonly projections and1/1 actual exhausted-budget projection on b556530",
+    "integration": "Exact tree equals delivery tip; no conflicts or executable changes; no redundant rebuild/tests"
+  },
+  "preserved": [
+    "Initial de-dup, reattachment, dispatch miscount and running alias failures",
+    "r2 missing TMPDIR fixture configuration refusal",
+    "Legacy dispatch uncertainty and interrupted originals",
+    "Merger verifier virtual dependency path error retained separately"
+  ],
+  "remaining": [
+    "#22 actual paired comparisons",
+    "#23–#29 improve and metrics",
+    "#30 authorized real DeepSeek batch NOT AUTHORIZED/NOT RUN",
+    "#31 integrated native product and measurements",
+    "#32 explicit daily-use acceptance",
+    "final fixed-candidate independent review"
+  ],
+  "rootDist": "preserved old ignored dist; use r4/install as tested candidate"
+}
