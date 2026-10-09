@@ -80,6 +80,7 @@ pi-durio recover --run UUID --data-root PATH --authorization auth.json --decisio
 - 项目检查 `npm run check`；专属回归 `node --test dist/test/recovery.test.js`。
 - 独立演示 `node scripts/demo-recovery.mjs /absolute/evidence/directory`：实际 Pi/SQLite/shell，独立文件效果 oracle，副作用前/后与已提交边界、首次落盘失败、source 不变、重复决定、全 Harness 非目标 pending 和非公开调度动作。
 - 用例另覆盖 retained owner 的真实子进程正常退出/晚关闭、SIGKILL、活跃 owner，配置/权限/原内容缺失、跨库 admission 正负向、未知成本、CLI 非零结构化输入与保存。
+- 正常只读 host viewer 可与 evidence writer 并发；writer 最多等待 1000ms SQLite 锁，持续锁冲突仍是持久化失败，不触发业务重试。跨进程回归与 8 并发 headless 启动探针保留原首败及修复后结果，未放宽既有信号测试。
 - 所有 provider 交互都是明确 offline fixture，真实 DeepSeek/付费鉴权/计费 NOT RUN；TUI 无修改，真实 Terminal 接入属于 #17。未 push、PR/tracker 改动、main 合并、关票或发布。
 - 首败日志与所有原未知事实保留；要求—证据与精确候选身份见外部 `evidence/issue-15/handoff.json`，其路径在协调运行目录 `/Users/nineofour/pi-durio-v1-run/`。
 
