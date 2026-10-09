@@ -13,7 +13,7 @@
 
 可选 `cleanupTimeoutMs` 是宿主等待策略，默认 10000，允许 1–300000 ms，实际值保存于 `execution.config` 和结果。它不是给模型扩展权限的入口，也不是外部停止期限。deadline 到达或 abort/close 失败时 `status/cleanup` 为 `unknown`，保留 owner 与核验责任。迟到响应、工具输出和关闭结果仍可写入原记录；只在真实关闭完成后关宿主 evidence，不因等待者超时提前关在用存储。迟到完成追加 `lifecycle.late-close`，不提升先前 unknown，也不自动释放 owner。
 
-CLI `run` 接受 `--cleanup-timeout-ms N`；SIGINT 表示停止任务，SIGTERM 表示退出，首次意图保留。处理中消息写 stderr，最终 JSON 写 stdout。headless 清理不能确认时，在 flush JSON 后退出 75，避免不响应取消的 active handle 使应用无限挂起；这只结束宿主进程，不宣称残留命令/远程副作用已停止。正常/中止/需核对/失败沿用退出码 0/130/75/1。取消不退款、不回滚已经写入的文件。
+CLI `run` 接受 `--cleanup-timeout-ms N`；SIGINT 表示停止任务，SIGTERM 表示退出，首次意图保留。处理中消息写 stderr，最终 JSON 写 stdout。headless 清理不能确认时，在 flush JSON 后退出 75，避免不响应取消的 active handle 使应用无限挂起；这只结束宿主进程，不宣称残留命令/远程副作用已停止。TUI CLI 在 `runTui` 完成终端适配清理、输出原有有界摘要之后，复用同一 flush/exit 小函数；不会改为输出完整 RunResult。独立真实 Node active-handle 演示确认该适配以 75 结束，机械 Terminal 的 stopped/cursor/alternate-buffer 观察均通过，`actualMacTerminal: false`。正常/中止/需核对/失败沿用退出码 0/130/75/1。取消不退款、不回滚已经写入的文件。
 
 ## 清理、存储和 owner
 

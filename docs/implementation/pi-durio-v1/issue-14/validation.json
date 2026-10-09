@@ -4,7 +4,7 @@
   "status": "LOCAL_ACCEPTANCE_PASS",
   "implementation_commit": "c62f340cf0eb3029248bfede14a9483044ea86fb",
   "integration_base": "372fcf3038b5b5e7ad6a41b41ac946be5c95009b",
-  "integration_merge": "2773cab",
+  "integration_merge": "2773cab05d34d8f0003d34d5b9c0bc7b4b2f7ef3",
   "code_candidate": {
     "commit": "c0350714439dfc272f7c53759129e0dc6d2e182f",
     "tree": "5ed78f743594bdb743f2da46489bb91bdf273306",
@@ -216,5 +216,18 @@
       "sha256": "33a00ccf86ca885ed821e73794f62d8ef5dd966e6244164a833eb21f39d9411f",
       "bytes": 902
     }
-  ]
+  ],
+  "tui_exit_adapter": {
+    "status": "PASS",
+    "exitCode": 75,
+    "boundedSummaryFlushed": true,
+    "activeIntervalDidNotHang": true,
+    "ownerRetained": true,
+    "terminalStopped": true,
+    "cursorShown": true,
+    "alternateBufferDisabled": true,
+    "actualMacTerminal": false,
+    "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/demo-Utx4Os/tui-cleanup-timeout/view.json"
+  },
+  "verification_reuse": "Code, dependency and compiled bytes checked at c035071 are unchanged by subsequent issue-14 documentation commits; retain integrated-check-02 and demo-final without repeating deterministic checks."
 }
