@@ -65,7 +65,7 @@
       "assignees": [
         "nineofoursyrup"
       ],
-      "comments": 0,
+      "comments": 1,
       "blocked_by": [
         11
       ],
@@ -84,24 +84,33 @@
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "note": "T03 local/offline applicable acceptance passed. Source/compiled/evidence identities and original materials verified; complete lifecycle/recovery/Terminal/provider remain later obligations.",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-13.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-13.json",
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/13#issuecomment-6079270047"
     },
     "14": {
       "number": 14,
       "title": "中止与退出的可解释收尾",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         13
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-14",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-14",
+      "agent": "/root/issue14",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T103610Z/issue-14.json",
+      "note": "Fresh gpt-6-astra/xhigh implementer; lifecycle/CLI scope and #16 compatibility fixed in interfaces-14-16.md."
     },
     "15": {
       "number": 15,
@@ -133,18 +142,23 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-awaiting-terminal",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "004266e9e6c1a3b639a44c31096511efe71c5d61",
+      "integrated_sha": "d62441c9b6752f1e90739a29e92d995a846b14a5",
+      "evidence": [
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/handoff.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/manifest.json",
+        "docs/implementation/pi-durio-v1/issue-16/candidate-r3.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/merge-integration-readback.json"
+      ],
       "branch": "codex/pi-durio-v1-issue-16",
       "agent": "/root/issue16",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "Partial TUI commit; local checks passed. Main conversation presentation correction and merge of #13 tool.summary pending. Real Terminal human observations still NOT RUN; no dependency unlock.",
+      "note": "Partial implementation integrated; r3 unchanged and human Terminal evidence requested. Do not unlock successors until actual applicable Terminal acceptance passes.",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-16.json",
-      "local_checkpoint": "ee6d8bd"
+      "local_checkpoint": "e98fef9"
     },
     "17": {
       "number": 17,
@@ -433,11 +447,9 @@
       "evidence": []
     }
   },
-  "frontier": [
-    14
-  ],
+  "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "ae7454b226f7298cb8f0885e32b071c8b3ed3fe9",
+  "integration_tip": "d62441c9b6752f1e90739a29e92d995a846b14a5",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -447,10 +459,11 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T10:39:38.667483+00:00",
+  "updated_at": "2026-10-09T10:57:02.571306+00:00",
   "last_remote_readback": {
-    "headRefOid": "fe6382fd3992135569547d8f51f0a2c5c442f040",
+    "headRefOid": "8021923a6163d7e815beabb6a05a38eff5dd3bbf",
     "isDraft": true,
+    "state": "OPEN",
     "closingIssuesReferences": [],
     "url": "https://github.com/nineofoursyrup/pi-durio/pull/33"
   }

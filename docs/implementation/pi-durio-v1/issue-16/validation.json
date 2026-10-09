@@ -1,0 +1,23 @@
+{
+  "issue": 16,
+  "status": "PARTIAL_TERMINAL_ACCEPTANCE_BLOCKED",
+  "runtimeIntegration": "75716d843f0c8ae848b822dea70b424f268f30b8",
+  "merge": "11f1e7a",
+  "checks": [
+    {"command":"npm run check", "result":"PASS", "tests":31, "evidence":"check-with-issue13-first.log", "scope":"Combined runtime/coding/query/TUI checks after merging accepted issue 13"},
+    {"command":"npm run build && node --test dist/test/tui.test.js", "result":"PASS", "tests":8, "evidence":"tui-with-summary-r2.log", "scope":"Additional real-read truncation/error folded summaries and rejection of TUI coding flags; unchanged production source"},
+    {"command":"registry exact artifact download + SHA512 verification", "result":"PASS", "evidence":"dependency-artifact.json", "sha256":"5d0f9dfb31c06f27d1fb2b05d166fc0d33430f53ece0a3ff3f69d55950f1430b"},
+    {"command":"candidate-r1 npm pack + independent production install + 12675 file manifest", "result":"PASS_WITH_RETAINED_FIRST_FAILURE", "evidence":"candidate-r1", "scope":"Historical installation smoke; non-TTY stdout escape leakage found and repaired; r1 is not the human acceptance candidate"}
+  ],
+  "realTerminal": {
+    "status":"BLOCKED",
+    "reason":"Computer Use is not allowed to use the app 'com.apple.Terminal' for safety reasons.",
+    "tool":"mcp__cua_repl.js / cua.getApp(\"Terminal\")",
+    "required":["Chinese IME candidate confirmation does not submit", "actual Shift+Enter/Ctrl+J/backslash+Enter key encoding", "emoji/graphemes/wide cells", "native mouse selection and clipboard", "focus and draft stability", "resize and measured minimum cells", "raw/mouse/paste/cursor/original-buffer cleanup", "catchable failure cleanup and same-run headless readback"],
+    "candidateRunner":"scripts/terminal-validation.mjs",
+    "operatorObservations":"NOT RUN; never prefilled as PASS"
+  },
+  "paidProvider":"NOT RUN; no authorization",
+  "evidenceRoot":"/Users/nineofour/pi-durio-v1-run/evidence/issue-16",
+  "dependencyGate":"Do not mark issue 16 integrated-accepted or unblock successors before actual Terminal evidence is verified"
+}
