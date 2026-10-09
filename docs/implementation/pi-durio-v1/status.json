@@ -160,8 +160,8 @@
       "dependencies_match": true,
       "status": "integrated-native-partial",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-width",
-      "commit": "e4571452a1ebf712cd60282ded0161640670d70e",
-      "integrated_sha": "7a067340dda2e4fb84a4472ff91cfec1100c626f",
+      "commit": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+      "integrated_sha": "f17ddfbe9fb8b07a6ddde46a42cb35560b07687c",
       "evidence": [
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/handoff.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/manifest.json",
@@ -180,13 +180,19 @@
         "docs/implementation/pi-durio-v1/issue-16/candidate-r5.json",
         "docs/implementation/pi-durio-v1/issue-16/terminal-r5-feedback.md",
         "docs/implementation/pi-durio-v1/issue-16/terminal-r5-normal-partial.json",
-        "docs/implementation/pi-durio-v1/issue-16/terminal-r5-computer-use.json"
+        "docs/implementation/pi-durio-v1/issue-16/terminal-r5-computer-use.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-exit-failure-readback.json",
+        "docs/implementation/pi-durio-v1/issue-16/confirmation-repair-r6.md",
+        "docs/implementation/pi-durio-v1/issue-16/candidate-r6.json",
+        "docs/implementation/pi-durio-v1/issue-16/terminal-r6-feedback.md",
+        "docs/implementation/pi-durio-v1/issue-16/terminal-r5-exit-failure.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-confirmation/merge-integration-readback.json"
       ],
       "branch": "codex/pi-durio-v1-issue-16-width",
       "agent": "/root/issue16_width",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "R5 C1-C3 and N1-N4 human PASS preserved. Normal task was aborted; minimum grid UNKNOWN. Stop/Esc/exit/fault and short completion/grid supplement still require human Terminal operation. Current Computer Use recheck explicitly refused Terminal access; successors blocked.",
+      "note": "r6 integrated with identical tree and preserved originals. Native running first Ctrl+D pair PASS (516ms, intent exit, cleanup confirmed, same-run headless). Other r6 gates pending; prior r5 EXIT F preserved.",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T122309Z/issue-16.json",
       "local_checkpoint": "e98fef9",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6079513003",
@@ -242,6 +248,14 @@
           "merge": "7a067340dda2e4fb84a4472ff91cfec1100c626f",
           "acceptance": "C1-C3 native PASS; remaining native gates pending",
           "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-width"
+        },
+        {
+          "candidate": "r6",
+          "commit": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+          "handoff_tip": "b256a70ee18337bddca09ae5adb079eee1adbb78",
+          "merge": "f17ddfbe9fb8b07a6ddde46a42cb35560b07687c",
+          "acceptance": "EXIT_FIRST_PAIR native PASS; remaining native gates pending",
+          "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-width"
         }
       ],
       "width_repair_agent": "/root/issue16_width",
@@ -279,7 +293,7 @@
       "width_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6080376801",
       "width_authorization_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6080496788",
       "human_revalidation_r5": {
-        "status": "C1-C3 and N1-N4 human PASS; successful completion/minimum grid/stop/esc/exit/fault PENDING",
+        "status": "C1-C3, N1-N4, STOP and ESC human PASS preserved; EXIT human FAIL preserved; independent confirmation-calibration regression RED; fault/completion/grid pending",
         "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
         "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/terminal-validation.mjs",
         "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manifest.json",
@@ -292,12 +306,43 @@
         "normal_observation": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-normal-partial.json",
         "computer_use_recheck": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/computer-use-recheck.json",
         "user_closed_terminal": true,
-        "continuation_entry": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/unfinished-native-entry.json"
+        "continuation_entry": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/unfinished-native-entry.json",
+        "continuation_command": "bash '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/run-unfinished-native.sh'",
+        "stop_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-stop-readback.json",
+        "esc_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-esc-readback.json",
+        "interaction_mode": "One standalone scenario at a time; full instructions in Codex question popup",
+        "current_requested_scenario": null,
+        "reason": "User cannot see Terminal-preface instructions after entering full-screen TUI; requested restart with popup steps",
+        "exit_failure_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-exit-failure-readback.json"
       },
       "original_worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
       "original_branch": "codex/pi-durio-v1-issue-16",
       "r5_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6081022930",
-      "r5_publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/publication/readback.json"
+      "r5_publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/publication/readback.json",
+      "r6_handoff": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-confirmation/handoff.json",
+      "r6_product_commit": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+      "r6_handoff_tip": "b256a70ee18337bddca09ae5adb079eee1adbb78",
+      "human_revalidation_r6": {
+        "status": "EXIT_FIRST_PAIR native PASS; IDLE_C_FIRST_PAIR requested; fault/completed/minGrid pending",
+        "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+        "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json",
+        "manifestSha256": "5e33c0c52eb80c2a6e5c57b0c85dd03ae37b249d2c5ed874b6cf3238f7e17e91",
+        "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/terminal-validation.mjs",
+        "runnerSha256": "f6241325c635eb0518625c0d7f3292da35d073d1ca0643176c62566e925e37d9",
+        "coordinatorVerifyOnly": "PASS 12704 exact files; manifest/runner/handoff hashes matched",
+        "current_requested_scenario": "idle-c-first-pair",
+        "command": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json' --scenario exit-first-pair",
+        "interaction_mode": "One scenario per invocation and popup with complete steps",
+        "requestAt": "2026-10-09T13:32:34.298160+00:00",
+        "remainingNative": [
+          "idle-c-first-pair",
+          "fault",
+          "normal completed",
+          "explicit minimum grid and smaller-window behavior"
+        ],
+        "idle_d_partial": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-idle-d-partial.json",
+        "exit_first_pair_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-exit-first-pair-pass.json"
+      }
     },
     "17": {
       "number": 17,
@@ -588,7 +633,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "7f139320c1f0125e52b0d6c261f336c4ef8494b4",
+  "integration_tip": "f17ddfbe9fb8b07a6ddde46a42cb35560b07687c",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -598,7 +643,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T12:54:06.090613+00:00",
+  "updated_at": "2026-10-09T13:39:42.191818+00:00",
   "last_remote_readback": {
     "headRefOid": "3efa84d54c67d1df24915edec941aa87223798b7",
     "isDraft": true,
