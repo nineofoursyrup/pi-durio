@@ -1,6 +1,6 @@
 # pi-durio v1 implementation status
 
-Integration: `codex/pi-durio-v1`; observed tip: `fb8a173ee6d3bf224894d2ca119662fe04a331bc`.
+Integration: `codex/pi-durio-v1`; observed tip: `0261d0f5872a96a0727d2b2564ee0c504480ea87`.
 Draft PR: https://github.com/nineofoursyrup/pi-durio/pull/33.
 
 Issues remain OPEN; integrated-accepted means ticket acceptance only, not v1 acceptance or release.
@@ -12,7 +12,7 @@ Issues remain OPEN; integrated-accepted means ticket acceptance only, not v1 acc
 | #13 可写 coding、工作区所有权与完整输出 | implementing | #11 | — | — | Fresh gpt-6-astra/xhigh implementer; runtime/coding ownership fixed in interfaces-13-16.md. |
 | #14 中止与退出的可解释收尾 | blocked-by-dependencies | #13 | — | — | NOT RUN |
 | #15 只读重开与恢复核对 | blocked-by-dependencies | #14 | — | — | NOT RUN |
-| #16 真实 Terminal 请求往返与可靠输入 | implementing | #11 | — | — | Fresh gpt-6-astra/xhigh implementer; real Terminal evidence required, offline provider only. |
+| #16 真实 Terminal 请求往返与可靠输入 | implementing | #11 | — | — | Terminal CUA safety denial: no alternate-tool bypass. Continue implementation; candidate-bound manual Terminal evidence required before ticket acceptance. Owns new src/query.ts bounded reads. |
 | #17 忙时队列、停止与恢复决策交互 | blocked-by-dependencies | #16, #15 | — | — | NOT RUN |
 | #18 历史原文、trace、用量追查与固定证据 | blocked-by-dependencies | #13, #16 | — | — | NOT RUN |
 | #19 自动与主动上下文压缩 | blocked-by-dependencies | #18, #17 | — | — | NOT RUN |
