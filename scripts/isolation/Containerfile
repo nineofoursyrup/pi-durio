@@ -1,0 +1,2 @@
+FROM docker.io/library/node@sha256:cadbfafeb6baf87eaaffa40b3640209c4b7fd38cebde65059d15bc39cd636b85
+RUN apt-get update && apt-get install -y --no-install-recommends python3=3.11.2-1+b1 libseccomp2=2.5.4-1+deb12u1 && rm -rf /var/lib/apt/lists/*

@@ -1,0 +1,429 @@
+{
+  "spec": "PI-DURIO-V1-SPEC-r1",
+  "integration_branch": "codex/pi-durio-v1",
+  "draft_pr": "https://github.com/nineofoursyrup/pi-durio/pull/33",
+  "candidate": null,
+  "provider_authorization": "NOT GRANTED",
+  "human_acceptance": "NOT RUN",
+  "tickets": {
+    "11": {
+      "number": 11,
+      "title": "首个 headless 只读任务与持久记录",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-11",
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-11",
+      "agent": "/root/issue11",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh"
+    },
+    "12": {
+      "number": 12,
+      "title": "受限执行与可信评分探查",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "integrated-accepted",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-12",
+      "commit": "9fb7ca7e5ad51d2abb83646dfabf417f3f5eeba6",
+      "integrated_sha": "a4a4a08b65a709d3d731749084d51f482516ab5d",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-12/report.md",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-12/merge-integration-readback.json"
+      ],
+      "branch": "codex/pi-durio-v1-issue-12",
+      "agent": "/root/issue12",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "note": "Six ticket criteria verified; merger validating and integrating. Formal product eval awaits #21."
+    },
+    "13": {
+      "number": 13,
+      "title": "可写 coding、工作区所有权与完整输出",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        11
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "14": {
+      "number": 14,
+      "title": "中止与退出的可解释收尾",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        13
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "15": {
+      "number": 15,
+      "title": "只读重开与恢复核对",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        14
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "16": {
+      "number": 16,
+      "title": "真实 Terminal 请求往返与可靠输入",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        11
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "17": {
+      "number": 17,
+      "title": "忙时队列、停止与恢复决策交互",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        16,
+        15
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "18": {
+      "number": 18,
+      "title": "历史原文、trace、用量追查与固定证据",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        13,
+        16
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "19": {
+      "number": 19,
+      "title": "自动与主动上下文压缩",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        18,
+        17
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "20": {
+      "number": 20,
+      "title": "保留保护下的归档、清理与一致性迁移",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        15,
+        18
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "21": {
+      "number": 21,
+      "title": "固定计划下的受预算 eval 与独立评分",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        18,
+        12,
+        15
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "22": {
+      "number": 22,
+      "title": "fresh 对照与限定范围改善报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        21
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "23": {
+      "number": 23,
+      "title": "improve 受限取证与候选报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        17,
+        18
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "24": {
+      "number": 24,
+      "title": "improve 结构化选择、仅验证与建议抑制",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        22,
+        23
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "25": {
+      "number": 25,
+      "title": "项目与配置候选的验证后写回、启用和回退",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        24
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "26": {
+      "number": 26,
+      "title": "自身源码新构建与独立 eval 资产改进",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        25
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "27": {
+      "number": 27,
+      "title": "任务验收三率与执行、验收双时钟",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        17,
+        18
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "28": {
+      "number": 28,
+      "title": "全样本成本与任务、尝试故障报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        27
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "29": {
+      "number": 29,
+      "title": "低打扰人工介入与交付后返工报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        27
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "30": {
+      "number": 30,
+      "title": "真实 DeepSeek 代表任务与 improve 执行闭环",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        25
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "31": {
+      "number": 31,
+      "title": "首版技术验收与轻量实测报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        19,
+        28,
+        29,
+        26,
+        20,
+        30
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    },
+    "32": {
+      "number": 32,
+      "title": "本机试用与明确日用接受",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        31
+      ],
+      "body_matches": true,
+      "dependencies_match": true,
+      "status": "blocked-by-dependencies",
+      "worktree": null,
+      "commit": null,
+      "integrated_sha": null,
+      "evidence": []
+    }
+  },
+  "frontier": [],
+  "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
+  "integration_tip": "dadabad8e602e7f36202a2939e6691653bb495ab",
+  "model_execution": {
+    "coordinator": "actual model not attestable with current tools",
+    "children": {
+      "requested_model": "gpt-6-astra",
+      "requested_reasoning": "xhigh",
+      "spawn_tool": "accepted request",
+      "backend_attestation": "not exposed"
+    }
+  },
+  "updated_at": "2026-10-09T09:51:06.717346+00:00",
+  "last_remote_readback": {
+    "baseRefName": "main",
+    "closingIssuesReferences": [],
+    "headRefName": "codex/pi-durio-v1",
+    "headRefOid": "dadabad8e602e7f36202a2939e6691653bb495ab",
+    "isDraft": true,
+    "number": 33,
+    "state": "OPEN",
+    "url": "https://github.com/nineofoursyrup/pi-durio/pull/33"
+  }
+}
