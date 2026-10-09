@@ -44,7 +44,11 @@ export async function acquireWorkspaceOwner(workspace: string, onCompromised: (e
     for (const entry of await readdir(registry, { withFileTypes: true })) {
       if (!entry.isDirectory() || !/^[a-f0-9]{64}$/.test(entry.name)) continue;
       const path = join(registry, entry.name);
-      try { await access(`${path}.lock`); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue; throw error; }
+      let unresolved = false;
+      for (const marker of [`${path}.lock`, join(path, 'owner.json')]) {
+        try { await access(marker); unresolved = true; } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+      }
+      if (!unresolved) continue;
       // Missing/corrupt registration with an active lock is uncertain, never an invitation to take ownership.
       const registered = JSON.parse(await readFile(join(path, 'workspace.json'), 'utf8')) as { root: string };
       if (contains(root, registered.root) || contains(registered.root, root)) {

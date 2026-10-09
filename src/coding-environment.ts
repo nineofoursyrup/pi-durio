@@ -90,6 +90,7 @@ export function codingEnvironment(workspace: string, env: Readonly<Record<string
       const [command, options, context] = args;
       let bytes = 0, chunks = 0;
       record('shell.started', { command, cwd: workspace, environmentNames: Object.keys(env).sort(), inheritEnv: false, boundary: 'trusted local shell; output is complete acquired decoded UTF-8, with separate stdout/stderr' });
+      guard();
       shellState('started');
       const result = await base.exec(command, { ...options, cwd: workspace, env: { ...env }, inheritEnv: false, window: undefined,
         onOutput(text, outputContext, info) {

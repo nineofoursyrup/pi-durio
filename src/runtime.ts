@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { createModels, type AssistantMessage, type Models, type AssistantMessageEvent, type Usage } from '@earendil-works/pi-ai';
 import { deepseekProvider } from '@earendil-works/pi-ai/providers/deepseek';
-import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context';
+import { BACKGROUND_CONTEXT, withAbortSignal, awaitWithContext } from '@earendil-works/chord/context';
 import { Harness, createRegistry, defineExtension, GenerationTask, hook, type Conversation, type UsageState, type Storage, type ToolRegistration, type ToolDiagnostic } from '@earendil-works/pi-durable';
 import { createReadTool, createWriteTool, createEditTool, createBashTool } from '@earendil-works/pi-durable/tools';
 import { openNodeSqliteStorage } from '@earendil-works/pi-durable/storage/sqlite/node';
@@ -28,6 +28,8 @@ export interface ReadTaskOptions {
   signal?: AbortSignal;
   /** stop persists abort intent; exit preserves unfinished work and closes. */
   cancellation?: 'stop' | 'exit';
+  /** Host cleanup waiting policy, not a claim that work stops at the deadline. */
+  cleanupTimeoutMs?: number;
   onObservation?: (event: { kind: string; runId: string }) => void;
   fault?: FaultInjector;
   /** Injectable credential source for embedding/tests; value is never recorded. */
@@ -39,6 +41,7 @@ export interface RunResult {
   runId: string; sessionId: string; taskId: string; mode: 'live' | 'offline';
   status: 'completed' | 'failed' | 'aborted' | 'unknown';
   answer?: string; reason?: string; observation: 'ok' | 'degraded'; cleanup: 'confirmed' | 'unknown';
+  lifecycle?: { intent: 'stop' | 'exit' | null; disposition: 'completed' | 'failed' | 'aborted' | 'resumable' | 'needs-recovery'; cleanupTimeoutMs: number; storage: 'not-opened' | 'closed' | 'unknown'; owner: 'release-after-host-close' | 'retained'; remoteTermination: 'unknown' };
   executionCleanup?: { managedCommands: 'settled' | 'unknown'; started: number; settled: number; externalProcesses: 'unknown' };
   usage: { source: 'pi.usage'; scope: string; completeness: 'known' | 'partial' | 'unknown'; value: UsageState | null; cost: { kind: 'estimate'; currency: 'USD'; source: string; observedAt: string } };
 }
@@ -69,7 +72,24 @@ export async function runCodingTask(options: CodingTaskOptions): Promise<RunResu
   return runTask(options, true);
 }
 
+export function waitForRun(run: Promise<RunResult>, signal?: AbortSignal): Promise<RunResult> {
+  // The upstream waiter cancels only this observation, never the underlying runtime.
+  return awaitWithContext(run, signal ? withAbortSignal(signal, CTX) : CTX);
+}
+
 async function runTask(options: CodingTaskOptions, coding: boolean): Promise<RunResult> {
+  let firstIntent: 'stop' | 'exit' | undefined;
+  const latch = () => { firstIntent ??= options.cancellation ?? 'exit'; };
+  options.signal?.addEventListener('abort', latch, { once: true });
+  if (options.signal?.aborted) latch();
+  try { return await executeTask({ ...options, get cancellation() { return firstIntent ?? options.cancellation; } }, coding); }
+  finally { options.signal?.removeEventListener('abort', latch); }
+}
+
+async function executeTask(options: CodingTaskOptions, coding: boolean): Promise<RunResult> {
+  if (options.signal?.aborted) throw new Error(`RUN_CANCELLED_BEFORE_ACCEPTANCE: ${options.cancellation ?? 'exit'}`);
+  const cleanupTimeoutMs = options.cleanupTimeoutMs ?? 10000;
+  if (!Number.isSafeInteger(cleanupTimeoutMs) || cleanupTimeoutMs < 1 || cleanupTimeoutMs > 300000) throw new Error('INVALID_CLEANUP_TIMEOUT: provide 1–300000 milliseconds');
   if (!options.input.trim() || Buffer.byteLength(options.input) > 32 * 1024) throw new Error('INPUT_LIMIT: provide 1–32768 bytes');
   if (options.mode === 'offline' && !options.transport) throw new Error('OFFLINE_TRANSPORT_REQUIRED');
   if (options.mode === 'live' && options.transport) throw new Error('LIVE_TRANSPORT_OVERRIDE_DENIED');
@@ -91,6 +111,10 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
   let generationTaskId: number | undefined;
   const toolContext = new AsyncLocalStorage<{ attemptId: string; durableTaskId: number }>();
   let stopped = false;
+  let finalizing = false;
+  let storageClosed = false;
+  let accepted = false;
+  let cancellation: 'stop' | 'exit' | undefined;
   let shellsStarted = 0, shellsSettled = 0;
   const observedFiles = new Map<string, ObservedFile>();
   let harness: Harness | undefined;
@@ -110,7 +134,7 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
   let sessionOwner: Awaited<ReturnType<typeof acquireOwner>> | undefined;
   let workspaceOwner: Awaited<ReturnType<typeof acquireWorkspaceOwner>> | undefined;
   let result: RunResult | undefined;
-  const guard = () => { owner.assertHeld(); sessionOwner?.assertHeld(); workspaceOwner?.assertHeld(); if (stopped || controller.signal.aborted) throw new Error(failure ?? 'RUN_STOPPING'); };
+  const guard = () => { owner.assertHeld(); sessionOwner?.assertHeld(); workspaceOwner?.assertHeld(); if (stopped || finalizing || controller.signal.aborted) throw new Error(failure ?? 'RUN_STOPPING'); };
   const record = (kind: string, data: unknown) => {
     let seq: number;
     try { seq = evidence!.append(kind, data); } catch (error) {
@@ -126,11 +150,20 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
     catch { observationDegraded = true; }
   };
   const stop = () => {
-    if (stopped) return;
-    try { record(options.cancellation === 'stop' ? 'run.abort-intent' : 'run.exit-intent', { action: options.cancellation ?? 'exit', remoteTermination: 'unknown' }); } catch { /* Earlier records remain authoritative. */ }
+    if (stopped || finalizing) return;
+    cancellation = options.cancellation ?? 'exit';
     stopped = true;
+    try {
+      if (accepted) record(cancellation === 'stop' ? 'run.abort-intent' : 'run.exit-intent', { action: cancellation, remoteTermination: 'unknown' });
+      if (accepted) record('lifecycle.processing', { action: cancellation, admission: 'closed', dispatch: 'closed' });
+    } catch { /* Earlier records remain authoritative. */ }
     controller.abort();
     notifyStop();
+  };
+  options.signal?.addEventListener('abort', stop, { once: true });
+  if (options.signal?.aborted) stop();
+  const lifecycleRecord = (kind: string, data: unknown) => {
+    if (evidence) try { record(kind, data); } catch { /* Keep cleanup running after original-record failure. */ }
   };
   let requests = 0, responses = 0, usageReports = 0;
   let httpStatus: number | undefined;
@@ -143,8 +176,12 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
     }
     await chmod(dataRoot, 0o700);
     const inspected = await preflight(owner);
+    if (stopped) throw new Error(`RUN_CANCELLED_BEFORE_ACCEPTANCE: ${options.cancellation ?? 'exit'}`);
+    guard();
     evidence = new Evidence(dataRoot, runId, options.fault);
     record('preflight', { sessions: inspected });
+    guard();
+    accepted = true;
     record('task.accepted', { taskId, runId, sessionId, input: options.input, workspace, mode: options.mode, authorization: { tools: coding ? ['read', 'write', 'edit', 'bash'] : ['read'], execution: coding ? 'trusted-local-coding' : 'trusted-local-read-only', requestLimit: 8, fileLimitBytes: 256 * 1024, replay: 'unsafe' }, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } });
     if (workspaceOwner) record('workspace.owner', { root: workspaceOwner.root, workspace, scope: 'protocol participants only; external editors, shared Git metadata and external resources are not isolated' });
     record('execution.artifact', captureArtifact(evidence, workspace));
@@ -153,7 +190,7 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
     const model = models.getModel('deepseek', 'deepseek-flash');
     if (!model || model.api !== 'openai-completions' || model.baseUrl !== 'https://api.deepseek.com') throw new Error('MODEL_CONFIGURATION_MISMATCH');
     const settings = { retry: { enabled: false, maxRetries: 0 }, compaction: { enabled: false }, stream: { maxRetries: 0, timeoutMs: 120000 }, contextRetentionMs: 0, ...(coding ? { toolExecution: 'sequential' as const } : {}) };
-    record('execution.config', { model, instructions, settings, mode: options.mode, ...(coding ? { toolEnvironment: { version: toolEnvironmentVersion, baseVersion: 'minimal-build-v1', names: Object.keys(shellEnvironment!).sort(), inheritEnv: false } } : {}), capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
+    record('execution.config', { cleanupTimeoutMs, model, instructions, settings, mode: options.mode, ...(coding ? { toolEnvironment: { version: toolEnvironmentVersion, baseVersion: 'minimal-build-v1', names: Object.keys(shellEnvironment!).sort(), inheritEnv: false } } : {}), capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
     const actualStream = models.streamSimple.bind(models);
     const capturedModels: Models = Object.assign(models, {
       streamSimple: ((requestedModel, context, streamOptions) => {
@@ -166,6 +203,7 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
           ...streamOptions, apiKey, fetch: async (url, init) => {
             guard();
             record('model.dispatch', { attemptId, url: String(url), method: init?.method, body: typeof init?.body === 'string' ? init.body : null, boundary: 'fetch JSON request body; authentication headers excluded' });
+            guard();
             const response = await (options.transport ?? globalThis.fetch)(url, init);
             httpStatus = response.status;
             record('model.http', { attemptId, status: response.status });
@@ -235,10 +273,25 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
       } catch (error) { const errorSeq = record('tool.error', { attemptId, durableTaskId: api.taskId, error: safeError(error) }); summary(true, { errorSeq }); throw error; }
     } }) satisfies ToolRegistration);
     registry.install(defineExtension({ name: coding ? 'pi-durio-coding' : 'pi-durio-read-only', tools: capturedTools, hooks: [hook(GenerationTask, { beforeRequest: (request, api) => { guard(); generationTaskId = api.taskId; record('generation.request', { durableTaskId: api.taskId, conversationId: api.conversationId, messages: request.messages }); return undefined; } })] }));
+    guard();
     const sessionPath = join(dataRoot, 'sessions', sessionId);
     sessionOwner = await acquireOwner(sessionPath, fatal);
-    storage = await openNodeSqliteStorage(join(sessionPath, 'durable.sqlite'));
+    // Finish allocating this already-accepted session even if cancellation arrived
+    // during owner acquisition; an empty durable store is then closed, never scheduled.
+    const openedStorage = await openNodeSqliteStorage(join(sessionPath, 'durable.sqlite'));
+    storage = new Proxy(openedStorage, { get(target, key) {
+      if (key === 'close') return async (...args: Parameters<Storage['close']>) => {
+        lifecycleRecord('lifecycle.storage-closing', { managedCommands: { started: shellsStarted, settled: shellsSettled } });
+        options.fault?.('storage.close');
+        await target.close(...args);
+        storageClosed = true;
+        lifecycleRecord('lifecycle.storage-closed', { storage: 'closed' });
+      };
+      const value = Reflect.get(target, key);
+      return typeof value === 'function' ? value.bind(target) : value;
+    } });
     await chmod(join(sessionPath, 'durable.sqlite'), 0o600);
+    guard();
     options.fault?.('harness.open');
     harness = await Harness.open(storage, { models: capturedModels, registry, settings, env: () => {
       const capture = (kind: string, acquired: unknown) => record(kind, { toolAttempt: toolContext.getStore(), acquired });
@@ -246,17 +299,13 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
     } }, CTX);
     conversation = await harness.root(CTX, { agent: { model: { provider: 'deepseek', modelId: 'deepseek-flash' }, cwd: workspace, instructions } });
     record('run.started', { taskId, sessionId, conversationId: conversation.id });
-    options.signal?.addEventListener('abort', stop, { once: true });
-    if (options.signal?.aborted) stop();
     guard();
     record('submission.intent', { requestId: taskId, conversationId: conversation.id, input: options.input });
     const submission = await conversation.submit({ type: 'input', content: options.input, requestId: taskId }, CTX);
     record('submission.accepted', { requestId: taskId, submissionId: submission.id });
     const settled = await Promise.race([submission.wait(CTX), stopping]);
-    if (settled === 'stopped') {
-      if (options.cancellation === 'stop' && !failure) await conversation.abort(CTX);
-      await close();
-    } else {
+    if (settled !== 'stopped') {
+      finalizing = true;
       record('submission.settled', settled);
       const view = await conversation.viewState(CTX);
       try { usage = structuredClone(view.value.docs['pi.usage']) as UsageState; } finally { view.dispose(); }
@@ -265,13 +314,32 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
       if (last) answer = last.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
       if (settled.status !== 'done') failure ??= httpStatus === 401 || httpStatus === 403 ? 'AUTH_REJECTED: DeepSeek rejected credentials; no provider fallback' : 'TASK_UNANSWERED';
       record('usage.projection', { source: 'pi.usage', conversationId: conversation.id, value: usage, reportedAttempts: usageReports, requests, completeness: usageReports === requests ? 'known' : usageReports ? 'partial' : 'unknown' });
-      await close();
     }
-  } catch (error) { failure ??= safeError(error); }
+  } catch (error) { if (!stopped || failure) failure ??= safeError(error); }
   finally {
     options.signal?.removeEventListener('abort', stop);
+    finalizing = true;
     controller.abort();
-    try { await close(); } catch (error) { cleanup = 'unknown'; failure ??= safeError(error); }
+    const deadline = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; deadline.abort(new Error('CLEANUP_TIMEOUT: cleanup remains unconfirmed; inspect residual work before releasing ownership')); }, cleanupTimeoutMs);
+    const shutdown = (async () => {
+      if (cancellation === 'stop' && conversation) {
+        lifecycleRecord('lifecycle.abort-started', { action: cancellation });
+        try {
+          options.fault?.('conversation.abort');
+          await conversation.abort(withAbortSignal(deadline.signal, CTX));
+          lifecycleRecord('lifecycle.abort-settled', { action: cancellation });
+        } catch (error) { cleanup = 'unknown'; failure ??= safeError(error); lifecycleRecord('lifecycle.abort-failed', { reason: safeError(error) }); }
+      }
+      lifecycleRecord('lifecycle.close-started', { action: cancellation ?? 'finish', admission: 'closed', dispatch: 'closed' });
+      await close();
+    })();
+    try { await awaitWithContext(shutdown, withAbortSignal(deadline.signal, CTX)); }
+    catch (error) { cleanup = 'unknown'; failure ??= safeError(error); lifecycleRecord(timedOut ? 'lifecycle.timeout' : 'lifecycle.close-failed', { cleanupTimeoutMs, reason: safeError(error), owner: 'retained', recoveryRequired: true }); }
+    finally { clearTimeout(timer); }
+    try { owner.assertHeld(); sessionOwner?.assertHeld(); workspaceOwner?.assertHeld(); }
+    catch (error) { cleanup = 'unknown'; failure ??= safeError(error); lifecycleRecord('lifecycle.owner-lost', { reason: safeError(error), owner: 'retained', recoveryRequired: true }); }
     if (shellsStarted !== shellsSettled) { cleanup = 'unknown'; failure ??= 'SHELL_TERMINATION_UNKNOWN'; }
     if (evidence && sessionOwner && cleanup === 'confirmed') {
       try {
@@ -281,14 +349,19 @@ async function runTask(options: CodingTaskOptions, coding: boolean): Promise<Run
       } catch (error) { originalLoss = true; failure ??= safeError(error); }
     }
     if (evidence) {
-      result = { runId, taskId, sessionId, mode: options.mode, status: originalLoss || cleanup === 'unknown' ? 'unknown' : failure ? 'failed' : stopped ? (options.cancellation === 'stop' ? 'aborted' : 'unknown') : 'completed', answer, reason: failure ?? (stopped ? 'Cancellation requested; remote termination cannot be confirmed' : undefined), observation: observationDegraded ? 'degraded' : 'ok', cleanup,
+      result = { runId, taskId, sessionId, mode: options.mode, status: originalLoss || cleanup === 'unknown' ? 'unknown' : failure ? 'failed' : cancellation ? (cancellation === 'stop' ? 'aborted' : 'unknown') : 'completed', answer, reason: failure ?? (cancellation ? (cancellation === 'stop' ? 'Task aborted; acquired changes and costs remain; remote termination unknown' : 'Application exit preserved unfinished work; explicit recovery required; remote termination unknown') : undefined), observation: observationDegraded ? 'degraded' : 'ok', cleanup,
+        lifecycle: { intent: cancellation ?? null, disposition: originalLoss || cleanup === 'unknown' ? 'needs-recovery' : failure ? 'failed' : cancellation === 'stop' ? 'aborted' : cancellation === 'exit' ? 'resumable' : 'completed', cleanupTimeoutMs, storage: storage ? (storageClosed ? 'closed' : 'unknown') : 'not-opened', owner: cleanup === 'confirmed' ? 'release-after-host-close' : 'retained', remoteTermination: 'unknown' },
         ...(coding ? { executionCleanup: { managedCommands: shellsStarted === shellsSettled ? 'settled' as const : 'unknown' as const, started: shellsStarted, settled: shellsSettled, externalProcesses: 'unknown' as const } } : {}),
-        usage: { source: 'pi.usage', scope: `session:${sessionId}`, completeness: usageReports === requests && requests > 0 ? 'known' : usageReports ? 'partial' : 'unknown', value: usageReports ? usage : null, cost: { kind: 'estimate', currency: 'USD', source: '@earendil-works/pi-ai@1.1.0 model price catalog', observedAt: new Date().toISOString() } } };
+        usage: { source: 'pi.usage', scope: `session:${sessionId}`, completeness: usageReports === requests && requests > 0 ? 'known' : usageReports ? 'partial' : 'unknown', value: usageReports && cleanup === 'confirmed' ? usage : null, cost: { kind: 'estimate', currency: 'USD', source: '@earendil-works/pi-ai@1.1.0 model price catalog', observedAt: new Date().toISOString() } } };
       try { record('run.closed', result); } catch { result.status = 'unknown'; result.reason = 'EVIDENCE_FAILURE: close receipt could not be saved'; }
-      evidence.close();
+      if (timedOut) {
+        // The caller may stop waiting, but active writers still own their storage.
+        // Never promote the earlier unknown receipt or auto-release owners after a late close.
+        void shutdown.then(() => lifecycleRecord('lifecycle.late-close', { storage: storageClosed ? 'closed' : 'unknown', owner: 'retained', recoveryRequired: true }), error => lifecycleRecord('lifecycle.late-close-failed', { reason: safeError(error), owner: 'retained' })).finally(() => evidence!.close());
+      } else evidence.close();
     }
     if (cleanup === 'confirmed') { await sessionOwner?.release(); await workspaceOwner?.release(); await owner.release(); }
   }
-  if (!result) throw new Error(failure ?? 'RUN_NOT_ACCEPTED');
+  if (!result) throw new Error(failure ?? (stopped ? `RUN_CANCELLED_BEFORE_ACCEPTANCE: ${cancellation ?? options.cancellation ?? 'exit'}` : 'RUN_NOT_ACCEPTED'));
   return result;
 }
