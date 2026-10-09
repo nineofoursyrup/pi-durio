@@ -18,7 +18,7 @@ test('report preserves all planned identities, grader errors and first failure; 
  const root=mkdtempSync(join(tmpdir(),'durio-eval-report-')),e=new Evidence(root,'plan');const p=plan(e),source=appendFact(e,'eval.plan',p),artifact=e.blob('original product');e.close();await fixEvidence(root,{id:'eval-plan:plan',sources:[source],purpose:'test fixed plan'});
  const facts=new Evidence(root,'plan');
  for(const [trialId,status,judgment]of [['good','completed','PASS'],['failure','error','FAIL'],['grader-error','completed','unknown']]){const outcome=appendFact(facts,'eval.outcome',{trialId,status,started:true,valid:true,artifacts:[{path:'project/a.ts',ref:artifact}],isolation:null,timing:{preparationMs:1,taskMs:2}});appendFact(facts,'eval.grade',{id:trialId,trialId,outcome,graderVersion:'v1',judgment,reason:judgment==='unknown'?'grader crashed':'fixed rule',checks:[],at:new Date().toISOString()});}
- facts.close();const report=evalReport(root,'plan');assert.deepEqual(report.counts,{planned:4,started:3,completed:2,gradable:2,passed:1,passRate:0.5,completionRate:0.5,coverageRate:0.5});assert.equal(report.trials[3].outcome.status,'not-run');assert.equal(report.trials[2].grade.judgment,'unknown');assert.match(formatEvalReport(report),/grader crashed/);
+ const last=evalFacts(root,'plan').at(-1)!.source;facts.close();assert.equal(evalReport(root,'plan').counts.gradable,0);await fixEvidence(root,{id:'eval-outcomes:plan',sources:[last],purpose:'protect report inputs'});const report=evalReport(root,'plan');assert.deepEqual(report.counts,{planned:4,started:3,completed:2,gradable:2,passed:1,passRate:0.5,completionRate:0.5,coverageRate:0.5});assert.equal(report.trials[3].outcome.status,'not-run');assert.equal(report.trials[2].grade.judgment,'unknown');assert.match(formatEvalReport(report),/grader crashed/);
  const before=readFileSync(join(root,'host.sqlite'));const view=new EvalView(root,'plan');assert.ok(view.render(80,24).join('\n').includes('Eval'));view.handleInput('e');view.handleInput('\r');assert.match(view.render(80,24).join('\n'),/e1:/);view.handleInput('n');view.handleInput('p');view.handleInput('b');assert.deepEqual(readFileSync(join(root,'host.sqlite')),before);
  unlinkSync(join(root,'objects',artifact.sha256));const missing=evalReport(root,'plan');assert.equal(missing.counts.gradable,0);assert.equal(missing.trials[0].grade.judgment,'PASS');assert.equal(missing.trials[0].outcome.valid,false);assert.equal(missing.trials[1].gradeHistory[0].judgment,'FAIL');
 });
@@ -40,4 +40,10 @@ test('paid plan needs a fixed provider upper bound before dispatch, not only an 
  await assert.rejects(mediator.request({input:JSON.stringify(payload),maxOutputTokens:32,signal}),/OWNER_LOST/);held=true;
  await assert.rejects(mediator.request({input:'x'.repeat(262145),maxOutputTokens:32,signal}),/EVAL_MEDIATOR_LIMIT/);assert.equal(calls,0);
  await mediator.request({input:JSON.stringify(payload),maxOutputTokens:32,signal});assert.equal(mediator.lastError,'PROVIDER_HTTP_503');assert.equal(budget.snapshot().requests,1);assert.equal(budget.snapshot().unknown,1);e.close();
+ });
+
+ test('wrapped eval plan selection remains visible in a narrow viewport',()=>{
+ const root=mkdtempSync(join(tmpdir(),'durio-eval-view-'));
+ for(let index=0;index<8;index++){const e=new Evidence(root,`plan-${index}`),p=plan(e);p.id=`plan-${index}`;p.purpose='长目的说明 '.repeat(50);appendFact(e,'eval.plan',p);e.close();}
+ const view=new EvalView(root);view.render(40,12);for(let index=0;index<7;index++){view.handleInput('\x1b[B');view.render(40,12);}assert.match(view.render(40,12).join('\n'),/› plan-0/);
  });

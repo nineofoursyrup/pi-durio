@@ -6,7 +6,7 @@ import {readFileSync} from 'node:fs';
 import {Evidence,readObject,type BlobRef} from '../evidence.js';
 import {acquireOwner} from '../ownership.js';
 import {fixEvidence,verifyFixed} from '../fixed-evidence.js';
-import {appendFact,captureFiles,installedRuntimeFiles,evalFacts,type ContentFile} from './store.js';
+import {appendFact,captureFiles,installedRuntimeFiles,regularFiles,evalFacts,type ContentFile} from './store.js';
 import {representativeCases,type EvalCase} from './fixtures.js';
 import type {BudgetLimits} from '../provider-boundary.js';
 export const verifiedImage='pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c';
@@ -17,7 +17,7 @@ export interface EvalPlan {
  image:string;runtime:{id:string;manifest:BlobRef;bytes:number};cases:EvalCase[];trials:EvalTrial[];
  budget:BudgetLimits;trialTimeoutMs:number;gradingTimeoutMs:number;maxOutputTokens:number;requestRetryLimit:0;
  price:{version:string;source:string;currency:'USD';perMillionTokens:number};
- authorization:{scope:'run-all-listed-trials';paid:boolean};environment:{node:string;isolation:string;writable:string;cache:string;boundaryFiles?:ContentFile[]};
+ authorization:{scope:'run-all-listed-trials';paid:boolean};environment:{node:string;isolation:string;writable:string;cache:string;boundaryFiles?:ContentFile[];hostFiles?:ContentFile[]};
  mainObjective:string;protection:string[];improvementConclusion:'not-evaluated';
 }
 export function validatePlan(plan:EvalPlan){
@@ -37,10 +37,11 @@ export async function prepareEval(options:PrepareEvalOptions){
   const environment=JSON.parse(readFileSync(join(installation,'eval-environment.json'),'utf8'));
   if(environment.platform!=='linux'||environment.arch!=='arm64'||environment.node!=='v24.8.0'||environment.image!==(options.image??verifiedImage))throw Error('EVAL_RUNTIME_PREPARATION_REQUIRED: use scripts/eval/prepare-runtime.mjs for the fixed Linux image');
   const runtime=captureFiles(evidence,installation,installedRuntimeFiles(installation));
+  const hostDirectory=fileURLToPath(new URL('../',import.meta.url));const hostFiles=captureFiles(evidence,hostDirectory,regularFiles(hostDirectory)).files;
   const boundaryFiles=captureFiles(evidence,fileURLToPath(new URL('../../execution/isolation/',import.meta.url)),['boundary.mjs','export.mjs','restrict.py']).files;
   const cases=structuredClone(options.cases??representativeCases);
   const trials=options.trials??cases.map(c=>({id:randomUUID(),caseId:c.id,side:'candidate',repeat:1,pair:null,...(options.mode==='live'?{}:{scenario:'pass' as const})}));
-  plan={id,purpose:options.purpose,mode:options.mode??'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:options.image??verifiedImage,runtime:{id:runtime.id,manifest:evidence.blob(JSON.stringify(runtime.files)),bytes:runtime.bytes},cases,trials:trials.map(t=>({...t,version:runtime.id})),budget:options.budget,trialTimeoutMs:options.trialTimeoutMs??90000,gradingTimeoutMs:options.gradingTimeoutMs??30000,maxOutputTokens:options.maxOutputTokens??2048,requestRetryLimit:0,price:options.price??{version:'offline-zero-v1',source:'deterministic local transport; no model inference or paid network',currency:'USD',perMillionTokens:0},authorization:{scope:'run-all-listed-trials',paid:options.paid??false},environment:{node:'v24.8.0',isolation:'Apple container 1.4.1 VM + namespace/capability/seccomp',writable:'fresh session, HOME, TMPDIR, cache, workspace and data-root each trial',cache:'fixed read-only dependencies only',boundaryFiles},mainObjective:'task requirements',protection:['fixture initial state','declared writable scope','isolation','complete acquired originals'],improvementConclusion:'not-evaluated'};
+  plan={id,purpose:options.purpose,mode:options.mode??'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:options.image??verifiedImage,runtime:{id:runtime.id,manifest:evidence.blob(JSON.stringify(runtime.files)),bytes:runtime.bytes},cases,trials:trials.map(t=>({...t,version:runtime.id})),budget:options.budget,trialTimeoutMs:options.trialTimeoutMs??90000,gradingTimeoutMs:options.gradingTimeoutMs??30000,maxOutputTokens:options.maxOutputTokens??2048,requestRetryLimit:0,price:options.price??{version:'offline-zero-v1',source:'deterministic local transport; no model inference or paid network',currency:'USD',perMillionTokens:0},authorization:{scope:'run-all-listed-trials',paid:options.paid??false},environment:{node:'v24.8.0',isolation:'Apple container 1.4.1 VM + namespace/capability/seccomp',writable:'fresh session, HOME, TMPDIR, cache, workspace and data-root each trial',cache:'fixed read-only dependencies only',boundaryFiles,hostFiles},mainObjective:'task requirements',protection:['fixture initial state','declared writable scope','isolation','complete acquired originals'],improvementConclusion:'not-evaluated'};
   validatePlan(plan);source=appendFact(evidence,'eval.plan',plan);
  }finally{evidence?.close();await owner.release();}
  const fixed=await fixEvidence(root,{id:`eval-plan:${id}`,sources:[source!],purpose:'retain complete eval plan, fixture/grader content and execution dependency bytes before execution'});

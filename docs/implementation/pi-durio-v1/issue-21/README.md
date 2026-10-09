@@ -42,7 +42,7 @@ node dist/src/cli.js eval report --data-root /absolute/eval-data --id my-eval
 }
 ```
 
-`plan` 返回全部案例、初态/dirty 内容、实际依赖引用、内容版本、顺序/身份、模型、不可变镜像、隔离源码、请求/用量/时限/重试限制和费用口径，并通过已有固定证据保存。默认包含四类公开案例。`run --id` 是对这份完整固定计划的明确执行；CLI 会在开始前把计划打印到 stderr，stdout 返回机器报告。开始过的计划只能查询，不能重启同身份；补跑须新计划和 trial ID，可用 `replaces` 指向原 trial。
+`plan` 返回全部案例、初态/dirty 内容、实际依赖与可信宿主源码引用、内容版本、顺序/身份、模型、不可变镜像、隔离源码、请求/用量/时限/重试限制和费用口径，并通过已有固定证据保存。默认包含四类公开案例。`run --id` 是对这份完整固定计划的明确执行；CLI 会在开始前把计划打印到 stderr，stdout 返回机器报告。开始过的计划只能查询，不能重启同身份；补跑须新计划和 trial ID，可用 `replaces` 指向原 trial。
 
 TUI 输入 `/eval`，只读查看列表与报告；`e` 查看记录来源，Enter 查看原文，`n/p` 翻页，`b` 返回。它没有模型、runner 或写入能力。完整原文、provider dispatch、预算事实及固定证据也可用已有 `history`/`evidence` CLI 查询。
 
@@ -57,7 +57,7 @@ TUI 输入 `/eval`，只读查看列表与报告；`e` 查看记录来源，Ente
 
 ## 报告口径
 
-`N` 计划、`B` 启动、`C` 正常完成、`G` 有效且可判定的评分、`S` 通过。通过率为 `S/G`，完成率为 `C/N`，覆盖率为 `G/N`；分母为零返回 null/N/A。错误、未运行、旧评分和首败都仍可见。正式评分仅计入 valid outcome；missing/corrupt evidence 会移出有效集合，并保留历史判断。
+`N` 计划、`B` 启动、`C` 正常完成、`G` 有效且可判定的评分、`S` 通过。通过率为 `S/G`，完成率为 `C/N`，覆盖率为 `G/N`；分母为零返回 null/N/A。错误、未运行、旧评分和首败都仍可见。正式评分仅计入 valid outcome；尚未固定或 missing/corrupt evidence 会移出有效集合，并保留历史判断。
 
 费用只从宿主实际 reservation/settlement 计算；输出全部 side、失败请求和 missing 数量，unknown 不伪装为零总费用。价格是计划固定的每百万 token 估算口径，离线 transport 为零费用来源。准备、任务、评分采用宿主单调时钟；显式镜像/Linux 安装准备在独立日志中，不含在 eval execution time 中。
 
