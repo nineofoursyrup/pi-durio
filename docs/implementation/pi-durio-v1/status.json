@@ -744,19 +744,30 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-25",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T184952Z/issue-25.json",
+      "commit": "29f00ced7c033816d1413cd53cf39870e475e191",
+      "integrated_sha": "ac14c395823fe9c81e1b551288d4d3a487df3da8",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-25/coordinator-acceptance.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-integration-readback.json"
+      ],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T201412Z/issue-25.json",
       "branch": "codex/pi-durio-v1-issue-25",
       "agent": "/root/issue25",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "integration_base": "1ed2e4b5dd3ea206429ce8c096a9367f9ebd454e",
       "claim_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/claim-readback.json",
-      "checkpoint": "Frozen b34 installed formal/profile demo in progress; newly observed first-activation no-behavior classification gap requires narrow affected repair before acceptance."
+      "checkpoint": "Final exact source/package/runtime and installed behavior accepted; 30/30 affected checks; original failures and invalidated claims retained. No final whole-suite claim.",
+      "product_commit": "52f8dd25fed19f84c5712d2c916de3878a1de945",
+      "handoff": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/handoff.json",
+      "acceptance": {
+        "at": "2026-10-09T20:22:07.862590+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/coordinator-acceptance.json",
+        "sha256": "fe88c495f6566b3349d64b045115f29c5d38fab0a49a72314f8256ef47491179"
+      },
+      "note": "Exact formal execution and future-default activation accepted with 30/30 affected checks and scoped installed evidence. Early 196/196 is not final-source-bound. Real provider, self-build and final acceptance remain separate."
     },
     "26": {
       "number": 26,
@@ -769,12 +780,12 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T182559Z/issue-26.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T201412Z/issue-26.json"
     },
     "27": {
       "number": 27,
@@ -902,7 +913,9 @@
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/coordinator-acceptance.json",
         "sha256": "f057e399d39a28ee36d1921cef6bc8e60b9ed1bc3ccd6b7e8cf00c9dbdd5c601"
       },
-      "note": "Applicable intervention/rework acceptance complete with exact installed actual runtime; mature historical windows are deterministic fixtures and current deliveries remain immature. Synthetic feedback is not human acceptance."
+      "note": "Applicable intervention/rework acceptance complete with exact installed actual runtime; mature historical windows are deterministic fixtures and current deliveries remain immature. Synthetic feedback is not human acceptance.",
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/29#issuecomment-6088023725",
+      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/publication/readback.json"
     },
     "30": {
       "number": 30,
@@ -915,12 +928,12 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T182559Z/issue-30.json",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T201412Z/issue-30.json",
       "preparation": {
         "status": "unapproved draft; actual post-25 candidate/plan pending",
         "fixture": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/improve-fixture-proposal-r1.json",
@@ -956,7 +969,7 @@
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T182559Z/issue-31.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T194338Z/issue-31.json"
     },
     "32": {
       "number": 32,
@@ -974,12 +987,15 @@
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T182559Z/issue-32.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T194338Z/issue-32.json"
     }
   },
-  "frontier": [],
+  "frontier": [
+    26,
+    30
+  ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "a78014c20b875facc033bbed03b824207de01c67",
+  "integration_tip": "ac14c395823fe9c81e1b551288d4d3a487df3da8",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -989,8 +1005,8 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T19:42:08.015823+00:00",
-  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-28/publication/readback.json",
+  "updated_at": "2026-10-09T20:22:07.943748+00:00",
+  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/publication/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
       "commit": "01f2d3a562b12a9917b3db1dc8111ea2717d386f",

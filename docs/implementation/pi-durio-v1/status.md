@@ -1,6 +1,6 @@
 # pi-durio v1 implementation status
 
-Integration: `codex/pi-durio-v1`; observed tip: `a78014c20b875facc033bbed03b824207de01c67`.
+Integration: `codex/pi-durio-v1`; observed tip: `ac14c395823fe9c81e1b551288d4d3a487df3da8`.
 Draft PR: https://github.com/nineofoursyrup/pi-durio/pull/33.
 
 Issues remain OPEN; integrated-accepted means ticket acceptance only, not v1 acceptance or release.
@@ -21,12 +21,12 @@ Issues remain OPEN; integrated-accepted means ticket acceptance only, not v1 acc
 | #22 fresh 对照与限定范围改善报告 | integrated-accepted | #21 | fa6aa2a798cf4629749cb6c07e72a7ca7422e60f | 291a5fc5a6d49e2b6e785122c437106575f3c4f7 | /Users/nineofour/pi-durio-v1-run/evidence/issue-22/handoff.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-22/coordinator-premerge.json, docs/implementation/pi-durio-v1/issue-22/README.md, docs/implementation/pi-durio-v1/issue-22/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-22/merge-integration-readback.json |
 | #23 improve 受限取证与候选报告 | integrated-accepted | #17, #18 | ea0c1ed70a28240214a740a4c543e91a6d00291f | ee33413ab9e6af1af5bc98a51536149433098625 | /Users/nineofour/pi-durio-v1-run/evidence/issue-23/handoff.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-23/coordinator-premerge.json, docs/implementation/pi-durio-v1/issue-23/README.md, docs/implementation/pi-durio-v1/issue-23/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-23/merge-integration-readback.json |
 | #24 improve 结构化选择、仅验证与建议抑制 | integrated-accepted | #22, #23 | ab5d8179c153fc54acd294aa6b806dfeb7023731 | 6e0c39132daf1beb9883fe0110ed7d5d0b20889b | docs/implementation/pi-durio-v1/issue-24/README.md, docs/implementation/pi-durio-v1/issue-24/acceptance.json, docs/implementation/pi-durio-v1/issue-24/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-24/merge-integration-readback.json |
-| #25 项目与配置候选的验证后写回、启用和回退 | implementing | #24 | — | — | NOT RUN |
-| #26 自身源码新构建与独立 eval 资产改进 | blocked-by-dependencies | #25 | — | — | NOT RUN |
+| #25 项目与配置候选的验证后写回、启用和回退 | integrated-accepted | #24 | 29f00ced7c033816d1413cd53cf39870e475e191 | ac14c395823fe9c81e1b551288d4d3a487df3da8 | docs/implementation/pi-durio-v1/issue-25/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-integration-readback.json |
+| #26 自身源码新构建与独立 eval 资产改进 | ready | #25 | — | — | NOT RUN |
 | #27 任务验收三率与执行、验收双时钟 | integrated-accepted | #17, #18 | 0d292488cef06eedf917cf032d7c8417a9db3584 | 716aab74832e781c4652246671893430699808ea | /Users/nineofour/pi-durio-v1-run/evidence/issue-27/handoff.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-27/coordinator-premerge.json, docs/implementation/pi-durio-v1/issue-27/README.md, docs/implementation/pi-durio-v1/issue-27/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-27/merge-integration-readback.json |
 | #28 全样本成本与任务、尝试故障报告 | integrated-accepted | #27 | 960db7658f6a8afc1c544bd20a4fed2e74184ecf | a35cb3b672f412d0e6330b43ad947c24a085b9b1 | docs/implementation/pi-durio-v1/issue-28/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-28/merge-integration-readback.json |
 | #29 低打扰人工介入与交付后返工报告 | integrated-accepted | #27 | 210a9c005c89c9deaaf4cfd2be8e2a2c8eb1b589 | a78014c20b875facc033bbed03b824207de01c67 | docs/implementation/pi-durio-v1/issue-29/coordinator-acceptance.json, /Users/nineofour/pi-durio-v1-run/evidence/issue-29/merge-integration-readback.json |
-| #30 真实 DeepSeek 代表任务与 improve 执行闭环 | blocked-by-dependencies | #25 | — | — | NOT RUN |
+| #30 真实 DeepSeek 代表任务与 improve 执行闭环 | ready | #25 | — | — | NOT RUN |
 | #31 首版技术验收与轻量实测报告 | blocked-by-dependencies | #19, #28, #29, #26, #20, #30 | — | — | NOT RUN |
 | #32 本机试用与明确日用接受 | blocked-by-dependencies | #31 | — | — | NOT RUN |
 
