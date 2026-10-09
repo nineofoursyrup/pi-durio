@@ -2,11 +2,13 @@
 
 当前状态：**PREPARED / PAID NOT RUN / CANDIDATE NOT SELECTED**。没有读取凭据、认证或真实模型调用；#30 仍未完成。只增加批次脚本、固定 fixture 和说明，未修改产品源码、依赖或评分规则。
 
+当前可审阅批次已重新冻结于产品候选 `9aed1af`，清单 SHA256 为 `d5272b244660c2a54a2fc70d1f5c50785ed20edf92a3dfb78a7e24ef7dfb3a22`；[授权范围、当前工件及凭据要求](final-9aed1af/authorization-request.md)为最新入口。原有 prepared-r1/r2 及下述修复过程保持历史身份；当前缺授权、真实调用和实际候选选择，不能从准备完成推断 #30 完成。
+
 ## 取消入口修复与准备适用性
 
 `run.mjs` 现在将 `SIGINT` / `SIGTERM` 接入两阶段共用的 `AbortController`，先保留 `cancellation-request.json`，等待当前公开 API 已有的清理/关闭边界，再保存 `batch-result.json`。首个信号决定退出码（130 / 143），重复信号不会跳过清理。准备期间取消不启动 eval；eval 取消不启动 improve；已取得的结果、失败和清理未知继续保留。取消及 API 返回均不证明远端请求或所有外部进程已停止，未运行项不得自动续跑。
 
-入口同时核对当前实际执行的 `run.mjs` 与它加载的 `common.mjs` 均在冻结 harness 中，继续校验完整文件 hash。**下述 prepared-r1/r2 是不可改写的历史准备证据，不覆盖当前修复入口，也不构成当前执行授权。** 新入口必须重新冻结实际脚本、重新核对安装/输入/预算/期限适用性，取得针对新 manifest 的具体人工付费授权与许可凭据来源；旧 manifest 和旧检查不得改标为新版本通过。本次没有生成新付费清单或授权。
+入口同时核对当前实际执行的 `run.mjs` 与它加载的 `common.mjs` 均在冻结 harness 中，继续校验完整文件 hash。**下述 prepared-r1/r2 是不可改写的历史准备证据，不覆盖当前修复入口，也不构成当前执行授权。** 新入口必须重新冻结实际脚本、重新核对安装/输入/预算/期限适用性，取得针对新 manifest 的具体人工付费授权与许可凭据来源；旧 manifest 和旧检查不得改标为新版本通过。该入口修复阶段没有生成新付费清单或授权；之后的当前冻结清单见本文开头的最新入口。
 
 `test/live-batch.test.ts` 直接启动当前入口和 `common.mjs`，只将公开 installed product API 换成临时离线安装夹具。实际进程信号覆盖延迟清理、重复信号、准备阶段取消、清理失败、improve 未知，以及旧入口/旧 helper/内容漂移拒绝。它验证准备入口控制流，不证明真实 provider、VM 取消或 A1 真实闭环。首次失败及结果保存在 `/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/`；原 prepared-r1 全部保留。真实付费授权仍为 **NOT GRANTED**，实际 provider / 凭据读取 / VM 启动均为 0。
 

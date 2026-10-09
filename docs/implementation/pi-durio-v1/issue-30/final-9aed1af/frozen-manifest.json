@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "batchId": "pi-durio-v1-live-r1",
+  "status": "FROZEN_PENDING_HUMAN_GRANT",
+  "proposal": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/proposed-batch-reviewed.json",
+    "bytes": 68789,
+    "sha256": "6af625fa56de175368f5e0063b43ee13bdef095a59a3cc4c9736684001afa877"
+  },
+  "artifact": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/artifact.json",
+    "bytes": 1905,
+    "sha256": "a1c8fb0660266c7758335a31a8773396294e3fc86d550a479be53ea2b344647b"
+  },
+  "output": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af",
+  "harness": [
+    {
+      "path": "/Users/nineofour/Durio/scripts/live-batch/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "path": "/Users/nineofour/Durio/scripts/live-batch/run.mjs",
+      "bytes": 8506,
+      "sha256": "aa0cb70081fedfb584d0f8ff156ad6af8647bd353203d6c383a89c1de6a9f041"
+    },
+    {
+      "path": "/Users/nineofour/Durio/scripts/live-batch/prepare.mjs",
+      "bytes": 7333,
+      "sha256": "e5005275e73c1da7372d9ccee7f43586ba0b3393095dd21c6adb89a19877ee8d"
+    },
+    {
+      "path": "/Users/nineofour/Durio/scripts/live-batch/check-auth-stop.mjs",
+      "bytes": 3075,
+      "sha256": "4f02fea9474c9e124d7601848540377e69c5860dc1e28797fc0b4237758a3160"
+    },
+    {
+      "path": "/Users/nineofour/Durio/scripts/live-batch/check-installation.mjs",
+      "bytes": 1931,
+      "sha256": "59d156efb161f6e1dc72c7faef4775e89cc1250a66cd188152af477b57162eaf"
+    },
+    {
+      "path": "/Users/nineofour/Durio/scripts/live-batch/freeze.mjs",
+      "bytes": 1404,
+      "sha256": "8a451b3eb73aa73fbc4a587321da67fd98a515f9fc2be08b0be9ab81cac9a40f"
+    }
+  ],
+  "fixture": {
+    "status": "PREPARATION ONLY; no live plan or provider authorization",
+    "preparedAt": "2026-10-09T19:16:35.926596+00:00",
+    "purpose": "One actual improve analysis over a small known deterministic project defect; no performance winner required.",
+    "files": {
+      "package.json": "{\"name\":\"durio-live-improve-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}\n",
+      "clamp.ts": "export const clamp = (value: number, lower: number, upper: number) => Math.min(upper, Math.min(lower, value));\n",
+      "README.md": "User draft: preserve this exact note.\nClamp a number to the inclusive lower and upper bounds; lower is never greater than upper.\n",
+      "check.mjs": "import assert from 'node:assert/strict';\nimport {clamp} from './clamp.ts';\nconst cases = [[-4,0,10,0],[0,0,10,0],[6,0,10,6],[14,0,10,10],[-3,-5,-1,-3],[-9,-5,-1,-5]];\nfor (const [value,lower,upper,expected] of cases) assert.equal(clamp(value,lower,upper), expected, JSON.stringify({value,lower,upper}));\nconsole.log('All declared clamp requirements pass');\n"
+    },
+    "allowedWriteback": [
+      "clamp.ts"
+    ],
+    "protected": [
+      "README.md",
+      "package.json",
+      "check.mjs"
+    ],
+    "baselineExpectation": "Declared check is expected to fail for in-range and upper-bound cases; actual first failure is captured before real analysis, not asserted executed here.",
+    "analysisScope": "Register project source clamp.ts, check.mjs and README.md; actual model must inspect registered source and provide its own structured candidate. No prefilled candidate.",
+    "selection": "After actual report, present exact candidate revision, target baseline, content proposal, deterministic check and writeback scope for human structured selection. Paid-batch grant alone does not select a future candidate.",
+    "validation": "Run fixed project check against prepared candidate; verify protected bytes and real output. No fresh model behavior claim or paid validation required for this directly testable local function bug.",
+    "openConditions": [
+      "Freeze actual installed product after #25; bind source/build/install identities.",
+      "Capture actual seed task facts with explicitly controlled provenance; synthetic seed is not live evidence.",
+      "Fix exact request/trial identities and user-paid authorization before any real provider request.",
+      "Keep zero-candidate/invalid reports and first failures; no implicit extra calls.",
+      "Reopen actual decision/writeback records and verify final protected contents; do not imply performance improvement."
+    ],
+    "fileHashes": {
+      "package.json": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+      "clamp.ts": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+      "README.md": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+      "check.mjs": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d"
+    }
+  },
+  "caseSource": {
+    "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/cases.json",
+    "bytes": 5131,
+    "sha256": "666962275c6b5a7a6176a4733d614061d23d57fa20727a782c7ff112434fe84c"
+  },
+  "providerObservation": {
+    "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/provider-observation.json",
+    "bytes": 2311,
+    "sha256": "66b2b1fb8b898fff70b6b967c3aec0f4c6ce3baa5684d1e8efd8a503b73aa766"
+  },
+  "futureDecision": "Actual improve candidate is not selected. Unknown future content cannot be selected by this grant."
+}

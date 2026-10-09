@@ -2,7 +2,7 @@
 
 面向 macOS arm64 / Node >=22.19.0 的本地 coding agent，复用 Pi runtime，保留运行原文，并由用户明确控制恢复、eval 和 improve。
 
-首版仍在实现中。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围；真实 DeepSeek 批次、完整技术验收和本机日用接受尚未完成。[局部本地测量](docs/implementation/pi-durio-v1/issue-31/local-r1-report.md)保留固定旧候选的体积与进程启动数据；独立评审后的四组修复已通过各自适用复核；组合检查为 250 PASS / 1 FAIL，新发现的检查期限问题正在修复，仍不声明 ready for review。
+首版尚未完成全部验收。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#29 的本票适用验收完成；#30–#32 的真实 DeepSeek、最终原生 Terminal、完整技术验收和本机日用接受仍待完成。固定产品候选 `9aed1af` 已修复评审及组合检查发现的问题，独立 Spec / Standards 受影响复审均通过；[当前适用检查](docs/implementation/pi-durio-v1/review/9aed1af/applicable-check-gate.json)保留原 250 PASS / 1 FAIL 和修复后的相关验证，没有改写成新全套 PASS。[当前本地测量](docs/implementation/pi-durio-v1/issue-31/final-9aed1af/partial-report.md)包括体积、启动、五分钟连续任务和完整输出核对；不声明完整首版 ready for review。
 
 ## 安装与本地演示
 
@@ -31,9 +31,11 @@ node dist/src/cli.js run --workspace "$PWD/test/fixtures/project" \
 
 `npm pack` 生成包含锁定生产依赖的分发包，供当前 macOS arm64 目标独立安装；Node 本身不打包。各票的已验证安装有自己的源码、构建、依赖与包身份，最新源码状态不能自动替代这些身份。
 
+固定分发包已验证首次及重复离线 `npm install --omit=dev --ignore-scripts --no-audit --no-fund --offline /absolute/pi-durio-0.1.0.tgz`，以及 CLI 和 12 个公开 import。npm `11.19.1` 下，bundled `file:` 依赖会使 `npm ls` 报 invalid，消费端新生成的 lock 也不能用于上述离线 `npm ci`；两项失败及最小复现见[安装诊断](docs/implementation/pi-durio-v1/delivery-9aed1af/npm-diagnosis-REPORT.md)。这与上方使用仓库完整 lock 的源码 `npm ci` 是不同路径。
+
 ## 真实 coding 与终端操作
 
-默认 provider 为 `deepseek/deepseek-flash`，地址为 `https://api.deepseek.com`，认证从 `DEEPSEEK_API_KEY` 读取。**去掉 `--offline-demo` 后，提交任务会发出可能计费的请求。** 本轮实现的真实批次仍需[固定计划与单独授权](docs/implementation/pi-durio-v1/issue-30/README.md)；缺凭据或认证失败不会静默切换 provider。
+默认 provider 为 `deepseek/deepseek-flash`，地址为 `https://api.deepseek.com`，认证从 `DEEPSEEK_API_KEY` 读取。**去掉 `--offline-demo` 后，提交任务会发出可能计费的请求。** 本轮实现的真实批次仍需[当前固定计划与单独授权](docs/implementation/pi-durio-v1/issue-30/final-9aed1af/authorization-request.md)；缺凭据或认证失败不会静默切换 provider。
 
 `run` / `tui` 默认只提供 `read`。为明确指定的项目和任务加入 `--coding`，才开放 `read/write/edit/bash`。普通 coding 是可信本机执行，没有 OS 沙箱保证；工作区锁防止本产品内部重叠写入，不能隔离外部编辑器或其他本机程序。文件工具当前支持最多 256 KiB，普通任务最多 8 次 provider 尝试，输入最多 32 KiB。
 

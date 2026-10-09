@@ -1,0 +1,33 @@
+{
+  "status": "FROZEN_FOR_LOCAL_NATIVE_MEASUREMENT",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+  "nodeVersion": "v26.8.2",
+  "install": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install",
+  "output": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native",
+  "installInventory": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install-complete-tree.json",
+    "bytes": 3555010,
+    "sha256": "13e3237a9a36ab342c8fc25a18522dcb574547002a9fa5f68d742d30c771aa35"
+  },
+  "identity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/candidate-identity.json",
+    "bytes": 5219556,
+    "sha256": "f56d137950dbe52af7854df4d360699fe8612fa45aeb4208e2def0d6a5d0de03"
+  },
+  "packageDisposition": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/dependency-report-disposition.json",
+    "bytes": 3230,
+    "sha256": "1b93c4965e57e2d01af0c9a9fe0d6a4aa00ef4f7fe3f36f6db3c0741adc9cd46"
+  },
+  "harnesses": {
+    "native-batch.mjs": "bf33e1667c7844ca4e19de955853a4cc5077bd427f730fc10ed27b77291048e3",
+    "native-idle.mjs": "e40078530911a41e6d0dc562ee77ac6eef28bd9e6fc247043f33efab403936de",
+    "native-session.mjs": "9759643db32363fbae68fb85b1582149b619983b24357f1bf7c9ce22ebd0b2ca",
+    "native-composition.mjs": "39533830ba1de452a2d3853922febf9fe6b938b608454806919069334c111420",
+    "readonly-data.mjs": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+  },
+  "providerPolicy": "Fixed synthetic transports only; no model key inherited",
+  "humanAcceptance": "NOT CLAIMED",
+  "resourcePolicy": "Coordinator headless/resource preparation must finish before asking user to launch; no competing controlled VM/build/measurement workload while native batch runs."
+}

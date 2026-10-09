@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-09T23:51:33.229464+00:00",
+  "status": "PASS_EXPECTED_DENIAL_BEFORE_CREDENTIAL_USE",
+  "exitCode": 1,
+  "reason": "EXPLICIT_PAID_GRANT_REQUIRED",
+  "manifestSha256": "d5272b244660c2a54a2fc70d1f5c50785ed20edf92a3dfb78a7e24ef7dfb3a22",
+  "credentialReads": 0,
+  "realProviderRequests": 0,
+  "paidStartAbsent": true,
+  "authorizedPlanAbsent": true,
+  "scope": "Fresh actual frozen runner with explicit false grant; unaffected auth-stop and cancel regressions reuse applicable fixed-candidate checks, not rerun."
+}
