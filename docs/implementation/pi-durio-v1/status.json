@@ -158,10 +158,10 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "integrated-terminal-failed",
-      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
-      "commit": "aff8b09224780f5938dce311580fc30822fb6ecf",
-      "integrated_sha": "afd14225862bb2339b008f912beff208caf7d579",
+      "status": "integrated-native-partial",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-width",
+      "commit": "e4571452a1ebf712cd60282ded0161640670d70e",
+      "integrated_sha": "7a067340dda2e4fb84a4472ff91cfec1100c626f",
       "evidence": [
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/handoff.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/manifest.json",
@@ -175,14 +175,17 @@
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/user-feedback-r4.json",
         "docs/implementation/pi-durio-v1/issue-16/terminal-r4-feedback.json",
         "docs/implementation/pi-durio-v1/issue-16/terminal-width-diagnosis.md",
-        "docs/implementation/pi-durio-v1/issue-16/terminal-width-report-r4.json"
+        "docs/implementation/pi-durio-v1/issue-16/terminal-width-report-r4.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/merge-integration-readback.json",
+        "docs/implementation/pi-durio-v1/issue-16/candidate-r5.json",
+        "docs/implementation/pi-durio-v1/issue-16/terminal-r5-feedback.md"
       ],
-      "branch": "codex/pi-durio-v1-issue-16",
-      "agent": "/root/issue16",
+      "branch": "codex/pi-durio-v1-issue-16-width",
+      "agent": "/root/issue16_width",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "R3/R4 Terminal FAIL preserved. Actual CPR root cause confirmed; user authorized narrow two-source-file width API patch plus host native dynamic calibration. R5 implementing; successors remain blocked.",
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-16.json",
+      "note": "R5 integrated; 65/65 plus 8/8 affected checks and exact 12704-file installed candidate verified. Human C1-C3 PASS with actual 5-cell emoji width; remaining native scenarios pending. Original R3/R4 FAIL preserved. Successors stay blocked.",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T122309Z/issue-16.json",
       "local_checkpoint": "e98fef9",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6079513003",
       "human_evidence_request": {
@@ -229,6 +232,14 @@
           "merge": "afd14225862bb2339b008f912beff208caf7d579",
           "candidate": "r4",
           "acceptance": "pending human revalidation"
+        },
+        {
+          "candidate": "r5",
+          "commit": "e4571452a1ebf712cd60282ded0161640670d70e",
+          "handoff_tip": "4ce87ba777a27227905e72ecd38c847a9f25bb85",
+          "merge": "7a067340dda2e4fb84a4472ff91cfec1100c626f",
+          "acceptance": "C1-C3 native PASS; remaining native gates pending",
+          "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-width"
         }
       ],
       "width_repair_agent": "/root/issue16_width",
@@ -263,7 +274,22 @@
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/user-authorized-exception.json",
         "recordSha256": "6495746dc4622a25e09a00cf2ffdd48fb354af48e7f5b59ffcf731d1c470955a"
       },
-      "width_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6080376801"
+      "width_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6080376801",
+      "width_authorization_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6080496788",
+      "human_revalidation_r5": {
+        "status": "C1-C3 PASS; remaining native scenarios PENDING",
+        "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+        "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/terminal-validation.mjs",
+        "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manifest.json",
+        "manifestSha256": "de8eeefbc906e318e378b847628cfcd9d6a91de257f47468069bd2dffbc06d95",
+        "requestAt": "2026-10-09T12:26:51.222747+00:00",
+        "coordinatorVerifyOnly": "PASS 12704 files; exact set and content",
+        "command": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manifest.json'",
+        "short_feedback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/user-feedback-r5-short.json",
+        "observed_short_run": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-29-31-312Z"
+      },
+      "original_worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
+      "original_branch": "codex/pi-durio-v1-issue-16"
     },
     "17": {
       "number": 17,
@@ -554,7 +580,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "a29a5ecde3ac13615b84a7357783ac8546727822",
+  "integration_tip": "7a067340dda2e4fb84a4472ff91cfec1100c626f",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -564,9 +590,9 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T12:02:22.142160+00:00",
+  "updated_at": "2026-10-09T12:35:49.194092+00:00",
   "last_remote_readback": {
-    "headRefOid": "a29a5ecde3ac13615b84a7357783ac8546727822",
+    "headRefOid": "3efa84d54c67d1df24915edec941aa87223798b7",
     "isDraft": true,
     "state": "OPEN",
     "closingIssuesReferences": [],
