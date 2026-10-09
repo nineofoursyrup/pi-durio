@@ -1,0 +1,42 @@
+{
+  "issue": 16,
+  "status": "PARTIAL_TERMINAL_ACCEPTANCE_BLOCKED",
+  "tip": "004266e9e6c1a3b639a44c31096511efe71c5d61",
+  "branch": "codex/pi-durio-v1-issue-16",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
+  "tree": "36a88bd1a8dec264eb95c79b5d3f0ad31ca793e7",
+  "candidate": {
+    "commit": "004266e9e6c1a3b639a44c31096511efe71c5d61",
+    "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/manifest.json",
+    "manifestSha256": "b4496931008ec8160d91e3ff155f5145a3c4010f516c9efa033d84e4a6a803c1",
+    "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/terminal-validation.mjs",
+    "runnerSha256": "e39b178c67eb99509f17e7c523124e007a32a10d598d331fbe4edc5e51407a38",
+    "files": 12681,
+    "packageRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/installed/node_modules/pi-durio",
+    "coordinatorVerifyOnly": "PASS 2026-10-09; no Terminal automation"
+  },
+  "checks": [
+    {
+      "log": "check-with-issue13-first.log",
+      "passed": 31
+    },
+    {
+      "log": "tui-with-summary-r2.log",
+      "passed": 8
+    },
+    {
+      "scope": "manifest exact set including added/missing/modified file rejection",
+      "passed": 1
+    }
+  ],
+  "installedSmoke": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/installed-smoke-result.json",
+  "documentation": "docs/implementation/pi-durio-v1/issue-16/README.md",
+  "validation": "docs/implementation/pi-durio-v1/issue-16/validation.json",
+  "realTerminal": "NOT RUN; user asked via async input to run this exact r3 candidate",
+  "dependencySatisfaction": false,
+  "paidProvider": "NOT RUN",
+  "instruction": "May integrate implementation as partial only; must not unlock #17/#18 or claim ticket acceptance. Preserve r1/r2/r3 and original first failures.",
+  "integrationMerge": "d62441c9b6752f1e90739a29e92d995a846b14a5",
+  "integrationReadback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/merge-integration-readback.json",
+  "manualCommand": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r3/manifest.json'"
+}

@@ -1,6 +1,6 @@
 # #16：全屏只读 TUI（真实 Terminal 验收待完成）
 
-实现状态为 **PARTIAL / Terminal acceptance BLOCKED**，不是 #16 整票通过，也不解除 #17/#32 的依赖。`@earendil-works/pi-tui@1.1.0` 已从当前官方 npm registry 核对、精确安装并纳入 lock 与生产打包。使用公开 `Editor`、`TuiAltScreen`、`ScrollView`、`MouseRegion`、`VStack` 与 `ProcessTerminal`；没有私有 demo 导入、fork 或 UI 持有 Harness。
+实现状态为 **PARTIAL / Terminal acceptance BLOCKED**，不是 #16 整票通过，也不解除 #17/#18 及其后继的依赖。`@earendil-works/pi-tui@1.1.0` 已从当前官方 npm registry 核对、精确安装并纳入 lock 与生产打包。使用公开 `Editor`、`TuiAltScreen`、`ScrollView`、`MouseRegion`、`VStack` 与 `ProcessTerminal`；没有私有 demo 导入、fork 或 UI 持有 Harness。
 
 ## 运行
 
@@ -52,3 +52,7 @@ reset
 `scripts/terminal-validation.mjs` 是供使用者在实际 Terminal.app 启动的候选验收入口，不控制 Terminal.app、不合成键盘输入。它先核对固定安装候选全部文件与 runner hash，然后分正常、Ctrl+C、Esc、退出和可捕获故障五个场景运行实际 TUI。自动保存环境、原始 ANSI、输入/resize、复制后 pbpaste 对照、raw/stty 前后、运行结果与同一 run 的 headless 读回。IME/字符格/视觉恢复由操作者单独报告，不自动填写 PASS。每次新建证据目录和独立数据根，保留第一次失败。具体 manifest 与复制启动命令由候选交接记录提供。
 
 完整日志及独立候选位于 `/Users/nineofour/pi-durio-v1-run/evidence/issue-16/`。当前候选已补验 #13 的实际只读工具摘要；真实 Terminal 证据取得前不得标记整票完成。历史会话列表、完整队列、可写中止/恢复、长期查询和首版整体验收仍由后续切片完成。
+
+## 固定人工候选 r3
+
+候选 commit `004266e9e6c1a3b639a44c31096511efe71c5d61`；[候选身份、安装与启动指针](candidate-r3.json)。全部 12,681 个文件的集合和内容已核对，新增/缺失/改字节拒绝检查通过。r1/r2 原件与首败保留。实现以部分状态合入 `d62441c9b6752f1e90739a29e92d995a846b14a5`，与候选只相差协调状态文档；产品、package/lock 和 runner 字节未变。实际 Terminal 观察仍待用户完成，不能借此解除依赖；这也不是 #32 日用接受。
