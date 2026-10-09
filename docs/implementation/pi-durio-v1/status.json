@@ -374,24 +374,33 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-native-pending",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-17",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "8eeb3b35e831fad276ce3dd884e17a23799c5981",
+      "integrated_sha": "fc01fc4fc21f92a65fa11f9677f9686008ba9fc7",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-17/README.md",
+        "docs/implementation/pi-durio-v1/issue-17/candidate-r1.json",
+        "docs/implementation/pi-durio-v1/issue-17/integration-partial.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/merge-integration-readback.json"
+      ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-17.json",
       "branch": "codex/pi-durio-v1-issue-17",
       "agent": "/root/issue17",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "base_commit": "943e8a7b00bf7278d69e6671d476a701d9eda9d6",
-      "note": "Claimed and dispatched with fresh context; shared accepted-task interface coordinated before pending projections.",
-      "product_commit": "082d85edabac2025f0c4562399636da232d14637",
+      "note": "Offline-verified partial integration; native two-phase acceptance pending. Does not satisfy #19/#23/#27 dependencies.",
+      "product_commit": "66c7fcafb34e722eafd738140f9305e5a235db80",
       "implementation_checks": {
         "full": "79/79 PASS before final control-drain changes",
         "affected": "6/6 control checks after final changes; headless demo PASS",
-        "native": "NOT RUN; awaiting combined #18 integration before installed candidate freeze"
-      }
+        "native": "NOT RUN; operator phase 1 requested"
+      },
+      "handoff_tip": "8eeb3b35e831fad276ce3dd884e17a23799c5981",
+      "candidate_manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/manifest.json",
+      "candidate_manifest_sha256": "38742960c17164ed1c66970c67e5ff60ce73cccd7556828fae28e092b15d7474",
+      "native_acceptance": "NOT RUN; frozen candidate r1, first-stage operator request pending"
     },
     "18": {
       "number": 18,
@@ -428,7 +437,9 @@
         "later": "affected r4/r5/r7/r8/r9 PASS; earlier FAIL retained",
         "actual_demo": "failed runtime, unknown usage, complete output reconstruction and 11840 retained content objects; whole demonstration 130.562291291 seconds",
         "install": "in progress"
-      }
+      },
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/18#issuecomment-6083399178",
+      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/publication/readback.json"
     },
     "19": {
       "number": 19,
@@ -452,7 +463,9 @@
       "number": 20,
       "title": "保留保护下的归档、清理与一致性迁移",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         15,
@@ -460,17 +473,25 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-20",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "branch": "codex/pi-durio-v1-issue-20",
+      "agent": "/root/issue20",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T144939Z/issue-20.json",
+      "note": "Fresh implementer dispatched from 1558066 after #15/#18 applicable acceptance; existing evidence is protected, demonstrations only on owned fixtures."
     },
     "21": {
       "number": 21,
       "title": "固定计划下的受预算 eval 与独立评分",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         18,
@@ -479,11 +500,18 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-21",
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T145831Z/issue-21.json",
+      "note": "Fresh-context implementer dispatched; #12/#15/#18 accepted, real restricted product runtime with controlled provider; paid model work separate.",
+      "branch": "codex/pi-durio-v1-issue-21",
+      "agent": "/root/issue21",
+      "base_commit": "fc01fc4fc21f92a65fa11f9677f9686008ba9fc7",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh"
     },
     "22": {
       "number": 22,
@@ -681,12 +709,9 @@
       "evidence": []
     }
   },
-  "frontier": [
-    20,
-    21
-  ],
+  "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "fe6757df3de554cd834b0f11b45167e59ed3b26c",
+  "integration_tip": "fc01fc4fc21f92a65fa11f9677f9686008ba9fc7",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -696,12 +721,16 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T14:48:56.223850+00:00",
+  "updated_at": "2026-10-09T15:06:47.167355+00:00",
   "last_remote_readback": {
-    "headRefOid": "943e8a7b00bf7278d69e6671d476a701d9eda9d6",
+    "at": "2026-10-09T14:57:02.573039+00:00",
+    "prHead": "1558066370085ca63ab7b6eede8e2cd8713d1e5d",
+    "bodyExact": true,
     "isDraft": true,
     "state": "OPEN",
-    "closingIssuesReferences": []
+    "closingIssuesReferences": [],
+    "commentUrl": "https://github.com/nineofoursyrup/pi-durio/issues/18#issuecomment-6083399178",
+    "commentBodyExact": true
   },
   "shared_interfaces": {
     "accepted_task_queue": {
