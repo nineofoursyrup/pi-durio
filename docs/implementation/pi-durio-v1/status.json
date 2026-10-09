@@ -1,7 +1,7 @@
 {
   "spec": "PI-DURIO-V1-SPEC-r1",
   "integration_branch": "codex/pi-durio-v1",
-  "draft_pr": null,
+  "draft_pr": "https://github.com/nineofoursyrup/pi-durio/pull/33",
   "candidate": null,
   "provider_authorization": "NOT GRANTED",
   "human_acceptance": "NOT RUN",
@@ -405,7 +405,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "a4a4a08b65a709d3d731749084d51f482516ab5d",
+  "integration_tip": "dadabad8e602e7f36202a2939e6691653bb495ab",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -415,5 +415,15 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T09:51:06.717346+00:00"
+  "updated_at": "2026-10-09T09:51:06.717346+00:00",
+  "last_remote_readback": {
+    "baseRefName": "main",
+    "closingIssuesReferences": [],
+    "headRefName": "codex/pi-durio-v1",
+    "headRefOid": "dadabad8e602e7f36202a2939e6691653bb495ab",
+    "isDraft": true,
+    "number": 33,
+    "state": "OPEN",
+    "url": "https://github.com/nineofoursyrup/pi-durio/pull/33"
+  }
 }
