@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.scratch/
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+*.tsbuildinfo

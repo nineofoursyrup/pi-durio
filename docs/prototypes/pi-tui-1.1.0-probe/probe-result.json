@@ -1,0 +1,41 @@
+{
+  "node": "v26.8.2",
+  "platform": "darwin",
+  "arch": "arm64",
+  "checks": {
+    "fixedFooter": true,
+    "initialFollowEnd": true,
+    "pageUpScrollsWithEditorFocused": true,
+    "footerAfterScroll": true,
+    "mouseClickDispatched": true,
+    "dragSelectionAndInjectedCopy": true,
+    "ctrlJInsertsNewline": true,
+    "enterSubmits": true,
+    "ctrlDDeletesForward": true,
+    "ctrlCDoesNotExitWithoutHostHandler": true,
+    "escapeDoesNotStopWithoutHostHandler": true,
+    "bracketedPastePreservesNewlineWithoutSubmit": true,
+    "wideGraphemes": true,
+    "wideWrapFits": true,
+    "resizeKeepsFooter": true,
+    "preserveScreenExitsAltWithoutHistory": true,
+    "preserveScreenRestoresMouseAndAutowrap": true,
+    "defaultStopPrintsFullDocument": true
+  },
+  "allPassed": true,
+  "screenBeforeStop": [
+    "tool details toggle     Copied! ",
+    "line-00 中文 👩‍💻 é               ",
+    "line-01 中文 👩‍💻 é               ",
+    "line-02 中文 👩‍💻 é               ",
+    "line-03 中文 👩‍💻 é               ",
+    "────────────────────────────────",
+    "第一行                          ",
+    "第二行                          ",
+    "────────────────────────────────",
+    "STATUS fixed footer             "
+  ],
+  "copied": "line-0",
+  "stopOutput": "\u001b[?2026h\u001b[?1006l\u001b[?1004l\u001b[?1003l\u001b[?1002l\u001b[?1000l\u001b[?7h\u001b[?2026l\u001b[?2026h\u001b[?1049l\u001b[?25h\u001b[?2026l",
+  "note": "Synthetic Terminal interface probe; not macOS Terminal.app, real IME, system clipboard, PTY signal cleanup, or performance validation."
+}

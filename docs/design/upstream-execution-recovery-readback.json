@@ -1,0 +1,168 @@
+{
+  "checked_at": "2026-10-09T03:33:28.123668+08:00",
+  "decision": {
+    "number": 3,
+    "title": "上游复用与执行恢复边界",
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/3",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-08T19:32:24Z",
+    "resolution_url": "https://github.com/nineofoursyrup/pi-durio/issues/3#issuecomment-6067523440",
+    "resolution_body_readback": "matched prepared file",
+    "resolution_body_sha256": "91c9edeaf01549184189416443399ddc1c272ea261c1adb6f99be8dba5453c22"
+  },
+  "map": {
+    "number": 1,
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/1",
+    "state": "open",
+    "body_readback": "matched prepared file",
+    "decision_index_matches": true
+  },
+  "children": [
+    {
+      "number": 2,
+      "title": "首版范围与轻量目标",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/2",
+      "state": "closed",
+      "assignees": [
+        "nineofoursyrup"
+      ],
+      "blockers": []
+    },
+    {
+      "number": 3,
+      "title": "上游复用与执行恢复边界",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/3",
+      "state": "closed",
+      "assignees": [
+        "nineofoursyrup"
+      ],
+      "blockers": [
+        {
+          "number": 2,
+          "state": "closed"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "TUI 的最小交互合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+      "state": "open",
+      "assignees": [],
+      "blockers": [
+        {
+          "number": 3,
+          "state": "closed"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "运行证据与长期记录合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/5",
+      "state": "open",
+      "assignees": [],
+      "blockers": [
+        {
+          "number": 3,
+          "state": "closed"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Eval 与性能改善的判定合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/6",
+      "state": "open",
+      "assignees": [],
+      "blockers": [
+        {
+          "number": 5,
+          "state": "open"
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "improve 的建议、选择与执行合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/7",
+      "state": "open",
+      "assignees": [],
+      "blockers": [
+        {
+          "number": 6,
+          "state": "open"
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "首版验收与实现交接边界",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/8",
+      "state": "open",
+      "assignees": [],
+      "blockers": [
+        {
+          "number": 4,
+          "state": "open"
+        },
+        {
+          "number": 7,
+          "state": "open"
+        }
+      ]
+    }
+  ],
+  "closed_children": 2,
+  "eligible_frontier": [
+    {
+      "number": 4,
+      "title": "TUI 的最小交互合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+      "state": "open",
+      "assignees": [],
+      "blockers": [
+        {
+          "number": 3,
+          "state": "closed"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "运行证据与长期记录合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/5",
+      "state": "open",
+      "assignees": [],
+      "blockers": [
+        {
+          "number": 3,
+          "state": "closed"
+        }
+      ]
+    }
+  ],
+  "next_frontier": {
+    "number": 4,
+    "title": "TUI 的最小交互合同",
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+    "state": "open",
+    "assignees": [],
+    "blockers": [
+      {
+        "number": 3,
+        "state": "closed"
+      }
+    ]
+  },
+  "source_html_sha256": "a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6",
+  "scope": "design decision closeout; no product or provider execution",
+  "graphql_readback": {
+    "number": 3,
+    "state": "CLOSED",
+    "stateReason": "COMPLETED",
+    "closedAt": "2026-10-08T19:32:24Z",
+    "matches_rest": true
+  }
+}
