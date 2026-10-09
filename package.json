@@ -17,7 +17,8 @@
     "scripts/eval",
     "scripts/isolation",
     "docs/implementation/pi-durio-v1/issue-21/README.md",
-    "docs/implementation/pi-durio-v1/issue-22/README.md"
+    "docs/implementation/pi-durio-v1/issue-22/README.md",
+    "docs/implementation/pi-durio-v1/issue-27"
   ],
   "engines": {
     "node": ">=22.19.0"
@@ -47,7 +48,8 @@
     "./query": "./dist/src/query.js",
     "./eval": "./dist/src/eval/runner.js",
     "./storage": "./dist/src/storage.js",
-    "./compaction": "./dist/src/compaction.js"
+    "./compaction": "./dist/src/compaction.js",
+    "./metrics": "./dist/src/metrics/index.js"
   },
   "bundleDependencies": [
     "@earendil-works/pi-ai",

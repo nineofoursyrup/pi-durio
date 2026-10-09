@@ -22,3 +22,16 @@ Actual report version comes only from its own started run's artifact fact.
 The forthcoming `pi-durio/metrics` read-only query consumes these original
 facts; #28/#29 can reuse its stable task membership, selected acceptance,
 counts, clocks and source references. No separate metrics ledger is created.
+
+`stampFact` returns `{data, acquiredAt}`; unlisted payloads with their own
+`clock` fields never control the host's acquisition timestamp. Explicit host
+`task.phase` boundaries are also stamped. Live mode with an injected transport
+defaults to `diagnostic` unless its trusted host explicitly declares origin.
+Ordinary live mode with the standard transport defaults to `ordinary`.
+
+The final `pi-durio/metrics` export provides `recordAcceptance`, `readAcceptance`,
+`selectAcceptance`, `queryTaskMetrics`, `formatTaskMetrics`, and their schema
+interfaces. Writing a judgment persists host-derived `assessment` in that same
+Evidence fact alongside the exact submitted input and request identity. There
+is no report-side grader execution. Package/source-build and improve ownership
+remain with #23; merges must retain both origin metadata and improve context.

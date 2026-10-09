@@ -10,6 +10,7 @@ import { writeHeadlessResult, exitHostIfUnconfirmed } from './headless-lifecycle
 import { demoTransport } from './offline.js';
 import { historyCommand } from './history-cli.js';
 import { evalCommand } from './eval/cli.js';
+import { metricsCommand } from './metrics/cli.js';
 import { storageCommand } from './storage-cli.js';
 
 function lifecycleSignals() {
@@ -38,10 +39,12 @@ async function main() {
     console.log('pi-durio compact --run UUID --id REQUEST_ID --authorization FILE [--data-root PATH] [--offline-demo]; compact --inspect --run UUID is read-only. Compaction retains originals and records generation separately from application. run --context-run UUID imports a verified completed context into a new independent task.');
     console.log('Eval: eval plan --spec FILE; eval run --id PLAN --directory NEW_DIR; eval report --id PLAN [--format text|json]; eval grade --id PLAN --spec REVISION --directory NEW_DIR; eval list. All accept --data-root. Plans fix runtime/fixtures/graders, ordering, deadline, request/token budgets and price before execution. Offline controlled provider is explicit; live plans require a paid authorization and proven request token bound.');
     console.log('History: history --filter JSON [--cursor JSON]; evidence --run ID or --evidence ID [--offset N --limit N --decoded]; trace --run ID; usage --run IDs; derive --run IDs --evidence IDs --purpose TEXT; export adds --destination FILE; fix --id ID --evidence IDs --purpose TEXT [--dependencies IDs]; fixed --evidence ID; estimate --id ID --run IDs --price JSON. All accept --data-root and --format json|text. Only fix/estimate write management facts; export requires an explicit new destination. Queries never execute.');
+    console.log('Metrics: metrics --scope JSON [--snapshot SEQ --format json|text --destination NEW_FILE]; acceptance --spec JSON_FILE. Scope: {from,to,asOf,project,taskType,version,source}. Ordinary coding is the default; synthetic/diagnostic sources are explicit and separate. Reports are read-only. Acceptance inputs append requirements/results/judgments/withdrawals/disputes with original evidence and explicit human or actual-check sources; no required feedback or model grading.');
     console.log('Storage: storage usage; storage preview --id ID --units session:ID,object:SHA --reason TEXT; storage commit --id ID --confirm PREVIEW_IDENTITY; storage status --id ID; storage archive --scope whole-root|attachments [--objects SHAS] --destination NEW_PATH; storage restore --archive PATH --destination NEW_PATH; storage verify --archive PATH; storage migrate --backup NEW_ARCHIVE_PATH --destination NEW_ROOT; storage unfix --id ID --evidence FIXED_ID --reason TEXT. All accept --data-root and --format json|text. Whole-root archive includes every project. Archive/migrate retain the source; cleanup requires its own preview and explicit commit.');
     return;
   }
   const dataRoot = values['data-root'] ?? join(homedir(), 'Library', 'Application Support', 'pi-durio');
+  if(metricsCommand(command,dataRoot,values))return;
   if(command==='eval'){await evalCommand(positionals[1],dataRoot,values);return;}
   if (await storageCommand(command,positionals[1],dataRoot,values)) return;
   if (await historyCommand(command, dataRoot, values)) return;
