@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises';
 import { runReadTask, runCodingTask, readRun, inspectRecovery, checkRecovery, recoverRun, settleRecoveryOwners, type ToolEnvironmentConfig, type RecoveryAuthorization } from './runtime.js';
 import { writeHeadlessResult, exitHostIfUnconfirmed } from './headless-lifecycle.js';
 import { demoTransport } from './offline.js';
+import { historyCommand } from './history-cli.js';
 
 async function main() {
   const { values, positionals } = parseArgs({ allowPositionals: true, options: {
@@ -13,15 +14,20 @@ async function main() {
     run: { type: 'string' }, 'offline-demo': { type: 'boolean' }, originals: { type: 'boolean' },
     after: { type: 'string' }, limit: { type: 'string' }, help: { type: 'boolean' },
     coding: { type: 'boolean' }, 'tool-env-config': { type: 'string' }, 'cleanup-timeout-ms': { type: 'string' },
+    filter: { type: 'string' }, cursor: { type: 'string' }, snapshot: { type: 'string' }, evidence: { type: 'string' },
+    offset: { type: 'string' }, format: { type: 'string' }, decoded: { type: 'boolean' }, id: { type: 'string' },
+    purpose: { type: 'string' }, dependencies: { type: 'string' }, destination: { type: 'string' }, price: { type: 'string' }, 'max-bytes': { type: 'string' },
     authorization: { type: 'string' }, decision: { type: 'string' }, inspect: { type: 'boolean' }
   } });
   const command = positionals[0];
   if (values.help || !command) {
     console.log('pi-durio run --workspace PATH --prompt TEXT [--data-root PATH] [--offline-demo] [--coding] [--tool-env-config PATH] [--cleanup-timeout-ms N]\npi-durio tui --workspace PATH [--data-root PATH] [--offline-demo] (read only)\npi-durio show --run UUID [--data-root PATH] [--originals] [--after SEQ] [--limit N]\nrun defaults to DeepSeek/deepseek-flash at https://api.deepseek.com; DEEPSEEK_API_KEY is required.\n--offline-demo uses a deterministic README.md fixture transport, with no network or model inference.\nDefault run grants read only; --coding explicitly grants read/write/edit/bash for the stated task. Trusted local bash is not an OS sandbox. File tools support files up to 256 KiB; at most 8 provider attempts.\n--tool-env-config supplies JSON {version,variables} for coding only; values are not added to configuration records. Model API keys are not inherited. Old pending work blocks new execution.\nSIGINT persists stop intent; SIGTERM exits and preserves unfinished work. The first intent is retained. Both show processing and await cleanup (default 10000 ms); timeout leaves unknown and owner evidence for recovery. Cancellation does not undo changes or refund costs.');
     console.log('pi-durio recover --run UUID [--data-root PATH] [--inspect] [--authorization FILE] [--decision FILE] [--offline-demo]\n--inspect reads facts without changing source databases. Default recover saves a separate report and exits 75 when input is needed. Authorization JSON declares {workspace,mode,tools,toolEnvironment?}; decision JSON binds {id,snapshotId,action,acceptAdditionalModelAttempts?,resolutions?}. Actions: continue, end, confirm-cleanup. A decision never changes the original unknown facts.');
+    console.log('History: history --filter JSON [--cursor JSON]; evidence --run ID or --evidence ID [--offset N --limit N --decoded]; trace --run ID; usage --run IDs; derive --run IDs --evidence IDs --purpose TEXT; export adds --destination FILE; fix --id ID --evidence IDs --purpose TEXT [--dependencies IDs]; fixed --evidence ID; estimate --id ID --run IDs --price JSON. All accept --data-root and --format json|text. Only fix/estimate write management facts; export requires an explicit new destination. Queries never execute.');
     return;
   }
   const dataRoot = values['data-root'] ?? join(homedir(), 'Library', 'Application Support', 'pi-durio');
+  if (await historyCommand(command, dataRoot, values)) return;
   if (command === 'tui') {
     if (values.coding || values['tool-env-config']) throw new Error('USAGE: tui currently grants read only; coding lifecycle is not connected to this entry');
     if (!values.workspace || values.prompt) throw new Error('USAGE: tui requires --workspace; enter requests in the input area');
