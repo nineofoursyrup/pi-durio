@@ -125,6 +125,8 @@ export class ReadOnlyTui {
     const resizeLayout=()=>this.tui.setLayoutRoot(this.terminal.columns<40||this.terminal.rows<12?root:layout);
     const originalStart=this.terminal.start.bind(this.terminal);
     this.terminal.start=(input,resize)=>originalStart(data=>{
+      // Query replies are not user actions and must not revoke the confirmation they helped paint.
+      if(this.widths?.consumeTerminalReply(data))return;
       // Runs before pi-tui's own viewport listener, which consumes mouse/focus/page keys.
       if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+d')) this.confirmation=undefined;
       if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+x')&&!matchesKey(data,'enter'))this.followChord=false;

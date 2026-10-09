@@ -54,7 +54,7 @@ export class TerminalWidthGate {
     terminal.start=(input,resize)=>{
       this.acceptInput=input;
       this.originalStart.call(terminal,data=>{
-        if(this.probe.consume(data))return;
+        if(this.consumeTerminalReply(data))return;
         const event={data,context:options.context()};
         if(this.closing){this.retain([event],'arrived-during-exit');return;}
         if(this.blocked) {
@@ -73,6 +73,8 @@ export class TerminalWidthGate {
       });
     };
   }
+  /** Outer input observers must consume these before treating an event as a user action. */
+  consumeTerminalReply(data:string){return this.probe.consume(data);}
   get blocked(){return this.busy||this.error!==undefined;}
   inspect(extra:string[]=[]):void {
     if(this.closing)return;
