@@ -69,3 +69,8 @@ export function readTextPage(root:string, ref:BlobRef, offset=0, limit=2048) {
   if(next===offset&&offset<ref.bytes)throw new Error('TEXT_PAGE_TOO_SMALL');
   return {text,offset,total:page.total,next:next<page.total?next:null};
 }
+
+export { queryHistory, queryEvidence, queryAttempts, readEvidence, watermark } from './history.js';
+export { queryUsage } from './usage-query.js';
+export { scopedEvidence } from './derived-evidence.js';
+export { fixEvidence, verifyFixed, fixedDependencies, iterateFixedDependencies, estimateUsage } from './fixed-evidence.js';
