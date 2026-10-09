@@ -22,8 +22,10 @@ export async function evalCommand(action:string|undefined,root:string,values:Rec
   try{report=await runEval({dataRoot:root,id,directory:values.directory,signal:controller.signal});}finally{process.off('SIGINT',cancel);process.off('SIGTERM',cancel);}
  }else if(action==='grade'){
   if(typeof values.spec!=='string'||typeof values.directory!=='string')throw Error('eval grade requires --spec FILE and --directory NEW_DIRECTORY');
-  const revision=JSON.parse(await readFile(values.spec,'utf8'));report=await regradeEval({...revision,dataRoot:root,id,directory:values.directory});
+  const revision=JSON.parse(await readFile(values.spec,'utf8')),controller=new AbortController(),cancel=()=>controller.abort();process.on('SIGINT',cancel);process.on('SIGTERM',cancel);
+  try{report=await regradeEval({...revision,dataRoot:root,id,directory:values.directory,signal:controller.signal});}finally{process.off('SIGINT',cancel);process.off('SIGTERM',cancel);}
  }else throw Error('eval supports plan, list, run, report, grade');
  console.log(values.format==='text'?formatEvalReport(report):JSON.stringify(report,null,2));
+ if(action==='grade'&&report.regrading?.state!=='completed')process.exitCode=report.regrading?.state==='cancelled'?130:75;
  if(action==='run')process.exitCode=report.trials.some(t=>['invalid','unknown'].includes(t.outcome.status))?75:report.counts.passed===report.counts.planned?0:1;
 }

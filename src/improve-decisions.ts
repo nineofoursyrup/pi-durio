@@ -1,3 +1,4 @@
+import {planEvalAssets} from './improve-eval-assets.js';
 import {readFileSync,realpathSync,existsSync} from 'node:fs';
 import {mkdir} from 'node:fs/promises';
 import {dirname,join,isAbsolute,relative,resolve} from 'node:path';
@@ -14,6 +15,8 @@ import {validateFormalSelection,captureGroupIdentities,applyImproveGroup,type Fo
 import {assertWorkspaceUnfenced} from './workspace-fence.js';
 import {plannedDefaults,validateDefaultScope} from './improve-defaults.js';
 import {effectiveProfileChanges,validateProfileBasis,type EffectiveProfileChange} from './improve-profile-validation.js';
+import {readImproveBuildDefault} from './improve-process.js';
+export {readImproveBuildDefault,launchImproveBuild,type ImproveBuildLaunch} from './improve-process.js';
 export {readImproveDefaults} from './improve-defaults.js';
 export {readImproveEffectiveConfig,type EffectiveConfig,type EffectiveProfileChange} from './improve-profile-validation.js';
 export {rollbackImproveDecision,type ImproveRollback} from './improve-rollback.js';
@@ -54,11 +57,13 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
   const c=report.candidates.find(c=>c.id===s.candidateId);
   if(!c||c.revision!==s.candidateRevision||!isDeepStrictEqual(c.target,s.target)||!isDeepStrictEqual(c.steps,s.steps))throw Error('IMPROVE_CANDIDATE_REVISION_DRIFT');
   validateFormalSelection(s,c,report.target.workspace);
+  if(s.formal?.newProcess&&readImproveBuildDefault(root,s.formal.newProcess.workspace).revision!==s.formal.newProcess.baseline)throw Error('IMPROVE_BUILD_DEFAULT_CHANGED');
   if(['validate-only','execute-declared-scope'].includes(s.mode)&&(c.suggestionOnly||c.target.state!=='verified'))throw Error('IMPROVE_SUGGESTION_ONLY');
   if(c.target.workspace)checkImproveBaseline(c.target);candidates.push(c);
  }
  const active=candidates.filter(c=>['validate-only','execute-declared-scope'].includes(d.selections.find(s=>s.candidateId===c.id)!.mode)),groups=d.groups;
  if(new Set(groups.map(g=>g.id)).size!==groups.length)throw Error('IMPROVE_GROUP_ID_CONFLICT');
+ if(active.some(c=>c.target.kind==='eval-asset'&&d.selections.find(s=>s.candidateId===c.id)!.mode==='execute-declared-scope')&&active.some(c=>c.target.kind!=='eval-asset'))throw Error('IMPROVE_EVAL_ASSET_INDEPENDENT_DECISION_REQUIRED');
  const members=groups.flatMap(g=>g.candidateIds);
  if(members.length!==active.length||new Set(members).size!==members.length||active.some(c=>!members.includes(c.id)))throw Error('IMPROVE_VALIDATION_PLAN_REQUIRED: every selected validation must appear in exactly one ordered group');
  for(const c of active){
@@ -74,6 +79,7 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
  const effectiveProfiles:{groupId:string;profiles:EffectiveProfileChange[]}[]=[];
  for(const group of groups){validateGroup(group,active,l.deadline);const selected=d.selections.filter(s=>group.candidateIds.includes(s.candidateId)),modes=selected.map(s=>s.mode);if(new Set(modes).size!==1)throw Error('IMPROVE_COMBINATION_MODE_CONFLICT');
   if(group.profileScope){validateDefaultScope(group.profileScope,report.target.workspace);if(!selected.some(s=>['agent-config','prompt-skill'].includes(s.target.kind)))throw Error('IMPROVE_PROFILE_SCOPE_TARGET_REQUIRED');if(selected.some(s=>s.formal?.activate)&&selected.filter(s=>['agent-config','prompt-skill'].includes(s.target.kind)).some(s=>!isDeepStrictEqual(s.formal?.activate,group.profileScope)))throw Error('IMPROVE_PROFILE_ACTIVATION_COMBINATION_MISMATCH');}
+  if(modes.includes('execute-declared-scope'))planEvalAssets(root,group,active);
   const defaults=plannedDefaults(root,selected,group);
   const profiles=effectiveProfileChanges(defaults);validateProfileBasis(group,profiles);if(profiles.length)effectiveProfiles.push({groupId:group.id,profiles});
   if(modes.includes('execute-declared-scope')&&group.changes.some(c=>Buffer.byteLength(c.content)>262144))throw Error('IMPROVE_FORMAL_FILE_SIZE_LIMIT');
@@ -87,7 +93,7 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
 }
 type SubmitOptions={dataRoot:string;decision:ImproveDecision;fault?:(kind:string)=>void;signal?:AbortSignal};
 async function workspaceLeases(decision:ImproveDecision,onCompromised:(error:Error)=>void){
- const roots=[...new Set(await Promise.all(decision.selections.filter(s=>['validate-only','execute-declared-scope'].includes(s.mode)).flatMap(s=>[s.target.workspace!,...(s.formal?.activate?[s.formal.activate.workspace]:[])]).map(root=>resolveWorkspaceRoot(root))))].sort((a,b)=>a.length-b.length),leases:Awaited<ReturnType<typeof acquireWorkspaceOwner>>[]=[];
+ const roots=[...new Set(await Promise.all(decision.selections.filter(s=>['validate-only','execute-declared-scope'].includes(s.mode)).flatMap(s=>[s.target.workspace!,...(s.formal?.activate?[s.formal.activate.workspace]:[]),...(s.formal?.newProcess?[s.formal.newProcess.workspace]:[])]).map(root=>resolveWorkspaceRoot(root))))].sort((a,b)=>a.length-b.length),leases:Awaited<ReturnType<typeof acquireWorkspaceOwner>>[]=[];
  try{for(const root of roots)if(!leases.some(l=>contains(l.root,root)))leases.push(await acquireWorkspaceOwner(root,onCompromised));return leases;}catch(error){for(const lease of leases.reverse())await lease.release();throw error;}
 }
 async function executeGroups(options:SubmitOptions,evidence:Evidence,sourceId:string,groups:ValidationGroup[],version:string,guard:()=>void,ownerRoots:string[],resuming=false){
@@ -181,3 +187,5 @@ export async function restoreImproveSuggestion(options:{dataRoot:string;id:strin
  }finally{e?.close();await owner.release();}
  return improveFacts(options.dataRoot).find(f=>f.kind==='improve.restore'&&f.data.id===options.id)!;
 }
+
+export {readImproveEvalAssets,regradeImproveAsset} from './improve-eval-assets.js';

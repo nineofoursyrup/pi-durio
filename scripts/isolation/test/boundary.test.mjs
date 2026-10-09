@@ -107,3 +107,16 @@ test('host request count and cancellation bound concurrent guest requests', {
     assert.equal(result.modelRequests[0].status, pending ? 'unknown' : 'completed');
   }
 });
+
+test('unknown resource profiles are rejected before filesystem or controller effects',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'durio-profile-denied-'));
+ await assert.rejects(runRestricted({image:'unused@sha256:'+'a'.repeat(64),inputDir:root,runDir:join(root,'not-created'),command:['node','--version'],timeoutMs:1000,resourceProfile:'unbounded'}),/invalid_resource_profile/);
+});
+test('fixed build resources and unchanged default resources are inspected before real execution',{skip:!process.env.DURIO_ISOLATION_IMAGE},async()=>{
+ const root=await mkdtemp(join(tmpdir(),'durio-build-profile-')),input=join(root,'input');await mkdir(input);
+ for(const [profile,bytes]of [['default',536870912],['typescript-build',1073741824]]){
+  const result=await runRestricted({image:process.env.DURIO_ISOLATION_IMAGE,inputDir:input,runDir:join(root,profile),command:['node','--input-type=module','-e',"import v8 from'node:v8';console.log(JSON.stringify({heap:v8.getHeapStatistics().heap_size_limit,options:process.env.NODE_OPTIONS??null}));"],timeoutMs:15000,resourceProfile:profile});
+  assert.equal(result.status,'completed',JSON.stringify(result));assert.equal(result.terminated,true);assert.equal(result.resources.memoryBytes,bytes);assert.equal(result.observedResources.memoryBytes,bytes);
+  const observed=JSON.parse(result.stdout);if(profile==='typescript-build'){assert.equal(observed.options,'--max-old-space-size=768');assert.ok(observed.heap>=768*1024*1024&&observed.heap<850*1024*1024);}else assert.equal(observed.options,null);
+ }
+});
