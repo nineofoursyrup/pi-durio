@@ -773,19 +773,27 @@
       "number": 26,
       "title": "自身源码新构建与独立 eval 资产改进",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         25
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-26",
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T201412Z/issue-26.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T201412Z/issue-26.json",
+      "branch": "codex/pi-durio-v1-issue-26",
+      "agent": "/root/issue26",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "integration_base": "7553824adf2a7769e2add9c6bf9c20c06ff8f821",
+      "claim_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/claim-readback.json"
     },
     "27": {
       "number": 27,
@@ -921,15 +929,17 @@
       "number": 30,
       "title": "真实 DeepSeek 代表任务与 improve 执行闭环",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         25
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-30",
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
@@ -946,7 +956,13 @@
           "validity": "NOT VERIFIED",
           "need": "User-selected credential source/setup is required together with exact batch grant; never request the secret value in chat."
         }
-      }
+      },
+      "branch": "codex/pi-durio-v1-issue-30",
+      "agent": "/root/issue30",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "integration_base": "7553824adf2a7769e2add9c6bf9c20c06ff8f821",
+      "claim_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/claim-readback.json"
     },
     "31": {
       "number": 31,
@@ -990,12 +1006,9 @@
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T194338Z/issue-32.json"
     }
   },
-  "frontier": [
-    26,
-    30
-  ],
+  "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "ac14c395823fe9c81e1b551288d4d3a487df3da8",
+  "integration_tip": "7553824adf2a7769e2add9c6bf9c20c06ff8f821",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -1005,7 +1018,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T20:22:07.943748+00:00",
+  "updated_at": "2026-10-09T20:22:30.735082+00:00",
   "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/publication/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
