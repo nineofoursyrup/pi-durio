@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-09T12:53:23.807015+00:00",
+  "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+  "command": "bash '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/run-unfinished-native.sh'",
+  "runnerSha256": "46f59f174b76c8a90f2a3e7cd3c0f4cdd6c5f99f716aabd894debdb3f42e9ef4",
+  "fixedOriginalRunner": "candidate-r5/terminal-validation.mjs",
+  "remainingScenarios": [
+    "stop",
+    "esc",
+    "exit",
+    "fault",
+    "supplement completion/minimum grid"
+  ],
+  "supplementBindingSha256": "0df54cedadadc05eaa8e248f660d8c1d6a85624298c59573f735382b8a5d67f2",
+  "doesNotRepeat": [
+    "cursor C1-C3",
+    "normal N1-N4"
+  ],
+  "humanRequired": "Computer Use currently refuses com.apple.Terminal; no bypass attempted",
+  "nativeResults": "NOT RUN for remaining scenarios"
+}

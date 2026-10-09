@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-09T12:49:54.167435+00:00",
+  "tool": "mcp__cua_repl.js",
+  "request": "await cua.getApp('com.apple.Terminal')",
+  "result": "Computer Use is not allowed to use the app 'com.apple.Terminal' for safety reasons.",
+  "userRequest": "被我关闭了，你可以用computer use自己测试吗",
+  "noAlternateControlAttempted": true,
+  "requiredContinuation": "Human native operation; synthetic checks remain separate"
+}

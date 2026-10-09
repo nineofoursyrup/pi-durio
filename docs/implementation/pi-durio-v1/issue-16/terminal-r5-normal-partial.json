@@ -1,0 +1,70 @@
+{
+  "at": "2026-10-09T12:49:54.167435+00:00",
+  "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+  "source": "completed human normal ratings plus machine record; later user said the Terminal was closed",
+  "humanRatings": [
+    {
+      "id": "N1",
+      "label": "中文候选 Enter 不提交；持续新增 Unicode 输出时 IME 候选窗和 caret 留在输入处",
+      "status": "PASS",
+      "answer": "p"
+    },
+    {
+      "id": "N2",
+      "label": "多行三种键位、整段粘贴及 é/emoji 整簇删除正确，忙时 Enter 不启动新任务",
+      "status": "PASS",
+      "answer": "p"
+    },
+    {
+      "id": "N3",
+      "label": "滚动/菜单/详情不抢焦点，鼠标选文内容正确，复制内容核对正确",
+      "status": "PASS",
+      "answer": "p"
+    },
+    {
+      "id": "N4",
+      "label": "缩放及小窗口可恢复，退出回到原缓冲区并可正常输入",
+      "status": "PASS",
+      "answer": "p"
+    }
+  ],
+  "minimumGrid": {
+    "reported": "u",
+    "status": "UNKNOWN"
+  },
+  "machine": {
+    "resultStatus": "aborted",
+    "cleanup": "confirmed",
+    "rawRestored": true,
+    "sttyRestored": true,
+    "sameRunHeadless": true,
+    "clipboardAdapterRecords": []
+  },
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-39-54-127Z/normal/operator-observation.json",
+      "sha256": "0230d398420d23bfe28dad6fd5caf6e0ffef61160ac5b1a25b54d11898634373"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-39-54-127Z/normal/machine.json",
+      "sha256": "d15b445a6cce69b267ddbcb57071a5bb61db06483ea9f6d38fed845a586466a6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-39-54-127Z/normal/events.jsonl",
+      "sha256": "63c0b629a40cdb4430805c7c6008d6d9e0462753779005637f7295c7a51b9369"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-39-54-127Z/normal/terminal-output.ansi",
+      "sha256": "cbf66b424ea4bcf42c38f806a61795336d76bac26781d9fcea501d2d8f329dec"
+    }
+  ],
+  "remaining": [
+    "Successful read-only Terminal request completion and same-run headless readback",
+    "Explicit usable minimum grid; smaller-window behavior",
+    "stop",
+    "esc",
+    "exit",
+    "fault"
+  ],
+  "acceptance": "PARTIAL; no dependency unlock"
+}

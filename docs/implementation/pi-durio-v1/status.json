@@ -178,13 +178,15 @@
         "docs/implementation/pi-durio-v1/issue-16/terminal-width-report-r4.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/merge-integration-readback.json",
         "docs/implementation/pi-durio-v1/issue-16/candidate-r5.json",
-        "docs/implementation/pi-durio-v1/issue-16/terminal-r5-feedback.md"
+        "docs/implementation/pi-durio-v1/issue-16/terminal-r5-feedback.md",
+        "docs/implementation/pi-durio-v1/issue-16/terminal-r5-normal-partial.json",
+        "docs/implementation/pi-durio-v1/issue-16/terminal-r5-computer-use.json"
       ],
       "branch": "codex/pi-durio-v1-issue-16-width",
       "agent": "/root/issue16_width",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "R5 integrated; 65/65 plus 8/8 affected checks and exact 12704-file installed candidate verified. Human C1-C3 PASS with actual 5-cell emoji width; remaining native scenarios pending. Original R3/R4 FAIL preserved. Successors stay blocked.",
+      "note": "R5 C1-C3 and N1-N4 human PASS preserved. Normal task was aborted; minimum grid UNKNOWN. Stop/Esc/exit/fault and short completion/grid supplement still require human Terminal operation. Current Computer Use recheck explicitly refused Terminal access; successors blocked.",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T122309Z/issue-16.json",
       "local_checkpoint": "e98fef9",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6079513003",
@@ -277,7 +279,7 @@
       "width_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6080376801",
       "width_authorization_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6080496788",
       "human_revalidation_r5": {
-        "status": "C1-C3 PASS; remaining native scenarios PENDING",
+        "status": "C1-C3 and N1-N4 human PASS; successful completion/minimum grid/stop/esc/exit/fault PENDING",
         "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
         "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/terminal-validation.mjs",
         "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manifest.json",
@@ -286,10 +288,16 @@
         "coordinatorVerifyOnly": "PASS 12704 files; exact set and content",
         "command": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manifest.json'",
         "short_feedback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/user-feedback-r5-short.json",
-        "observed_short_run": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-29-31-312Z"
+        "observed_short_run": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-29-31-312Z",
+        "normal_observation": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-normal-partial.json",
+        "computer_use_recheck": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/computer-use-recheck.json",
+        "user_closed_terminal": true,
+        "continuation_entry": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/unfinished-native-entry.json"
       },
       "original_worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
-      "original_branch": "codex/pi-durio-v1-issue-16"
+      "original_branch": "codex/pi-durio-v1-issue-16",
+      "r5_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6081022930",
+      "r5_publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/publication/readback.json"
     },
     "17": {
       "number": 17,
@@ -580,7 +588,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "7a067340dda2e4fb84a4472ff91cfec1100c626f",
+  "integration_tip": "7f139320c1f0125e52b0d6c261f336c4ef8494b4",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -590,7 +598,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T12:35:49.194092+00:00",
+  "updated_at": "2026-10-09T12:54:06.090613+00:00",
   "last_remote_readback": {
     "headRefOid": "3efa84d54c67d1df24915edec941aa87223798b7",
     "isDraft": true,
