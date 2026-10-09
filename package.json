@@ -17,6 +17,7 @@
     "scripts/eval",
     "scripts/isolation",
     "docs/implementation/pi-durio-v1/issue-21/README.md",
+    "docs/implementation/pi-durio-v1/issue-22/README.md",
     "docs/implementation/pi-durio-v1/issue-23/README.md"
   ],
   "engines": {

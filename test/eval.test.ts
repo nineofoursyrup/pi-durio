@@ -12,7 +12,14 @@ import {appendFact,evalFacts} from '../src/eval/store.js';
 import {PersistentBudget} from '../src/provider-boundary.js';
 import {evalMediator} from '../src/eval/mediator.js';
 import {EvalView} from '../src/tui/eval.js';
+import {pairedTrials} from '../src/eval/comparison.js';
 function plan(e:Evidence):EvalPlan{return{id:'plan',purpose:'test fixed reporting',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:{id:'content-v1',manifest:e.blob('[]'),bytes:2},cases:representativeCases,trials:['good','failure','grader-error','not-run'].map(id=>({id,caseId:'local-fix',version:'content-v1',side:'candidate',repeat:1,pair:null})),budget:{maxRequests:8,maxTokens:1000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null},trialTimeoutMs:1000,gradingTimeoutMs:1000,maxOutputTokens:32,requestRetryLimit:0,price:{version:'test',source:'controlled',currency:'USD',perMillionTokens:0},authorization:{scope:'run-all-listed-trials',paid:false},environment:{node:'v24.8.0',isolation:'fixture only',writable:'new',cache:'empty'},mainObjective:'requirements',protection:['originals'],improvementConclusion:'not-evaluated'};}
+
+test('a started trial without final host duration is unknown time rather than a zero-duration total',async()=>{
+ const root=mkdtempSync(join(tmpdir(),'durio-eval-time-gap-')),e=new Evidence(root,'plan');const source=appendFact(e,'eval.plan',plan(e));e.close();await fixEvidence(root,{id:'eval-plan:plan',sources:[source],purpose:'fixed time-gap fixture'});
+ const facts=new Evidence(root,'plan');appendFact(facts,'eval.trial-started',{trialId:'good'});facts.close();
+ const report=evalReport(root,'plan');assert.deepEqual(report.timing,{...report.timing,taskMs:null,knownTaskMs:0,missing:1});assert.equal(report.counts.started,1);assert.equal(report.trials[0].outcome.status,'unknown');
+});
 
 test('report preserves all planned identities, grader errors and first failure; missing actual evidence removes eligibility',async()=>{
  const root=mkdtempSync(join(tmpdir(),'durio-eval-report-')),e=new Evidence(root,'plan');const p=plan(e),source=appendFact(e,'eval.plan',p),artifact=e.blob('original product');e.close();await fixEvidence(root,{id:'eval-plan:plan',sources:[source],purpose:'test fixed plan'});
@@ -41,6 +48,19 @@ test('paid plan needs a fixed provider upper bound before dispatch, not only an 
  await assert.rejects(mediator.request({input:'x'.repeat(262145),maxOutputTokens:32,signal}),/EVAL_MEDIATOR_LIMIT/);assert.equal(calls,0);
  await mediator.request({input:JSON.stringify(payload),maxOutputTokens:32,signal});assert.equal(mediator.lastError,'PROVIDER_HTTP_503');assert.equal(budget.snapshot().requests,1);assert.equal(budget.snapshot().unknown,1);e.close();
  });
+
+test('same per-trial limit blocks a noisy side without consuming the next side allowance or resetting global facts',async()=>{
+ const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-eval-fairness-')),'plan'),p=plan(e);
+ p.comparison={kind:'deterministic',repetitions:1,repetitionBasis:'controlled',change:'fixed',hypothesis:'fixed',roles:{'local-fix':'objective'},objective:{metric:'requests',direction:'lower',delta:1,basis:'one request'},protections:[{id:'scope',kind:'hard',check:'scope',cases:['local-fix']}],trialBudget:{maxRequests:1,maxTokens:100},sides:{baseline:{runtime:p.runtime,instructions:''},candidate:{runtime:p.runtime,instructions:''}}};
+ const budget=new PersistentBudget(e,'plan',p.budget);let calls=0;
+ const transport:typeof fetch=async()=>{calls++;return new Response('data: {"usage":{"prompt_tokens":2,"completion_tokens":3}}\n\ndata: [DONE]\n\n');};
+ const [a,b]=pairedTrials('fair',['local-fix'],1).map(t=>({...t,version:p.runtime.id}));
+ const first=evalMediator(p,a,budget,transport),second=evalMediator(p,b,budget,transport),signal=new AbortController().signal;
+ const request={input:JSON.stringify({model:'deepseek-flash',stream:true,max_tokens:32,messages:[{role:'user',content:'hello'}]}),maxOutputTokens:32,signal};
+ await first.request(request);await assert.rejects(first.request(request),/BUDGET_TRIAL_REQUEST_LIMIT/);await second.request(request);
+ assert.equal(calls,2);assert.equal(budget.snapshot().requests,2);assert.equal(budget.snapshot().knownTokens,10);
+ const reopened=new PersistentBudget(e,'plan',p.budget);await assert.rejects(evalMediator(p,a,reopened,transport).request(request),/BUDGET_TRIAL_REQUEST_LIMIT/);e.close();
+});
 
  test('wrapped eval plan selection remains visible in a narrow viewport',()=>{
  const root=mkdtempSync(join(tmpdir(),'durio-eval-view-'));

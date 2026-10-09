@@ -10,7 +10,11 @@ export async function evalCommand(action:string|undefined,root:string,values:Rec
  if(action==='list'||!action){console.log(JSON.stringify(listEvalPlans(root),null,2));return;}
  if(!id)throw Error('eval requires --id PLAN_ID');
  let report;
- if(action==='report')report=evalReport(root,id);
+ if(action==='report'){
+  const asOf=typeof values.snapshot==='string'?Number(values.snapshot):undefined;
+  if(asOf!==undefined&&(!Number.isSafeInteger(asOf)||asOf<1))throw Error('eval report --snapshot requires a positive fact sequence');
+  report=evalReport(root,id,{asOf});
+ }
  else if(action==='run'){
   if(typeof values.directory!=='string')throw Error('eval run requires --directory NEW_OWNED_DIRECTORY');
   console.error(JSON.stringify({fixedPlan:loadEvalPlan(root,id),authorization:'Explicit eval run --id authorizes all listed trials and fixed limits'},null,2));
