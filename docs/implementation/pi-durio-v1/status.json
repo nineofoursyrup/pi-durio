@@ -142,7 +142,8 @@
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T110901Z/issue-15.json",
-      "note": "T05 applicable acceptance passed: 59/59 combined checks, 4/4 standalone recovery cases, 8/8 concurrent startup; exact candidate tree and artifacts verified. Unknown foreign pending/raw crash remains fenced with explicit responsibility. Terminal acceptance remains #16."
+      "note": "T05 applicable acceptance passed: 59/59 combined checks, 4/4 standalone recovery cases, 8/8 concurrent startup; exact candidate tree and artifacts verified. Unknown foreign pending/raw crash remains fenced with explicit responsibility. Terminal acceptance remains #16.",
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/15#issuecomment-6080374212"
     },
     "16": {
       "number": 16,
@@ -180,7 +181,7 @@
       "agent": "/root/issue16",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "R3/R4 Terminal FAIL preserved; actual CPR confirms compound emoji width 5 versus Pi 2 and caret 3 columns early. A5 dependency patch decision being prepared, not authorized. Successors blocked.",
+      "note": "R3/R4 Terminal FAIL preserved. Actual CPR root cause confirmed; user authorized narrow two-source-file width API patch plus host native dynamic calibration. R5 implementing; successors remain blocked.",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T101814Z/issue-16.json",
       "local_checkpoint": "e98fef9",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6079513003",
@@ -251,14 +252,18 @@
         "sttyRestored": true
       },
       "width_repair_checkpoint": "5a46dcda811c0ce9964ecaecce9da2dc8e606ea2",
-      "width_repair_agent_status": "running after followup_task with actual CPR",
+      "width_repair_agent_status": "implementing authorized narrow width patch and native calibration for r5",
       "upstream_width_exception": {
-        "status": "preparing concrete A5 decision; NOT AUTHORIZED and NOT YET ASKED",
+        "status": "AUTHORIZED by explicit user response",
         "spec": "docs/specs/pi-durio-v1-spec.md:121",
         "proposal": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/proposal/upstream-width-overrides.patch",
         "scope": "Small public width configuration seam; native calibration and complete layout/selection consistency still require implementation and validation",
-        "open_design_point": "Newly encountered compound graphemes cannot stay limited to one hardcoded fixture; bounded runtime calibration and invalidation plan required before asking user"
-      }
+        "open_design_point": "Public dynamic invalidation feasibility passed six prototype checks; product CPR transport/lifecycle/native acceptance still required",
+        "authorizedAt": "2026-10-09T12:01:44.363602Z",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/user-authorized-exception.json",
+        "recordSha256": "6495746dc4622a25e09a00cf2ffdd48fb354af48e7f5b59ffcf731d1c470955a"
+      },
+      "width_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6080376801"
     },
     "17": {
       "number": 17,
@@ -549,7 +554,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "bb0ba36b1c17743e05ee1765f6c0389bcc6f16ef",
+  "integration_tip": "a29a5ecde3ac13615b84a7357783ac8546727822",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -559,9 +564,9 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T11:56:31.122149+00:00",
+  "updated_at": "2026-10-09T12:02:22.142160+00:00",
   "last_remote_readback": {
-    "headRefOid": "9df8ff03b6d4df6c558ba0810f07f2390c530bcd",
+    "headRefOid": "a29a5ecde3ac13615b84a7357783ac8546727822",
     "isDraft": true,
     "state": "OPEN",
     "closingIssuesReferences": [],

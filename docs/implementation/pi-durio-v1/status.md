@@ -1,6 +1,6 @@
 # pi-durio v1 implementation status
 
-Integration: `codex/pi-durio-v1`; observed tip: `bb0ba36b1c17743e05ee1765f6c0389bcc6f16ef`.
+Integration: `codex/pi-durio-v1`; observed tip: `a29a5ecde3ac13615b84a7357783ac8546727822`.
 Draft PR: https://github.com/nineofoursyrup/pi-durio/pull/33.
 
 Issues remain OPEN; integrated-accepted means ticket acceptance only, not v1 acceptance or release.
