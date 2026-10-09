@@ -44,7 +44,8 @@
     "./offline": "./dist/src/offline.js",
     "./tui": "./dist/src/tui/app.js",
     "./query": "./dist/src/query.js",
-    "./eval": "./dist/src/eval/runner.js"
+    "./eval": "./dist/src/eval/runner.js",
+    "./storage": "./dist/src/storage.js"
   },
   "bundleDependencies": [
     "@earendil-works/pi-ai",

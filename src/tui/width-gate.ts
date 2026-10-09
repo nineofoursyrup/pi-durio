@@ -26,6 +26,8 @@ export class TerminalWidthGate {
   private lastFrame='';
   private acceptInput?:(data:string)=>void;
   private busy=false;
+  private queryHolds=0;
+  private calibration?:Promise<void>;
   private error?:string;
   private closing=false;
   private epoch=0;
@@ -75,7 +77,23 @@ export class TerminalWidthGate {
   }
   /** Outer input observers must consume these before treating an event as a user action. */
   consumeTerminalReply(data:string){return this.probe.consume(data);}
-  get blocked(){return this.busy||this.error!==undefined;}
+  get blocked(){return this.busy||this.queryHolds>0||this.error!==undefined;}
+  /** Keep synchronous host checks out of a timed CPR exchange, including any already in flight. */
+  async withoutQueries<T>(work:()=>Promise<T>):Promise<T> {
+    this.queryHolds++;
+    try {
+      await this.calibration;
+      if(this.closing)throw Error('WIDTH_GATE_CLOSED');
+      if(!this.error)this.message('Checking recovery; input retained. Ctrl+C / Esc available.');
+      return await work();
+    } finally {
+      this.queryHolds--;
+      if(!this.closing&&!this.queryHolds) {
+        this.inspect();
+        if(!this.blocked){this.options.ready();this.options.tui.renderNow(true);this.drain();}
+      }
+    }
+  }
   inspect(extra:string[]=[]):void {
     if(this.closing)return;
     for(const source of [...this.options.sources(),...extra]) {
@@ -83,12 +101,12 @@ export class TerminalWidthGate {
         if(/[^\x00-\x7f]/.test(segment)&&!/[\x00-\x1f\x7f-\x9f]/.test(segment)&&!this.profile.has(segment))this.wanted.add(segment);
       }
     }
-    if(this.busy||this.error||!this.wanted.size)return;
+    if(this.busy||this.queryHolds||this.error||!this.wanted.size)return;
     if(this.profile.size+this.wanted.size>4096){this.fail('WIDTH_SESSION_LIMIT');return;}
     this.busy=true;
     const epoch=++this.epoch,controller=new AbortController();this.controller=controller;
     // The frame may be inside Pi's render method. Never recursively render from terminal.write.
-    queueMicrotask(()=>{void this.calibrate(epoch,controller);});
+    this.calibration=Promise.resolve().then(()=>this.calibrate(epoch,controller));
   }
   private async calibrate(epoch:number,controller:AbortController) {
     const next=new Map(this.profile);

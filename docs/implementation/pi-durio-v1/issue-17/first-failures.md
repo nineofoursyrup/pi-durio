@@ -9,3 +9,5 @@ External root: `/Users/nineofour/pi-durio-v1-run/evidence/issue-17`.
 - `check-first.log`: TypeScript held an idle-phase narrowing across asynchronous recovery inspection. The check now uses the actual exiting promise rather than the narrowed enum. `check-02.log` records 79/79 PASS after repairs.
 
 Original log files are retained. No native failure, UNKNOWN or old #16 evidence was rewritten. Additional close/admission concurrency and follow-up-stop checks are separately recorded under `queue-close-*`; later candidate checks do not erase first failures.
+
+- Recovery-start native failure is preserved in candidate-r1's second manual attempt. Independent `reopen-repair/first-red.log` reproduces the same `WIDTH_CPR_TIMEOUT` through real startup/recovery and a real CPR reply pipe while execution-material verification blocks the event loop. `first-green.log` and `affected-checks.log` record the serialised lifecycle repair; no timeout extension or rewritten native result. Details and remaining native scope: [reopen-width-repair.md](reopen-width-repair.md).

@@ -8,6 +8,7 @@ import { openNodeSqliteStorage } from '@earendil-works/pi-durable/storage/sqlite
 import { openHostReadonly, readObject, digest, type BlobRef } from './evidence.js';
 import type { Cursor, TaskRecord, EntryRecord, SubmissionRecord, ConversationRecord, JsonObject, LiveState } from '@earendil-works/pi-durable';
 import type { OwnerLease } from './ownership.js';
+import { sessionRemovalVerified } from './storage-disposition.js';
 
 async function hashFile(path: string) {
   const hash = createHash('sha256');
@@ -108,11 +109,11 @@ export async function preflight(owner: OwnerLease) {
   owner.assertHeld();
   const reports: Awaited<ReturnType<typeof inspectSession>>[] = [];
   const sessions = await readdir(join(root, 'sessions'), { withFileTypes: true }).catch((e: NodeJS.ErrnoException) => { if (e.code === 'ENOENT') return []; throw e; });
-  let records: {runId:string;kind:string;data:any}[] = [];
+  let records: {seq:number;runId:string;kind:string;data:any}[] = [];
   try { await access(join(root,'host.sqlite')); }
   catch { if (sessions.length) throw new Error('RECOVERY_REQUIRED: missing host facts'); return reports; }
   const db = openHostReadonly(root);
-  try { records = db.prepare('SELECT run_id,kind,body FROM records ORDER BY seq').all().map(row => ({runId:String(row.run_id),kind:String(row.kind),data:JSON.parse(readObject(root,JSON.parse(String(row.body)) as BlobRef).toString())})); }
+  try { records = db.prepare('SELECT seq,run_id,kind,body FROM records ORDER BY seq').all().map(row => ({seq:Number(row.seq),runId:String(row.run_id),kind:String(row.kind),data:JSON.parse(readObject(root,JSON.parse(String(row.body)) as BlobRef).toString())})); }
   finally { db.close(); }
   const accepted = records.filter(record => record.kind === 'task.accepted');
   const resolved = new Set<string>();
@@ -134,7 +135,7 @@ export async function preflight(owner: OwnerLease) {
     const checked = history.findLast(record => record.kind === 'recovery.report')?.data;
     if (closed?.cleanup === 'confirmed' && closed.status !== 'unknown' || checked?.status === 'completed' && JSON.stringify(checked.session?.sourceFiles) === JSON.stringify(report.sourceFiles)) resolved.add(run.runId);
   }
-  for (const record of records.filter(record => record.kind === 'run.started')) if (!sessions.some(dir => dir.name === record.data.sessionId)) throw new Error('RECOVERY_REQUIRED: recorded session storage is missing');
+  for (const record of records.filter(record => record.kind === 'run.started')) if (!sessions.some(dir => dir.name === record.data.sessionId)&&!sessionRemovalVerified(root,record.data.sessionId,records)) throw new Error('RECOVERY_REQUIRED: recorded session storage is missing or cleanup is incomplete');
   for (const run of accepted) {
     if (resolved.has(run.runId)) continue;
     const receipt = records.findLast(record => record.runId === run.runId && record.kind === 'run.closed')?.data;
