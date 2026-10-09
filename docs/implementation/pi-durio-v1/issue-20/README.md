@@ -43,7 +43,7 @@ TUI 面板用方向键选择、`c` 预览、在实际渲染后的预览上 Enter
 
 先持现有 data-root owner，拒绝 session owner 和未完成清理；在没有活动连接的 quiescent 根上采集完整文件集合与前后 hash，包括每个 durable 主库及 WAL。只在临时副本上使用 `openNodeSqliteStorage` 和公开扫描。压缩是逐文件流式 gzip；manifest 绑定相对路径、hash 和长度，解压限量并逐文件验证，实际还原后再核对 host 和全部 session 可读，成功才发布新目标。源文件不删除；清理须另 preview/commit。失败的 `.partial-*` 目录保留供核对；没有自动重试发布或覆盖现有目标。
 
-当前受支持迁移是本 host 格式与 Pi 1.1.0 的同格式、可读验证后的新根副本。没有自建 schema 升级平台，也不改上游私有表。上游格式由公开 Storage 的迁移/读取机制在验证副本上处理；高版本/未知/损坏格式失败，原件及支持的 host 只读路径保留。迁移成功明确 `executionAuthorized:false`；原执行内容、授权、兼容性和 pending 仍由 #15/#17 检查。不会将当前进程切换到目标，也不会让旧源与目标同时继续同一 pending。
+当前受支持迁移是本 host 格式与 Pi 1.1.0 的同格式、可读验证后的新根副本。没有自建 schema 升级平台，也不改上游私有表。上游格式由公开 Storage 的迁移/读取机制在验证副本上处理；高版本/未知/损坏格式失败，原件及支持的 host 只读路径保留。迁移成功明确 `executionAuthorized:false`；原执行内容、授权、兼容性和 pending 仍由 #15/#17 检查。不会将当前进程切换到目标，也不会自动让旧源与目标同时继续同一 pending。
 
 SQLite/Pi 的 WAL 和宿主 DELETE journal 分开处理。宿主未知 journal/schema 不尝试猜测迁移。`-shm` 是可重建锁缓存，不作为档案内容；WAL 是必须内容。管理不承诺掉电零丢失、任意外部写入者隔离、任意历史版本升级或损坏源的自动修复。
 
@@ -54,5 +54,7 @@ SQLite/Pi 的 WAL 和宿主 DELETE journal 分开处理。宿主未知 journal/s
 `test/storage.test.ts` 覆盖实际 Pi/SQLite fixture：固定/解除/共享保护、预览后漂移、完整 session 删除与 admission、冻结和另一 conversation 的待接入 write/summary、部分失败续作、无损归档与还原、非空 committed WAL 的迁移、未知格式/磁盘故障/owner 阻断、TUI 显示后才可提交与 CLI 回读。它不会归档或清理真实开发证据，所有数据由测试新建。
 
 `node scripts/demo-storage.mjs NEW_OUTPUT [INSTALLED_PACKAGE_ROOT]` 在新目录中运行真实 Pi runtime + 明确 offline transport + 本机 shell；固定依赖阻挡、归档还原、精确删除与部分故障、未知格式及 WAL 迁移结果分别保存。失败的 shell 检查与 fixture assistant 的正常结束分开报告，不伪造任务验收。提供可选安装根用于验证独立安装包。
+
+`node scripts/validate-storage-resume.mjs NEW_OUTPUT INSTALLED_PACKAGE_ROOT` 补充实际安装的多部分续作回归：前一附件已完成、后一附件故障后同操作继续剩余 session；预览后新增独立来源仍拒绝删除。r1 全场景与 r2 受影响路径分别绑定各自产品候选，适用性和原失败见 `validation.json` / `first-failures.md`。
 
 完整检查和首败、精确候选、实际演示与独立安装记录见同目录 validation/first-failures/handoff 文件以及 `/Users/nineofour/pi-durio-v1-run/evidence/issue-20`。未调用付费模型。普通面板组合的原生 Terminal 抽查保留给 #31；这里的合成 TUI 检查不冒充原生键码、宽度或输入法验收。未 push、关闭票、产品合并到 main 或 release。
