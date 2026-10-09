@@ -1,4 +1,5 @@
 import {mkdir,writeFile} from 'node:fs/promises';
+import {retainExecutionOutput,executionPreview} from './execution-output.js';
 import {readFileSync,lstatSync} from 'node:fs';
 import {join,dirname} from 'node:path';
 import {Evidence,digest,readObject} from './evidence.js';
@@ -131,7 +132,7 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
     const bootstrap="import {cp,chmod,readFile} from 'node:fs/promises'; await cp('/input/targets','/work/targets',{recursive:true}); await chmod('/work/targets',0o755); process.chdir('/work/targets'); "+profileAssertion+"await import('/input/check.mjs');";
     await writeFile(join(input,'bootstrap.mjs'),bootstrap,{flag:'wx',mode:0o444});
     const execution=await engine.runRestricted({image:verifiedImage,inputDir:input,runDir:join(checkDirectory,'execution'),command:['node','/input/bootstrap.mjs'],timeoutMs:Math.max(100,Math.min(check.timeoutMs,Date.parse(options.deadline)-Date.now())),signal:options.signal});
-    guard();let artifacts:any[]=[];
+    guard();retainExecutionOutput(e,execution,{decisionId:options.decisionId,groupId:group.id,index,executionId:execution.id});let artifacts:any[]=[];
     if(execution.terminated&&execution.status!=='invalid'){
      const names=regularFiles(join(checkDirectory,'execution/work/targets')).map(p=>`targets/${p}`),destination=join(checkDirectory,'export');
      await engine.exportStopped(execution,names,destination,{maxFiles:200,maxBytes:4194304});artifacts=captureFiles(e,destination,names).files;
@@ -147,7 +148,7 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
      if(!resource.protectionsPassed){state='failed';reason='Declared resource protection failed';}
     }
     if(build)verifyImproveBuild(root,build.candidate);
-    checks.push({index,kind:check.kind,state,reason,effect:check.kind==='resource'?effect:state==='completed'?'direct-checks-passed':'direct-checks-failed',execution,executionRef:e.blob(JSON.stringify(execution)),artifacts,resource,...(build?{buildId:build.candidate.id}:{}),...(profiles.length?{profileInput:construction.effectiveProfiles,fullProfileAssertions:checkedProfiles}:{} )});
+    checks.push({index,kind:check.kind,state,reason,effect:check.kind==='resource'?effect:state==='completed'?'direct-checks-passed':'direct-checks-failed',execution:executionPreview(execution),executionRef:e.blob(JSON.stringify(execution)),artifacts,resource,...(build?{buildId:build.candidate.id}:{}),...(profiles.length?{profileInput:construction.effectiveProfiles,fullProfileAssertions:checkedProfiles}:{} )});
    }
   }catch(error){state=options.signal.aborted?'cancelled':'unknown';reason=String(error);checks.push({index,kind:check.kind,state,reason});}
   Object.assign(checks.at(-1),benefit);

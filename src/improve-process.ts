@@ -1,4 +1,4 @@
-import {spawn} from 'node:child_process';
+import {spawn,type ChildProcess} from 'node:child_process';
 import {realpathSync} from 'node:fs';
 import {join,isAbsolute,relative} from 'node:path';
 import {Evidence,digest} from './evidence.js';
@@ -9,6 +9,25 @@ import {acquireWorkspaceOwner} from './workspace-ownership.js';
 import {assertWorkspaceUnfenced} from './workspace-fence.js';
 import {verifyImproveBuild,verifyBuildSource,type ImproveBuildPair} from './improve-build.js';
 import type {ImproveSelection} from './improve-decisions.js';
+import {retainExecutionOutput} from './execution-output.js';
+const {captureOutput}=await import(new URL('../execution/isolation/boundary.mjs',import.meta.url).href);
+
+/** Observe the already-authorized child; no build selection or spawn authority.
+ * After stop, unread pipe bytes are not claimed as acquired. */
+export async function observeImproveProcess(child:ChildProcess,options:{timeoutMs:number;signal?:AbortSignal;recordStarted:()=>Promise<string|null>}) {
+ const output=captureOutput(1048576,1048576);
+ const closed=new Promise<number|null>(resolve=>child.once('close',resolve));
+ let error:string|null=null,reason:string|null=null,killTimer:NodeJS.Timeout|undefined;
+ const signalGroup=(signal:NodeJS.Signals)=>{try{if(child.pid)process.kill(-child.pid,signal);}catch(err){if((err as NodeJS.ErrnoException).code!=='ESRCH')error=String(err);}};
+ const stop=(why:string)=>{if(reason)return;reason=why;child.stdout!.destroy();child.stderr!.destroy();signalGroup('SIGTERM');killTimer=setTimeout(()=>signalGroup('SIGKILL'),5000);};
+ const abort=()=>stop('cancelled');options.signal?.addEventListener('abort',abort,{once:true});if(options.signal?.aborted)abort();
+ const timer=setTimeout(()=>stop('timeout'),options.timeoutMs);
+ for(const stream of ['stdout','stderr']as const)child[stream]!.on('data',(chunk:Buffer)=>{if(!output.append(stream,chunk))stop('output-limit');});
+ child.on('error',err=>{error=String(err);});
+ let started:string|null=null;try{started=await options.recordStarted();}catch(err){error=String(err);stop('journal-failure');}
+ const code=await closed;clearTimeout(timer);if(killTimer)clearTimeout(killTimer);options.signal?.removeEventListener('abort',abort);
+ return {state:error||reason||code!==0?'failed':'completed',pid:child.pid??null,parentPid:process.pid,started,code,reason,error,...output.result(16384),sourceEnd:reason?'stopped-before-eof':'eof'};
+}
 
 export interface BuildEntry {decisionId:string;groupId:string;buildId:string;directory:string;entry:string}
 export interface BuildDefault {workspace:string;revision:string;current:BuildEntry|null}
@@ -50,7 +69,7 @@ export async function launchImproveBuild(input:ImproveBuildLaunch):Promise<any>{
    e=new Evidence(o.dataRoot,runId,()=>owner.assertHeld());appendFact(e,'improve.process-request',{id:o.decisionId,groupId:o.groupId,launchId:o.id,requestDigest,request,buildId:build.id,entry:join(build.directory,build.entry),scope:'Explicit new process only; no existing run/session passed and no current process replacement'});
   }finally{await lease.release();}
  }finally{e?.close();await owner.release();}
- const record=async(kind:string,data:any)=>{const lease=await acquireOwner(o.dataRoot,()=>{});let evidence:Evidence|undefined;try{evidence=new Evidence(o.dataRoot,runId!,()=>lease.assertHeld());return appendFact(evidence,kind,{id:o.decisionId,groupId:o.groupId,launchId:o.id,...data});}finally{evidence?.close();await lease.release();}};
+ const record=async(kind:string,data:any,execution?:any)=>{const lease=await acquireOwner(o.dataRoot,()=>{});let evidence:Evidence|undefined;try{evidence=new Evidence(o.dataRoot,runId!,()=>lease.assertHeld());if(execution)retainExecutionOutput(evidence,execution,{decisionId:o.decisionId,groupId:o.groupId,launchId:o.id});return appendFact(evidence,kind,{id:o.decisionId,groupId:o.groupId,launchId:o.id,...data});}finally{evidence?.close();await lease.release();}};
  const args=o.operation.kind==='help'?['--help']:['run','--workspace',auth.workspace,'--data-root',o.operation.dataRoot,'--prompt',o.operation.input,...(o.operation.taskType==='coding'?['--coding']:[]),...(auth.mode==='offline'?['--offline-demo']:[])];
  // Recheck after asynchronous journal/lease cleanup immediately before spawn.
  if(realpathSync(auth.workspace)!==auth.workspace)throw Error('IMPROVE_BUILD_AUTHORIZATION_CHANGED');
@@ -58,13 +77,7 @@ export async function launchImproveBuild(input:ImproveBuildLaunch):Promise<any>{
  if(o.side==='candidate'&&readImproveBuildDefault(o.dataRoot,auth.workspace).current?.buildId!==build!.id)throw Error('IMPROVE_BUILD_NOT_SELECTED_FOR_NEW_PROCESS');
  verifyImproveBuild(o.dataRoot,build!);if(o.signal?.aborted)throw Error('IMPROVE_BUILD_LAUNCH_CANCELLED');
  const child=spawn(process.execPath,[join(build!.directory,build!.entry),...args],{cwd:auth.workspace,detached:true,stdio:['ignore','pipe','pipe'],env:{PATH:process.env.PATH,HOME:process.env.HOME,LANG:process.env.LANG,...(auth.mode==='live'&&process.env.DEEPSEEK_API_KEY?{DEEPSEEK_API_KEY:process.env.DEEPSEEK_API_KEY}:{})}});
- const closed=new Promise<number|null>(resolve=>child.once('close',resolve));
- let stdout='',stderr='',error:string|null=null,reason:string|null=null,killTimer:NodeJS.Timeout|undefined;
- const signalGroup=(signal:NodeJS.Signals)=>{try{if(child.pid)process.kill(-child.pid,signal);}catch(err){if((err as NodeJS.ErrnoException).code!=='ESRCH')error=String(err);}};
- const stop=(why:string)=>{if(reason)return;reason=why;signalGroup('SIGTERM');killTimer=setTimeout(()=>signalGroup('SIGKILL'),5000);};const abort=()=>stop('cancelled');o.signal?.addEventListener('abort',abort,{once:true});if(o.signal?.aborted)abort();const timer=setTimeout(()=>stop('timeout'),o.timeoutMs);
- child.stdout.on('data',chunk=>{stdout+=chunk;if(Buffer.byteLength(stdout)>1048576){stdout=stdout.slice(0,1048576);stop('output-limit');}});child.stderr.on('data',chunk=>{stderr+=chunk;if(Buffer.byteLength(stderr)>1048576){stderr=stderr.slice(0,1048576);stop('output-limit');}});child.on('error',err=>{error=String(err);});
- let spawned:string|null=null;try{spawned=child.pid?await record('improve.process-started',{buildId:build!.id,pid:child.pid,parentPid:process.pid,entry:join(build!.directory,build!.entry),args,observation:'OS child spawn with immediately verified executable/dependency bytes; task outcome is a separate result'}):null;}catch(err){error=String(err);stop('journal-failure');}
- const code=await closed;clearTimeout(timer);if(killTimer)clearTimeout(killTimer);o.signal?.removeEventListener('abort',abort);
- const result={state:error||reason||code!==0?'failed':'completed',pid:child.pid??null,parentPid:process.pid,buildId:build!.id,entry:join(build!.directory,build!.entry),started:spawned,code,reason,error,stdout,stderr,scope:'New process invocation and its exit observed. Process completion alone does not establish task acceptance or improvement; prior pending runs were not opened.'};
- await record('improve.process-result',{result});return result;
+ const observed=await observeImproveProcess(child,{timeoutMs:o.timeoutMs,signal:o.signal,recordStarted:()=>child.pid?record('improve.process-started',{buildId:build!.id,pid:child.pid,parentPid:process.pid,entry:join(build!.directory,build!.entry),args,observation:'OS child spawn with immediately verified executable/dependency bytes; task outcome is a separate result'}):Promise.resolve(null)});
+ const result={...observed,buildId:build!.id,entry:join(build!.directory,build!.entry),scope:'New process invocation and its exit observed. Process completion alone does not establish task acceptance or improvement; prior pending runs were not opened.'};
+ await record('improve.process-result',{result},result);return result;
 }

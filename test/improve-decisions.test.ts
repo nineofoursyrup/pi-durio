@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {Evidence,digest} from '../src/evidence.js';
+import {Evidence,digest,readObject} from '../src/evidence.js';
 import {captureImproveSources} from '../src/improve-source.js';
 import {submitImproveDecision,readImproveDecision,previewImproveDecision,resumeImproveDecision,suppressionMatch,listImproveSuppressions,restoreImproveSuggestion,type ImproveMode,type ImproveDecision} from '../src/improve-decisions.js';
 import {scopedImproveDecisions} from '../src/improve-history.js';
@@ -45,6 +45,27 @@ test('validate-only constructs and checks real restricted content while preservi
  assert.equal(await readFile(join(f.workspace,'math.mjs'),'utf8'),'export const add=(a,b)=>a-b;\n');
  const before=digest(await readFile(join(f.dataRoot,'host.sqlite')));
  assert.deepEqual(await submitImproveDecision({dataRoot:f.dataRoot,decision:submitted as any}),outcome);assert.equal(digest(await readFile(join(f.dataRoot,'host.sqlite'))),before);
+});
+test('over-limit restricted check output reopens from retained byte blocks without overflowing the check journal',async t=>{
+ for(const stream of ['stdout','stderr']){
+  const f=await fixture();t.diagnostic(`Output retention evidence: ${f.directory}`);
+  const program=`process.${stream}.write(Buffer.alloc(1048575,97));setTimeout(()=>{process.${stream}.write(Buffer.from([0xff,0x80]));setInterval(()=>{},1000);},100);`;
+  const d={...decision(f,'validate-only'),directory:join(f.directory,'output-validation'),groups:[{id:'math',candidateIds:[f.candidate.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',program,timeoutMs:30000},{kind:'direct',program:'throw Error("must remain not-run")',timeoutMs:30000}]}],limits:{...decision(f).limits,maxChecks:2}};
+  const result=await submitImproveDecision({dataRoot:f.dataRoot,decision:d as any}),check=result.groups[0].result.checks[0];
+  assert.equal(check.state,'failed');assert.equal(check.execution.reason,'output_limit');assert.equal(check.execution.terminated,true);
+  assert.equal(result.groups[0].result.checks[1].state,'not-run');assert.ok(Buffer.byteLength(check.execution[stream])<=16384);
+  const reopened=readImproveDecision(f.dataRoot,d.id).groups[0].result.checks[0],execution=JSON.parse(readObject(f.dataRoot,reopened.executionRef).toString());
+  const original=JSON.parse(await readFile(join(f.directory,'output-validation/math/check-0/execution/outcome.json'),'utf8'));
+  const acquired=Buffer.concat(original.output[stream].chunks.map((chunk:string)=>Buffer.from(chunk,'base64'))),retained=Buffer.concat(execution.output[stream].chunks.map((ref:any)=>readObject(f.dataRoot,ref)));
+  // The existing stdout line limit can stop the controller before all emitted
+  // bytes arrive. Compare actual acquisition, not output still inside the VM.
+  assert.ok(acquired.length>(stream==='stdout'?16384:1048576));
+  assert.equal(retained.length,acquired.length);assert.equal(digest(retained),digest(acquired));
+  const emitted=Buffer.concat([Buffer.alloc(1048575,97),Buffer.from([0xff,0x80])]);
+  assert.equal(digest(retained),digest(emitted.subarray(0,retained.length)));
+  assert.deepEqual(reopened.execution.output,check.execution.output);
+  assert.equal(await readFile(join(f.workspace,'math.mjs'),'utf8'),'export const add=(a,b)=>a-b;\n');
+ }
 });
 test('scope/problem suppression survives rewording, new IDs and versions; ambiguous overlapping keys are withheld until explicit restore',async()=>{
  const f=await fixture();await submitImproveDecision({dataRoot:f.dataRoot,decision:decision(f,'do-not-suggest')});

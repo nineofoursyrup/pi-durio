@@ -3,12 +3,40 @@ import { mkdir, copyFile, realpath, writeFile, chmod, cp } from 'node:fs/promise
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { StringDecoder } from 'node:string_decoder';
 import { exportRegularFiles } from './export.mjs';
 
 const stopped = new WeakMap();
 const policy = fileURLToPath(new URL('./restrict.py', import.meta.url));
 const json = value => JSON.stringify(value, null, 2) + '\n';
 const cleanHostEnv = () => ({ PATH: '/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin', HOME: process.env.HOME });
+
+// Callers stop reading both pipes immediately when append returns false. Thus
+// each stream retains at most its byte limit plus one delivered data event.
+// Fixed-size blocks avoid a retained object per tiny OS chunk. No UTF-8 decode
+// occurs until after acquisition; arbitrary bytes and split characters survive.
+export function captureOutput(stdoutLimit, stderrLimit) {
+  const streams = Object.fromEntries([['stdout',stdoutLimit],['stderr',stderrLimit]].map(([name,limit]) =>
+    [name,{limit,bytes:0,blocks:[],pending:Buffer.allocUnsafe(65536),used:0}]));
+  return {
+    append(name, chunk) {
+      const stream=streams[name];
+      for(let offset=0;offset<chunk.length;){const length=Math.min(65536-stream.used,chunk.length-offset);chunk.copy(stream.pending,stream.used,offset,offset+length);stream.used+=length;offset+=length;
+        if(stream.used===65536){stream.blocks.push(stream.pending);stream.pending=Buffer.allocUnsafe(65536);stream.used=0;}}
+      stream.bytes+=chunk.length;return stream.bytes<=stream.limit;
+    },
+    result(previewBytes) {
+      const result={output:{layer:'OS pipe bytes delivered to data events; excludes bytes not returned after stop',encoding:'base64',textProjection:'bounded UTF-8 decoding; original byte blocks are authoritative'}};
+      for(const [name,stream]of Object.entries(streams)){
+        const chunks=[...stream.blocks,...(stream.used?[stream.pending.subarray(0,stream.used)]:[])],limit=previewBytes??stream.limit;
+        const text=Buffer.from(new StringDecoder('utf8').write(Buffer.concat(chunks,stream.bytes).subarray(0,limit)));
+        result[name]=new StringDecoder('utf8').write(text.subarray(0,limit));
+        result.output[name]={bytes:stream.bytes,chunks:chunks.map(chunk=>chunk.toString('base64')),displayTruncated:stream.bytes>limit||text.length>limit};
+      }
+      return result;
+    },
+  };
+}
 
 async function cli(executable, args, timeout = 30_000) {
   return new Promise(resolve => {
@@ -111,7 +139,8 @@ export async function runRestricted({ image, inputDir, runDir, command,
       const child = spawn(containerExecutable, ['start', '--attach', '--interactive', id], {
         env: cleanHostEnv(), stdio: ['pipe', 'pipe', 'pipe'],
       });
-      let reason = null, stdout = '', stderr = '', pending = '', chain = Promise.resolve();
+      let reason = null, pending = '', chain = Promise.resolve();
+      const output=captureOutput(limits.totalBytes,1_048_576),decoder=new StringDecoder('utf8');
       let accepted = 0, closed = false;
       const abort = new AbortController();
       const halt = value => {
@@ -133,12 +162,11 @@ export async function runRestricted({ image, inputDir, runDir, command,
       child.stdin.on('error', () => {});
       child.on('error', () => halt('execution_start_failed'));
       child.stderr.on('data', chunk => {
-        stderr += chunk;
-        if (stderr.length > 1_048_576) halt('output_limit');
+        if (!output.append('stderr',chunk)) halt('output_limit');
       });
       child.stdout.on('data', chunk => {
-        stdout += chunk; pending += chunk;
-        if (Buffer.byteLength(stdout) > limits.totalBytes || Buffer.byteLength(pending) > limits.lineBytes) return halt('output_limit');
+        const withinLimit=output.append('stdout',chunk);pending += decoder.write(chunk);
+        if (!withinLimit || Buffer.byteLength(pending) > limits.lineBytes) return halt('output_limit');
         let end;
         while ((end = pending.indexOf('\n')) !== -1) {
           const line = pending.slice(0, end); pending = pending.slice(end + 1);
@@ -173,7 +201,7 @@ export async function runRestricted({ image, inputDir, runDir, command,
         abort.abort('execution_ended');
         for (const attempt of result.modelRequests) if (attempt.status === 'started') attempt.status = 'unknown';
         // A stuck provider must not prevent the boundary from terminating the VM.
-        resolve({ code, reason, stdout: stdout.slice(0, limits.totalBytes), stderr: stderr.slice(0, 1_048_576) });
+        resolve({ code, reason, ...output.result(), sourceEnd:reason?'stopped-before-eof':'eof' });
       });
     });
     Object.assign(result, execution);
