@@ -251,7 +251,16 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
       const expected=executionConfig(accepted.authorization.execution==='trusted-local-coding',auth.mode,auth.toolEnvironment);
       if(Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('QUEUE_EXECUTION_CONFIGURATION_CHANGED');
       await preflight(owner);
-      const snapshot=source.findLast(record=>record.kind==='context.snapshot');if(!snapshot)throw Error('QUEUE_CONTEXT_UNAVAILABLE');
+      let contextSource=source,contextRunId=item.target.runId;
+      if(item.kind==='compact')for(const previous of queueItems(owner.path).filter(other=>other.kind==='follow-up'&&other.acceptedSeq<item.acceptedSeq&&other.target.sessionId===item.target.sessionId&&other.status==='applied').sort((a,b)=>a.acceptedSeq-b.acceptedSeq)){
+        if(!previous.runId)throw Error('COMPACTION_CONTEXT_LINEAGE_UNPROVEN');
+        const next=recoveryRecords(owner.path,previous.runId),accepted=next.find(r=>r.kind==='task.accepted')?.data as any,imported=next.find(r=>r.kind==='context.imported')?.data as any;
+        if(accepted?.queueRequestId!==previous.requestId||imported?.source?.sourceRunId!==contextRunId)throw Error('COMPACTION_CONTEXT_LINEAGE_UNPROVEN');
+        const closed=(next.findLast(r=>r.kind==='recovery.closed')?.data as any)?.result??next.findLast(r=>r.kind==='run.closed')?.data as RunResult|undefined;
+        if(closed?.status!=='completed'||closed.cleanup!=='confirmed'||next.some(r=>r.kind==='recovery.ended'))throw Error('COMPACTION_CONTEXT_SOURCE_NOT_COMPLETED');
+        contextSource=next;contextRunId=previous.runId;
+      }
+      const snapshot=contextSource.findLast(record=>record.kind==='context.snapshot');if(!snapshot)throw Error('QUEUE_CONTEXT_UNAVAILABLE');
       const context={...(snapshot.data as Omit<ContextSnapshot,'receiptSeq'>),receiptSeq:snapshot.seq};readObject(owner.path,context.messages);
       evidence.append('control.decision',{decision,authorization:{workspace:auth.workspace,mode:auth.mode,tools:auth.tools}});
       evidence.append('control.receipt',{requestId:item.requestId,status:'pending',reason:`Explicit compatible reattachment decision ${decision.id}`});
@@ -587,7 +596,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       if(settled==='stopped'){if(cancellation==='stop'&&compactTask){record('compaction.cancel-decision',{requestId:maintenance.requestId,taskId:compactTask,source:'stop-current-maintenance'});compactResult=await compactions.cancel(compactTask);}throw Error('COMPACTION_INTERRUPTED');}
       compactResult=settled;
       if(!['applied','noop','cancelled','stale'].includes(settled.state))failure??=settled.reason??'COMPACTION_FAILED';
-      if(maintenance.item){const e=new Evidence(dataRoot,maintenance.item.target.runId,options.fault);try{e.append('control.receipt',{requestId:maintenance.requestId,status:['applied','noop'].includes(settled.state)?'applied':settled.state==='cancelled'?'withdrawn':'frozen',reason:`Compaction ${settled.state}; generated and applied facts are separate`,execution:{runId,sessionId}});}finally{e.close();}}
+      if(maintenance.item){const e=new Evidence(dataRoot,maintenance.item.target.runId,options.fault);try{e.append('control.receipt',{requestId:maintenance.requestId,status:['applied','noop'].includes(settled.state)?'applied':['cancelled','stale'].includes(settled.state)?'withdrawn':'frozen',reason:`Compaction ${settled.state}; generated and applied facts are separate`,execution:{runId,sessionId}});}finally{e.close();}}
       record('compaction.operation-result',{requestId:maintenance.requestId,result:settled});
     } else {
     if (recovery) {
@@ -691,7 +700,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       } else evidence.close();
     }
     compactions?.close();
-    if(maintenance?.item&&(!compactResult||!['applied','noop','cancelled'].includes(compactResult.state))){const e=new Evidence(dataRoot,maintenance.item.target.runId);try{e.append('control.receipt',{requestId:maintenance.requestId,status:'frozen',reason:'Compaction interrupted or failed; inspect actual task and submission before reuse'});}finally{e.close();}}
+    if(maintenance?.item&&(!compactResult||!['applied','noop','cancelled','stale'].includes(compactResult.state))){const e=new Evidence(dataRoot,maintenance.item.target.runId);try{e.append('control.receipt',{requestId:maintenance.requestId,status:'frozen',reason:'Compaction interrupted or failed; inspect actual task and submission before reuse'});}finally{e.close();}}
     if (cleanup === 'confirmed') { await sessionOwner?.release(); await workspaceOwner?.release(); await owner.release(); }
   }
   if (!result) throw new Error(failure ?? (stopped ? `RUN_CANCELLED_BEFORE_ACCEPTANCE: ${cancellation ?? options.cancellation ?? 'exit'}` : 'RUN_NOT_ACCEPTED'));

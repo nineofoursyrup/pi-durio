@@ -158,3 +158,39 @@ test('a late cancellation loses to committed summary placement and never claims 
  const result=await compactContext({...paths,runId:initial.runId,requestId:'placement-wins',authorization:{workspace:paths.workspace,mode:'offline',tools:['read','write','edit','bash']},transport:summary.fetch,control,onObservation:e=>{if(e.kind==='compaction.finished'&&!cancellation){const f=recoveryRecords(paths.dataRoot,initial.runId).findLast(r=>r.kind==='compaction.finished')?.data as any;if(f?.state==='applied')cancellation=control.cancelCompaction({id:'too-late',taskId:f.taskId,target:control.target()!});}}});
  assert.equal(result.compaction?.state,'applied');assert.equal((await cancellation)?.state,'applied');assert.equal(summary.calls.length,1);assert.equal(readQueue(paths.dataRoot).items[0].status,'applied');
 });
+
+test('frozen unexecuted compact reattaches to the proven completed follow-up context',async()=>{
+ const {checkQueue,decideQueue}=await import('../src/runtime.js');
+ const paths=await fixture(),control=new TaskControl();let actions:Promise<void>|undefined,calls=0;
+ const first=scriptedTransport([{name:'bash',args:{command:`'${process.execPath}' wait.cjs`}}]);
+ const transport:typeof fetch=async(url,init)=>{if(++calls<=2)return first.fetch(url,init);const response=await scriptedTransport([]).fetch(url,init);return new Response((await response.text()).replace('Controlled response: inspect actual tool evidence for acceptance.','REATTACHED FOLLOWUP '+ 'z'.repeat(90000)),{headers:{'content-type':'text/event-stream'}});};
+ const done=await runCodingTask({...paths,input:'Complete source chain',mode:'offline',transport,control,onObservation:e=>{if(e.kind==='tool.output'&&!actions)actions=(async()=>{const target=control.target()!;for(const [id,kind,input] of [['reattach-first','follow-up','FIRST'],['reattach-barrier','improve','improve'],['reattach-compact','compact','compact']] as const)await control.submit({id,kind,input,target});})();}});await actions;
+ const report=await checkQueue(paths.dataRoot),item=report.items.find(i=>i.requestId==='reattach-compact')!,barrier=report.items.find(i=>i.requestId==='reattach-barrier')!;
+ assert.equal(item.status,'frozen');assert.notEqual(done.runId,item.target.runId);
+ await decideQueue({...paths,runId:barrier.target.runId,decision:{id:'remove-reattach-barrier',requestId:barrier.requestId,target:barrier.target,receiptSeq:barrier.receipt.seq,action:'withdraw'}});
+ const summary=scriptedTransport([]),request={...paths,runId:item.target.runId,authorization:{workspace:paths.workspace,mode:'offline' as const,tools:['read','write','edit','bash'] as const},decision:{id:'explicit-reattach-compact',requestId:item.requestId,target:item.target,receiptSeq:item.receipt.seq,action:'reattach' as const},transport:summary.fetch};
+ const result=await decideQueue(request);assert.equal(result.status,'completed');assert.ok('compaction' in result&&result.compaction?.state==='applied');assert.ok('runId' in result&&result.runId===done.runId);assert.match(JSON.stringify(summary.calls),/REATTACHED FOLLOWUP/);
+ assert.equal((await decideQueue(request)).status,'applied');assert.equal(summary.calls.length,1);assert.equal(readAcceptedTasks(paths.dataRoot).tasks.length,2);
+});
+
+test('frozen compact cannot jump over a failed dispatched follow-up to reuse an older completed context',async()=>{
+ const {checkQueue,decideQueue}=await import('../src/runtime.js');const paths=await fixture(),control=new TaskControl();let actions:Promise<void>|undefined,calls=0;
+ const first=scriptedTransport([{name:'bash',args:{command:`'${process.execPath}' wait.cjs`}}]);
+ const transport:typeof fetch=async(url,init)=>++calls<=2?first.fetch(url,init):new Response(JSON.stringify({error:{message:'controlled preceding failure'}}),{status:400,headers:{'content-type':'application/json'}});
+ const result=await runCodingTask({...paths,input:'Complete before failed follow-up',mode:'offline',transport,control,onObservation:e=>{if(e.kind==='tool.output'&&!actions)actions=(async()=>{const target=control.target()!;await control.submit({id:'failed-predecessor',kind:'follow-up',input:'FAIL',target});await control.submit({id:'after-failed-predecessor',kind:'compact',input:'compact',target});})();}});await actions;assert.equal(result.status,'failed');
+ const item=(await checkQueue(paths.dataRoot)).items.find(i=>i.kind==='compact')!,summary=scriptedTransport([]);
+ await assert.rejects(decideQueue({...paths,runId:item.target.runId,authorization:{workspace:paths.workspace,mode:'offline',tools:['read','write','edit','bash']},decision:{id:'refuse-old-context',requestId:item.requestId,target:item.target,receiptSeq:item.receipt.seq,action:'reattach'},transport:summary.fetch}),/COMPACTION_CONTEXT_SOURCE_NOT_COMPLETED/);assert.equal(summary.calls.length,0);
+});
+
+test('manual maintenance keeps the original dispatch capability and exhausted persistent budget',async()=>{
+ const {compactContext}=await import('../src/runtime.js');const {PersistentBudget}=await import('../src/provider-boundary.js');const {Evidence}=await import('../src/evidence.js');
+ const paths=await fixture(),ledger=new Evidence(join(paths.workspace,'budget-ledger'),'budget-host');
+ const budget=new PersistentBudget(ledger,'original-budget',{maxRequests:1,maxTokens:100,maxRequestTokens:25,unknownUpperBound:null,deadline:new Date(Date.now()+60000).toISOString()});let dispatched=0;
+ const providerBoundary={budget,purpose:'generation' as const,operationId:'original-operation',onDispatch:()=>{dispatched++;}};
+ try{const initial=await longSource(paths,{providerBoundary});assert.equal(initial.status,'completed');assert.equal(dispatched,1);
+ const summary=scriptedTransport([]),result=await compactContext({...paths,runId:initial.runId,requestId:'budget-maintenance',authorization:{workspace:paths.workspace,mode:'offline',tools:['read','write','edit','bash']},transport:summary.fetch,providerBoundary});
+ assert.equal(result.status,'failed');assert.equal(summary.calls.length,0);assert.equal(dispatched,1);assert.equal(budget.snapshot().requests,1);
+ const facts=recoveryRecords(paths.dataRoot,initial.runId),operation=facts.findLast(r=>r.kind==='compaction.started')!.data as any;
+ assert.equal(operation.providerOperation.parentOperationId,'original-operation');assert.equal(operation.providerOperation.operationId,'maintenance:budget-maintenance');assert.equal(operation.providerOperation.budgetId,'original-budget');assert.match(JSON.stringify(facts),/BUDGET_REQUEST_LIMIT/);
+ }finally{ledger.close();}
+});
