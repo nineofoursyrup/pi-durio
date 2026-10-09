@@ -1,0 +1,86 @@
+{
+  "phase1": {
+    "at": "2026-10-09T15:28:56.912669+00:00",
+    "candidate": "66c7fcafb34e722eafd738140f9305e5a235db80",
+    "run": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/manual/2026-10-09T15-23-31-721Z",
+    "phase": "queue-stop",
+    "status": "PASS",
+    "facts": {
+      "codingAccepted": true,
+      "actualBash": true,
+      "actualLocalEffect": true,
+      "steerSameTask": true,
+      "withdrawn": true,
+      "independentFollow": true,
+      "ctrlXDelivered": true,
+      "ctrlCDelivered": true,
+      "actualStopTool": true,
+      "separateIdleExitPair": true,
+      "stopped": true,
+      "frozenFollow": true,
+      "frozenManagement": true
+    },
+    "operator": {
+      "at": "2026-10-09T15:28:09.196Z",
+      "candidate": "66c7fcafb34e722eafd738140f9305e5a235db80",
+      "name": "queue-stop",
+      "status": "PASS",
+      "answer": "P",
+      "source": "human macOS Terminal operator"
+    },
+    "rawRestored": true,
+    "sttyRestored": true,
+    "remaining": "Reopen/recovery stage requested; full issue acceptance not yet satisfied",
+    "hashes": {
+      "environment.json": "eb8ac3f713c730622a63cd1e2d8302cd65ac9622997f75cffc82ec4e008d296c",
+      "plan.json": "2ee8e78dbb9a079c9e2a9f79b1aa7135f7b500e857b60efaff645d412a1a4db6",
+      "queue-stop/input.jsonl": "99d7f1489283ec7e535c93294bb1241f4c6efb30059f0279f3e81b36facdc884",
+      "queue-stop/output.ansi": "fc0e0baa3d5d2de7a46dac09a16a4b0216471697e2f10088324476649feab6ae",
+      "queue-stop/machine.json": "f575f0ade219c289c35784377842f232b443a0a00e2d179329bd0cc5a120abd8",
+      "queue-stop/operator.json": "a0dd7eba7792f6d0c06b6e199c0c422941f18a758a1f166ce77a84bacf7733f4"
+    }
+  },
+  "finalReadback": {
+    "at": "2026-10-09T15:44:35.223809+00:00",
+    "candidate": "66c7fcafb34e722eafd738140f9305e5a235db80",
+    "manual": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/manual/2026-10-09T15-23-31-721Z",
+    "userObservation": "Ctrl+L 后的只读限制、e 结束旧工作、新任务完成、旧队列仍冻结这四项都符合",
+    "operatorOriginal": {
+      "at": "2026-10-09T15:40:44.353Z",
+      "candidate": "66c7fcafb34e722eafd738140f9305e5a235db80",
+      "name": "reopen-recovery",
+      "status": "UNKNOWN",
+      "answer": "F启动时 WIDTH_CPR_TIMEOUT，Ctrl+L 后恢复步骤通过",
+      "source": "human macOS Terminal operator"
+    },
+    "interpretationOfRating": "Original runner stored UNKNOWN because F was immediately followed by Chinese. User text explicitly identifies initial WIDTH_CPR_TIMEOUT failure. Original operator record remains unchanged.",
+    "status": "NOT_ACCEPTED; startup FAIL and new task NOT_VERIFIED",
+    "firstPhase": "PASS all runtime facts, human P, raw/stty restored",
+    "recoveryFacts": {
+      "sourceExplicitlyEnded": true,
+      "sourceOriginalPreserved": true,
+      "newTaskOnly": false,
+      "oldQueueFrozen": true
+    },
+    "rawRestored": true,
+    "sttyRestored": true,
+    "newTaskGap": {
+      "beforeRequests": 4,
+      "afterRequests": 4,
+      "newPayloads": 0,
+      "submittedNewTask": false,
+      "inputObservation": "No 全新任务 text was submitted; e was followed by /queue and /exit. Human reported new-task completion but matching execution is absent, so this fact stays unverified."
+    },
+    "repair": "Serial recovery checking and active width probes; true timeout protection unchanged. New native supplement will cover cold start and actual new task, keeping previous passing behavior evidence.",
+    "hashes": {
+      "queue-stop/machine.json": "f575f0ade219c289c35784377842f232b443a0a00e2d179329bd0cc5a120abd8",
+      "queue-stop/operator.json": "a0dd7eba7792f6d0c06b6e199c0c422941f18a758a1f166ce77a84bacf7733f4",
+      "reopen-recovery/input.jsonl": "f5afdb0b9000a1d4c0a0e51a1c6552aaf9241f9ead96d35b8fd234091b812ac3",
+      "reopen-recovery/output.ansi": "0c9037025457142bb5c58a45b320bff89641a1e8e8043b89d12676802a4b77ca",
+      "reopen-recovery/machine.json": "8897f8321e2dd656abc65e06236ff81c7d7214cea8dd36ff8fcf97457a4c08f9",
+      "reopen-recovery/operator.json": "d1d32d38128b02e747e4bc7691206afed9a4c31a53afa9ce47bff23e0abc85a3",
+      "workflow.json": "52dd4f8e3eaea185941dc79df2fc3e8246f13f4bdf77d5711630c901e7606972",
+      "provider-payloads.json": "8ceac98ddc490abcab831cc5b23c1eb133ec760a8dedae230e575aa52410c213"
+    }
+  }
+}

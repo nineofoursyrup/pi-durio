@@ -384,7 +384,11 @@
         "docs/implementation/pi-durio-v1/issue-17/integration-partial.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/merge-integration-readback.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/native-r1-attempt1-feedback.json",
-        "docs/implementation/pi-durio-v1/issue-17/terminal-r1-first-attempt.json"
+        "docs/implementation/pi-durio-v1/issue-17/terminal-r1-first-attempt.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/native-r1-attempt2-phase1-pass.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/native-r1-attempt2-reopen-startup-failure.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/native-r1-attempt2-final-readback.json",
+        "docs/implementation/pi-durio-v1/issue-17/terminal-r1-second-attempt.json"
       ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-17.json",
       "branch": "codex/pi-durio-v1-issue-17",
@@ -392,18 +396,21 @@
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "base_commit": "943e8a7b00bf7278d69e6671d476a701d9eda9d6",
-      "note": "Offline-verified partial integration; native two-phase acceptance pending. Does not satisfy #19/#23/#27 dependencies.",
+      "note": "Queue-stop native PASS; cold reopen WIDTH_CPR_TIMEOUT FAIL and actual new task missing; repair candidate being frozen. #19/#23/#27 remain blocked.",
       "product_commit": "66c7fcafb34e722eafd738140f9305e5a235db80",
       "implementation_checks": {
         "full": "79/79 PASS before final control-drain changes",
         "affected": "6/6 control checks after final changes; headless demo PASS",
-        "native": "NOT RUN; operator phase 1 requested"
+        "native": "Queue-stop PASS; reopen startup FAIL and new task NOT VERIFIED; repair pending"
       },
       "handoff_tip": "8eeb3b35e831fad276ce3dd884e17a23799c5981",
       "candidate_manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/manifest.json",
       "candidate_manifest_sha256": "38742960c17164ed1c66970c67e5ff60ce73cccd7556828fae28e092b15d7474",
-      "native_acceptance": "First attempt incomplete: observed wait, one follow-up due Enter-before-CtrlX; failed attempt preserved; split retry requested",
-      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/17#issuecomment-6083615308"
+      "native_acceptance": "Queue-stop PASS; reopened source explicitly ended, originals preserved, old queue frozen and readonly restriction observed; cold display FAIL, actual new task absent. Repair 30/30 affected passed, new native supplement preparing.",
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/17#issuecomment-6083615308",
+      "repair_worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-17-reopen",
+      "repair_branch": "codex/pi-durio-v1-issue-17-reopen",
+      "repair_agent": "/root/issue17_reopen"
     },
     "18": {
       "number": 18,
@@ -439,7 +446,7 @@
         "initial": "22/22 PASS",
         "later": "affected r4/r5/r7/r8/r9 PASS; earlier FAIL retained",
         "actual_demo": "failed runtime, unknown usage, complete output reconstruction and 11840 retained content objects; whole demonstration 130.562291291 seconds",
-        "install": "in progress"
+        "install": "PASS: 5/5 readonly queries with unchanged source hash"
       },
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/18#issuecomment-6083399178",
       "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/publication/readback.json"
@@ -476,17 +483,27 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-20",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "30f25fac6c8c94546355bf03b94622f994b22714",
+      "integrated_sha": "6d2d3aba847965542a3cab4e1653a2bc340bf92a",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-20/README.md",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/handoff-r2.json",
+        "docs/implementation/pi-durio-v1/issue-20/acceptance.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/merge-integration-readback.json"
+      ],
       "branch": "codex/pi-durio-v1-issue-20",
       "agent": "/root/issue20",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T144939Z/issue-20.json",
-      "note": "Fresh implementer dispatched from 1558066 after #15/#18 applicable acceptance; existing evidence is protected, demonstrations only on owned fixtures."
+      "note": "Applicable archive/retention/cleanup/migration evidence passed and merged product bytes bound; native management composition remains #31.",
+      "product_commit": "68fb251623326b1a6357e7efb8b2602ecbc74f3e",
+      "acceptance": {
+        "at": "2026-10-09T15:49:24.561467+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/acceptance.json"
+      }
     },
     "21": {
       "number": 21,
@@ -714,7 +731,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "0557d08c8a6dda6d96a08c0ef77948a7e91bbc5b",
+  "integration_tip": "6d2d3aba847965542a3cab4e1653a2bc340bf92a",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -724,7 +741,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T15:16:27.618678+00:00",
+  "updated_at": "2026-10-09T15:49:24.561467+00:00",
   "last_remote_readback": {
     "headRefOid": "0557d08c8a6dda6d96a08c0ef77948a7e91bbc5b",
     "isDraft": true,
@@ -747,6 +764,19 @@
         "reason": "ordinary admission closing was ignored before run.started; no invented execution",
         "status": "source and 2/2 snapshot regression inspected; #18 cherry-pick authorized"
       }
+    },
+    "provider_boundary": {
+      "owner": 21,
+      "potential_consumer": 19,
+      "commit": "a4da70b78cb112e5391b0ee3a8ff04212c1a2187",
+      "status": "Coordinator inspected both commits and applicable tests; eligible as shared seam for future #19 after its own dependencies satisfy",
+      "checks": "16/16 initial seam+runtime, then 2/2 affected compaction/recovery after follow-up; no VM/product-eval acceptance claim",
+      "followup": [
+        "Host mediator must still enforce trustworthy request upper bounds before live dispatch; #21 whole-ticket acceptance pending"
+      ],
+      "scope": "Internal API coordination only; neither #21 nor #19 acceptance",
+      "followup_commit": "fe57347b0d44c628f80044e16277be49358c5a26"
     }
-  }
+  },
+  "root_write_owner": "coordinator"
 }
