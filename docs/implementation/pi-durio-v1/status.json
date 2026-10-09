@@ -356,13 +356,17 @@
         "at": "2026-10-09T14:03:52.611723+00:00",
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-acceptance/acceptance.json",
         "recordSha256": "4c60fd3dd5476bf1bbeb869b4fbc97c849a63073d47ce087631421d693089365"
-      }
+      },
+      "acceptance_publication": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-acceptance/publication/readback.json",
+      "acceptance_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/16#issuecomment-6082577585"
     },
     "17": {
       "number": 17,
       "title": "忙时队列、停止与恢复决策交互",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         16,
@@ -370,18 +374,32 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
+      "status": "implementing",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-17",
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-17.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-17.json",
+      "branch": "codex/pi-durio-v1-issue-17",
+      "agent": "/root/issue17",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "base_commit": "943e8a7b00bf7278d69e6671d476a701d9eda9d6",
+      "note": "Claimed and dispatched with fresh context; shared accepted-task interface coordinated before pending projections.",
+      "product_commit": "082d85edabac2025f0c4562399636da232d14637",
+      "implementation_checks": {
+        "full": "79/79 PASS before final control-drain changes",
+        "affected": "6/6 control checks after final changes; headless demo PASS",
+        "native": "NOT RUN; awaiting combined #18 integration before installed candidate freeze"
+      }
     },
     "18": {
       "number": 18,
       "title": "历史原文、trace、用量追查与固定证据",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         13,
@@ -389,12 +407,28 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
-      "worktree": null,
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-18.json"
+      "status": "integrated-accepted",
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-18",
+      "commit": "3aecc37380a7c4678a3ce12b03740a6e2b52a332",
+      "integrated_sha": "fe6757df3de554cd834b0f11b45167e59ed3b26c",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-18/acceptance.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/merge-integration-readback.json"
+      ],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T140208Z/issue-18.json",
+      "branch": "codex/pi-durio-v1-issue-18",
+      "agent": "/root/issue18",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "base_commit": "943e8a7b00bf7278d69e6671d476a701d9eda9d6",
+      "note": "T08 applicable acceptance passed: readonly query/trace/usage and verified content retention; actual failing shell/unknown usage demo plus installed readbacks. Historical FAIL retained; #17 native and #19/#27/#31 duties remain separate.",
+      "product_commit": "3aecc37380a7c4678a3ce12b03740a6e2b52a332",
+      "implementation_checks": {
+        "initial": "22/22 PASS",
+        "later": "affected r4/r5/r7/r8/r9 PASS; earlier FAIL retained",
+        "actual_demo": "failed runtime, unknown usage, complete output reconstruction and 11840 retained content objects; whole demonstration 130.562291291 seconds",
+        "install": "in progress"
+      }
     },
     "19": {
       "number": 19,
@@ -426,7 +460,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
@@ -445,7 +479,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "blocked-by-dependencies",
+      "status": "ready",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
@@ -648,11 +682,11 @@
     }
   },
   "frontier": [
-    17,
-    18
+    20,
+    21
   ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "32d36f45adafe72035c2a8b68ac4aed37053c91f",
+  "integration_tip": "fe6757df3de554cd834b0f11b45167e59ed3b26c",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -662,11 +696,29 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T14:03:52.690682+00:00",
+  "updated_at": "2026-10-09T14:48:56.223850+00:00",
   "last_remote_readback": {
-    "headRefOid": "32d36f45adafe72035c2a8b68ac4aed37053c91f",
+    "headRefOid": "943e8a7b00bf7278d69e6671d476a701d9eda9d6",
     "isDraft": true,
     "state": "OPEN",
     "closingIssuesReferences": []
+  },
+  "shared_interfaces": {
+    "accepted_task_queue": {
+      "commit": "01f2d3a562b12a9917b3db1dc8111ea2717d386f",
+      "owner": 17,
+      "consumer": 18,
+      "status": "coordinator verified; consumer cherry-pick authorized",
+      "evidence": [
+        "evidence/issue-17/seam-build.log",
+        "evidence/issue-17/seam-tests.log"
+      ],
+      "scope": "readonly stable acceptance, nullable execution, immutable target, as-of receipts and closure; not full issue acceptance",
+      "followup_fix": {
+        "commit": "ca972e836d2abcc60d89467a522c556bf45127c5",
+        "reason": "ordinary admission closing was ignored before run.started; no invented execution",
+        "status": "source and 2/2 snapshot regression inspected; #18 cherry-pick authorized"
+      }
+    }
   }
 }
