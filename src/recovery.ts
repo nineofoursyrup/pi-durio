@@ -2,9 +2,11 @@ import { join, dirname } from 'node:path';
 import { readdir, realpath, access, readFile, stat, mkdir, rename, rmdir } from 'node:fs/promises';
 import { openSync, writeFileSync, fsyncSync, closeSync } from 'node:fs';
 import { hostname } from 'node:os';
-import { Evidence, digest, openHostReadonly, readObject, type EvidenceRecord, type BlobRef } from './evidence.js';
+import { Evidence, digest } from './evidence.js';
 import { acquireOwner, type OwnerLease } from './ownership.js';
-import { inspectSession } from './preflight.js';
+import { inspectSession, inspectAdmission } from './preflight.js';
+import { recoveryRecords, recoverySnapshotId, ownerSnapshotId, type RecoveryRecords } from './recovery-facts.js';
+export { recoveryRecords } from './recovery-facts.js';
 import { verifyArtifact } from './artifact.js';
 import { retainedExecutionConfig } from './execution-config.js';
 import { resolveWorkspaceRoot } from './workspace-ownership.js';
@@ -39,12 +41,7 @@ export interface RecoveryReport {
   needsInput?: { reason:string; options:string[]; risks:string[] };
   decisionId?: string;
 }
-export function recoveryRecords(root: string, runId?: string): EvidenceRecord[] {
-  const db = openHostReadonly(root);
-  try { return db.prepare(`SELECT seq,kind,at,body FROM records ${runId ? 'WHERE run_id=?' : ''} ORDER BY seq`).all(...(runId ? [runId] : [])).map(row => ({ seq: Number(row.seq), kind: String(row.kind), at: String(row.at), data: JSON.parse(readObject(root, JSON.parse(String(row.body)) as BlobRef).toString()) })); }
-  finally { db.close(); }
-}
-function freezePendingControls(evidence:Evidence,records:EvidenceRecord[]) {
+function freezePendingControls(evidence:Evidence,records:RecoveryRecords) {
   for(const record of records.filter(record=>record.kind==='control.accepted')) {
     const admission=record.data as any;
     const state=records.findLast(record=>record.kind==='control.receipt'&&(record.data as any).requestId===admission.requestId)?.data as any;
@@ -52,7 +49,7 @@ function freezePendingControls(evidence:Evidence,records:EvidenceRecord[]) {
   }
 }
 interface OwnerClaim { path:string; markerSha256:string; claim:{pid:number;host:string;token?:string}; lock:{ino:number;mtimeMs:number}|null }
-async function ownerClaims(root:string,records:EvidenceRecord[]):Promise<OwnerClaim[]> {
+async function ownerClaims(root:string,records:RecoveryRecords):Promise<OwnerClaim[]> {
   const acquired=last(records,'ownership.acquired');
   const session=last(records,'ownership.session');
   const known=[acquired?.workspace,session,acquired?.dataRoot].filter(Boolean) as {path:string;claim:OwnerClaim['claim']}[];
@@ -73,14 +70,14 @@ async function saveOwnerReport(root:string,report:RecoveryReport) {
   try {const fd=openSync(path,'wx',0o600);try{writeFileSync(fd,JSON.stringify(report));fsyncSync(fd);}finally{closeSync(fd);}const folder=openSync(dir,'r');try{fsyncSync(folder);}finally{closeSync(folder);}}
   catch(error){if((error as NodeJS.ErrnoException).code!=='EEXIST')throw error;}
 }
-const last = (records: EvidenceRecord[], kind: string): any => records.findLast(r => r.kind === kind)?.data;
+const last = (records: RecoveryRecords, kind: string): any => records.findLast(r => r.kind === kind)?.data;
 const identity = (files: {path:string;sha256:string}[]) => digest(JSON.stringify(files));
 function authorizationIdentity(auth?:RecoveryAuthorization) {
   if(!auth)return undefined;
   const environment=auth.toolEnvironment;
   return {...auth,...(environment?{toolEnvironment:{version:environment.version,names:Object.keys(environment.variables).sort(),digest:digest(JSON.stringify(Object.entries(environment.variables).sort(([a],[b])=>a.localeCompare(b))))}}:{})};
 }
-export function sessionWasEnded(records: EvidenceRecord[], sessionId: string, files: {path:string;sha256:string}[]) {
+export function sessionWasEnded(records: RecoveryRecords, sessionId: string, files: {path:string;sha256:string}[]) {
   return records.some(record => record.kind === 'recovery.ended' && (record.data as any).sessionId === sessionId && (record.data as any).sourceId === identity(files));
 }
 
@@ -117,7 +114,7 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
     const message = assistant?.model?.[0];
     const call = message?.role === 'assistant' ? message.content.find(part => part.type === 'toolCall' && part.id === input.callId) : undefined;
     if (!call || call.type !== 'toolCall') { reasons.push(`DURABLE_TOOL_IDENTITY_MISSING:${task.id}`); continue; }
-    const facts = records.filter(r => (r.data as any)?.durableTaskId === task.id);
+    const facts = records.filter(r => ['tool.intent','tool.dispatch','tool.result','tool.error'].includes(r.kind) && (r.data as any)?.durableTaskId === task.id);
     const outcome = task.state.outcome;
     const result = task.state.status === 'terminal' && outcome?.status === 'completed' ? session.entries.find(entry => entry.id === outcome.result?.entryId) : undefined;
     const hostResult = facts.find(r => r.kind === 'tool.result');
@@ -142,8 +139,8 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   for (const dir of await readdir(join(owner.path,'sessions'), {withFileTypes:true})) {
     if (!dir.isDirectory()) { reasons.push('SESSION_STORAGE_ALIAS'); continue; }
     if (dir.name === accepted.sessionId) continue;
-    const other = await inspectSession(join(owner.path,'sessions',dir.name,'durable.sqlite'),owner);
-    if (other.pending.length && !sessionWasEnded(allRecords,dir.name,other.sourceFiles)) reasons.push(`OTHER_SESSION_PENDING:${dir.name}`);
+    const other = await inspectAdmission(join(owner.path,'sessions',dir.name,'durable.sqlite'),owner);
+    if (other.pending && !sessionWasEnded(allRecords,dir.name,other.sourceFiles)) reasons.push(`OTHER_SESSION_PENDING:${dir.name}`);
     const otherAccepted = allRecords.find(r => r.kind === 'task.accepted' && (r.data as any).sessionId === dir.name);
     if (!otherAccepted) reasons.push(`SESSION_WITHOUT_HOST_IDENTITY:${dir.name}`);
   }
@@ -173,7 +170,7 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
     if (!remainingModelAttempts) reasons.push('REQUEST_LIMIT_EXHAUSTED');
     if (original.cleanup === 'unknown' && !records.some(r => r.kind === 'lifecycle.late-close' && (r.data as any).storage === 'closed')) reasons.push('CLEANUP_UNCONFIRMED');
   }
-  const snapshotId = digest(JSON.stringify({ source:session.sourceFiles, facts:records.filter(r => !r.kind.startsWith('recovery.')||r.kind==='recovery.decision').map(r => [r.seq,r.kind,r.data]), authorization:authorizationIdentity(options.authorization), reasons }));
+  const snapshotId = recoverySnapshotId(session.sourceFiles, records, authorizationIdentity(options.authorization), reasons);
   const status: RecoveryReport['status'] = ended ? 'ended' : reasons.length ? 'blocked' : settled ? 'completed' : 'needs-decision';
   const report: RecoveryReport = { runId:options.runId,snapshotId,status,exitCode:status === 'completed'||status === 'ended'?0:75,reasons,options:status === 'completed'||status === 'ended'?[]:reasons.length?['inspect','end']:['inspect','continue','end'],original,tools,compactions,unknownModelAttempts,remainingModelAttempts,session:{id:accepted.sessionId,sourceFiles:session.sourceFiles,pending:session.pending,taskCount:session.tasks.length,submissionCount:session.submissions.length},persistence:'not-requested' };
   if(reasons.some(reason=>/OTHER_PENDING|OTHER_SESSION|SESSION_WITHOUT|ALIAS/.test(reason))) report.options=['inspect','external-verification'];
@@ -189,7 +186,7 @@ export async function inspectRecovery(options: RecoveryOptions): Promise<Recover
   try { owner = await acquireOwner(options.dataRoot, () => {}); return (await inspectOwnedRecovery(options,owner)).report; }
   catch (error) {
     const claims=(await ownerClaims(await realpath(options.dataRoot),records)).filter(claim=>claim.path!==owner?.path);
-    return { runId:options.runId,snapshotId:digest(JSON.stringify({facts:records.map(r => [r.seq,r.kind]),claims})),status:'blocked',exitCode:75,reasons:[String(error)],options:['inspect','confirm-cleanup'],original:last(records,'run.closed')??{status:'unknown'},tools:[],unknownModelAttempts:[],remainingModelAttempts:0,persistence:'owner-blocked',ownerClaims:claims,needsInput:{reason:'Ownership or stable snapshot unavailable',options:['inspect','confirm-cleanup'],risks:['No durable store was opened. PID disappearance or user consent alone cannot establish cleanup.']} };
+    return { runId:options.runId,snapshotId:ownerSnapshotId(records,claims),status:'blocked',exitCode:75,reasons:[String(error)],options:['inspect','confirm-cleanup'],original:last(records,'run.closed')??{status:'unknown'},tools:[],unknownModelAttempts:[],remainingModelAttempts:0,persistence:'owner-blocked',ownerClaims:claims,needsInput:{reason:'Ownership or stable snapshot unavailable',options:['inspect','confirm-cleanup'],risks:['No durable store was opened. PID disappearance or user consent alone cannot establish cleanup.']} };
   } finally { await owner?.release(); }
 }
 /** Explicit check persists a separate report, without changing execution state. Read-only show/inspect never calls this. */
@@ -252,7 +249,7 @@ export async function settleRecoveryOwners(options:RecoveryOptions & {decision:{
   } finally {await gate.release();}
 }
 export interface RecoveryPlan {
-  owner: OwnerLease; report: RecoveryReport; records: EvidenceRecord[]; accepted: any; started: any; config: any; coding: boolean;
+  owner: OwnerLease; report: RecoveryReport; records: RecoveryRecords; accepted: any; started: any; config: any; coding: boolean;
   submissionId: SubmissionId; decision: RecoveryDecision; readOnly: boolean; previousRequests: number; previousUsageUnknown: boolean;
   adopted?:boolean;
   frozenSubmissions?:{id:SubmissionId;requestId:string}[];

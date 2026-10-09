@@ -414,7 +414,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     }
     await chmod(dataRoot, 0o700);
     if(!recovery?.readOnly&&!improve)assertWorkspaceUnfenced(workspace);
-    const inspected = recovery ? [] : await preflight(owner);
+    const inspected = recovery ? undefined : await preflight(owner, { runId: maintenance?.source.sourceRunId ?? options.contextRunId });
     const savedConfiguration=recovery?.config??(maintenance?maintenanceRecords.find(r=>r.kind==='execution.config')?.data:queued?recoveryRecords(dataRoot,queued.item.target.runId).find(r=>r.seq===queued.item.executionVersion.configSeq)?.data:undefined) as any;
     if(!improve){
       if(savedConfiguration){configuration=retainedExecutionConfig(dataRoot,coding,options.mode,options.toolEnvironment,savedConfiguration);defaults=savedConfiguration.improveDefaults;}
@@ -433,7 +433,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       const expected=configuration;
       if(accepted.workspace!==workspace||Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('CONTEXT_EXECUTION_CONFIGURATION_CHANGED');
       if(config.providerBoundary)throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
-      if(inspected.find(r=>r.source===join(dataRoot,'sessions',accepted.sessionId,'durable.sqlite'))?.pending.length||prior.some(r=>r.kind==='recovery.ended'))throw Error('CONTEXT_SOURCE_FROZEN');
+      if(inspected?.selectedSession?.pending||prior.some(r=>r.kind==='recovery.ended'))throw Error('CONTEXT_SOURCE_FROZEN');
       const snapshot=prior.findLast(r=>r.kind==='context.snapshot');if(!snapshot)throw Error('CONTEXT_UNAVAILABLE');
       continued={...(snapshot.data as Omit<ContextSnapshot,'receiptSeq'>),receiptSeq:snapshot.seq};readObject(dataRoot,continued.messages);
     }
@@ -444,7 +444,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       if(maintenanceRecords.some(r=>r.kind==='recovery.ended'))throw Error('COMPACTION_SOURCE_ENDED');
       if(workspace!==sourceAccepted.workspace||Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('COMPACTION_EXECUTION_CONFIGURATION_CHANGED');
       if(config.providerBoundary&&(providerBoundary?.operationId!==config.providerBoundary.operationId||providerBoundary?.budget?.id!==config.providerBoundary.budget?.id))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
-      if(inspected.find(r=>r.source===join(dataRoot,'sessions',sessionId,'durable.sqlite'))?.pending.length)throw Error('COMPACTION_RECOVERY_REQUIRED: source has frozen durable work');
+      if(inspected?.selectedSession?.pending)throw Error('COMPACTION_RECOVERY_REQUIRED: source has frozen durable work');
       if(!maintenance.item){
         const existing=findQueueItem(dataRoot,maintenance.requestId);
         if(existing)throw Error('COMPACTION_ALREADY_PENDING: inspect the saved request');
@@ -474,7 +474,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     if (stopped) throw new Error(`RUN_CANCELLED_BEFORE_ACCEPTANCE: ${options.cancellation ?? 'exit'}`);
     guard();
     evidence = new Evidence(dataRoot, runId, options.fault);
-    if (!recovery) record('preflight', { sessions: inspected });
+    if (!recovery) record('preflight', inspected);
     else record('recovery.started', { decisionId: recovery.decision.id, snapshotId: recovery.report.snapshotId, capabilities: recovery.readOnly ? ['read'] : recovery.accepted.authorization.tools, previousRequests: requests, previousUsageUnknown: recovery.previousUsageUnknown, originalStatus: (recovery.report.original as {status:string}).status });
     guard();
     accepted = true;
