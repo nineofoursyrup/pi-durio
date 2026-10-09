@@ -1,0 +1,40 @@
+{
+  "issue": 22,
+  "acceptedAt": "2026-10-09T17:17:30.617729+00:00",
+  "status": "integrated-accepted",
+  "scope": "T12 applicable fixed controlled-provider fresh comparison and report acceptance; no paid model effect or native composition claim",
+  "productSource": "f7191308674d8b92d2e4d717c57386b77046867a",
+  "ticketTip": "fa6aa2a798cf4629749cb6c07e72a7ca7422e60f",
+  "integrationMerge": "291a5fc5a6d49e2b6e785122c437106575f3c4f7",
+  "mergeTree": "1a5157befa4dd836c9dbc896c8e1c8369dfe17b8",
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/merge-integration-readback.json",
+    "sha256": "e0adb47746cb8f596eb3ea71da3971f892d7222fe9863c88917025d6b66c531b"
+  },
+  "criteria": {
+    "fixedPlan": "PASS: single objective/threshold/protections and bound runtime content, same initial state, per-trial equal limits, AB/BA fresh execution",
+    "decision": "PASS: hard-regression precedence, repeated threshold logic, incomplete/contradictory/invalid evidence retained; synthetic four conclusions and requirement-level P/V/R example",
+    "actualExecution": "PASS: eight new installed product sessions/VMs, four valid pairs, 28 requests/392 tokens, twelve valid protections without regressions; twenty execution/grading VMs terminated",
+    "revision": "PASS: same frozen outcomes regraded with independent new rule identity, original no-difference result retained, no additional dispatch",
+    "readonly": "PASS: installed cold CLI JSON/text, historical snapshot and TUI share report semantics; SQLite unchanged",
+    "identity": "PASS: 103 source files/141 compiled/12803 installed/12745 Linux runtime manifest/511 demo records and12858 objects bound"
+  },
+  "checks": {
+    "full": "143/143 on f719130 frozen product",
+    "knownResults": "13/13 synthetic cases, separate from actual execution",
+    "integration": "Exact delivered tree, no conflicts or executable changes, applicable evidence reused"
+  },
+  "preserved": [
+    "Original test/setup failures, missing-cost and missing-time regressions",
+    "Unknown/unrun/invalid comparisons and original grading facts",
+    "Merger verifier mistaken failed-cost-subtotal invariant retained and corrected; total and original identities unchanged"
+  ],
+  "remaining": [
+    "#23–#29 improve and metrics",
+    "#30 paid real DeepSeek batch NOT AUTHORIZED/NOT RUN",
+    "#31 native combined acceptance and resource measurements",
+    "#32 human daily-use acceptance",
+    "final fixed-candidate independent review"
+  ],
+  "rootDist": "Old ignored dist preserved; validated independent installation remains issue-22/install-01"
+}

@@ -511,7 +511,9 @@
       "acceptance": {
         "at": "2026-10-09T16:58:57.933461+00:00",
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/coordinator-acceptance.json"
-      }
+      },
+      "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/19#issuecomment-6085481855",
+      "publication_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-19/publication/readback.json"
     },
     "20": {
       "number": 20,
@@ -605,19 +607,30 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "implementing",
+      "status": "integrated-accepted",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-22",
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "commit": "fa6aa2a798cf4629749cb6c07e72a7ca7422e60f",
+      "integrated_sha": "291a5fc5a6d49e2b6e785122c437106575f3c4f7",
+      "evidence": [
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/handoff.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/coordinator-premerge.json",
+        "docs/implementation/pi-durio-v1/issue-22/README.md",
+        "docs/implementation/pi-durio-v1/issue-22/coordinator-acceptance.json",
+        "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/merge-integration-readback.json"
+      ],
       "branch": "codex/pi-durio-v1-issue-22",
       "agent": "/root/issue22",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T161054Z/issue-22.json",
-      "note": "Fixed comparison/report checks pass (15 eval, 4 unchanged provider); final installed fresh VM/regrade demo awaits accepted #19 integration. Not accepted yet.",
+      "note": "T12 fixed controlled-provider fresh comparison, report and same-outcome revision accepted. Paid model effect and native integrated acceptance remain separate.",
       "base_commit": "0782fe35e941567d94d05ef71da5e45857c4e57c",
-      "local_checkpoint": "c16d5d4"
+      "local_checkpoint": "f7191308674d8b92d2e4d717c57386b77046867a",
+      "product_commit": "f7191308674d8b92d2e4d717c57386b77046867a",
+      "acceptance": {
+        "at": "2026-10-09T17:17:30.617729+00:00",
+        "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/coordinator-acceptance.json"
+      }
     },
     "23": {
       "number": 23,
@@ -633,7 +646,7 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "dispatching",
+      "status": "implementing",
       "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-23",
       "commit": null,
       "integrated_sha": null,
@@ -643,7 +656,8 @@
       "agent": "/root/issue23",
       "model_requested": "gpt-6-astra",
       "reasoning_requested": "xhigh",
-      "note": "Claim readback verified; fresh implementer dispatch follows #19 metadata commit."
+      "note": "Fresh gpt-6-astra/xhigh implementer active on scoped improve analysis/report; claim readback verified.",
+      "base_commit": "6b6b5f64f817a724d15f0bae554f4c008d5bc0eb"
     },
     "24": {
       "number": 24,
@@ -661,7 +675,8 @@
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
-      "evidence": []
+      "evidence": [],
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T171238Z/issue-24.json"
     },
     "25": {
       "number": 25,
@@ -709,12 +724,12 @@
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready",
+      "status": "dispatching",
       "worktree": null,
       "commit": null,
       "integrated_sha": null,
       "evidence": [],
-      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T165127Z/issue-27.json"
+      "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T171238Z/issue-27.json"
     },
     "28": {
       "number": 28,
@@ -807,11 +822,9 @@
       "evidence": []
     }
   },
-  "frontier": [
-    27
-  ],
+  "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "cd94ecaf0dc67b68b3d43f9cb50897c965b771f5",
+  "integration_tip": "291a5fc5a6d49e2b6e785122c437106575f3c4f7",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -821,11 +834,11 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-09T16:58:57.933461+00:00",
+  "updated_at": "2026-10-09T17:17:30.739144+00:00",
   "last_remote_readback": {
-    "headRefOid": "0782fe35e941567d94d05ef71da5e45857c4e57c",
-    "isDraft": true,
+    "headRefOid": "6b6b5f64f817a724d15f0bae554f4c008d5bc0eb",
     "state": "OPEN",
+    "isDraft": true,
     "closingIssuesReferences": []
   },
   "shared_interfaces": {
