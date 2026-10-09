@@ -37,14 +37,20 @@
         "STD-02"
       ],
       "ticket": 26,
-      "scope": "actual acquired output retention across common isolation/new-process entry"
+      "scope": "actual acquired output retention across common isolation/new-process entry",
+      "status": "INTEGRATED_PENDING_REVIEW",
+      "integrated": "6a8c1aba3fd6a4938875357ecf9996ea4b169391",
+      "readback": "docs/implementation/pi-durio-v1/issue-26/output-repair-merge-readback.json"
     },
     {
       "findings": [
         "STD-03"
       ],
       "ticket": 27,
-      "scope": "shared acceptance/feedback/cost owner boundary"
+      "scope": "shared acceptance/feedback/cost owner boundary",
+      "status": "INTEGRATED_PENDING_REVIEW",
+      "integrated": "30478e315f433ec28dab1b846a87ae70934277a1",
+      "readback": "docs/implementation/pi-durio-v1/issue-27/owner-repair-merge-readback.json"
     }
   ],
   "optional": [
@@ -56,5 +62,5 @@
   "provider": "NOT_GRANTED_NOT_RUN",
   "native": "NOT_RUN_USER_LAUNCH_PENDING",
   "dailyUse": "NOT_ACCEPTED",
-  "updatedAt": "2026-10-09T22:11:07.506878+00:00"
+  "updatedAt": "2026-10-09T22:27:29.598246+00:00"
 }
