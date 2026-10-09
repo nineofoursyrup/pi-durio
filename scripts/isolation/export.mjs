@@ -5,8 +5,9 @@ import { createHash } from 'node:crypto';
 
 // The caller must stop the VM before invoking this function. No candidate file
 // is imported, evaluated, unpacked, or used as a destination path.
-export async function exportRegularFiles(source, names, destination, maxBytes = 1_048_576) {
-  if (!Array.isArray(names) || names.length > 32 || new Set(names).size !== names.length) {
+export async function exportRegularFiles(source, names, destination, maxBytes = 1_048_576, maxFiles = 32) {
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 134217728 || !Number.isSafeInteger(maxFiles) || maxFiles < 1 || maxFiles > 20000) throw new Error('invalid_export_limits');
+  if (!Array.isArray(names) || names.length > maxFiles || new Set(names).size !== names.length) {
     throw new Error('invalid_export_manifest');
   }
   const root = await lstat(source);

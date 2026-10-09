@@ -1,3 +1,4 @@
+import { dispatchProvider, type ProviderBoundary } from './provider-boundary.js';
 import { realpath, mkdir, chmod } from 'node:fs/promises';
 import { join, relative, isAbsolute, resolve, dirname, basename } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -31,6 +32,10 @@ export interface ReadTaskOptions {
   mode: 'live' | 'offline';
   /** Explicit offline transport boundary. Never silently fall back from a live provider. */
   transport?: typeof fetch;
+  /** Trusted host dispatch capability; never accepted from model/tool data. */
+  providerBoundary?: ProviderBoundary;
+  /** Offline boundary verification only; normal product compaction defaults stay unchanged. */
+  verificationCompaction?: { reserveTokens:number; keepRecentTokens:number };
   signal?: AbortSignal;
   /** stop persists abort intent; exit preserves unfinished work and closes. */
   cancellation?: 'stop' | 'exit';
@@ -88,6 +93,7 @@ export function waitForRun(run: Promise<RunResult>, signal?: AbortSignal): Promi
 
 /** Explicit recovery is a checked reopening of the same run, not a new scheduler or task loop. */
 export async function recoverRun(options: RecoveryOptions & { decision: RecoveryDecision; transport?: typeof fetch; apiKey?: string; signal?: AbortSignal; cancellation?: 'stop' | 'exit'; onObservation?: ReadTaskOptions['onObservation']; fault?: FaultInjector; control?:TaskControl }): Promise<RunResult | RecoveryReport> {
+  if(options.decision.action==='continue'&&recoveryRecords(options.dataRoot,options.runId).some(record=>record.kind==='execution.config'&&(record.data as any).providerBoundary))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED: original dispatch capability cannot be reconstructed by this recovery entry; inspect or end old work, never resume with an unbudgeted provider');
   const stable = { ...options, authorization: options.authorization && structuredClone(options.authorization), decision: structuredClone(options.decision) };
   const prepared = await prepareRecovery(stable);
   if (!prepared || typeof prepared !== 'object' || !('owner' in prepared)) return prepared as RunResult | RecoveryReport;
@@ -193,6 +199,7 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
       const auth=options.authorization;
       if(await realpath(auth.workspace)!==item.target.workspace||auth.mode!==accepted.mode||JSON.stringify([...auth.tools].sort())!==JSON.stringify([...accepted.authorization.tools].sort()))throw Error('QUEUE_AUTHORIZATION_CHANGED');
       const config=source.find(record=>record.seq===item.executionVersion.configSeq)!.data as any;
+      if(config.providerBoundary)throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED: queued work cannot drop the original dispatch boundary');
       const expected=executionConfig(accepted.authorization.execution==='trusted-local-coding',auth.mode,auth.toolEnvironment);
       if(Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('QUEUE_EXECUTION_CONFIGURATION_CHANGED');
       await preflight(owner);
@@ -213,6 +220,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
   const cleanupTimeoutMs = options.cleanupTimeoutMs ?? 10000;
   if (!Number.isSafeInteger(cleanupTimeoutMs) || cleanupTimeoutMs < 1 || cleanupTimeoutMs > 300000) throw new Error('INVALID_CLEANUP_TIMEOUT: provide 1–300000 milliseconds');
   if (!options.input.trim() || Buffer.byteLength(options.input) > 32 * 1024) throw new Error('INPUT_LIMIT: provide 1–32768 bytes');
+  if (options.verificationCompaction && (options.mode !== 'offline' || !options.providerBoundary || !Object.values(options.verificationCompaction).every(n=>Number.isSafeInteger(n)&&n>0) || options.verificationCompaction.keepRecentTokens > 32768 || options.verificationCompaction.reserveTokens > 1_048_576)) throw new Error('INVALID_VERIFICATION_COMPACTION');
   if (options.mode === 'offline' && !options.transport) throw new Error('OFFLINE_TRANSPORT_REQUIRED');
   if (options.mode === 'live' && options.transport) throw new Error('LIVE_TRANSPORT_OVERRIDE_DENIED');
   const apiKey = options.mode === 'offline' ? 'offline-transport-placeholder' : (options.apiKey ?? process.env.DEEPSEEK_API_KEY);
@@ -331,22 +339,33 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     const model = models.getModel('deepseek', 'deepseek-flash');
     if (!model || model.api !== 'openai-completions' || model.baseUrl !== 'https://api.deepseek.com') throw new Error('MODEL_CONFIGURATION_MISMATCH');
     const configuration = executionConfig(coding,options.mode,options.toolEnvironment);
-    const settings = configuration.settings;
-    const configSeq=recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.config')!.seq:record('execution.config', { cleanupTimeoutMs, ...configuration, recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
+    const settings = options.verificationCompaction ? {...configuration.settings,compaction:{enabled:true,...options.verificationCompaction}} : configuration.settings;
+    const configSeq=recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.config')!.seq:record('execution.config', { cleanupTimeoutMs, ...configuration, settings, ...(options.providerBoundary?{providerBoundary:{kind:'trusted-dispatch-capability',operationId:options.providerBoundary.operationId,budget:options.providerBoundary.budget?{id:options.providerBoundary.budget.id,root:options.providerBoundary.budget.evidence.root,runId:options.providerBoundary.budget.evidence.runId,limits:options.providerBoundary.budget.limits}:null,recovery:'requires-original-capability; this entry supports readonly or explicit end only'}}:{}), ...(options.verificationCompaction?{verificationCompaction:options.verificationCompaction}:{}), recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
     const actualStream = models.streamSimple.bind(models);
+    const actualComplete = models.completeSimple.bind(models);
+    // In the fixed Pi Harness, completeSimple is used by the compaction task.
+    const requestPurpose = new AsyncLocalStorage<'compaction'>();
     const capturedModels: Models = Object.assign(models, {
+      completeSimple: ((requestedModel,context,streamOptions) => requestPurpose.run('compaction',()=>actualComplete(requestedModel,context,streamOptions))) as Models['completeSimple'],
       streamSimple: ((requestedModel, context, streamOptions) => {
         guard();
         if (++requests > 8) { requests--; throw new Error('REQUEST_LIMIT: this task permits eight provider attempts'); }
         const attemptId = randomUUID();
-        let hasUsage = false;
-        record('model.intent', { attemptId, durableTaskId: generationTaskId, ordinal: requests, model: { provider: requestedModel.provider, id: requestedModel.id }, context, purpose: 'generation', boundary: 'Models.streamSimple', options: { maxRetries: streamOptions?.maxRetries, timeoutMs: streamOptions?.timeoutMs, reasoning: streamOptions?.reasoning, sessionId: streamOptions?.sessionId } });
+        let hasUsage = false, responseRecorded = false;
+        const purpose=requestPurpose.getStore()??'generation';
+        const completed=(message:AssistantMessage)=>{
+          if(responseRecorded)return;responseRecorded=true;responses++;if(hasUsage)usageReports++;
+          record('model.response', { attemptId, message: { ...message, ...(message.errorMessage ? { errorMessage: safeError(message.errorMessage) } : {}) }, completeness: message.stopReason==='error'||message.stopReason==='aborted'?'partial':'complete', usage: hasUsage ? 'reported' : 'unknown', remoteTermination: message.stopReason==='error'||message.stopReason==='aborted'?'unknown':'response-returned' });
+        };
+        record('model.intent', { attemptId, durableTaskId: purpose==='compaction'?null:generationTaskId, ...(purpose==='compaction'?{durableTaskSource:'unknown: Models.completeSimple exposes no owning compaction task ID'}:{}), ordinal: requests, model: { provider: requestedModel.provider, id: requestedModel.id }, context, purpose, boundary: 'Models.streamSimple', options: { maxRetries: streamOptions?.maxRetries, timeoutMs: streamOptions?.timeoutMs, reasoning: streamOptions?.reasoning, sessionId: streamOptions?.sessionId } });
         const stream = actualStream(requestedModel, context, {
           ...streamOptions, apiKey, fetch: async (url, init) => {
             guard();
             record('model.dispatch', { attemptId, url: String(url), method: init?.method, body: typeof init?.body === 'string' ? init.body : null, boundary: 'fetch JSON request body; authentication headers excluded' });
             guard();
-            const response = await (options.transport ?? globalThis.fetch)(url, init);
+            const response = options.providerBoundary
+              ? await dispatchProvider({ ...options.providerBoundary, purpose, transport: options.transport ?? options.providerBoundary.transport }, url, init)
+              : await (options.transport ?? globalThis.fetch)(url, init);
             httpStatus = response.status;
             record('model.http', { attemptId, status: response.status });
             return response;
@@ -362,6 +381,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
         return new Proxy(stream, { get(target, property) {
           if (property === 'result') return async () => {
             const message = await target.result();
+            completed(message);
             return message.errorMessage ? { ...message, errorMessage: safeError(message.errorMessage) } : message;
           };
           if (property === Symbol.asyncIterator) return async function* () {
@@ -369,9 +389,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
               for await (const event of target) {
                 if (event.type === 'done' || event.type === 'error') {
                   const message = event.type === 'done' ? event.message : event.error;
-                  responses++;
-                  if (hasUsage) usageReports++;
-                  record('model.response', { attemptId, message: { ...message, ...(message.errorMessage ? { errorMessage: safeError(message.errorMessage) } : {}) }, completeness: event.type === 'done' ? 'complete' : 'partial', usage: hasUsage ? 'reported' : 'unknown', remoteTermination: event.type === 'done' ? 'response-returned' : 'unknown' });
+                  completed(message);
                 }
                 if (event.type === 'error' && event.error.errorMessage) yield { ...event, error: { ...event.error, errorMessage: safeError(event.error.errorMessage) } };
                 else yield event;
