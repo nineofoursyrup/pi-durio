@@ -1,0 +1,29 @@
+{
+  "status": "OFFLINE_READY_NATIVE_PENDING",
+  "sourceCommit": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+  "packageRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/install/node_modules/pi-durio",
+  "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json",
+  "manifestSha256": "5e33c0c52eb80c2a6e5c57b0c85dd03ae37b249d2c5ed874b6cf3238f7e17e91",
+  "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/terminal-validation.mjs",
+  "runnerSha256": "f6241325c635eb0518625c0d7f3292da35d073d1ca0643176c62566e925e37d9",
+  "archive": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/pi-durio-0.1.0.tgz",
+  "archiveSha256": "474ef2a2dbc1be2232366e73449b9fd850d82753a193c5df0ce858069a6fdce6",
+  "files": 12704,
+  "sourceBinding": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/source-binding.json",
+  "nativeAcceptance": "NOT RUN for r6",
+  "paidProvider": "NOT RUN",
+  "commands": {
+    "exit-first-pair": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json' --scenario exit-first-pair",
+    "idle-c-first-pair": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json' --scenario idle-c-first-pair",
+    "fault": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json' --scenario fault"
+  },
+  "remainingNative": [
+    "exit-first-pair",
+    "idle-c-first-pair",
+    "fault",
+    "normal completed",
+    "explicit minimum grid and smaller-window behavior"
+  ],
+  "additionalProbeUnknown": "OS window-switch focus reporting was an extra probe in the old card; UNKNOWN, no support claim, not a newly added mandatory platform feature.",
+  "preservedStatus": "Old r5 EXIT FAIL and earlier UNKNOWN unchanged. New atomic ratings cannot overwrite them."
+}

@@ -6,6 +6,8 @@
 
 验证证据位于 `/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-confirmation/`：
 
+产品候选固定为 `231f206e859f0ed889a69d943b9c17f92a20cf79`；[安装身份与单场景入口](candidate-r6.json)。独立 offline 安装 smoke 为 completed、cleanup confirmed，同 run headless 一致；12,704 个文件完整核验，69 个非依赖安装文件与源码工作区逐字节一致，lock 副本一致。r5 manifest、runner、tgz、12,704 个安装文件及旧 EXIT 五份原件全部核验未改。
+
 - `first-red.log`：修改前，首次 Ctrl+D 与空闲 Ctrl+C 两项独立失败；`first-green.log`：最小修复后 2/2 PASS。
 - `affected-checks.log`：`npm run build` 后执行 TUI 与宽度测试，23/23 PASS。覆盖首对确认、迟到/分片协议回复、800ms 过期、实际文本/焦点/PageUp/modified F3/括号粘贴/resize 在等待测量时仍立即取消确认，以及中止、modal 优先级、SIGTERM、草稿/收据、运行完成后的旧 Enter 禁止重放。
 - `runner-checks.log`：候选清单增删/字节变化拒绝检查 1/1 PASS；新 runner 语法与差异检查通过。
@@ -25,5 +27,7 @@
 | 800ms 超时 / 真实输入、焦点、resize 取消 | 本次离线检查 PASS；保留此前人验材料及其原评级，旧 EXIT 总项 FAIL/UNKNOWN 不提升。两项原子首次确认的 P 不等同重测这些子项 |
 | 可捕获 fault | 旧反馈 UNKNOWN；仍需独立真人场景 |
 | 正常 completed / 精确最低字符格 | 原 normal 和补充记录尚未满足；仍需补验，不能用本次首次退出项目代替 |
+
+证据适用范围：规格 T6 的确认规则、输入组件/弹层/运行场景变化由精确键码和受控时钟/事件次序的行为回归，以及既有原生菜单/详情/ESC 观察支持；规格 T7、ACC-20 与设计合同的异常恢复表仍要求真实 Terminal 的键位及视觉恢复。r6 因实际回包接线缺陷而新增的两项首次确认必须新做原生观察；不因此要求全套未变化的 IME/复制重测。旧 EXIT 的多次 Ctrl+D 间隔为 3.9 秒/9.2 秒，不能证明 800ms 内的取消路径；只有一次右方向键，且没有 CSI I/O 焦点事件。原生“OS 窗口切换使确认失效”是此前人工卡的附加探查，继续 **UNKNOWN**：不推断操作者未切换，不宣称当前 Terminal 支持此项，也不把合成 focus 事件等同实际终端报告。T6 与 #4 原合同没有单列 OS 窗口焦点探测机制；不为这项附加探查新增平台 API 或扩大本轮必验范围。r6 两项原子首次确认即使都 P，也不把旧 EXIT 总项或附加探查提升为 P。
 
 首次失败应安全退出后填 F，记录第一对。原始输入/resize/ANSI、机器结果和评分均写入新的时间戳目录。人工期间不运行 Terminal 自动化，不设置假的 TERM；付费 provider 继续 NOT RUN。
