@@ -27,7 +27,7 @@ function planFix(root:string,id:string){const db=openHostReadonly(root);try{for(
 function verifyBoundaryContent(root:string,plan:EvalPlan){if(!plan.environment.boundaryFiles?.length)throw Error('EVAL_BOUNDARY_CONTENT_MISSING');for(const file of plan.environment.boundaryFiles){if(!['boundary.mjs','export.mjs','restrict.py'].includes(file.path)||!readFileSync(new URL('../../execution/isolation/'+file.path,import.meta.url)).equals(readObject(root,file.ref)))throw Error('EVAL_BOUNDARY_CONTENT_CHANGED');}}
 function snapshot(e:Evidence,budget:PersistentBudget,trialId:string){const result=budget.snapshot();e.append('eval.budget-snapshot',{trialId,...result});return result;}
 function classify(result:RestrictedResult,error:string|null,guest:any):TrialStatus{
- if(result.status==='invalid'||!result.terminated)return 'invalid';if(result.reason==='cancelled')return'cancelled';if(result.reason==='timeout')return'timeout';if(error?.includes('BUDGET_'))return'budget-stopped';if(error)return'service-error';if(guest?.reason?.includes('CONTROLLED_ORIGINAL_WRITE_FAILURE'))return'original-error';return result.code===0&&guest?.status==='completed'?'completed':'error';
+ if(result.status==='invalid'||!result.terminated)return 'invalid';if(result.reason==='cancelled')return'cancelled';if(error?.includes('BUDGET_'))return'budget-stopped';if(result.reason==='timeout')return'timeout';if(error)return'service-error';if(guest?.reason?.includes('CONTROLLED_ORIGINAL_WRITE_FAILURE'))return'original-error';return result.code===0&&guest?.status==='completed'?'completed':'error';
 }
 function initial(fixture:EvalCase):Record<string,string>{return {...fixture.files,...fixture.dirty,'package-lock.json':fixture.dependencyLock};}
 function controlled(plan:EvalPlan,trial:EvalTrial){
@@ -94,7 +94,8 @@ export async function runEval(options:RunEvalOptions){
      const retained=captureFiles(e,exported,names);outcome.artifacts=retained.files;
      const result=retained.files.find(f=>f.path==='product-result.json');outcome.runtimeResult=result?.ref??null;
      const guestResult=result?JSON.parse(readObject(options.dataRoot,result.ref).toString()):null;
-     outcome.status=classify(execution,mediator.lastError,guestResult);outcome.valid=outcome.status!=='original-error';
+     const boundaryError=mediator.lastError??(execution.reason==='timeout'&&Date.now()>=Date.parse(plan.budget.deadline)?'BUDGET_DEADLINE':null);
+     outcome.status=classify(execution,boundaryError,guestResult);if(boundaryError)outcome.reason=boundaryError;outcome.valid=outcome.status!=='original-error';
      if(!guestResult&&(retained.files.some(f=>f.path==='product-error.json')||!retained.files.some(f=>f.path==='data/host.sqlite'))){outcome.status='preparation-error';outcome.valid=false;outcome.reason='Product failed before returning an accepted runtime result; infrastructure excluded from formal evaluation';}
     }else{outcome.status='invalid';outcome.reason=execution.reason;}
     outcome.reason??=mediator.lastError??execution.reason;
