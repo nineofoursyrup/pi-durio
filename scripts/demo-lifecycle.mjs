@@ -8,7 +8,7 @@ import { once } from 'node:events';
 import { setTimeout as delay } from 'node:timers/promises';
 import { createHash } from 'node:crypto';
 import { runCodingTask, runReadTask, readRun, waitForRun } from '../dist/src/runtime.js';
-import { writeHeadlessResult } from '../dist/src/headless-lifecycle.js';
+import { writeHeadlessResult, exitHostIfUnconfirmed } from '../dist/src/headless-lifecycle.js';
 import { scriptedTransport } from '../dist/src/offline.js';
 
 const quote = value => `'${value.replaceAll("'", "'\\''")}'`;
@@ -48,6 +48,25 @@ if (process.argv[2] === '--crash-worker') {
   const result = await runReadTask({ workspace, dataRoot, input: 'Hold the controlled transport through cleanup', mode: 'offline', signal: controller.signal, cancellation: 'exit', cleanupTimeoutMs: 50,
     transport: async () => new Promise(() => { process.send({ ready: true }); }) });
   writeHeadlessResult(result);
+} else if (process.argv[2] === '--tui-timeout-worker') {
+  const [workspace, dataRoot] = process.argv.slice(3);
+  const { ReadOnlyTui } = await import('../dist/src/tui/app.js');
+  class ObservedTerminal {
+    columns = 80; rows = 24; kittyProtocolActive = false; stopped = false; cursorShown = false; writes = [];
+    input = () => {}; start(input) { this.input = input; } stop() { this.stopped = true; } async drainInput() {}
+    write(value) { this.writes.push(value); } showCursor() { this.cursorShown = true; }
+    moveBy() {} hideCursor() {} clearLine() {} clearFromCursor() {} clearScreen() {} setTitle() {} setProgress() {} setProgramStatus() {}
+  }
+  const terminal = new ObservedTerminal();
+  setInterval(() => {}, 1000);
+  const app = new ReadOnlyTui({ workspace, dataRoot, draftRoot: `${dataRoot}-drafts`, mode: 'offline', terminal,
+    transport: async () => new Promise(() => { process.send({ ready: true }); }) });
+  app.start(); terminal.input('Hold until explicit exit'); terminal.input('\r');
+  const exit = await app.closed, result = exit.result;
+  assert.equal(terminal.stopped, true); assert.equal(terminal.cursorShown, true); assert.ok(terminal.writes.join('').includes('\x1b[?1049l'));
+  await save(`${dataRoot}-terminal-cleanup.json`, { stopped: terminal.stopped, cursorShown: terminal.cursorShown, alternateBufferDisabled: true, actualMacTerminal: false });
+  console.log(JSON.stringify({ tui: 'closed', runId: result.runId, sessionId: result.sessionId, status: result.status, cleanup: result.cleanup, usage: result.usage.completeness, draftSaved: exit.draftSaved }));
+  exitHostIfUnconfirmed(result);
 } else if (process.argv[2] === '--reopen') {
   const [dataRoot, runId] = process.argv.slice(3); const before = await treeHash(dataRoot); const view = await allRecords(dataRoot, runId);
   const after = await treeHash(dataRoot); assert.equal(after, before);
@@ -130,6 +149,19 @@ if (process.argv[2] === '--crash-worker') {
     await assert.rejects(runReadTask({ ...paths, input: 'No automatic recovery after host timeout', mode: 'offline', transport: scriptedTransport([]).fetch }), /OWNER_CONFLICT/);
     await save(join(root, 'cleanup-timeout', 'view.json'), { ...view, exitCode: code, stderr, lockDirectoryAfterExit: existsSync(`${paths.dataRoot}.lock`), persistentOwner: true });
     results.push({ action: 'cleanup-timeout-headless', result, exitCode: code, activeIntervalDidNotHang: true, ownerRetained: true });
+  }
+  // TUI entry restores its adapter before the same bounded host-exit function.
+  {
+    const paths = await project(root, 'tui-cleanup-timeout');
+    const worker = spawn(process.execPath, [process.argv[1], '--tui-timeout-worker', paths.workspace, paths.dataRoot], { stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
+    let stdout = '', stderr = ''; worker.stdout.on('data', bytes => { stdout += bytes; }); worker.stderr.on('data', bytes => { stderr += bytes; });
+    await once(worker, 'message'); const exited = once(worker, 'exit'); worker.kill('SIGTERM'); const [code] = await exited;
+    assert.equal(code, 75, stderr); assert.ok(Buffer.byteLength(stdout) < 2048); const summary = JSON.parse(stdout);
+    assert.equal(summary.tui, 'closed'); assert.equal(summary.cleanup, 'unknown');
+    const terminal = JSON.parse(await readFile(`${paths.dataRoot}-terminal-cleanup.json`, 'utf8'));
+    const view = await allRecords(paths.dataRoot, summary.runId); assert.equal(view.result.lifecycle.owner, 'retained');
+    await save(join(root, 'tui-cleanup-timeout', 'view.json'), { ...view, summary, terminal, exitCode: code, stderr });
+    results.push({ action: 'cleanup-timeout-tui-adapter', summary, terminal, exitCode: code, activeIntervalDidNotHang: true, ownerRetained: true });
   }
   await save(join(root, 'summary.json'), { status: 'PASS', scope: 'offline public-runtime lifecycle; no provider inference or billing', node: process.version, platform: process.platform, arch: process.arch, results });
   console.log(JSON.stringify({ root, summary: join(root, 'summary.json'), status: 'PASS', cases: results.length }));

@@ -4,7 +4,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { runReadTask, runCodingTask, readRun, type ToolEnvironmentConfig } from './runtime.js';
-import { writeHeadlessResult } from './headless-lifecycle.js';
+import { writeHeadlessResult, exitHostIfUnconfirmed } from './headless-lifecycle.js';
 import { demoTransport } from './offline.js';
 
 async function main() {
@@ -29,6 +29,7 @@ async function main() {
     console.log(JSON.stringify({ tui: 'closed', runId: result?.runId, sessionId: result?.sessionId, status: result?.status ?? 'no-task', cleanup: result?.cleanup, usage: result?.usage.completeness ?? 'unknown', draftSaved: exit.draftSaved, error: exit.error?.slice(0,1024) }));
     if (result) console.log(`Read back: pi-durio show --data-root '${dataRoot.replaceAll("'", "'\\''")}' --run ${result.runId}`);
     process.exitCode = exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : 0;
+    exitHostIfUnconfirmed(result);
     return;
   }
   if (command === 'show') {
