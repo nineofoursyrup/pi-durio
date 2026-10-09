@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "axis": "Standards",
+  "verdict": "FAIL",
+  "identity": {
+    "baseline": "25d311616136766b37c0274f3f490ec1105f9592",
+    "candidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+    "candidateTree": "e5ad9f25f84ded025fe7b2dff49fc08936a89eb3",
+    "checkout": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-26",
+    "checkoutHead": "ccc8e53257cb4274889b1a0bc3fd982fe6de3597",
+    "checkoutTree": "e5ad9f25f84ded025fe7b2dff49fc08936a89eb3",
+    "status": "",
+    "checkedAt": "2026-10-09T21:51:15.420147+00:00"
+  },
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoningEffort": "xhigh",
+  "actualBackend": "not independently attestable",
+  "scope": "#11-29 implementation and #30 preparation on the fixed candidate. No other reviewer conclusions or parallel repair sources read.",
+  "method": "Independent read-only source/diff/log review, documented contract mapping, existing check identity validation; no new tests.",
+  "standardsSources": [
+    "AGENTS.md",
+    "docs/agents/domain.md",
+    "docs/agents/issue-tracker.md",
+    "docs/agents/triage-labels.md",
+    "GLOSSARY.md",
+    "docs/adr/0001-local-execution-and-recovery-boundary.md",
+    "docs/adr/0002-full-original-records-and-user-controlled-reduction.md",
+    "docs/adr/0003-eval-isolation-and-evidence-boundary.md",
+    "docs/specs/pi-durio-v1-spec.md",
+    "docs/implementation/pi-durio-v1/execution-contract.md",
+    "docs/design/runtime-evidence-and-retention.md",
+    "vendor/pi-tui/README.md"
+  ],
+  "findings": [
+    {
+      "id": "STD-01",
+      "priority": 1,
+      "classification": "documented-standard-breach",
+      "title": "新任务启动全量加载并重存历史，违反内存有界约定",
+      "location": {
+        "file": "src/preflight.ts",
+        "start": 116,
+        "end": 116
+      },
+      "relatedLocations": [
+        {
+          "file": "src/preflight.ts",
+          "start": 54,
+          "end": 80
+        },
+        {
+          "file": "src/preflight.ts",
+          "start": 126,
+          "end": 127
+        },
+        {
+          "file": "src/runtime.ts",
+          "start": 476,
+          "end": 478
+        },
+        {
+          "file": "src/evidence.ts",
+          "start": 132,
+          "end": 138
+        },
+        {
+          "file": "src/recovery.ts",
+          "start": 44,
+          "end": 48
+        }
+      ],
+      "standards": [
+        {
+          "file": "docs/adr/0002-full-original-records-and-user-controlled-reduction.md",
+          "line": 7,
+          "rule": "内存、显示和送模内容保持有界，不应以这些上限替代磁盘原文保留。"
+        },
+        {
+          "file": "docs/specs/pi-durio-v1-spec.md",
+          "line": 69,
+          "rule": "E2：内存、显示及送模有界，长输出分块持久化、背压和引用分页。"
+        },
+        {
+          "file": "docs/design/runtime-evidence-and-retention.md",
+          "line": 143,
+          "rule": "大原文只保存必要的一份完整内容，复用可靠引用，避免逐 span 复制。"
+        }
+      ],
+      "trigger": "A data root containing an increasing number of valid completed sessions, with no user cleanup.",
+      "evidence": "preflight SELECTs every host row using all(), decodes every body into records, and accumulates complete inspectSession reports for all sessions. inspectSession paginates the upstream reads but pushes every task, submission and entry into retained arrays. runtime serializes all reports into one preflight record before task.accepted. Evidence.append rejects that record above 2 MiB. recoveryRecords likewise materializes all requested originals and has whole-root callers.",
+      "consequence": "Peak memory grows with all retained original content, including repeated historical preflight snapshots. Once the aggregate preflight body exceeds 2 MiB, starting unrelated new work fails with EVIDENCE_RECORD_LIMIT even when prior sessions are completed and valid. No empirical session-count threshold is claimed.",
+      "recommendedDirection": "Stream scoped metadata and pending-state checks; retain bounded summaries and stable references. Read original entry content only for the selected recovery and paginate it. Avoid weakening pending-state checks or deleting originals to make admission succeed.",
+      "validation": "Static call-chain proof; no new product execution."
+    },
+    {
+      "id": "STD-02",
+      "priority": 2,
+      "classification": "documented-standard-breach",
+      "title": "输出限额路径截掉已经取得的检查和进程原文",
+      "location": {
+        "file": "scripts/isolation/boundary.mjs",
+        "start": 171,
+        "end": 176
+      },
+      "relatedLocations": [
+        {
+          "file": "scripts/isolation/boundary.mjs",
+          "start": 135,
+          "end": 141
+        },
+        {
+          "file": "scripts/isolation/boundary.mjs",
+          "start": 198,
+          "end": 199
+        },
+        {
+          "file": "src/improve-process.ts",
+          "start": 65,
+          "end": 69
+        },
+        {
+          "file": "src/improve-build.ts",
+          "start": 68,
+          "end": 71
+        },
+        {
+          "file": "src/improve-validation.ts",
+          "start": 133,
+          "end": 140
+        }
+      ],
+      "standards": [
+        {
+          "file": "docs/adr/0002-full-original-records-and-user-controlled-reduction.md",
+          "line": 7,
+          "rule": "默认完整保留运行原文；不能用展示或内存上限替代磁盘保留。"
+        },
+        {
+          "file": "docs/design/runtime-evidence-and-retention.md",
+          "line": 147,
+          "rule": "原文采集也有界但采用分块落盘和背压，不能通过丢弃内容满足队列上限。"
+        },
+        {
+          "file": "docs/specs/pi-durio-v1-spec.md",
+          "line": 68,
+          "rule": "E1：完整保留实际取得的工具输出、检查及失败、取消和已收到的未完成内容。"
+        }
+      ],
+      "trigger": "An ASCII stdout/stderr data event crosses the corresponding retained-output cap. This uses already delivered local data events, not hypothetical unreceived provider output.",
+      "evidence": "runRestricted appends delivered chunks to stdout/stderr, detects output_limit and stops the client; on close it slices stdout to limits.totalBytes and stderr to 1,048,576 characters. Only the sliced result enters outcome.json and the product Evidence blob. launchImproveBuild slices stdout/stderr immediately after appending each over-cap chunk, requests SIGTERM then SIGKILL after 5 seconds, and records only the sliced process-result. There is no persistent raw-output stream or reference preserving discarded tails.",
+      "productScope": "scripts/isolation/boundary.mjs is the shipped product isolation engine called by eval/runner and improve-validation/build. A declared direct/regression check, build, startup or explicit selected-build process can emit these streams. This finding does not concern external acceptance scripts or require shell output from ordinary coding to be affected.",
+      "stopSemantics": "The retained reason output_limit/output-limit correctly reports the deliberate stop. It does not preserve the tail already appended before the check. No claim is made that output produced after destroyed pipes was acquired. Existing unknown termination states remain separate.",
+      "consequence": "Reopening the saved failed/cancelled operation cannot recover all acquired original output, violating the raw-retention guarantee even though the limit failure is visible.",
+      "recommendedDirection": "Persist acquired chunks before applying display/protocol caps; keep bounded projections and mark the remaining unacquired output incomplete when stopping.",
+      "validation": "Static callback-to-persistence proof; no VM or child process invoked."
+    },
+    {
+      "id": "STD-03",
+      "priority": 2,
+      "classification": "documented-standard-breach",
+      "title": "指标写入入口没有遵守数据根单写入者协议",
+      "location": {
+        "file": "src/metrics/acceptance.ts",
+        "start": 45,
+        "end": 47
+      },
+      "relatedLocations": [
+        {
+          "file": "src/metrics/feedback.ts",
+          "start": 19,
+          "end": 20
+        },
+        {
+          "file": "src/metrics/costs.ts",
+          "start": 17,
+          "end": 19
+        },
+        {
+          "file": "src/metrics/cli.ts",
+          "start": 11,
+          "end": 13
+        },
+        {
+          "file": "src/evidence.ts",
+          "start": 110,
+          "end": 116
+        }
+      ],
+      "standards": [
+        {
+          "file": "docs/specs/pi-durio-v1-spec.md",
+          "line": 49,
+          "rule": "R2：可写打开数据根前取得相应 owner lock；同一 storage/data root 的第二写入者在写入前被挡住。"
+        },
+        {
+          "file": "docs/design/runtime-evidence-and-retention.md",
+          "line": 144,
+          "rule": "第二个争用同一数据根的写入进程在写入前被挡住，可只读查看。"
+        }
+      ],
+      "trigger": "A separate pi-durio acceptance, feedback, or cost-estimate CLI invocation with valid input while another runtime or archive operation owns the same data root.",
+      "evidence": "metricsCommand calls the exported synchronous record functions directly. Each opens new Evidence, whose constructor opens writable host.sqlite and creates/chmods objects before BEGIN IMMEDIATE. None obtains acquireOwner, accepts/asserts an existing lease, or checks owner markers. SQLite serializes its transaction, not the application ownership interval.",
+      "consideredDocumentation": "issue-27/README.md:91-92 allows recording requirements from an in-process observation callback and says the short transaction does not take over execution owner. That can justify reuse of an already-held same-process owner; it does not establish a documented exception allowing a second process to bypass the explicit data-root rule. No claim of actual corruption is made.",
+      "consequence": "A second writer can modify host evidence under another process's exclusive owner, contradicting the contract and permitting avoidable interference with execution writes and owner-fenced stable archive capture.",
+      "recommendedDirection": "Route in-process recording through a verified existing owner capability, and acquire or reject at the external CLI write boundary before any writable Evidence open.",
+      "validation": "Static CLI-to-writable-constructor proof; no concurrent write test run."
+    }
+  ],
+  "optionalSmells": [
+    {
+      "id": "SMELL-01",
+      "classification": "optional-judgment",
+      "name": "possible Duplicated Code",
+      "blocking": false,
+      "locations": [
+        {
+          "file": "src/derived-evidence.ts",
+          "start": 26,
+          "end": 28
+        },
+        {
+          "file": "src/improve-source.ts",
+          "start": 13,
+          "end": 15
+        }
+      ],
+      "quote": "if(/\\u0000|�/.test(text))reasons.push(...);",
+      "detail": "The same credential-like, instruction-like and undecodable-text regex decisions are duplicated in scopedEvidence and redactAnalysisText. An optional shared text-classification helper would reduce policy drift while preserving scopedEvidence's additional raw-chunk withholding. This is a Fowler heuristic, not a documented standard breach."
+    }
+  ],
+  "counts": {
+    "documentedBreaches": 3,
+    "P1": 1,
+    "P2": 2,
+    "optionalSmells": 1
+  },
+  "checks": {
+    "sourceInputs": 156,
+    "mismatches": [],
+    "checks": [
+      {
+        "name": "npm pack prepack TypeScript build and dependency bundling",
+        "recordedState": "PASS",
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/pack-build.log",
+        "expectedSha256": "f852ead95fc8ada46c6130e02a92732caf5f3f25c1ffee0f1d89e2ad2f63431f",
+        "actualSha256": "f852ead95fc8ada46c6130e02a92732caf5f3f25c1ffee0f1d89e2ad2f63431f",
+        "reuse": null,
+        "passed": null,
+        "failed": null,
+        "skipped": null
+      },
+      {
+        "name": "Affected improve, eval, comparison and provider-boundary tests",
+        "recordedState": "PASS",
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r5/affected-tests.log",
+        "expectedSha256": "8c030dd0dd8c80d45828c0f2180f9043a7a5e3000556708d43ab98f7aca34902",
+        "actualSha256": "8c030dd0dd8c80d45828c0f2180f9043a7a5e3000556708d43ab98f7aca34902",
+        "reuse": "Only src/tui/app.ts completion notice and its TUI assertion changed after this run. Improve/build/formal/rollback/eval/provider/boundary logic is byte-identical. The final installed demo separately binds the new source/build identity.",
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "name": "Actual TUI selection completion remains truthful and visible after closing result panel",
+        "recordedState": "PASS",
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/tui-status-green.log",
+        "expectedSha256": "062b20d647241818002a159c543c9b3b30282defeeb8bb25f59ddd3b024442e9",
+        "actualSha256": "062b20d647241818002a159c543c9b3b30282defeeb8bb25f59ddd3b024442e9",
+        "reuse": null,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "name": "Real default-profile model request count/cancellation, unknown profile rejection and actual default/build memory inspection",
+        "recordedState": "PASS",
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/model-profile-boundary.log",
+        "expectedSha256": "ed1be4d494f12aa9f9a4f9168a8928c71cc2f5e266ff58fba0558d20607c1b8c",
+        "actualSha256": "ed1be4d494f12aa9f9a4f9168a8928c71cc2f5e266ff58fba0558d20607c1b8c",
+        "reuse": null,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "name": "Independent installed Pi API and actual restricted-VM acceptance",
+        "recordedState": "PASS",
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance.log",
+        "expectedSha256": "8aef0b3436543931421deae138ba9362f6877af18fd254582d208ac6deb1cc87",
+        "actualSha256": "8aef0b3436543931421deae138ba9362f6877af18fd254582d208ac6deb1cc87",
+        "reuse": null,
+        "passed": null,
+        "failed": null,
+        "skipped": null
+      }
+    ],
+    "interpretation": "Exact input and log identity checked read-only. Reused limited historical outcomes; no test/build/VM/native/provider invocation made by this review. Checks do not cover the newly identified cases."
+  },
+  "limitations": [
+    "No build, full test suite, VM, native Terminal, provider or paid request performed.",
+    "Existing checks retain their recorded limited scope; new findings are static and do not depend on a fresh runtime reproduction.",
+    "No assertion that every behavior of the 342-file implementation has been validated; this is the Standards axis.",
+    "No separate CODING_STANDARDS.md or CONTRIBUTING.md was found; tooling-enforced concerns were skipped.",
+    "Explicit Pi TUI width derivative exception documented in vendor/pi-tui/README.md was respected.",
+    "Declared #30 paid/credential gate, #31 measurement/native gaps and #32 human daily-use acceptance remain open gates, not additional implementation failures or PASS claims.",
+    "No implementation changes, commits, pushes, issue mutations, product main merge or publication authorized or performed."
+  ],
+  "artifacts": [
+    "standards-review.md",
+    "standards-evidence/identity.json",
+    "standards-evidence/candidate.log",
+    "standards-evidence/candidate.diff",
+    "standards-evidence/reused-checks.json",
+    "standards-evidence/appendix.md"
+  ]
+}
