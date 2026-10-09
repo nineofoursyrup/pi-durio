@@ -175,10 +175,12 @@ export class ReadOnlyTui {
       retain:(inputs,reason)=>{this.drafts.savePending(inputs,reason);this.notice='显示更新期间的部分输入未应用，已保留；请确认当前画面后重新操作';}
     });
     this.tui.start();
+    // Claim the query hold before the first calibration can start. Recovery verifies
+    // installed bytes synchronously; a valid terminal reply must not queue behind it.
+    if(this.runId){this.pendingRefresh=true;void this.openRecovery(this.runId);}
     this.widths?.inspect();
     this.terminal.write('\x1b[?1004h'); // Focus reports invalidate any pending exit confirmation.
     this.timer=setInterval(()=>{if(this.pendingRefresh) this.refresh();},75);
-    if(this.runId){this.pendingRefresh=true;this.refresh();void this.openRecovery(this.runId);}
     this.loadQueue();
     this.tui.requestRender();
   }
@@ -331,7 +333,8 @@ export class ReadOnlyTui {
   private async openRecovery(runId:string) {
     if(this.phase!=='idle'){this.notice=`正在执行 ${this.control.target()?.runId??this.runId}；先停止或退出后核对`;this.tui.requestRender();return;}
     this.viewingRecovery=true;this.runId=runId;
-    try {this.recovery=await checkRecovery({dataRoot:this.options.dataRoot,runId,authorization:this.authorization()});if(this.stopped||this.exiting)return;this.pendingRefresh=true;this.refresh();this.openPanel('recovery');}
+    const inspect=()=>checkRecovery({dataRoot:this.options.dataRoot,runId,authorization:this.authorization()});
+    try {this.recovery=await (this.widths?this.widths.withoutQueries(inspect):inspect());if(this.stopped||this.exiting)return;this.pendingRefresh=true;this.refresh();this.openPanel('recovery');}
     catch(error){this.notice=`恢复核对受阻：${safe(String(error))}`;this.tui.requestRender();}
   }
   private recoveryText() {
