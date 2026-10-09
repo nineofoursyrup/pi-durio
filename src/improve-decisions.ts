@@ -12,7 +12,7 @@ import {improveFacts,readImproveDecision,problemIdentity,conditionIdentity,condi
 import {validateGroup,validateImproveGroup,groupReservation,type ValidationGroup} from './improve-validation.js';
 import {validateFormalSelection,captureGroupIdentities,applyImproveGroup,type FormalSelection} from './improve-formal.js';
 import {assertWorkspaceUnfenced} from './workspace-fence.js';
-import {plannedDefaults} from './improve-defaults.js';
+import {plannedDefaults,validateDefaultScope} from './improve-defaults.js';
 export {readImproveDefaults} from './improve-defaults.js';
 export {rollbackImproveDecision,type ImproveRollback} from './improve-rollback.js';
 export {readImproveDecision,scopedImproveDecisions,suppressionMatch,listImproveSuppressions} from './improve-history.js';
@@ -69,7 +69,10 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
   const group=groups.find(g=>g.candidateIds.includes(c.id));
   if(group&&c.dependencies.some(id=>group.candidateIds.indexOf(id)>group.candidateIds.indexOf(c.id)))throw Error('IMPROVE_DEPENDENCY_ORDER');
  }
- for(const group of groups){validateGroup(group,active,l.deadline);const selected=d.selections.filter(s=>group.candidateIds.includes(s.candidateId)),modes=selected.map(s=>s.mode);if(new Set(modes).size!==1)throw Error('IMPROVE_COMBINATION_MODE_CONFLICT');const defaults=plannedDefaults(root,selected,group);
+ for(const group of groups){validateGroup(group,active,l.deadline);const selected=d.selections.filter(s=>group.candidateIds.includes(s.candidateId)),modes=selected.map(s=>s.mode);if(new Set(modes).size!==1)throw Error('IMPROVE_COMBINATION_MODE_CONFLICT');
+  if(group.profileScope){validateDefaultScope(group.profileScope,report.target.workspace);if(!selected.some(s=>['agent-config','prompt-skill'].includes(s.target.kind)))throw Error('IMPROVE_PROFILE_SCOPE_TARGET_REQUIRED');if(selected.some(s=>s.formal?.activate)&&selected.filter(s=>['agent-config','prompt-skill'].includes(s.target.kind)).some(s=>!isDeepStrictEqual(s.formal?.activate,group.profileScope)))throw Error('IMPROVE_PROFILE_ACTIVATION_COMBINATION_MISMATCH');}
+  const defaults=plannedDefaults(root,selected,group);
+  if(modes.includes('execute-declared-scope')&&group.changes.some(c=>Buffer.byteLength(c.content)>262144))throw Error('IMPROVE_FORMAL_FILE_SIZE_LIMIT');
   for(const check of group.checks)if(check.kind==='fresh'&&check.effectiveTask&&!defaults.some(d=>d.current.taskType===check.effectiveTask))throw Error('IMPROVE_EFFECTIVE_PROFILE_SCOPE_REQUIRED');
   if(!['no-behavior','deterministic-fix'].includes(group.basis?.impact??''))for(const d of defaults)if(!group.checks.some(c=>c.kind==='fresh'&&c.effectiveTask===d.current.taskType))throw Error('IMPROVE_EFFECTIVE_PROFILE_CHECK_REQUIRED: legacy instruction-only comparison cannot authorize runtime profile activation');
  }

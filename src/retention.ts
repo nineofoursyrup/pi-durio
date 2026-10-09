@@ -37,6 +37,7 @@ export async function retentionState(root:string,owner:OwnerLease,options:{skipS
   const blockers:string[]=[],recordBodies=new Set<string>(),runSessions=new Map<string,string>();
   const objects=new Map<string,{ref:BlobRef;sources:Set<string>;runs:Set<string>}>(),facts=new Map<string,{source:EvidenceReference;refs:BlobRef[];links:string[]}>();
   const fixedFacts:{source:EvidenceReference;data:any}[]=[];let dependencyEdges=0;
+  const formal=new Map<string,{id:string;groupId:string;refs:BlobRef[]}>(),reverted=new Set<string>(),defaults=new Map<string,{workspace:string;taskType:string;refs:BlobRef[]}>();
   const byRun=new Map<string,string[]>(),closed=new Map<string,any>(),protectedRuns=new Map<string,Set<string>>();
   const addRun=(run:string,why:string)=>{let reasons=protectedRuns.get(run);if(!reasons)protectedRuns.set(run,reasons=new Set());reasons.add(why);};
   const add=(ref:BlobRef,source:EvidenceReference)=>{let item=objects.get(ref.sha256);if(!item)objects.set(ref.sha256,item={ref,sources:new Set(),runs:new Set()});if(item.ref.bytes!==ref.bytes)throw Error('CONFLICTING_OBJECT_IDENTITY');item.sources.add(source.id);item.runs.add(source.runId);};
@@ -50,11 +51,20 @@ export async function retentionState(root:string,owner:OwnerLease,options:{skipS
     if(source.kind==='task.accepted')runSessions.set(source.runId,data.sessionId);
     if(source.kind==='run.closed'||source.kind==='recovery.closed')closed.set(source.runId,data.result??data);
     if(source.kind==='recovery.report'&&data.status!=='completed'&&data.status!=='ended')addRun(source.runId,'recovery-needs-decision');
+    const groupKey=JSON.stringify([data.id,data.groupId]);
+    if(source.kind==='improve.formal-started')formal.set(groupKey,{id:data.id,groupId:data.groupId,refs});
+    if(source.kind==='improve.rollback'&&data.state==='completed')reverted.add(groupKey);
+    if(source.kind==='improve.activation')for(const change of data.defaults??[]){const current=change.current;defaults.set(JSON.stringify([current.workspace,current.taskType]),{workspace:current.workspace,taskType:current.taskType,refs:blobReferences(current)});}
   }
   // Retain the released manifest as decision evidence; release only its payload scope.
   const protectedObjects=new Map<string,Set<string>>();
   const protect=(sha:string,why:string)=>{let reasons=protectedObjects.get(sha);if(!reasons)protectedObjects.set(sha,reasons=new Set());reasons.add(why);};
   for(const sha of recordBodies)protect(sha,'host-fact-body');
+  // Exact rollback and future new-task defaults still consume these original
+  // payloads after the analysis run closes. Derive protection from the existing
+  // journal; completed rollback releases only that batch, not a current default.
+  for(const [key,value]of formal)if(!reverted.has(key))for(const ref of value.refs)protect(ref.sha256,`improve-formal:${value.id}:${value.groupId}`);
+  for(const value of defaults.values())for(const ref of value.refs)protect(ref.sha256,`improve-active-default:${value.workspace}:${value.taskType}`);
   for(const fact of fixedFacts) {
     const manifest=JSON.parse(readObject(root,fact.data.manifest).toString());
     if(manifest.version!==1||!Array.isArray(manifest.runs)||!Array.isArray(manifest.objects))throw Error('FIX_MANIFEST_INVALID');

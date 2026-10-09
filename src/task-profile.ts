@@ -7,8 +7,8 @@ export interface EffectiveTask {type:'read'|'coding';profile:TaskProfile}
 export interface ProfileContent {targetId:string;path:string;kind:'agent-config'|'prompt-skill';text:string}
 export function validateTaskProfile(value:TaskProfile){
  if(!value||value.version!==1||typeof value.instructions!=='string'||Buffer.byteLength(value.instructions)>262144||!Object.keys(value).every(k=>['version','instructions','compaction','stream'].includes(k)))throw Error('IMPROVE_PROFILE_INVALID');
- if(value.compaction){const c=value.compaction;if(!Object.keys(c).every(k=>['enabled','reserveTokens','keepRecentTokens'].includes(k))||c.enabled!==undefined&&typeof c.enabled!=='boolean'||[c.reserveTokens,c.keepRecentTokens].some(n=>n!==undefined&&(!Number.isSafeInteger(n)||n<1||n>1048576))||c.keepRecentTokens!==undefined&&c.reserveTokens!==undefined&&c.keepRecentTokens>c.reserveTokens)throw Error('IMPROVE_PROFILE_COMPACTION_INVALID');}
- if(value.stream&&(!Object.keys(value.stream).every(k=>k==='timeoutMs')||!Number.isSafeInteger(value.stream.timeoutMs)||value.stream.timeoutMs<100||value.stream.timeoutMs>300000))throw Error('IMPROVE_PROFILE_STREAM_INVALID');
+ if(value.compaction!==undefined){const c=value.compaction;if(!c||typeof c!=='object'||Array.isArray(c)||!Object.keys(c).every(k=>['enabled','reserveTokens','keepRecentTokens'].includes(k))||c.enabled!==undefined&&typeof c.enabled!=='boolean'||[c.reserveTokens,c.keepRecentTokens].some(n=>n!==undefined&&(!Number.isSafeInteger(n)||n<1||n>1048576))||c.keepRecentTokens!==undefined&&c.reserveTokens!==undefined&&c.keepRecentTokens>c.reserveTokens)throw Error('IMPROVE_PROFILE_COMPACTION_INVALID');}
+ if(value.stream!==undefined&&(!value.stream||typeof value.stream!=='object'||Array.isArray(value.stream)||!Object.keys(value.stream).every(k=>k==='timeoutMs')||!Number.isSafeInteger(value.stream.timeoutMs)||value.stream.timeoutMs<100||value.stream.timeoutMs>300000))throw Error('IMPROVE_PROFILE_STREAM_INVALID');
  return structuredClone(value);
 }
 export function profileFromContent(files:ProfileContent[]):TaskProfile {
@@ -17,7 +17,7 @@ export function profileFromContent(files:ProfileContent[]):TaskProfile {
   if(file.kind==='prompt-skill')instructions.push(`[${file.targetId}/${file.path}]\n${file.text}`);
   else{
    const config=JSON.parse(file.text);if(!config||typeof config!=='object'||Array.isArray(config)||!Object.keys(config).every(k=>['instructions','compaction','stream'].includes(k))||config.instructions!==undefined&&typeof config.instructions!=='string')throw Error('IMPROVE_CONFIG_SCHEMA_UNSUPPORTED');
-   const checked=validateTaskProfile({version:1,instructions:config.instructions??'',...(config.compaction?{compaction:config.compaction}:{}),...(config.stream?{stream:config.stream}:{})});
+   const checked=validateTaskProfile({version:1,instructions:config.instructions??'',...(config.compaction!==undefined?{compaction:config.compaction}:{}),...(config.stream!==undefined?{stream:config.stream}:{})});
    if(checked.instructions)instructions.push(`[${file.targetId}/${file.path}]\n${checked.instructions}`);
    for(const key of ['compaction','stream']as const){if(!checked[key])continue;for(const [field,value]of Object.entries(checked[key]!)){const previous=(profile as any)[key]?.[field];if(previous!==undefined&&previous!==value)throw Error('IMPROVE_CONFIG_COMBINATION_CONFLICT');((profile as any)[key]??={})[field]=value;}}
   }

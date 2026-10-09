@@ -6,9 +6,9 @@ import type {ImproveSelection} from './improve-decisions.js';
 import type {ValidationGroup} from './improve-validation.js';
 import {sourceBytes} from './improve-source.js';
 import {setWorkspaceFence,clearWorkspaceFence,assertWorkspaceUnfenced,type WorkspaceFence} from './workspace-fence.js';
-import {plannedDefaults,assertDefaultBaseline,type DefaultChange,type TaskType} from './improve-defaults.js';
+import {assertDefaultBaseline,validateDefaultScope,type DefaultChange,type DefaultScope} from './improve-defaults.js';
 
-export interface FormalSelection {writeback:true;activate:null|{scope:'project-default';workspace:string;taskTypes:TaskType[];baseline:Partial<Record<TaskType,string>>};failureCompensation:'none'}
+export interface FormalSelection {writeback:true;activate:null|DefaultScope;failureCompensation:'none'}
 export interface PathIdentity {path:string;dev:number;ino:number;mode:number}
 export function fileIdentity(root:string,path:string):PathIdentity[]{
  const parts=[root];let part=root;for(const segment of path.split('/')){part=join(part,segment);parts.push(part);}
@@ -34,7 +34,7 @@ export function validateFormalSelection(selection:ImproveSelection,candidate:Imp
  if(selection.mode!=='execute-declared-scope'){if(f!==undefined)throw Error('IMPROVE_FORMAL_AUTHORITY_REQUIRES_EXECUTE');return;}
  if(!['project','agent-config','prompt-skill'].includes(candidate.target.kind))throw Error('IMPROVE_EXECUTE_UNSUPPORTED: tools/runtime and eval assets require issue #26');
  if(!f||f.writeback!==true||f.failureCompensation!=='none'||!Object.keys(f).every(k=>['writeback','activate','failureCompensation'].includes(k))||f.activate===undefined||!candidate.activation.writeback)throw Error('IMPROVE_FORMAL_AUTHORITY_REQUIRED');
- if(f.activate!==null){const a=f.activate;if(!candidate.activation.enable||!['agent-config','prompt-skill'].includes(candidate.target.kind)||a.scope!=='project-default'||a.workspace!==workspace||realpathSync(a.workspace)!==a.workspace||!Array.isArray(a.taskTypes)||!a.taskTypes.length||new Set(a.taskTypes).size!==a.taskTypes.length||a.taskTypes.some(t=>!['read','coding'].includes(t))||!a.baseline||Object.keys(a.baseline).some(t=>!a.taskTypes.includes(t as TaskType))||a.taskTypes.some(t=>typeof a.baseline[t]!=='string')||!Object.keys(a).every(k=>['scope','workspace','taskTypes','baseline'].includes(k)))throw Error('IMPROVE_ACTIVATION_SCOPE_DENIED');}
+ if(f.activate!==null){if(!candidate.activation.enable||!['agent-config','prompt-skill'].includes(candidate.target.kind))throw Error('IMPROVE_ACTIVATION_SCOPE_DENIED');validateDefaultScope(f.activate,workspace);}
 }
 export function captureGroupIdentities(candidates:ImproveCandidate[]){return candidates.flatMap(c=>c.target.files.map(f=>({targetId:c.target.id,path:f.path,identity:fileIdentity(c.target.workspace!,f.path)})));}
 export interface FormalFile {targetId:string;root:string;path:string;before:BlobRef;after:BlobRef;identity:PathIdentity[]}

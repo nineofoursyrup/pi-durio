@@ -413,7 +413,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       if (workspaceOwner.root !== workspaceRoot) throw new Error('WORKSPACE_IDENTITY_CHANGED: project root changed before acceptance');
     }
     await chmod(dataRoot, 0o700);
-    if(!recovery&&!maintenance&&!improve)assertWorkspaceUnfenced(workspace);
+    if(!recovery?.readOnly&&!improve)assertWorkspaceUnfenced(workspace);
     const inspected = recovery ? [] : await preflight(owner);
     const savedConfiguration=recovery?.config??(maintenance?maintenanceRecords.find(r=>r.kind==='execution.config')?.data:queued?recoveryRecords(dataRoot,queued.item.target.runId).find(r=>r.seq===queued.item.executionVersion.configSeq)?.data:undefined) as any;
     if(!improve){

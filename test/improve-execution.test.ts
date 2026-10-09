@@ -51,8 +51,13 @@ test('functional pass with a predeclared performance no-gain comparison cannot w
 });
 test('config loader refuses credentials, authority, output limits and conflicting merged settings',()=>{
  const config=(text:string)=>({kind:'agent-config' as const,targetId:'config',path:'agent.json',text});
- for(const input of ['{"tools":["bash"]}','{"provider":"different"}','{"apiKey":"secret"}','{"stream":{"maxTokens":99999}}','{"retry":{"enabled":true}}'])assert.throws(()=>profileFromContent([config(input)]),/UNSUPPORTED|INVALID/);
+ for(const input of ['{"tools":["bash"]}','{"provider":"different"}','{"apiKey":"secret"}','{"stream":{"maxTokens":99999}}','{"retry":{"enabled":true}}','{"compaction":null}','{"stream":false}'])assert.throws(()=>profileFromContent([config(input)]),/UNSUPPORTED|INVALID/);
  assert.throws(()=>profileFromContent([config('{"stream":{"timeoutMs":2000}}'),{...config('{"stream":{"timeoutMs":3000}}'),targetId:'other'}]),/COMBINATION_CONFLICT/);
+});
+test('lost write-result evidence stays unknown on reopen; explicit exact-byte rollback records reconciliation without erasing it',async()=>{
+ const f=await fixture();await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision,fault:kind=>{if(kind==='improve.write-result')throw Error('lost-result-receipt');}}),/lost-result-receipt/);
+ const unknown=readImproveDecision(f.dataRoot,f.decision.id);assert.equal(unknown.groups[0].writes[0].state,'unknown');assert.equal(await readFile(join(f.workspace,'math.mjs'),'utf8'),'export const add=(a,b)=>a+b;\n');
+ const restored=await rollbackImproveDecision({dataRoot:f.dataRoot,id:f.decision.id,rollbackId:'restore-unknown',decisionSource:unknown.sourceId,groupIds:['fix'],reason:'Read exact retained bytes and restore original content'});assert.equal(restored.groups[0].writes[0].state,'unknown');assert.equal(restored.groups[0].writes[0].rollback?.state,'restored');assert.equal(await readFile(join(f.workspace,'math.mjs'),'utf8'),'export const add=(a,b)=>a-b;\n');
 });
 test('an activated prompt version does not replace an older pending task and explicit rollback only changes future defaults',async()=>{
  const f=await fixture('prompt-skill',{'skill.md':'Use acquired evidence.\n\n'}),controller=new AbortController();

@@ -5,7 +5,7 @@ import {Evidence,digest,readObject} from './evidence.js';
 import type {ImproveCandidate} from './improve.js';
 import {verifiedImage,prepareEval,runEval,type PrepareEvalOptions,type PrepareComparison} from './eval/runner.js';
 import {installedRuntimeFiles,captureFiles,regularFiles} from './eval/store.js';
-import type {DefaultChange,TaskType} from './improve-defaults.js';
+import type {DefaultChange,TaskType,DefaultScope} from './improve-defaults.js';
 
 export interface ContentChange {targetId:string;path:string;content:string}
 export interface DirectCheck {kind:'direct'|'regression'|'resource';program:string;timeoutMs:number;resource?:{direction:'lower'|'higher';delta:number;unit:string;basis:string}}
@@ -17,7 +17,7 @@ export interface FreshCheck {
  comparison:Omit<PrepareComparison,'sides'>;
 }
 export type ImproveCheck=DirectCheck|FreshCheck;
-export interface ValidationGroup {id:string;candidateIds:string[];changes:ContentChange[];checks:ImproveCheck[];basis?:{impact:'no-behavior'|'deterministic-fix'|'model-behavior'|'unknown';reason:string;checkIndices:number[]}}
+export interface ValidationGroup {id:string;candidateIds:string[];changes:ContentChange[];checks:ImproveCheck[];profileScope?:DefaultScope;basis?:{impact:'no-behavior'|'deterministic-fix'|'model-behavior'|'unknown';reason:string;checkIndices:number[]}}
 export function describeImproveRuntime(installation:string){
  const files=installedRuntimeFiles(installation).map(path=>{const bytes=readFileSync(join(installation,path));return {path,ref:{sha256:digest(bytes),bytes:bytes.length},mode:lstatSync(join(installation,path)).mode&0o777};});
  return digest(JSON.stringify(files));
@@ -37,7 +37,7 @@ export function summarizeImproveValidation(checks:{kind:string;state:string;effe
 }
 const safePath=(path:unknown)=>typeof path==='string'&&/^[a-zA-Z0-9_@+.,=-]+(?:\/[a-zA-Z0-9_@+.,=-]+)*$/.test(path)&&!path.split('/').some(p=>p==='.'||p==='..'||p==='.git'||p==='node_modules');
 export function validateGroup(group:ValidationGroup,candidates:ImproveCandidate[],deadline:string){
- if(!group||!/^[-\w.]{1,64}$/.test(group.id)||['.','..'].includes(group.id)||!Array.isArray(group.candidateIds)||!group.candidateIds.length||new Set(group.candidateIds).size!==group.candidateIds.length||group.candidateIds.some(id=>!candidates.some(c=>c.id===id))||!Array.isArray(group.changes)||group.changes.length>80||!Array.isArray(group.checks)||!group.checks.length||group.checks.length>32||!Object.keys(group).every(k=>['id','candidateIds','changes','checks','basis'].includes(k)))throw Error('IMPROVE_GROUP_INVALID');
+ if(!group||!/^[-\w.]{1,64}$/.test(group.id)||['.','..'].includes(group.id)||!Array.isArray(group.candidateIds)||!group.candidateIds.length||new Set(group.candidateIds).size!==group.candidateIds.length||group.candidateIds.some(id=>!candidates.some(c=>c.id===id))||!Array.isArray(group.changes)||group.changes.length>80||!Array.isArray(group.checks)||!group.checks.length||group.checks.length>32||!Object.keys(group).every(k=>['id','candidateIds','changes','checks','basis','profileScope'].includes(k)))throw Error('IMPROVE_GROUP_INVALID');
  const selected=candidates.filter(c=>group.candidateIds.includes(c.id));
  if(selected.some(c=>!safePath(c.target.id)))throw Error('IMPROVE_TARGET_PATH_ID_INVALID');
  const names=new Set<string>();let bytes=0;

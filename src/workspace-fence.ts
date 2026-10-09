@@ -22,10 +22,10 @@ export function workspaceFences(workspace:string):WorkspaceFence[]{
 export function assertWorkspaceUnfenced(workspace:string){const fences=workspaceFences(workspace);if(fences.length)throw Error(`IMPROVE_RECOVERY_REQUIRED: ${JSON.stringify(fences)}; inspect the original decision and explicitly roll back or reconcile; no ordinary task clears this fence`);}
 export function setWorkspaceFence(fence:WorkspaceFence){
  const path=join(workspaceOwnerRegistry,digest(fence.workspace),'improve-fence.json');
- writeFileSync(path,JSON.stringify(fence),{flag:'wx',mode:0o600});const fd=openSync(path,'r');try{fsyncSync(fd);}finally{closeSync(fd);}
+ writeFileSync(path,JSON.stringify(fence),{flag:'wx',mode:0o600});for(const p of [path,join(workspaceOwnerRegistry,digest(fence.workspace))]){const fd=openSync(p,'r');try{fsyncSync(fd);}finally{closeSync(fd);}}
 }
 export function clearWorkspaceFence(fence:WorkspaceFence){
  const path=join(workspaceOwnerRegistry,digest(fence.workspace),'improve-fence.json');
  if(!existsSync(path))return;
- if(JSON.stringify(JSON.parse(readFileSync(path,'utf8')))!==JSON.stringify(fence))throw Error('IMPROVE_FENCE_CHANGED');unlinkSync(path);
+ if(JSON.stringify(JSON.parse(readFileSync(path,'utf8')))!==JSON.stringify(fence))throw Error('IMPROVE_FENCE_CHANGED');unlinkSync(path);const fd=openSync(join(workspaceOwnerRegistry,digest(fence.workspace)),'r');try{fsyncSync(fd);}finally{closeSync(fd);}
 }
