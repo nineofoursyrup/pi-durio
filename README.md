@@ -2,7 +2,7 @@
 
 面向 macOS arm64 / Node >=22.19.0 的本地 coding agent，复用 Pi runtime，保留运行原文，并由用户明确控制恢复、eval 和 improve。
 
-首版仍在实现中。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围；真实 DeepSeek 批次、完整技术验收和本机日用接受尚未完成。
+首版仍在实现中。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围；真实 DeepSeek 批次、完整技术验收和本机日用接受尚未完成。[局部本地测量](docs/implementation/pi-durio-v1/issue-31/local-r1-report.md)保留固定旧候选的体积与进程启动数据；评审发现的启动内存和批次取消问题正在修复。
 
 ## 安装与本地演示
 
