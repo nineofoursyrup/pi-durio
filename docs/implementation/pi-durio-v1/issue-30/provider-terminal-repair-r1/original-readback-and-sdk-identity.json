@@ -1,0 +1,90 @@
+{
+  "finding": "LIVE-USD3-R3-01",
+  "originalProduct": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "originalRun": "f05d3379-5950-4bfa-aebd-72dd671c4fc3",
+  "hostSqlite": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/improve-data/host.sqlite",
+    "sha256Before": "732643c7dc67ada44baf0eda70bc66a93f9e6a453476a4db9cafcb46535eef7b",
+    "sha256After": "732643c7dc67ada44baf0eda70bc66a93f9e6a453476a4db9cafcb46535eef7b",
+    "mode": "ro"
+  },
+  "frames": [
+    {
+      "seq": 71,
+      "bytes": 304,
+      "sha256": "91d6c7add02ab4a8e43760b7d8cb3574cc4df0acc40589784bcc63be0bbd7889"
+    },
+    {
+      "seq": 73,
+      "bytes": 286,
+      "sha256": "ee3972dd751e34f02da7491cca575ddee556f525584de7083b9bacaf05bb959d"
+    },
+    {
+      "seq": 75,
+      "bytes": 288,
+      "sha256": "0552071d2c631ea0a74dd2a2e5485991d6af22cb7898a51be3395e369ddbe132"
+    },
+    {
+      "seq": 77,
+      "bytes": 1164,
+      "sha256": "10f993985ed5657779718e3df0026d3c3c0835d1ab67ef2c0d8c2eebda7817e0"
+    },
+    {
+      "seq": 82,
+      "bytes": 579,
+      "sha256": "9bc99aa59e3761c885c3715f53fb02f67c5919e33115c73b81d1fa447d51a6b5"
+    },
+    {
+      "seq": 85,
+      "bytes": 740,
+      "sha256": "346ff6cf9c090b44327c3d5d0810f82b2339a9620b3890f6cd4e7f9337b0190a"
+    },
+    {
+      "seq": 88,
+      "bytes": 469,
+      "sha256": "a6c66b38e6e0a7fd497a203795724446440c8cababf717e5702c64fc0bc3bbf8"
+    }
+  ],
+  "dependencyComparison": [
+    {
+      "path": "openai/package.json",
+      "installed": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/node_modules/openai/package.json",
+      "local": "/Users/nineofour/.codex/worktrees/provider-terminal-repair/Durio/node_modules/openai/package.json",
+      "installedSha256": "8a855f81669a434ce894e2d1ae2f18e9050e93c57d14091f155cd543056bdc30",
+      "localSha256": "8a855f81669a434ce894e2d1ae2f18e9050e93c57d14091f155cd543056bdc30",
+      "equal": true
+    },
+    {
+      "path": "openai/core/streaming.mjs",
+      "installed": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/node_modules/openai/core/streaming.mjs",
+      "local": "/Users/nineofour/.codex/worktrees/provider-terminal-repair/Durio/node_modules/openai/core/streaming.mjs",
+      "installedSha256": "1b8fa8338dc28913351993382187962082f0af42c5274a009060de3263579842",
+      "localSha256": "1b8fa8338dc28913351993382187962082f0af42c5274a009060de3263579842",
+      "equal": true
+    },
+    {
+      "path": "openai/core/streaming.js",
+      "installed": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/node_modules/openai/core/streaming.js",
+      "local": "/Users/nineofour/.codex/worktrees/provider-terminal-repair/Durio/node_modules/openai/core/streaming.js",
+      "installedSha256": "9230a5e7579c7a26aaf973626ef1e90174925ee1ed9f76204ec02a4c4d07d862",
+      "localSha256": "9230a5e7579c7a26aaf973626ef1e90174925ee1ed9f76204ec02a4c4d07d862",
+      "equal": true
+    },
+    {
+      "path": "@earendil-works/pi-ai/package.json",
+      "installed": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/node_modules/@earendil-works/pi-ai/package.json",
+      "local": "/Users/nineofour/.codex/worktrees/provider-terminal-repair/Durio/node_modules/@earendil-works/pi-ai/package.json",
+      "installedSha256": "a8f10d5157b335379ae00edf9c25ae7a15bfc0f3a76107d4376a3779bb5b2995",
+      "localSha256": "a8f10d5157b335379ae00edf9c25ae7a15bfc0f3a76107d4376a3779bb5b2995",
+      "equal": true
+    },
+    {
+      "path": "@earendil-works/pi-ai/dist/api/openai-completions.js",
+      "installed": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/node_modules/@earendil-works/pi-ai/dist/api/openai-completions.js",
+      "local": "/Users/nineofour/.codex/worktrees/provider-terminal-repair/Durio/node_modules/@earendil-works/pi-ai/dist/api/openai-completions.js",
+      "installedSha256": "5a79cc5aa41dee180692695e65771720d1ea556e9a978649dc2040278be51753",
+      "localSha256": "5a79cc5aa41dee180692695e65771720d1ea556e9a978649dc2040278be51753",
+      "equal": true
+    }
+  ]
+}
