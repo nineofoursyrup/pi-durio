@@ -1,0 +1,28 @@
+{
+  "status": "ACTUAL_ARTIFACT_READONLY_BOUND_REVIEW_STILL_PENDING",
+  "artifact": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/artifact.json",
+    "bytes": 2792,
+    "sha256": "6608f6149f3e45051fc73eadcdb1dac8b77aa0d070070ef642ed3e26cd276661"
+  },
+  "producer": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "tree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+  "hashBoundEntries": [
+    "producerIdentity",
+    "sourceBuild",
+    "sourceArchive",
+    "package",
+    "linuxDerivation",
+    "dependencyCompatibility"
+  ],
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+    "bytes": 92984,
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "linuxRuntimeIdentity": "173a8fcf34c463c7bcf2527c16c7852ead668fc9c69c26acf3d7d0d2991e1d9c",
+  "independentReview": "PENDING_SEPARATE_GATE_REQUIRED",
+  "noProductExecution": true,
+  "noPaidAuthority": true
+}

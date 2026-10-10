@@ -1,0 +1,61 @@
+{
+  "status": "FROZEN_OFFLINE_CHECKS_PASS_PENDING_INDEPENDENT_HARNESS_REVIEW_AND_NEW_GRANT",
+  "newExactSourceCases": 30,
+  "newActualDenialCases": 2,
+  "newProviderRequests": 0,
+  "realCredentialReads": 0,
+  "restrictedVmStarts": 0,
+  "productExecutions": 0,
+  "actualPaidStartFiles": 0,
+  "reused": {
+    "credentialParserCases": 12,
+    "reason": "launch.py byte-identical to already reviewed/tested r3 wrapper; common.mjs byte-identical too"
+  },
+  "newChecks": [
+    "check-r5.json",
+    "wrapper-check-r3.json"
+  ],
+  "firstFailures": [
+    {
+      "evidence": "check-r1.json",
+      "source": "check-r1-source.mjs",
+      "cause": "Offline fixture preloaded paid-start to test restart denial, then incorrectly required it absent. Fixed fixture comparison to retain the pre-existing receipt; no production gate failure."
+    },
+    {
+      "evidence": "check-r2.json",
+      "source": "check-r2-preflight-source.mjs",
+      "cause": "New preflight compared binary floating multiplication 2.7819936000000003 with literal 2.7819936. Corrected price arithmetic to integer-tenths tariff: tokens*12/10000000. Declared cap and authorization unchanged."
+    }
+  ],
+  "frozenManifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/frozen-manifest.json",
+    "bytes": 74214,
+    "sha256": "9a948eb693a20f5ca4d17443152fff0639465160628432d8d1f2eaa6b8cb1f8e"
+  },
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "independentHarnessReview": "PENDING",
+  "candidateReviewAndApplicability": "PASS_SCOPED",
+  "supersededPasses": [
+    "check-r3.json",
+    "wrapper-check-r1.json",
+    "check-r4.json",
+    "wrapper-check-r2.json"
+  ],
+  "changeAfterSupersededPass": "Bind actual integratedSource fixed candidate separately from producer commit; add wrong-producer-as-candidate rejection and rerun affected gate/denial checks.",
+  "candidateGate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
+    "bytes": 4084,
+    "sha256": "21271432e2d61a85048c5be7d9679328b49286bf96ae86e299eb6801f945a47d"
+  },
+  "finalCandidatePreflight": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-preflight-check-r1.json",
+    "bytes": 1398,
+    "sha256": "6d4d6a0029833ada479f0a593b7f94692729f9a2b0fbf7d220433b216ff224c9"
+  },
+  "finalActualDenials": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-denials-r1.json",
+    "bytes": 814,
+    "sha256": "41ce179b97692469ff670e509e4f5f20de33aaf8ce029f8d0647eecf0093b230"
+  },
+  "finalScope": "30 unchanged exact-source fixtures reused, 1 exact-candidate complete preflight with in-memory authorization only, 3 actual denial paths. No real grant or paid start."
+}
