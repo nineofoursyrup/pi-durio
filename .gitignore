@@ -10,3 +10,6 @@ coverage/
 *.tgz
 !vendor/pi-tui/*.tgz
 !vendor/pi-tui/upstream/*.tgz
+
+# Local provider credentials
+/api.env
