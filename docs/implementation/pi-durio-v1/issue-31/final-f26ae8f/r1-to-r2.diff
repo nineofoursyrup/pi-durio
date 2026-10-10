@@ -1,0 +1,18 @@
+--- prepared-r1/native-recovery.mjs
++++ prepared-r2/native-recovery.mjs
+@@ -54,7 +54,14 @@
+ try{app=new ReadOnlyTui({workspace,dataRoot,runId:original.runId,mode:'offline',coding:true,terminal,draftRoot:join(root,'drafts'),transport:async(url,init)=>{prompts.push(JSON.parse(String(init.body)));return scriptedTransport([]).fetch(url,init);}});
+  try{
+   void app.closed.then(()=>{closed=true;});app.start();
+-  await until(()=>frame().includes('e 明确结束旧工作'),'recovery panel');capture('recovery-first-frame');
++  await until(()=>frame().includes('恢复核对 ·'),'initial recovery panel');capture('recovery-first-frame');
++  const recoveryScroll=[];
++  for(let step=1;!frame().includes('e 明确结束旧工作')&&step<=64;step++){
++    inject('\x1b[B');await delay(300);
++    recoveryScroll.push({step,at:new Date().toISOString(),screen:frame()});
++  }
++  save('recovery-scroll.json',{maxSteps:64,steps:recoveryScroll,actionVisible:frame().includes('e 明确结束旧工作'),source:'bounded normal Down input in actual native panel; no hidden action submission'});
++  assert.ok(frame().includes('e 明确结束旧工作'),'RECOVERY_END_ACTION_NOT_VISIBLE_AFTER_BOUNDED_SCROLL');capture('recovery-action-frame');
+   inject('e');await until(()=>frame().includes('恢复决定：ended'),'explicit end');capture('ended-frame');
+   await enter('全新任务');await until(()=>readAcceptedTasks(dataRoot,{limit:200}).tasks.some(t=>t.input==='全新任务'&&t.status==='completed')&&frame().includes('已完成'),'new task');capture('new-task-frame');
+   await enter('/queue');await until(()=>frame().includes('已冻结，普通输入不会执行'),'frozen queue first item');capture('queue-first-frame');
