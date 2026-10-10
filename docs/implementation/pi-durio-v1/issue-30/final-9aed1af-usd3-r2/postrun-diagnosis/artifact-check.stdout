@@ -1,0 +1,1 @@
+{"status":"DIAGNOSTIC_ASSERTIONS_PASS","outcomes":[{"caseId":"local-fix","status":"LINKED"},{"caseId":"multi-file","status":"LINK_ERROR"}]}

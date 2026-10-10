@@ -1,0 +1,36 @@
+[
+  {
+    "caseId": "local-fix",
+    "files": [
+      {
+        "path": "project/math.ts",
+        "source": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/eval-data/objects/8d344bcb231aaa7f94df684340b260c5edc259441a6e56f600f23f736b3f2f5e",
+        "ref": {
+          "sha256": "8d344bcb231aaa7f94df684340b260c5edc259441a6e56f600f23f736b3f2f5e",
+          "bytes": 52
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "multi-file",
+    "files": [
+      {
+        "path": "project/greeting.ts",
+        "source": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/eval-data/objects/087823927c237d65b49ca53dda65ad0bd2eb2b2a24bb3922484cb7734a35c953",
+        "ref": {
+          "sha256": "087823927c237d65b49ca53dda65ad0bd2eb2b2a24bb3922484cb7734a35c953",
+          "bytes": 61
+        }
+      },
+      {
+        "path": "project/main.ts",
+        "source": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/eval-data/objects/44e74018b054b9fd0820a3602418018e6574892ef2578207282f0c5f279ebb28",
+        "ref": {
+          "sha256": "44e74018b054b9fd0820a3602418018e6574892ef2578207282f0c5f279ebb28",
+          "bytes": 138
+        }
+      }
+    ]
+  }
+]
