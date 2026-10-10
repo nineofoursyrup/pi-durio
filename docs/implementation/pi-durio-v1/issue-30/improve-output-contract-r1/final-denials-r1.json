@@ -1,0 +1,29 @@
+{
+  "status": "PASS_ALL_REAL_ADMISSION_PATHS_DENIED",
+  "manifestSha256": "809aa5350c2d1d3cd3fac9281210ce41e2ff643e889a565bd15f25ae02e30856",
+  "checks": [
+    {
+      "name": "false-pinned-grant",
+      "status": "DENIED_AS_REQUIRED",
+      "exit": 1,
+      "stderr": "PREFLIGHT_DENIED: EXPLICIT_NEW_PAID_GRANT_REQUIRED\n\nfalse !== true\n\n"
+    },
+    {
+      "name": "missing-real-grant",
+      "status": "DENIED_AS_REQUIRED",
+      "exit": 1,
+      "stderr": "PREFLIGHT_DENIED: EXPLICIT_NEW_PAID_GRANT_REQUIRED\n"
+    },
+    {
+      "name": "exact-wrapper-missing-grant",
+      "status": "DENIED_AS_REQUIRED",
+      "exit": 1,
+      "credentialOrExecEffects": []
+    }
+  ],
+  "actualAuthorization": false,
+  "realCredentialReads": 0,
+  "newProviderRequests": 0,
+  "productExecutions": 0,
+  "newVmStarts": 0
+}
