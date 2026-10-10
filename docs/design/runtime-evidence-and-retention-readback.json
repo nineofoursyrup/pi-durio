@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "kind": "design-closeout",
+  "issue_number": 5,
+  "design_revision": "r1",
+  "observed_at_utc": "2026-10-09T05:04:20.654528+00:00",
+  "user_timezone": "Asia/Shanghai",
+  "authorization": {
+    "design": "确认",
+    "remote_closeout": "回写关闭 #5"
+  },
+  "issue": {
+    "number": 5,
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/5",
+    "title": "运行证据与长期记录合同",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-09T05:03:14Z",
+    "original_body": "## Question\n\n满足 tracing、LLM Ops、长期自评与 improve 取证所需的最小事实记录是什么，怎样关联、保存和查询，才能避免重复记账、不可追溯或无界增长？\n\n依据本地规格第 8–10 章，确定产品 run、物理 attempt、工具执行、session、版本、检查结果和后续 judgment 的身份与归属；明确已知 usage 的来源、价格/估算口径、未知和缺失、stream 真实终止、compaction/retry 的覆盖、故障隔离与有界缓冲。\n\n确定本地存储拓扑、摘要/原文引用、最小检索维度、脱敏与外发边界、保留/清理/固定证据和失效引用的规则。先定行为与查询需求，不要求把每个逻辑记录做成独立表或服务。历史事实不能被后来的判断覆盖。\n\n结论应给出足以支撑 eval 与 improve 的最小数据和生命周期合同，包括观测失败时能与不能得出的结论。\n\n来源：[durable usage](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/usage.ts)、[pi-telemetry](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/telemetry/README.md)。UI snapshot 不是无损审计账本；telemetry contract/内存参考不等于长期后端。\n\n本票解决设计决策，不以实现功能、调用真实模型或跑出性能结果作为本轮结论。沿用已给定的产品要求；现有规格的推荐值只在必要时重新讨论。结论记录在 resolution comment，确认后再关闭本票。\n"
+  },
+  "resolution": {
+    "id": 6074633590,
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/5#issuecomment-6074633590",
+    "body": "<!-- pi-durio:issue-5:resolution:r1 -->\n## Resolution — 运行证据与长期记录合同 r1\n\n2026-10-09（Asia/Shanghai），用户已确认 Q1–Q4、追加使用者主动上下文压缩，并在完整合同交付后回复“确认”；随后明确授权“回写关闭 #5”。本票以设计决策完成收尾，保留原问题正文。下面是完整合同、ADR 和新增术语，远程读者无需本地文件即可取得本票的结论。\n\n决定摘要：完整保留运行原文，磁盘压缩与清理由使用者主动发起；允许自动及手动上下文压缩，两者都保留原文并计量；improve 仅外发声明范围内的脱敏摘要及必要片段。运行事实、用户决定、后续判断分开，未知用量不记零。具体字段、命令拼写及落实细节作为可逆默认值随合同整体确认。\n\n### 范围与依据\n\n- 从原始 HTML 第 22 章开始，核对第 8–10、20 章；原文保持不变，SHA256 为 `a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6`。\n- 沿用 [#2 首版范围](https://github.com/nineofoursyrup/pi-durio/issues/2#issuecomment-6066794453)、[#3 执行与恢复边界](https://github.com/nineofoursyrup/pi-durio/issues/3#issuecomment-6067523440)、[#4 TUI 合同](https://github.com/nineofoursyrup/pi-durio/issues/4#issuecomment-6073998011)和 [ADR-0001](https://github.com/nineofoursyrup/pi-durio/issues/3#issuecomment-6067523440)。\n- 本票确定可支持 tracing、LLM Ops、长期查询、eval 和 improve 的最小记录及生命周期；不要求每个逻辑记录成为独立表或服务。\n- 本轮只做设计与配套文档。工作目录没有 Git 元数据；不把文档当作已提交的产品代码。\n\n### 沿用的约束\n\n这些来自已有合同及原规格，不是本轮新增、待用户重新选择的选项。\n\n1. 本机 macOS arm64 / Node CLI；本地 SQLite 和单进程为既有起点。durable 是权威执行状态来源，宿主不修改上游私有 schema、不另建 agent loop。\n2. 产品的一次工作可以跨进程恢复，并包含多个模型请求。产品 run、durable task、逻辑工具调用、实际执行尝试及会话须可关联而不混为同一身份。\n3. 已提交的已知用量以 `pi.usage` 为主要来源；查询、重绘、恢复已提交结果和重复导出不新增费用。重新实际调用才形成新尝试；未返回或未提交用量保留 unknown / partial，不能写成零。\n4. 用量与费用估算分开，保留价格口径和版本；模型自然语言自报不是账本。DeepSeek 静态价格估算不等于实际账单。模型别名不构成不可变权重身份。\n5. 流式追踪持续到真实终止，重试及 compaction 应覆盖可观测的实际尝试。不能重复消费响应流，不能把不可观测的内部重试次数编造成事实。\n6. UI 事件可退化为 snapshot，不能作为无损审计账本。可丢遥测失败不改变业务结果、触发工具重跑或无限累积队列；恢复必需状态、授权和用户决定不能降格为可丢遥测。\n7. 执行版本要能区分 build、依赖、工具、有效指令及模型配置。只有 hash、缺少可取得的内容，不足以声称可恢复或可复现；也不要求每次真实任务复制整个仓库。\n8. 恢复核对追加证据与处置，保留原有未知事实。运行事实、用户决定、后续判断分别留存；后来的评分不覆盖历史。\n9. headless 需要用户输入时，保存原因及可读取结果；退出、中止、失败或恢复核对后，未接入的 steer / follow-up 必须保存且冻结。历史查看不得启动调度。\n10. 显示窗口受限、已保存原文本身不完整、原文已不可取得是三种不同情况。清理后的引用保留缺失状态；固定证据不能仅固定一条随后会失效的链接。\n11. 日常 coding、eval、improve 分开归属和统计；报告包含分母、验证覆盖和缺失。用户采纳不等于有效，历史趋势不等于因果。\n12. 观测默认本地，improve 先读摘要再取必要证据，不默认全量历史注入。宿主不主动把认证密钥写入会话、trace 或报告。Q1 已将本地原文保留范围扩大为全部原文；本地保真与派生视图脱敏分开，不能用派生报告脱敏冒充全部原文都已脱敏，也不能承诺识别所有秘密。\n\n### 第一轮已确认决策\n\n用户答复：“Q1 保留所有原文，除非使用者主动压缩。Q2 按建议，由使用者主动清理。Q3按建议”。Q1 取代首轮推荐的“仅保留必要原文和有界工具输出”；不能继续把该旧推荐当作允许截掉已取得原文的依据。已确认的保留原则另记于 ADR-0002（全文见本评论下方）。\n\n#### Q1：任务结束后的本机原文保存深度\n\n问题：为了日后追查失败、进行 improve 和精选 eval 案例，默认保留多少原始内容？这里决定的是历史证据留存，不是取消运行与恢复所需的持久化状态。\n\n已确认：默认保留所有原文；只有使用者主动压缩或按 Q2 主动清理，才允许缩减历史原文。不能因原文太长、时间过久、展示截断或模型上下文有限，就静默丢弃已经取得的内容。\n\n落实方向：内存、显示窗口和送模上下文仍须有界；它们与磁盘原文保留是不同维度。长输出应分块写盘、按引用分页，不能只保存一个临时路径就声称长期完整。原文保留也不等于取得服务端未返回的内容、模型内部不可见状态，或完整复制所有未读取文件。取得范围、脱敏边界及压缩行为见下文。\n\n#### Q2：历史清理是否自动执行\n\n问题：对已经结束、不承担恢复依赖、也未固定保留的历史内容，首版是自动按策略清理，还是由用户发起清理？这项授权原则适用于 Q1 任一记录深度。\n\n已确认：首版显示占用与可清理范围，由使用者主动清理；提供预览，保护未完成工作和固定证据，清理后保留引用失效标记。默认不设置自动过期、自动清理或自动丢弃原文的容量淘汰策略。\n\n落实方向：容量不足时如何停止接收新工作、处置在途工作及保存不完整标记，必须符合完整留存原则；不可通过静默丢弃原文继续运行。具体预警阈值和写盘开销在实现阶段测量，不将未经测量的天数或容量当作已接受指标。\n\n#### Q3：显式 improve 的模型取证外发边界\n\n问题：显式调用 improve 是否包含将这次分析所需的历史证据发送给已配置的模型服务？本地存储不等于外部模型分析也在本地完成。\n\n已确认：显式调用即允许在已声明分析范围内，向已配置模型发送脱敏摘要及少量必要片段；沿用当前会话及按需相关近期历史的起点，不逐片段重复确认。扩展到其他项目、超出分析范围或引入新的外发目的，需另行明确。外部 tracing 后端仍默认关闭。\n\n### 原文保留的落实方向\n\n下列是依据 Q1–Q3 和已有恢复合同推导的实施默认值，尚非产品验证结果。\n\n- 运行原文按实际可取得的内容留存，包括用户输入、有效指令、模型请求与返回内容、工具参数、执行输出、检查结果和相关附件；正常结束、失败、取消及已收到的未完成内容均有归属。提供方未返回的数据不能伪造为完整；不把逐 token 的界面重绘、可重建投影及同一内容的重复副本都当成必须永久保存的独立原文。\n- 模型调用边界记录请求内容与可取得的返回内容，排除认证传输密钥；注明取得的是模型接口消息还是 provider payload，未取得网络载荷时不声称逐字节留存最终请求。多次请求可复用原文块，但须保存当次有序组成及变换身份；会话 transcript 不能自动视为最终请求。记录可访问的内容，不要求取得不可见的模型内部思维。\n- 长输出使用有界内存分块保存，模型与 TUI 可只取有限内容。已取得的完整输出不得因显示或送模截断而丢失；对工具未读取的文件范围不声称已保存，也不为了补齐无关文件而自动扩大采集。\n- 遵循用户“全部原文”的选择，本地原文不因派生摘要或外发脱敏而被不可逆改写。宿主仍不主动将认证密钥加入记录；原文偶然含敏感值时不能声称本地档案已脱敏。improve 的受限读取接口提供范围内的脱敏视图，外发内容与原文身份关联，不能将脱敏视图冒充原文。无法确定可安全提供的片段保留缺失/遮蔽说明，不借原文读取权限绕过外发范围。\n- 使用者主动的磁盘“压缩”先采用可还原原文的无损归档。用摘要替换并删除原文属于有信息损失的清理，必须在已确认的清理预览中明确列出；不能把普通压缩按钮暗中实现为摘要替换。完整性校验及可读取性核对成功前保留原件，固定证据身份不因物理存储位置变化而失效。\n- 无法继续保存原文时，停止放行新的模型/工具工作，并对在途工作实施受控停止；不为补日志自动重做已发生的操作。保留已有内容并尽可能记录故障与缺口，不能承诺磁盘已满时仍能成功写入错误标记；恢复后核对未知副作用。原文留存是 Q1 要求的运行能力，不属于可以静默丢弃的遥测。\n- span 或可重建查询索引单独故障，且原文及恢复必需状态仍可可靠保存时，可标记观测降级而不改写执行结果。不能把“遥测失败不影响业务”扩大成“原文写不下仍可无限运行”。\n\n### 上游事实核对\n\n2026-10-09，只读核对固定源码 `6fb2e7815167e6b19006fc526d1a5d0f5f998787`，不代表选定 npm 制品已安装或以下路径已通过运行验证。\n\n| 事实 | 对本票的含义 |\n| --- | --- |\n| durable compaction 追加 summary/head，旧 entries 继续保存在 storage；公开 `settings.compaction.enabled = false` 可关闭自动压缩，手动 compact 仍可用。 | 模型上下文摘要与删除磁盘原文分开定义。Q4 已允许自动上下文压缩，并要求手动入口。见 [README](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/README.md#L336-L364)、[公开策略](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/types.ts#L381-L390)。 |\n| `context()` 返回 active transcript；完整历史可由 `entries()` 分页读取。`pi.live` 采用 latest history，watch/watchEvents 可退化为 snapshot。 | 不能将 active context、流式投影或 UI 订阅当成完整原文档案。见 [读取接口](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/types.ts#L501-L551)、[live](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/live.ts#L63-L75)。 |\n| bash 会话结果默认仅保留输出尾部，超限原始输出 spill 到临时文件；shell 接口允许不传 window 时接收全部解码输出，spill 文件保存 raw output。 | 宿主必须在公开执行环境边界落实持久归档，不能仅保存会话尾部或临时路径。具体适配需运行测试验证。见 [bash](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/tools/bash.ts#L80-L120)、[ShellExecOptions](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/env/index.ts#L224-L251)。 |\n| read 以 offset/limit 和输出上限读取文件内容，不保证读取或返回整个文件。 | 保留此次实际取得的内容及读取范围，不能据此声称已备份整个文件。见 [read](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/tools/read.ts#L42-L94)。 |\n| Node spill 具有背压，保存失败会停止命令；临时文件使用系统 tmpdir。 | 背压有可参考实现，但临时文件不等于长期档案，也不自动证明崩溃后仍可完整定位与读取。见 [Node 环境](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/env/node.ts#L701-L760)。 |\n| 手动 compact 会启动调度，每次调用创建新 task；会话中止只撤回 queued input，queued write 仍可保留。 | 手动入口先受宿主排队/去重/恢复检查约束；未接入 summary 要独立核对与撤回。见 [compact 入口](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/harness.ts#L99-L103)、[中止队列](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/inbox.ts#L110-L121)、[submission 撤回](https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/submissions.ts#L81-L94)。 |\n\n### 第二轮已确认：自动与主动上下文压缩\n\n#### Q4：保留本机完整原文时，是否允许自动缩短模型上下文\n\n用户答复：“按建议，并且我想 添加用户可主动进行上下文压缩”。这项确认允许自动上下文压缩，并明确加入使用者主动触发能力。\n\n已确认：允许 runtime 在需要时自动整理模型上下文，同时完整保留原文、追加摘要及其覆盖范围，并单独记录这次模型调用和用量。使用者也能主动发起同样的上下文压缩；两者都不删除历史原文。磁盘历史的无损归档或清理仍只能由使用者主动发起，不从任何上下文压缩推导删除授权。\n\n#### 主动压缩的最小交互合同\n\n以 TUI `/compact` 及可见的“压缩当前上下文”入口、等价的 headless/CLI 操作为默认入口；命令拼写可在接线时调整，语义必须一致。\n\n| 情况 | 行为与记录 |\n| --- | --- |\n| 当前会话空闲且满足执行条件 | 明确绑定当前 session/conversation，主动请求本身即是本次压缩的授权，正常范围内不再重复确认。显示压缩中与结果；这是可能调用模型的操作，仍受适用预算和权限约束。 |\n| 当前工作运行中 | 先保存可见的管理请求，待当前工作正常结束并满足恢复/版本/授权条件后执行；不把命令作为 steer 文本发给模型，不中止正在运行的工具。对同一会话重复触发同一未完成请求合并显示，不偷偷叠加收费调用。 |\n| 与其他排队请求并存 | 管理请求有稳定身份，顺序约束只适用于后续独立工作与管理请求：先于压缩受理的后续工作按原顺序处理，后于压缩受理的后续工作等待其处理结果。当前 run 的 steer 仍按 #4 在工具轮次边界接入，不等待压缩；压缩真正执行时再确定源上下文边界。手动压缩不会解冻中止后遗留的 steer/follow-up，也不改变它们的原始归属。 |\n| 中止、退出、失败或进入恢复核对 | 尚未执行的手动压缩请求一同冻结，必须显式重新接入。已经启动的压缩受正常停止/恢复检查约束，不能为了压缩绕过未知副作用核对或唤醒其他旧 pending。 |\n| 正在只读查看历史会话 | 默认不提供会写入/调用模型的压缩动作；使用者先显式选定执行目标并通过所有权及兼容性检查。不能因当前展示哪个历史，就隐式把它变成执行会话。 |\n| 无可压缩内容、重复点击或已有等效在途操作 | 能在调用前识别时直接显示无需压缩或已排队；不虚构改善、节省或用量。若上游判定 noop 前已经发生请求，仍保留真实尝试及已知/未知成本。 |\n| 摘要生成但尚未接入 | 分别显示“摘要已生成”和“上下文已更新”；以 durable 的 submission 接入状态确认生效，不以 compaction task completed 直接宣称更新完成。过期摘要不能强行接入。 |\n| 使用者撤回/取消压缩 | 尚在宿主队列时撤回该请求；计算中只取消对应 compaction task；已经生成则核对并撤回未接入的 summary submission。与接入竞争时按已提交事实显示，已经生效不承诺回滚；不为取消压缩而顺带中止无关工作。 |\n| 失败、取消或中断 | 保留原消息、生成到的内容和已知用量；不得把不完整摘要当成已生效上下文。重新执行是真实新尝试，不因重试隐藏此前失败或费用；已提交的摘要不重复应用。 |\n| 完成 | 可查看触发方式、覆盖范围、保留边界、摘要与来源引用；上下文大小若能可靠取得则显示口径与变化，否则标记未知。不得把 token 估计减少写成磁盘空间已释放。 |\n\n所有压缩均记录 `automatic/manual`、请求及执行身份、执行版本、源上下文边界、摘要引用、接入状态、模型尝试和用量。自动压缩的成本归入实际触发它的工作；空闲时主动压缩作为会话维护操作单列，再纳入总成本，不混进 coding 成功率或归到下一次任务。\n\n上游 `compact()` 会启动调度，因此忙时由宿主先保存排队请求，不能直接调用后再期待它只做只读准备。宿主复用 durable 的 compaction task、submission 和结果，负责入口与接入核对，不另写摘要调度器。自动压缩及已经生成但尚未接入的 summary 也须通过整份 Harness 的恢复核对；不把它们排除在冻结/取消管理之外。\n\n### 最小逻辑记录与身份\n\n下表描述所需事实与关系，不规定一行对应一张表。身份稳定且有明确作用域；时间戳、显示编号、路径和 provider tool-call ID 均不能单独充当全局身份。\n\n| 逻辑对象 | 必须能回答的问题 |\n| --- | --- |\n| 项目、工作区、session/conversation | 属于哪个登记项目、哪个实际工作目录和 durable 存储/会话/分支。规范化路径用于所有权检查；移动目录、相同 remote 或不同 worktree 不自动被当作同一个执行初态。 |\n| 产品运行（run） | 哪项已受理的工作，kind、输入、时间、状态/结束原因、执行版本、代码初态和结果引用是什么。steer 归当前 run；follow-up 被实际接入后才开始自己的 run；跨进程恢复仍关联原 run。受理但未执行的请求不能冒充已完成的 run。 |\n| 模型尝试（attempt） | 哪个 run/维护操作的哪次可观测请求，普通生成、compaction 或其他 purpose，provider、请求模型与可得返回标识/指纹、参数、请求/响应引用、起止、错误、用量及完整性。重试中新发出的请求有新身份；仅恢复已提交响应不新增尝试。 |\n| 工具实际执行 | 哪个 session/task 范围的逻辑 tool call、哪次实际执行、输入、工作目录、有效执行条件、输出引用、退出/错误/取消状态和未知副作用。provider 的调用编号只作相关字段；恢复核对不得覆写最初的未知结果。 |\n| 执行版本与工作初态 | 宿主 build、依赖锁、工具/扩展实现、有效指令与模型设置、平台及必要环境身份。内容能取得就保留或指向验证过的不可变工件；仅有 hash 时标明缺口。Git 可用时记录 commit、dirty 及能取得的相关 diff/初态，未取得的内容不声称可复现。认证值不封存，记录配置来源及可用性而非秘密值。 |\n| 检查与结果 | 哪条实际检查、针对什么输入/候选及环境、实际命令/工具版本、退出结果、完整输出和产物。执行完成、检查通过、目标已验证是不同事实；模型自称完成只作为声明，不能替代检查证据。 |\n| 证据引用 | 稳定记录身份、所属范围、内容摘要/hash、取得状态、完整性、来源及派生关系。区分完整取得、源头未返回、采集缺口、显示截断、派生脱敏、无损归档、主动清理、损坏和暂时不可读取，不用单一 unknown 覆盖这些区别。 |\n| 用户输入与决定 | steer/follow-up/管理请求的受理、接入、撤回、冻结及目标；需要输入的原因、可用选项、授权范围与基线；恢复核对的证据和决定。用户选择不改写原事实；TUI 与 headless 读取同一状态。 |\n| 后续判断与反馈 | 谁依据哪些证据、规则/评判版本、在何时作出判断，结论及局限是什么。新判断追加并可注明修订关系，保留原判断；无反馈保持未知。 |\n| eval 与 improve 关联 | case/fixture/grader/version、计划 trial 及结果、baseline/candidate；报告/候选稳定 ID 和 revision、证据范围、用户选择、执行、版本启用和效果分别可关联。R1 仅是报告内显示号；实际动作权限和评分方法由 #6/#7 完成。 |\n\n普通任务不额外调用模型分类；任务类型可由已知入口或明确元数据给出，未知则留空。首版只保存后续确实需要的关系，避免复制 durable 内部状态机。\n\n### 用量、耗时与完整性\n\n- 以 durable 已提交 usage 的稳定来源身份去重投影，保留累计口径及归属范围；不能对每个 run 重复累计整个 session 的总用量。无法可靠归属的用量作为未归属项计入会话总量，报告归属缺失，不用前后差值伪装精确归属。\n- `completeSimple` 包装 `streamSimple` 时只在实际请求边界采集一次；流式 span 到真实完成、失败或取消才结束。provider/SDK 内不可观测的重试仅声明观测限制，不臆造物理调用次数。新进程恢复使用新尝试/关联，不伪装成同一个连续 span。\n- 正常生成、compaction、已发生的重试、失败请求以及工具报告的费用均按可观测事实纳入。reasoning 等子集不能与所属总量重复相加；可用分类与缺失分类分别保存。\n- 原始 usage、价格表/币种/生效时间、估算方法和计算结果分开。重新按新价格计算产生新估算版本，不改写当时估算；已知部分的估算旁边明确缺失范围。provider usage 不等于已取得账单，估算不能称为实际扣费。\n- 开始时间、单进程可测的活跃耗时和等待使用者的时间分开；跨重启时钟无法精确拼接时声明局限。compaction/分析/eval 的成本不能隐藏在“优化节省”之外。\n- 日常 coding、eval、improve 及独立维护操作分开统计，再给总已知成本。成功率附分母、验证覆盖和缺失数量；失败、取消、需求变更和基础设施错误可分组但不能从总样本中悄悄删除。运行完成不自动等于通过验收。\n\n### 本地存储与写入责任\n\n默认使用应用自有、位于项目目录之外的本机数据根目录；路径可以配置，首版不要求同步服务。逻辑布局为每个 session 的上游 durable SQLite、一个宿主元数据 SQLite，以及持久原文/附件目录；精确文件名可逆，不要求增加 ORM、服务或独立守护进程。\n\n1. durable SQLite 保留上游权威执行状态与已提交消息。宿主库保存产品身份、用户决定、版本与证据关系，以及可重建的查询投影；其中用户决定等独有事实不是缓存，不能把删除整个宿主库称为重建索引。大原文只保存必要的一份完整内容，复用可靠引用，避免逐 span 复制。\n2. 沿用单宿主写入者起点，对宿主数据根目录与每个可写 session storage 落实所有权；工作区写入者另按 #3 检查。第二个争用同一数据根的写入进程在写入前被挡住，可只读查看。读取/分页不借机打开会触发协调或调度的 Harness。\n3. 需要恢复或控制执行的请求、授权和意图先保存，再放行对应操作；如果无法保存，就不能假装已受理或已授权。引用大原文前先确认内容已持久取得，再提交其完整性/身份。中途崩溃可能留下待核对的记录或附件，不能为了修索引重做模型/工具调用。\n4. 两个库与外部副作用之间不承诺跨库原子事务或 exactly-once。通过稳定关联、记录阶段和启动核对发现空隙；无法证明某个请求是否已交给上游时保留不确定，不盲目再次提交。投影落后可由 durable 已提交记录重建，宿主独有事实与未提交原文缺失则如实标记。\n5. UI/遥测队列有界，派生 span 可降级并计遗漏；原文采集也有界但采用分块落盘和背压，不能通过丢弃内容满足队列上限。保存失败按前述受控停止处理；检测不出精确丢失量时记录未知缺口，不宣称原文完整。\n6. 原文所在目录及文件限定当前用户读取；这不是 OS 沙箱、加密保险库或对同用户恶意进程的隔离保证。improve 只能走宿主的范围查询与脱敏视图，不能取得任意文件路径后绕过读取限制。\n\n### 保留、压缩、固定证据与清理\n\n- 没有默认保留天数或自动容量淘汰。显示各项目/会话与原文类别的占用，具体预警阈值由实现测量后配置；用户不清理时存储需求会增长。\n- 手动无损归档保留内容身份并验证还原后的 hash；不压缩正在写入的数据文件。处于恢复、冻结请求、待用户决定、未完成工作或待接入摘要中的必要材料不得被清理。\n- 固定证据覆盖内容及其必要来源依赖，不只是引用行；如果内容已缺失，固定操作不得显示成功。eval case 成立所需的 fixture、版本、检查与原文在声明的固定范围内一起保护；解除固定与清理为明确的管理操作，不由 improve 建议自动触发。\n- 清理先预览实际范围、字节估计、受保护依赖及将失效的引用；明确提交后才执行。清理中断可重新核对和继续同一管理操作，不能把部分成功写成全部完成。最小清理记录保存内容身份、范围、原因和时间，不复制被删除的敏感正文。\n- 不直接修改 durable 私有 schema 来逐条删除消息或回写压缩摘要。首版清理以依赖闭合、无未完成工作的完整 session/归档单元及独立附件为起点；原始库若共享多个 conversation 或分支，其受保护引用都须检查。无法独立清理的内容说明限制，不能破坏剩余会话。\n- 原文主动清理后仍可显示保留的结构化事实及旧判断，但证据状态改为已清理，后续报告明确当前无法重查；原来基于该证据作出的判断不被改写成从未有证据。若使用者主动要求删除整个记录范围，则预览说明摘要与判断也将移除。\n- 备份/迁移先取得一致性快照并验证可读，不能只复制活跃 SQLite 主文件而忽略 WAL。宿主 schema 和上游 schema 各自按拥有者的公开机制升级；失败保留原件并限制为可支持的只读查看，未知格式不尝试猜测。数据迁移成功不等于允许新执行版本恢复旧 pending。\n\n### 最小查询与外发合同\n\nTUI 与 headless 使用相同查询语义：按项目、时间、kind、任务类型、状态/原因、执行版本、provider/model 与完整性筛选，分页列出摘要，再按稳定身份读取必要原文、检查和关联。还需支持从一条运行向下追查模型/工具尝试、恢复核对、用户输入/决定、compaction、eval 或 improve 引用；不要求全文向量检索或 Web 运维平台。\n\n汇总必须注明筛选范围、数据更新位置、样本与缺失；索引落后时显示陈旧状态，不把空查询等同于没有发生。长输出分页保持稳定范围及内容身份，不因后续写入悄悄错页。只读查询不产生模型调用、用量、新运行或自动恢复。\n\nimprove 取证先确定 session/项目/时间范围和查询上限，先摘要再少量原文片段；即使全部历史保留，也不自动全部入模。送出的派生内容记录来源、遮蔽/截断、目标 provider/model 与分析归属，报告可说明哪些证据尚未覆盖。历史记录里的指令样文本仍只是数据，不能改变权限或访问范围。其他导出动作显式选择目的地与内容范围；默认没有远程 telemetry 后端，也不因本地原文完整就自动完整外发。\n\n### 交接验证与下游责任\n\n以下是实现阶段的行为验证义务，不是本轮运行通过的产品测试：\n\n| 场景 | 必须观察的结果 |\n| --- | --- |\n| 工具输出超过上游会话窗口、临时目录被清理 | 磁盘档案能读取已取得的完整输出；TUI/送模仍有界；只留尾部或失效临时链接不能通过。 |\n| 模型流正常、报错、取消、进程中断 | 结束边界和原文完整性准确；已有内容保留，未知用量不为零；不多消费响应流。 |\n| 自动与主动压缩 | 原文可读、摘要及覆盖范围可查、用量归属清楚；忙时排队、重复请求去重、无内容 noop、生成与接入分开。 |\n| 压缩与退出/中止/恢复交错 | 未接入请求及 summary 不因下一次 submit/compact 隐式恢复；失效摘要不应用，未知副作用仍先核对。 |\n| 忙时先请求压缩、后补充 steer | steer 仍归当前 run 并按工具轮次接入；只有后续独立工作受压缩顺序约束，不产生互相等待。 |\n| 重启、索引重建、重复查询和导出 | 同一已提交 usage 不重复累计；真实重试有新身份；不能可靠归属的成本保留在未归属项。 |\n| 原文写盘失败与派生遥测失败 | 前者阻止新工作并暴露缺口，后者可降级但不重跑工具；两者都不伪造业务成功/失败。 |\n| 固定、归档、清理及中途故障 | 保护恢复和固定依赖；归档可还原校验，清理预览与实际范围一致，部分完成及失效引用可见。 |\n| 版本内容不可取得、dirty 初态缺失、数据库迁移失败 | 保留不可恢复/不可复现原因及原件；不因 hash 相同或 schema 升级就自动续跑。 |\n| 原文含秘密或指令样内容 | 原文和派生视图区别明确；improve 只能取得授权范围的脱敏证据，不由内容提升权限，不宣称检测覆盖所有秘密。 |\n| 后续判断或用户选择改变 | 追加修订与关联，原运行事实保持不变；选择、执行、启用及效果不能合并成一个成功状态。 |\n\n#6 继续确定 eval 的隔离、评分、预算与重试阈值；#7 继续确定 improve 候选动作权限、选择后的执行和版本启用；#8 汇总真实工件、故障注入、性能/增长测量和整条路径验收。本票提供相应身份与事实接口，不提前声明下游通过。\n\n本轮检查范围为设计一致性、本地链接、上游固定源码及原 HTML 完整性。独立文档核对发现“压缩之后的请求等待”可能误挡当前 run 的 steer，已收紧为只约束后续独立工作与管理请求，并加入对应验证场景；定点复核通过。没有产品依赖安装、实际模型调用、产品测试、磁盘故障实验或容量基准；所有“必须观察”仍是实施责任。用户已对整理后的完整合同回复“确认”，设计定稿为 r1，并随后明确授权“回写关闭 #5”。本次关闭表示设计决策完成，不代表产品实现或验收完成。\n\n### ADR-0002：完整原文保留与使用者主动缩减\n\n2026-10-09，用户在 [#5 运行证据与长期记录合同](https://github.com/nineofoursyrup/pi-durio/issues/5) 的设计访谈中明确选择“保留所有原文，除非使用者主动压缩”，并确认清理由使用者主动发起。pi-durio 默认完整保留运行原文，不因期限、展示窗口或模型上下文限制自动丢弃；内存、显示和送模内容保持有界，不应以这些上限替代磁盘原文保留。\n\n用户随后确认自动上下文压缩，并追加“用户可主动进行上下文压缩”。这两种上下文压缩只改变后续模型请求使用的上下文，保留原文、追加摘要并记录用量；它们都不构成删除磁盘历史的授权。\n\n这项选择放弃默认只存必要片段或自动淘汰历史原文的路线，以保留事后追查及分析能力，接受更高的存储需求和使用者主动管理的成本。磁盘归档、清理保护未完成工作的恢复依赖及固定证据；具体落实见 [#5 设计合同](https://github.com/nineofoursyrup/pi-durio/issues/5)。本 ADR 不承诺取得服务端未返回的数据、掉电零丢失或每个历史任务完整可复现，也不表示实现已通过验证。\n\n### 新增术语\n\n**运行原文**:\npi-durio 在一次工作中实际收到或产生的原始内容，包括消息与工具交互，区别于从中提取的摘要或事后判断。\n_Avoid_: 将摘要当作原文、将运行原文等同于整个项目的完整快照\n\n**产品运行（run）**:\npi-durio 为一项已接入工作持续开展的执行过程，可以包含多个模型请求与工具操作，也可以跨中断恢复。\n_Avoid_: 将长会话、单次模型请求或 durable 内部 task 直接等同于产品运行\n\n**上下文压缩**:\n将部分会话内容整理成供后续模型请求使用的摘要，同时保留原有运行原文的操作，可自动或由使用者主动触发。\n_Avoid_: 历史清理、删除原文、磁盘无损归档\n\n**固定证据**:\n被明确选定持续保留、供核验或评估使用的证据内容及其必要依赖。\n_Avoid_: 仅收藏链接、将已缺失的原文标成保留成功\n\n### 配套材料身份与交付边界\n\n以下是发布时本机已确认材料的路径和校验值；这些路径不是 GitHub 下载链接，文件尚未提交或推送。本评论完整刊载本票合同、ADR-0002 和新增术语；TUI 的主动压缩补充已包含在本合同中，原 HTML 保持不变。后续本地文档仅更新远程收尾状态时，文件整体 hash 会改变，不表示已确认行为发生变化。\n\n- `/Users/nineofour/Durio/docs/design/runtime-evidence-and-retention.md` — SHA256 `6dd2975165e193e0427195324724d16bec71048b6dc922eaddf95f1b009f35e3`\n- `/Users/nineofour/Durio/docs/adr/0002-full-original-records-and-user-controlled-reduction.md` — SHA256 `1999cf397500e0721e6b47ac7591bfba777dcf7f0b37a2276d72318fdc287461`\n- `/Users/nineofour/Durio/GLOSSARY.md` — SHA256 `5e22df28845538783798e24732b11201ea92059aee0d8aaa6ff7d95343a3cd04`\n- `/Users/nineofour/Durio/docs/design/tui-minimum-interaction.md` — SHA256 `70e9a65fb3658eaa29c6782d3a95ec2df7baec130c029219a58fb90134c1b779`\n- `/Users/nineofour/Durio/pi-durable-coding-agent-spec.html` — SHA256 `a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6`\n\n本次没有产品实现、真实模型调用、产品测试或性能验收结果。#6 承接 eval 与改善判定，#7 承接 improve 动作授权和版本启用，#8 汇总实现交接与验收；本次不领取或启动这些票据。\n",
+    "sha256": "81e17c310efbb5d9d7665ab74f29a3bf89b1be71ce23e6ed956297cc4d5967dc"
+  },
+  "map": {
+    "number": 1,
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/1",
+    "state": "open",
+    "body": "## Destination\n\n以现有 HTML 规格为起点，形成可交给实现 Agent 的 pi-durio 首版规格：明确轻量 coding 核心、evals / LLM Ops / tracing、长期运行证据，以及显式调用 improve 后由用户选择执行的行为合同与验收边界。\n\n地图完成意味着实现前的实质决策已经解决；产品实现及交付另行推进。\n\n## Notes\n\n- 当前用户要求：产品名 pi-durio；基于 pi-durable；参考官方 durable coding-agent demo 和 Grok Build TUI；尽量减少自有代码与体积；具备 evals / LLM Ops / tracing 和长期自我性能评估；内置 improve，先给有证据的候选，仅执行用户选择的范围。\n- 原始输入为本地 `/Users/nineofour/Durio/pi-durable-coding-agent-spec.html`，首先阅读第 22 章，按议题查阅相关章节。保留原文件；其中旧功能名 retro 按当前要求映射为 improve。其推荐方案、例子和未决参数不自动成为已确认决策。\n- TypeScript + Node、pi-tui、本地 SQLite、单进程、共用 runtime、本地观测为现有规格的推荐起点。只有发现冲突、测量结果或影响范围的新要求时重新讨论，避免逐项重问已有材料。\n- 已有正确性约束继续适用：未知用量不记为零；历史趋势不等于因果；用户采纳不等于效果；恢复不保证外部副作用恰好一次；分析只读由宿主落实；候选不能修改评分规则来证明自身有效。\n- 每次按 wayfinder 推进一个决策票；使用 grilling 与 domain-modeling。外部事实调查按需使用 research，体验问题使用 prototype。问题先查资料，再问用户偏好。\n- 建图终点已由用户于 2026-10-09 确认；这项确认不代替后续 HITL 决策。现有参考规格 SHA256：`a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6`。本地原文和研究报告尚未提交到 GitHub，不将本地路径当作远程已发布材料。\n- 上游来源：[pi-durable 固定快照](https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable)、[官方 durable demo](https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable)、[Grok Build](https://github.com/xai-org/grok-build/tree/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8)、[参考 retro](https://github.com/mattpocock/skills/blob/b0618bc436ad893b3c5e84e55fba86586d34a404/skills/engineering/retro/SKILL.md)。\n- Issue tracker：`nineofoursyrup/pi-durio`；正式地图使用 `wayfinder:map`，子票使用原生父子关系和原生依赖。\n- 规划范围内不运行付费模型、不创建产品实现、不提交或推送代码。远程 Issue 的创建与维护按用户显式调用的 wayfinder 流程执行。\n\n## Decisions so far\n\n- [首版范围与轻量目标](https://github.com/nineofoursyrup/pi-durio/issues/2#issuecomment-6066794453)：首版 macOS arm64 / Node CLI，先用 DeepSeek V4.1 Flash；少维护代码优先，按实测基线优化轻量开销。\n\n- [上游复用与执行恢复边界](https://github.com/nineofoursyrup/pi-durio/issues/3#issuecomment-6067523440)：普通 coding 采用可信本机执行；副作用不确定时先受限只读核对，证据不足再由用户决定；执行版本变化不自动续跑旧 pending。复用公开 Pi API，宿主承担权限、存储/工作区所有权与恢复前检查；本票为设计收敛，实际工件与恢复行为仍待实现验证。\n\n- [TUI 的最小交互合同](https://github.com/nineofoursyrup/pi-durio/issues/4#issuecomment-6073998011)：全屏单列、底部固定输入与状态，基本鼠标及键盘等价入口；忙时 Enter 为 steer，显式 follow-up，首版验收目标 macOS Terminal。快捷键参考 Claude Code，保留中止后冻结队列与只读恢复；improve 逐项选择、汇总后一次提交。用户已确认修订原型；浏览器模拟与合成接口检查仅支持设计，真实终端及执行层行为仍待实现验收。\n\n- [运行证据与长期记录合同](https://github.com/nineofoursyrup/pi-durio/issues/5#issuecomment-6074633590)：完整保留运行原文，由使用者主动归档/清理；自动及手动上下文压缩均保留原文并计量，忙时手动压缩排队且不阻挡当前任务 steer。improve 仅外发声明范围内的脱敏摘要及必要片段；运行事实、用户决定、后续判断分开，未知用量不记零。原文写入失败受控停止，固定证据与恢复依赖受保护。r1 设计已确认，产品实现及故障/性能验收仍待完成。\n\n## Not yet specified\n\n后续决策可能暴露上游公共入口、TUI 能力或评估隔离方面的新取舍；以实际发现为准，不预先分拆成实现任务。\n\n## Out of scope\n\n本地图不承担产品代码实现、发布与部署。常驻 optimizer、日常自动 LLM critic、自动选择候选、自动启用新 skill、完整 Web 运维平台、向量数据库和 fine-tuning 不属于现有首版推荐路径；若改变产品范围，须单独作出决定。\n",
+    "added_decision": "- [运行证据与长期记录合同](https://github.com/nineofoursyrup/pi-durio/issues/5#issuecomment-6074633590)：完整保留运行原文，由使用者主动归档/清理；自动及手动上下文压缩均保留原文并计量，忙时手动压缩排队且不阻挡当前任务 steer。improve 仅外发声明范围内的脱敏摘要及必要片段；运行事实、用户决定、后续判断分开，未知用量不记零。原文写入失败受控停止，固定证据与恢复依赖受保护。r1 设计已确认，产品实现及故障/性能验收仍待完成。"
+  },
+  "graphql": {
+    "state": "CLOSED",
+    "state_reason": "COMPLETED",
+    "closed_at": "2026-10-09T05:03:14Z",
+    "parent_number": 1
+  },
+  "checks": {
+    "rest_closed_completed": true,
+    "graphql_closed_completed": true,
+    "closed_at_matches": true,
+    "original_issue_body_preserved": true,
+    "resolution_rest_exact": true,
+    "resolution_graphql_exact": true,
+    "map_exact": true,
+    "map_existing_content_preserved": true,
+    "map_still_open": true,
+    "parent_map_1": true,
+    "original_html_preserved": true
+  },
+  "confirmed_source_manifest": [
+    {
+      "path": "/Users/nineofour/Durio/docs/design/runtime-evidence-and-retention.md",
+      "sha256": "6dd2975165e193e0427195324724d16bec71048b6dc922eaddf95f1b009f35e3"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/adr/0002-full-original-records-and-user-controlled-reduction.md",
+      "sha256": "1999cf397500e0721e6b47ac7591bfba777dcf7f0b37a2276d72318fdc287461"
+    },
+    {
+      "path": "/Users/nineofour/Durio/GLOSSARY.md",
+      "sha256": "5e22df28845538783798e24732b11201ea92059aee0d8aaa6ff7d95343a3cd04"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/design/tui-minimum-interaction.md",
+      "sha256": "70e9a65fb3658eaa29c6782d3a95ec2df7baec130c029219a58fb90134c1b779"
+    },
+    {
+      "path": "/Users/nineofour/Durio/pi-durable-coding-agent-spec.html",
+      "sha256": "a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6"
+    }
+  ],
+  "children": [
+    {
+      "number": 2,
+      "title": "首版范围与轻量目标",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/2",
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "assignees": {
+        "nodes": [
+          {
+            "login": "nineofoursyrup"
+          }
+        ]
+      },
+      "blockedBy": {
+        "nodes": []
+      }
+    },
+    {
+      "number": 3,
+      "title": "上游复用与执行恢复边界",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/3",
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "assignees": {
+        "nodes": [
+          {
+            "login": "nineofoursyrup"
+          }
+        ]
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 2,
+            "state": "CLOSED"
+          }
+        ]
+      }
+    },
+    {
+      "number": 4,
+      "title": "TUI 的最小交互合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "assignees": {
+        "nodes": [
+          {
+            "login": "nineofoursyrup"
+          }
+        ]
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 3,
+            "state": "CLOSED"
+          }
+        ]
+      }
+    },
+    {
+      "number": 5,
+      "title": "运行证据与长期记录合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/5",
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "assignees": {
+        "nodes": [
+          {
+            "login": "nineofoursyrup"
+          }
+        ]
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 3,
+            "state": "CLOSED"
+          }
+        ]
+      }
+    },
+    {
+      "number": 6,
+      "title": "Eval 与性能改善的判定合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/6",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": {
+        "nodes": []
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 5,
+            "state": "CLOSED"
+          }
+        ]
+      }
+    },
+    {
+      "number": 7,
+      "title": "improve 的建议、选择与执行合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/7",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": {
+        "nodes": []
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 6,
+            "state": "OPEN"
+          }
+        ]
+      }
+    },
+    {
+      "number": 8,
+      "title": "首版验收与实现交接边界",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/8",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": {
+        "nodes": []
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 7,
+            "state": "OPEN"
+          },
+          {
+            "number": 4,
+            "state": "CLOSED"
+          }
+        ]
+      }
+    }
+  ],
+  "eligible_frontier": [
+    6
+  ],
+  "next_frontier": {
+    "number": 6,
+    "title": "Eval 与性能改善的判定合同",
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/6"
+  },
+  "scope": "Design resolution only. No product implementation, real model call, product tests, performance acceptance, git commit or push.",
+  "local_closeout_files": [
+    {
+      "path": "/Users/nineofour/Durio/docs/design/runtime-evidence-and-retention.md",
+      "sha256": "ab3355ed874a6a7fd33d5631de1677784fcc8548aa9e7e2e925351033fa8e0a3"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/adr/0002-full-original-records-and-user-controlled-reduction.md",
+      "sha256": "455387761601a83c165bf3c3da7a5ffbe7af44c8e437250e25d7ab1446abd76d"
+    }
+  ]
+}

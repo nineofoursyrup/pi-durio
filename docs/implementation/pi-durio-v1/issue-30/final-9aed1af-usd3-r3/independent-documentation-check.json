@@ -1,0 +1,165 @@
+{
+  "status": "PASS",
+  "commit": "fc9e2d446306036af85f75da13ba8228cc3a648a",
+  "parent": "370d91875bd00bf25606fe469fb63ae89423f124",
+  "files": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/README.md",
+      "bytes": 6688,
+      "sha256": "6a1036af9b0581e80db12f250a0916ecf3cc05cbc80327b3f1c7e1203cdc611a"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/authorization-source-template-NOT-EXECUTABLE.json",
+      "bytes": 649,
+      "sha256": "74296b1b81902caa73ec1dc4f125afe698855303f0a109c24f80008e6f32d640"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/budget-check-r1.json",
+      "bytes": 1841,
+      "sha256": "76428bdfb41ce5a3393b06d7f72034a08c6c738fac84e0097590483dec929486"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/budget-check-r1.stderr",
+      "bytes": 173,
+      "sha256": "93c36da807df413044bd6549c4dc26dd2543c97deddd7278320d5f6a0b384d20"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/budget-check-r1.stdout",
+      "bytes": 28,
+      "sha256": "be58970717716c618560e5b5aa2eedfcdeaebca6dd40cc68d7896dd19a90b5f0"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/check-budget.mjs",
+      "bytes": 5985,
+      "sha256": "0c371fd95781f1aeb4f693c975802a36e278c24f6586764e952b3fc31d3bfc26"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/check-supplement-r1-source.mjs",
+      "bytes": 15869,
+      "sha256": "4b352787c701d6eb470765207076cc5f0b77994a807876945b46b38cb44fa2e0"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/check-supplement.mjs",
+      "bytes": 15938,
+      "sha256": "808b99ea0290d9a85c09f262853d4ad718173641e1ea68994a7cbbbb9fe3c407"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/checked-manifest.json",
+      "bytes": 10012,
+      "sha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/checks.json",
+      "bytes": 5162,
+      "sha256": "0c87bae1f93ce6f11c8862eb31bd515609b5c3c1b2501f840101d6c3642f569a"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/derivation.json",
+      "bytes": 1367,
+      "sha256": "bea10efbfbe992b674d961075eb1aad5de065ce43414566ca8613f67494c0c90"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/evidence-index.json",
+      "bytes": 7671,
+      "sha256": "23f3c2f9636148b5e9555c123623640489f1c2e819945bd3ec469e3b12674927"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/frozen-manifest.json",
+      "bytes": 10012,
+      "sha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/grant-template-NOT-EXECUTABLE.json",
+      "bytes": 801,
+      "sha256": "3f041bf6cf865c67fbf55bdd4308ca0a1b0d9764477ade0d4044c7b77402d631"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/harness/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/harness/launch.py",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/harness/preflight.mjs",
+      "bytes": 11132,
+      "sha256": "3e8d4e97b46a3fdff423d95ab54766b1f7165dfda398ab4281ba5ed55a3f2b7c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/harness/prepare-supplement.py",
+      "bytes": 8454,
+      "sha256": "f3f8edd19d8e99f373798d1472b9f18b9cbe55761454b0cf64dab254d5d24735"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/harness/run.mjs",
+      "bytes": 8166,
+      "sha256": "4dfdd125850ae6d891024fe34d03861878d023503c75ab80c901b689513f3202"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/harness/supplement.mjs",
+      "bytes": 4039,
+      "sha256": "4d98547fa6fe3363a0c8f1df48834f6f0f6f5314745a47342d210b90980a898a"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/prior-budget-ledger.json",
+      "bytes": 833,
+      "sha256": "aa937e6d251595d5945983e5e1e829305e8412ef382ab83140b031751a2f592c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/proposed-batch-reviewed.json",
+      "bytes": 70103,
+      "sha256": "e48f678b8364d1cdd4166330ac72bc5475662800a802f9938bcf7b093efa46c5"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/provider-observation.json",
+      "bytes": 1560,
+      "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/revision-delta.json",
+      "bytes": 27182,
+      "sha256": "c53b83dc94bbf0c2178b46e2106614113404a9bf07d39a39565140591ff49a3c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/supplement-check-r1.json",
+      "bytes": 8042,
+      "sha256": "d72bde048b04f308f44e035baead4741cdb8be87925ac811dac3fac72e2f6fde"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/supplement-check-r1.stderr",
+      "bytes": 592,
+      "sha256": "ee0e85b698eaaf713c2d0b93dc8eaffa5666203dea19cbcceb2eeb6c8edfdae4"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/supplement-check-r1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/supplement-check-r2.json",
+      "bytes": 45449,
+      "sha256": "d9b01fa7bebbf035aeae2590ba773724d913191b98efc47314e674e7e7ddc69c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/supplement-check-r2.stderr",
+      "bytes": 173,
+      "sha256": "60766e1184c66ef3af090a188a9fe382068426167443ec760b9e64f687acdfaa"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/supplement-check-r2.stdout",
+      "bytes": 113,
+      "sha256": "f1fbc2f3a893c5b391261d499650bbda0263746b7b0613ae2f9f09a0212d47cd"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/wrapper-check-r1.json",
+      "bytes": 706,
+      "sha256": "9a99edda9edfa343e589d17171dccc12688690915c7b717161eac20a3a97158b"
+    }
+  ],
+  "fileCount": 31,
+  "rule": "Every added docs review copy is byte-identical to its external r3 counterpart; no execution or checkout mutation",
+  "firstCheckerFailure": "documentation-check-r1-failure.json"
+}

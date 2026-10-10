@@ -1,0 +1,183 @@
+{
+  "checked_at_utc": "2026-10-09T07:02:51.896427+00:00",
+  "issue_url": "https://github.com/nineofoursyrup/pi-durio/issues/8",
+  "resolution_url": "https://github.com/nineofoursyrup/pi-durio/issues/8#issuecomment-6076091393",
+  "checks": {
+    "resolution_body_exact_match": true,
+    "resolution_hash_match": true,
+    "rest_closed_completed": true,
+    "graphql_closed_completed": true,
+    "issue_original_body_preserved": true,
+    "map_expected_body_match": true,
+    "map_existing_content_preserved": true,
+    "map_one_resolution_entry": true,
+    "map_open_rest_graphql": true,
+    "native_children_2_through_8_all_closed": true,
+    "native_blockers_closed": true,
+    "source_materials_unchanged_during_publication": true,
+    "local_links_after_closeout_valid": true,
+    "confirmed_contract_unchanged_by_status_update": true,
+    "original_html_unchanged_after_closeout": true
+  },
+  "published_materials": {
+    "prepared_at_utc": "2026-10-09T06:59:39.977181+00:00",
+    "files": [
+      {
+        "path": "docs/design/first-version-acceptance.md",
+        "sha256_at_publication": "02ed34417a7bec9b445c4e6e76fd631a04c608c20c55ef58fd0bbff19da9c37f"
+      },
+      {
+        "path": "GLOSSARY.md",
+        "sha256_at_publication": "8904007155c9943d97a23b6d45d4464b5abcc074e4e5f279e16dbe39d0c3ae46"
+      },
+      {
+        "path": "pi-durable-coding-agent-spec.html",
+        "sha256_at_publication": "a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6"
+      }
+    ],
+    "resolution_sha256": "4b17900785c8e5314a61fb16ad4b02ef4e60194705a9a355aa871222ba6fa701",
+    "canonical_contract_sha256": "04072e64785c7e6b38f828f6e85f96b2b98c2b1e0404941f2a2f2a2f16691c48",
+    "new_glossary_term": "**日用接受**:\npi-durio 技术验收完成后，使用者依据轻量测量报告与本机试用，明确认可首版可用于日常工作的决定。\n_Avoid_: 将技术检查通过等同用户接受、将设计确认等同首版完成"
+  },
+  "issue": {
+    "number": 8,
+    "title": "首版验收与实现交接边界",
+    "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/8",
+    "state": "closed",
+    "state_reason": "completed",
+    "body": "## Question\n\n前述已确认决策是否足以交给实现 Agent，哪些属于首版必须验证的行为，哪些数值必须待真实基线测量，哪些缺口会阻止交接？\n\n对照本地规格第 18–22 章与各决策票 resolution，明确最小完整首版、按依赖推进的实现顺序、适用验收场景和完成证据。现有 ACC-01 至 ACC-22 是起点；保留恢复、副作用、重复记账、stream、缺失、观测失败、eval 有效性、improve 选择/仅验证/版本生效及轻量测量的实质约束，避免照抄实现的测试配额。\n\n确认 TUI 与 improve 选择合同是否一致，以及实现、真实 provider 验证、发布各自所需条件。只做设计一致性与交接决策；实现阶段的真实运行或性能测试未做时必须明确列出，不能写成 PASS。\n\n结论应提供可执行的交接入口和验收边界，引用各票中的唯一决策记录，不在 Map 复制全部规格。若出现新的实质问题，创建并连接必要决策票，不以交接文本掩盖缺口。\n\n本票解决设计决策，不以实现功能、调用真实模型或跑出性能结果作为本轮结论。沿用已给定的产品要求；现有规格的推荐值只在必要时重新讨论。结论记录在 resolution comment，确认后再关闭本票。\n",
+    "updated_at": "2026-10-09T07:00:48Z",
+    "closed_at": "2026-10-09T07:00:48Z"
+  },
+  "map": {
+    "number": 1,
+    "title": "pi-durio 首版决策地图",
+    "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/1",
+    "state": "open",
+    "state_reason": null,
+    "body": "## Destination\n\n以现有 HTML 规格为起点，形成可交给实现 Agent 的 pi-durio 首版规格：明确轻量 coding 核心、evals / LLM Ops / tracing、长期运行证据，以及显式调用 improve 后由用户选择执行的行为合同与验收边界。\n\n地图完成意味着实现前的实质决策已经解决；产品实现及交付另行推进。\n\n## Notes\n\n- 当前用户要求：产品名 pi-durio；基于 pi-durable；参考官方 durable coding-agent demo 和 Grok Build TUI；尽量减少自有代码与体积；具备 evals / LLM Ops / tracing 和长期自我性能评估；内置 improve，先给有证据的候选，仅执行用户选择的范围。\n- 原始输入为本地 `/Users/nineofour/Durio/pi-durable-coding-agent-spec.html`，首先阅读第 22 章，按议题查阅相关章节。保留原文件；其中旧功能名 retro 按当前要求映射为 improve。其推荐方案、例子和未决参数不自动成为已确认决策。\n- TypeScript + Node、pi-tui、本地 SQLite、单进程、共用 runtime、本地观测为现有规格的推荐起点。只有发现冲突、测量结果或影响范围的新要求时重新讨论，避免逐项重问已有材料。\n- 已有正确性约束继续适用：未知用量不记为零；历史趋势不等于因果；用户采纳不等于效果；恢复不保证外部副作用恰好一次；分析只读由宿主落实；候选不能修改评分规则来证明自身有效。\n- 每次按 wayfinder 推进一个决策票；使用 grilling 与 domain-modeling。外部事实调查按需使用 research，体验问题使用 prototype。问题先查资料，再问用户偏好。\n- 建图终点已由用户于 2026-10-09 确认；这项确认不代替后续 HITL 决策。现有参考规格 SHA256：`a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6`。本地原文和研究报告尚未提交到 GitHub，不将本地路径当作远程已发布材料。\n- 上游来源：[pi-durable 固定快照](https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable)、[官方 durable demo](https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable)、[Grok Build](https://github.com/xai-org/grok-build/tree/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8)、[参考 retro](https://github.com/mattpocock/skills/blob/b0618bc436ad893b3c5e84e55fba86586d34a404/skills/engineering/retro/SKILL.md)。\n- Issue tracker：`nineofoursyrup/pi-durio`；正式地图使用 `wayfinder:map`，子票使用原生父子关系和原生依赖。\n- 规划范围内不运行付费模型、不创建产品实现、不提交或推送代码。远程 Issue 的创建与维护按用户显式调用的 wayfinder 流程执行。\n\n## Decisions so far\n\n- [首版范围与轻量目标](https://github.com/nineofoursyrup/pi-durio/issues/2#issuecomment-6066794453)：首版 macOS arm64 / Node CLI，先用 DeepSeek V4.1 Flash；少维护代码优先，按实测基线优化轻量开销。\n\n- [上游复用与执行恢复边界](https://github.com/nineofoursyrup/pi-durio/issues/3#issuecomment-6067523440)：普通 coding 采用可信本机执行；副作用不确定时先受限只读核对，证据不足再由用户决定；执行版本变化不自动续跑旧 pending。复用公开 Pi API，宿主承担权限、存储/工作区所有权与恢复前检查；本票为设计收敛，实际工件与恢复行为仍待实现验证。\n\n- [TUI 的最小交互合同](https://github.com/nineofoursyrup/pi-durio/issues/4#issuecomment-6073998011)：全屏单列、底部固定输入与状态，基本鼠标及键盘等价入口；忙时 Enter 为 steer，显式 follow-up，首版验收目标 macOS Terminal。快捷键参考 Claude Code，保留中止后冻结队列与只读恢复；improve 逐项选择、汇总后一次提交。用户已确认修订原型；浏览器模拟与合成接口检查仅支持设计，真实终端及执行层行为仍待实现验收。\n\n- [运行证据与长期记录合同](https://github.com/nineofoursyrup/pi-durio/issues/5#issuecomment-6074633590)：完整保留运行原文，由使用者主动归档/清理；自动及手动上下文压缩均保留原文并计量，忙时手动压缩排队且不阻挡当前任务 steer。improve 仅外发声明范围内的脱敏摘要及必要片段；运行事实、用户决定、后续判断分开，未知用量不记零。原文写入失败受控停止，固定证据与恢复依赖受保护。r1 设计已确认，产品实现及故障/性能验收仍待完成。\n\n- [Eval 与性能改善的判定合同](https://github.com/nineofoursyrup/pi-durio/issues/6#issuecomment-6075512766)：首版坚持极简，一个手动顺序 runner、四类小型 TypeScript/Node 案例与本地报告，复用共用 runtime、记录及既有检查。正式行为改善须有经过验证的受限 eval 边界，目录分离的本机试跑仅作诊断；预算与验证范围随显式选择授权，保留全部计划试次及失败/缺失。正确性优先，区分改善、退化、无明显差异与证据不足；可信观测与有效分母支撑结论。r1 完整合同、ADR-0003 和术语已确认发布，产品实现、隔离及真实效果仍待验证。\n\n- [improve 的建议、选择与执行合同](https://github.com/nineofoursyrup/pi-durio/issues/7#issuecomment-6075789748)：显式受限分析，允许明确目标的项目/配置/skill/自身源码及独立 eval 候选；仅验证在临时副本中进行，不写回或启用。不再建议在目标范围内持续到用户恢复；性能候选须证明预定收益才启用。一次选择绑定版本、基线、范围与预算，组合验证、部分失败和回退均保留事实并保护用户编辑；新版本不热改旧 pending。r1 完整合同与 3 个术语已确认发布，产品实现、隔离与实际效果仍待验证。\n\n- [首版验收与实现交接边界](https://github.com/nineofoursyrup/pi-durio/issues/8#issuecomment-6076091393)：首版须有真实 DeepSeek coding、四类代表任务和 improve 选择后执行闭环；故障与权限分支复用确定性检查，不强求性能收益。完整实测报告与用户本机试用后的明确日用接受共同约束首版完成。r1 已汇总 ACC-01–22、后续合同义务、证据/阻塞判定及实现顺序；先验证公共入口、原文、恢复、隔离与终端可行性。完整合同及术语已确认发布，产品实现和真实验收仍待完成。\n\n## Not yet specified\n\n后续决策可能暴露上游公共入口、TUI 能力或评估隔离方面的新取舍；以实际发现为准，不预先分拆成实现任务。\n\n## Out of scope\n\n本地图不承担产品代码实现、发布与部署。常驻 optimizer、日常自动 LLM critic、自动选择候选、自动启用新 skill、完整 Web 运维平台、向量数据库和 fine-tuning 不属于现有首版推荐路径；若改变产品范围，须单独作出决定。\n",
+    "updated_at": "2026-10-09T07:01:23Z",
+    "closed_at": null
+  },
+  "comment": {
+    "id": 6076091393,
+    "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/8#issuecomment-6076091393",
+    "body": "## Resolution — 首版验收与实现交接边界（r1）\n\n2026-10-09，用户对 Q1/Q2 回复“全按建议”，随后对整理后的完整设计明确授权“确认，回写并关闭 #8”。本 resolution 是 #8 的唯一远程决策记录，完整承载已确认的验收与实现交接合同。本次收尾针对设计决策；产品实现、真实模型、实际终端、隔离及性能验收尚未完成，Map #1 保持开放。\n\n## 权威输入与当前事实\n\n已先读取原 HTML 第 22 章，再对照第 18–20 章和下列已确认合同。原 HTML 是保留的参考原件；较新的明确决策覆盖其旧称和建议，不能把其中的 retro、自动保留期限或未定参数当作当前要求。\n\n| 决策 | 唯一远程决策记录 | 本地配套 |\n| --- | --- | --- |\n| 首版范围、平台、模型、轻量方向 | [#2 resolution](https://github.com/nineofoursyrup/pi-durio/issues/2#issuecomment-6066794453) | `docs/design/first-version-scope.md`（首版范围，本地配套，未提交） |\n| 上游复用、执行和恢复 | [#3 resolution](https://github.com/nineofoursyrup/pi-durio/issues/3#issuecomment-6067523440) | `docs/design/upstream-execution-recovery.md`（执行与恢复，本地配套，未提交） |\n| TUI、输入、中止和选择 | [#4 resolution](https://github.com/nineofoursyrup/pi-durio/issues/4#issuecomment-6073998011) | `docs/design/tui-minimum-interaction.md`（TUI，本地配套，未提交） |\n| 运行证据、压缩和长期保留 | [#5 resolution](https://github.com/nineofoursyrup/pi-durio/issues/5#issuecomment-6074633590) | `docs/design/runtime-evidence-and-retention.md`（运行证据，本地配套，未提交） |\n| Eval、隔离、预算和改善判断 | [#6 resolution](https://github.com/nineofoursyrup/pi-durio/issues/6#issuecomment-6075512766) | `docs/design/eval-and-improvement.md`（Eval，本地配套，未提交） |\n| improve 建议、选择、验证和启用 | [#7 resolution](https://github.com/nineofoursyrup/pi-durio/issues/7#issuecomment-6075789748) | `docs/design/improve-workflow.md`（improve，本地配套，未提交） |\n\n设计访谈时读取 GitHub：#2–#7 均 CLOSED；#8 为 OPEN，原生 blocker #4、#7 均 closed，已按项目约定分配给当前用户。#4–#7 的远程 resolution 与相应本地收尾读回中的全文一致；#2、#3 的远程全文另行读取核对。Map #1 仍 OPEN。\n\n本地目录尚无 Git 元数据或产品源码/依赖工程。TUI 浏览器原型和 pi-tui 合成探查只证明其声明范围内的观察，不构成产品、真实 Terminal 或 provider 验收。既有实现责任均未因决策票关闭而通过。\n\n## 沿用的首版与授权边界\n\n首版保持 macOS arm64 本机 Node CLI、DeepSeek `deepseek-flash`、coding/TUI/headless/eval 共用 runtime；普通 coding 可信本机执行，正式 eval 使用经验证的受限环境。继续复用 durable 的 loop、存储、恢复与用量，不新增并行 agent 平台、常驻 optimizer、日常 critic 或自动更新器。\n\n首版完整路径是 coding 与检查、退出/恢复、用量/trace 查询、长期原文及上下文压缩、手动 eval、显式 improve 的建议→选择→执行验证→结果留存。阶段性交付不表示这条路径已经完整。\n\n设计可交接、产品实现验证、真实 provider 验证和发布分别记录。缺少真实凭据或付费授权时，可继续独立的本地实现和确定性检查，但相关真实验收保持未运行；设计确认不授权模型调用、候选执行或发布。\n\n## 本轮已确认的决策\n\n已收敛的根节点：平台/模型、可信本机执行、恢复核对、执行版本、原文保留、TUI 选择、正式 eval 边界及 improve 动作权限。暂未发现需要重开 ADR-0001–0003 的合同冲突。\n\n本轮 Q1、Q2 均按建议确认；无需重开已有决定。真实运行预算、实际依赖与隔离接线、测量值和本机试用结果由实施阶段取得，不能由设计确认代替。\n\n### Q1：首版真实端到端验收的深度\n\n已确认：首版完成须有真实 DeepSeek coding/工具轮转，以及真实 improve 分析与选中执行闭环。#6 的四类固定任务通过真实模型运行，产生实际产物和检查证据；不应改动的反例以目标状态未被改变等真实证据验收，不强求产生 patch。TUI/headless 接线和 macOS Terminal 交互分别核验，不要求同一任务在每个入口重复支付模型调用。另以可控的小型项目完成 improve 取证→用户选中→必要验证→正式写回或适用的新任务生效→重新打开记录核验。\n\nimprove 可以使用已知可改进问题的 fixture，选择确定性修复，不以模型必须发现新优化或测得性能收益作为首版门槛。候选仍须来自实际分析并经选择，不能以预填候选替代真实分析结果。零候选保持合法，只是该次不能证明执行链已经完成；可用受控输入独立验证分支，报告分清真实模型与合成证据。性能候选的改善和启用继续受 #6/#7 的预定规则约束。\n\n真实验收批次在执行前固定案例、要求、版本、次数、预算和可观察结果；保留首次失败及所有计划项。修复后运行新的、关联原失败的验收记录，不挑成功输出改写旧结论。首版任务达标不自动成为行为改善或普遍稳定性证明；重复次数和费用额度由实际批次计划决定，本轮不发明统一测试数量。\n\n### Q2：轻量实测如何进入首版接受判断\n\n已确认：沿用先测基线，不把未知数值拖成实现前置条件。交付可复核的体积/启动/内存/记录增长与开销报告，并在用户本机试用后明确接受或指出需改进项；只有技术验收已完成、尚欠用户试用决定时，才称“技术验收完成，日用接受待确认”。不通过一项未校准的 MB/ms 总分宣布轻量达标，也不建设通用性能门禁平台。\n\n正确性、授权、原文保留、内存/显示有界等既定硬约束仍须通过。正常完整原文引起的磁盘增长单独报告，不被当作必须自动清理的故障。若实测暴露不可接受的资源或体验问题，用具体证据界定下一步优化目标；目标及门槛在相应优化试验前固定，不能事后修改门槛制造改善。\n\n## 既有验收义务索引\n\n以下是对原 ACC-01–22 及 #3–#7 补充义务的分组索引；各源合同仍是完整要求。一个行为测试可以覆盖多项，独立失效方式不能因为合并行而省略。所有产品结果当前均为未运行。\n\n| 分组与来源 | 必须观察的行为 | 适用证据 |\n| --- | --- | --- |\n| 安装与公共入口；#3 | 精确依赖/lock 可安装、公开 import 可用、模型配置解析正确；不依赖 demo 私有导入 | 实际安装工件与最小执行记录 |\n| 共用 runtime；ACC-01 | TUI/headless/eval 的业务、权限和配置语义一致，UI 不决定执行事实 | 入口集成与实际产物 |\n| 所有权；ACC-02、#3 | 同 storage、同工作区的别名/嵌套入口不能获得并行写权；残留进程与陈旧锁有核对 | 多进程冲突与退出证据 |\n| 恢复与副作用；ACC-03/04/18、#3 | 副作用前、后未提交、已提交边界中断；未知先只读核对；版本/授权不符不续跑，等效新调用也不能绕过 | 故障注入与真实目标状态 |\n| TUI 队列与压缩；#4/#5 | steer/follow-up 归属、接入/撤回竞争、停止/退出冻结；主动压缩不阻挡当前 steer，失效摘要不接入 | runtime 集成与交互观察 |\n| 计量与流；ACC-05/06/07 | 重绘/重开/重建/导出不双计；stream 到真实终止；重试有身份，未知/partial 不记零 | provider/流的确定性夹具与真实接线 |\n| 原文及派生观测；ACC-08、#5 | 大输出、取消/中断保留已取得原文；原文写入失败受控停止，派生 telemetry 失败只降级，不重跑工具 | 大输出、存储故障、慢消费者检查 |\n| 长期记录；#5 | 自动/主动 compaction 不删原文；固定/恢复依赖受保护；主动归档/清理、迁移失败与部分完成保留事实 | 重开读取、归档还原及故障检查 |\n| Eval 有效性；ACC-09/10、#6 | 初态/版本可取得；候选不能越界或改分；独立评分，子进程结束、导出与评分执行也受边界保护 | 真实隔离负向探查及四类 fixture |\n| Eval 预算与判定；#6 | 全部计划项/失败/缺失保留；有效分母明确；预算、重试、compaction 与停止受控；结果支持限定范围结论 | runner 行为、报告和预定批次证据 |\n| improve 分析；ACC-11/12/13/21 | 仅显式触发、受限脱敏取证、允许零候选；不可信文本不能提权，业务目标不被分析写入 | 能力阻断、无候选/秘密/指令样文本场景 |\n| improve 选择；ACC-14/15/16/17、#7 | 结构化逐项选择、一次提交；重复提交去重、旧选择失效、仅验证不写回；依赖/冲突和持续抑制正确 | TUI/headless 共用选择与目标差异 |\n| improve 执行和生效；ACC-18/19、#7 | 组合单独验证；部分失败停止剩余项；验证内容等于写回内容；自身构建/配置生效与旧 pending 分离；回退保护用户编辑 | 真实文件/构建、故障、版本和结果记录 |\n| 真实终端；ACC-20、#4 | macOS Terminal 中文 IME/emoji/键位、鼠标复制、多行、小窗口、大输出、退出后的终端状态可靠 | 实际 Terminal 观察；浏览器/合成 PTY 不替代 |\n| 轻量与效果；ACC-22、#2/#5/#6/#7 | 固定统计口径，区分生产安装/分发体积、本地/模型时间、coding/eval/improve 开销；效果不以采纳代替 | 实测报告；按 Q2 经本机试用明确接受 |\n\n## 完成判定与最小证据\n\n使用同一份验收记录引用现有 run、trace、eval 和 improve 产物，不另建验收平台。每项至少能追查要求/源合同、候选内容与执行条件、检查方式及实际结果、证据位置与缺口；一个证据可支持多项，但不能超出其实际验证范围。\n\n| 交付状态 | 成立条件 | 当前状态 |\n| --- | --- | --- |\n| 设计可交接 | 实质决策已解决；源合同、验收义务、工程起点及阻塞处置明确 | 本 resolution 完整承载已确认合同 |\n| 技术验收完成 | 全部首版必要行为有适用证据；实际安装、公共入口、确定性/故障检查、正式 eval 边界及 runner、真实 Terminal、Q1 的真实模型完整路径通过；轻量报告具备完整口径和必需测量 | 未实现、未运行 |\n| 日用接受 | 技术验收完成，用户依据测量报告及本机试用明确接受 | 未进行 |\n| 首版完成 | 上述技术验收与日用接受均成立，已知限制被如实记录且未削弱既定首版承诺 | 未完成 |\n| 对外发布 | 有明确发布范围、目标产物及独立授权，并验证对应产物 | 不在本轮范围 |\n\n用户提出阻碍日用的问题、要求先修正时，保持待接受；完成修正及必要复测后，再由用户明确接受，不能把反馈或修正计划当作接受结果。\n\n验收项区分通过、失败、未运行、受阻、证据不足；不适用只能用于确实不属于已确认范围的分支，并说明依据。不能因为功能未做、环境不可用或没有预算就把首版必需项写成不适用。检查应验证“预期失败被正确处理”还是“要求任务成功”；故障注入中正确阻断是产品行为通过，被测任务本身仍保留其失败或未知事实。\n\n所有必需项均有支持才能声称技术验收完成。任一已证实的恢复/权限/原文/计量/隔离等硬约束失败都阻止该结论，不能用较小体积或较低费用抵消。缺少真实凭据、授权、Terminal 观察或有效隔离证据时，将相关项明确留为未运行/受阻/证据不足，其余独立检查可继续。未知原因不能被 UI 的完成提示或 agent 自报成功覆盖。\n\n四类代表任务各自必须满足预先固定的要求，所声明验收批次的全部计划项与结果都进入报告；失败、取消或未运行项不能挑出后声称整批通过。允许依据首次失败修复并重新验证受影响范围，产生关联的新记录；其他仍适用的确定性检查直接复用。随机模型结论按预定计划重复，不能凭一次成功宣布稳定或改善，也不为了凑出通过无限重跑。技术验收仅支持已声明案例和环境，不承诺任意语言/项目的总体成功率。\n\n正式 eval 能力验收须证明隔离、可信评分、预算与失败分类实际工作，并以已知结果的对照材料检查改善/退化/无明显差异/证据不足的判定路径。受控的确定性材料可以检验 runner 与判定实现，不能冒充随机模型改善证据；不要求首版必须找到一个性能更好的真实候选。\n\n候选工件须可取得，包括必要源码或分发产物、依赖 lock、有效配置/指令、相关 dirty 输入及 fixture/grader 的实际内容；单独 hash 不够。每份证据记录适用版本和环境，验证后相关内容变化则原结果只支持原内容。证据引用遵循 #5 的完整性/固定保留，不能只留已删除的临时目录。凭据值不进入交接、报告或版本内容。\n\n轻量报告按 #2 统一口径列出自有维护代码、生产安装与分发体积、冷启动、空闲/代表性长会话 RSS、记录增长、写盘/查询、大输出及三类工作用量/费用。记录机器、Node/依赖、终端、输入负载、测量过程及重复数据；区分本地和网络/模型耗时，无法分离时说明限制。费用仍为带时间与来源的估算。必需的本地测量未取得时不声称报告完整，provider 未提供的用量则按合同保留 unknown，并限制相应成本判断。\n\n## 可交接的实现依赖顺序\n\n这是工程起点，不新增产品范围，亦不代表已经授权实现。\n\n1. **验证关键接线可行性**：锁定真实安装工件，验证公开 API、只读历史/恢复前检查与能力边界；尽早探查一个现成 eval 隔离机制及 macOS Terminal 的关键输入能力。若要维护 fork、换核心、放宽隔离/恢复保证才能工作，先带证据重开相应设计，不默默降级。\n2. **最小 runtime 与基础记录同步形成**：实现 headless、小型 coding 路径、所有权、退出/中止/恢复；从首次持久运行就保留必要身份、原文和用量，不能到后期才补造历史。\n3. **接入 TUI 与可查询记录**：共用 runtime，落实队列、恢复面板、上下文压缩、长历史/大输出有界显示、查询及长期保留。\n4. **完成手动 eval**：复用 runtime 和记录，固定四类任务初态，落实一种受限环境、可信评分与预算；明确诊断和正式结果。\n5. **完成 improve 选择闭环**：受限分析、候选/决定、临时构造、适用验证、写回/生效、回退和记录重开；依赖的隔离及恢复保证须先具备。\n6. **执行整体验收并测量**：按本票合同完成实际工件、真实 provider、Terminal、代表任务与轻量测量，逐项保留状态和缺口，再提交用户本机试用及日用接受。\n\n具体文件拆分、命令名称、报告字段、fixture 数量、页大小和可逆参数由实现 Agent 按既有接口选择，不新增逐项访谈。实际付费批次的预算/次数、测量负载与判定门槛须在对应执行前具体化。\n\n## 实现 Agent 的交接入口\n\n未来获得实现授权后，从本文的权威输入表进入各完整合同，并读取项目 AGENTS、GLOSSARY 与 ADR-0001–0003；原 HTML 第 22 章提供历史摘要，不覆盖后续已确认决策。TUI 原型用于交互参照，其后补主动压缩合同以 #4/#5 文本为准，不能只实现原型已有按钮。\n\n首先确认实际仓库/源码目标、当前编辑及授权；本地目前无 Git 元数据，不能假设已有可用 commit、PR、CI 或默认分支。任何后续提交、推送、发布或远程建票按届时授权执行。本文是可执行的设计入口，不要求先生成一个新的通用任务编排系统。\n\n从第一阶段建立精确安装与最小行为探查，优先暴露公共 API、完整原文接入、恢复边界、eval 隔离和真实终端接线风险。工程选择可自主迭代；若只能依靠 fork、更换核心依赖、放宽已确认保证或实质扩大成本/平台范围解决，则保留具体失败、影响合同及可选方案，停止受影响路径，并通过有授权的决策票流程解决。其余不依赖该阻塞的工作可继续，不把缺口藏进交接文字。\n\n每阶段交付可运行结果及必要证据，最终交付启动/配置/恢复说明、精确候选工件、要求到证据的索引、真实模型/Terminal 验收记录和轻量测量报告。复用已通过且条件仍适用的确定性检查；只有相关变化、新失败或未覆盖风险才重跑/扩测。\n\n## 新增领域术语\n\n**日用接受**:\npi-durio 技术验收完成后，使用者依据轻量测量报告与本机试用，明确认可首版可用于日常工作的决定。\n_Avoid_: 将技术检查通过等同用户接受、将设计确认等同首版完成\n\n## 设计收敛、检查与交付边界\n\nQ1/Q2 均已确认，当前没有剩余的本票实质决策。不新增 ADR：日用接受是可调整的首版接受程序，既有执行、原文保留及评估边界继续使用 ADR-0001–0003。#4/#5 的 TUI/压缩与 #7 的结构化选择、冻结队列及生效规则一致；正式 eval 与普通可信本机执行适用不同边界，原文写盘失败与可选 telemetry 失败也分别处理。\n\n本轮已完成文档一致性、本地链接、ACC-01–22 索引覆盖、术语唯一性及原 HTML SHA256 检查。独立文档核对发现“要求修正”不可当作“日用接受”，已修正为明确接受才成立，并定点复核。没有安装产品、读取凭据、调用模型、运行产品/隔离/终端/性能测试、提交或推送代码；这些工作不是本轮设计完成的证据。\n\n本地配套为 `docs/design/first-version-acceptance.md` 与 `GLOSSARY.md`，当前目录尚无 Git 元数据。下列身份对应发布前材料；后续本地收尾状态更新不改写发布时内容身份。原 HTML 保持不变。本 resolution 已嵌入完整合同及新增术语，不依赖本地路径才能理解本票决定；Map 只追加摘要链接。\n\n| 本地材料 | 发布时 SHA256 |\n| --- | --- |\n| `docs/design/first-version-acceptance.md` | `02ed34417a7bec9b445c4e6e76fd631a04c608c20c55ef58fd0bbff19da9c37f` |\n| `GLOSSARY.md` | `8904007155c9943d97a23b6d45d4464b5abcc074e4e5f279e16dbe39d0c3ae46` |\n| `pi-durable-coding-agent-spec.html` | `a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6` |\n",
+    "created_at": "2026-10-09T07:00:21Z",
+    "updated_at": "2026-10-09T07:00:21Z"
+  },
+  "graphql": {
+    "data": {
+      "repository": {
+        "issue8": {
+          "number": 8,
+          "url": "https://github.com/nineofoursyrup/pi-durio/issues/8",
+          "state": "CLOSED",
+          "stateReason": "COMPLETED",
+          "closedAt": "2026-10-09T07:00:48Z",
+          "assignees": {
+            "nodes": [
+              {
+                "login": "nineofoursyrup"
+              }
+            ]
+          }
+        },
+        "map": {
+          "number": 1,
+          "url": "https://github.com/nineofoursyrup/pi-durio/issues/1",
+          "state": "OPEN",
+          "stateReason": null
+        }
+      }
+    }
+  },
+  "children": [
+    {
+      "number": 2,
+      "title": "首版范围与轻量目标",
+      "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/2",
+      "state": "closed",
+      "state_reason": "completed"
+    },
+    {
+      "number": 3,
+      "title": "上游复用与执行恢复边界",
+      "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/3",
+      "state": "closed",
+      "state_reason": "completed"
+    },
+    {
+      "number": 4,
+      "title": "TUI 的最小交互合同",
+      "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+      "state": "closed",
+      "state_reason": "completed"
+    },
+    {
+      "number": 5,
+      "title": "运行证据与长期记录合同",
+      "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/5",
+      "state": "closed",
+      "state_reason": "completed"
+    },
+    {
+      "number": 6,
+      "title": "Eval 与性能改善的判定合同",
+      "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/6",
+      "state": "closed",
+      "state_reason": "completed"
+    },
+    {
+      "number": 7,
+      "title": "improve 的建议、选择与执行合同",
+      "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/7",
+      "state": "closed",
+      "state_reason": "completed"
+    },
+    {
+      "number": 8,
+      "title": "首版验收与实现交接边界",
+      "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/8",
+      "state": "closed",
+      "state_reason": "completed"
+    }
+  ],
+  "issue8_blockers": [
+    {
+      "number": 4,
+      "title": "TUI 的最小交互合同",
+      "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+      "state": "closed",
+      "state_reason": "completed"
+    },
+    {
+      "number": 7,
+      "title": "improve 的建议、选择与执行合同",
+      "html_url": "https://github.com/nineofoursyrup/pi-durio/issues/7",
+      "state": "closed",
+      "state_reason": "completed"
+    }
+  ],
+  "preserved_before_sha256": {
+    "issue8_body": "de3c6c4d3681679de7aa828b9ddf80faddad272c9c607da6db24357ecd442c01",
+    "map_body": "bb4aeeda131f80dfb66ff2b7aaaeaba4ce627f1ab5bca8288ea395968032ead1"
+  },
+  "map_added_entry": "- [首版验收与实现交接边界](https://github.com/nineofoursyrup/pi-durio/issues/8#issuecomment-6076091393)：首版须有真实 DeepSeek coding、四类代表任务和 improve 选择后执行闭环；故障与权限分支复用确定性检查，不强求性能收益。完整实测报告与用户本机试用后的明确日用接受共同约束首版完成。r1 已汇总 ACC-01–22、后续合同义务、证据/阻塞判定及实现顺序；先验证公共入口、原文、恢复、隔离与终端可行性。完整合同及术语已确认发布，产品实现和真实验收仍待完成。",
+  "next_frontier": {
+    "open_children": [],
+    "map_state": "OPEN",
+    "note": "既有 #2–#8 设计票均已关闭；本次不关闭 Map #1、不创建实现票或开始产品实现。"
+  },
+  "validation_boundary": "仅设计文档及 GitHub 发布/状态核验；产品、真实模型、Terminal、隔离、故障及性能均未验收。",
+  "local_files_after_closeout": [
+    {
+      "path": "docs/design/first-version-acceptance.md",
+      "sha256": "933e026ed0f5eecf88296eec276269a043b1dcb6c56dd04031d1a54de1ba6d8b"
+    },
+    {
+      "path": "GLOSSARY.md",
+      "sha256": "8904007155c9943d97a23b6d45d4464b5abcc074e4e5f279e16dbe39d0c3ae46"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "at": "2026-10-10T11:02:19.457721+00:00",
+  "status": "PASS",
+  "scope": "Syntax, exact installed file/mode/content membership, sourceBuild, Node and manifest/config binding; no product import, runtime task or Terminal operation",
+  "config": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-config.json",
+    "bytes": 2819,
+    "sha256": "bb6cbc77100405825395a8dc8bbfd6986edb37b2e799a5fea4ebd8a590532385"
+  },
+  "syntaxChecks": [
+    {
+      "name": "process-startup.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "native-batch.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "native-idle.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "native-session.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "readonly-data.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "native-recovery.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "installedEntries": 14230,
+  "productManifestEntries": 12925,
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+    "bytes": 92984,
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "node": {
+    "path": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+    "bytes": 50288,
+    "sha256": "3e401401d90e7f0367b7737a613801242c9a6b2966fb50c2e48eb1c45d701c6a"
+  },
+  "nodeVersion": "v26.8.2",
+  "system": {
+    "sw_vers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2\nBuildVersion:\t\t26B5101f\n",
+    "architecture": "arm64",
+    "machine": "MacBookPro18,1",
+    "memoryBytes": 34359738368,
+    "installedTerminalVersion": "2.15",
+    "installedTerminalBuild": "488.7",
+    "actualTerminalProfile": "UNKNOWN",
+    "actualTerminalFont": "UNKNOWN",
+    "actualTerminalDimensions": "TO_BE_RECORDED_AT_NATIVE_RUN"
+  },
+  "terminalTool": "DENIED; user launch required",
+  "outputAbsent": true
+}

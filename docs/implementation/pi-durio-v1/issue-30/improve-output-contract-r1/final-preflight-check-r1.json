@@ -1,0 +1,32 @@
+{
+  "status": "PASS_OFFLINE_IN_MEMORY_AUTHORIZATION_ONLY",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/checked-manifest.json",
+    "bytes": 77149,
+    "sha256": "809aa5350c2d1d3cd3fac9281210ce41e2ff643e889a565bd15f25ae02e30856"
+  },
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "producer": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "candidateGate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
+    "bytes": 4084,
+    "sha256": "21271432e2d61a85048c5be7d9679328b49286bf96ae86e299eb6801f945a47d"
+  },
+  "priorUnknownReservation": 1056768,
+  "newMaxRequests": 8,
+  "cumulativeMaxChargedTokens": 2362794,
+  "scope": "Exact frozen-input content and complete preflight evaluated using only an artificial in-memory authorization. Real seed tree and referenced evidence hashes checked. No product import/API/environment access.",
+  "actualReads": 12110,
+  "actualAuthorization": false,
+  "realCredentialReads": 0,
+  "newProviderRequests": 0,
+  "vmStarts": 0,
+  "productExecutions": 0,
+  "newGrantFiles": 0,
+  "newPaidStartFiles": 0,
+  "script": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/check-final-preflight.mjs",
+    "bytes": 5136,
+    "sha256": "f49d619fba9d5553486b74563d7d7ee0a904fb2a502f85b79fecc24b2494df49"
+  }
+}

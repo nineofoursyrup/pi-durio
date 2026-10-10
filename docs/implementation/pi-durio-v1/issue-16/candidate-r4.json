@@ -1,0 +1,67 @@
+{
+  "issue": 16,
+  "status": "FAIL_PENDING_HUMAN_REVALIDATION",
+  "dependencySatisfaction": false,
+  "implementationCommit": "aff8b09",
+  "candidateCommit": "42ff424757f83c8578949d2a31f31eafca8ad486",
+  "candidateTree": "d502b804bf8ca48848dbffd393f9550825b95635",
+  "integratedBase": "afcfe83f5faf17519796b560fb161bd440e57d50",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-cursor",
+  "branch": "codex/pi-durio-v1-issue-16-cursor",
+  "candidate": {
+    "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r4/manifest.json",
+    "manifestSha256": "21334d9cfada9de155dfa24c81cba3662199fafe9a5ce21a7d6b49ed0163dde2",
+    "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r4/terminal-validation.mjs",
+    "runnerSha256": "243f0510106d0bd4ff1dab6df6ae3db3d96869c8c9d7bae34a798d225a51758a",
+    "pack": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r4/pi-durio-0.1.0.tgz",
+    "packSha256": "479f085c6735d5bef2cdb96b3a56f8ac78229a8f9a94ee3f84562708b35249ee",
+    "files": 12687,
+    "verified": {
+      "verified": true,
+      "commit": "42ff424757f83c8578949d2a31f31eafca8ad486",
+      "files": 12687,
+      "packageRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r4/installed/node_modules/pi-durio"
+    }
+  },
+  "checks": {
+    "npmCheck": {
+      "status": "PASS",
+      "tests": 48,
+      "log": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/cursor-repair/check-with-issue14.log"
+    },
+    "compiledAndLockIdentity": {
+      "compiledFiles": 45
+    },
+    "installedSmoke": {
+      "status": "PASS",
+      "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r4/installed-smoke-result.json",
+      "cursor": {
+        "singleHardwareCaret": true,
+        "paintHidesCaret": true,
+        "menuHidesCaret": true,
+        "focusRestored": true,
+        "bracketedPasteCombiningDeletion": true
+      },
+      "headlessSameResult": true
+    },
+    "firstFailures": [
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/cursor-repair/first-failure.log",
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/cursor-repair/first-paint-failure.log"
+    ],
+    "recordedR3Audit": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/cursor-repair/recorded-ansi-audit.json"
+  },
+  "confirmedCause": "Pinned Pi Editor paints a reverse-video caret while host enables a hardware caret; repaint moves a visible hardware caret across output rows. Both independently reproduce at real Pi ANSI boundary.",
+  "repair": "Retain hardware caret and public IME marker; remove only marker-adjacent fake caret style. Hide hardware caret before painting and preserve Pi final positioning/visibility.",
+  "eAcute": "User clarification: could not enter or paste é. Real logs confirm no direct combining-character input; retain original FAIL as incomplete human validation, no proven editor grapheme defect. Synthetic bracketed-paste path passes.",
+  "notReproduced": "Long-editor marker clipping: eight-line draft and 40x12/80x24/120x30 passed; no layout change.",
+  "humanRevalidation": "NOT RUN; do not infer native Terminal visual/IME acceptance from synthetic ANSI checks",
+  "manualCommand": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r4/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r4/manifest.json' --scenario cursor",
+  "remaining": "Normal shortcuts/copy/stop/esc/exit/fault retain their own applicable PASS/FAIL/UNKNOWN; cursor-only success cannot close #16. Do not unlock #17/#18.",
+  "report": "docs/implementation/pi-durio-v1/issue-16/cursor-repair-r4.md",
+  "paidProvider": "NOT RUN",
+  "push": "NOT PERFORMED",
+  "tracker": "NOT MODIFIED",
+  "integrationMerge": "afd14225862bb2339b008f912beff208caf7d579",
+  "integrationReadback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/cursor-repair/merge-integration-readback.json",
+  "coordinatorVerifyOnly": "PASS 12687 files; human request issued; candidate frozen"
+}

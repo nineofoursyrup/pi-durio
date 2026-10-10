@@ -1,0 +1,218 @@
+{
+  "schema": "pi-durio.user-trial-pending.v1",
+  "at": "2026-10-10T11:32:17.523496+00:00",
+  "issue": {
+    "number": 32,
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/32",
+    "state": "OPEN",
+    "slice": "PI-DURIO-V1-TICKETS-r1:T22"
+  },
+  "status": "TRIAL_PREPARATION_READY_DAILY_USE_PENDING",
+  "entry": "docs/implementation/pi-durio-v1/issue-32/TRIAL.md",
+  "documentationBase": "af559570433282249f32154f3c547246225f2dc9",
+  "technicalAcceptance": {
+    "status": "TECHNICAL_ACCEPTANCE_COMPLETE_DAILY_USE_PENDING",
+    "at": "2026-10-10T11:27:48.471648+00:00",
+    "acceptedTickets": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "pendingTickets": [
+      32
+    ],
+    "references": {
+      "technicalAcceptance": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/technical-acceptance.json",
+        "bytes": 2210,
+        "sha256": "a5dcd3f6796cb82270385e5c4e806a10e009a283ae4476a7092dd157e34d0c12"
+      },
+      "technicalAcceptanceSummary": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/TECHNICAL-ACCEPTANCE.md",
+        "bytes": 1619,
+        "sha256": "137a93e07b7d3492aea0e15f06f8d3bf2a96a7a272f4282ea6f1544e179b2184"
+      },
+      "independentReview": {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/review.json",
+        "bytes": 6495,
+        "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a"
+      },
+      "technicalReport": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/REPORT.md",
+        "bytes": 8986,
+        "sha256": "2e2178e818bd6cd4d72d63e575ea419fe9685e873b4d7e8cead1b6d96880f601"
+      },
+      "contractIndex": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.json",
+        "bytes": 140385,
+        "sha256": "228624816baedb82189d9b5f7539e72bbbe2001f430b29094feab156d6215fa5"
+      },
+      "startupRecovery": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/STARTUP-RECOVERY.md",
+        "bytes": 3868,
+        "sha256": "4e0e3366b61669b1327447b1855fc9e16c98f7aa67574148c803d80e417f7536"
+      },
+      "nativeMeasurements": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/NATIVE-REPORT.md",
+        "bytes": 4303,
+        "sha256": "9619c65c7b5aabb521bbe799c94d148dda0607d8d09b586e5162206495e23336"
+      },
+      "evidenceApplicability": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.json",
+        "bytes": 45425,
+        "sha256": "6f5e56fac683f032d6c5c7352f403c9300add6056b985d3bcae43a3e16c4bb9d"
+      },
+      "installLimits": {
+        "path": "docs/implementation/pi-durio-v1/delivery-9aed1af/npm-diagnosis-REPORT.md",
+        "bytes": 10646,
+        "sha256": "08d5f92945847b0a67f7a7beee1777b3addf657615befa52a84f4281f6a6a161"
+      }
+    }
+  },
+  "suppliedCandidate": {
+    "sourceCommit": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "sourceTree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+      "bytes": 92984,
+      "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+    },
+    "package": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/pack/pi-durio-0.1.0.tgz",
+      "bytes": 19222769,
+      "sha256": "0be03d6d7e090f3ba58f55297f1c9dd50b28540fbba0ed76ae55d34419f1221b"
+    },
+    "installation": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install",
+    "cli": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/src/cli.js",
+      "bytes": 21189,
+      "sha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b"
+    },
+    "installInventory": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install-complete-tree.json",
+      "bytes": 3555012,
+      "sha256": "8800e7bfd67290ac39f7269799fc185998df46877b4a48062b5d4a1549591eb8"
+    },
+    "candidateIdentity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/candidate-identity.json",
+      "bytes": 5258817,
+      "sha256": "ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091"
+    },
+    "node": {
+      "path": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+      "bytes": 50288,
+      "sha256": "3e401401d90e7f0367b7737a613801242c9a6b2966fb50c2e48eb1c45d701c6a"
+    },
+    "readOnlyIdentityCheckAt": "2026-10-10T11:32:17.523496+00:00",
+    "note": "Supplied unchanged executable candidate, not evidence that the user has tried this candidate. Later documentation commits do not change it."
+  },
+  "suppliedMachineEnvironment": {
+    "observedAt": "2026-10-10T11:32:17.523496+00:00",
+    "method": "Read-only host commands and installed Terminal Info.plist; no Terminal session or product started.",
+    "facts": {
+      "macOSVersion": "27.2",
+      "macOSBuild": "26B5101f",
+      "architecture": "arm64",
+      "machine": "MacBookPro18,1",
+      "memoryBytes": 34359738368,
+      "nodeVersion": "v26.8.2",
+      "installedTerminalVersion": "2.15",
+      "installedTerminalBuild": "488.7",
+      "trialTerminalProfile": "PENDING",
+      "trialTerminalFont": "PENDING",
+      "trialTerminalDimensions": "PENDING"
+    }
+  },
+  "suppliedEntries": {
+    "offline": {
+      "purpose": "Zero-cost manual interaction and record-navigation demo; no network or model inference",
+      "workspace": "/Users/nineofour/Durio/test/fixtures/project",
+      "fixture": {
+        "path": "/Users/nineofour/Durio/test/fixtures/project/README.md",
+        "bytes": 81,
+        "sha256": "03b38e56583c0045020e794e949a28c9a5fb33be4feb88bae65f2bac759219ed"
+      },
+      "dataRoot": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo",
+      "existingAtPreparation": false,
+      "executedByThisAgent": false
+    },
+    "realTask": {
+      "workspace": "USER_CHOSEN_PENDING",
+      "dataRootSuggestion": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial",
+      "existingAtPreparation": false,
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "credentialVariable": "DEEPSEEK_API_KEY",
+      "credentialValueRead": false,
+      "purpose": "User may elect to start a real task themselves; not an agent paid-batch grant."
+    }
+  },
+  "actualTrial": {
+    "status": "PENDING_DIRECT_USER_TRIAL_EVIDENCE",
+    "candidate": null,
+    "sourceBuild": null,
+    "environment": null,
+    "workspace": null,
+    "dataRoot": null,
+    "scope": null,
+    "startedAt": null,
+    "endedAt": null,
+    "source": null,
+    "evidence": []
+  },
+  "userDecision": {
+    "status": "PENDING_DIRECT_USER_RESPONSE",
+    "decision": null,
+    "originalResponse": null,
+    "source": null,
+    "sourceTime": null,
+    "receivedAt": null,
+    "corrections": []
+  },
+  "completion": {
+    "dailyUseAccepted": false,
+    "firstVersionComplete": false,
+    "rule": "All necessary technical evidence remains applicable AND direct explicit user daily-use acceptance after actual use. A correction request keeps acceptance pending; preserve original feedback/candidate/first failures and seek explicit acceptance after authorized repair and required checks.",
+    "notAcceptance": [
+      "silence",
+      "design confirmation",
+      "technical test PASS",
+      "repair plan",
+      "ordinary thanks"
+    ]
+  },
+  "authority": {
+    "agentPaidBatch": "NO_NEW_GRANT_ALL_PRIOR_ONE_START_GRANTS_CONSUMED",
+    "userMayChooseOwnRealTasks": true,
+    "extraPaidTrialMandatory": false,
+    "minimumTrialDuration": null,
+    "feedbackQuestionnaire": false,
+    "automaticAcceptance": false,
+    "automaticIssueClose": false,
+    "mainProductMerge": false,
+    "release": false
+  },
+  "model": {
+    "requested": "gpt-6-astra",
+    "reasoningRequested": "xhigh",
+    "actualBackend": "NOT_ATTESTED"
+  }
+}

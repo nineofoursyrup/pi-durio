@@ -1,0 +1,28 @@
+✖ installed SDK completion sentinel closes a live SSE body without discarding known usage or blocking the next request (112.098375ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 233.771625
+
+✖ failing tests:
+
+test at dist/test/provider-boundary.test.js:9:1
+✖ installed SDK completion sentinel closes a live SSE body without discarding known usage or blocking the next request (112.098375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 952
+  
+      at TestContext.<anonymous> (file:///Users/nineofour/.codex/worktrees/provider-terminal-repair/Durio/dist/test/provider-boundary.test.js:30:16)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 952,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,21 @@
+{
+  "observedAt": "2026-10-09T23:45:01.006262+00:00",
+  "method": "Official-domain web search primary documentation; search index reports crawled two weeks ago, not live account availability or tariff effective timestamp",
+  "sources": [
+    "https://api-docs.deepseek.com/quick_start/pricing/",
+    "https://api-docs.deepseek.com/api/list-models/"
+  ],
+  "model": "deepseek-flash",
+  "documentedVersion": "DeepSeek-V4.1-Flash",
+  "contextTokens": 1048576,
+  "maximumDocumentedOutputTokens": 393216,
+  "priceCurrency": "USD",
+  "maximumListedUsdPerMillionAnyClass": 1.2,
+  "requestedAggregateTokens": 4000000,
+  "conservativeTokenPriceEstimateUsd": 4.8,
+  "requestedUsdCeiling": 5,
+  "credentialAccess": "NOT RUN",
+  "authenticatedAvailability": "NOT RUN",
+  "pricingChangeStop": "Do not dispatch if a known tariff change exceeds the grant; this estimate is not an observed account invoice or hard account spending cap",
+  "priorObservationUnchanged": true
+}

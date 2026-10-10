@@ -1,0 +1,96 @@
+{
+  "schema": "pi-durio.issue-31.contract-evidence-index-r2-static-check.v1",
+  "at": "2026-10-10T06:10:53.876921+00:00",
+  "status": "PASS_STATIC_DOCUMENT_CHECK_ONLY",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+  "counts": {
+    "contracts": 62,
+    "ACC": 22,
+    "MET": 7
+  },
+  "checks": {
+    "all_original_rows_fields_and_order_preserved": true,
+    "original_row_statuses_not_escalated": true,
+    "all_91_rows_have_observation_and_remaining_scope": true,
+    "all_new_reference_ids_resolve": true,
+    "all_new_catalog_hashes_match": true,
+    "original_reports_and_first_failure_unchanged": true,
+    "external_and_repo_new_copies_identical": true,
+    "r1_markdown_embedded_unchanged_except_final_newline_delimiter": true
+  },
+  "inputs": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/contract-evidence-index.json",
+      "bytes": 262960,
+      "sha256": "6eb89a362b05918b070b782deec78c597612439a8dea0c79a44dcb19bf580122"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/contract-evidence-index.md",
+      "bytes": 7251,
+      "sha256": "15e83cab1b9ec029834cfefac322f1a001aa5c0762d05750771a153bcfe420a9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/partial-summary.json",
+      "bytes": 24287,
+      "sha256": "1084eaca7169014231e379b6988c854d8c54292a1b355e081c83990ae2ff7bda"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/partial-report.md",
+      "bytes": 2198,
+      "sha256": "e342740ff2bbb734aa5b8d05d6a7b674729ad124713429a5774003c1a6a283bf"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-summary.json",
+      "bytes": 46845,
+      "sha256": "cf9457281285f8d5bdc76fd5f8604136dedb3235e61877e5a4780fcf92ec02dc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-report.md",
+      "bytes": 5423,
+      "sha256": "77cfdf8b8ff89b111db7a6bde5da593b29df4b5b9fdbacda2bba1c4dd44fdb34"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/result.json",
+      "bytes": 5351,
+      "sha256": "5062ec149ebc874839d4dc799937e8cff993e4c64580ed14949b9eca082c72d6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/composition/failure.json",
+      "bytes": 5680,
+      "sha256": "cf3c34090a4b138b1676343b05a5fa13fbce2bd2493badceb700263cdc5d2c8a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-summary.json",
+      "bytes": 87837,
+      "sha256": "a508257a7d366a69f490e43f1b8c94ba33b49065328b7a2c624e6e5a7640c03d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-report.md",
+      "bytes": 5453,
+      "sha256": "f3edb4c2d3dc450887383f56786ae95932df238dc78c3bcec34f84abc6603b67"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-evidence-disposition-r1.json",
+      "bytes": 5387,
+      "sha256": "87275adc9e96ea57d2266965d3ff4f42a34edf7dda64649f3529d8d5a024c2e3"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/contract-evidence-index-r2.json",
+      "bytes": 334921,
+      "sha256": "a8022a362c954c916f300de88f3b46b86f6c7fd44b966fcbf9f5165c5264a78c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/contract-evidence-index-r2.md",
+      "bytes": 43515,
+      "sha256": "a007cf3c64441f1436d52e920208aa00477b42f5bb55f618c124041def0c0ed1"
+    }
+  ],
+  "limits": [
+    "Static checks are not product tests or technical acceptance.",
+    "No provider/VM/build/Terminal/product test was run.",
+    "No original report, README, status.json, status.md or product source was modified."
+  ]
+}

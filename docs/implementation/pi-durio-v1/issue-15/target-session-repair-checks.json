@@ -1,0 +1,106 @@
+[
+  {
+    "command": "npm run build",
+    "status": "PASS",
+    "exitCode": 0,
+    "log": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/build-final.log",
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+      "bytes": 59
+    },
+    "sourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/source-build-final.json",
+      "sha256": "95fa0768cb040f4c0668d78aa2a18bcea31c1ded599e38ad75d12ddfd3ced037",
+      "bytes": 91832
+    }
+  },
+  {
+    "command": "node --test --test-concurrency=1 dist/test/recovery-projection.test.js dist/test/compaction.test.js dist/test/storage.test.js dist/test/preflight.test.js dist/test/history.test.js",
+    "status": "PASS",
+    "exitCode": 0,
+    "tests": 43,
+    "pass": 43,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "log": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/affected-r1.log",
+      "sha256": "6c70a8da437475ab4ac4d91aa0f8d72ba9dca7deb52518d707fe4178408e0ce6",
+      "bytes": 5449
+    },
+    "buildManifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/source-build-r5.json",
+      "sha256": "a4273821078d00001b52b3b3d5d0370c935ed29651274817cff4c0d8f0c5a53b",
+      "bytes": 91832
+    },
+    "scope": "Direct affected checks on r5. Later r6 removed unused inspectSession/exported type-only callback restriction, expanded fixture assertions, and tightened snapshot ID guard; final change only bounds the detail callId display and corrects the Entry/Task navigation wording. Reused unchanged compaction/storage/history/preflight behavior."
+  },
+  {
+    "command": "node --test --test-concurrency=1 dist/test/recovery-projection.test.js dist/test/runtime.test.js dist/test/lifecycle.test.js dist/test/control.test.js",
+    "status": "PASS",
+    "exitCode": 0,
+    "tests": 34,
+    "pass": 34,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "log": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/affected-r2.log",
+      "sha256": "a95f8f5d157fa7f538a74dfc1465a478bd331cfad902b3dada03841be74bf95b",
+      "bytes": 4804
+    },
+    "buildManifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/source-build-r6.json",
+      "sha256": "337e5f75a49358f20bb7924ba3d5e16b8e26ec0591a9219ba6999ee28eddf71c",
+      "bytes": 91832
+    },
+    "scope": "Latest full projection fixtures and direct runtime/lifecycle/control consumers. Only subsequent source change is bounded args reference callId and Entry/Task hint, verified by final navigation test."
+  },
+  {
+    "command": "node --test --test-concurrency=1 --test-name-pattern='paged unknown tools|recovery pages expose' dist/test/recovery-projection.test.js dist/test/tui.test.js",
+    "status": "PASS",
+    "exitCode": 0,
+    "tests": 2,
+    "pass": 2,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "log": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/navigation-final.log",
+      "sha256": "2f032889e8ecba82134f45df87630047e35490365c44a3bc2a44c7b784c0a8b9",
+      "bytes": 381
+    },
+    "buildManifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/source-build-final.json",
+      "sha256": "95fa0768cb040f4c0668d78aa2a18bcea31c1ded599e38ad75d12ddfd3ced037",
+      "bytes": 91832
+    },
+    "scope": "Final exact candidate CLI/API detail pagination plus TUI page navigation and continuation decision coverage."
+  },
+  {
+    "command": "node --test dist/test/recovery.test.js",
+    "status": "PASS",
+    "exitCode": 0,
+    "tests": 10,
+    "pass": 10,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "log": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/recovery-r1.log",
+      "sha256": "ea33eb01598b68614c0083a789a7af728b3942d690b15edd3447a31a5620fa74",
+      "bytes": 1427
+    },
+    "buildManifest": null,
+    "scope": "Supplemental historical 10/10 run after build-r2. Its exact source-build manifest was not frozen; do not label this as final candidate evidence. Coordinator combined gate/review remains required."
+  },
+  {
+    "command": "post-commit source-build inputs/compiler/outputs content readback + git diff --check + git status --porcelain",
+    "status": "PASS",
+    "result": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/verification.json",
+      "sha256": "9385b0969c0c26ce0873adfefd717234f4e1c249522c36c607f4dd70fc9a829f",
+      "bytes": 199
+    }
+  }
+]

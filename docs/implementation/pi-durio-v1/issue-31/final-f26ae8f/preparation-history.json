@@ -1,0 +1,88 @@
+{
+  "at": "2026-10-10T11:03:42.544526+00:00",
+  "status": "PREEXECUTION_UNPUBLISHED_PREPARATION_REVISIONS_ONLY",
+  "nativeAttempts": 0,
+  "explanation": "Initial r1 freeze was revised before handoff to require absent captured runtime error and confirmed final task cleanup; relying only on inherited old native facts could otherwise miss a late caught app fault. Initial config/runner/manifest/freeze/derivation were copied as .initial before revision. r2 subsequently resolves offscreen e action with bounded normal Down. oldPreparationPreserved in r2 revision means the final r1 handoff files are preserved; it does not mean the primary r1 filenames never changed during preparation.",
+  "initial": {
+    "native-config.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/native-config.json.initial",
+      "bytes": 2526,
+      "sha256": "c06bbfdb9ee40d2b31894ff5f4b6aef6d6f2f36ac46f318728ad86a8334ca60e"
+    },
+    "native-recovery.mjs": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/native-recovery.mjs.initial",
+      "bytes": 12144,
+      "sha256": "acbb295ea154e97751a438155ae8350bbdd79452e0f7544375a268bbdc5dbe42"
+    },
+    "recovery-manifest.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/recovery-manifest.json.initial",
+      "bytes": 2279502,
+      "sha256": "a12bb6a028cf680ea5063da043f03eac972735e78e51476668cae46eca41f582"
+    },
+    "freeze-verification.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/freeze-verification.json.initial",
+      "bytes": 2179,
+      "sha256": "245e3506c6975db980b60b94a0ca721eae8d9eddec8f613f5ce2bd3a6a49fcb0"
+    },
+    "harness-derivation.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/harness-derivation.json.initial",
+      "bytes": 3797,
+      "sha256": "f26bdf3adc308ed2b742826a40befdf4408cbd7773d7b062f9c081cdcbcd17ea"
+    }
+  },
+  "r1Handoff": {
+    "native-config.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/native-config.json",
+      "bytes": 2526,
+      "sha256": "61a0c12ef0c9737f7fd54e72ba5b302844bfa423f13899112d897c87d1626c92"
+    },
+    "native-recovery.mjs": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/native-recovery.mjs",
+      "bytes": 12246,
+      "sha256": "5700c10c76ba9213984511fdf6dbc732ad8a0b3c2343466799c433297fec3f7e"
+    },
+    "recovery-manifest.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/recovery-manifest.json",
+      "bytes": 2279502,
+      "sha256": "3285712998b8eedbe5ac8105a391485513dfdc309ef7fcf77abf1d55d9a2b0fe"
+    },
+    "freeze-verification.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/freeze-verification.json",
+      "bytes": 2179,
+      "sha256": "3e274d59529423c420dfbe07ea11ff63f009358b651cb591edb0810f5725e4ba"
+    }
+  },
+  "r2": {
+    "native-config.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-config.json",
+      "bytes": 2819,
+      "sha256": "bb6cbc77100405825395a8dc8bbfd6986edb37b2e799a5fea4ebd8a590532385"
+    },
+    "native-recovery.mjs": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-recovery.mjs",
+      "bytes": 12831,
+      "sha256": "86ee066764eabc5fd242e4773023019d82dea82d2cfa288fb231af7ac811d8be"
+    },
+    "recovery-manifest.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/recovery-manifest.json",
+      "bytes": 2279557,
+      "sha256": "a9de035f7eaa3c229a71b2982921884b2828902c5652bb69de924bd290487511"
+    },
+    "freeze-verification.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/freeze-verification.json",
+      "bytes": 2179,
+      "sha256": "d8253fcbd95db366f6dfc7d2b89f636699884c6dd6633d9d48618f6c0a7d262b"
+    }
+  },
+  "initialToR1Diff": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/initial-to-r1-runtime-guard.diff",
+    "bytes": 990,
+    "sha256": "73acf0d9c9ce32742d6dd448d8f74b4b0df9de540518863d4e12da3fc5a42f23"
+  },
+  "r1ToR2Diff": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/r1-to-r2.diff",
+    "bytes": 1717,
+    "sha256": "378dd3e4202235989d1f42015cfe66b9cb4787cdc2f118da4e33258a396f7149"
+  },
+  "noHistoricalExecutionOverwritten": true
+}

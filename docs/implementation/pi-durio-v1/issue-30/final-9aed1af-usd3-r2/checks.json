@@ -1,0 +1,70 @@
+{
+  "status": "PASS_AFFECTED_OFFLINE_WITH_EXPLICIT_REUSE",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+    "bytes": 8105,
+    "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+  },
+  "newCheck": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/start-window-check-r1.json",
+    "bytes": 1726,
+    "sha256": "2942c7cb6f55cdf500fc8aa6961779269659fc7046c886802659188310edb187"
+  },
+  "newCases": 2,
+  "newCommand": "/opt/homebrew/Cellar/node/26.8.2/bin/node --experimental-vm-modules /Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/check-start-window.mjs /Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/start-window-check-r1.json",
+  "newExit": 0,
+  "stdout": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/start-window-check-r1.stdout",
+    "bytes": 28,
+    "sha256": "11de6e389e3ffe1f3f1d1157468b7c30ea778cac73aa5a8a66bb777e46168078"
+  },
+  "stderr": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/start-window-check-r1.stderr",
+    "bytes": 173,
+    "sha256": "c61e4e625a32a0c6bf8d86c9baf52cc8734d8970b748ca64e90e60514ac2dcd9"
+  },
+  "reused": [
+    {
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/summary.json",
+        "bytes": 7025,
+        "sha256": "a6f50c614fffdc6f1faa1ae71148d1c7b013bd5cf651f354416c0970c0b665b4"
+      },
+      "cases": 24,
+      "basis": "same preflight/common/wrapper/test bytes and unchanged policy/input/product; r2 positive and across-expiry control flow covered by two new exact-source probes"
+    },
+    {
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/credential-check-r1.json",
+        "bytes": 985,
+        "sha256": "49913057315ce07cead2580230dae43c81e8b66f7578b64cdae390ffc3043fd1"
+      },
+      "cases": 12,
+      "basis": "launch.py parser/file policy unchanged byte for byte"
+    },
+    {
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/compiled-r2.log",
+        "bytes": 684,
+        "sha256": "39aacfa0d2cb41693720c431486a3de274c8dc59c2063ad3de7ff0bc8137b0fe"
+      },
+      "basis": "run suffix from const output unchanged; original cancellation/authentication/cleanup scope retained"
+    }
+  ],
+  "firstFailurePreserved": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+    "bytes": 907,
+    "sha256": "341b2233193117b0c05ccda0042a9ac8ab3d5c8ef34b48f45583b3612f36da07"
+  },
+  "syntax": "PASS; 5 .mjs node --check and 3 .py ast.parse",
+  "newGrantsOrStarts": false,
+  "actualProviderRequests": 0,
+  "actualCredentialReads": 0,
+  "restrictedVmStarts": 0,
+  "productBuilds": 0,
+  "limitations": [
+    "JavaScript node:vm SourceTextModule evaluates exact source with mock API/clock/in-memory outputs; it does not launch a product VM",
+    "Full installation/runtime recheck remains the paid runner pre-materialization gate; no new live provider or billing acceptance",
+    "Independent affected re-review pending at handoff generation; old f0 review remains BLOCKED"
+  ]
+}

@@ -1,0 +1,653 @@
+{
+  "spec": "PI-DURIO-V1-SPEC-r1",
+  "note": "Direct ticket citations are navigation; all full contracts apply. Ticket acceptance does not alone prove full contract acceptance.",
+  "contracts": [
+    {
+      "id": "S1",
+      "label": "平台与目标。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        31
+      ]
+    },
+    {
+      "id": "S2",
+      "label": "公开上游。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11
+      ]
+    },
+    {
+      "id": "S3",
+      "label": "共用执行。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        13,
+        16
+      ]
+    },
+    {
+      "id": "S4",
+      "label": "模型与认证默认值。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        30
+      ]
+    },
+    {
+      "id": "S5",
+      "label": "工具环境。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        13
+      ]
+    },
+    {
+      "id": "S6",
+      "label": "本地最小形态。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11
+      ]
+    },
+    {
+      "id": "R1",
+      "label": "授权落点。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        13,
+        15
+      ]
+    },
+    {
+      "id": "R2",
+      "label": "所有权。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        13,
+        14
+      ]
+    },
+    {
+      "id": "R3",
+      "label": "查看与执行分离。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        15
+      ]
+    },
+    {
+      "id": "R4",
+      "label": "退出与中止。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        14
+      ]
+    },
+    {
+      "id": "R5",
+      "label": "恢复核对。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        15
+      ]
+    },
+    {
+      "id": "R6",
+      "label": "执行版本。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        15,
+        20,
+        25,
+        26
+      ]
+    },
+    {
+      "id": "R7",
+      "label": "headless 与请求中断。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        14,
+        15,
+        17
+      ]
+    },
+    {
+      "id": "T1",
+      "label": "布局。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        16,
+        18,
+        24
+      ]
+    },
+    {
+      "id": "T2",
+      "label": "状态与有界显示。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        16,
+        18
+      ]
+    },
+    {
+      "id": "T3",
+      "label": "当前任务和后续请求。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        17
+      ]
+    },
+    {
+      "id": "T4",
+      "label": "队列冻结。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        17,
+        19,
+        23,
+        24
+      ]
+    },
+    {
+      "id": "T5",
+      "label": "历史与恢复。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        17,
+        19,
+        23
+      ]
+    },
+    {
+      "id": "T6",
+      "label": "键位默认值。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        16,
+        17
+      ]
+    },
+    {
+      "id": "T7",
+      "label": "终端边界。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        16,
+        31
+      ]
+    },
+    {
+      "id": "E1",
+      "label": "原文。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        13
+      ]
+    },
+    {
+      "id": "E2",
+      "label": "有界与完整性。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        13,
+        18,
+        20
+      ]
+    },
+    {
+      "id": "E3",
+      "label": "身份和事实。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        13,
+        14,
+        15,
+        17,
+        18,
+        21,
+        27
+      ]
+    },
+    {
+      "id": "E4",
+      "label": "存储默认值。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        13,
+        14,
+        15,
+        17,
+        18,
+        20
+      ]
+    },
+    {
+      "id": "E5",
+      "label": "故障。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        13,
+        14,
+        20
+      ]
+    },
+    {
+      "id": "E6",
+      "label": "用量和 trace。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        11,
+        13,
+        14,
+        18,
+        19,
+        21,
+        28
+      ]
+    },
+    {
+      "id": "E7",
+      "label": "自动与主动上下文压缩。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        19
+      ]
+    },
+    {
+      "id": "E8",
+      "label": "压缩生效与取消。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        19
+      ]
+    },
+    {
+      "id": "E9",
+      "label": "归档、清理、迁移。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        18,
+        20,
+        21
+      ]
+    },
+    {
+      "id": "E10",
+      "label": "查询与外发。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        15,
+        18,
+        23
+      ]
+    },
+    {
+      "id": "V1",
+      "label": "最小 eval。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        21,
+        30
+      ]
+    },
+    {
+      "id": "V2",
+      "label": "计划。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        21,
+        22,
+        30
+      ]
+    },
+    {
+      "id": "V3",
+      "label": "独立试次。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        21,
+        22
+      ]
+    },
+    {
+      "id": "V4",
+      "label": "正式隔离。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        12,
+        21
+      ]
+    },
+    {
+      "id": "V5",
+      "label": "产物和评分。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        12,
+        21
+      ]
+    },
+    {
+      "id": "V6",
+      "label": "预算与失败。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        21
+      ]
+    },
+    {
+      "id": "V7",
+      "label": "验证按影响选择。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        22
+      ]
+    },
+    {
+      "id": "V8",
+      "label": "效果规则。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        22
+      ]
+    },
+    {
+      "id": "V9",
+      "label": "报告与规则修订。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        21,
+        22,
+        26
+      ]
+    },
+    {
+      "id": "I1",
+      "label": "触发和受限分析。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        23
+      ]
+    },
+    {
+      "id": "I2",
+      "label": "候选合同。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        23
+      ]
+    },
+    {
+      "id": "I3",
+      "label": "可改对象。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        23,
+        25,
+        26
+      ]
+    },
+    {
+      "id": "I4",
+      "label": "结构化选择。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        24,
+        25
+      ]
+    },
+    {
+      "id": "I5",
+      "label": "仅验证与准备。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        24,
+        25
+      ]
+    },
+    {
+      "id": "I6",
+      "label": "抑制。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        24
+      ]
+    },
+    {
+      "id": "I7",
+      "label": "顺序、组合与失败。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        24,
+        25
+      ]
+    },
+    {
+      "id": "I8",
+      "label": "验证和启用。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        25,
+        26
+      ]
+    },
+    {
+      "id": "I9",
+      "label": "回退与授权。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        25,
+        26
+      ]
+    },
+    {
+      "id": "I10",
+      "label": "结果。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        24,
+        25,
+        26,
+        30
+      ]
+    },
+    {
+      "id": "M0",
+      "label": "共同统计合同。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        17,
+        22,
+        27,
+        28,
+        29
+      ]
+    },
+    {
+      "id": "M1",
+      "label": "任务验收。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        27
+      ]
+    },
+    {
+      "id": "M2",
+      "label": "成本。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        28
+      ]
+    },
+    {
+      "id": "M3",
+      "label": "双时钟。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        27
+      ]
+    },
+    {
+      "id": "M4",
+      "label": "人工介入。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        29
+      ]
+    },
+    {
+      "id": "M5",
+      "label": "回归与返工。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        22,
+        29
+      ]
+    },
+    {
+      "id": "M6",
+      "label": "故障。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        28
+      ]
+    },
+    {
+      "id": "M7",
+      "label": "反馈与报告。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        22,
+        27,
+        28,
+        29,
+        31
+      ]
+    },
+    {
+      "id": "A1",
+      "label": "真实路径。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        30,
+        31
+      ]
+    },
+    {
+      "id": "A2",
+      "label": "轻量与接受。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        31,
+        32
+      ]
+    },
+    {
+      "id": "A3",
+      "label": "交付状态。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        30,
+        31,
+        32
+      ]
+    },
+    {
+      "id": "A4",
+      "label": "实施顺序。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        12,
+        30,
+        31,
+        32
+      ]
+    },
+    {
+      "id": "A5",
+      "label": "工程阻塞。",
+      "technical_status": "NOT RUN",
+      "evidence": [],
+      "direct_tickets": [
+        12,
+        31
+      ]
+    }
+  ]
+}

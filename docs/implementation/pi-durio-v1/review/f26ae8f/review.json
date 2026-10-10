@@ -1,0 +1,309 @@
+{
+  "schema": "pi-durio.provider-terminal-repair.focused-review.v1",
+  "at": "2026-10-10T07:16:40.186349+00:00",
+  "status": "PASS_SCOPED",
+  "finding": "LIVE-USD3-R3-01",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "candidateTree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+  "baseline": "a3ea6eac3c1b2a8b6d0c870dbe5a9974052a700a",
+  "producerCommit": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+  "reviewer": {
+    "agent": "/root/review_provider_terminal",
+    "freshContext": true,
+    "independentOfProducerAndMerger": true,
+    "axes": "One independent focused reviewer, separate Standards and Spec conclusions",
+    "requestedModel": "gpt-6-astra",
+    "requestedReasoningEffort": "xhigh",
+    "actualBackendIdentity": "NOT_ATTESTED: tool/session outputs do not expose verifiable actual backend identity"
+  },
+  "scope": {
+    "productionFiles": [
+      "src/provider-boundary.ts"
+    ],
+    "tests": [
+      "test/provider-boundary.test.ts",
+      "test/improve.test.ts"
+    ],
+    "evidenceDocs": [
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/README.md",
+        "bytes": 5142,
+        "sha256": "825cb5ec034f9ea9e65f21cd2d8eba0814d21ed896a5d9ba61102a146381556f"
+      },
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/build-identity.json",
+        "bytes": 2721,
+        "sha256": "ba72d156c4e0e0c147eaa26aacb6379c02fc65e4c03b2252c5db9aae5d44643e"
+      },
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/final-boundary-checks-r3.log",
+        "bytes": 1384,
+        "sha256": "32735f2eaeca3fd4239bc6753ad0999f806286a10d86c2b93337e58ec20f7027"
+      },
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/final-sdk-runtime-checks-r3.log",
+        "bytes": 366,
+        "sha256": "afe0cbd340169380d327bebb32c594ecc40d2d1e916ff6bd36433108758a228c"
+      },
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red-identity.json",
+        "bytes": 514,
+        "sha256": "9c623bef9e02458d814212c9f0192eee9000b84cc80bd198ce603f6dd49f4379"
+      },
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red.log",
+        "bytes": 986,
+        "sha256": "89f31209c448ae84ad8580eb5f1574ccb0ee2dd6eb58eb291d92321e698734ad"
+      },
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/original-readback-and-sdk-identity.json",
+        "bytes": 4239,
+        "sha256": "35206b8c45899ffa1dbb6dc3aa69f479b917e867df6e449f3bb539a9bcec1545"
+      },
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/original-replay-result-r3.json",
+        "bytes": 975,
+        "sha256": "2325ed75c3bbd56c229d8a2a272b1b21d2f93fdb9779d637c45e0d87023a1020"
+      }
+    ],
+    "excluded": [
+      "new paid harness implementation",
+      "new packaging/install gate",
+      "whole-v1 acceptance",
+      "real provider/VM/Terminal execution",
+      "commit/push/release/Issue operations"
+    ]
+  },
+  "standards": {
+    "verdict": "PASS",
+    "hardFindings": [],
+    "optionalSmells": [
+      {
+        "id": "PT-OPT-01",
+        "name": "possible Mysterious Name",
+        "classification": "optional-judgment",
+        "blocking": false,
+        "file": "src/provider-boundary.ts",
+        "start": 42,
+        "end": 64,
+        "quote": "private frameBytes=0; ... this.frameBytes+=line.length;",
+        "observation": "frameBytes 累加 JavaScript string.length，实际是 UTF-16 code units，且不含行结束符；命名可能让后续维护者误认为 UTF-8 字节限额。",
+        "suggestion": "可将字段改名 frameUnits/frameCharacters，并说明该 parser buffer 上限与 raw maxResponseBytes 的单位不同。",
+        "reasonNotHardFinding": "总响应 raw byte 限制独立在 103 行执行；当前 parser 仍有界，未发现违反合同或可重现行为错误。"
+      }
+    ],
+    "prose": "PASS：未发现文档标准硬违规。生产改动留在已有 provider boundary；raw block 在解析和限额判断前保存，使用原 Evidence/budget settlement，未引入第二账本或修改旧结果。两份测试覆盖真实安装 SDK 关闭、合法 improve 工具后续请求及关键异常；8 份证据文档保留首败并明确候选和验收边界。first-red.log 的原始尾空格不作格式问题重写。可选 possible Mysterious Name：`frameBytes` 实际累加 `line.length`（UTF-16 code units），建议改名并注明单位；原 raw 字节上限独立存在，此项不阻塞。",
+    "sources": [
+      "/Users/nineofour/AGENTS.md",
+      "AGENTS.md",
+      "docs/agents/domain.md",
+      "GLOSSARY.md",
+      "docs/adr/0001-local-execution-and-recovery-boundary.md",
+      "docs/adr/0002-full-original-records-and-user-controlled-reduction.md",
+      "docs/adr/0003-eval-isolation-and-evidence-boundary.md",
+      "docs/specs/pi-durio-v1-spec.md:68-77,82-100,147-149",
+      "docs/design/runtime-evidence-and-retention.md:18-29,61-67",
+      "docs/design/eval-and-improvement.md:65-87",
+      "docs/design/improve-workflow.md:20-35,58-82",
+      "/Users/nineofour/.agents/skills/code-review/SKILL.md"
+    ],
+    "fowlerBaselineConsidered": [
+      "Mysterious Name",
+      "Duplicated Code",
+      "Feature Envy",
+      "Data Clumps",
+      "Primitive Obsession",
+      "Repeated Switches",
+      "Shotgun Surgery",
+      "Divergent Change",
+      "Speculative Generality",
+      "Message Chains",
+      "Middle Man",
+      "Refused Bequest"
+    ],
+    "status": "PASS",
+    "findingCount": 0,
+    "optionalSmellCount": 1
+  },
+  "spec": {
+    "verdict": "PASS",
+    "findings": [],
+    "prose": "PASS（本次修复范围）：完整、有效 raw SSE usage 与 DONE 经过成功 reader cleanup 后，正常 SDK close 可保存 known/returned，并允许下一请求；HTTP 错误、异常/缺失 usage、不完整 terminal frame、真实 abort/显式 reason、cleanup 失败或期间 abort 均保持未知且受预算阻断。仅观察到 usage 或 DONE 不触发提前结算，pending pull 不把 cancel 唤醒误当 EOF，已取得字节先留存，原一次 settlement 门不变。LF/CRLF/CR、跨块和多行 data 有证据；非 SSE 不新增 usage 推断。符合 E1/E2/E6、V6/V7、I1，未发现缺项、错误实现或额外 scope。真实 improve 旧失败仍未被真实新执行解决；该门槛属于后续独立授权批次。",
+    "requirements": [
+      {
+        "file": "docs/specs/pi-durio-v1-spec.md",
+        "line": 68,
+        "rule": "E1 complete acquired originals including cancelled/incomplete responses"
+      },
+      {
+        "file": "docs/specs/pi-durio-v1-spec.md",
+        "line": 69,
+        "rule": "E2 bounded memory and faithful acquisition completeness"
+      },
+      {
+        "file": "docs/specs/pi-durio-v1-spec.md",
+        "line": 73,
+        "rule": "E6 actual request accounting once; unknown is not zero; SDK mirrors do not replace admission facts"
+      },
+      {
+        "file": "docs/specs/pi-durio-v1-spec.md",
+        "line": 86,
+        "rule": "V6 unknown usage blocks without proven bound; actual cancellation does not prove refund or external stop"
+      },
+      {
+        "file": "docs/specs/pi-durio-v1-spec.md",
+        "line": 87,
+        "rule": "V7 deterministic bug uses direct regression; reuse applicable evidence"
+      },
+      {
+        "file": "docs/specs/pi-durio-v1-spec.md",
+        "line": 93,
+        "rule": "I1 restricted improve analysis under executable time/request/usage limits"
+      },
+      {
+        "file": "docs/specs/pi-durio-v1-spec.md",
+        "line": 149,
+        "rule": "retain original failures; no mandatory full rerun when deterministic evidence remains applicable"
+      }
+    ],
+    "status": "PASS",
+    "findingCount": 0,
+    "optionalSmellCount": 0
+  },
+  "hunkAssessment": [
+    {
+      "file": "src/provider-boundary.ts",
+      "lines": [
+        39,
+        82
+      ],
+      "result": "PASS",
+      "basis": "Encapsulated raw SSE parsing, safe nonnegative integer totals, optional total_tokens equality and repeated total consistency; full event delimiters and terminal marker required, no SDK usage fallback."
+    },
+    {
+      "file": "src/provider-boundary.ts",
+      "lines": [
+        97,
+        115
+      ],
+      "result": "PASS",
+      "basis": "Acquire/persist before parse/limit; EOF and successful normal consumer cleanup settle only through existing once gate; cancel awakened pending read cannot settle as EOF; explicit abort/reason/errors remain unknown."
+    },
+    {
+      "file": "test/provider-boundary.test.ts",
+      "lines": [
+        8,
+        110
+      ],
+      "result": "PASS",
+      "basis": "Installed SDK continuation plus chunk/line framing, invalid/missing/conflicting usage, HTTP/transport errors, explicit/actual cancellation, cleanup failure, acquired concurrent bytes, reopening and JSON compatibility."
+    },
+    {
+      "file": "test/improve.test.ts",
+      "lines": [
+        16,
+        40
+      ],
+      "result": "PASS",
+      "basis": "Actual Pi public restricted runtime receives a body held open after DONE; evidence_summary continuation yields 28 known tokens, 0 unknown; report reopening remains read-only."
+    },
+    {
+      "file": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1",
+      "result": "PASS",
+      "basis": "All 8 new docs read, hashes matched merge receipt; first-red raw trailing whitespace retained intentionally, original real FAIL/UNKNOWN not overwritten."
+    }
+  ],
+  "originalFindingDisposition": {
+    "id": "LIVE-USD3-R3-01",
+    "disposition": "RESOLVED_IN_SOURCE_AND_OFFLINE_REGRESSION",
+    "notClaimed": "New real improve completion or retroactive old usage repair"
+  },
+  "evidence": {
+    "independentIdentity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/identity-readback.json",
+      "bytes": 21004,
+      "sha256": "500f6800eccfd4504448c5c957a4a82b5ad308c60269aa1051cc434986953b4f"
+    },
+    "applicability": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/evidence-applicability.json",
+      "bytes": 22510,
+      "sha256": "36da7ef8eec3f12fb22a853206a92ee750a43f1b5c65df8e4a91b59fb7291da3"
+    },
+    "newTargetedReadback": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/readonly-applicability-result.json",
+      "bytes": 301453,
+      "sha256": "1305bbabbb812cd3051c81f238197c6eb58b9f754ef2ea66850b91e87ad34516"
+    },
+    "reusedChecks": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-boundary-checks-r3.json",
+        "result": "11/11 PASS",
+        "applicability": "Final provider boundary exact source/build/test identity independently verified."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-sdk-runtime-checks-r3.json",
+        "result": "2/2 PASS",
+        "applicability": "Final Pi improve continuation and shared automatic compaction paths exact source/build/test identity."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/original-replay-r3.json",
+        "result": "7 original raw blocks; 952 then 7; two returned settlements",
+        "applicability": "Final boundary through installed identical openai@7.19.0; pure offline replay, not new inference."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/affected-checks.json",
+        "result": "26/26 historical affected PASS",
+        "applicability": "Reuse only unchanged eval EOF/policy, improve permissions/report/request limits/recovery callers. Interim consumer-close assertions superseded by final r3 boundary/runtime checks; overlapping counts not summed."
+      },
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/review/9aed1af/spec-review.json",
+        "result": "Prior scoped Spec PASS",
+        "applicability": "Unchanged source/lock/runtime/eval/improve implementation only; no reliance on old review to establish repaired terminal handling or new real acceptance."
+      },
+      {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/review/9aed1af/standards-review.json",
+        "result": "Prior scoped Standards PASS with optional smells",
+        "applicability": "Unchanged areas only; prior optional smells remain historical observations outside current diff."
+      }
+    ],
+    "firstFailuresPreserved": [
+      "first-red",
+      "framing-red",
+      "cleanup-red",
+      "acquired-red",
+      "merge-preflight-first-failure",
+      "r2 multi-file error/unknown",
+      "r3 improve failed/incomplete/UNKNOWN",
+      "native composition IMPROVE_REPORT_NOT_FOUND"
+    ],
+    "newCheckReason": "Requiring complete DONE at SSE EOF changed parser acceptance. Existing final checks do not by themselves show compatibility of the four old real coding successes and native budgeted fixture, so their actual original blocks were checked with the exact new parser. No new full suite, SDK runtime or product execution was needed."
+  },
+  "limitations": [
+    "No actual backend attestation; requested model/reasoning cannot be promoted to observed identity.",
+    "No new provider, OS VM, Terminal, full suite, build or installation check by this reviewer; no credentials read.",
+    "Native resource/timing and source/package inventory values remain on old measured candidate until independently replaced.",
+    "No whole-v1, ready-for-review, paid authorization, daily acceptance, push or release conclusion.",
+    "New paid harness review and new install/package evidence belong to separately coordinated work."
+  ],
+  "reviewerActions": {
+    "sourceOrGitWrites": 0,
+    "stateWrites": 0,
+    "oldEvidenceWrites": 0,
+    "providerCalls": 0,
+    "vmStarts": 0,
+    "terminalOperations": 0,
+    "credentialReads": 0,
+    "newProductTests": 0,
+    "newExactClassRawCompatibilityChecks": 1,
+    "writes": "Only this review directory"
+  },
+  "summary": {
+    "standardsHardFindings": 0,
+    "standardsOptionalSmells": 1,
+    "standardsWorst": "optional Mysterious Name; nonblocking",
+    "specFindings": 0,
+    "specWorst": "none",
+    "paidAuthorizationGranted": false
+  }
+}

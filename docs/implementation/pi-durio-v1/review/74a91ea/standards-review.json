@@ -1,0 +1,304 @@
+{
+  "schema": 2,
+  "axis": "Standards",
+  "verdict": "FAIL",
+  "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+  "candidateTree": "e3089debbbbc34a3a4ba48980087cf9bbd12589d",
+  "identity": {
+    "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+    "tree": "e3089debbbbc34a3a4ba48980087cf9bbd12589d",
+    "status": "?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png\n?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json",
+    "checkedAt": "2026-10-09T23:06:41.552665+00:00"
+  },
+  "baseline": "25d311616136766b37c0274f3f490ec1105f9592",
+  "previousCandidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoningEffort": "xhigh",
+  "actualBackend": "not independently attestable",
+  "scope": "Independent Standards repair review of fixed candidate #11-29 implementation and #30 preparation. Reused this axis previous full review for unchanged code. Read only previous Standards conclusions, never Spec conclusions. The newly finished combined test failure is independently inspected as product evidence.",
+  "method": "Read-only source/diff/contract/call-chain review and existing fixture/log/content-identity inspection. No new build, test, VM, native Terminal, provider, paid request or probe was run. Report writes are confined to this review directory.",
+  "standardsSources": [
+    "Provided global/project AGENTS.md instructions",
+    "/Users/nineofour/AGENTS.md",
+    "AGENTS.md",
+    "docs/agents/domain.md",
+    "docs/agents/issue-tracker.md",
+    "docs/agents/triage-labels.md",
+    "GLOSSARY.md",
+    "README.md",
+    "package.json",
+    "docs/specs/pi-durio-v1-spec.md",
+    "docs/adr/0001-local-execution-and-recovery-boundary.md",
+    "docs/adr/0002-full-original-records-and-user-controlled-reduction.md",
+    "docs/adr/0003-eval-isolation-and-evidence-boundary.md",
+    "docs/design/runtime-evidence-and-retention.md",
+    "docs/design/eval-and-improvement.md",
+    "docs/design/improve-workflow.md"
+  ],
+  "originalFindingDispositions": [
+    {
+      "id": "STD-01",
+      "previousPriority": 1,
+      "disposition": "RESOLVED",
+      "locations": [
+        {
+          "file": "src/preflight.ts",
+          "start": 63,
+          "end": 164
+        },
+        {
+          "file": "src/recovery-facts.ts",
+          "start": 34,
+          "end": 77
+        },
+        {
+          "file": "src/recovery-projection.ts",
+          "start": 29,
+          "end": 142
+        },
+        {
+          "file": "src/storage-projection.ts",
+          "start": 57,
+          "end": 107
+        },
+        {
+          "file": "src/runtime.ts",
+          "start": 766,
+          "end": 768
+        }
+      ],
+      "evidence": "Admission streams bounded host metadata pages, joins identities in a disposable disk SQLite index and retains only sessionCount/hostThrough/one selectedSession. Recovery facts are fixed-watermark lazy records with content validation and incremental hashes. Target recovery scans complete state into disk joins while tools/reasons/pending/attempts use bounded pages; continuation uses complete unresolved counts. Closed-session receipts retain only counts/source identities and one usage document per receipt, with usage dedup unchanged. Storage and compaction callers now use scoped public readers. Originals are not deleted or reclassified to achieve bounded memory.",
+      "validation": "Current combined candidate tests 167-169, 176-182 and 240 passed, including constrained-heap multi-session admission, 64 MiB target originals, old 2 MiB close seam, exact usage attribution, late-page unknown/foreign tasks, partial resolutions and stale snapshot rejection. This is behavioral evidence for these repaired paths, not the full #31 RSS/resource acceptance."
+    },
+    {
+      "id": "STD-02",
+      "previousPriority": 2,
+      "disposition": "RESOLVED",
+      "locations": [
+        {
+          "file": "scripts/isolation/boundary.mjs",
+          "start": 18,
+          "end": 38
+        },
+        {
+          "file": "scripts/isolation/boundary.mjs",
+          "start": 164,
+          "end": 204
+        },
+        {
+          "file": "src/execution-output.ts",
+          "start": 7,
+          "end": 27
+        },
+        {
+          "file": "src/improve-process.ts",
+          "start": 17,
+          "end": 29
+        },
+        {
+          "file": "src/improve-process.ts",
+          "start": 72,
+          "end": 82
+        }
+      ],
+      "evidence": "Raw Buffer blocks retain each delivered threshold-crossing event in full before display/protocol clipping; acquisition stops at the cap plus delivered event, keeping memory finite. Eval/runtime/grader and improve checks/build/startup/selected process persist ordered content-addressed blocks via execution.output, with direct references visible to fixation and retention. Conversion from base64 to retained references occurs only after all blobs and the receipt are durable; persistence errors do not claim completeness. Boundaries preserve sourceEnd and unknown VM termination. No claim is made about bytes not acquired after pipe destruction.",
+      "validation": "Current combined tests 52-54 passed for byte-exact selected-process output, fixed dependency closure, cancellation/journal failure and persistence failure. repair-26-output output-final.log (9 passed, 4 real-VM skipped), maximum-output-result.json and vm-output-acquired.log are retained scoped historical support for unchanged output code; their standalone build is not this full combination. STD-04 independently concerns timeout admission/classification, not reappearance of output truncation."
+    },
+    {
+      "id": "STD-03",
+      "previousPriority": 2,
+      "disposition": "RESOLVED",
+      "locations": [
+        {
+          "file": "src/metrics/acceptance.ts",
+          "start": 41,
+          "end": 45
+        },
+        {
+          "file": "src/metrics/feedback.ts",
+          "start": 17,
+          "end": 21
+        },
+        {
+          "file": "src/metrics/costs.ts",
+          "start": 10,
+          "end": 14
+        },
+        {
+          "file": "src/ownership.ts",
+          "start": 14,
+          "end": 98
+        }
+      ],
+      "evidence": "Each exported synchronous write enters withOwnerSync before writable Evidence opens. Canonical roots borrow only an in-module registered live lease validated against root/lock inode and exact claim; other processes or unregistered markers conflict. Idle calls acquire the same proper-lockfile protocol, retain it through all synchronous work and handle close, then release. Releasing/lost leases reject reuse; failures keep evidence and expose cleanup errors. Read-only reports remain independent.",
+      "validation": "Current combined tests 150-157 passed, covering second-process API/CLI/root/symlink rejection before mutations, idempotence, borrowed/releasing/lost/foreign leases, stale markers, simultaneous receipt writes and aggregate operation/cleanup errors. Metrics runtime observation and existing runtime/recovery/storage tests also passed."
+    },
+    {
+      "id": "SMELL-01",
+      "disposition": "RETAINED_OPTIONAL",
+      "blocking": false,
+      "evidence": "The credential-like, instruction-like and undecodable-text classifiers remain duplicated at src/derived-evidence.ts:26-28 and src/improve-source.ts:13-15. Both files are unchanged since the prior review. No demonstrated semantic drift or written hard rule makes this blocking."
+    }
+  ],
+  "findings": [
+    {
+      "id": "STD-04",
+      "priority": 2,
+      "classification": "documented-standard-breach",
+      "title": "准备耗尽截止预算后仍启动检查，并将已知 timeout 归为导出未知",
+      "location": {
+        "file": "src/improve-validation.ts",
+        "start": 134,
+        "end": 137
+      },
+      "relatedLocations": [
+        {
+          "file": "src/improve-validation.ts",
+          "start": 103,
+          "end": 105
+        },
+        {
+          "file": "src/improve-validation.ts",
+          "start": 125,
+          "end": 153
+        },
+        {
+          "file": "src/improve-build.ts",
+          "start": 70,
+          "end": 70
+        },
+        {
+          "file": "src/improve-build.ts",
+          "start": 86,
+          "end": 86
+        },
+        {
+          "file": "scripts/isolation/boundary.mjs",
+          "start": 99,
+          "end": 158
+        }
+      ],
+      "standards": [
+        {
+          "file": "docs/specs/pi-durio-v1-spec.md",
+          "line": 97,
+          "rule": "I5 permits execution of checks only within the declared budget."
+        },
+        {
+          "file": "docs/specs/pi-durio-v1-spec.md",
+          "line": 99,
+          "rule": "I7 requires a new decision for enlarged scope/budget and retains completed/failed/not-run states."
+        },
+        {
+          "file": "docs/design/improve-workflow.md",
+          "line": 74,
+          "rule": "Stop affected work when declared validation scope or budget is exceeded."
+        },
+        {
+          "file": "docs/specs/pi-durio-v1-spec.md",
+          "line": 86,
+          "rule": "V6 checks time bounds before new work and retains timeout, budget-stop, infrastructure-error and not-run reasons distinctly."
+        }
+      ],
+      "trigger": "Build/check preparation or boundary staging consumes the remaining absolute deadline. A check then times out before bootstrap creates work/targets.",
+      "evidence": "The pre-check deadline test precedes candidate materialization. The invocation clamps remaining time with Math.max(100, ...), so expiry authorizes another invocation; runRestricted itself starts its relative timer only after staging, create and configuration. The exact fixed-candidate test 68 fixture records deadline 2026-10-09T22:59:18.890Z, improve.check-started at 22:59:13.643Z, then a check plan with timeoutMs=100 (mtime 22:59:34.981Z), and an actual started/terminated failed timeout outcome. Export enumerates work/targets before classifying this failure; the absent directory throws ENOENT, so host seq 151-153 records unknown/frozen with ENOENT instead of the already known timeout. The raw timeout remains present in outcome.json and execution.output seq 150; it is not claimed deleted.",
+      "consequence": "The user-declared absolute time budget does not fence actual new execution after expensive preparation. A predictable budget/timeout stop is additionally presented as an infrastructure/unknown check, obscuring the actionable cause. The batch remains frozen and formal changes did not run; no paid request, escaped execution or successful activation is alleged.",
+      "recommendedDirection": "Carry the absolute deadline or equivalent continuous cancellation through build, startup and check preparation to the actual restricted start boundary; refuse new execution when expired or below the supported minimum. Persist/classify the original execution outcome before optional artifact collection, and make missing artifacts after failed/cancelled/timeout execution a secondary availability fact rather than replacing the primary reason. Add focused deterministic coverage for expiry during preparation and timeout before target creation.",
+      "validation": "Independently read fixed-candidate source, original fixture decision/host facts, three plan/outcome pairs and the complete combined TAP/result. No fresh probe executed. All relevant identities and first failure excerpt are saved in standards-evidence/review-audit.json and combined-first-failure.tap.",
+      "regressionAttribution": "Newly demonstrated existing defect; these deadline/export expressions predate the output-retention repair. No unsupported claim that the repair introduced it."
+    }
+  ],
+  "optionalSmells": [
+    {
+      "id": "SMELL-01",
+      "name": "possible Duplicated Code",
+      "classification": "optional-judgment",
+      "blocking": false,
+      "locations": [
+        {
+          "file": "src/derived-evidence.ts",
+          "start": 26,
+          "end": 28
+        },
+        {
+          "file": "src/improve-source.ts",
+          "start": 13,
+          "end": 15
+        }
+      ],
+      "quote": "if(/\\u0000|�/.test(text))reasons.push(...);",
+      "suggestion": "Optionally share the text classification predicates while retaining caller-specific withholding policy."
+    }
+  ],
+  "fowlerBaselineConsidered": [
+    "Mysterious Name",
+    "Duplicated Code",
+    "Feature Envy",
+    "Data Clumps",
+    "Primitive Obsession",
+    "Repeated Switches",
+    "Shotgun Surgery",
+    "Divergent Change",
+    "Speculative Generality",
+    "Message Chains",
+    "Middle Man",
+    "Refused Bequest"
+  ],
+  "counts": {
+    "resolvedOriginalHardFindings": 3,
+    "unresolvedOriginalHardFindings": 0,
+    "newHardFindings": 1,
+    "P1": 0,
+    "P2": 1,
+    "optionalSmells": 1
+  },
+  "validation": {
+    "combinedBuild": "PASS",
+    "combinedTest": "FAIL",
+    "testFiles": 39,
+    "tests": 251,
+    "passed": 250,
+    "failed": 1,
+    "skipped": 0,
+    "cancelled": 0,
+    "testResult": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/test-result.json",
+    "testLog": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tests.tap",
+    "failedTest": 68,
+    "inputIdentity": {
+      "inputs": 168,
+      "compilerFiles": 140,
+      "productionOutputs": 246,
+      "mismatches": []
+    },
+    "historicalReuse": "Per-stage source/build differences were explicitly enumerated in review-audit.json. Stage counts are not added together; prior same-name VM test PASS never overrides this candidate test 68 failure."
+  },
+  "externalGates": [
+    {
+      "issue": 30,
+      "state": "NOT_ACCEPTED",
+      "required": "Real paid DeepSeek batch under explicit credentials/budget and complete real analysis/selection/execution evidence."
+    },
+    {
+      "issue": 31,
+      "state": "NOT_ACCEPTED",
+      "required": "Complete technical/resource acceptance including real macOS Terminal and complete measurements; constrained-heap regressions are not production RSS acceptance."
+    },
+    {
+      "issue": 32,
+      "state": "NOT_ACCEPTED",
+      "required": "Explicit human daily-use acceptance after technical evidence and local trial."
+    }
+  ],
+  "limitations": [
+    "Standards axis only; Spec conclusions were not read or imported.",
+    "The authorized Pi TUI width exception is preserved; unchanged material reused from the previous Standards review.",
+    "No whole-product completion, merge/push/publication or external acceptance is established.",
+    "A follow-up candidate must bind a new review to its own SHA/tree and applicable checks; this FAIL belongs to 74a91ea and is not rewritten."
+  ],
+  "artifacts": [
+    "standards-review.md",
+    "standards-review.json",
+    "standards-evidence/review-audit.json",
+    "standards-evidence/combined-first-failure.tap"
+  ]
+}

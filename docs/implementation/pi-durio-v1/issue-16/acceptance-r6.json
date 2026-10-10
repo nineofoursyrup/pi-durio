@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-09T14:03:52.611723+00:00",
+  "issue": 16,
+  "spec": "PI-DURIO-V1-SPEC-r1",
+  "slice": "PI-DURIO-V1-TICKETS-r1:T06",
+  "status": "ACCEPTED_FOR_INTERNAL_DEPENDENCIES",
+  "sourceCommit": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+  "integratedSha": "f17ddfbe9fb8b07a6ddde46a42cb35560b07687c",
+  "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json",
+  "manifestSha256": "5e33c0c52eb80c2a6e5c57b0c85dd03ae37b249d2c5ed874b6cf3238f7e17e91",
+  "minimumGrid": {
+    "columns": 40,
+    "rows": 12
+  },
+  "deterministicEvidence": {
+    "r5Baseline": "65/65 combined checks and 8/8 final affected checks; unchanged areas reused",
+    "r6Delta": "23/23 affected TUI/width checks and 1/1 candidate inventory check",
+    "independentInstall": "offline completed, cleanup confirmed, same-run headless; 12704 exact files",
+    "rootProductDiffSinceCandidate": "empty for src, package.json, package-lock.json, vendor and terminal validation runner"
+  },
+  "nativeEvidence": {
+    "r5Retained": "C1-C3, N1-N4, STOP and ESC native P; unchanged rendering/editing/copy/runtime paths, applicability documented",
+    "r6New": "EXIT_FIRST_PAIR, IDLE_C_FIRST_PAIR, FAULT, normal completed S1, smaller-window recovery S3 and separately confirmed GRID_INPUT at 40x12",
+    "notUpgraded": "Original r3/r4/r5 failures, prior S2 U, invalid size field P and raw UNKNOWN summaries unchanged"
+  },
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/user-feedback-r5-short.json",
+      "sha256": "a9bcabcc6bccceec07424e9d201dde8a952fadecb8a4c08b6dca21b259427842"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-normal-partial.json",
+      "sha256": "c18014803c6eb54327b36f20e725a309e462313d4497961133a4b66e7cb738ea"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-stop-readback.json",
+      "sha256": "b4129f7bad1714487d72a15aeeceb786d7b82253d57a453067840fdf1a7cbcc2"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-esc-readback.json",
+      "sha256": "23a449a607adfd007d2ec5b6a1485de46c4d44d62c1eec445c97db8e11ecbb38"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-exit-first-pair-pass.json",
+      "sha256": "3ab2e4188f7ddbf31b9773f4553df5a78785ed4657d883084496090e37485a6c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-idle-c-first-pair-pass.json",
+      "sha256": "25fcf1feaac36253021dc13a60dca7f49d0ded3118c8379df9ec03b63beecf6a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-fault-pass.json",
+      "sha256": "161e8388a95bcd068f75b40b05a427d787f9dbec39cc248e029f636ca3c455d6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-supplement-partial.json",
+      "sha256": "1e26039398d2b2438defcf7a0a80d297f87e6856f0723d365fb0461aa5f9c554"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-acceptance/native-grid-confirmed.json",
+      "sha256": "0e6dd0029dbf036f00a3fd57b4a1bc592791723445f599892e539693ab662c2a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-confirmation/handoff.json",
+      "sha256": "c72fdc75434df6e80c9771a448db72ab14d93ec6a0703acb8db23ef3da28fb0a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-confirmation/merge-integration-readback.json",
+      "sha256": "183a9452b7803c5883d60907c192d2435a2414d5814043b49590604746e41309"
+    }
+  ],
+  "limits": [
+    "Ticket #16 only; full coding control/queue/recovery UI remains #17",
+    "Offline fixture is not paid/real DeepSeek model acceptance",
+    "OS application window focus-reporting was an extra probe and remains UNKNOWN; component/modal/run context cancellation is covered by existing native observations and event regressions",
+    "Remote termination unknown is retained separately from local cleanup confirmed",
+    "Does not imply v1 acceptance, independent full review, #31 technical closeout, #32 daily-use acceptance, main merge, release or issue closure"
+  ]
+}

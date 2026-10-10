@@ -1,0 +1,16 @@
+{
+  "status": "COORDINATOR_SCHEMA_ASSUMPTION_FAILURE",
+  "error": "AssertionError: compared reviewedCandidate object directly with commit string",
+  "observed": {
+    "commit": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "tree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuild": {
+      "path": "/Users/nineofour/Durio/dist/execution/source-build.json",
+      "bytes": 92984,
+      "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+    }
+  },
+  "correction": "Use reviewedCandidate.commit and verify tree/sourceBuild too; no product/evidence change",
+  "productAttribution": "NONE",
+  "candidateGateCreated": false
+}

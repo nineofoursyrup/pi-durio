@@ -1,0 +1,50 @@
+{
+  "status": "PREPARED_NOT_AUTHORIZED",
+  "artifact": {
+    "kind": "reused exact accepted independently installed product",
+    "producer": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+    "integratedSource": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+    "installation": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install",
+    "linux": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/linux-runtime",
+    "producerIdentity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/candidate-identity.json",
+      "bytes": 5219556,
+      "sha256": "f56d137950dbe52af7854df4d360699fe8612fa45aeb4208e2def0d6a5d0de03"
+    },
+    "sourceArchive": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/source.tar.gz",
+      "bytes": 2625663,
+      "sha256": "99fb03e03dfaeae14984b305a77889b7e7d571bbb6f565523991e53e9f96310c"
+    },
+    "package": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/pack/pi-durio-0.1.0.tgz",
+      "bytes": 19221238,
+      "sha256": "3628f9fd3e6c66cf7cd123dd9ea3dc6260c3be07ffb556d0972197e221d66d9a"
+    },
+    "sourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/execution/source-build.json",
+      "bytes": 92981,
+      "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+    },
+    "sourceInputsMatched": 169,
+    "compiledOutputsMatched": 246,
+    "installedFilesMatched": 12925,
+    "linuxRuntimeIdentity": "5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a",
+    "environment": {
+      "node": "v24.8.0",
+      "platform": "linux",
+      "arch": "arm64",
+      "image": "pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c",
+      "preparation": "Copied previously prepared Linux dependencies with exact lock and complete content verification; own candidate dist copied unchanged; no new install or network."
+    }
+  },
+  "seedRunId": "1ff5b41c-5fde-460f-9dcf-8a3ebe090d03",
+  "firstFailedCheck": "actual public runtime bash check; AssertionError retained in original tool output; all fixture bytes unchanged",
+  "proposed": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/proposed-batch.json",
+    "bytes": 68303,
+    "sha256": "03863184236673a88f979719e5d9b0dc729be626c4fbb610f3a4868749667190"
+  },
+  "syntheticSeed": true,
+  "paidRequests": 0
+}

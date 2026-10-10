@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-09T13:13:38.419327+00:00",
+  "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+  "scenario": "esc",
+  "human": "PASS",
+  "machineChecks": "PASS",
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-02-18-728Z/esc/machine.json",
+      "sha256": "1cba231f4a79fada465dfe9a2c4ec43c15295e484d29931da066d1868ef015e2"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-02-18-728Z/esc/operator-observation.json",
+      "sha256": "02ab7ac183dede4c3317c5a0092a87211e87d6cdab64123f39ef306ae4e64cdc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-02-18-728Z/esc/events.jsonl",
+      "sha256": "74da41808f7f1406a1b335de12b5c3577ce4a0b06d390f5f8cfb8c1879873dfb"
+    }
+  ],
+  "remaining": [
+    "exit observation",
+    "fault observation",
+    "supplement completed request and explicit minimum grid"
+  ]
+}

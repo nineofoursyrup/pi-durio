@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-10T11:35:19.570751+00:00",
+  "candidate": "4cbebb8dc1f475945483f8b38eec48eab401327f",
+  "files": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final/review.md",
+      "bytes": 2981,
+      "sha256": "7c6b144ec9882971095429d41deafc774a0b2df4f5eda30cfefea8b29fabaa88"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final/review.json",
+      "bytes": 3530,
+      "sha256": "fb6b6897b1c570a54f23d4af0442461463add516ae03d067c5c972f00d9ab95a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final/affected-readback.json",
+      "bytes": 8595,
+      "sha256": "5422c1f39f57a0815dfdc4827683b9f4c333feb7e6e9cf5c36e8af6aba2100c2"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final/first-segment-preparation.json",
+      "bytes": 3232,
+      "sha256": "dca66f7ee18815e8eb3ba08eddcc183b4defe185a1e9193714728ef7012e0af3"
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "review": "Spec",
+  "review_kind": "Independent affected-delta review; unchanged complete Spec coverage reused from 74a91ea",
+  "status": "PASS",
+  "status_scope": "No demonstrable open Spec defect in the deadline repair and reviewed adjacent behavior; not complete v1 acceptance",
+  "completed_at": "2026-10-09T23:34:56.210114+00:00",
+  "identity": {
+    "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+    "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+    "status": "?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png\n?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json\n",
+    "tracked_clean": true,
+    "executable_delta_sha256": "2b179955372baf20f4b68d229488ccc902c3be2772b506adcf1d52da3f2e2500",
+    "candidate_tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+    "baseline": "25d311616136766b37c0274f3f490ec1105f9592",
+    "previous_candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+    "checkout": "/Users/nineofour/Durio",
+    "source_build_sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "untracked_scope": "Four original planning files excluded"
+  },
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "xhigh",
+  "actual_backend_attestation": "UNAVAILABLE; requested model is not proof of serving backend",
+  "finding_count": 0,
+  "highest_priority": null,
+  "findings": [],
+  "scope_creep_findings": [],
+  "optional_suggestions": [],
+  "prior_findings": [
+    {
+      "id": "SPEC-01",
+      "original_priority": 1,
+      "disposition": "RESOLVED_REUSED_UNCHANGED",
+      "basis": "74a91ea Spec report: bounded admission/recovery/close implementation and relevant inputs unchanged by this delta."
+    },
+    {
+      "id": "SPEC-02",
+      "original_priority": 1,
+      "disposition": "RESOLVED_REUSED_WITH_ADJACENT_REVIEW",
+      "basis": "Signal entry and owner/output lifecycle unchanged; shared boundary and eval cancellation paths re-reviewed below."
+    },
+    {
+      "id": "COORD-DEADLINE-ADMISSION-ATTRIBUTION",
+      "source": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/first-failure-diagnosis.json",
+      "disposition": "RESOLVED_IN_REVIEWED_CANDIDATE",
+      "basis": "Original check was created after the absolute deadline and confirmed timeout was masked by targets ENOENT. Current actual admission and execution-first attribution repair both paths. Original 300000ms decision, 350166.185542ms failure and 12 referenced objects remain unchanged."
+    }
+  ],
+  "affected_review": [
+    {
+      "area": "Actual deadline and cancellation admission",
+      "contract": {
+        "path": "docs/specs/pi-durio-v1-spec.md",
+        "line": 86,
+        "quote": "开始新 trial/请求/重试/compaction 前检查额度和时限，重启不重置预算或截止点"
+      },
+      "source": [
+        "scripts/isolation/boundary.mjs:66-97",
+        "scripts/isolation/boundary.mjs:109-176"
+      ],
+      "conclusion": "Original absolute deadline survives staging; preparation/create/start admissions recheck cancellation and cutoff. Execution uses min(relative timeout, remaining absolute duration), without a 100ms minimum. Newly refused work does not claim termination when no create occurred."
+    },
+    {
+      "area": "Cleanup uncertainty and callers",
+      "contract": {
+        "path": "docs/specs/pi-durio-v1-spec.md",
+        "line": 86,
+        "quote": "残留进程未确认结束不复用空间或开受影响试次"
+      },
+      "source": [
+        "scripts/isolation/boundary.mjs:228-241",
+        "src/improve-build.ts:70-89",
+        "src/improve-validation.ts:98-103",
+        "src/eval/runner.ts:93-116"
+      ],
+      "conclusion": "Any attempted create retains stop/inspect/delete/absence obligations. Unknown termination overrides cancellation/refusal. Build/startup/check and eval runtime/grader receive the original deadline; invalid/cancelled/budget-stopped results freeze affected later work."
+    },
+    {
+      "area": "Execution evidence and success integrity",
+      "contract": [
+        {
+          "path": "docs/specs/pi-durio-v1-spec.md",
+          "line": 68,
+          "quote": "默认完整保留实际取得的用户输入、有效指令、模型请求/响应、工具参数/输出、检查及相关附件，包括失败、取消和已收到的未完成内容"
+        },
+        {
+          "path": "docs/specs/pi-durio-v1-spec.md",
+          "line": 100,
+          "quote": "启用内容必须就是验证内容，验证 A 不能复制 B 后称通过"
+        }
+      ],
+      "source": [
+        "src/improve-validation.ts:135-158",
+        "src/improve-build.ts:71-91",
+        "src/eval/runner.ts:94-116",
+        "src/eval/runner.ts:140-151"
+      ],
+      "conclusion": "Direct checks persist execution/output before artifact collection; failed/cancelled missing targets or export errors retain actual reason and a separate artifactError. Success still requires complete matching candidate content. Eval refusal does not run a grader; timeout/cancel without bootstrap artifacts no longer becomes preparation-error. Grader refusal produces no new deterministic judgment, while any already-proven necessary scope failure remains authoritative."
+    }
+  ],
+  "checks": {
+    "new_behavior_tests": [],
+    "identity_readback": "/Users/nineofour/pi-durio-v1-run/review/9aed1af/spec-evidence-readback.json",
+    "independently_verified": {
+      "source_build_counts": {
+        "inputs": 169,
+        "compiler": 140,
+        "outputs": 246
+      },
+      "compiled_test_fixtures": 123,
+      "current_compiled_set_exact": true,
+      "before_after_identity_exact": true,
+      "gate_evidence_references": 14,
+      "original_first_failure_references": 12,
+      "recorded_vm_cleanup": 11,
+      "mismatches": []
+    },
+    "reused_affected_evidence": {
+      "boundary": "7 RED then 7 GREEN; controller admission only",
+      "upper_call_chain": "10 passing actual product-path regressions using fake container controller; not VM isolation proof",
+      "real_boundary": "2 tests / 4 VMs",
+      "source_happy_path": "1 test / 3 VMs; 246140.769791ms; new 600000ms fixture deadline fixed before execution",
+      "output_retention": "1 test / 2 VMs",
+      "offline_eval": "1 trial and 1 grader / 2 VMs; 4 controlled requests, 56 known tokens, 0 paid calls"
+    },
+    "combined_gate": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-repaired-r1/gate.json",
+      "status": "PASS_WITH_APPLICABLE_REUSE",
+      "original": {
+        "tests": 251,
+        "pass": 250,
+        "fail": 1
+      },
+      "claim": "Applicable unchanged results plus affected repair evidence; no new full-suite PASS and no summing overlapping groups."
+    },
+    "excluded_results": [
+      "Skipped nested-test wrapper nominal PASS (improve-green-r1.tap)",
+      "Incorrect fixture assertion about unacquired cancelled bytes (improve-green-r2.tap)"
+    ],
+    "first_failures_preserved": "Original product failure and coordinator log-parser failure remain distinct; fixture deadline change does not extend production authorization."
+  },
+  "external_gates": [
+    {
+      "issue": 30,
+      "status": "NOT_RUN_AWAITING_AUTHORIZATION_AND_INPUT",
+      "contract": "A1/A3",
+      "remaining": "Fresh frozen paid DeepSeek batch, explicit paid authorization/permitted credential source, real coding and generated improve candidate followed by user choice/verification/effect/reopen chain."
+    },
+    {
+      "issue": 31,
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "contract": "A1/A2/A3; T7",
+      "remaining": "Final candidate native macOS Terminal and complete local resource/technical evidence."
+    },
+    {
+      "issue": 32,
+      "status": "NOT_RUN_AWAITING_EXPLICIT_HUMAN_ACCEPTANCE",
+      "contract": "A2/A3",
+      "remaining": "User local trial and explicit daily-use acceptance after required technical evidence."
+    }
+  ],
+  "approved_exceptions": "Existing separately authorized #16 two public width seams and declared #26 build resources unchanged.",
+  "previous_report": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/74a91ea/spec-review.json",
+    "sha256": "12874f5c6a31d56a43597baf5faa47a42ce96543ec5a3f3b5ff95b777ec0a528",
+    "preserved": true
+  },
+  "limitations": [
+    "No Standards conclusion consulted.",
+    "No product/Git/state/PR/Issue modification, new build, new behavioral test, VM/provider/native Terminal execution or sub-agent spawn.",
+    "Scope remains #11-29 product implementation and #30 offline preparation; other prior review coverage reused only where unchanged.",
+    "Recorded real VM evidence is reused after identity checks; no live VM inventory or general isolation revalidation performed by this reviewer."
+  ],
+  "delivery_verification_unresolved": {
+    "status": "DEPENDENCY_REPORT_FAILURE_UNDER_DIAGNOSIS",
+    "source": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install-first-failure.json",
+    "sha256": "7808c0f66dfe7a7987c2f0829a54e4d0f1d7455bf93bd35e990e2dec137601f2",
+    "command": "npm ls --omit=dev --all --json",
+    "exitCode": 1,
+    "observed": "ELSPROBLEMS invalid bundled @earendil-works/pi-tui@1.1.0-durio-width.1 for file:vendor/pi-tui/pi-tui-1.1.0-durio-width.1.tgz",
+    "product_attribution": "UNKNOWN; coordinator is independently diagnosing npm 11.19.1 resolution and content",
+    "scope": "Separate install/delivery gate, not attributed to reviewed deadline delta; scoped Spec PASS is not installation or complete technical acceptance PASS."
+  }
+}

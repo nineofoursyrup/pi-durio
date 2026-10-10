@@ -1,0 +1,23 @@
+not ok 68 - selected source produces a content-bound executable and only an explicit new process observes it
+  ---
+  duration_ms: 350166.185542
+  type: 'test'
+  location: '/Users/nineofour/Durio/dist/test/improve-build.test.js:61:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"state":"frozen","reason":"A started group has no certain recorded outcome.","groups":[{"state":"unknown","reason":"Error: ENOENT: no such file or directory, scandir '/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/work/targets'","formal":null}]}
+    + actual - expected
+    
+    + 'frozen'
+    - 'completed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'completed'
+  actual: 'frozen'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/nineofour/Durio/dist/test/improve-build.test.js:63:12)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...

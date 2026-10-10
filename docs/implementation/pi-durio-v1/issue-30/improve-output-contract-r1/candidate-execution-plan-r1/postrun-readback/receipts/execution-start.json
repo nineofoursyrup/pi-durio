@@ -1,0 +1,24 @@
+{
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/frozen-plan-manifest.json",
+    "bytes": 8942,
+    "sha256": "686b5c023020444104cd711b809dfd01442b0568a79fa36e42484716c8f1f3fe"
+  },
+  "authorization": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/actual-selection.json",
+    "bytes": 834,
+    "sha256": "48a40d980bed8f81ccbc9c06888e432bffdce084bcf3320150c58a4bd507317e"
+  },
+  "startedAt": "2026-10-10T10:45:25.690Z",
+  "deadline": "2026-10-10T10:50:25.690Z",
+  "decisionId": "v1-live-r4-clamp-execute-r1",
+  "clonedBaseline": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/closed-seed-tree.json",
+    "bytes": 708195,
+    "sha256": "f433294284116b793be9a58879d54d8aec8a47d685e852eac9ed26c6a1d2548b"
+  },
+  "cloneGlobalCutoff": 4298,
+  "priorCumulativeRequests": 45,
+  "newProviderBudget": 0,
+  "scope": "one fixed regression and conditional clamp.ts writeback; consumed on entry; no retry"
+}

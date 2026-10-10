@@ -1,0 +1,453 @@
+{
+  "ticket": 26,
+  "at": "2026-10-09T21:34:01.560209+00:00",
+  "status": "integrated-accepted",
+  "scope": "Registered-source executable builds and independent eval asset ticket acceptance only; final review/native/provider/v1 gates remain separate",
+  "integrationMerge": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+  "integrationTree": "e5ad9f25f84ded025fe7b2dff49fc08936a89eb3",
+  "productCommit": "2554316e5a175299d1149d02e5bb2d8a5824beef",
+  "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+  "verifiedDirectFiles": {
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/handoff.md": "3ea6cf1bf3d4a86db4fb9519b03cd0dc554584e04a4bb8405700b8a033bfb764",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/handoff.json": "fa9f74a154b8d547980b6eeea94b97febb2db6e47e8f723278eadee52ab8cf6e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/validation.json": "9a07ddacd6643fe69351b497c3d1370a6b8caec628c51e39d3fa941e87d0c580",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/inventory-summary.json": "de7758771f2a02455e28c9b604ba0b43bf3d00dab7997cd3f7295cd7b2fc414e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/final-producer-verification.json": "718cc1a889b318a8b728641ca6f532426175047273a6a512b03f88e0aefb2a94",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/merge-26-verifier.py": "ff66488f680e5b3c5c3b406a26c63bc38f29e696a2ba8bd1be270e709d144241",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/merge-preflight.json": "9e49364b00cb89ca67ca57e5ec0faea837e18a8ea2c55bdb9eedfb6f1a76191e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/merge-postflight.json": "122eb229316666aab8563a06ddafc7eb0962335d7685d588186ff8d8096e982b",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/root-dependency-copy-result.json": "38a33e354f8bf8e163a9a9936006f761099c82e03115cc51dc8e81d5bf9ad2bb",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/root-inputs-r2-result.json": "7642b69c3efc8da02631ba6df5ebc92ea3968a44dec9c797090960caff67fb7e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/root-build-result.json": "03d1f4300e12d29d58447ed1cff64fb628a65d6c442c2589636795751dbd5f28",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/root-full-result.json": "a57a92de3b43c62356185b734004511f4f3c877f77519cdf2e9b9d67d4a7d2cf",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/pack-build.log": "f852ead95fc8ada46c6130e02a92732caf5f3f25c1ffee0f1d89e2ad2f63431f",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r5/affected-tests.log": "8c030dd0dd8c80d45828c0f2180f9043a7a5e3000556708d43ab98f7aca34902",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/tui-status-green.log": "062b20d647241818002a159c543c9b3b30282defeeb8bb25f59ddd3b024442e9",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/model-profile-boundary.log": "ed1be4d494f12aa9f9a4f9168a8928c71cc2f5e266ff58fba0558d20607c1b8c",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance.log": "8aef0b3436543931421deae138ba9362f6877af18fd254582d208ac6deb1cc87"
+  },
+  "mergeReadback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/merge-integration-readback.json",
+    "sha256": "2637f04207d8339fd527dee27deeeb3135ccafc39ba8b31efdc319ce92405c2e"
+  },
+  "identity": {
+    "sourceArchiveFiles": 341,
+    "buildCounts": {
+      "inputs": 156,
+      "compiler": 140,
+      "outputs": 231
+    },
+    "preparedDependencies": 12771,
+    "fullInventories": {
+      "install-complete-tree.json": {
+        "file": 12906,
+        "symlink": 5,
+        "directory": 1301
+      },
+      "linux-runtime-complete-tree.json": {
+        "file": 12872,
+        "symlink": 4,
+        "directory": 1278
+      }
+    },
+    "packageFiles": 12903,
+    "npmBinModeNormalization": {
+      "path": "dist/src/cli.js",
+      "tarMode": "0644",
+      "installedMode": "0755",
+      "authority": "package.json bin; actual full install inventory matches frozen modes"
+    },
+    "linuxDependencies": 12631,
+    "retainedBuildFiles": {
+      "baseline": 13159,
+      "candidate": 13159
+    },
+    "variantDifferences": {
+      "inputs": [
+        "src/headless-lifecycle.ts"
+      ],
+      "outputs": [
+        "dist/src/headless-lifecycle.js"
+      ],
+      "compiler": []
+    },
+    "runtimeEntries": 12836
+  },
+  "actualContent": {
+    "rawData": {
+      "data": {
+        "records": 437,
+        "verifiedReferencedObjects": 12674
+      },
+      "asset-data": {
+        "records": 116,
+        "verifiedReferencedObjects": 124
+      },
+      "eval-data": {
+        "records": 217,
+        "verifiedReferencedObjects": 12356
+      }
+    },
+    "executionArtifacts": [
+      {
+        "root": "data",
+        "run": "799153d1-21d5-494a-8fa0-33893d9fc637",
+        "artifactId": "715cecf2664d28af967dba03db9cf18bede853d0401301d53c283ae7082bab49",
+        "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+        "files": 231,
+        "dependencies": 12631
+      },
+      {
+        "root": "data",
+        "run": "d436e22c-d0e9-42cd-9526-c7bfbf92904f",
+        "artifactId": "715cecf2664d28af967dba03db9cf18bede853d0401301d53c283ae7082bab49",
+        "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+        "files": 231,
+        "dependencies": 12631
+      },
+      {
+        "root": "data",
+        "run": "10476a99-0535-44e9-b436-559147384ef3",
+        "artifactId": "715cecf2664d28af967dba03db9cf18bede853d0401301d53c283ae7082bab49",
+        "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+        "files": 231,
+        "dependencies": 12631
+      },
+      {
+        "root": "data",
+        "run": "17a868f8-db7b-49dc-ba1c-53864fb6788e",
+        "artifactId": "715cecf2664d28af967dba03db9cf18bede853d0401301d53c283ae7082bab49",
+        "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+        "files": 231,
+        "dependencies": 12631
+      },
+      {
+        "root": "data",
+        "run": "facf571f-400c-4037-9e81-3918906d74dc",
+        "artifactId": "283a850566da697becc4943ca4bfd852ce995af9ce5dd3ec48ff041b681a644d",
+        "sourceBuild": "51474df79f7fc6de1d1af03f6b5e68df5531f911748cb06fbcad89579b074839",
+        "files": 231,
+        "dependencies": 12631
+      },
+      {
+        "root": "data",
+        "run": "a15e19d7-06a8-4286-aca6-2fba6142f49a",
+        "artifactId": "715cecf2664d28af967dba03db9cf18bede853d0401301d53c283ae7082bab49",
+        "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+        "files": 231,
+        "dependencies": 12631
+      },
+      {
+        "root": "asset-data",
+        "run": "16f29e0b-3c9b-4df0-afb1-c1973e17ffdc",
+        "artifactId": "715cecf2664d28af967dba03db9cf18bede853d0401301d53c283ae7082bab49",
+        "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+        "files": 231,
+        "dependencies": 12631
+      },
+      {
+        "root": "asset-data",
+        "run": "32d92bcf-47dd-48f8-b079-17b1bf0cf175",
+        "artifactId": "715cecf2664d28af967dba03db9cf18bede853d0401301d53c283ae7082bab49",
+        "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+        "files": 231,
+        "dependencies": 12631
+      }
+    ],
+    "actualVMCount": 10,
+    "actualVMs": [
+      {
+        "id": "durio-i12-83e750d2-d28b-4c65-b74f-ec86e7e7c3e3",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 1073741824,
+          "cpus": 1,
+          "nodeHeapMiB": 768
+        }
+      },
+      {
+        "id": "durio-i12-ca3c8750-d94b-45e5-a624-fce4d772989e",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        }
+      },
+      {
+        "id": "durio-i12-c14e4fb3-8eb4-4d79-a41c-939f1835e920",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        }
+      },
+      {
+        "id": "durio-i12-d00c3b7f-96df-4c17-9fc5-0ffbb0d746d3",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        }
+      },
+      {
+        "id": "durio-i12-5cd6ea68-e0bc-4d8c-a903-0ba2422cc8fc",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        }
+      },
+      {
+        "id": "durio-i12-0aeb3ecf-8f8b-4f0e-aebd-93842442ca87",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        }
+      },
+      {
+        "id": "durio-i12-394267c4-a3ce-4446-828d-9adbc6f762ba",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        }
+      },
+      {
+        "id": "durio-i12-27f5c9d5-bb9b-47a2-8d45-09e78a1e6ecc",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        }
+      },
+      {
+        "id": "durio-i12-1cb6f3b1-c77b-441d-ac49-10f4664d912d",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        }
+      },
+      {
+        "id": "durio-i12-4677468d-c6f9-4169-9c61-6d33ad42c4d2",
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "resources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        }
+      }
+    ],
+    "actualProcesses": {
+      "original": 86314,
+      "new": 89968,
+      "baseline": 90283,
+      "pendingExit": 75,
+      "pendingUnchanged": true
+    },
+    "grading": {
+      "before": [
+        "FAIL",
+        "FAIL"
+      ],
+      "after": [
+        "PASS",
+        "PASS"
+      ],
+      "sameOutcomes": true,
+      "historicalAffectedMarker": true,
+      "improvement": "not-evaluated"
+    },
+    "sourceRollback": "Exact baseline source restored; selected future build entry rolled back; retained baseline and candidate remain separately available",
+    "retention": "Ordinary cleanup blocked four original build/source object units",
+    "producerVsCopies": "Original r6 producer sourceBuild differs from the explicitly changed candidate build. Full installed and Linux directory inventories verified as their own roots. Retained baseline/candidate content manifests verified against immutable content blobs and materialized readonly copies, with mode normalization 0444 | executable bits. Runtime manifest checked against prepared Linux bytes/modes. JSON inventory file hashes are distinct from canonical content-addressed manifest IDs."
+  },
+  "checks": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/pack-build.log",
+      "sha256": "f852ead95fc8ada46c6130e02a92732caf5f3f25c1ffee0f1d89e2ad2f63431f",
+      "name": "npm pack prepack TypeScript build and dependency bundling",
+      "state": "PASS",
+      "producer": "2554316e5a175299d1149d02e5bb2d8a5824beef"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r5/affected-tests.log",
+      "sha256": "8c030dd0dd8c80d45828c0f2180f9043a7a5e3000556708d43ab98f7aca34902",
+      "name": "Affected improve, eval, comparison and provider-boundary tests",
+      "state": "PASS",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "producer": "a22dab93644d0b3605a1c913fdfad57d1e142403",
+      "sourceBuild": "0ddd72c35c0ecdbc7bf3d32fde6f8a4d353ae7397f31ff23fc43c17350b08ea6",
+      "reuse": "Only src/tui/app.ts completion notice and its TUI assertion changed after this run. Improve/build/formal/rollback/eval/provider/boundary logic is byte-identical. The final installed demo separately binds the new source/build identity.",
+      "difference": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/r5-to-r6.diff"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/tui-status-green.log",
+      "sha256": "062b20d647241818002a159c543c9b3b30282defeeb8bb25f59ddd3b024442e9",
+      "name": "Actual TUI selection completion remains truthful and visible after closing result panel",
+      "state": "PASS",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "producer": "2554316e5a175299d1149d02e5bb2d8a5824beef"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/model-profile-boundary.log",
+      "sha256": "ed1be4d494f12aa9f9a4f9168a8928c71cc2f5e266ff58fba0558d20607c1b8c",
+      "name": "Real default-profile model request count/cancellation, unknown profile rejection and actual default/build memory inspection",
+      "state": "PASS",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "producer": "2554316e5a175299d1149d02e5bb2d8a5824beef"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance.log",
+      "sha256": "8aef0b3436543931421deae138ba9362f6877af18fd254582d208ac6deb1cc87",
+      "name": "Independent installed Pi API and actual restricted-VM acceptance",
+      "state": "PASS",
+      "producer": "2554316e5a175299d1149d02e5bb2d8a5824beef",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/report.json"
+    }
+  ],
+  "rootBuild": {
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "cwd": "/Users/nineofour/Durio",
+    "startedAt": "2026-10-09T21:26:01.794795+00:00",
+    "finishedAt": "2026-10-09T21:26:06.293886+00:00",
+    "exitCode": 0,
+    "log": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/root-build.log",
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281"
+    }
+  },
+  "rootFullVerification": {
+    "command": [
+      "node",
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/verify-producer.mjs",
+      "/Users/nineofour/Durio",
+      "full"
+    ],
+    "cwd": "/Users/nineofour/Durio",
+    "startedAt": "2026-10-09T21:26:06.294474+00:00",
+    "finishedAt": "2026-10-09T21:26:10.449059+00:00",
+    "exitCode": 0,
+    "log": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/root-full.log",
+      "sha256": "49086766a7a29d800c14e16226ca33e62c8f61685634567560569820e1b28df2"
+    }
+  },
+  "preservation": {
+    "originalsUnchanged": 162,
+    "untrackedFiles": [
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+      "docs/wayfinder-proposal.md",
+      "docs/wayfinder-readback-2026-10-09.json"
+    ],
+    "protectedUnchanged": 387,
+    "previousEvidenceAnchor": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/merge-preparation-readback.json",
+      "sha256": "daad0ee7a41a94e6181ddffdd2d94f070e17ee6ae78e3cc18340355cf75a3fb2"
+    },
+    "firstFailures": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/red-01-source-selection.log",
+        "reason": "Source execution initially lacked the mandatory build contract."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/red-02-input-set.log",
+        "reason": "Registration initially missed new build-input files."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/first-build-execution.log",
+        "reason": "Readonly dependency copy hit the restricted per-file write bound; dependencies are now mounted readonly without recopying TypeScript."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/build-execution-r2.log",
+        "reason": "Compiler exhausted the original 256 MiB heap."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/build-execution-r3.log",
+        "reason": "Compiler also exhausted 384 MiB; fixed trusted build profile was explicitly coordinated."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/profile-red.log",
+        "reason": "Fixed profile support was initially missing."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/build-execution-r4.log",
+        "reason": "Build/start/new-process had passed; the mutation test itself attempted a write to a deliberately readonly artifact. Original retained; fixture now explicitly changes mode first."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/tui-status-red.log",
+        "reason": "Expected truthful result notice was absent because the completion refresh replaced it. Original misleading fixed text and overwritten message were repaired."
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r5/linux-dependency-reuse.json",
+        "reason": "First inventory helper rejected node_modules/.bin symlinks. Recovered by exact lockfile package inventory; no product runtime was executed by this helper failure."
+      }
+    ],
+    "oldInventoryPolicy": "No historical full evidence rescan; prior merger anchor and explicit frozen references retained. All required r6 content and complete inventories verified."
+  },
+  "firstVerificationFailures": {
+    "packageModeVerifier": {
+      "records": [
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/merge-verification-first-failure-1791581043-884569.json",
+          "sha256": "5e163df7d4506f139122c853fda4a106b3c3f87292e293093ff7a2be0efbe8c3"
+        }
+      ],
+      "reason": "Initial verifier treated tar mode as identical to npm-installed bin mode. The single cli.js 0644 to 0755 transformation is declared by package.json bin; all frozen installed modes already matched. Corrected only this expected conversion; actual package bytes and exact regular-file set remained identical."
+    },
+    "rootInputs": {
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/root-inputs-result.json",
+        "sha256": "a70998ef49b4635a29e2e5f6c7d62d0e1c1a2cbb4c9729ce87e774a691d64e57"
+      },
+      "reason": "Root had no node_modules, so @types/proper-lockfile/LICENSE was absent. Original failure retained; authorized offline dependency copy followed by successful inputs-r2, one build and full verify."
+    }
+  },
+  "limitations": [
+    "No paid provider calls, model quality or performance improvement. Both grader reports retain improvement=not-evaluated.",
+    "No full repository test-suite claim; required affected checks and real installed acceptance are listed exactly.",
+    "No automatic update, current-process replacement, old-pending migration, main merge, push, release or issue closure.",
+    "Source build support is limited to existing registered src/**/*.ts files with already prepared exact lock/compiler/dependency inputs.",
+    "Independent Spec/Standards reviews are pending. Complete native final composition and resource report remain pending; Terminal app control denied by CUA policy. Paid provider and #32 user acceptance remain NOT RUN."
+  ]
+}

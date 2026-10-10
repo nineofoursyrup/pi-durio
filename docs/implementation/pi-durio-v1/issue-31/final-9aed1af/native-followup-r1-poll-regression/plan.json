@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-10T05:46:44.896Z",
+  "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+  "nodeVersion": "v26.8.2",
+  "harness": {
+    "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/poll-regression.mjs",
+    "bytes": 5169,
+    "sha256": "4dcf7d23115c9985e56f12f2a423ab70e08cc55d120f5368eb651404e4f7f953"
+  },
+  "fixedComposition": {
+    "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/native-composition.mjs",
+    "bytes": 13088,
+    "sha256": "e70829545c65daa6bd793d69ef242256afb17bc1d0fafa9422a2299e4eafc3e7"
+  },
+  "originalComposition": {
+    "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-composition.mjs",
+    "bytes": 12975,
+    "sha256": "39533830ba1de452a2d3853922febf9fe6b938b608454806919069334c111420"
+  },
+  "product": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/src/improve.js",
+    "bytes": 26798,
+    "sha256": "dfa8cf65a8969cb96880dc52f1568f41f9740fe8f5c59c53fe2b5b84b636f108"
+  },
+  "fixtureWriter": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/src/evidence.js",
+    "bytes": 11600,
+    "sha256": "4f2aa5f772d3c6adecc45f2296bd3cd2a15805726ea6c78291e165b8b06a78cb"
+  },
+  "scope": "Actual installed readImproveReport with delayed improve.started and improve.report fixture records; exact original/fixed callbacks and original async until function extracted from pinned harness files. Other errors must retain object identity. No native/VM/provider execution."
+}

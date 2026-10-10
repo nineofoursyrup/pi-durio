@@ -1,0 +1,177 @@
+{
+  "at": "2026-10-09T20:42:50.868771+00:00",
+  "ticket": 30,
+  "status": "INTEGRATED_PREPARATION_PAID_NOT_RUN_ISSUE_INCOMPLETE",
+  "integrationMerge": "f7890ede828f20c1f7b45689be50cc703e9322ba",
+  "integrationTree": "053841c57b3b3d3f2aab1a52757c30ea2ac00a03",
+  "originalPreparationCommit": "dea2f5a77bc47ca6cc8cdecec1c27d2737c78f8a",
+  "combinedPreparationCommit": "cf6a45f0f6c2c74621fdedc8be846b599b429a97",
+  "verifiedDirectFiles": {
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/merge-preparation-readback.json": "daad0ee7a41a94e6181ddffdd2d94f070e17ee6ae78e3cc18340355cf75a3fb2",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-integration-readback.json": "6f5ee804a577175a2ff17ad544e77d35275494b6251fa69939e97907b748dcc4",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/frozen-manifest-r2.json": "fd9b8b5741e8ec9f7ef1dff965e6abcbedda33a668ea4cdd7b318881e9d90892",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/candidate-r2/eval-data/host.sqlite": "8b5851e02dd5cd2473068f190699986e23f36a44cec01e9d1f6c14554940a9f0",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/candidate-r2/improve-data/host.sqlite": "60bf3449265135512f62155eab9d95ade5286ec9fe1eae319b75e09f11cb34f3",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/candidate-identity.json": "5f988e2528d5d9578e58ca6ef524139b49b4c4d02a2165103be9389b795ac7da",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/prepare-first.log": "3f0f4410bbcb4e006a24f12b35ec3d004e48e57048e1d43f8775d339738983e8",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/candidate-r2/query-limit-first-failure.json": "07d65311a83c21c5e71f7d7ca0dd718c3388f848ac46206d1b3443ca5a90920f",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/auth-stop-first.log": "c0fe1435063332b5e94f6ade91700d6e3de88314c898013d75de8e4678c6419f",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/auth-stop/report-401.json": "91c5479ccf5baed719293b8919c81c9bc3e902dfa7b44e4815675b2a5e2eac0d",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/frozen-manifest.json": "d80e894a7e3db134894ecb5a19826c9f97238e3e29f537cbe36c3bfd408b8e61",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/preparation-handoff.json": "f5e94bb100e3004869d02922e980e0a436f7e3bc9b9b10c6a043387acdbc4445",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/coordinator-premerge-preparation.json": "6e940315c87bbf1615a570f89e23c0fd8b37f5691a414ba10f884fe68f7ae1a5",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/coordinator-grant-preflight.json": "d8c1f9fd2a4629bce7ede3b93a8d38ee14481f36d23cb9cc5b1140b10514cc7f",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/merge-preparation-verifier.py": "3f6ee54326fa6287236f7d747bf053bd8762994bc4f9a6c52608dbde7d25a897",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/merge-preparation-preflight.json": "82dc06f4b00e04209520995abeb7abaa7d31c2c652fbc06e2b2371db60346c44",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/merge-preparation-postflight.json": "47b3985c43f42c5337fabe5df4268a5734a7d89225ddda4be09ee52e483523c9"
+  },
+  "productIdentity": {
+    "producer": "52f8dd25fed19f84c5712d2c916de3878a1de945",
+    "unchangedOriginalInputs": 144,
+    "newFutureBuildInventoryInputs": [
+      "scripts/live-batch/check-auth-stop.mjs",
+      "scripts/live-batch/check-installation.mjs",
+      "scripts/live-batch/common.mjs",
+      "scripts/live-batch/freeze.mjs",
+      "scripts/live-batch/prepare.mjs",
+      "scripts/live-batch/run.mjs"
+    ],
+    "futureInputCount": 150,
+    "interpretation": "The 144 frozen product input bytes remain unchanged. Six added preparation scripts expand a future build inventory to 150; root was not rebuilt and is not represented as a newly compiled product. Existing #25 independent package/runtime remains the frozen product producer.",
+    "previousVerification": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-integration-readback.json",
+      "sha256": "6f5ee804a577175a2ff17ad544e77d35275494b6251fa69939e97907b748dcc4"
+    }
+  },
+  "checksReused": {
+    "seedRecords": 45,
+    "seedModelDispatches": 2,
+    "authStop": {
+      "status": "PASS",
+      "provenance": "Synthetic HTTP responses through real installed runner, budget ledger and restricted VM. No real provider requests or credential reads.",
+      "results": [
+        {
+          "status": 401,
+          "calls": 1,
+          "stop": {
+            "reason": "PROVIDER_HTTP_401",
+            "source": "e1:285:5badb76b655a575c1e2874b154565384dc431d2e8329412e47e47f178bc440c2",
+            "dispatchId": "bcb4c7eb-dd1e-41b9-baba-d1dcb04dc9fc"
+          },
+          "first": "cancelled",
+          "remaining": "not-run",
+          "rawPreserved": true,
+          "settledTokens": 2
+        },
+        {
+          "status": 403,
+          "calls": 1,
+          "stop": {
+            "reason": "PROVIDER_HTTP_403",
+            "source": "e1:440:91a41cd1b7f6e798649e59ec76b3fe346a51a9ff215326de4110768a0a3bb63c",
+            "dispatchId": "c35a1dc0-943e-48db-b8c7-7c8c425fe19a"
+          },
+          "first": "cancelled",
+          "remaining": "not-run",
+          "rawPreserved": true,
+          "settledTokens": 2
+        }
+      ]
+    },
+    "noGrant": {
+      "status": "PASS",
+      "test": "Absent paid authority rejects before credential lookup and durable paid plan/start",
+      "exitCode": 1,
+      "journalsUnchanged": [
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/candidate-r2/eval-data/host.sqlite",
+          "bytes": 45056,
+          "sha256": "8b5851e02dd5cd2473068f190699986e23f36a44cec01e9d1f6c14554940a9f0"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/candidate-r2/improve-data/host.sqlite",
+          "bytes": 20480,
+          "sha256": "60bf3449265135512f62155eab9d95ade5286ec9fe1eae319b75e09f11cb34f3"
+        }
+      ],
+      "paidStartExists": false,
+      "liveRequests": 0
+    },
+    "exactInstallationSet": {
+      "status": "PASS",
+      "actualInstallationFiles": 12894,
+      "identity": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/candidate-identity.json",
+        "bytes": 5184009,
+        "sha256": "5f988e2528d5d9578e58ca6ef524139b49b4c4d02a2165103be9389b795ac7da"
+      },
+      "checks": [
+        "Actual independent install exact file/link set and byte/link-target identity",
+        "Extra regular module rejected",
+        "Extra directory symlink rejected without following it",
+        "Explicit directory symlink represented by its own path and literal target"
+      ],
+      "credentialReads": 0,
+      "productImports": 0,
+      "providerCalls": 0
+    },
+    "authenticationBodyUnchanged": true
+  },
+  "preservation": {
+    "originalsUnchanged": 162,
+    "untracked": [
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+      "docs/wayfinder-proposal.md",
+      "docs/wayfinder-readback-2026-10-09.json"
+    ],
+    "protectedFilesUnchanged": 228,
+    "firstFailures": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/prepare-first.log",
+        "bytes": 574,
+        "sha256": "3f0f4410bbcb4e006a24f12b35ec3d004e48e57048e1d43f8775d339738983e8"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/candidate-r2/query-limit-first-failure.json",
+        "bytes": 407,
+        "sha256": "07d65311a83c21c5e71f7d7ca0dd718c3388f848ac46206d1b3443ca5a90920f"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/auth-stop-first.log",
+        "bytes": 437,
+        "sha256": "c0fe1435063332b5e94f6ade91700d6e3de88314c898013d75de8e4678c6419f"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/auth-stop/report-401.json",
+        "bytes": 64699,
+        "sha256": "91c5479ccf5baed719293b8919c81c9bc3e902dfa7b44e4815675b2a5e2eac0d"
+      }
+    ],
+    "supersededManifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/frozen-manifest.json",
+      "bytes": 5386,
+      "sha256": "d80e894a7e3db134894ecb5a19826c9f97238e3e29f537cbe36c3bfd408b8e61"
+    },
+    "rootIgnoredDist": "Older ignored outputs unchanged; not final composition build evidence"
+  },
+  "paid": {
+    "status": "NOT RUN",
+    "authority": "No human grant received for the frozen batch at this preparation integration",
+    "credentialSource": "NOT PROVIDED; no credentials read",
+    "actualProviderAuthentication": "NOT RUN",
+    "actualCandidate": "NOT GENERATED OR SELECTED",
+    "paidRequests": 0,
+    "dependency31": "NOT UNBLOCKED"
+  },
+  "remaining": [
+    "Human exact batch grant and permitted local credential source",
+    "Single authorized live batch with every result retained",
+    "Actual generated report/candidate and concrete content/check/writeback proposal for separate human structured choice",
+    "Selected verification/writeback and read-only CLI/TUI/API record reopen",
+    "Final #26 applicability and #31/#32 remain separately evidenced"
+  ],
+  "dependency31": "NOT UNBLOCKED",
+  "independentFinalReview": "NOT RUN; final implementation scope review remains required",
+  "publication": "Pending metadata push/readback; issue30 remains OPEN, PR Draft and main unchanged"
+}

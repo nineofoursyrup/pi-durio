@@ -1,0 +1,53 @@
+{
+  "at": "2026-10-09T15:58:15.462410+00:00",
+  "candidate": "f67a2edd377d37e3f13bbc0da273028103695d6f",
+  "manual": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z",
+  "status": "NATIVE_SUPPLEMENT_PASS; integration verification pending",
+  "humanReply": "补测完成",
+  "operator": {
+    "at": "2026-10-09T15:57:49.831Z",
+    "candidate": "f67a2edd377d37e3f13bbc0da273028103695d6f",
+    "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manifest.json",
+    "manifestSha256": "4dd92b179e26ec29f1724bc256885fcb55b209addfcc4a25dadc59aef46ff693",
+    "runnerSha256": "a5b280f8f4244c4b50498cff69db734f442d4742d161e3c33a879458d943cb10",
+    "packageRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/install/node_modules/pi-durio",
+    "status": "PASS",
+    "answer": "P",
+    "source": "human macOS Terminal operator"
+  },
+  "requiredFacts": {
+    "recoveryReportSaved": true,
+    "noWidthTimeout": true,
+    "noRetryNeeded": true,
+    "measured": true,
+    "sourceExplicitlyEnded": true,
+    "sourceOriginalPreserved": true,
+    "newTaskCompleted": true,
+    "newTaskOnly": true,
+    "oldQueueFrozen": true,
+    "rawRestored": true,
+    "sttyRestored": true
+  },
+  "providerRequests": 1,
+  "sourceRun": "0772bbcd-dfef-4aec-ac32-45237fe85328",
+  "newTasks": [
+    {
+      "taskId": "54568471-bae8-40fc-b3a2-445ef520ace5",
+      "runId": "39fce29f-3955-41ea-90d1-9cfae9fda9eb",
+      "status": "completed",
+      "input": "全新任务"
+    }
+  ],
+  "reused": "r1 native queue-stop PASS and read-only recovery restriction observations; original startup FAIL/operator UNKNOWN/new-task gap remain immutable",
+  "scope": "r2 cold reopen without retry, explicit end, actual independent new task, old queue frozen, raw/stty",
+  "hashes": {
+    "environment.json": "3eeea2a26cb44d6b8c88fff4930664e6941c91c9e5d0ef4280916a47e896c187",
+    "preparation.json": "fdfc848a873b15082866969848626096f4200844674e8024b98b2fbd689432b0",
+    "input.jsonl": "8553237a165a17528fe725d4bc925634e5365c4536b6dbe722f7f2c2d2240827",
+    "output.ansi": "cd267b1231ca6f919a2dbb50971d1cc1c3e57415fb2775ff3191d2140d9f44b8",
+    "machine.json": "5a53035fbec7981800d29945ad788897c2e9bfa246e6c32f062638a0ca1c205e",
+    "operator.json": "933c055019af92b085a1ba3c11c4d6e804dde01ffad16549d7e178014e8f0dfb",
+    "workflow.json": "66bd9a45526a67786290acc269b087444c4fb0a2b664d7383befd62f172573c7",
+    "provider-payloads.json": "098ae645902e410115bd5cff2488a984e168b97f3457ca994e64bff83b4c9d51"
+  }
+}

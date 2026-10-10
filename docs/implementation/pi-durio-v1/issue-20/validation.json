@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "issue": 20,
+  "product": {
+    "commit": "68fb251623326b1a6357e7efb8b2602ecbc74f3e",
+    "tree": "ef9cc416e8944f293bf8be4194fd6e49472db676",
+    "integratedProductBase": "0557d08c8a6dda6d96a08c0ef77948a7e91bbc5b"
+  },
+  "environment": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v26.8.2",
+    "piVersion": "1.1.0"
+  },
+  "evidenceRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20",
+  "checks": [
+    {
+      "command": "npm run check",
+      "result": "PASS",
+      "passed": 91,
+      "log": "check-r5.log",
+      "applicability": "Full required check before #17 merge. Reused for unchanged modules; affected combination checked subsequently."
+    },
+    {
+      "command": "npm run build && node --test dist/test/storage.test.js dist/test/tui.test.js dist/test/history-view.test.js",
+      "result": "PASS",
+      "passed": 26,
+      "log": "merged-r6.log",
+      "buildLog": "build-r6-merged.log",
+      "applicability": "Storage, TUI, history after merging #17 product."
+    },
+    {
+      "command": "npm run build && node --test dist/test/storage.test.js",
+      "result": "PASS",
+      "passed": 11,
+      "log": "storage-r8.log",
+      "buildLog": "build-r8.log",
+      "applicability": "Final product; new completed-part/remaining-session regression plus all storage protection/archive/migration tests."
+    },
+    {
+      "command": "npm pack --json --pack-destination candidate-r2",
+      "result": "PASS",
+      "log": "candidate-r2/pack.log",
+      "details": "Prepack rebuilt tsc and execution artifact; source and compiled hashes captured in candidate-r2/manifest.json."
+    },
+    {
+      "command": "npm install --ignore-scripts --no-audit --no-fund candidate-r2/pi-durio-0.1.0.tgz",
+      "result": "PASS",
+      "log": "install-r2/install.log"
+    },
+    {
+      "command": "Compare source compiled/package/execution-lock and every installed production dependency file",
+      "result": "PASS",
+      "record": "candidate-r2/installed-comparison.json",
+      "compiledFiles": 99,
+      "dependencyFiles": 12631,
+      "dependencyBytes": 97141335
+    },
+    {
+      "command": "Import pi-durio/storage from independent install",
+      "result": "PASS",
+      "record": "install-r2/public-api.json"
+    }
+  ],
+  "actualDemos": [
+    {
+      "productCommit": "275678203394c7acd3f9093c350ec9db346da289",
+      "runner": "candidate-r1/demo-storage.mjs",
+      "log": "demo-r1.log",
+      "result": "demo-r1/result.json",
+      "cases": [
+        "real Pi runtime, explicit offline transport and real shell check exit 7",
+        "lossless whole-root archive and actual restore exact identities",
+        "real fixed dependencies block cleanup",
+        "preview exact deletion, after-delete receipt failure and same-operation continuation",
+        "simulated archive ENOSPC preserves source",
+        "synthetic unknown host format 999 refused without source mutation",
+        "nonempty committed WAL 49472 bytes included, migration target publicly readable"
+      ],
+      "applicability": "r2 changes only same-operation source comparison in commitCleanup; these deterministic archive/protection/failure/migration results remain applicable and original artifacts are retained."
+    },
+    {
+      "productCommit": "68fb251623326b1a6357e7efb8b2602ecbc74f3e",
+      "runner": "candidate-r2/validate-storage-resume.mjs",
+      "log": "resume-r2.log",
+      "result": "resume-r2/result.json",
+      "cases": [
+        "actual installed run artifact attachment A completed, attachment B fails, session not run; same operation resumes to completed",
+        "independent new source after a new preview still rejects stale preview and preserves attachment hash"
+      ]
+    }
+  ],
+  "firstFailures": [
+    "build-r1.log",
+    "storage-r2.log",
+    "storage-r4.log",
+    "partial-resume-first-failure-r7.log",
+    "demo-r1/cleanup-first-failure.json",
+    "resume-r2/first-failure.json"
+  ],
+  "notRun": {
+    "paidProvider": "NOT RUN; explicit offline fixtures only",
+    "nativeTerminal": "NOT RUN; ordinary management panel composition remains #31. No CUA refusal bypass."
+  },
+  "fixtureManifest": "evidence-fixtures-r2.json"
+}

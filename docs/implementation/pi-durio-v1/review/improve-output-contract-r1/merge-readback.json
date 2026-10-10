@@ -1,0 +1,284 @@
+{
+  "status": "PASS",
+  "startedAt": "2026-10-10T10:07:11.373463+00:00",
+  "repository": "/Users/nineofour/Durio",
+  "branch": "codex/pi-durio-v1",
+  "preMergeHead": "c616a75cd10bfd41d59f246e956a5d756abbc653",
+  "producerCommit": "2af46c785ef7e94c2bc1dcfea48c5cfc065f773d",
+  "scope": "27 added improve-output-contract-r1 docs only; no status or existing tracked files modified",
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoningEffort": "xhigh",
+  "actualBackendAttestation": "NOT_ATTESTED",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/frozen-manifest.json",
+    "bytes": 77149,
+    "sha256": "809aa5350c2d1d3cd3fac9281210ce41e2ff643e889a565bd15f25ae02e30856"
+  },
+  "review": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1/independent-review.json",
+    "bytes": 17920,
+    "sha256": "a300f9ab302bcf4dafdf2511d0701068c0acdca30593fbfb5ea32d13b55dc9fa",
+    "standards": "PASS",
+    "spec": "PASS",
+    "findingCount": 0
+  },
+  "productCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+  "originalUntrackedBefore": {
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+    },
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+    },
+    "docs/wayfinder-proposal.md": {
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+    },
+    "docs/wayfinder-readback-2026-10-09.json": {
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+    }
+  },
+  "apiEnv": {
+    "readContent": false,
+    "addedToGit": false,
+    "beforeStat": {
+      "size": 118,
+      "mode": 33152,
+      "inode": 108595560,
+      "mtimeNs": 1791610965598957000,
+      "ctimeNs": 1791610965609405872
+    }
+  },
+  "distBefore": {
+    "fileCount": 370,
+    "aggregateSha256": "a73e298a6375c50fe9d16da3a4fe6a7170b1756a6d08a256f85bcdf39f3ef450"
+  },
+  "priorOriginalsPreservation": {
+    "mode": "REUSED_EXISTING_BEFORE_AFTER_HASH_EVIDENCE",
+    "originalFiles": 12074,
+    "allMatched": true,
+    "bindingFiles": {
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/report.json": {
+        "bytes": 12036,
+        "sha256": "d0a1f3e9860b082fbcb0c127461ca4f0a830865aead08b883dd47317427e81d8"
+      },
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/REPORT.md": {
+        "bytes": 5607,
+        "sha256": "fedb5f8a90ddfd6717067610ec862e601fd58206d1f152299ad210cade8ea0d9"
+      },
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/evidence-index.json": {
+        "bytes": 9141,
+        "sha256": "87da8b40af1d9db7919efc995d1aacd0470dc306cf99abd897cb0b36bd334e25"
+      },
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/read-identities.json": {
+        "bytes": 3380142,
+        "sha256": "8af12422214af83f0a47b800ad7c449d90a1d1d1e8109e7fbbc0f7e42c95ebbd"
+      }
+    },
+    "originalFilesRescanned": false,
+    "reason": "Authorized docs-only merge cannot write external original evidence; existing immutable readback and hash-index identities are reused."
+  },
+  "productChecksRerun": false,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "terminalRuns": 0,
+  "statusWrites": 0,
+  "pushes": 0,
+  "newAuthorizationOrCandidateActions": false,
+  "externalWrites": "Only this new independent merge receipt directory",
+  "completedAt": "2026-10-10T10:07:12.248757+00:00",
+  "mergeCommit": "80b4e3f036786113bb62bc17194675f691d324f9",
+  "mergeTree": "99f902e78ec1df6402908e2ee8d8067a431e6cae",
+  "parents": [
+    "c616a75cd10bfd41d59f246e956a5d756abbc653",
+    "2af46c785ef7e94c2bc1dcfea48c5cfc065f773d"
+  ],
+  "producerTree": "99f902e78ec1df6402908e2ee8d8067a431e6cae",
+  "mergeTreeEqualsProducer": true,
+  "addedDocsCount": 27,
+  "addedDocsBytes": 203644,
+  "addedDocs": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/README.md",
+      "bytes": 4966,
+      "sha256": "6c9b7de77a6c8e408752a20b8022d8e50a703fad55b0bd7b80c35fddd37419ff",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/authorization-source-template-FROZEN-NOT-EXECUTABLE.json",
+      "bytes": 889,
+      "sha256": "00ca2b75c8d0673dc8a87676e1a1482f038ecaadf70b9c7ab5f1baa28adf4c24",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-binding-check.json",
+      "bytes": 1355,
+      "sha256": "c9eadf15e7d9025dd41bc6ecce940e1789e0b7a73a3bfe6d6de0608f9add6f74",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/check-final-denials.py",
+      "bytes": 1836,
+      "sha256": "65f8f9ecf1ede6d567208fe35a558a9e3a7062ef0008b6a26a91ac6b51e7353d",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/check-final-preflight.mjs",
+      "bytes": 5136,
+      "sha256": "f49d619fba9d5553486b74563d7d7ee0a904fb2a502f85b79fecc24b2494df49",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/check-input-revision.mjs",
+      "bytes": 14091,
+      "sha256": "f716a58bae1c722f7c46c3fa9aa366cbe9996e6b15dcb673df7461855baae847",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/check-reuse.json",
+      "bytes": 3817,
+      "sha256": "883bf8241886f3475428a0f194eacffc911f8ca0433c9ff1b52e08a967f07bff",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/checks.json",
+      "bytes": 2373,
+      "sha256": "7743711c220b8085771ca16ce277675e829906781b38e2dbacc84c529a1865ff",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/evidence-index.json",
+      "bytes": 15744,
+      "sha256": "3ab455848d20ce8353686566ddb1b104a6f75df60e661dc33b4b494750bd45d8",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/final-denials-r1.json",
+      "bytes": 814,
+      "sha256": "f16fa4c58101e163f52642c8b8d651b4c04096dff813a4fc812923e0621138fb",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/final-preflight-check-r1.json",
+      "bytes": 1407,
+      "sha256": "9740835ddbed8fa195b814133ff3aa7f162478457e6ccece69072530876d1346",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/freeze-r1.stdout",
+      "bytes": 319,
+      "sha256": "0984b264aadb077d826fd659afb4ee1eb24d3e4381bb7464b059fda1d0c063c6",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/frozen-manifest.json",
+      "bytes": 77149,
+      "sha256": "809aa5350c2d1d3cd3fac9281210ce41e2ff643e889a565bd15f25ae02e30856",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/grant-template-FROZEN-NOT-EXECUTABLE.json",
+      "bytes": 686,
+      "sha256": "0469d857b927b07fefeb7294d84760ac2d447509050fc4757a712e951e76e8fc",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/freeze.mjs",
+      "bytes": 3306,
+      "sha256": "128428df533c48fdc33529503230c2e84c40011c4538d0601f0291235fcfbae7",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/launch.py",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/ledger.mjs",
+      "bytes": 3187,
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/preflight.mjs",
+      "bytes": 18144,
+      "sha256": "7f1589074f31de5b8e030256b5a003e78587dc621dabb84857b3db65b83d0452",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/prepare-output.py",
+      "bytes": 5864,
+      "sha256": "3f084330e257fd95bbe12fa10097d78a212dd9c6511095f99736a6b5cfde5153",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/run.mjs",
+      "bytes": 6234,
+      "sha256": "dd37dad031bb87757a91357c75abe041d5a29804189d15cf433357c76a02f456",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/input-check-r1.json",
+      "bytes": 12959,
+      "sha256": "554317e5824f6dde99d78416ef2bbab90ae5c5207e6be2132fe7b5ea7ec06da0",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/prepare-r1.stdout",
+      "bytes": 126,
+      "sha256": "7fb4fc65ec56d43e1a9d1ee2a2da4f42e47d5c6378da0a0333ea4a8ce9360552",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/proposed-batch-reviewed.json",
+      "bytes": 11615,
+      "sha256": "5488af96e8b57580d7a9d67207a4036ec501ddf1e4d4d17e7a10d4ccdbb7d4dd",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/provider-observation.json",
+      "bytes": 1560,
+      "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/purpose.txt",
+      "bytes": 1524,
+      "sha256": "adad8464a3cc3c68d128d852230b4eed1a90c1323b7582740d37c1310eec07cd",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/revision-delta.json",
+      "bytes": 3022,
+      "sha256": "9fe0c3719e90f11c1cd41fc94cc5ff2bc8a9b42607f5856e180583e2c25de834",
+      "equalsProducerAndExternal": true
+    }
+  ],
+  "existingTrackedUnchanged": true,
+  "productAndBuildInputChanges": [],
+  "originalUntrackedUnchanged": true,
+  "apiEnvStatUnchanged": true,
+  "distUnchanged": true,
+  "priorPreservationEvidenceUnchanged": true,
+  "reviewAndManifestUnchanged": true,
+  "docsDiffCheck": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "trackedCleanAfter": true,
+  "gitStatus": "?? docs/prototypes/archive/\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json\n",
+  "mergeOutput": "Merge made by the 'ort' strategy.\n .../issue-30/improve-output-contract-r1/README.md  |   39 +\n ...tion-source-template-FROZEN-NOT-EXECUTABLE.json |   25 +\n .../candidate-binding-check.json                   |   30 +\n .../check-final-denials.py                         |   21 +\n .../check-final-preflight.mjs                      |   31 +\n .../check-input-revision.mjs                       |   90 +\n .../improve-output-contract-r1/check-reuse.json    |   79 +\n .../improve-output-contract-r1/checks.json         |   62 +\n .../improve-output-contract-r1/evidence-index.json |  332 ++++\n .../final-denials-r1.json                          |   29 +\n .../final-preflight-check-r1.json                  |   32 +\n .../improve-output-contract-r1/freeze-r1.stdout    |    1 +\n .../frozen-manifest.json                           | 1800 ++++++++++++++++++++\n .../grant-template-FROZEN-NOT-EXECUTABLE.json      |   20 +\n .../improve-output-contract-r1/harness/common.mjs  |   50 +\n .../improve-output-contract-r1/harness/freeze.mjs  |   21 +\n .../improve-output-contract-r1/harness/launch.py   |   66 +\n .../improve-output-contract-r1/harness/ledger.mjs  |   23 +\n .../harness/preflight.mjs                          |  125 ++\n .../harness/prepare-output.py                      |   82 +\n .../improve-output-contract-r1/harness/run.mjs     |   46 +\n .../improve-output-contract-r1/input-check-r1.json |  322 ++++\n .../improve-output-contract-r1/prepare-r1.stdout   |    1 +\n .../proposed-batch-reviewed.json                   |  232 +++\n .../provider-observation.json                      |   35 +\n .../improve-output-contract-r1/purpose.txt         |    1 +\n .../improve-output-contract-r1/revision-delta.json |   72 +\n 27 files changed, 3667 insertions(+)\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/README.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/authorization-source-template-FROZEN-NOT-EXECUTABLE.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-binding-check.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/check-final-denials.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/check-final-preflight.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/check-input-revision.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/check-reuse.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/checks.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/evidence-index.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/final-denials-r1.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/final-preflight-check-r1.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/freeze-r1.stdout\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/frozen-manifest.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/grant-template-FROZEN-NOT-EXECUTABLE.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/common.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/freeze.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/launch.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/ledger.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/preflight.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/prepare-output.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/harness/run.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/input-check-r1.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/prepare-r1.stdout\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/proposed-batch-reviewed.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/provider-observation.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/purpose.txt\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/revision-delta.json\n",
+  "rootWriteLock": "RETURNED_TO_MAIN_AFTER_RECEIPT"
+}

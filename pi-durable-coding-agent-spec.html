@@ -1,0 +1,2390 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="基于 pi-durable 的超轻量 coding agent 实现规格：运行架构、恢复、evals、LLM Ops、tracing 与手动 retro。包含证据、权限、验收和跨 agent 交接摘要。">
+<meta name="author" content="本次会话整理">
+<meta name="spec-version" content="0.1.0">
+<meta name="spec-status" content="design-only">
+<title>轻量 Coding Agent · 实现规格 v0.1</title>
+<style>
+:root{color-scheme:light;--paper:#fff;--bg:#f3f5f1;--ink:#233630;--muted:#6c7b72;--green:#215a46;--line:#dfe6dc;--gold:#b58d3e;--sidebar:278px}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:32px}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.85 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;text-rendering:optimizeLegibility}a{color:var(--green);text-underline-offset:3px;text-decoration-thickness:1px}a:hover{color:#a97720}a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,.table-scroll:focus-visible{outline:3px solid #b5914e;outline-offset:3px}button,input{font:inherit}button{cursor:pointer}::selection{background:#d8ead6;color:#153a29}.skip{position:absolute;left:16px;top:-70px;z-index:9;background:white;padding:12px}.skip:focus{top:10px}.reading-progress{position:fixed;inset:0 auto auto 0;height:3px;width:0;background:var(--gold);z-index:20;transition:width .1s linear}
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:28px 20px 20px 24px;overflow-y:auto;background:#edf1e9;border-right:1px solid var(--line);scrollbar-width:thin}.brand{display:flex;align-items:center;gap:12px;margin-bottom:20px}.brand-mark{display:grid;place-items:center;background:#214d3f;color:#fff;width:38px;height:38px;font-family:ui-monospace,monospace;font-size:22px;border-radius:10px}.brand strong{display:block;font-size:14px;font-weight:720;line-height:1.6}.brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:.12em}.search-box{display:none;margin-bottom:14px}.enhanced .search-box{display:block}.search-box label{display:block;font-size:11px;font-weight:650;letter-spacing:.05em;color:var(--muted);margin-bottom:6px}.search-box input{width:100%;border:1px solid #cfd9ca;border-radius:7px;padding:8px 10px;background:#fafbf9;font-size:13px;color:var(--ink)}.search-note{display:block;min-height:18px;font-size:11px;color:var(--muted);margin-top:4px}.toc-label{font-size:10px;letter-spacing:.1em;color:#798477;font-weight:700;margin:19px 8px 6px}.toc-link{display:grid;grid-template-columns:22px 1fr;gap:7px;text-decoration:none;color:#526252;border-radius:6px;padding:6px 8px;font-size:12px;line-height:1.5;transition:background .12s}.toc-link>span:first-child{font:11px/1.7 ui-monospace,monospace;color:#8a9587}.toc-link:hover{background:#e2e9dc;color:#215a46}.toc-link.active{background:#dce7d4;color:#204c35;font-weight:650}.toc-link.active>span:first-child{color:#50694a}.toc-link[hidden],.toc-group[hidden]{display:none}.sidebar-foot{border-top:1px solid #d6dfd1;padding-top:15px;margin-top:22px;font-size:11px;line-height:1.8;color:#7b8676}.sidebar-foot a{color:#667b5f}.content-shell{margin-left:var(--sidebar);padding:42px 42px 60px}.document{max-width:1050px;margin:auto;background:var(--paper);box-shadow:0 6px 34px #32422e08;border:1px solid #e3e8de;border-radius:16px;overflow:hidden}.hero{padding:52px 58px 44px;background:linear-gradient(126deg,#f6f9f2 0%,#fff 70%);border-bottom:1px solid var(--line);position:relative}.eyebrow{font:700 11px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--green);letter-spacing:.15em;margin:0 0 17px}.hero h1{font-size:clamp(28px,3vw,43px);line-height:1.28;letter-spacing:-.04em;margin:0 0 22px;font-weight:760}.hero h1 span{display:block;font-size:24px;margin-top:10px;color:#7b8971;font-weight:500;letter-spacing:0}.hero .lead{font-size:16px;line-height:1.95;max-width:740px;color:#52694f;margin:0}.badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:26px}.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:5px;border:1px solid #d6e3cf;background:#eef5e9;color:#42683d;font-size:11px;line-height:1.7;font-weight:600}.badge.amber{background:#fcf5e7;border-color:#eddcb7;color:#906e2c}.meta{display:flex;flex-wrap:wrap;gap:8px 23px;font-size:11px;color:#7c8975;margin-top:21px}.hero-actions{display:none;flex-wrap:wrap;gap:8px;margin-top:24px}.enhanced .hero-actions{display:flex}.hero-actions button{padding:7px 13px;background:#fff;border:1px solid #d1dccb;border-radius:6px;color:#48623d;font-size:12px}.hero-actions button:first-child{background:#2b5944;color:#fff;border-color:#2b5944}.hero-actions button:hover{filter:brightness(.97)}.quick-route{padding:21px 58px;background:#fbfcf9;border-bottom:1px solid var(--line);display:flex;gap:11px 20px;flex-wrap:wrap;font-size:12px}.quick-route strong{font-weight:650;color:#77836d}.quick-route a{text-decoration:none}.spec-section{padding:41px 58px 36px;border-bottom:1px solid #e5ebdf;scroll-margin-top:24px}.spec-section:last-child{border-bottom:0}.chapter-number{font:600 10px/1.4 ui-monospace,Consolas,monospace;letter-spacing:.16em;color:#8b986c;margin-bottom:12px}.spec-section h2{font-size:25px;line-height:1.5;margin:0 0 24px;letter-spacing:-.025em;font-weight:720;color:#263f2c}.spec-section h3{font-size:17px;margin:31px 0 12px;line-height:1.6;color:#365438;font-weight:700;scroll-margin-top:24px}.spec-section p{margin:13px 0}.spec-section strong{font-weight:690;color:#293f2b}.spec-section ul,.spec-section ol{padding-left:1.5em;margin:13px 0}.spec-section li{margin:6px 0;padding-left:3px}.spec-section code{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:.87em;background:#edf2e9;padding:.13em .32em;border-radius:3px;overflow-wrap:anywhere;color:#48603c}.spec-section pre{border:1px solid #dce6d4;background:#f6f8f3;overflow:auto;padding:19px 20px;border-radius:8px;line-height:1.65;margin:18px 0;font-size:13px;tab-size:2}.spec-section pre code{padding:0;background:none;overflow-wrap:normal;white-space:pre;color:#385337;font-size:inherit}.table-scroll{width:100%;overflow-x:auto;margin:18px 0 23px;border:1px solid #dce5d5;border-radius:8px;scrollbar-width:thin}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:13px;line-height:1.85;margin:0}th,td{text-align:left;vertical-align:top;padding:12px 14px;border-bottom:1px solid #e1e8d9;overflow-wrap:anywhere}th{background:#edf3e7;color:#47613b;font-size:12px;font-weight:700}th:first-child{width:22%}td:first-child{color:#344e30;font-weight:570}tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:#fcfdfb}table code{font-size:.86em}#s02 table:first-of-type th:first-child,#s06 th:first-child,#s12 th:first-child,#s19 th:first-child{width:15%}#s23 th:first-child{width:7%}#s23 th:nth-child(2){width:52%}#s23 table{font-size:12px}#s23 td:first-child{font:11px/1.85 ui-monospace,monospace;padding-top:15px}#s23 [id]{scroll-margin-top:50px}.spec-section a[href^="#src-"]{font:10px/1 ui-monospace,monospace;vertical-align:super;white-space:nowrap;text-decoration:none;background:#edf4e7;color:#567849;border-radius:3px;padding:2px 4px;margin-left:2px}.spec-section blockquote{margin:20px 0;padding:17px 22px;border-left:3px solid #c5a261;border-radius:0 8px 8px 0;background:#fcf8ee;color:#6c5934}.spec-section blockquote p{margin:0;line-height:2}.spec-section blockquote strong{color:#776037}.architecture{margin:26px 0;padding:16px 16px 12px;border:1px solid #dce5d8;border-radius:10px;background:#f7faf5}.architecture svg{display:block;width:100%;height:auto}.architecture figcaption{font-size:11px;line-height:1.8;color:#7a8871;padding:3px 7px 10px}.architecture details{border-top:1px solid #dce5d8;padding:10px 7px 0;font-size:11px;color:#7a8871}.architecture summary{cursor:pointer}.architecture pre{font-size:11px;margin-bottom:0}.footer{max-width:1050px;margin:18px auto 0;display:flex;justify-content:space-between;gap:16px;color:#7a8871;font-size:11px;line-height:1.8}.toast{position:fixed;bottom:25px;left:calc(50% + 100px);transform:translateX(-50%);padding:10px 18px;border-radius:8px;background:#234d3a;color:#fff;box-shadow:0 4px 20px #163d3020;font-size:13px;z-index:25;max-width:90vw}.toast[hidden]{display:none}.noscript{font-size:12px;padding:16px 58px;background:#f9f4e5;color:#8a723e;border-bottom:1px solid var(--line)}
+@media(min-width:1660px){.content-shell{padding-left:70px;padding-right:70px}.hero,.spec-section{padding-left:66px;padding-right:66px}}
+@media(max-width:1100px){:root{--sidebar:236px}.sidebar{padding:23px 14px}.content-shell{padding:24px 23px 45px}.hero{padding:38px 32px}.spec-section{padding:34px 32px 28px}.quick-route{padding:18px 32px}table{font-size:12px}td,th{padding:10px 11px}.toc-link{font-size:11px}}
+@media(max-width:780px){html{scroll-padding-top:16px}.sidebar{position:relative;inset:auto;width:auto;max-height:none;border-right:0;border-bottom:1px solid var(--line);padding:20px 22px}.brand{margin-bottom:12px}.brand-mark{width:32px;height:32px;font-size:19px}.sidebar nav{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;max-height:310px;overflow:auto}.toc-label{margin-top:12px}.toc-link{font-size:11px}.search-box{max-width:380px}.sidebar-foot{display:none}.content-shell{margin-left:0;padding:15px 12px 30px}.document{border-radius:11px}.hero{padding:30px 25px}.hero h1{font-size:31px}.hero h1 span{font-size:20px}.hero .lead{font-size:14px}.spec-section{padding:29px 24px 23px}.spec-section h2{font-size:22px}.spec-section h3{font-size:16px}.spec-section p,.spec-section li{font-size:14px}.quick-route{padding:16px 24px;gap:8px 16px}.table-scroll table{min-width:560px}.architecture{padding:8px 4px}.architecture figcaption{font-size:10px}.toast{left:50%}.meta{font-size:10px;gap:5px 15px}.footer{padding:0 6px;flex-direction:column;gap:4px}.noscript{padding:12px 24px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toc-link,.reading-progress{transition:none}}
+@media print{html{scroll-behavior:auto}.sidebar,.hero-actions,.quick-route,.reading-progress,.toast,.noscript,.architecture details{display:none!important}body{background:#fff;font-size:10pt;line-height:1.65;color:#111}.content-shell{margin:0;padding:0}.document{border:0;box-shadow:none;border-radius:0;max-width:none}.hero{padding:0 0 24px;background:#fff;break-after:avoid}.hero h1{font-size:27pt}.hero h1 span{font-size:17pt}.hero .lead{font-size:11pt}.spec-section{padding:24px 0 16px;border-bottom:1px solid #ddd;break-before:auto}.spec-section h2{font-size:17pt;break-after:avoid}.spec-section h3{font-size:12pt;break-after:avoid}.chapter-number{font-size:8pt;break-after:avoid}p,li{orphans:3;widows:3}.table-scroll{overflow:visible;border:0;border-radius:0}table{table-layout:fixed;min-width:0!important;font-size:9pt!important}thead{display:table-header-group}tr{break-inside:avoid}th,td{padding:7px 8px}pre{white-space:pre-wrap;overflow:visible;font-size:8.5pt!important;break-inside:avoid}pre code{white-space:pre-wrap!important;overflow-wrap:anywhere!important}blockquote,.architecture{break-inside:avoid}.architecture{max-width:680px;margin:18px auto}a{color:inherit;text-decoration:none}.footer{font-size:8pt;max-width:none}#s23 table{font-size:8pt!important}.hero,.badge,th,blockquote{-webkit-print-color-adjust:exact;print-color-adjust:exact}@page{size:A4;margin:17mm 16mm 18mm}}
+</style>
+<script type="application/json" id="spec-manifest">{
+  "document_type": "engineering_specification",
+  "title": "轻量 Coding Agent · 实现规格",
+  "spec_version": "0.1.0",
+  "date": "2026-10-09",
+  "timezone": "Asia/Shanghai",
+  "language": "zh-CN",
+  "implementation_status": "design_only_not_implemented_or_benchmarked",
+  "source_baseline": {
+    "repository": "https://github.com/earendil-works/pi",
+    "commit": "6fb2e7815167e6b19006fc526d1a5d0f5f998787"
+  },
+  "primary_workflow": "passive_records -> explicit_retro -> evidence_based_proposals -> user_selection -> scoped_execution_and_validation -> outcome_record",
+  "decision_precedence": "explicit current and earlier user requirements; compatible project constraints; correctness constraints; recommendations; examples",
+  "defaults_are_recommendations": true,
+  "proposed_stack": [
+    "TypeScript",
+    "Node",
+    "pi-durable",
+    "selected pi-ai providers",
+    "pi-tui",
+    "local SQLite"
+  ],
+  "default_exclusions": [
+    "per-task LLM critic",
+    "always-on optimizer",
+    "mandatory second reviewer",
+    "automatic skill activation",
+    "mandatory remote backend",
+    "automatic deployment",
+    "fine-tuning"
+  ],
+  "reading_routes": {
+    "overview": [
+      "s01",
+      "s02",
+      "s03",
+      "s04"
+    ],
+    "runtime": [
+      "s05",
+      "s06",
+      "s07"
+    ],
+    "observability_evals": [
+      "s08",
+      "s09",
+      "s10",
+      "s11"
+    ],
+    "retro": [
+      "s12",
+      "s13",
+      "s14",
+      "s15",
+      "s16"
+    ],
+    "implementation": [
+      "s17",
+      "s18",
+      "s19",
+      "s20"
+    ],
+    "handoff": [
+      "s22"
+    ],
+    "references": [
+      "s23"
+    ]
+  },
+  "requirements": [
+    "U-01",
+    "U-02",
+    "U-03",
+    "U-04",
+    "U-05",
+    "U-06",
+    "DUR-01",
+    "DUR-02",
+    "DUR-03",
+    "DUR-04",
+    "DUR-05",
+    "DUR-06",
+    "DUR-07",
+    "RET-01",
+    "RET-02",
+    "RET-03",
+    "RET-04",
+    "RET-05",
+    "RET-06",
+    "RET-07",
+    "RET-08",
+    "RET-09",
+    "RET-10",
+    "ACC-01",
+    "ACC-02",
+    "ACC-03",
+    "ACC-04",
+    "ACC-05",
+    "ACC-06",
+    "ACC-07",
+    "ACC-08",
+    "ACC-09",
+    "ACC-10",
+    "ACC-11",
+    "ACC-12",
+    "ACC-13",
+    "ACC-14",
+    "ACC-15",
+    "ACC-16",
+    "ACC-17",
+    "ACC-18",
+    "ACC-19",
+    "ACC-20",
+    "ACC-21",
+    "ACC-22"
+  ],
+  "sections": [
+    {
+      "id": "s01",
+      "number": "01",
+      "title": "阅读契约与结论"
+    },
+    {
+      "id": "s02",
+      "number": "02",
+      "title": "产品目标、轻量指标与范围"
+    },
+    {
+      "id": "s03",
+      "number": "03",
+      "title": "决策记录与方案演进"
+    },
+    {
+      "id": "s04",
+      "number": "04",
+      "title": "推荐系统架构"
+    },
+    {
+      "id": "s05",
+      "number": "05",
+      "title": "上游源码事实与复用边界"
+    },
+    {
+      "id": "s06",
+      "number": "06",
+      "title": "Durable、恢复与执行正确性"
+    },
+    {
+      "id": "s07",
+      "number": "07",
+      "title": "TUI 与命令体验"
+    },
+    {
+      "id": "s08",
+      "number": "08",
+      "title": "Tracing 与 LLM Ops"
+    },
+    {
+      "id": "s09",
+      "number": "09",
+      "title": "最小数据合同与长期保留"
+    },
+    {
+      "id": "s10",
+      "number": "10",
+      "title": "长期评估：衡量什么，怎样解释"
+    },
+    {
+      "id": "s11",
+      "number": "11",
+      "title": "最小 Eval 体系与候选验证"
+    },
+    {
+      "id": "s12",
+      "number": "12",
+      "title": "Retro：触发、取证与完整流程"
+    },
+    {
+      "id": "s13",
+      "number": "13",
+      "title": "优化候选、选择与结果格式"
+    },
+    {
+      "id": "s14",
+      "number": "14",
+      "title": "权限、目标作用域与版本生效"
+    },
+    {
+      "id": "s15",
+      "number": "15",
+      "title": "参考 retro skill 的取舍与宿主合同"
+    },
+    {
+      "id": "s16",
+      "number": "16",
+      "title": "经验如何沉淀，以及更进一步的优化"
+    },
+    {
+      "id": "s17",
+      "number": "17",
+      "title": "推荐代码组织与接口草案"
+    },
+    {
+      "id": "s18",
+      "number": "18",
+      "title": "分阶段实施路线"
+    },
+    {
+      "id": "s19",
+      "number": "19",
+      "title": "验收标准与有意义的验证"
+    },
+    {
+      "id": "s20",
+      "number": "20",
+      "title": "待定事项与建议默认值"
+    },
+    {
+      "id": "s21",
+      "number": "21",
+      "title": "容易误实现的地方"
+    },
+    {
+      "id": "s22",
+      "number": "22",
+      "title": "可直接交给实现 Agent 的摘要"
+    },
+    {
+      "id": "s23",
+      "number": "23",
+      "title": "来源、版本与核查索引"
+    }
+  ]
+}</script>
+</head>
+<body>
+<a class="skip" href="#spec-content">跳到完整规格正文</a>
+<div class="reading-progress" id="progress" aria-hidden="true"></div>
+<aside class="sidebar" aria-label="文档目录">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">π</span><div><strong>轻量 Agent / SPEC</strong><small>ENGINEERING HANDOFF</small></div></div>
+  <div class="search-box"><label for="chapter-search">章节与正文关键词</label><input id="chapter-search" type="search" placeholder="例如：replay、只读、费用" autocomplete="off"><span class="search-note" id="search-note" aria-live="polite">查找正文关键词；不会隐藏正文。</span></div>
+  <nav aria-label="章节导航"><div class="toc-group"><div class="toc-label">方向与架构</div><a href="#s01" class="toc-link" data-section="s01"><span>01</span><span>阅读契约与结论</span></a><a href="#s02" class="toc-link" data-section="s02"><span>02</span><span>产品目标、轻量指标与范围</span></a><a href="#s03" class="toc-link" data-section="s03"><span>03</span><span>决策记录与方案演进</span></a><a href="#s04" class="toc-link" data-section="s04"><span>04</span><span>推荐系统架构</span></a><a href="#s05" class="toc-link" data-section="s05"><span>05</span><span>上游源码事实与复用边界</span></a><a href="#s06" class="toc-link" data-section="s06"><span>06</span><span>Durable、恢复与执行正确性</span></a><a href="#s07" class="toc-link" data-section="s07"><span>07</span><span>TUI 与命令体验</span></a></div><div class="toc-group"><div class="toc-label">记录与评估</div><a href="#s08" class="toc-link" data-section="s08"><span>08</span><span>Tracing 与 LLM Ops</span></a><a href="#s09" class="toc-link" data-section="s09"><span>09</span><span>最小数据合同与长期保留</span></a><a href="#s10" class="toc-link" data-section="s10"><span>10</span><span>长期评估：衡量什么，怎样解释</span></a><a href="#s11" class="toc-link" data-section="s11"><span>11</span><span>最小 Eval 体系与候选验证</span></a></div><div class="toc-group"><div class="toc-label">Retro 与优化</div><a href="#s12" class="toc-link" data-section="s12"><span>12</span><span>Retro：触发、取证与完整流程</span></a><a href="#s13" class="toc-link" data-section="s13"><span>13</span><span>优化候选、选择与结果格式</span></a><a href="#s14" class="toc-link" data-section="s14"><span>14</span><span>权限、目标作用域与版本生效</span></a><a href="#s15" class="toc-link" data-section="s15"><span>15</span><span>参考 retro skill 的取舍与宿主合同</span></a><a href="#s16" class="toc-link" data-section="s16"><span>16</span><span>经验如何沉淀，以及更进一步的优化</span></a></div><div class="toc-group"><div class="toc-label">实施与交接</div><a href="#s17" class="toc-link" data-section="s17"><span>17</span><span>推荐代码组织与接口草案</span></a><a href="#s18" class="toc-link" data-section="s18"><span>18</span><span>分阶段实施路线</span></a><a href="#s19" class="toc-link" data-section="s19"><span>19</span><span>验收标准与有意义的验证</span></a><a href="#s20" class="toc-link" data-section="s20"><span>20</span><span>待定事项与建议默认值</span></a><a href="#s21" class="toc-link" data-section="s21"><span>21</span><span>容易误实现的地方</span></a><a href="#s22" class="toc-link" data-section="s22"><span>22</span><span>可直接交给实现 Agent 的摘要</span></a><a href="#s23" class="toc-link" data-section="s23"><span>23</span><span>来源、版本与核查索引</span></a></div></nav>
+  <div class="sidebar-foot">Spec 0.1.0 · 2026-10-09<br>23 章 / 43 组来源<br><a href="#s22">直接阅读 Agent 交接摘要 ↗</a><br><a href="#s23">查看来源与固定源码版本 ↗</a></div>
+</aside>
+<main class="content-shell">
+<div class="document">
+  <header class="hero">
+    <p class="eyebrow">PI-DURABLE / DESIGN SPECIFICATION</p>
+    <h1>轻量 Coding Agent<span>运行、评估与按需改进</span></h1>
+    <p class="lead">日常记录事实；调用 retro 时提出少量可信建议；用户选择后，完成对应改动与必要验证。把实际结果留给下一次复盘。</p>
+    <div class="badges"><span class="badge">单进程 · 本地优先</span><span class="badge">Evals / LLM Ops / Tracing</span><span class="badge">手动 Retro · 选择后执行</span><span class="badge amber">设计规格 · 尚未实现</span></div>
+    <div class="meta"><span>版本 0.1.0</span><span>2026-10-09 · Asia/Shanghai</span><span>基于本次完整会话</span><span>供其他 Agent 独立接手</span></div>
+    <div class="hero-actions"><button type="button" id="copy-summary">复制交接摘要</button><button type="button" id="copy-all">复制完整纯文本</button><button type="button" id="print-spec">打印 / 保存 PDF</button></div>
+  </header>
+  <div class="quick-route"><strong>快速入口</strong><a href="#s03">决策记录</a><a href="#s06">恢复约束</a><a href="#s12">Retro 合同</a><a href="#s19">验收标准</a><a href="#s20">待定项</a></div>
+  <noscript><div class="noscript">当前浏览器未运行脚本。正文与目录均可完整阅读；可使用浏览器的查找、复制和打印功能。</div></noscript>
+  <article id="spec-content" aria-label="完整实现规格"><section class="spec-section" id="s01" aria-labelledby="s01-title"><div class="chapter-number">CHAPTER 01</div><h2 id="s01-title">阅读契约与结论</h2><p>本规格汇总本次会话从技术选型、可恢复执行、evals / LLM Ops / tracing，到长期改进与手动 retro 的全部主要结果。目标读者是接手设计或实现的 coding agent；阅读本文不需要访问原会话。</p>
+<p><strong>当前推荐主线：使用 pi-durable 构建轻量 coding agent；日常低成本记录运行事实；用户显式调用内置 retro skill 后，获得少量有证据的优化候选；用户选择后，agent 完成所选范围的改动与必要验证，并记录实际结果。</strong></p>
+<p>这是一份<strong>待实现的设计规格</strong>。本次已进行源码与文档研究，未创建或安装目标 agent、retro skill、telemetry adapter 或 eval runner，也未运行目标产品的性能基准。本文里的接口、目录、字段和命令示例，除非明确标注为上游已有 API，均为应用层设计建议。</p>
+<h3 id="s01-p1">状态与优先级</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>标记</th>
+<th>含义</th>
+<th>接手 agent 如何处理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>用户要求</strong></td>
+<td>用户明确提出的目标或工作流</td>
+<td>实现时优先遵守；不能用早期建议覆盖</td>
+</tr>
+<tr>
+<td><strong>推荐方案</strong></td>
+<td>本次讨论收敛出的技术选择</td>
+<td>可作为默认起点；允许以源码和测量证据调整</td>
+</tr>
+<tr>
+<td><strong>源码事实</strong></td>
+<td>本会话核对过的上游行为</td>
+<td>仅对所记录版本负责；升级时重新核对</td>
+</tr>
+<tr>
+<td><strong>正确性约束</strong></td>
+<td>防止权限、计数、恢复或评估结论出错的要求</td>
+<td>必须保持语义；实现形式可以简化</td>
+</tr>
+<tr>
+<td><strong>待定</strong></td>
+<td>未由用户确定的产品参数或实现细节</td>
+<td>依据现有项目上下文决定；真正影响目标时再询问</td>
+</tr>
+<tr>
+<td><strong>后续可选</strong></td>
+<td>已讨论但未纳入首版主路径的能力</td>
+<td>不因写在文档里就自动实现</td>
+</tr>
+</tbody></table></div>
+<p><strong>本产品决策的优先顺序：用户当前及本次会话已明确的要求与授权（冲突时以较新指令为准）→ 与这些要求相容的当前项目约束 → 本规格的正确性约束 → 推荐默认值 → 示例。</strong> 本规格只记录设计与范围，不授予发布、发送信息或扩大文件访问范围的额外权限。</p>
+<h3 id="s01-p2">交接速读</h3>
+<ol>
+<li>先读第 02–04 章理解目标、范围和架构。</li>
+<li>实现 runtime / storage 前，读第 05–06 章的上游限制。</li>
+<li>实现观测和评估时，读第 08–11 章；重点是身份、版本、完整性与对照。</li>
+<li>实现 retro 时，读第 12–15 章；重点是建议与执行的边界。</li>
+<li>按第 18–20 章分阶段实施与验收；第 22 章可直接作为交接摘要。</li>
+</ol>
+</section>
+<section class="spec-section" id="s02" aria-labelledby="s02-title"><div class="chapter-number">CHAPTER 02</div><h2 id="s02-title">产品目标、轻量指标与范围</h2><h3 id="s02-p1">用户要求</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>要求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>U-01</td>
+<td>基于 <strong>pi-durable</strong> 开发 coding agent，尽可能代码精简、体积轻量。</td>
+</tr>
+<tr>
+<td>U-02</td>
+<td>具备 <strong>evals、LLM Ops、Tracing</strong> 能力，并长期保留有用记录。</td>
+</tr>
+<tr>
+<td>U-03</td>
+<td>TUI 体验参考 <strong>grok-build</strong>；实现参考 pi 官方 durable coding-agent demo。</td>
+</tr>
+<tr>
+<td>U-04</td>
+<td>长期记录能够帮助识别自身性能问题，并支持后续改进。</td>
+</tr>
+<tr>
+<td>U-05</td>
+<td>内置可显式调用的 <strong>retro skill</strong>；先提出优化方向，由用户选择是否执行。</td>
+</tr>
+<tr>
+<td>U-06</td>
+<td>本次交付是可供其他 agent 独立阅读的 HTML spec。</td>
+</tr>
+</tbody></table></div>
+<h3 id="s02-p2">推荐的首版目标</h3>
+<ul>
+<li>一个本地运行的进程；无需启动数据库服务器、消息队列或常驻优化服务。</li>
+<li>交互式 TUI 与 headless / eval 共用同一 runtime 和工具语义。</li>
+<li>保存可恢复会话、已知用量、关键调用轨迹及检查结果。</li>
+<li>提供按需查询记录、运行精选 eval、查看结果的最小能力。</li>
+<li>retro 平时不消耗模型调用；调用后先建议，用户选中后执行。</li>
+<li>记录建议、用户决定、改动版本和实际效果，为下一次复盘提供证据。</li>
+</ul>
+<h3 id="s02-p3">“轻量”必须分别测量</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>应记录什么</th>
+<th>避免的误解</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>自有代码</td>
+<td>维护的源码规模、模块数、特殊分支和依赖边界</td>
+<td>自己写得少，不代表运行依赖少</td>
+</tr>
+<tr>
+<td>安装体积</td>
+<td>lockfile 下真实安装字节、开发与生产依赖</td>
+<td>按需 import 不会自动减少 npm 声明依赖的安装</td>
+</tr>
+<tr>
+<td>分发体积</td>
+<td>bundle、外置资源、平台原生模块、是否含 runtime</td>
+<td>单文件不等于体积小</td>
+</tr>
+<tr>
+<td>运行开销</td>
+<td>冷启动、空闲 RSS、长会话峰值、TUI 响应</td>
+<td>只看初次启动内存不够</td>
+</tr>
+<tr>
+<td>观测开销</td>
+<td>写盘频率、trace 增量、查询耗时、导出队列大小</td>
+<td>记录系统不能无限增长或逐 token 放大</td>
+</tr>
+<tr>
+<td>模型成本</td>
+<td>coding、retro、eval 各自 tokens、费用与耗时</td>
+<td>优化分析本身也有成本</td>
+</tr>
+<tr>
+<td>维护成本</td>
+<td>新增规则、脚本、平台分支、重复状态</td>
+<td>为省少量调用引入复杂平台未必值得</td>
+</tr>
+</tbody></table></div>
+<p><strong>尚未设定任何已批准的 MB、毫秒、tokens 或行数硬阈值。</strong> 先测量可运行基线，再据实际瓶颈制定预算；不要把本文的“轻量”宣传成未经测量的数值承诺。</p>
+<h3 id="s02-p4">首版不默认引入</h3>
+<p>常驻 optimizer、每任务 LLM critic、强制第二 reviewer、自动创建并启用 skill、向量数据库、知识图谱、多模型委员会、自动微调或强化学习、完整实验管理平台、自动灰度发布、多进程协作执行框架。完整 Web 运维后台也不是首版必要交付。</p>
+</section>
+<section class="spec-section" id="s03" aria-labelledby="s03-title"><div class="chapter-number">CHAPTER 03</div><h2 id="s03-title">决策记录与方案演进</h2><div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>决策</th>
+<th>状态</th>
+<th>结论与理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>使用 pi-durable</td>
+<td>用户要求</td>
+<td>复用已有 durable agent 执行能力，避免重写另一套任务状态机。</td>
+</tr>
+<tr>
+<td>TypeScript + Node</td>
+<td>推荐方案</td>
+<td>顺着上游路径做最薄宿主，先验证正确性与实际体积。</td>
+</tr>
+<tr>
+<td>pi-tui 实现界面</td>
+<td>推荐方案</td>
+<td>与 TypeScript runtime 直接衔接；借鉴 Grok 交互，无需同时维护 Rust TUI。</td>
+</tr>
+<tr>
+<td>本地 SQLite</td>
+<td>推荐方案</td>
+<td>复用 durable 持久化；为查询与长期记录提供简单路径。</td>
+</tr>
+<tr>
+<td>同一 runtime 服务 TUI / headless / eval</td>
+<td>推荐方案</td>
+<td>降低行为分叉，确保评测的是实际使用的 agent。</td>
+</tr>
+<tr>
+<td>telemetry 默认本地、远程导出可选</td>
+<td>推荐方案</td>
+<td>运维后端不成为使用前提。</td>
+</tr>
+<tr>
+<td>手动调用 retro，选择后优化</td>
+<td>当前收敛方向</td>
+<td>满足用户控制与轻量目标，避免后台分析和盲目自改。</td>
+</tr>
+<tr>
+<td>同一个 agent 可分析和执行</td>
+<td>推荐方案</td>
+<td>谁执行不是核心约束；证据、范围和验证更重要。</td>
+</tr>
+<tr>
+<td>其他 agent 可接手</td>
+<td>兼容目标</td>
+<td>用明确的证据引用与改动合同交接，避免绑定模型供应商。</td>
+</tr>
+<tr>
+<td>把经验写成 skill</td>
+<td>条件性选择</td>
+<td>只适合稳定、可复用、有触发条件的流程；不是所有发现的默认归宿。</td>
+</tr>
+<tr>
+<td>自动发布或自动选择候选</td>
+<td>后续可选</td>
+<td>未进入首版授权路径；后续须依据手动复盘的实际收益决定。</td>
+</tr>
+</tbody></table></div>
+<h3 id="s03-p1">此前讨论的几条路线如何保留</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>路线</th>
+<th>价值</th>
+<th>当前处理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Agent 修改自身</td>
+<td>能修复工具或 runtime 的真实缺陷</td>
+<td>用户选中具体候选后可执行；不热改正在运行的任务</td>
+</tr>
+<tr>
+<td>留记录给另一个 agent 优化</td>
+<td>便于独立视角、离线研究和跨模型接手</td>
+<td>原生支持报告和证据交接；不强制常驻第二 agent</td>
+</tr>
+<tr>
+<td>总结成 skill</td>
+<td>适合可复用工作流，按需加载较省上下文</td>
+<td>仅在确有适用边界且验证有效时采用</td>
+</tr>
+<tr>
+<td>自动优化平台</td>
+<td>可搜索大量候选、自动比较与发布</td>
+<td>作为远期扩展，首版先不构建</td>
+</tr>
+<tr>
+<td>手动 retro</td>
+<td>用户掌握优先级和实施时机，实现成本低</td>
+<td><strong>当前推荐主方案</strong></td>
+</tr>
+</tbody></table></div>
+<p>优化主体、优化对象、验证方式是三个独立维度。可以由同一个模型提出工具修复，也可以由另一个模型压缩 skill；两者都应满足相同的证据和执行边界。</p>
+</section>
+<section class="spec-section" id="s04" aria-labelledby="s04-title"><div class="chapter-number">CHAPTER 04</div><h2 id="s04-title">推荐系统架构</h2><p>采用一个薄宿主，把交互入口、运行时、记录和复盘连接起来。不要再包一层与 durable 重叠的 agent loop 或恢复状态机。</p>
+<figure class="architecture" aria-labelledby="architecture-caption">
+<svg viewBox="0 0 880 610" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="arch-title arch-desc">
+  <title id="arch-title">运行与手动复盘共用一个宿主</title>
+  <desc id="arch-desc">TUI 与 headless 或 eval 进入同一宿主。宿主连接 pi-durable 及显式触发的 retro。durable 调用模型和工具并保存记录；retro 读取记录，用户选中候选后返回宿主执行。</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0L8 4L0 8Z" fill="#6d8584"/></marker></defs>
+  <g fill="none" stroke="#6d8584" stroke-width="1.7" marker-end="url(#arrow)">
+    <path d="M160 91V113H440V138"/><path d="M705 91V113H440V138"/>
+    <path d="M440 215V266"/><path d="M565 176H705V266"/>
+    <path d="M315 305H162V402"/><path d="M440 344V402"/><path d="M480 344V370H705V402"/>
+    <path d="M705 344V402" stroke-dasharray="5 5"/>
+    <path d="M785 344V518H545"/><path d="M335 545H24V176H315"/>
+  </g>
+  <g font-family="system-ui, -apple-system, 'Microsoft YaHei', sans-serif" text-anchor="middle">
+    <g fill="#fff" stroke="#d6e2df"><rect x="50" y="27" width="220" height="64" rx="12"/><rect x="595" y="27" width="220" height="64" rx="12"/></g>
+    <text x="160" y="64" fill="#284943" font-size="17" font-weight="650">TUI / CLI</text>
+    <text x="705" y="64" fill="#284943" font-size="17" font-weight="650">Headless / Eval runner</text>
+    <rect x="315" y="138" width="250" height="77" rx="12" fill="#173f39"/>
+    <text x="440" y="168" fill="#fff" font-size="19" font-weight="650">同一宿主与 Controller</text>
+    <text x="440" y="192" fill="#c4ddd7" font-size="13">命令 · 版本 · 能力 · 所有权</text>
+    <rect x="315" y="266" width="250" height="78" rx="12" fill="#e5f1ed" stroke="#90b9ac"/>
+    <text x="440" y="297" fill="#234b40" font-size="19" font-weight="650">pi-durable Harness</text>
+    <text x="440" y="321" fill="#527065" font-size="13">会话 · 调度 · 已提交状态</text>
+    <rect x="605" y="266" width="200" height="78" rx="12" fill="#fff5df" stroke="#dec18b"/>
+    <text x="705" y="297" fill="#76511c" font-size="18" font-weight="650">Retro 分析</text>
+    <text x="705" y="321" fill="#8a6d43" font-size="13">只读证据，提出候选</text>
+    <g fill="#fff" stroke="#d6e2df"><rect x="52" y="402" width="220" height="74" rx="12"/><rect x="330" y="402" width="220" height="74" rx="12"/><rect x="595" y="402" width="220" height="74" rx="12"/></g>
+    <text x="162" y="433" fill="#284943" font-size="17" font-weight="650">Model adapter</text>
+    <text x="162" y="455" fill="#71847e" font-size="13">真实 attempt 与流式终止</text>
+    <text x="440" y="433" fill="#284943" font-size="17" font-weight="650">Tools / Env</text>
+    <text x="440" y="455" fill="#71847e" font-size="13">工具语义与执行边界</text>
+    <text x="705" y="433" fill="#284943" font-size="17" font-weight="650">本地持久化记录</text>
+    <text x="705" y="455" fill="#71847e" font-size="13">事实 · 用量 · 检查 · 决定</text>
+    <rect x="335" y="518" width="210" height="55" rx="12" fill="#fff5df" stroke="#dec18b"/>
+    <text x="440" y="552" fill="#76511c" font-size="17" font-weight="650">候选与用户选择</text>
+    <g fill="#657f73" font-size="12"><text x="635" y="164">显式调用</text><text x="744" y="386">读取证据</text><text x="99" y="535">仅执行选中范围</text></g>
+  </g>
+</svg>
+<figcaption id="architecture-caption">图 1 · TUI、headless 与 eval 复用运行时；手动 retro 读取记录，用户选择决定是否执行。图示为推荐职责关系，不表示功能已经实现。</figcaption>
+<details><summary>查看 Mermaid 源码</summary><pre><code class="language-mermaid">flowchart TD
+  UI[&quot;TUI / CLI&quot;] --&gt; H[&quot;同一宿主与 Controller&quot;]
+  E[&quot;Headless / Eval runner&quot;] --&gt; H
+  H --&gt; D[&quot;pi-durable Harness&quot;]
+  D --&gt; M[&quot;Model adapter&quot;]
+  D --&gt; T[&quot;Tools / Env&quot;]
+  D --&gt; S[&quot;本地持久化记录&quot;]
+  H --&gt;|&quot;显式调用&quot;| R[&quot;Retro 分析&quot;]
+  R --&gt;|&quot;读取证据&quot;| S
+  R --&gt; P[&quot;候选与用户选择&quot;]
+  P --&gt;|&quot;选中范围&quot;| H</code></pre></details>
+</figure>
+
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>层</th>
+<th>责任</th>
+<th>边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TUI / CLI</td>
+<td>输入、会话选择、流式展示、retro 候选与用户选择</td>
+<td>不维护第二份权威任务状态</td>
+</tr>
+<tr>
+<td>Controller / host</td>
+<td>参数、模型与工具注册、会话所有权、命令路由、执行阶段能力</td>
+<td>不重写 durable 内部调度</td>
+</tr>
+<tr>
+<td>pi-durable</td>
+<td>对话、entries / documents、generation / tool tasks、提交、恢复与 compaction</td>
+<td>不自动提供完整应用的登录、skill loader、审计或沙箱</td>
+</tr>
+<tr>
+<td>Model adapter</td>
+<td>只注册需要的 provider、超时重试配置、真实请求边界观测</td>
+<td>同一物理模型 attempt 的用量只记一次；返回 stream 对象不代表请求结束</td>
+</tr>
+<tr>
+<td>Tool / env</td>
+<td>read / write / edit / shell，工作区和执行权限</td>
+<td>cwd、worktree 与完整进程隔离是不同概念</td>
+</tr>
+<tr>
+<td>本地记录</td>
+<td>durable 会话、运行摘要、必要 spans、eval 与 retro 记录</td>
+<td>能复用则引用；不要重复存整份 transcript</td>
+</tr>
+<tr>
+<td>Eval runner</td>
+<td>从固定初态运行任务、收集产物与独立检查</td>
+<td>使用产品 runtime；候选不控制自己的评分器</td>
+</tr>
+<tr>
+<td>Retro skill</td>
+<td>选择证据、诊断、提出候选、解释验证方式</td>
+<td>它不是数据库、权限系统或另一个常驻 runtime</td>
+</tr>
+</tbody></table></div>
+<h3 id="s04-p1">技术组合</h3>
+<ul>
+<li>运行基线：TypeScript / ESM / Node，Node 最低版本以选择的上游版本为准。</li>
+<li>核心：<code>@earendil-works/pi-durable</code>。</li>
+<li>模型：<code>@earendil-works/pi-ai</code> 的必要 provider 入口。</li>
+<li>UI：<code>@earendil-works/pi-tui</code>。</li>
+<li>记录：durable SQLite；需要查询时增加薄索引或应用记录，而非默认新增 ORM。</li>
+<li>tracing：可实现 <code>pi-telemetry</code> adapter，也可用薄本地记录接口。运行、模型和工具分别在实际生命周期边界记录；同一个物理 attempt 的用量与终结记录由唯一适配层负责，避免多层包装重复计量。</li>
+<li>eval：开发工具和数据集，与生产必需依赖分开。</li>
+</ul>
+<p><strong>存储的推荐原则是复用，不是强制所有数据塞进上游内部表。</strong> 优先使用公开 storage / documents / entries 能力与自有命名空间；如果上游数据库迁移或连接所有权使共库不稳，允许增加一份小型索引库或追加记录。不能为追求“只有一个文件”直接修改上游私有 schema。</p>
+</section>
+<section class="spec-section" id="s05" aria-labelledby="s05-title"><div class="chapter-number">CHAPTER 05</div><h2 id="s05-title">上游源码事实与复用边界</h2><p>本会话研究的 Pi 快照为 <strong><code>6fb2e7815167e6b19006fc526d1a5d0f5f998787</code></strong>。该快照相关包的 <code>package.json</code> 版本为 <code>1.1.0</code>；这不表示对 npm 当前发布状态或兼容性作保证。源码与文档核对发生于 2026-10-08 UTC / 2026-10-09 亚洲上海时间。本文件保留 commit 链接，方便接手者复核。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>来源</th>
+<th>已核对事实</th>
+<th>实现影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>pi-durable</td>
+<td>标记 Experimental，API 可能不兼容变更；含会话、持久化任务、工具和 compaction。<a href="#src-durable">S01</a></td>
+<td>锁定依赖与 lockfile；升级需验证关键恢复语义。</td>
+</tr>
+<tr>
+<td>durable package</td>
+<td>Node 要求 <code>&gt;=22.19.0</code>；依赖 chord、pi-ai、diff、typebox。<a href="#src-durable-pkg">S02</a></td>
+<td>先采用官方 Node 路径；不要因只写少量宿主代码就称整体无依赖。</td>
+</tr>
+<tr>
+<td>官方 durable demo</td>
+<td>单进程拥有 ModelRuntime、Harness、SQLite 和 TUI；复用 Pi 内部组件与认证。<a href="#src-demo">S03</a></td>
+<td>可以参考分层；不是可直接抽出即独立运行的小 SDK。</td>
+</tr>
+<tr>
+<td>完整 coding-agent package</td>
+<td>发布文件排除了 <code>dist/experimental</code>，未把该 demo 作为稳定公开入口导出。<a href="#src-coding-pkg">S04</a></td>
+<td>不能只写 <code>npm install</code> 后假设 demo 私有 import 全部可用。</td>
+</tr>
+<tr>
+<td>demo 启动路径</td>
+<td>使用 monorepo 的 source resolver；登录依赖完整 Pi；省略了会话 picker、部分扩展与 <code>/login</code>。<a href="#src-demo">S03</a></td>
+<td>自有应用须明确初始化与认证体验，不能把 demo 能运行等同产品已完整。</td>
+</tr>
+<tr>
+<td>demo runtime</td>
+<td>依赖 core ModelRuntime、设置、主题与 interactive components；HTTP dispatcher 配置影响部分流式请求。<a href="#src-demo-runtime">S05</a> <a href="#src-model-runtime">S06</a></td>
+<td>抽离时核对实际依赖；不要为减行数删掉必要网络行为。</td>
+</tr>
+<tr>
+<td>demo subagent</td>
+<td>前台工具拥有 child conversation，以稳定 owner / request 身份处理重放；默认共享 cwd，不继承完整父 transcript，并移除递归 subagent 工具。<a href="#src-demo-subagent">S43</a></td>
+<td>可作为后续参考，首版不要求多 agent；取消关系与独立工作区要分别处理。</td>
+</tr>
+<tr>
+<td>pi-ai</td>
+<td>有命名 provider 入口，也声明了多个供应商 SDK 依赖。<a href="#src-ai-pkg">S07</a> <a href="#src-ai-providers">S08</a></td>
+<td>按需入口可改善加载或打包；普通 npm 安装仍会安装已声明依赖。</td>
+</tr>
+<tr>
+<td>pi-tui</td>
+<td>已有屏幕、布局、滚动、鼠标与剪贴板相关能力；包包含平台原生剪贴板资源。<a href="#src-tui">S09</a> <a href="#src-tui-pkg">S10</a></td>
+<td>先复用，测量资源实际进入 bundle / 安装包的情况。</td>
+</tr>
+<tr>
+<td>grok-build</td>
+<td>是独立 Rust harness / TUI 代码库，其 TUI 使用 ratatui / crossterm。<a href="#src-grok">S11</a> <a href="#src-grok-cargo">S12</a></td>
+<td>主要借鉴交互和布局；混合 Rust/TS 是额外维护选择。</td>
+</tr>
+<tr>
+<td>pi-telemetry</td>
+<td>提供中立契约、NOOP、内存参考和 conformance；不自带 exporter 或后端。<a href="#src-telemetry">S13</a></td>
+<td>需要宿主接线；不能称安装即有完整 tracing。</td>
+</tr>
+<tr>
+<td>pi-ai 的 telemetry</td>
+<td>接受并传递 context，但不拥有完整业务 span schema；durable 路径没有自动接上另一套 agent-core 埋点。<a href="#src-telemetry">S13</a> <a href="#src-generation">S14</a></td>
+<td>在模型与工具实际边界补充一次埋点。</td>
+</tr>
+<tr>
+<td>pi-evals</td>
+<td>是 private workspace，现有实验依赖完整 coding-agent / vitest-evals 等路径。<a href="#src-evals">S15</a> <a href="#src-evals-pkg">S16</a></td>
+<td>借鉴任务、重复试验和报告模式；不假定它是现成 durable eval SDK。</td>
+</tr>
+<tr>
+<td>完整 Pi 的 skills</td>
+<td>支持按需加载和显式 <code>/skill:name</code>；支持 <code>disable-model-invocation</code>。<a href="#src-skills">S17</a></td>
+<td>自有 durable 宿主需实现或复用命令与加载器；该标记不等于只读权限。</td>
+</tr>
+</tbody></table></div>
+<h3 id="s05-p1">体积研究的正确表述</h3>
+<p>本次观察到 demo 自身约 7 个 TypeScript 文件、约 1.35k 源码行，较多代码集中于 TUI 与 runtime。但它依赖 monorepo 现有实现，<strong>这个数量不是独立产品总 LOC、安装体积、内存或分发体积</strong>。未执行打包和基准测试。chord 的声明依赖、provider SDK 与 TUI 原生资源都应进入实际依赖审计。<a href="#src-chord-pkg">S18</a> <a href="#src-ai-pkg">S07</a> <a href="#src-tui-pkg">S10</a></p>
+<p>grok-build 的首方代码使用 Apache-2.0；如复制代码或资产，应检查当前 LICENSE 与第三方 notices。仅参考交互并不需要迁移其完整构建工具链。<a href="#src-grok">S11</a></p>
+</section>
+<section class="spec-section" id="s06" aria-labelledby="s06-title"><div class="chapter-number">CHAPTER 06</div><h2 id="s06-title">Durable、恢复与执行正确性</h2><h3 id="s06-p1">必须保持的语义</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>正确性约束</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DUR-01</td>
+<td>恢复依据 durable 已提交状态</td>
+<td>TUI、内存通知和临时事件不是恢复的权威来源。</td>
+</tr>
+<tr>
+<td>DUR-02</td>
+<td>一个 storage 同时由一个进程拥有</td>
+<td>SQLite 文件锁不替代应用会话所有权；durable 本身不提供跨进程 owner lock。</td>
+</tr>
+<tr>
+<td>DUR-03</td>
+<td>首版避免多个活动写入者共享同一工作区</td>
+<td>工具内的文件队列不能覆盖 shell、其他进程或第二个 session。</td>
+</tr>
+<tr>
+<td>DUR-04</td>
+<td>不把工具副作用描述为 exactly-once</td>
+<td>外部修改可能已发生而结果还未持久化。</td>
+</tr>
+<tr>
+<td>DUR-05</td>
+<td>区分退出与中止</td>
+<td>关闭保留待恢复工作；abort 是终止工作，产品文案和快捷键应清楚。</td>
+</tr>
+<tr>
+<td>DUR-06</td>
+<td>版本与未完成任务兼容</td>
+<td>工具语义、prompt 或 runtime 改动不应悄悄影响旧 pending task。</td>
+</tr>
+<tr>
+<td>DUR-07</td>
+<td>fork 对话不等于复制或回滚工作区</td>
+<td>文件、数据库、网络操作需要各自的隔离或回退方案。</td>
+</tr>
+</tbody></table></div>
+<h3 id="s06-p2">工具重放</h3>
+<p>上游先提交工具执行意图，再运行 <code>execute()</code>。重启时，只有<strong>已持久化的 replay 策略和当前工具声明同时为 <code>safe</code></strong>，才走安全重跑路径；未声明时按 unsafe 处理。研究快照中的内置 read / write / edit / bash 都没有显式声明 <code>safe</code>。不要自行把 read 判定为上游已保证安全。<a href="#src-tool">S19</a></p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>中断位置</th>
+<th>可能发生的情况</th>
+<th>宿主应如何呈现或处理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>外部操作前</td>
+<td>有执行意图，但实际副作用尚未发生</td>
+<td>根据真实 replay 合同恢复，不能盲目推断</td>
+</tr>
+<tr>
+<td>外部操作后、结果提交前</td>
+<td>文件可能已修改、命令可能已执行</td>
+<td>标记结果不确定；优先检查现状或使用幂等键</td>
+</tr>
+<tr>
+<td>结果已经提交</td>
+<td>已有可用结果</td>
+<td>读取已有结果不应再算一次工具调用或模型花费</td>
+</tr>
+<tr>
+<td>unsafe 执行中</td>
+<td>恢复得到 interrupted 结果</td>
+<td>模型可能再次提出操作；宿主仍要处理重复副作用风险</td>
+</tr>
+</tbody></table></div>
+<p><code>safe</code> 是工具对重复执行的承诺，不是“名字看起来只读”的分类。追加文件、提交、发送网络写请求等操作需要明确的幂等或冲突检查。write 同一路径是否安全也取决于当前内容与外部修改，不能一概设 safe。</p>
+<p><strong><code>beforeTool</code> 不是完整恢复权限门。</strong> 当前 safe replay 路径会直接进入执行，不重新调用该 hook。若需要在恢复时检查权限或执行环境，应在 resume 前或 tool / env 边界落实；<code>beforeTool</code> 的 block 产生拒绝结果，也不自动构成可持久化的人类审批工作流。<a href="#src-tool">S19</a></p>
+<h3 id="s06-p3">存储保证与局限</h3>
+<ul>
+<li>Node SQLite 适配器使用 <code>node:sqlite</code>，WAL 与 <code>synchronous=NORMAL</code>。已提交事务可承受进程崩溃，但断电或宿主故障可能丢失最新提交。运行时还有 WAL 等辅助文件；备份要保持一致性。<a href="#src-sqlite">S20</a></li>
+<li>partial 与 tool output 默认按约 100 ms 间隔合并提交；崩溃可能丢失尚未提交的进度窗口。这个窗口说明的是进度刷新策略，不是所有错误场景下的端到端丢失上界。<a href="#src-durable">S01</a></li>
+<li>JSONL 是替代选择；研究快照默认不 fsync，可配置更强写入同步。选择前应比较查询、文件增长与崩溃语义。<a href="#src-jsonl">S21</a></li>
+<li>demo 由宿主补充 session lock；过期锁处理应沿用成熟机制，不能直接根据 PID 不在就随意夺锁。<a href="#src-demo-sessions">S22</a></li>
+<li><code>viewState()</code> / <code>watchEvents()</code> 服务 UI。慢消费者落后时会得到 snapshot，不能把 UI 事件流当成无损审计总线或花费账本。<a href="#src-events">S23</a></li>
+</ul>
+<h3 id="s06-p4">工作区、退出与升级</h3>
+<p>NodeExecutionEnv 的 cwd 不是沙箱；内置路径处理支持绝对路径等形式。对进程、网络、凭证或路径的限制要由具体执行环境落实。worktree 可分离代码版本，却不自动阻止进程读取其他路径。<a href="#src-env">S24</a> <a href="#src-path">S25</a></p>
+<p>普通单进程宿主退出后，其 durable 调度器不再推进任务；重新打开相同持久化状态后才按恢复语义处理工作。已发出的远端请求或残留子进程是否停止，取决于取消与进程清理机制。若将来需要持续后台调度，再明确 daemon / worker 设计。</p>
+<p>推荐为每次任务记录应用、工具、prompt、skill 与设置版本；恢复 pending task 时检查版本兼容。工具或 runtime 候选优先在新任务或兼容的新会话生效。回退 agent 默认版本不等于撤销它已经修改的用户文件。</p>
+</section>
+<section class="spec-section" id="s07" aria-labelledby="s07-title"><div class="chapter-number">CHAPTER 07</div><h2 id="s07-title">TUI 与命令体验</h2><h3 id="s07-p1">交互目标</h3>
+<p>参考 grok-build 的全屏布局、可展开工具输出、明确运行状态和键鼠可用性。实现优先采用 pi-tui，维持输入、当前会话和执行状态一致；不要把全部运维数据常驻堆在主界面。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>区域</th>
+<th>推荐内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主区</td>
+<td>用户与 assistant 消息、工具摘要、必要 diff 和结果</td>
+</tr>
+<tr>
+<td>输入区</td>
+<td>编辑、提交、忙时 steer / 排队 follow-up 的明确语义</td>
+</tr>
+<tr>
+<td>状态区</td>
+<td>模型、思考配置、运行/等待/重试/恢复状态、已知用量</td>
+</tr>
+<tr>
+<td>按需展开</td>
+<td>工具长输出、task graph、compaction、单次 run / trace</td>
+</tr>
+<tr>
+<td>Retro 结果</td>
+<td>少量候选、证据、作用范围、验证方式和选择入口</td>
+</tr>
+</tbody></table></div>
+<p>TUI 使用 durable 的已提交视图作为投影。可以有光标、展开态等临时 UI 状态，但不能另建一份任务生命周期。headless 路径直接使用相同 controller，不加载 TUI。</p>
+<h3 id="s07-p2">建议命令，而非已存在 API</h3>
+<pre><code class="language-text">agent                     # 交互运行；产品命令名待定
+agent --continue          # 恢复当前项目相应会话
+agent run &quot;修复这个问题&quot;    # headless 运行
+agent eval &lt;suite&gt;         # 运行指定评测
+
+/retro
+/retro 最近 30 次任务，重点看 token 和工具开销
+/retro 当前会话，看看有哪些重复验证
+/retro 只分析 agent 自身，不调整当前项目
+</code></pre>
+<p>如果复用完整 Pi 的技能命令，入口可为 <code>/skill:retro</code>；<code>/retro</code> 作为本产品别名由宿主实现。自然语言范围与 CLI 参数无需首版同时覆盖所有组合，保持一套可解析的内部请求即可。<a href="#src-skills">S17</a></p>
+<h3 id="s07-p3">必须处理的实用细节</h3>
+<ul>
+<li>Ctrl+C / Ctrl+D / Esc 的退出、中止与清空含义明确，终端在异常退出后能够恢复。</li>
+<li>宽字符、中文、长行、缩放、粘贴和滚动不能破坏布局。</li>
+<li>大量工具输出采取截断和按需读取；展示截断不应伪装成完整数据。</li>
+<li>长历史使用合理的窗口和渲染节流，避免 TUI 或记录层持续累积。</li>
+<li>Windows 的 Bash / PowerShell / WSL 策略需明确；不能把某个平台的 shell 语义默认为跨平台。</li>
+<li>认证、模型选择与错误提示要有真实可运行路径；demo 的共享 Pi 登录只是参考方案。</li>
+</ul>
+</section>
+<section class="spec-section" id="s08" aria-labelledby="s08-title"><div class="chapter-number">CHAPTER 08</div><h2 id="s08-title">Tracing 与 LLM Ops</h2><h3 id="s08-p1">先明确三种数据</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>数据</th>
+<th>回答的问题</th>
+<th>不应承担的角色</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Durable 会话事实</td>
+<td>发生了哪些提交、消息、任务与已知用量</td>
+<td>不自动等于 provider 的完整账单</td>
+</tr>
+<tr>
+<td>Trace / span</td>
+<td>一次执行的耗时、父子关系、错误与重试在哪里</td>
+<td>不重新建立一套独立花费来源</td>
+</tr>
+<tr>
+<td>Eval / 判断</td>
+<td>结果是否正确、候选是否改善、证据是否充分</td>
+<td>不覆盖原始运行事实</td>
+</tr>
+</tbody></table></div>
+<p>LLM Ops 首版聚焦配置和版本、成本与延迟、失败原因、用量完整性、可追溯性与预算。一个本地查询和报告入口即可满足早期需要，不必先做托管平台。</p>
+<h3 id="s08-p2">建议追踪粒度</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>层级</th>
+<th>建议记录</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>应用 run</td>
+<td>任务类型、会话、目标版本、开始结束与 outcome</td>
+<td>区分 coding、retro、eval</td>
+</tr>
+<tr>
+<td>LLM attempt</td>
+<td>provider / model、purpose、真实尝试、耗时、usage、错误</td>
+<td>compaction、deferred 请求也有成本</td>
+</tr>
+<tr>
+<td>Tool execution</td>
+<td>task / toolCall ID、工具、起止、退出状态、结果引用</td>
+<td>区分逻辑调用、实际执行、恢复和重试</td>
+</tr>
+<tr>
+<td>Eval trial</td>
+<td>case、baseline / candidate、grader、检查与产物</td>
+<td>不与真实用户任务混在一个成功率分母</td>
+</tr>
+<tr>
+<td>Retro / optimization</td>
+<td>输入范围、候选、选择、实验与变更版本</td>
+<td>分析本身单独计量</td>
+</tr>
+</tbody></table></div>
+<p>默认不为每个 token 建 span，不把完整 prompts、工具大输出、diff 复制到每个 span。只存摘要和持久化记录引用，必要时按范围读取原文。</p>
+<h3 id="s08-p3">埋点的具体坑</h3>
+<ol>
+<li><code>pi-telemetry</code> 提供契约，宿主仍需接线。其内存参考实现适合测试，不是有界的长期存储，也没有替代生产耗时记录的完整时钟信息。<a href="#src-telemetry">S13</a> <a href="#src-telemetry-memory">S26</a></li>
+<li>在真正的模型调用边界埋点一次。当前 <code>Models.completeSimple()</code> 内部调用 <code>this.streamSimple(...).result()</code>，同时包装这两个入口会双计。<a href="#src-ai-models">S27</a></li>
+<li>流式调用的 span 必须持续到真实结束、出错或取消；不要在返回 stream 对象时结束，也不要为了记录而额外消费一遍流。</li>
+<li>正常生成、compaction 和 deferred response 取回都应覆盖。provider SDK retry 与 durable retry 是不同层次，记录可观测的真实尝试；无法观察的内部重试标明局限，不能臆造次数。<a href="#src-generation">S14</a> <a href="#src-compaction">S28</a></li>
+<li>崩溃后尚未结束的 span 可标记 interrupted / incomplete；恢复的新物理执行用新 span 或 link 表达，不伪装成同一进程持续运行。</li>
+<li>durable 内只持久化可序列化 ID 与元数据，不存 span / context 对象。</li>
+<li>telemetry 写入或导出失败不能改变业务回调结果、取消原请求或导致工具被重跑；队列必须有界，并能反映遗漏记录。可用上游 conformance 核对适配器。<a href="#src-telemetry-tests">S29</a></li>
+</ol>
+<h3 id="s08-p4">用量账本</h3>
+<p><code>pi.usage</code> 是 durable 已提交、已知用量的主要来源，包含记录到的模型响应、工具报告与 compaction。原始 provider 未返回 usage 或进程在提交前崩溃时，外部可能已收费但本地无法完整得知；此时记录完整性与未知项，不能记作零。<a href="#src-usage">S30</a></p>
+<ul>
+<li>仅重建已提交状态、重读历史、TUI 重绘和重复导出，不应新增本地费用记账。</li>
+<li>恢复过程中真正重新执行的模型请求或收费工具调用，应记录新的物理 attempt 及其已知用量；恢复前已经提交的结果不重复计费。</li>
+<li><code>reasoning</code> 是 output 的子集，<code>cacheWrite1h</code> 是 cacheWrite 的子集；不能再次相加。<a href="#src-ai-types">S31</a></li>
+<li>保留 token 分类及费用估算口径、币种、价格版本；provider API 返回的 usage 与基于价格表的本地估算应可区分。模型在自然语言中自报的成本不作为账本事实。</li>
+<li>全会话、会话分支、单次用户 run 的汇总范围需要明确；不能把累计会话用量重复归到每个 run。若只有不可靠的前后差值，要标记 attribution 的局限。</li>
+<li>如果以后启用子 agent，child 自身账本中的模型费用不能再作为父 subagent tool 的同一笔费用重复上报；工具确实产生的额外费用可另记。<a href="#src-usage">S30</a></li>
+</ul>
+<h3 id="s08-p5">可选远程后端</h3>
+<p>以后可通过 adapter 接 OpenTelemetry / Langfuse 等服务。导出携带稳定身份，以便关联和检测重复；只有后端明确提供并验证了去重语义时才依赖它。OTLP 可能因重发产生重复数据，远程 span 数不能直接充当精确用量账本。本地已提交 usage 仍是已记录用量的来源。GenAI semantic conventions 在研究时仍有演进状态，适合隔离在 adapter 中。<a href="#src-otlp">S32</a> <a href="#src-otel-genai">S33</a></p>
+<p>Langfuse 的原生 OpenTelemetry 接入文档在本次研究时使用 HTTP JSON / protobuf；不要假定所有 OTLP transport 都被后端支持。接入时复核当前文档；本规格不要求首版依赖任何远程后端。<a href="#src-langfuse">S34</a></p>
+</section>
+<section class="spec-section" id="s09" aria-labelledby="s09-title"><div class="chapter-number">CHAPTER 09</div><h2 id="s09-title">最小数据合同与长期保留</h2><p>以下是<strong>建议的逻辑记录</strong>，不是必须逐一创建的数据库表。优先复用现有数据，通过 ID 和引用建立关系。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>记录</th>
+<th>建议字段</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Run</td>
+<td>run_id、kind、session / conversation、时间、状态、project、版本、基线</td>
+<td>区分一次任务与长会话，便于比较</td>
+</tr>
+<tr>
+<td>Attempt / span</td>
+<td>run_id、durable task / toolCall、attempt、parent / link、purpose、耗时、错误</td>
+<td>解释成本与重试，避免重复计数</td>
+</tr>
+<tr>
+<td>Version manifest</td>
+<td>agent commit、模型/思考配置、prompt/tools/skills 内容身份、设置、平台</td>
+<td>知道当时究竟运行了什么</td>
+</tr>
+<tr>
+<td>Outcome / check</td>
+<td>结束原因、检查命令/版本/结果、artifact 或 diff 引用</td>
+<td>将自述完成与已验证结果分开</td>
+</tr>
+<tr>
+<td>Feedback</td>
+<td>明确用户反馈、来源、时间、关联任务</td>
+<td>支持后续补充；无反馈保持未知</td>
+</tr>
+<tr>
+<td>Eval case / trial</td>
+<td>输入、fixture/baseline、目标、grader版本、trial、结果</td>
+<td>精选可复现案例与对照</td>
+</tr>
+<tr>
+<td>Retro report / proposal</td>
+<td>分析范围、证据、问题指纹、候选、决定、执行与效果</td>
+<td>长期改进与跨 agent 交接</td>
+</tr>
+</tbody></table></div>
+<h3 id="s09-p1">关键区分</h3>
+<ul>
+<li>一次产品 run 可以跨多次进程执行和多个模型请求；durable 的内部 task ID 不能与产品 run 混为一谈。</li>
+<li>关联工具时使用包含会话/任务范围的身份，不能把 provider tool-call ID 当作全局唯一键。</li>
+<li>task_type 可以是 bugfix、feature、refactor、test、docs 等建议类别；不要求每次额外用模型打标签。</li>
+<li>当 Git 可用时记录 commit 与工作区是否 dirty。只有 hash 而没有可取得的配置内容、未提交 diff 或初态，不能声称可复现。</li>
+<li>不必为每个真实任务创建 worktree 或完整仓库快照。选中成为 eval case 时，先判断能否从已有材料还原初态；能还原时补齐输入，不能还原时标记“不可复现”，或另建明确标为重构案例的新任务，不能声称精确重放原运行。</li>
+<li>运行事实、用户决定和后续评分分别存储。重评估生成新的 judgment，不改写过去发生的事件。</li>
+<li>未知、缺失、估算、截断、过期引用分别标记。没有被记录的事件不是没有发生。</li>
+</ul>
+<h3 id="s09-p2">逻辑示例：Run 摘要</h3>
+<pre><code class="language-json">{
+  &quot;schema_version&quot;: 1,
+  &quot;run_id&quot;: &quot;run-example&quot;,
+  &quot;kind&quot;: &quot;coding&quot;,
+  &quot;conversation_id&quot;: &quot;conversation-example&quot;,
+  &quot;project_id&quot;: &quot;project-example&quot;,
+  &quot;version_manifest_ref&quot;: &quot;manifest-example&quot;,
+  &quot;workspace&quot;: {&quot;git_commit&quot;: null, &quot;dirty&quot;: true, &quot;snapshot_ref&quot;: null},
+  &quot;outcome&quot;: {&quot;status&quot;: &quot;completed&quot;, &quot;verified&quot;: &quot;unknown&quot;},
+  &quot;usage&quot;: {&quot;source&quot;: &quot;pi.usage&quot;, &quot;completeness&quot;: &quot;partial&quot;, &quot;cost_estimate&quot;: null},
+  &quot;evidence_refs&quot;: [],
+  &quot;feedback_refs&quot;: []
+}
+</code></pre>
+<p>此例的 ID、字段名和状态值仅用于说明设计；不是当前真实记录，也不是上游数据类型。<code>completed</code> 只表示执行结束，不等于目标已经被验证达成。</p>
+<h3 id="s09-p3">保存与查询策略</h3>
+<ol>
+<li>原始会话记录作为事实源，索引保存可查询的摘要和引用。</li>
+<li>小型结构化元数据保留较长时间；大块原文、工具输出和产物设置可配置保留策略。</li>
+<li>有价值的 eval case 与引用证据可单独固定保留；被清理的引用保留 tombstone 或状态。</li>
+<li>先支持按项目、时间、版本、状态、模型、任务类型查询；不要默认构建 embeddings。</li>
+<li>对日志中的密钥、认证 header、token 和不必要的敏感内容采用最小记录与脱敏；外发是额外可配置动作。</li>
+<li>不依赖不可见的模型内部思维。记录可访问的消息、工具事实、结果及 provider 提供的使用量即可。</li>
+<li>写入批次、容量、保留期和价格更新方式都是待定参数；先测实际增长，再给出默认值。</li>
+</ol>
+</section>
+<section class="spec-section" id="s10" aria-labelledby="s10-title"><div class="chapter-number">CHAPTER 10</div><h2 id="s10-title">长期评估：衡量什么，怎样解释</h2><h3 id="s10-p1">三类能力的关系</h3>
+<p>Tracing 解释发生了什么；LLM Ops 解释运行条件、资源和可靠性；evals 检查结果与行为是否达标。长期分析利用三者发现问题，<strong>观察到趋势不自动证明某个改动造成了趋势</strong>。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>有用指标</th>
+<th>解释边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>任务效果</td>
+<td>实际检查通过、目标达成、明确用户反馈、返工与回退</td>
+<td>agent 自称成功、patch 被采纳、没有投诉均不是充分证明</td>
+</tr>
+<tr>
+<td>正确性与约束</td>
+<td>必要回归、范围遵循、是否遗漏用户要求</td>
+<td>不能为了省工具调用省掉必要工作</td>
+</tr>
+<tr>
+<td>效率</td>
+<td>已知 tokens / 费用、完成延迟、工具输出量、疑似重复调用</td>
+<td>必须考虑任务难度、版本和质量</td>
+</tr>
+<tr>
+<td>可靠性</td>
+<td>API/网络/工具错误、中断、恢复、超时与未知结果</td>
+<td>基础设施错误需计入可靠性和实际成本，分析原因时再分组</td>
+</tr>
+<tr>
+<td>交互质量</td>
+<td>用户纠正、重复确认、无效等待、过度解释</td>
+<td>只使用实际证据，不臆测用户心情</td>
+</tr>
+<tr>
+<td>轻量程度</td>
+<td>启动、RSS、日志增量、依赖体积、维护负担</td>
+<td>不用单一 LOC 代表全部开销</td>
+</tr>
+</tbody></table></div>
+<h3 id="s10-p2">分母、覆盖率与缺失</h3>
+<ul>
+<li>真实任务按 completed / failed / cancelled / changed-requirement / unknown 等实际原因区分；具体枚举在实现时统一。</li>
+<li>成功率应显示分母和验证覆盖率。仅对已验证样本的通过率，应明确说明未覆盖多少任务。</li>
+<li>用户取消可能是需求改变，不能直接作为模型能力失败；也不能把所有取消或基础设施错误从报告中悄悄删掉。</li>
+<li>区分模型/工具活跃耗时和等待用户的时间。无法细分时说明测量口径。</li>
+<li>日常 coding、retro 和 eval 的开销分开报告，再给总成本，避免“优化节省”隐藏评测费用。</li>
+</ul>
+<h3 id="s10-p3">长期比较的常见混淆</h3>
+<p>本周 tokens 降低，可能因为任务更简单、模型改变、上下文更短或缓存命中增加。建议按项目、任务类型、模型配置、agent 版本和环境分层；小样本只报告观察，不给出过度精确的因果或显著性结论。</p>
+<p>历史重新评分可以改善 grader 或定位问题，但无法展示尚未运行过的新 prompt / skill / tool 策略会怎样行动。需要证明行为改进时，应执行新的可比试验。</p>
+<p>模型与 harness 之外的基础设施也可能改变 coding eval 结果；因此环境限制、资源、网络和缓存状态需要记录，不能把全部差异归因于模型或规则改动。<a href="#src-infra-evals">S35</a></p>
+<h3 id="s10-p4">优化的目标顺序</h3>
+<p>先满足任务正确性、用户约束和必要验证，再比较成本、延迟和维护复杂度。tokens 更少、测试更少、工具次数更少都不是单独的成功条件。一个合理候选也可能是：删除重复规则、缩短输出、复用现有检查，或保持现状。</p>
+</section>
+<section class="spec-section" id="s11" aria-labelledby="s11-title"><div class="chapter-number">CHAPTER 11</div><h2 id="s11-title">最小 Eval 体系与候选验证</h2><h3 id="s11-p1">首版需要什么</h3>
+<p>一个可手动运行的 runner、一小组有代表性的任务、真实产物与检查结果、可比较的版本信息，以及机器可读摘要。它应复用产品 runtime；不要求依赖完整实验平台。</p>
+<p>Agent eval 通常需要明确 task、一次或多次 trial、grader 和真实 outcome。软件任务可优先用可执行检查，主观行为再辅以 rubric 或用户校准；不能只根据聊天中“已经完成”评分。<a href="#src-evals-practice">S36</a></p>
+<h3 id="s11-p2">任务组成建议</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>检查目标</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>基本 coding</td>
+<td>读取、修改、运行检查、完成小修复</td>
+</tr>
+<tr>
+<td>回归</td>
+<td>已修复问题仍然正确，既有行为未退化</td>
+</tr>
+<tr>
+<td>恢复</td>
+<td>在具体提交边界中断后，恢复状态和副作用符合合同</td>
+</tr>
+<tr>
+<td>工具边界</td>
+<td>路径、失败、输出截断、取消和不确定结果</td>
+</tr>
+<tr>
+<td>轻量性</td>
+<td>不必要重复读取、输出、重复测试或上下文膨胀</td>
+</tr>
+<tr>
+<td>Retro 行为</td>
+<td>证据不足可给零候选、只读阶段不修改、尊重用户选择</td>
+</tr>
+<tr>
+<td>使用范围</td>
+<td>规则应该触发的正例，以及不该触发的反例</td>
+</tr>
+</tbody></table></div>
+<h3 id="s11-p3">候选验证协议</h3>
+<p>先按改动类型选择验证方式。以下 fresh A/B 步骤适用于需要证明模型行为、任务效果、成本或延迟改善的候选；纯内容修正、确定性 bug 或局部性能问题可采用直接检查或专项基准，不要求额外运行 coding A/B。</p>
+<ol>
+<li>写出具体假设、主变量、目标指标与需要保护的行为。不要一次混改模型、prompt、工具与预算后声称知道原因。</li>
+<li>需要 fresh A/B 时，从相同任务输入和代码初态运行 baseline 与 candidate；分开 session 和工作目录，避免复用答案或副作用。</li>
+<li>尽可能保持相近环境、模型配置、预算与时间条件；必要时交错顺序，减少缓存和环境漂移的影响。</li>
+<li>先用最小相关检查。只有模型行为变化或明确剩余风险需要时，才追加相关 eval；不为每次 retro 固定跑全量集合。</li>
+<li>保留所有计划的 trial 及失败、超时和缺失；报告差异和样本数，不只展示最好结果。</li>
+<li>随机性可能影响结论，需要时增加重复。单次通过不是稳定性的证明；结果可以是“未证明改善”。</li>
+<li>记录分析、试验和维护成本。明显超出潜在收益时可停止，不必强行找出赢家。</li>
+</ol>
+<h3 id="s11-p4">数据集边界</h3>
+<p>初期可区分用于提出候选的开发案例、固定回归案例，以及少量未被用于调优的新案例。若以后反复搜索候选，再引入更严格的 holdout 和更新机制。</p>
+<p><strong>用于反复选择候选的 holdout 会逐渐成为调优反馈。</strong> 不应长期暴露所有细节又宣称完全独立；可定期补充新任务并保留真正未参与选择的检验。首版不要求实现一整套数据集管理服务。</p>
+<h3 id="s11-p5">独立性与有效性</h3>
+<ul>
+<li>候选不能顺手修改使自己通过的 grader、隐藏测试或评分门槛。</li>
+<li>如果 grader 本身有问题，单独提出修复，独立版本化，并在新规则下重测 baseline 与 candidate。</li>
+<li>工作目录隔离可防止无意污染，但 worktree 不是权限沙箱；需要保护的 grader / hidden case 应由候选不可修改的 runner 管理。</li>
+<li>LLM judge 可能受轨迹中的不可信文本影响。把材料作为被评价的数据，明确 rubric；关键正确性优先依赖实际检查。</li>
+<li>不强制换模型或增加第二 reviewer；评判证据和执行边界比“由另一个 agent 发言”更重要。</li>
+<li>通过与失败案例都应保留代表性样本，避免只学习失败而不断增加负担。</li>
+</ul>
+<h3 id="s11-p6">按改动类型选择验证</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>改动</th>
+<th>合适的最小验证</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文案、导航、不改变行为的精确规则去重</td>
+<td>检查内容一致性与加载路径；不自动升级成全量 eval</td>
+</tr>
+<tr>
+<td>工具实现或 runtime bug</td>
+<td>针对真实失败路径的检查，必要时验证恢复/取消边界</td>
+</tr>
+<tr>
+<td>Prompt / skill / 策略效果</td>
+<td>相关任务的 fresh run，包含不应触发的反例</td>
+</tr>
+<tr>
+<td>成本或延迟优化</td>
+<td>在任务效果可比条件下比较；明确模型/环境与费用口径</td>
+</tr>
+<tr>
+<td>Grader 修改</td>
+<td>仅评分逻辑改变时，优先对保存的相同产物重评分；环境、任务或运行规则改变时再重跑，并保持基线与候选可比</td>
+</tr>
+<tr>
+<td>纯性能问题</td>
+<td>对具体瓶颈做基准，不以通用 coding eval 代替所有性能测量</td>
+</tr>
+</tbody></table></div>
+</section>
+<section class="spec-section" id="s12" aria-labelledby="s12-title"><div class="chapter-number">CHAPTER 12</div><h2 id="s12-title">Retro：触发、取证与完整流程</h2><h3 id="s12-p1">核心行为合同</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RET-01</td>
+<td>用户显式调用 retro 或明确要求复盘时才启动；普通 coding 结束不自动调用 LLM 自省。</td>
+</tr>
+<tr>
+<td>RET-02</td>
+<td>未指定范围时，先看当前任务/会话；需要历史对照时查询相关的近期同项目/同类型记录。</td>
+</tr>
+<tr>
+<td>RET-03</td>
+<td>先查询摘要和统计，再读取少量相关原始 trace、检查结果和配置；不默认注入全量历史。</td>
+</tr>
+<tr>
+<td>RET-04</td>
+<td>建议阶段只读业务材料；可由宿主持久化复盘报告，但不改变项目、agent、配置或默认行为。</td>
+</tr>
+<tr>
+<td>RET-05</td>
+<td>输出少量最有价值的候选，推荐上限 5 项，无最低数量；允许零候选或证据不足。</td>
+</tr>
+<tr>
+<td>RET-06</td>
+<td>每项候选有稳定 ID、证据、事实与假设区分、目标、具体动作、验证与生效范围。</td>
+</tr>
+<tr>
+<td>RET-07</td>
+<td>用户选择具体候选后，完成其声明的范围与必要验证；不逐文件反复确认。</td>
+</tr>
+<tr>
+<td>RET-08</td>
+<td>记录决定、执行、效果，保留它们之间的区别；不把采纳等同有效。</td>
+</tr>
+<tr>
+<td>RET-09</td>
+<td>尊重暂缓与不再建议的作用域；不让同一问题每次重复占据推荐列表。</td>
+</tr>
+<tr>
+<td>RET-10</td>
+<td>同一 runtime / 模型可完成分析与实施；不依赖固定的第二 reviewer。</td>
+</tr>
+</tbody></table></div>
+<h3 id="s12-p2">阶段与转移</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>输入与动作</th>
+<th>产生什么</th>
+<th>下一步</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Scope</td>
+<td>用户给定范围或合理默认值</td>
+<td>项目、时间、版本、任务和数据缺失说明</td>
+<td>检索证据</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td>结构化筛选，选择代表性失败与成功样本</td>
+<td>可追溯的事实与候选问题</td>
+<td>形成建议或报告证据不足</td>
+</tr>
+<tr>
+<td>Proposal</td>
+<td>区分事实和原因假设，提出最小改变</td>
+<td>少量可审阅候选</td>
+<td>等待用户选择</td>
+</tr>
+<tr>
+<td>Decision</td>
+<td>用户执行、仅验证、暂缓、不再建议</td>
+<td>针对具体候选版本的决定</td>
+<td>执行所选项或结束</td>
+</tr>
+<tr>
+<td>Execute</td>
+<td>检查前提仍成立，完成所选范围</td>
+<td>patch / 配置变更 / 实验</td>
+<td>必要验证与适用的启用</td>
+</tr>
+<tr>
+<td>Result</td>
+<td>保存检查、变化、实际效果和局限</td>
+<td>可供下一次 retro 使用的记录</td>
+<td>回到普通 coding</td>
+</tr>
+</tbody></table></div>
+<p>复盘可以独立结束在 Proposal 或 Decision 阶段；没有选择时，不继续修改。暂停的提议可以之后重新选中，前提是作用对象和版本仍适用。</p>
+<h3 id="s12-p3">推荐检索步骤</h3>
+<ol>
+<li>查询最近相关 run 的数量、状态、版本、用量和检查摘要，明确样本覆盖。</li>
+<li>找高影响、高频或明显阻塞的问题；不要只按费用从大到小猜低效。</li>
+<li>读取支持候选的原始 trace，同时选择必要成功反例。</li>
+<li>查看当前配置、工具实现与项目已有检查，确认问题尚存在、已有机制是否可以修复或复用。</li>
+<li>检查以前的候选、用户决定和实验结果，过滤重复、已解决与明确被抑制的内容。</li>
+<li>排序展示。排序可考虑影响、频率、置信度、实施成本与维护负担，无需首版设计复杂评分公式。</li>
+</ol>
+<h3 id="s12-p4">建议发现方向</h3>
+<p>信息定位慢、重复读取大文件、工具输出太大、无依据重复测试、无效或矛盾提示、错误恢复、模型/预算配置不匹配、检查缺失且确实导致问题、skill 触发过宽、compaction 后遗漏、依赖或启动开销、上下文污染。</p>
+<p>这些方向都是待查假设。例如两次运行同一测试，可能因为代码已变化或前次输出不完整；只有证据支持时才认定为可减少的重复。不得把“减少测试次数”直接写成规则。</p>
+</section>
+<section class="spec-section" id="s13" aria-labelledby="s13-title"><div class="chapter-number">CHAPTER 13</div><h2 id="s13-title">优化候选、选择与结果格式</h2><h3 id="s13-p1">每项候选需要回答的问题</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>内容要求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID 与 revision</td>
+<td>报告内显示编号、长期唯一身份与候选版本可关联，避免跨报告歧义</td>
+</tr>
+<tr>
+<td>问题与范围</td>
+<td>哪个项目/agent/版本/任务类型受影响</td>
+</tr>
+<tr>
+<td>证据</td>
+<td>run / trace / check / eval / feedback 引用，以及样本数和缺失</td>
+</tr>
+<tr>
+<td>已知事实</td>
+<td>实际发生了什么，不掺入推测</td>
+</tr>
+<tr>
+<td>原因假设</td>
+<td>为什么认为这个动作会改善；不确定时直说</td>
+</tr>
+<tr>
+<td>改动目标</td>
+<td>项目、配置、prompt、skill、工具、runtime 或评测资产</td>
+</tr>
+<tr>
+<td>最小改动</td>
+<td>具体计划；能指出文件或配置键时指出，不要求建议阶段先生成全部 patch</td>
+</tr>
+<tr>
+<td>预期收益与风险</td>
+<td>方向和适用条件；未经测量不给虚构百分比</td>
+</tr>
+<tr>
+<td>验证方式</td>
+<td>必要检查、相关对照、需保持不退化的行为</td>
+</tr>
+<tr>
+<td>执行合同</td>
+<td>是仅实验、修改与验证，还是还包含为新任务启用；生效时机明确</td>
+</tr>
+<tr>
+<td>回退方法</td>
+<td>如何撤销候选版本或默认设置；不混同用户工作区恢复</td>
+</tr>
+</tbody></table></div>
+<h3 id="s13-p2">展示示例：仅说明格式，不是实测发现</h3>
+<blockquote>
+<p><strong>R1 · 减少无变化时重复执行同一检查</strong><br><strong>范围：</strong> agent 的验证策略，仅限可确认代码与检查输入未变化的情况。<br><strong>证据：</strong> 实际报告应引用具体运行与检查；此示例不声称已经找到这些记录。<br><strong>假设：</strong> 若前次检查结果完整且仍有效，重复执行可能只增加耗时。<br><strong>最小改变：</strong> 优先复用已有检查结果；代码、环境、依赖或验证目标变化时重新检查。<br><strong>验证：</strong> 覆盖“结果可复用”和“必须重跑”两类案例，保留正确性。<br><strong>执行合同：</strong> 先验证假设；没有选择进一步实施时，不修改默认策略。</p>
+</blockquote>
+<p>避免输出“预计降低 30% tokens”之类没有基线与实验依据的数字。可以表达为“预期减少重复执行，收益尚未测量”。</p>
+<h3 id="s13-p3">用户选择语义</h3>
+<p><code>R1</code> / <code>R2</code> 是报告内显示编号。持久化与执行使用全局唯一 proposal ID，或 <code>(report_id, local_id, revision)</code>；用户选择绑定具体报告与候选版本。</p>
+<pre><code class="language-text">执行 R1 和 R3；R2 暂缓。
+只验证 R1，不启用改动。
+R2 不再建议，作用域限当前项目。
+</code></pre>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>用户动作</th>
+<th>授权与记录</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>执行</td>
+<td>完成该候选已声明的动作、必要验证，以及其中明确包含的启用步骤</td>
+</tr>
+<tr>
+<td>仅验证</td>
+<td>进行有边界的实验或检查；不据此自动改变生产默认行为</td>
+</tr>
+<tr>
+<td>暂缓</td>
+<td>保留候选，避免立即重复推荐；时机、范围或证据实质变化时说明理由后重提</td>
+</tr>
+<tr>
+<td>不再建议</td>
+<td>在用户声明的作用域中抑制；不以普通新增记录为理由绕过</td>
+</tr>
+<tr>
+<td>不适用 / 拒绝</td>
+<td>保存决定和可选原因，不自动判定技术假设错误</td>
+</tr>
+</tbody></table></div>
+<p>如果用户的选择无法对应具体项，可问一次简短澄清。明确选择后继续做完；只有发生实质范围扩大、候选前提失效或不兼容决定时，再说明原因并征询。</p>
+<h3 id="s13-p4">逻辑记录示例</h3>
+<pre><code class="language-json">{
+  &quot;report_id&quot;: &quot;retro-report-example&quot;,
+  &quot;proposal_id&quot;: &quot;proposal-unique-example&quot;,
+  &quot;display_id&quot;: &quot;R1&quot;,
+  &quot;revision&quot;: 1,
+  &quot;fingerprint&quot;: &quot;project:issue:applicable-version&quot;,
+  &quot;target&quot;: {&quot;kind&quot;: &quot;agent_policy&quot;, &quot;repo_ref&quot;: &quot;agent-repo&quot;, &quot;base_version&quot;: &quot;v-example&quot;},
+  &quot;evidence_refs&quot;: [&quot;run-example/check-example&quot;],
+  &quot;hypothesis&quot;: &quot;示例假设，不是实测结论&quot;,
+  &quot;action&quot;: {&quot;mode&quot;: &quot;validate_only&quot;, &quot;enable_after_validation&quot;: false},
+  &quot;decision&quot;: {&quot;status&quot;: &quot;deferred&quot;, &quot;scope&quot;: &quot;current_project&quot;},
+  &quot;execution&quot;: {&quot;status&quot;: &quot;not_started&quot;, &quot;change_ref&quot;: null},
+  &quot;effect&quot;: {&quot;status&quot;: &quot;unverified&quot;, &quot;evaluation_refs&quot;: []}
+}
+</code></pre>
+<p>建议把三条状态轴分开：<strong>用户决定</strong>（选中/暂缓等）、<strong>执行结果</strong>（完成/失败/取消等）、<strong>效果结论</strong>（改善/退化/无明显差异/证据不足等）。它们可以保存在同一记录中，不需要为每条轴搭建独立服务。</p>
+</section>
+<section class="spec-section" id="s14" aria-labelledby="s14-title"><div class="chapter-number">CHAPTER 14</div><h2 id="s14-title">权限、目标作用域与版本生效</h2><h3 id="s14-p1">分析阶段的能力</h3>
+<p>宿主应让 retro 能读取所选范围的记录、源码与配置，并查询结构化摘要。避免在只读阶段暴露任意 write / edit / unrestricted shell；如果需要执行查询命令，用受限的已知查询能力。仅在 skill 文本写“不要修改”不能提供可靠边界。</p>
+<p>报告和选择记录由宿主保存到自己的记录范围，这属于本功能的正常数据写入，不代表允许修改用户项目或 agent 默认行为。只读指的是<strong>被分析对象与执行环境</strong>，不是要求整个应用完全不写自己的日志。</p>
+<p>若普通任务正在运行，不要通过全局切换工具 registry 影响它。可以在明确边界排队复盘，或用同一宿主中的独立只读调用读取固定快照；不需要因此建立另一个常驻 agent 服务。</p>
+<h3 id="s14-p2">改动对象必须明确</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>目标</th>
+<th>示例</th>
+<th>执行注意</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>用户当前项目</td>
+<td>导航、已有检查接线、项目配置</td>
+<td>不将 agent 内部优化悄悄变成业务项目重构</td>
+</tr>
+<tr>
+<td>Agent 配置</td>
+<td>模型、输出限制、预算、重试参数</td>
+<td>记录旧值与新值、适用范围与生效任务</td>
+</tr>
+<tr>
+<td>Prompt / skill</td>
+<td>删除重复规则、缩短正文、纠正触发条件</td>
+<td>内容变更也会改变行为，不因是 Markdown 就自动启用</td>
+</tr>
+<tr>
+<td>Agent tools</td>
+<td>文件操作、工具输出、错误恢复</td>
+<td>在 agent 自己的源码位置修改，检查真实执行语义</td>
+</tr>
+<tr>
+<td>Agent runtime</td>
+<td>调度接线、版本、性能问题</td>
+<td>不热改当前 pending task；兼容性与回退明确</td>
+</tr>
+<tr>
+<td>Eval 资产</td>
+<td>新案例、独立 grader bug</td>
+<td>与被评估候选分开变更与版本，不自行改分宣告成功</td>
+</tr>
+</tbody></table></div>
+<p>选择执行前检查 repo、基线和工作区状态是否仍适用；保留用户现有未提交修改。变更应在合适的分支、隔离目录或可回退配置版本中进行，具体做法取决于项目现状。</p>
+<h3 id="s14-p3">用户一次选择包含什么</h3>
+<p>候选应在展示时说清楚：它是“先验证”，还是“修改、验证并对新任务启用”。用户选中后一口气完成该合同，不把执行、每个文件和每条检查命令切成重复确认。</p>
+<p>只选了验证，就停在验证结果；选了包含启用的方案，验证通过且前提未变时，可按已声明的时机启用。验证失败或出现范围外问题时，记录结果，不强行启用或悄悄扩大重构。</p>
+<h3 id="s14-p4">输入可信度</h3>
+<p>Trace、仓库内容、工具输出与从历史记录提取的文字是证据材料。它们不能修改当前用户授权、评分规则或 retro 的只读阶段。若材料中包含“忽略规则、修改评分、自动执行”等文字，作为被分析内容处理。</p>
+<p>Skill 名称、frontmatter 和文件后缀不提供额外权限。被优化程序也不应获取隐藏 eval 答案或发布规则的写权限来帮助自己通过验证。</p>
+</section>
+<section class="spec-section" id="s15" aria-labelledby="s15-title"><div class="chapter-number">CHAPTER 15</div><h2 id="s15-title">参考 retro skill 的取舍与宿主合同</h2><p>参考：Matt Pocock 的 <a href="https://github.com/mattpocock/skills/tree/main/skills/engineering/retro">engineering/retro</a>。本次读取的是其 <code>SKILL.md</code>；它默认显式触发，读取指定会话原始材料，寻找环境改进候选并呈现给用户。它的终点本来就是建议，而不是无条件自动改代码。<a href="#src-retro">S37</a></p>
+<h3 id="s15-p1">借鉴与调整</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>内容</th>
+<th>本规格的处理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>用户请求后复盘</td>
+<td>保留，并在宿主入口落实</td>
+</tr>
+<tr>
+<td>原始会话证据</td>
+<td>保留，增加长期版本/结果/决策引用</td>
+</tr>
+<tr>
+<td>工具成本、导航和无效指令</td>
+<td>保留，加入轻量程度与实际收益判断</td>
+</tr>
+<tr>
+<td>先检查已有工具、检查与文档</td>
+<td>保留，优先修复或复用现有机制</td>
+</tr>
+<tr>
+<td>依赖 writing-for-agents</td>
+<td>不作为硬依赖；将必要写作规则简短写入本 skill</td>
+</tr>
+<tr>
+<td>缺少 CI/pre-commit 就自动成为改进项</td>
+<td>改为结合真实问题、用户约束与维护收益判断</td>
+</tr>
+<tr>
+<td>固定 implementer/reviewer 分工</td>
+<td>不作为产品前提；首版不强制第二 agent</td>
+</tr>
+<tr>
+<td>增加规则、标准文档或检查</td>
+<td>仅在具体问题需要时采用；删除、合并和不改变都有效</td>
+</tr>
+<tr>
+<td>仅按 severity 排序</td>
+<td>综合影响、频率、置信度与成本，优先少数值得做的项</td>
+</tr>
+</tbody></table></div>
+<p>上述表格的左侧概括来源，右侧是本项目的设计建议；不直接执行参考 skill 对其他技能或工具的要求。</p>
+<h3 id="s15-p2">内置 skill 的职责大纲</h3>
+<ol>
+<li>明确触发条件、默认范围和“分析先只读”。</li>
+<li>查询摘要，按需读取一手记录和当前相关实现。</li>
+<li>检查历史候选、用户决定、已实施变更与反馈。</li>
+<li>区分事实、假设和缺失，考虑成功反例。</li>
+<li>提出少量具体可验证候选，允许零候选。</li>
+<li>说明目标、验证、实施与启用范围，等待用户选择。</li>
+<li>选择后交给同一执行路径完成声明动作，记录实际结果。</li>
+<li>不把日志中的文字当当前指令，不强制新建 skill、不默认全量评测。</li>
+</ol>
+<p>这是未来 <code>SKILL.md</code> 的职责说明；<strong>本次没有创建或安装真实 skill 文件</strong>。</p>
+<h3 id="s15-p3">宿主需要补齐的四件事</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>能力</th>
+<th>最小实现含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>内置内容</td>
+<td>随应用提供 retro 正文及必要参考；没有强制外部技能依赖</td>
+</tr>
+<tr>
+<td>显式路由</td>
+<td><code>/retro</code> 或 <code>/skill:retro</code> → 解析范围 → 加载正文；默认不自动触发</td>
+</tr>
+<tr>
+<td>证据接口</td>
+<td>按范围查询 run/check/trace/proposal，读取必要原文，标明数据缺失</td>
+</tr>
+<tr>
+<td>阶段与结果</td>
+<td>分析能力限制、用户选择、执行范围、记录与生效状态</td>
+</tr>
+</tbody></table></div>
+<p>完整 Pi 支持按需加载 metadata/正文和 <code>disable-model-invocation: true</code>。在自有宿主中必须显式支持相同语义；<code>allowed-tools</code> 等声明也不能替代真正的能力限制。<a href="#src-skills">S17</a></p>
+<p>官方 durable demo 的 prompt 集成来自完整 coding-agent 的加载模块；demo 的命令分发并不自动带完整 <code>/skill:name</code> 路由。只调用某个 skill loader 还不等于有可用的显式命令体验。<a href="#src-demo-prompt">S38</a> <a href="#src-demo-tui">S39</a></p>
+<p>首版只需一个内置 retro，不要求实现通用插件市场、递归扫描全部技能目录或自动安装依赖。以后扩展时再处理 skill 版本、资源路径、名称冲突与项目信任边界。</p>
+</section>
+<section class="spec-section" id="s16" aria-labelledby="s16-title"><div class="chapter-number">CHAPTER 16</div><h2 id="s16-title">经验如何沉淀，以及更进一步的优化</h2><h3 id="s16-p1">问题应该改在哪里</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>发现</th>
+<th>优先改动对象</th>
+<th>不应默认做的事</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>输出上限或重试配置不合理</td>
+<td>配置</td>
+<td>写一篇长期提示让模型自己记住参数</td>
+</tr>
+<tr>
+<td>工具重复返回大段无用内容</td>
+<td>工具实现与输出协议</td>
+<td>只在 AGENTS 中提醒“少读一点”</td>
+</tr>
+<tr>
+<td>明确稳定的使用错误</td>
+<td>最小规则或确定性检查</td>
+<td>为单次偶发失败增加全局强规则</td>
+</tr>
+<tr>
+<td>多次有用的工作流程</td>
+<td>现有 skill 的修订或有边界的新 skill</td>
+<td>每个任务结束生成一份技能</td>
+</tr>
+<tr>
+<td>仓库特定事实</td>
+<td>项目文档或可引用知识</td>
+<td>把所有项目事实加入全局 system prompt</td>
+</tr>
+<tr>
+<td>调度、恢复或状态 bug</td>
+<td>Runtime / tool 代码</td>
+<td>用模糊提示掩盖底层错误</td>
+</tr>
+<tr>
+<td>评分有缺陷</td>
+<td>独立 grader 修复</td>
+<td>修改候选和评分器后只重测候选</td>
+</tr>
+<tr>
+<td>证据稀少、变化无收益</td>
+<td>暂缓或不改</td>
+<td>为证明“自我优化”而强制产出</td>
+</tr>
+</tbody></table></div>
+<p><strong>Skill 管流程，记录层保存经验，eval 提供检验，版本控制承载改动。</strong> 这几者共同形成改进能力；不断加长 SKILL.md 本身不等于长期学习，更不等于模型权重训练。</p>
+<h3 id="s16-p2">相关研究的可借鉴部分</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>研究</th>
+<th>本项目借鉴</th>
+<th>不据此承诺</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Reflexion</td>
+<td>以可读反馈辅助后续任务，区分文字记忆和权重更新。<a href="#src-reflexion">S40</a></td>
+<td>任意自我总结都会带来泛化改善</td>
+</tr>
+<tr>
+<td>GEPA</td>
+<td>从轨迹和反馈提出文字候选，再通过独立运行选择。<a href="#src-gepa">S41</a></td>
+<td>必須引入完整优化框架，或直接迁移论文收益</td>
+</tr>
+<tr>
+<td>Darwin Gödel Machine</td>
+<td>代码也可以成为候选，但必须评价真实行为；研究报告了利用评测漏洞的情况。<a href="#src-dgm">S42</a></td>
+<td>自改代码天然可靠，或 agent 可自行修改验收标准</td>
+</tr>
+</tbody></table></div>
+<p>以上是设计启发，不是首版依赖列表。没有必要为了实现手动 retro 安装 DSPy、GEPA 或研究系统。</p>
+<h3 id="s16-p3">何时再考虑更自动的路线</h3>
+<p>当手动 retro 已有稳定输入、候选有可重复收益、用户选择模式明确时，再考虑批量候选搜索、自动调配置、可选独立 reviewer、任务路由、远程运维或周期性离线报告。</p>
+<p>即使将来自动化，也应区分“生成候选”“验证候选”“启用候选”。自动改变评分、预算或执行权限不应成为候选让自己通过的方式。是否自动启用、预算多少、运行频率是什么，都需要新的明确产品决策。</p>
+</section>
+<section class="spec-section" id="s17" aria-labelledby="s17-title"><div class="chapter-number">CHAPTER 17</div><h2 id="s17-title">推荐代码组织与接口草案</h2><p>以下只是职责划分，<strong>不是要求每项都独立成文件</strong>。实现时可合并相邻薄模块；没有必要为目录整齐引入抽象层。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>建议位置</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>src/main.ts</code></td>
+<td>CLI 参数、打开/关闭宿主、入口选择</td>
+</tr>
+<tr>
+<td><code>src/runtime.ts</code></td>
+<td>Harness、模型/工具注册、controller、版本与配置</td>
+</tr>
+<tr>
+<td><code>src/sessions.ts</code></td>
+<td>存储位置、所有权、恢复与锁冲突</td>
+</tr>
+<tr>
+<td><code>src/tui.ts</code></td>
+<td>视图投影、输入、可展开输出与命令展示</td>
+</tr>
+<tr>
+<td><code>src/observability.ts</code></td>
+<td>模型/工具观测、usage 引用、薄本地记录适配</td>
+</tr>
+<tr>
+<td><code>src/records.ts</code></td>
+<td>查询摘要、证据引用、eval/retro 元数据</td>
+</tr>
+<tr>
+<td><code>src/retro.ts</code></td>
+<td>显式命令路由、只读阶段、候选/选择/执行衔接</td>
+</tr>
+<tr>
+<td><code>skills/retro/SKILL.md</code></td>
+<td>简短复盘流程；按需加载</td>
+</tr>
+<tr>
+<td><code>evals/</code></td>
+<td>fixtures、cases、runner、graders，与生产入口分离</td>
+</tr>
+</tbody></table></div>
+<h3 id="s17-p1">应用层接口示意</h3>
+<pre><code class="language-ts">// 设计草案；这些名字不是 pi-durable 的现有 API。
+type RetroScope = {
+  projectId?: string;
+  runIds?: string[];
+  period?: { from?: string; to?: string };
+  target?: &quot;project&quot; | &quot;agent&quot; | &quot;both&quot;;
+  focus?: string[];
+};
+
+interface RecordReader {
+  summarize(scope: RetroScope): Promise&lt;RunSummary[]&gt;;
+  readEvidence(ref: EvidenceRef): Promise&lt;Evidence&gt;;
+  listProposals(scope: RetroScope): Promise&lt;ProposalRecord[]&gt;;
+}
+
+interface RetroHost {
+  analyze(scope: RetroScope): Promise&lt;RetroReport&gt;; // 无业务写能力
+  decide(selection: UserSelection): Promise&lt;DecisionRecord&gt;;
+  executeSelected(decisionId: string): Promise&lt;OptimizationResult&gt;;
+}
+</code></pre>
+<p>这里未定义的类型需要结合实际存储实现补齐。不要复制这段草案后把它当作可直接编译的完整接口或既有依赖。可先用几条函数满足同样职责，再依据真实复杂度抽象。</p>
+<h3 id="s17-p2">实现约束</h3>
+<ul>
+<li>命令层使用 typed request，尽量不要再加另一种通用 workflow DSL。</li>
+<li>read-only 与 selected-execution 的能力差异由宿主落实；业务只读查询不要暴露可执行任意 SQL 的写接口。</li>
+<li>新数据的格式版本和稳定身份可追溯，可使用数据库迁移版本、记录格式版本或关联 manifest；重复读取、导出和恢复要能识别同一记录。</li>
+<li>查询先返回小摘要，原文另读；大输出用引用与截断状态。</li>
+<li>同一次用户选择不会因重启或重复投递而盲目重新应用改动；恢复时依据候选版本、基线和实际文件状态判断已完成、可继续或结果不确定。执行记录关联 revision、基线和 change ref。</li>
+<li>不另外实现 durable 已有的调度、inbox、checkpoint、compaction 或第二套 usage 聚合。</li>
+</ul>
+</section>
+<section class="spec-section" id="s18" aria-labelledby="s18-title"><div class="chapter-number">CHAPTER 18</div><h2 id="s18-title">分阶段实施路线</h2><p>这是一条推荐依赖顺序，不是固定工期承诺。每阶段完成具体可运行结果，再决定是否扩展。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>交付</th>
+<th>完成条件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0 · 复核与基线</td>
+<td>锁定依赖；最小公开入口运行；记录平台/认证选择</td>
+<td>实际能启动和请求模型，依赖路径可解释</td>
+</tr>
+<tr>
+<td>P1 · Coding 核心</td>
+<td>单进程 runtime、基本工具、SQLite、headless、TUI</td>
+<td>能完成任务，退出/恢复/中止与锁冲突语义清楚</td>
+</tr>
+<tr>
+<td>P2 · 记录与观测</td>
+<td>run 身份、版本、usage、关键 spans、检查摘要与查询</td>
+<td>运行数据可追溯，恢复与导出不重复计费</td>
+</tr>
+<tr>
+<td>P3 · 基础 eval</td>
+<td>精选案例、独立初态、runner、实际检查和结果文件</td>
+<td>评测与产品共用 runtime，能识别明确回归</td>
+</tr>
+<tr>
+<td>P4 · Retro 建议</td>
+<td>内置 skill、显式命令、证据查询、只读候选与历史决策</td>
+<td>能给少量有证据建议，也能给零候选</td>
+</tr>
+<tr>
+<td>P5 · 选择后执行</td>
+<td>用户选择、范围校验、改动与验证、结果记录</td>
+<td>只完成所选范围，必要时对新任务启用，记录真实效果</td>
+</tr>
+<tr>
+<td>P6 · 按需扩展</td>
+<td>外部导出、更丰富统计、独立环境或更多 skills</td>
+<td>有测量或实际使用证据支持新增复杂度</td>
+</tr>
+</tbody></table></div>
+<p>在 P2 后就可以手动生成初版 retro 报告；不必等一个复杂 eval 平台。P3 与 P4 的部分内容可按当前项目条件交错实施，但“已经有报表”不等于“已经证明优化有效”。</p>
+<h3 id="s18-p1">接手时最先做的事情</h3>
+<ol>
+<li>阅读当前 repo 的说明与约束，确认要修改的是 agent 仓库还是用户业务仓库。</li>
+<li>复核所选 Pi 版本的公开入口、依赖、认证路径、工具与存储语义。</li>
+<li>先跑一个最小真实任务与最小恢复场景，建立可测基线。</li>
+<li>再接 usage / tracing 与 eval；最后把它们通过 retro 入口连接起来。</li>
+<li>完成合理范围的验证后停止追加无目标检查，交付可运行结果和已知局限。</li>
+</ol>
+</section>
+<section class="spec-section" id="s19" aria-labelledby="s19-title"><div class="chapter-number">CHAPTER 19</div><h2 id="s19-title">验收标准与有意义的验证</h2><p>验收项按已实现阶段适用，不要求每次小改动重跑全部内容。优先验证真实风险与产品合同，避免只复述实现细节的测试。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>场景</th>
+<th>应观察到的结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACC-01</td>
+<td>同一任务通过 TUI 与 headless 入口执行</td>
+<td>使用同一 runtime / tools / 配置语义，UI 不决定业务状态</td>
+</tr>
+<tr>
+<td>ACC-02</td>
+<td>两个进程打开同一 session storage</td>
+<td>第二个不能同时取得写入所有权，有清晰提示</td>
+</tr>
+<tr>
+<td>ACC-03</td>
+<td>在受控工具执行边界中断并重启</td>
+<td>依据 replay 合同恢复，不声称外部副作用恰好一次</td>
+</tr>
+<tr>
+<td>ACC-04</td>
+<td>工具副作用已发生而提交缺失</td>
+<td>状态呈现不确定；重新执行前有检查/幂等处理路径</td>
+</tr>
+<tr>
+<td>ACC-05</td>
+<td>恢复读取、UI 重绘与导出重发</td>
+<td>已知 usage 不增加；真实新请求才形成新 attempt</td>
+</tr>
+<tr>
+<td>ACC-06</td>
+<td>模型请求返回 stream 后继续输出</td>
+<td>span 到真实终止才结束；completeSimple 路径不双计</td>
+</tr>
+<tr>
+<td>ACC-07</td>
+<td>Provider 未返回 usage 或存在观测缺失</td>
+<td>报告保留 unknown / partial，不伪装成零成本</td>
+</tr>
+<tr>
+<td>ACC-08</td>
+<td>可选 telemetry exporter 失败</td>
+<td>业务结果保持不变，有界缓冲不会无限增长</td>
+</tr>
+<tr>
+<td>ACC-09</td>
+<td>eval 比较 baseline 与 candidate</td>
+<td>初态、任务与配置可追溯，session/目录不互相污染</td>
+</tr>
+<tr>
+<td>ACC-10</td>
+<td>候选试图修改评分或读取隐藏答案</td>
+<td>评测边界阻止或明确报告无效；不能据此认定改善</td>
+</tr>
+<tr>
+<td>ACC-11</td>
+<td>普通 coding 完成</td>
+<td>不额外自动调用 retro/critic 模型</td>
+</tr>
+<tr>
+<td>ACC-12</td>
+<td>用户只调用 retro</td>
+<td>读取证据并保存报告；项目与 agent 默认行为不改变</td>
+</tr>
+<tr>
+<td>ACC-13</td>
+<td>证据不够或没有值得做的优化</td>
+<td>合法返回零候选或局限说明，不凑数量</td>
+</tr>
+<tr>
+<td>ACC-14</td>
+<td>用户只选择 R1，R2 暂缓</td>
+<td>仅执行 R1 的声明范围及必要验证，保存 R2 的决定</td>
+</tr>
+<tr>
+<td>ACC-15</td>
+<td>用户选择“仅验证”</td>
+<td>报告实验结果，不自动启用候选</td>
+</tr>
+<tr>
+<td>ACC-16</td>
+<td>候选内容或基线已实质变化</td>
+<td>不沿用过期选择悄悄扩大范围，先重拟必要部分</td>
+</tr>
+<tr>
+<td>ACC-17</td>
+<td>已明确“不再建议”的同范围问题</td>
+<td>后续 retro 尊重抑制记录</td>
+</tr>
+<tr>
+<td>ACC-18</td>
+<td>Agent runtime / tool 候选启用</td>
+<td>生效版本明确；旧 pending task 不被不兼容热改</td>
+</tr>
+<tr>
+<td>ACC-19</td>
+<td>优化通过、失败或无明显差异</td>
+<td>用户决定、执行结果、效果结论分别可查</td>
+</tr>
+<tr>
+<td>ACC-20</td>
+<td>长会话、大输出、中文与终端退出</td>
+<td>无无界内存/渲染积累，终端恢复正常，截断可见</td>
+</tr>
+<tr>
+<td>ACC-21</td>
+<td>记录包含来自仓库/trace 的指令样文本</td>
+<td>作为证据处理，不改变权限、评分或阶段</td>
+</tr>
+<tr>
+<td>ACC-22</td>
+<td>声称产品轻量或优化有效</td>
+<td>附测量口径和数据；无实测时仅给目标或假设</td>
+</tr>
+</tbody></table></div>
+<h3 id="s19-p1">测试投入的边界</h3>
+<p>基础恢复、重复副作用、计数与权限边界值得有针对性的集成或故障注入验证。文案、样式、简单导航等低风险可逆改动，通常用直接检查即可。优先复用项目已有检查；不要因本规格讨论过 evals 就为所有改动新增测试框架或全量重复执行。</p>
+</section>
+<section class="spec-section" id="s20" aria-labelledby="s20-title"><div class="chapter-number">CHAPTER 20</div><h2 id="s20-title">待定事项与建议默认值</h2><p>下列内容未由用户逐一确定。接手者应先利用项目上下文解决常规选择；只有缺失答案会明显改变产品目标、兼容性或成本时再询问。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>待定项</th>
+<th>建议起点</th>
+<th>何时需要重新决定</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>目标平台</td>
+<td>先覆盖实际开发平台，记录 shell 选择</td>
+<td>要正式支持 Windows / macOS / Linux 多平台时</td>
+</tr>
+<tr>
+<td>模型/认证</td>
+<td>首版注册实际使用的少数 provider</td>
+<td>需要多账号、订阅 OAuth 或模型路由时</td>
+</tr>
+<tr>
+<td>分发方式</td>
+<td>官方 Node 路径先跑通</td>
+<td>实测证明单文件、Bun 或独立二进制值得时</td>
+</tr>
+<tr>
+<td>自有代码与体积预算</td>
+<td>记录真实基线</td>
+<td>有具体设备/安装/启动限制时设硬阈值</td>
+</tr>
+<tr>
+<td>存储位置与拓扑</td>
+<td>本地持久化、应用自己拥有记录空间</td>
+<td>上游迁移或多项目查询要求共库/分库选择时</td>
+</tr>
+<tr>
+<td>原文保留期与脱敏</td>
+<td>最小必要记录、大内容可配置清理</td>
+<td>长期数据量或敏感项目要求改变时</td>
+</tr>
+<tr>
+<td>远程 tracing</td>
+<td>默认不要求外部服务</td>
+<td>用户明确需要统一查看或跨设备分析时</td>
+</tr>
+<tr>
+<td>默认 retro 范围</td>
+<td>当前会话，按需取相关近期历史</td>
+<td>用户需要全局/跨项目趋势时</td>
+</tr>
+<tr>
+<td>Retro 候选数量</td>
+<td>上限建议 5，无最低数量</td>
+<td>用户希望更短或指定全部候选时</td>
+</tr>
+<tr>
+<td>Eval 数量与预算</td>
+<td>小型代表集，按风险补充</td>
+<td>候选搜索规模和使用流量增加时</td>
+</tr>
+<tr>
+<td>候选启用方式</td>
+<td>每项提议写明范围与生效时机</td>
+<td>以后决定允许某类自动启用时</td>
+</tr>
+<tr>
+<td>Agent 自身源码位置</td>
+<td>显式配置或确认对应 repo</td>
+<td>安装版只有产物而没有可编辑源码时</td>
+</tr>
+<tr>
+<td>任务标签与成功定义</td>
+<td>使用已知上下文与实际检查</td>
+<td>项目有特殊目标、评估方式或人工反馈时</td>
+</tr>
+<tr>
+<td>日常工作区并发</td>
+<td>首版一个活动写入者</td>
+<td>确有并行任务需求且具备独立工作区策略时</td>
+</tr>
+</tbody></table></div>
+<p><strong>本规格不要求现在向用户集中询问所有待定项。</strong> 能根据已有上下文做出的可逆实现选择应继续推进；不要把设计清单变成启动工作的问卷。</p>
+</section>
+<section class="spec-section" id="s21" aria-labelledby="s21-title"><div class="chapter-number">CHAPTER 21</div><h2 id="s21-title">容易误实现的地方</h2><div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>错误理解</th>
+<th>正确处理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>“长期自优化”就是每次任务结束跑自省</td>
+<td>日常记录；用户调用才复盘，选择后才执行候选</td>
+</tr>
+<tr>
+<td>每次 retro 必须给三条以上建议</td>
+<td>上限建议 5，零条也是有效结果</td>
+</tr>
+<tr>
+<td>用户采纳证明优化成功</td>
+<td>采纳是决定；效果独立记录和验证</td>
+</tr>
+<tr>
+<td>用户拒绝说明技术方案无效</td>
+<td>可能是成本、时机、范围或个人偏好</td>
+</tr>
+<tr>
+<td>没有反馈就是成功</td>
+<td>保持未知或弱证据，显示验证覆盖率</td>
+</tr>
+<tr>
+<td>Tokens / 工具 / 测试次数下降一定更好</td>
+<td>同时满足质量、用户约束与必要验证</td>
+</tr>
+<tr>
+<td>历史 trace 重评分证明新 agent 改善</td>
+<td>新行为需要 fresh run，历史主要用于诊断</td>
+</tr>
+<tr>
+<td>换一个模型审查天然独立可靠</td>
+<td>依赖实际结果、评分边界和必要校准</td>
+</tr>
+<tr>
+<td>Skill 就是长期记忆与权限控制</td>
+<td>数据层保存历史，宿主控制能力，skill 指导流程</td>
+</tr>
+<tr>
+<td>Markdown 改动不影响行为，可自动应用</td>
+<td>Prompt / skill 变更同样遵守候选和启用范围</td>
+</tr>
+<tr>
+<td><code>/skill:name</code> 是 Harness 自动能力</td>
+<td>自有应用必须实现或复用命令路由与加载器</td>
+</tr>
+<tr>
+<td>SQLite 让所有写入具备 exactly-once</td>
+<td>数据提交与外部副作用是两个不同边界</td>
+</tr>
+<tr>
+<td>beforeTool 能覆盖所有恢复权限</td>
+<td>safe replay 不再次调用它，必要检查位于执行/恢复边界</td>
+</tr>
+<tr>
+<td>cwd 或 worktree 是完整沙箱</td>
+<td>目录隔离与 OS/网络/凭证隔离分别处理</td>
+</tr>
+<tr>
+<td>子 agent 在 demo 中天然有独立工作区</td>
+<td>demo 子任务共享 cwd；并发写策略需要宿主设计</td>
+</tr>
+<tr>
+<td>从 UI events 累加就是完整费用账本</td>
+<td>使用持久化 usage 与明确 attempt，避免 snapshot / 重放双计</td>
+</tr>
+<tr>
+<td>装 pi-telemetry 就自动有全链路 tracing</td>
+<td>它是契约，实际埋点、存储与导出需要实现</td>
+</tr>
+<tr>
+<td>只导入一个 provider，安装包就不含其他 SDK</td>
+<td>import、依赖安装、bundle 与原生资源分别测量</td>
+</tr>
+<tr>
+<td>约 1.35k 行 demo 就是产品总体积</td>
+<td>该数只描述 demo 自有源码，不含依赖与运行时</td>
+</tr>
+<tr>
+<td>回退 agent 版本会撤销用户文件改动</td>
+<td>回退未来行为与恢复项目文件分别处理</td>
+</tr>
+<tr>
+<td>本次做了规格就代表功能已经实现</td>
+<td>当前交付为设计文档，产品代码与效果尚未验证</td>
+</tr>
+</tbody></table></div>
+</section>
+<section class="spec-section" id="s22" aria-labelledby="s22-title"><div class="chapter-number">CHAPTER 22</div><h2 id="s22-title">可直接交给实现 Agent 的摘要</h2><p>你要实现一个超轻量 coding agent。用户要求基于 pi-durable，具备 evals、LLM Ops 和 tracing，并借鉴 grok-build 的 TUI 体验以及 Pi 的官方 durable demo。核心目标是少量自有代码、可测量的低依赖/运行开销，以及可长期追溯的运行记录。</p>
+<p>采用本规格的推荐默认值作为起点：TypeScript + Node、pi-durable、必要的 pi-ai provider、pi-tui 与本地 SQLite；TUI、headless 和 eval 共用一个 runtime。先测量基线，再优化体积。不要重写 durable 已有的 agent loop、恢复状态机或 usage 聚合。</p>
+<p>长期改进的主方案是<strong>内置、手动调用的 retro skill</strong>。普通 coding 仅记录必要事实，不默认运行 LLM critic。retro 先查询小摘要，再读取少量原始证据；最多提出少量可操作候选，无最低数量，允许证据不足或无需改动。</p>
+<p>每个候选必须写清问题、证据、事实与假设、作用对象、最小改动、必要验证、潜在退化，以及选择后是否启用和何时生效。用户选择后，完成已声明范围，不逐文件重复确认；仅验证的选择不能自动改变默认行为。范围实质扩大或基线失效时重新说明。</p>
+<p>分析阶段的只读能力由宿主落实；skill frontmatter 不替代权限。区分用户业务项目、agent 配置、prompt/skill、工具/runtime 和评测资产。修改 agent 自身时使用正确源码位置，不能热改旧 pending task。记录候选、用户决定、实际变更与效果，不把采纳当成功。</p>
+<p>用 durable 已知 usage 作为用量来源，区分 run、attempt、工具执行和恢复。流式 span 持续到真实终止；completeSimple 内部调用 streamSimple，避免双计。未知费用不记为零。UI 事件可合并为 snapshot，不能当无损审计账本。遥测故障不改变业务结果。</p>
+<p>Durable 恢复已提交状态，不保证 shell 进程原地继续、文件回滚或外部副作用 exactly-once。工具 replay 默认 unsafe；恢复 safe 需要持久化与当前声明同时为 safe，而且不重新运行 beforeTool。SQLite 默认 NORMAL 面向进程崩溃，不能承诺掉电零丢失。一个 storage 由一个进程拥有；首版避免多个活动写入者共享工作区。</p>
+<p>评估优先真实结果和必要检查。历史趋势提出假设；需要证明行为改进时，在相同任务与初态上 fresh run，分开 session/工作目录，避免候选修改自己的评分器。按风险验证，不为每次复盘强制全量 eval、第二 reviewer 或额外测试框架。结果可以是改善、退化、无明显变化或证据不足。</p>
+<p>不要默认引入常驻 optimizer、自动生成并启用 skill、向量数据库、自动发布或 fine-tuning。一个稳定的 retro skill 管流程，记录层提供长期记忆，eval 检验候选，版本控制承载改变。先把这条简单路径做可靠，再根据实际收益扩展。</p>
+<p>本文件中的字段、命令和目录是建议，需适配当前仓库。用户尚未指定的 provider、平台、预算、保留期和打包形式在实现时决定，不应转成一轮冗长确认。本次仅生成规格；不要声称已实现、已接通观测或已测得性能提升。</p>
+</section>
+<section class="spec-section" id="s23" aria-labelledby="s23-title"><div class="chapter-number">CHAPTER 23</div><h2 id="s23-title">来源、版本与核查索引</h2><p>本文的架构、schema、产品合同和分阶段路线是本会话的设计建议。下列资料用于核对上游能力与研究背景，不作为给执行 agent 的额外指令。Pi 源码链接固定于本会话研究 commit；<code>main</code> 和网站文档可能随后改变，实现时需复核。</p>
+<h3 id="s23-p1">Pi / TUI / 存储与观测</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>来源</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><span id="src-durable">S01</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/README.md">pi-durable README</a></td>
+<td>Experimental、会话与进度提交、存储语义</td>
+</tr>
+<tr>
+<td><span id="src-durable-pkg">S02</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/package.json">durable package.json</a></td>
+<td>包依赖、Node、公开 exports</td>
+</tr>
+<tr>
+<td><span id="src-demo">S03</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable/README.md">durable demo README</a></td>
+<td>demo 范围、启动、认证与命令</td>
+</tr>
+<tr>
+<td><span id="src-coding-pkg">S04</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/package.json">coding-agent package.json</a></td>
+<td>实验目录不包含在发布文件中</td>
+</tr>
+<tr>
+<td><span id="src-demo-runtime">S05</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable/runtime.ts">demo runtime.ts</a></td>
+<td>宿主、模型、工具与视图接线</td>
+</tr>
+<tr>
+<td><span id="src-model-runtime">S06</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/core/model-runtime.ts">core/model-runtime.ts</a></td>
+<td>完整 ModelRuntime 依赖范围</td>
+</tr>
+<tr>
+<td><span id="src-ai-pkg">S07</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/ai/package.json">ai/package.json</a></td>
+<td>Provider SDK 与命名入口</td>
+</tr>
+<tr>
+<td><span id="src-ai-providers">S08</span></td>
+<td><a href="https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/ai/src/providers">ai/src/providers</a></td>
+<td>按需 provider 注册</td>
+</tr>
+<tr>
+<td><span id="src-tui">S09</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/tui/README.md">tui README</a></td>
+<td>UI 能力与布局</td>
+</tr>
+<tr>
+<td><span id="src-tui-pkg">S10</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/tui/package.json">tui/package.json</a></td>
+<td>依赖与平台资源</td>
+</tr>
+<tr>
+<td><span id="src-grok">S11</span></td>
+<td><a href="https://github.com/xai-org/grok-build">grok-build</a></td>
+<td>TUI 参考与许可入口，main 未固定</td>
+</tr>
+<tr>
+<td><span id="src-grok-cargo">S12</span></td>
+<td><a href="https://github.com/xai-org/grok-build/blob/main/Cargo.toml">grok-build Cargo.toml</a></td>
+<td>Rust / TUI 工具链，main 未固定</td>
+</tr>
+<tr>
+<td><span id="src-telemetry">S13</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/telemetry/README.md">telemetry README</a></td>
+<td>契约、adapter、pi-ai 传播边界</td>
+</tr>
+<tr>
+<td><span id="src-generation">S14</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/generation.ts">harness/generation.ts</a></td>
+<td>生成、重试和 deferred 路径</td>
+</tr>
+<tr>
+<td><span id="src-evals">S15</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/evals/README.md">evals README</a></td>
+<td>上游实验与报告参考</td>
+</tr>
+<tr>
+<td><span id="src-evals-pkg">S16</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/evals/package.json">evals/package.json</a></td>
+<td>private workspace</td>
+</tr>
+<tr>
+<td><span id="src-skills">S17</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md">coding-agent skills 文档</a></td>
+<td>显式命令与按需加载，文档 main 未固定</td>
+</tr>
+<tr>
+<td><span id="src-chord-pkg">S18</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/chord/package.json">chord/package.json</a></td>
+<td>传递依赖与打包器</td>
+</tr>
+<tr>
+<td><span id="src-tool">S19</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/tool.ts">harness/tool.ts</a> 与 <a href="https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/tools">内置工具定义</a></td>
+<td>Replay 默认值、恢复分支、beforeTool 与工具声明</td>
+</tr>
+<tr>
+<td><span id="src-sqlite">S20</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/storage/sqlite/node.ts">storage/sqlite/node.ts</a></td>
+<td>node:sqlite、WAL、NORMAL</td>
+</tr>
+<tr>
+<td><span id="src-jsonl">S21</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/storage/jsonl/node.ts">storage/jsonl/node.ts</a></td>
+<td>JSONL 打开参数与 fsync</td>
+</tr>
+<tr>
+<td><span id="src-demo-sessions">S22</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable/sessions.ts">demo sessions.ts</a></td>
+<td>Session 所有权与锁</td>
+</tr>
+<tr>
+<td><span id="src-events">S23</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/events.ts">harness/events.ts</a></td>
+<td>有界订阅、snapshot 与派生事件</td>
+</tr>
+<tr>
+<td><span id="src-env">S24</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/env/node.ts">env/node.ts</a></td>
+<td>进程与文件执行环境</td>
+</tr>
+<tr>
+<td><span id="src-path">S25</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/tools/path-utils.ts">tools/path-utils.ts</a></td>
+<td>工具路径规范化与向 ExecutionEnv 的解析委派</td>
+</tr>
+<tr>
+<td><span id="src-telemetry-memory">S26</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/telemetry/src/memory.ts">telemetry memory.ts</a></td>
+<td>内存参考实现</td>
+</tr>
+<tr>
+<td><span id="src-ai-models">S27</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/ai/src/models.ts">ai/models.ts</a></td>
+<td>completeSimple / streamSimple 调用关系</td>
+</tr>
+<tr>
+<td><span id="src-compaction">S28</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/compaction.ts">harness/compaction.ts</a></td>
+<td>摘要调用与计量</td>
+</tr>
+<tr>
+<td><span id="src-telemetry-tests">S29</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/telemetry/src/testing/conformance.ts">telemetry conformance</a></td>
+<td>Callback 与观测正确性验证</td>
+</tr>
+<tr>
+<td><span id="src-usage">S30</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable/src/harness/usage.ts">harness/usage.ts</a></td>
+<td>模型与工具已知用量累计</td>
+</tr>
+<tr>
+<td><span id="src-ai-types">S31</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/ai/src/types.ts">ai/types.ts</a></td>
+<td>Usage 子集、模型响应字段</td>
+</tr>
+<tr>
+<td><span id="src-otlp">S32</span></td>
+<td><a href="https://opentelemetry.io/docs/specs/otlp/">OTLP specification</a></td>
+<td>重发、可靠性与重复数据</td>
+</tr>
+<tr>
+<td><span id="src-otel-genai">S33</span></td>
+<td><a href="https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/README.md">GenAI semantic conventions</a></td>
+<td>属性与稳定性状态，main 未固定</td>
+</tr>
+<tr>
+<td><span id="src-langfuse">S34</span></td>
+<td><a href="https://langfuse.com/integrations/native/opentelemetry">Langfuse OpenTelemetry integration</a></td>
+<td>可选后端协议兼容性</td>
+</tr>
+</tbody></table></div>
+<h3 id="s23-p2">评估、自优化与 Skill 参考</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="规格对照表"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>来源</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><span id="src-infra-evals">S35</span></td>
+<td><a href="https://www.anthropic.com/engineering/infrastructure-noise">Quantifying infrastructure noise in agentic coding evals</a></td>
+<td>环境对实验结果的影响</td>
+</tr>
+<tr>
+<td><span id="src-evals-practice">S36</span></td>
+<td><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Demystifying evals for AI agents</a></td>
+<td>Task、trial、grader 与真实 outcome</td>
+</tr>
+<tr>
+<td><span id="src-retro">S37</span></td>
+<td><a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/retro/SKILL.md">mattpocock retro / SKILL.md</a></td>
+<td>手动会话复盘与环境改进建议，main 未固定</td>
+</tr>
+<tr>
+<td><span id="src-demo-prompt">S38</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable/prompt.ts">demo prompt.ts</a></td>
+<td>Skill 加载来自宿主集成</td>
+</tr>
+<tr>
+<td><span id="src-demo-tui">S39</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable/tui.ts">demo tui.ts</a></td>
+<td>Demo 命令分发与 UI 接线</td>
+</tr>
+<tr>
+<td><span id="src-reflexion">S40</span></td>
+<td><a href="https://arxiv.org/abs/2303.11366">Reflexion, arXiv:2303.11366</a></td>
+<td>文字反馈、经验与权重更新的区分</td>
+</tr>
+<tr>
+<td><span id="src-gepa">S41</span></td>
+<td><a href="https://arxiv.org/abs/2507.19457">GEPA, arXiv:2507.19457</a></td>
+<td>基于轨迹的候选优化与评估</td>
+</tr>
+<tr>
+<td><span id="src-dgm">S42</span></td>
+<td><a href="https://sakana.ai/dgm/">Darwin Gödel Machine, Sakana AI</a></td>
+<td>代码自改与评测漏洞风险</td>
+</tr>
+<tr>
+<td><span id="src-demo-subagent">S43</span></td>
+<td><a href="https://github.com/earendil-works/pi/blob/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable/subagent.ts">demo subagent.ts</a></td>
+<td>子任务身份、工作区与工具边界</td>
+</tr>
+</tbody></table></div>
+<h3 id="s23-p3">核查说明</h3>
+<ul>
+<li>主项目参考入口：<a href="https://github.com/earendil-works/pi/tree/main/packages/durable">pi-durable</a>、<a href="https://github.com/earendil-works/pi/tree/main/packages/coding-agent/src/experimental/durable">官方 demo</a>、<a href="https://github.com/xai-org/grok-build">grok-build</a>、<a href="https://github.com/mattpocock/skills/tree/main/skills/engineering/retro">retro</a>。</li>
+<li>本文不引用研究论文的性能数字作为本项目目标或承诺。</li>
+<li>本次仅研究与撰写规格，没有执行目标产品的依赖安装、构建或性能基准；HTML 自身的结构检查与产品验证不是一回事。</li>
+<li>其他 agent 实施时，先核对所选版本；如果上游变动，以实际源码和本规格的产品合同共同判断调整，不盲目复制过时接口。</li>
+</ul>
+</section></article>
+</div>
+<footer class="footer"><span>会话结果汇编 · 需求、建议、源码事实与待定项已区分</span><span>单文件 HTML · 无远程字体、脚本或样式依赖</span></footer>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script>
+(() => {
+  document.documentElement.classList.add('enhanced');
+  const sections = [...document.querySelectorAll('.spec-section')];
+  const links = [...document.querySelectorAll('.toc-link')];
+  const searchable = new Map(sections.map(s => [s.id,s.textContent.toLocaleLowerCase()]));
+  const search = document.getElementById('chapter-search');
+  const note = document.getElementById('search-note');
+  search.addEventListener('input', () => {
+    const query = search.value.trim().toLocaleLowerCase();
+    let matches = 0;
+    for (const a of links) {
+      const match = !query || searchable.get(a.dataset.section).includes(query);
+      a.hidden = !match;
+      if (match) matches++;
+    }
+    document.querySelectorAll('.toc-group').forEach(g => {
+      g.hidden = ![...g.querySelectorAll('.toc-link')].some(a => !a.hidden);
+    });
+    note.textContent = query ? matches + ' 个章节命中；回车跳到首项。正文保持完整。' : '查找正文关键词；不会隐藏正文。';
+  });
+  search.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { const match = links.find(a => !a.hidden); if (match) match.click(); }
+    if (e.key === 'Escape') { search.value=''; search.dispatchEvent(new Event('input')); search.blur(); }
+  });
+  const toast = document.getElementById('toast');
+  let toastTimer;
+  function announce(message) {
+    toast.textContent=message; toast.hidden=false;
+    clearTimeout(toastTimer); toastTimer=setTimeout(() => {toast.hidden=true},3200);
+  }
+  async function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      try { await navigator.clipboard.writeText(text); return; } catch (_) {}
+    }
+    const field=document.createElement('textarea'); field.value=text;
+    Object.assign(field.style,{position:'fixed',left:'-10000px',top:'0'});
+    document.body.append(field); field.select();
+    const ok=document.execCommand('copy'); field.remove();
+    if (!ok) throw new Error('clipboard unavailable');
+  }
+  document.getElementById('copy-summary').addEventListener('click',async () => {
+    try { await copyText(document.getElementById('s22').innerText); announce('交接摘要已复制。'); }
+    catch (_) { location.hash='s22'; announce('请在交接摘要章节中手动选择复制。'); }
+  });
+  document.getElementById('copy-all').addEventListener('click',async () => {
+    try {
+      const sources=[...document.querySelectorAll('#s23 a[href^="https://"]')].map(a=>a.textContent+' — '+a.href);
+      const text=[document.title,'2026-10-09 · Spec v0.1.0','',document.getElementById('spec-content').innerText,'','来源链接',...sources].join(String.fromCharCode(10));
+      await copyText(text); announce('完整规格纯文本与来源链接已复制。');
+    }
+    catch (_) { announce('当前预览限制剪贴板；可在浏览器打开文件后复制。'); }
+  });
+  document.getElementById('print-spec').addEventListener('click',() => window.print());
+  if ('IntersectionObserver' in window) {
+    const observer=new IntersectionObserver(entries => {
+      const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top);
+      if(!visible.length) return;
+      for (const a of links) {
+        const active=a.dataset.section===visible[0].target.id;
+        a.classList.toggle('active',active);
+        if(active) a.setAttribute('aria-current','location'); else a.removeAttribute('aria-current');
+      }
+    },{rootMargin:'-5% 0px -75% 0px',threshold:0});
+    sections.forEach(s=>observer.observe(s));
+  }
+  const progress=document.getElementById('progress'); let pending=false;
+  function updateProgress(){const max=document.documentElement.scrollHeight-innerHeight;progress.style.width=(max>0?Math.max(0,Math.min(100,scrollY/max*100)):0)+'%';pending=false;}
+  addEventListener('scroll',()=>{if(!pending){pending=true;requestAnimationFrame(updateProgress)}},{passive:true});
+  addEventListener('resize',updateProgress); updateProgress();
+})();
+</script>
+</body>
+</html>

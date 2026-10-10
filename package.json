@@ -1,0 +1,71 @@
+{
+  "name": "pi-durio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "pi-durio": "dist/src/cli.js"
+  },
+  "files": [
+    "dist/src",
+    "dist/execution",
+    "vendor/pi-tui",
+    "docs/implementation/pi-durio-v1/issue-11/README.md",
+    "docs/implementation/pi-durio-v1/issue-16/README.md",
+    "docs/implementation/pi-durio-v1/issue-16/width-repair-r5.md",
+    "docs/implementation/pi-durio-v1/issue-16/width-exception-authorization.json",
+    "scripts/eval",
+    "scripts/isolation",
+    "docs/implementation/pi-durio-v1/issue-21/README.md",
+    "docs/implementation/pi-durio-v1/issue-22/README.md",
+    "docs/implementation/pi-durio-v1/issue-27",
+    "docs/implementation/pi-durio-v1/issue-23/README.md",
+    "docs/implementation/pi-durio-v1/issue-24/README.md",
+    "docs/implementation/pi-durio-v1/issue-28",
+    "docs/implementation/pi-durio-v1/issue-25/README.md",
+    "docs/implementation/pi-durio-v1/issue-29/README.md",
+    "docs/implementation/pi-durio-v1/issue-26/README.md"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "build": "node scripts/build-artifact.mjs",
+    "test": "node --test dist/test/*.test.js",
+    "check": "npm run build && npm test",
+    "prepack": "npm run build && node scripts/prepare-pack.mjs"
+  },
+  "dependencies": {
+    "@earendil-works/chord": "1.1.0",
+    "@earendil-works/pi-ai": "1.1.0",
+    "@earendil-works/pi-durable": "1.1.0",
+    "@earendil-works/pi-tui": "file:vendor/pi-tui/pi-tui-1.1.0-durio-width.1.tgz",
+    "proper-lockfile": "4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/proper-lockfile": "4.1.4",
+    "typescript": "5.9.3"
+  },
+  "exports": {
+    ".": "./dist/src/runtime.js",
+    "./offline": "./dist/src/offline.js",
+    "./tui": "./dist/src/tui/app.js",
+    "./query": "./dist/src/query.js",
+    "./eval": "./dist/src/eval/runner.js",
+    "./storage": "./dist/src/storage.js",
+    "./compaction": "./dist/src/compaction.js",
+    "./improve": "./dist/src/improve.js",
+    "./improve-decisions": "./dist/src/improve-decisions.js",
+    "./improve-validation": "./dist/src/improve-validation.js",
+    "./improve-selection": "./dist/src/tui/improve-selection.js",
+    "./metrics": "./dist/src/metrics/index.js"
+  },
+  "bundleDependencies": [
+    "@earendil-works/pi-ai",
+    "@earendil-works/pi-durable",
+    "@earendil-works/chord",
+    "proper-lockfile",
+    "@earendil-works/pi-tui"
+  ]
+}

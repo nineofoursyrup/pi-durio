@@ -1,0 +1,29 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /GRANT_EXPIRED_BEFORE_START/. Input:
+
+'Expected values to be strictly equal:\n' +
+  '+ actual - expected\n' +
+  '\n' +
+  '+ 2.7819936000000003\n' +
+  '- 2.7819936\n' +
+  '           ^\n'
+
+    at fixture (file:///Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-repair.mjs:64:41)
+    at async file:///Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-repair.mjs:96:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'Expected values to be strictly equal:\n' +
+    '+ actual - expected\n' +
+    '\n' +
+    '+ 2.7819936000000003\n' +
+    '- 2.7819936\n' +
+    '           ^\n',
+  expected: /GRANT_EXPIRED_BEFORE_START/,
+  operator: 'match',
+  diff: 'simple'
+}
+
+Node.js v26.8.2

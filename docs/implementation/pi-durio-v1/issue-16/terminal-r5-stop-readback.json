@@ -1,0 +1,47 @@
+{
+  "at": "2026-10-09T13:04:40.703722+00:00",
+  "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+  "scenario": "stop",
+  "human": "PASS",
+  "machineChecks": "PASS",
+  "lifecycleEvents": [
+    {
+      "at": "2026-10-09T13:01:47.659Z",
+      "event": "provider-request",
+      "ordinal": 1
+    },
+    {
+      "at": "2026-10-09T13:01:51.328Z",
+      "event": "provider-cancellation-received"
+    },
+    {
+      "at": "2026-10-09T13:01:51.528Z",
+      "event": "provider-stream-terminated"
+    },
+    {
+      "at": "2026-10-09T13:02:12.334Z",
+      "event": "scenario-finished"
+    }
+  ],
+  "remoteTermination": "unknown",
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-01-30-125Z/stop/operator-observation.json",
+      "sha256": "a4803a5c089d30e8630aea6cbc27e6d220bec7dd18b12248cafc20bb9c779eb4"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-01-30-125Z/stop/machine.json",
+      "sha256": "5b309bd1e0af2cee9f7e4b9dbd13851cf9251a73beb450c409d0556516390480"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-01-30-125Z/stop/events.jsonl",
+      "sha256": "b77dd5970a58e21a56eda06ad50b970319cfb111a0c95c60bd4e9a50300fd0ee"
+    }
+  ],
+  "remaining": [
+    "esc",
+    "exit",
+    "fault",
+    "supplement completion and minimum grid"
+  ]
+}

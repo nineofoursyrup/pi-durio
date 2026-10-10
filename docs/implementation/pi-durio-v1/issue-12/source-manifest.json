@@ -1,0 +1,88 @@
+{
+  "baseCommit": "b405c3ace329ec4601cbeb1753385e8c890132b3",
+  "sourceFiles": [
+    {
+      "path": "scripts/isolation/Containerfile",
+      "bytes": 244,
+      "sha256": "644af6e828f3b149b92977ea215f1f0ca6d54eace8714be375ca6c3b4047a93b"
+    },
+    {
+      "path": "scripts/isolation/README.md",
+      "bytes": 8674,
+      "sha256": "f2b65aa2df0f182f879046de6dd9394e948413868ee7e2e9945c1373a125beba"
+    },
+    {
+      "path": "scripts/isolation/boundary.mjs",
+      "bytes": 11638,
+      "sha256": "b5ea09cb8f982d18e2f181777154db62f6bb9acf082a719f01647ecb12a4c990"
+    },
+    {
+      "path": "scripts/isolation/export.mjs",
+      "bytes": 2645,
+      "sha256": "3c672cf3868275a90766a346de7cb43a0b068fcef04d2e1e83777fa134a9d849"
+    },
+    {
+      "path": "scripts/isolation/fixtures/native-probe.py",
+      "bytes": 2246,
+      "sha256": "ee4ebc2f3dcee3f32261cdfb7bd1bece64a72e3aa6db81b06d2eaba43456031b"
+    },
+    {
+      "path": "scripts/isolation/fixtures/probe.mjs",
+      "bytes": 4564,
+      "sha256": "6b167e916f776dc31633b16029715019ee5609dddb37e2733d3a896268b9f603"
+    },
+    {
+      "path": "scripts/isolation/probe.mjs",
+      "bytes": 11518,
+      "sha256": "8f5cb4311ee007013a45ed5e6028fa4e0bbe528d61a55da22fc8adc03c6bae6f"
+    },
+    {
+      "path": "scripts/isolation/restrict.py",
+      "bytes": 2291,
+      "sha256": "acf442988bd1386fdc688c737b656eb9b6f315d9775fd6f9faa1091485f6fff7"
+    },
+    {
+      "path": "scripts/isolation/test/boundary.test.mjs",
+      "bytes": 5846,
+      "sha256": "5dfc3ac1573aadfd3f92341f639871974878c6b85ec68eb363fb67ab846d3f46"
+    },
+    {
+      "path": "scripts/isolation/test/export.test.mjs",
+      "bytes": 1287,
+      "sha256": "73b09eedae422cbb775d22edfa39d7c905a583e2b055e414034a82222b444c47"
+    }
+  ],
+  "retainedEvidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-12/probe-final-02/report.json",
+      "bytes": 27935,
+      "sha256": "6117541d8500b3770b028f9481edd499756aeed1a7e91dcafbb6d120f4779517"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-12/tests-final-03.log",
+      "bytes": 728,
+      "sha256": "de2d09cb33417cf972e1a0ff786eb024ab93f80bf0d4f2befc2dcf38ef6aed25"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-12/prepared-image.oci.tar",
+      "bytes": 96681984,
+      "sha256": "120137872998cb03a5dd6e5cdf99fbbce3ca11c3eea8e503303cf7d5b9154d85"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-12/vmlinux-6.18.35-197-debug",
+      "bytes": 30423552,
+      "sha256": "fb2cfb79eb1ae19447a85d75682d7fa5cfec97e24beb2609a492b806e8072c8d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-12/research/storage-before-cleanup.json",
+      "bytes": 569,
+      "sha256": "1abc707dce432de21e19fab894d5615701a7b9cb9d2a85f445c7a9844424f631"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-12/research/storage-after-cleanup.json",
+      "bytes": 572,
+      "sha256": "55e002631066fac86ee902c03fc10a827687a8524c4b1a915f1b0a9e493a9acb"
+    }
+  ],
+  "scope": "Issue #12 only; #21 product runtime integration remains unverified."
+}

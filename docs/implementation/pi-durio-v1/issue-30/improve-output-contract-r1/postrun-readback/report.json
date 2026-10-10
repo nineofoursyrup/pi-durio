@@ -1,0 +1,359 @@
+{
+  "status": "READ_ONLY_POSTRUN_VERIFIED",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/frozen-manifest.json",
+    "bytes": 77149,
+    "sha256": "809aa5350c2d1d3cd3fac9281210ce41e2ff643e889a565bd15f25ae02e30856"
+  },
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "producer": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+    "bytes": 92984,
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "authorization": {
+    "source": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/authorization-source.json",
+      "bytes": 1061,
+      "sha256": "3770836ee5a056a29e94fd8bd7412117c0dbfe1388a17997a2ac5d97d51a4fd5"
+    },
+    "author": "human-user",
+    "origin": {
+      "kind": "codex-user-reply",
+      "requestToolCallId": "call_2366d4d8dee44f8a9d3e4ec84160df92",
+      "userMessageId": "msg_01a1254f-fb83-78e2-9291-4d38ffdd9678"
+    },
+    "receivedAt": "2026-10-10T10:16:01.155Z",
+    "paidStart": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/paid-start.json",
+      "bytes": 1324,
+      "sha256": "0c932be246961a5a3f4bdbc6401dd6b7d332414cb1310a011aa9dd8d00549543"
+    },
+    "consumed": true,
+    "newAuthorizationCreatedByReadback": false
+  },
+  "startedAt": "2026-10-10T10:17:20.019Z",
+  "endedAt": "2026-10-10T10:17:55.835Z",
+  "launchExit": {
+    "exit": 0,
+    "observedAt": "2026-10-10T10:19:12.163537+00:00",
+    "execSessionId": 9631,
+    "stdout": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/launch-r1.stdout",
+    "stderrBytes": 0,
+    "paidStartConsumed": true,
+    "restarts": 0
+  },
+  "batchStatus": "AWAITING_ACTUAL_CANDIDATE_SELECTION",
+  "runId": "93d85e4a-d4ef-472d-add8-610e2c1de44a",
+  "taskId": "45deb270-f8eb-4d7e-8413-3eba9ca61c16",
+  "sessionId": "7bbcf33e-e01a-460a-8bec-6d2ddf6a62d1",
+  "runtime": {
+    "status": "completed",
+    "observation": "ok",
+    "cleanup": "confirmed",
+    "lifecycle": {
+      "intent": null,
+      "disposition": "completed",
+      "cleanupTimeoutMs": 10000,
+      "storage": "closed",
+      "owner": "release-after-host-close",
+      "remoteTermination": "unknown"
+    }
+  },
+  "formalReport": {
+    "id": "v1-live-r4-improve",
+    "revision": "b8e9b7c7c08d06d5ed955339630fac5e1b8fe59e6e700acd6499863d932aad2a",
+    "state": "complete",
+    "candidateCount": 1,
+    "selectedCount": 0,
+    "reason": null,
+    "summary": "The explicitly registered project clamps a number to inclusive bounds. Static inspection of clamp.ts (e1:49:a680a9179462aab085f0352e77a9e1c25a3d53ac56cf41015e1d20f913cf8ca7) shows `Math.min(upper, Math.min(lower, value))`, which for a value below `lower` returns `lower` but for a value above `upper` returns `upper`; however when `value` is below `lower` the inner `Math.min(lower, value)` equals `value`, and the outer min of `upper` and that result clamps high values correctly — the actual defect is that a below-lower value is returned as `value` only if `value <= upper`... Static tracing: inner = min(lower, value); result = min(upper, inner). For value < lower, inner = value, result = min(upper, value) = value (since value < lower <= upper), so the result is the unclamped low value — a genuine low-bound violation. check.mjs (e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2) expects clamp(-4,0,10)=0 and clamp(-9,-5,-1)=-5, so the low-bound behavior fails. Observed execution evidence: the retained run invoked `node check.mjs`, the managed command completed with exitCode 1 (e1:25:35696d254652b487ec6bab04fddf29f7ca231e63adf5d1c69e777eb23954193c) and a tool.error recorded 'Command exited with code 1' (e1:26:3f8896d0da5cc0426f7d92f9eed80708b8b289446b865d3eb47025d703e25edb). The raw failure stdout/stderr body is withheld (e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503 is [WITHHELD]), so the specific failing assertion output is not an acquired fact. One minimal repair candidate is supported in clamp.ts only; README.md, check.mjs and package.json remain protected. No performance improvement is claimed and no success counterexample was acquired. Report and candidate are analysis-only; no execution, validation, writeback or activation occurs here.",
+    "gaps": [
+      "The retained failure body is withheld (e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503 is [WITHHELD]); no acquired evidence states the exact failing assertion or the observed incorrect return value.",
+      "No successful/exit-0 run of check.mjs was acquired, so no success counterexample exists for either the current or the proposed code.",
+      "The self-source target is unregistered and incomplete; no self-source material was read and none is cited.",
+      "package.json declares no test script, so the acceptance path is the direct node check.mjs invocation observed in the retained run, not a project-scripted test.",
+      "No failure body, stack trace, or stdout/stderr of the check run was acquired; all defect reasoning beyond exitCode 1 is static analysis of registered source text.",
+      "No previous reports or decisions exist for this project, so no suppression or prior-key continuity applies; no problemKey was inherited.",
+      "The available evidence run is an offline fixture (mode offline, deepseek-flash-offline-fixture), so the run environment is not a real production execution.",
+      "e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503: raw acquired chunk has incomplete boundary context; use a complete textual result for derived analysis",
+      "Self source is not explicitly registered; no directory search or installation edits permitted"
+    ],
+    "record": {
+      "seq": 4297,
+      "kind": "improve.report",
+      "at": "2026-10-10T10:17:55.797Z",
+      "sourceId": "e1:4297:33ee6de1baf727c584809056aa98e507d77c595368e255fae135053b30501cdc",
+      "body": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/33ee6de1baf727c584809056aa98e507d77c595368e255fae135053b30501cdc",
+        "sha256": "33ee6de1baf727c584809056aa98e507d77c595368e255fae135053b30501cdc",
+        "bytes": 16341
+      }
+    },
+    "liveEqualsReopenedAndPersistedReport": true
+  },
+  "newHostAccounting": {
+    "requests": 4,
+    "http200": 4,
+    "completeRawSse": 4,
+    "terminalUsageEqualSettlements": 4,
+    "knownTokens": 24585,
+    "unknown": 0,
+    "reservedTokens": 0,
+    "conservativeKnownUsd": 0.029502
+  },
+  "cumulativeHostAccounting": {
+    "requests": 45,
+    "knownTokens": 130611,
+    "retainedOldUnknownTokens": 1056768,
+    "chargedUpperTokens": 1187379,
+    "conservativeChargedUpperUsd": 1.4248548,
+    "boundExceeded": false,
+    "ledger": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/cumulative-budget.json",
+      "bytes": 2806,
+      "sha256": "ea3f2100966346170682aa19184bc9765503f18f06cb11ccd53505d2b84da2eb"
+    },
+    "accountBill": "Not observed"
+  },
+  "sdkMirror": {
+    "tokens": 24585,
+    "catalogEstimateUsd": 0.0065205359999999995,
+    "addedToHostAccounting": false
+  },
+  "rawProviderIdentity": {
+    "models": [
+      "deepseek-flash"
+    ],
+    "fingerprints": [
+      "aeb56401ca74e127821c4f9126dcb669"
+    ],
+    "immutableModelVersionOrWeightsProven": false
+  },
+  "rawText": {
+    "proposedDraftCount": 1,
+    "formallyRegisteredCandidateCount": 1,
+    "answer": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw-analysis-answer.txt",
+      "bytes": 9764,
+      "sha256": "13ea1c557af31625295535a896ab7ddd6105daf61f34d568b0a6dd671f37422c"
+    },
+    "index": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw-answer-index.json",
+      "bytes": 4002,
+      "sha256": "2994b331bce53ac905fcb840fef606155a876b40fdf8c1903ef18e4238d73023"
+    },
+    "notSelectedOrExecuted": true
+  },
+  "eventCountsForActualRunOnly": {
+    "preflight": 1,
+    "budget.plan": 1,
+    "improve.source": 4,
+    "improve.started": 1,
+    "task.accepted": 1,
+    "ownership.acquired": 1,
+    "execution.artifact": 1,
+    "execution.config": 1,
+    "ownership.session": 1,
+    "run.started": 1,
+    "submission.intent": 1,
+    "submission.accepted": 1,
+    "generation.request": 4,
+    "model.intent": 4,
+    "model.payload": 4,
+    "model.fetch-intent": 4,
+    "budget.reserve": 4,
+    "provider.dispatch": 4,
+    "model.dispatch": 4,
+    "provider.http": 4,
+    "model.http": 4,
+    "provider.bytes": 1053,
+    "model.provider-event": 3076,
+    "budget.settle": 4,
+    "model.response": 4,
+    "tool.intent": 11,
+    "tool.dispatch": 11,
+    "improve.summary": 1,
+    "tool.result": 11,
+    "tool.summary": 11,
+    "improve.derived": 10,
+    "submission.settled": 1,
+    "usage.projection": 1,
+    "lifecycle.close-started": 1,
+    "lifecycle.storage-closing": 1,
+    "lifecycle.storage-closed": 1,
+    "durable.closed-snapshot": 2,
+    "improve.report": 1,
+    "run.closed": 1
+  },
+  "toolsObserved": {
+    "evidence_summary": 1,
+    "evidence_read": 6,
+    "source_view": 4
+  },
+  "noNewToolErrors": true,
+  "canonicalCandidate": {
+    "id": "candidate:197afe0a113c5c58ad0810ca24a4ad98",
+    "display": "R1",
+    "revision": "49e9331f282cda12efe5fb89f4b6ef35b8e50a8dc2d8140fa48c5fe3824c91c8",
+    "conditionKey": "2b0d2f5cc94ec16c8ae984afdd659866788ef20395d862a39f21da155bfdc3fe",
+    "target": {
+      "id": "clamp-project",
+      "kind": "project",
+      "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project",
+      "files": [
+        {
+          "path": "clamp.ts",
+          "sha256": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+          "bytes": 111,
+          "content": {
+            "sha256": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+            "bytes": 111
+          },
+          "sourceId": "e1:49:a680a9179462aab085f0352e77a9e1c25a3d53ac56cf41015e1d20f913cf8ca7",
+          "state": "available",
+          "reason": []
+        },
+        {
+          "path": "check.mjs",
+          "sha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d",
+          "bytes": 357,
+          "content": {
+            "sha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d",
+            "bytes": 357
+          },
+          "sourceId": "e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2",
+          "state": "available",
+          "reason": []
+        },
+        {
+          "path": "README.md",
+          "sha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+          "bytes": 129,
+          "content": {
+            "sha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+            "bytes": 129
+          },
+          "sourceId": "e1:51:ccf3e336d85ab9b57c2361610ef0777fc8288d1d2cedec9ee0eef5133438c927",
+          "state": "available",
+          "reason": []
+        },
+        {
+          "path": "package.json",
+          "sha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+          "bytes": 87,
+          "content": {
+            "sha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+            "bytes": 87
+          },
+          "sourceId": "e1:52:8cc84f042f96e2325ad9daf05845f9fa1bcd0183132f01a0329b99a45bfa60b4",
+          "state": "available",
+          "reason": []
+        }
+      ],
+      "baseline": "46864e756634ac28260fe43119d15103008ce1a2fbc9b37b548c2b2027ab257f",
+      "applicableVersion": "c3a26d10711de3ae1afdd08698e4dd43a92f48d1bc591653e8778218aa373ffd",
+      "state": "verified",
+      "gaps": []
+    },
+    "scope": [
+      "clamp.ts"
+    ],
+    "execution": "not-started",
+    "effect": "unverified",
+    "selection": "unselected",
+    "copy": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/canonical-candidate-copy.json",
+      "bytes": 8837,
+      "sha256": "6ef254121b198beb905a70396f4909131c90912773f720ed50030291104b889f"
+    }
+  },
+  "coordinatorStaticReviewOnly": {
+    "files": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/STATIC-ANALYSIS.md",
+        "bytes": 2319,
+        "sha256": "338289197a41ee57af99148fd389d00f8b602dea876e9b8d4a75c89ac4924eb8"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/static-analysis.json",
+        "bytes": 3819,
+        "sha256": "f1eca720d5005ba5c90908ba87b7876bd96fe486cabf3dda9c55ba46e86dcf77"
+      }
+    ],
+    "conclusion": {
+      "status": "CONFIRMED_BY_ALGEBRA_ONLY",
+      "location": "report.summary opening assertions and candidate.hypotheses[1]",
+      "originalHypothesis": "The check.mjs failure is caused specifically by the below-lower cases while in-range and above-upper cases already pass; this is a static inference from the expression and case list, not from the withheld assertion output.",
+      "explanation": "Given lower <= upper, min(upper,min(lower,value)) equals min(lower,value). Thus for (6,0,10) it is0 and for(14,0,10) it is0, contradicting the claim that in-range and above-upper cases already pass. The summary opens with inconsistent statements before correctly tracing below-lower behavior. No actual check or candidate was executed.",
+      "scope": "Model-generated report reasoning error; not a product parser or schema failure. Preserve original report/revision, disclose this caveat to the user, do not silently correct it."
+    },
+    "proposalAssessment": {
+      "status": "SUPPORTED_FOR_EXPLICIT_HUMAN_CONSIDERATION_NOT_VALIDATED",
+      "reason": "For lower<=upper, max(lower,value) floors below-lower inputs while preserving others, then min(upper,...) caps above-upper inputs. The one-expression replacement matches the original registered README contract and all input classes in the existing protected check. This is static reasoning only.",
+      "limits": "No test PASS, successful counterexample, candidate effect, writeback, activation or complete improve acceptance is claimed. Protected regression remains required after a new explicit selection."
+    },
+    "rawTransportAndSettlement": "PASS_FOR_THIS_FOUR_REQUEST_RUN",
+    "formalOutputShape": "COMPLETE_CANDIDATE_REGISTERED",
+    "semanticAcceptance": "NOT_CLAIMED",
+    "originalReportOrCandidateModified": false
+  },
+  "artifacts": {
+    "requests": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/requests.json",
+      "bytes": 18927,
+      "sha256": "c909e9f83c62ff131ac8a005b9e62e378241b6d5a769cf9567cf544ccbc4da34"
+    },
+    "rawChunkIndex": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw-chunk-index.json",
+      "bytes": 911203,
+      "sha256": "126eabd8b9ecebc631201edf9a8d3b71e52496d840248fb673ea6ad554d385fb"
+    },
+    "timeline": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/timeline.json",
+      "bytes": 51465,
+      "sha256": "321b86368c6386aee852771e5232d408a694d385d5745b94adcf3c38235ab4d5"
+    },
+    "evidenceSummaries": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/evidence-summary-100.json",
+        "bytes": 5194,
+        "sha256": "6e6450e99c09eaedc5be3560d8a42d790184f7e9822cde115f88d2e14126914e"
+      }
+    ],
+    "fixtureReadback": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/fixture-readback.json",
+      "bytes": 963,
+      "sha256": "fb38f34615d8616fc464b34c5e240ccd257d83f0f7a5bd8fb798609541c2bf3a"
+    },
+    "originalReadIdentities": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/read-identities.json",
+      "bytes": 4377156,
+      "sha256": "a2bab1af6c8c026798b3d39091d407680ab701219c68ba845703c130f754ff1c"
+    }
+  },
+  "preservation": {
+    "beforeAfterIdentities": 15558,
+    "currentBatchOriginalFiles": 3478,
+    "closedPriorFilesChecked": 12074,
+    "allMatched": true,
+    "priorUnknownRewritten": false
+  },
+  "limitations": [
+    "Static algebra review identifies an incorrect original hypothesis and contradictory summary; both remain preserved in canonical report.",
+    "Formal candidate identity and complete report state are structural results, not semantic acceptance or execution authorization.",
+    "No candidate or protected check was executed; effect remains unverified.",
+    "Provider alias/fingerprint are observed response metadata, not immutable model version or weights proof.",
+    "Remote termination remains unknown as recorded; local storage closed and cleanup confirmed."
+  ],
+  "readbackEffects": {
+    "credentialReads": 0,
+    "newProviderCalls": 0,
+    "newVmStarts": 0,
+    "productImportsOrExecutions": 0,
+    "originalWrites": 0,
+    "candidateActions": 0,
+    "rootOrStatusWrites": 0
+  }
+}

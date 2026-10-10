@@ -1,0 +1,70 @@
+{
+  "status": "RAW_TEXT_ONLY_NOT_REGISTERED_CANDIDATES",
+  "answer": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw-analysis-answer.txt",
+    "bytes": 12413,
+    "sha256": "71e132306496fb3b8f35d1734aca0e6170c06fd6984f4cd67affc0f0a13d14a1"
+  },
+  "prefixBeforeFence": "I have all acquirable evidence. Returning my structured report.\n\n",
+  "fencedObjectKeys": [
+    "summary",
+    "candidates",
+    "gaps"
+  ],
+  "rawProposedDrafts": [
+    {
+      "position": 1,
+      "title": "Repair clamp lower-bound saturation in clamp.ts (value above upper collapses to lower)",
+      "objective": "bug",
+      "targetId": "clamp-project",
+      "scope": [
+        "clamp.ts"
+      ],
+      "dependencies": [],
+      "conflicts": [
+        2
+      ],
+      "activation": {
+        "writeback": false,
+        "enable": false,
+        "conditions": [
+          "Only if the user selects this candidate",
+          "Only after the withheld failing assertion is confirmed to be the above-upper case, or the static reduction is accepted as sufficient"
+        ],
+        "timing": "Analysis only now; no writeback or activation occurs during this report."
+      }
+    },
+    {
+      "position": 2,
+      "title": "Missing/withheld acceptance evidence for the clamp check failure (gap-only, no executable scope)",
+      "objective": "validation",
+      "targetId": "clamp-project",
+      "scope": [],
+      "dependencies": [],
+      "conflicts": [
+        1
+      ],
+      "activation": {
+        "writeback": false,
+        "enable": false,
+        "conditions": [
+          "Never activated as an executable change; gap-only record"
+        ],
+        "timing": "N/A"
+      }
+    }
+  ],
+  "rawSummaryText": "The registered project target 'clamp-project' exposes one small module clamp.ts plus a protected black-box check (check.mjs), a protected README.md and a protected package.json. clamp.ts defines clamp(value,lower,upper) as Math.min(upper, Math.min(lower, value)). Because Math.min is associative/commutative, this composition reduces to min(upper, lower, value), which never returns a value above lower. The protected check.mjs requires an above-upper case [14,0,10,10] (expect 10) and a below-lower case [-9,-5,-1,-5] (expect -5). The retained run seq 20 invoked 'node check.mjs', and the shell result seq 25 reports exitCode 1 with seq 26 'Command exited with code 1', confirming at least one declared case failed. The raw tool.output text (seq 24) is withheld/boundary-redacted, so the exact failing assertion and message are not acquired. From static analysis, the above-upper case is the one that cannot pass under the current composition: min(10, min(0,14)) = min(10,0) = 0 != 10, while the below-lower case min(-1, min(-5,-9)) = min(-1,-5) = -5 does equal the expected -5. The defect is an inverted/composed nesting that lacks the lower-bound saturation (Math.max with lower). The minimal deterministic repair is to replace the inner composition with Math.min(upper, Math.max(lower, value)), changing only clamp.ts. No performance claim is made; this is a correctness (bug) repair. Highest-priority candidate: one. Candidate 1 is the clamp fix. A second, independent candidate holds the missing/withheld acceptance evidence (the exact failing assertion) as a gap; it is NOT proposed as an execution change because check.mjs is protected and eval assets must be independent of any runtime change.",
+  "rawGapsText": [
+    "The retained failing tool.output (seq 24, sha256 64d57d6f...) is withheld at every offset, so the exact failing assertion and Node error message are not acquired; all diagnosis of which case fails rests on static reduction of clamp.ts and the declared expectations in check.mjs.",
+    "No post-fix execution evidence exists in the retained window; the proposed fix's passing status is inferred statically and must be confirmed by the protected check at validation time.",
+    "lower > upper behavior is unspecified by any executed case (README.md states the precondition but check.mjs does not test its violation), so out-of-precondition behavior is unknown.",
+    "Self source is not explicitly registered ('self-source-unregistered', state incomplete), so no self-source claims are made.",
+    "The raw evidence body might contain additional context not visible through redaction; empty or withheld evidence is not treated here as proof of absence or presence."
+  ],
+  "formalReportState": "incomplete",
+  "formalCandidateCount": 0,
+  "selectedCandidateCount": 0,
+  "formalReason": "SyntaxError: Unexpected token 'I', \"I have all\"... is not valid JSON",
+  "warning": "Raw model claims are untrusted proposal text, not verified facts or user authorization. This textual index does not repair the report, validate drafts, assign candidate identities, select or execute anything."
+}

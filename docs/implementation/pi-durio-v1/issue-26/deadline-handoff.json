@@ -1,0 +1,121 @@
+{
+  "at": "2026-10-09T23:22:14.089132+00:00",
+  "issue": 26,
+  "scope": "Absolute deadline/cancellation admission and execution-result attribution repair only",
+  "base": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+  "commit": "304d255dd856316fe52a1863a12856c0468c72aa",
+  "tree": "0376fc17c75c9fc3114e577aa6fe1729b9cd60b3",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-26-deadline",
+  "branch": "codex/pi-durio-v1-repair-26-deadline",
+  "clean": true,
+  "diff": {
+    "path": "candidate.patch",
+    "sha256": "40b5c0b02d5c176e548ecf43e9a0c5239664c7da0d40b354f4cd51513c2fea42",
+    "files": [
+      "docs/implementation/pi-durio-v1/issue-26/deadline-repair-r1.md",
+      "scripts/isolation/boundary.mjs",
+      "scripts/isolation/test/boundary.test.mjs",
+      "src/eval/runner.ts",
+      "src/improve-build.ts",
+      "src/improve-validation.ts",
+      "test/improve-build.test.ts",
+      "test/improve-deadline.test.ts"
+    ]
+  },
+  "sourceBuild": {
+    "path": "source-build.json",
+    "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "boundEntries": 555,
+    "compiledTests": 123,
+    "before": "heavy-before-identity.json",
+    "after": "heavy-after-identity.json",
+    "unchanged": true
+  },
+  "verification": {
+    "boundaryNegative": {
+      "red": 7,
+      "green": 7,
+      "logs": [
+        "boundary-red.tap",
+        "boundary-green-r1.tap"
+      ]
+    },
+    "actualCallChainControllerRegression": {
+      "pass": 10,
+      "log": "improve-eval-green-r4.tap",
+      "scope": "Actual submit/validation/eval/boundary control flow; fake controller, no VM-isolation claim"
+    },
+    "realBoundarySmoke": {
+      "pass": 2,
+      "vms": 4,
+      "log": "vm-boundary.tap"
+    },
+    "sourceHappyPath": {
+      "pass": 1,
+      "vms": 3,
+      "durationMs": 246140.769791,
+      "predeclaredFixtureDeadlineMs": 600000,
+      "originalFixtureDeadlineMs": 300000,
+      "log": "source-happy-path.tap"
+    },
+    "realOutputRetention": {
+      "pass": 1,
+      "vms": 2,
+      "log": "real-output-retention.tap"
+    },
+    "realEval": {
+      "trials": 1,
+      "passed": 1,
+      "graders": 1,
+      "vms": 2,
+      "controlledRequests": 4,
+      "knownTokens": 56,
+      "paidCalls": 0,
+      "report": "real-eval-verification.json"
+    }
+  },
+  "cleanup": {
+    "actualVms": 11,
+    "allTerminated": true,
+    "beforeInventory": "containers-before-heavy.json",
+    "afterInventory": "containers-after-heavy.json",
+    "remainingIds": [
+      "buildkit"
+    ],
+    "details": "vm-outcomes.json"
+  },
+  "firstFailure": {
+    "originalFixtureUnchanged": true,
+    "readback": "original-first-failure-readback.json",
+    "verifiedOriginalReferences": 12,
+    "originalReason": "timeout",
+    "diagnosis": "first-failure-diagnosis.json"
+  },
+  "linuxRuntime": {
+    "runtime": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/linux-runtime",
+    "identity": "5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a",
+    "sourceBuildSha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "dependencySource": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/linux-runtime-05",
+    "dependencyContentIdentity": "05389876e7e6d1cadb3e6425a223a13ffecf962a85e6d336647734b883335f17",
+    "lockSha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67",
+    "copiedDependenciesExact": true,
+    "copiedProductOutputsExact": true
+  },
+  "coverageAndReuse": "docs/implementation/pi-durio-v1/issue-26/deadline-repair-r1.md records affected caller coverage. test/eval-runtime.test.ts does not exist in this candidate. Unchanged root 250 PASS evidence remains applicable to untouched behavior; no full-suite rerun claimed.",
+  "retainedInvalidOrFailedExperiments": [
+    {
+      "log": "improve-green-r1.tap",
+      "status": "INVALID_EVIDENCE",
+      "reason": "Inherited NODE_TEST_CONTEXT skipped nested tests; nominal wrapper PASS excluded"
+    },
+    {
+      "log": "improve-green-r2.tap",
+      "status": "FIXTURE_FAILURE",
+      "reason": "Cancellation can stop before emitted stdout reaches acquisition; final test compares retained bytes to actual acquired bytes"
+    }
+  ],
+  "evidenceManifest": "evidence-manifest.json",
+  "commands": "commands.json",
+  "restrictions": "No root source changes, no push/main/release/ticket closure, no credentials or paid provider, no Terminal control. Heavy VM window now complete.",
+  "remaining": "Independent review and serial integration by coordinator; no claim of complete technical acceptance, day-use acceptance, or first release."
+}

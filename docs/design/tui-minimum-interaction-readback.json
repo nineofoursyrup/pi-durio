@@ -1,0 +1,358 @@
+{
+  "checked_at": "2026-10-09T04:02:49.241019+00:00",
+  "scope": "design decision closeout only; real Terminal and product implementation remain unverified",
+  "authorization": "User: 回写关闭 #4",
+  "decision": {
+    "number": 4,
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-09T04:01:46Z",
+    "updated_at": "2026-10-09T04:01:46Z",
+    "body": "## Question\n\n借鉴 Grok 的哪些交互，足以让 pi-durio 清楚呈现输入、运行状态、工具输出、中止/恢复与 improve 候选选择，同时满足轻量目标？\n\n依据本地规格第 7、12–14、19 章，使用 prototype 与用户共同确认最小体验：会话/输入/状态布局，运行中 steer 与 follow-up，长输出/折叠，中文与宽字符，键盘与鼠标范围，异常退出终端恢复。明确首版是否承诺全屏以及哪些鼠标交互。\n\n原型只能表达和检查设计，不能被当成已交付产品。TUI 展示 durable 已提交状态，不另建任务生命周期；运维详情按需展开。improve 的最终授权含义由对应决策票确定，本票只处理展示与选择体验。\n\n结论应链接原型资产、记录用户反馈、确定交互范围和关键验收场景。\n\n来源：[Grok TUI 文档](https://github.com/xai-org/grok-build/blob/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8/crates/codegen/xai-grok-pager/docs/user-guide/03-keyboard-shortcuts.md)、[Grok TUI manifest](https://github.com/xai-org/grok-build/blob/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8/crates/codegen/xai-grok-pager/Cargo.toml)。Grok 是 Rust TUI；优先用 pi-tui 验证体验覆盖，不预设需要移植其全部实现。\n\n本票解决设计决策，不以实现功能、调用真实模型或跑出性能结果作为本轮结论。沿用已给定的产品要求；现有规格的推荐值只在必要时重新讨论。结论记录在 resolution comment，确认后再关闭本票。\n",
+    "resolution_url": "https://github.com/nineofoursyrup/pi-durio/issues/4#issuecomment-6073998011",
+    "resolution_body": "## Resolution — TUI 最小交互合同已确认（2026-10-09）\n\n本票的设计问题已解决，按 completed 关闭。用户依次确认：\n\n- “Q1-2按建议，Q3 macOS Terminal”。\n- “Q4 快捷键参考claude code，Q5按推荐”。\n- 修订合同与交互原型交付后回复“确认”。\n- 随后明确授权“回写关闭 #4”。\n\n这是设计票收敛；不表示产品已实现、真实终端已验收或性能已达标。原 issue body 保留。\n\n### 确认的交互范围\n\n1. **全屏单列**：主区为会话内容，底部固定输入和简洁状态；会话列表与运维详情按需打开。工具默认显示名称、简短参数、状态和有限摘要，失败与截断在折叠时仍可见。基本鼠标范围为滚动、选文、点击展开，核心操作有键盘等价入口。UI 展示 durable 已提交状态，不另建执行生命周期。\n2. **steer 与 follow-up**：忙时普通 Enter 提交当前任务补充（steer），当前工具轮次结束后接入；显式“排到下一任务”或 Ctrl+X 后 Enter 提交 follow-up，等当前任务完成。显示待接入与已接入；撤回与接入发生竞争时按 runtime 事实展示，不伪装撤回成功。运行中 `/improve` 单独排为改进分析请求，不作为 steer，也不替换当前任务的工具集合。\n3. **中止、退出与冻结队列**：先显示中止中/退出中，等待执行事实、清理和关闭确认。中止不等于退出，退出不承诺后台继续。中止、失败、退出或恢复核对时，未接入消息保存且冻结，不能在下次普通输入时自动执行。保留只保存文本；显式重新接入且满足恢复条件后才解除冻结。已中止工作不能恢复为普通 pending；新任务采用旧文本须重新明确提交。冻结必须由宿主执行层落实，不能只做 UI 禁用。\n4. **历史与恢复**：打开历史只读，不自动续跑、调用模型或重做工具；查看其他历史时禁止提交，并明确活动会话及中止目标。未知副作用先受限只读核对；关闭面板不解除限制。可靠证据确认完成后避免重做；证据不足的处置显示具体重复风险且保留原始未知记录。版本不兼容或授权失效不能通过普通确认弹层绕过 #3 的恢复检查。\n5. **improve 选择**：结构化逐项选择为正式入口，默认不选；区分“执行已声明范围”“仅验证”“暂缓”，汇总候选、模式和影响后一次提交。自然语言只补充意见，自由文本直接执行留给 #7。候选显示证据、假设、目标、动作、验证、生效范围、风险及版本；报告、候选 revision 或目标基线变化使旧选择失效。用户决定、执行结果、效果结论分别展示，验证通过仍可标为效果未验证。最终授权与启用语义由 #7 决定。\n6. **有界显示与终端范围**：长历史按窗口读取，大输出按需展开/分页，区分展示截断、原始记录不完整和原始内容不可取得。用户上滚后停止自动跟随，新输出不抢焦点、覆盖草稿或重置展开态；“回到底部”恢复跟随。小窗口压缩次要信息，必要时提示过小。首版完整验收目标为 macOS Terminal，覆盖中文 IME、宽字符、emoji、粘贴、缩放、鼠标、剪贴板和退出清理；最小行列数待实际终端测定，不以网页像素代替终端格宽。\n\n### 快捷键合同\n\n参考当日 Claude Code 官方习惯，保持 pi-durio 的执行和恢复边界：\n\n| 键位 | 采用行为 |\n| --- | --- |\n| Enter | 空闲提交新请求；运行中默认 steer。IME 组合未提交或候选选择中不误发。 |\n| Shift+Enter / Ctrl+J / 反斜杠后 Enter | 换行；反斜杠回退入口移除转义符。Option+Enter 仅在用户自行配置 Meta 后使用，不更改用户终端配置。真实 Terminal 编码仍须验证。 |\n| Ctrl+X 后 Enter | 显式 follow-up。借用排队键位，不引入强制即时发送。 |\n| Ctrl+C | 运行中请求中止；空闲首次暂存并清空输入，未编辑/未切换上下文时再按才请求退出。中止动作不算空闲退出的第一次按键；中止中/退出中连按不跳过确认事实。 |\n| Ctrl+D | 输入框非空且聚焦时向前删除一个字符簇或选区；空输入首次提示，800ms 内再次按才请求退出。其他按键、输入、焦点/场景变化或超时使确认失效；不穿透弹层。 |\n| Esc | 最上层菜单/弹层先关闭并消费按键；无弹层且任务运行时请求中止。关闭恢复面板不放行；双 Esc 不引入回退。 |\n| `/exit` / 可见退出入口 | 显式退出；有草稿时提供保留草稿的选择，等待受管执行清理及存储关闭。 |\n| Ctrl+O / Ctrl+L | 切换详情 / 重绘，不改变工作状态或证据。 |\n\nClaude Code 中断后发送原队列的行为不沿用；pi-durio 仍冻结队列。未引入回退代码、权限模式切换、后台运行或热切执行版本承诺。\n\n官方参照：[Interactive mode](https://code.claude.com/docs/en/interactive-mode)、[Keybindings](https://code.claude.com/docs/en/keybindings)、[Terminal configuration](https://code.claude.com/docs/en/terminal-config)。\n\n### 原型、反馈与证据\n\n以下资产保存在用户本机，尚未提交或发布到 GitHub。路径用于定位本地交付物，不代表远程可下载文件；本评论已独立写明设计结论。\n\n- 完整合同：`/Users/nineofour/Durio/docs/design/tui-minimum-interaction.md`\n- 可操作原型：`/Users/nineofour/Durio/docs/prototypes/tui-minimum-interaction-prototype.html`\n- 预览截图：`/Users/nineofour/Durio/docs/prototypes/tui-minimum-interaction-preview.png`\n- Q4 修订前原型与截图：`/Users/nineofour/Durio/docs/prototypes/archive/before-claude-code-keybindings/`\n- 精确 npm pi-tui 1.1.0 合成接口探查：`/Users/nineofour/Durio/docs/prototypes/pi-tui-1.1.0-probe/README.md`\n- 术语：`/Users/nineofour/Durio/GLOSSARY.md`\n\n所有原型任务、输出、用量、恢复证据和结果均为模拟夹具；无模型、真实命令、SQLite 或持久化。浏览器演练覆盖补充/排队、冻结后不能复活已中止任务、恢复面板关闭不放行、版本不兼容只读、improve revision 变化清选择、仅验证不启用、长输出不抢滚动等设计路径。\n\n修订后的实际浏览器按键观察：Esc 的弹层优先级、Ctrl+D 完整 emoji 字符簇删除、空输入双按及超时/其他按键失效、多行输入通过。Ctrl+C 的清空/暂存/恢复与再按退出仅通过模拟按钮及状态检查验证。第一次 Ctrl+X → Enter 得到 steer；进一步观察发现 Ctrl+X 本身没有触发页面提示，Ctrl+C 同样无页面动作，疑似内置浏览器拦截。保留失败观察，**Ctrl+C / Ctrl+X 浏览器键盘交付仍未验证**，不能用按钮或状态检查替代。\n\n内联 JavaScript 语法和本地文档链接检查通过。精确 npm pi-tui 1.1.0 的无模型合成 Terminal smoke 有 18 项观察通过，但不是 macOS Terminal.app 实测。npm 制品与研究快照的光标实现存在差异，不改变 #3 的候选基线；实际 IME/光标仍须验收。实现起点复用公开组件、可靠 copySelection 适配及 `stop({preserveScreen:true})` 后输出有界摘要；历史窗口/分页/保留上限由宿主实现，ScrollView 不等于历史虚拟化。\n\n### 保留的实现与后续设计义务\n\n- #5 衔接消息队列、冻结与恢复读取、用量未知/不完整标记及证据保留。\n- #7 确定 improve 的最终权限、动作范围与生效合同；此票不扩大授权。\n- #8 将真实 macOS Terminal 的 IME/候选窗、字符格宽、鼠标/剪贴板、PTY/raw mode、正常/异常退出清理、进程回收、长历史资源上限纳入验收；SIGKILL/掉电不承诺程序能自行清理，应有可用的终端恢复方法。\n- 实际 durable 接线、接入/撤回竞争、冻结约束、持久化与权限行为尚未实现验证。未调用真实模型、未执行性能基准、未提交或推送产品代码。\n\n发布时本地资产 SHA256（原规格保持不变）：\n\n- `docs/prototypes/tui-minimum-interaction-prototype.html`：`b4c15bd349166429c25bd457dbf0d3da10bacd336515cc68106ac5f058c3c16e`\n- `docs/prototypes/tui-minimum-interaction-preview.png`：`4266955a2705f963c10a77eab357558137a6716d11cc408df644ef95d706a2fa`\n- `pi-durable-coding-agent-spec.html`：`a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6`\n",
+    "resolution_sha256": "3ebd0bf63a344cd3276f751ce1c1af32556b25cfaf38ee0917ffaf44e2ba2d6b"
+  },
+  "map": {
+    "number": 1,
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/1",
+    "state": "open",
+    "updated_at": "2026-10-09T04:02:17Z",
+    "body": "## Destination\n\n以现有 HTML 规格为起点，形成可交给实现 Agent 的 pi-durio 首版规格：明确轻量 coding 核心、evals / LLM Ops / tracing、长期运行证据，以及显式调用 improve 后由用户选择执行的行为合同与验收边界。\n\n地图完成意味着实现前的实质决策已经解决；产品实现及交付另行推进。\n\n## Notes\n\n- 当前用户要求：产品名 pi-durio；基于 pi-durable；参考官方 durable coding-agent demo 和 Grok Build TUI；尽量减少自有代码与体积；具备 evals / LLM Ops / tracing 和长期自我性能评估；内置 improve，先给有证据的候选，仅执行用户选择的范围。\n- 原始输入为本地 `/Users/nineofour/Durio/pi-durable-coding-agent-spec.html`，首先阅读第 22 章，按议题查阅相关章节。保留原文件；其中旧功能名 retro 按当前要求映射为 improve。其推荐方案、例子和未决参数不自动成为已确认决策。\n- TypeScript + Node、pi-tui、本地 SQLite、单进程、共用 runtime、本地观测为现有规格的推荐起点。只有发现冲突、测量结果或影响范围的新要求时重新讨论，避免逐项重问已有材料。\n- 已有正确性约束继续适用：未知用量不记为零；历史趋势不等于因果；用户采纳不等于效果；恢复不保证外部副作用恰好一次；分析只读由宿主落实；候选不能修改评分规则来证明自身有效。\n- 每次按 wayfinder 推进一个决策票；使用 grilling 与 domain-modeling。外部事实调查按需使用 research，体验问题使用 prototype。问题先查资料，再问用户偏好。\n- 建图终点已由用户于 2026-10-09 确认；这项确认不代替后续 HITL 决策。现有参考规格 SHA256：`a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6`。本地原文和研究报告尚未提交到 GitHub，不将本地路径当作远程已发布材料。\n- 上游来源：[pi-durable 固定快照](https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable)、[官方 durable demo](https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable)、[Grok Build](https://github.com/xai-org/grok-build/tree/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8)、[参考 retro](https://github.com/mattpocock/skills/blob/b0618bc436ad893b3c5e84e55fba86586d34a404/skills/engineering/retro/SKILL.md)。\n- Issue tracker：`nineofoursyrup/pi-durio`；正式地图使用 `wayfinder:map`，子票使用原生父子关系和原生依赖。\n- 规划范围内不运行付费模型、不创建产品实现、不提交或推送代码。远程 Issue 的创建与维护按用户显式调用的 wayfinder 流程执行。\n\n## Decisions so far\n\n- [首版范围与轻量目标](https://github.com/nineofoursyrup/pi-durio/issues/2#issuecomment-6066794453)：首版 macOS arm64 / Node CLI，先用 DeepSeek V4.1 Flash；少维护代码优先，按实测基线优化轻量开销。\n\n- [上游复用与执行恢复边界](https://github.com/nineofoursyrup/pi-durio/issues/3#issuecomment-6067523440)：普通 coding 采用可信本机执行；副作用不确定时先受限只读核对，证据不足再由用户决定；执行版本变化不自动续跑旧 pending。复用公开 Pi API，宿主承担权限、存储/工作区所有权与恢复前检查；本票为设计收敛，实际工件与恢复行为仍待实现验证。\n\n- [TUI 的最小交互合同](https://github.com/nineofoursyrup/pi-durio/issues/4#issuecomment-6073998011)：全屏单列、底部固定输入与状态，基本鼠标及键盘等价入口；忙时 Enter 为 steer，显式 follow-up，首版验收目标 macOS Terminal。快捷键参考 Claude Code，保留中止后冻结队列与只读恢复；improve 逐项选择、汇总后一次提交。用户已确认修订原型；浏览器模拟与合成接口检查仅支持设计，真实终端及执行层行为仍待实现验收。\n\n## Not yet specified\n\n后续决策可能暴露上游公共入口、TUI 能力或评估隔离方面的新取舍；以实际发现为准，不预先分拆成实现任务。\n\n## Out of scope\n\n本地图不承担产品代码实现、发布与部署。常驻 optimizer、日常自动 LLM critic、自动选择候选、自动启用新 skill、完整 Web 运维平台、向量数据库和 fine-tuning 不属于现有首版推荐路径；若改变产品范围，须单独作出决定。\n"
+  },
+  "rest_checks": {
+    "issue_closed_completed": true,
+    "issue_original_body_preserved": true,
+    "resolution_body_match": true,
+    "map_body_match": true,
+    "map_still_open": true,
+    "map_resolution_occurs_once": true
+  },
+  "source_html_sha256": "a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6",
+  "graphql_readback": {
+    "decision": {
+      "number": 4,
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-09T04:01:46Z",
+      "parent": {
+        "number": 1,
+        "url": "https://github.com/nineofoursyrup/pi-durio/issues/1"
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 3,
+            "state": "CLOSED"
+          }
+        ]
+      },
+      "blocking": {
+        "nodes": [
+          {
+            "number": 8,
+            "state": "OPEN"
+          }
+        ]
+      },
+      "comments": {
+        "nodes": [
+          {
+            "url": "https://github.com/nineofoursyrup/pi-durio/issues/4#issuecomment-6073998011",
+            "body": "## Resolution — TUI 最小交互合同已确认（2026-10-09）\n\n本票的设计问题已解决，按 completed 关闭。用户依次确认：\n\n- “Q1-2按建议，Q3 macOS Terminal”。\n- “Q4 快捷键参考claude code，Q5按推荐”。\n- 修订合同与交互原型交付后回复“确认”。\n- 随后明确授权“回写关闭 #4”。\n\n这是设计票收敛；不表示产品已实现、真实终端已验收或性能已达标。原 issue body 保留。\n\n### 确认的交互范围\n\n1. **全屏单列**：主区为会话内容，底部固定输入和简洁状态；会话列表与运维详情按需打开。工具默认显示名称、简短参数、状态和有限摘要，失败与截断在折叠时仍可见。基本鼠标范围为滚动、选文、点击展开，核心操作有键盘等价入口。UI 展示 durable 已提交状态，不另建执行生命周期。\n2. **steer 与 follow-up**：忙时普通 Enter 提交当前任务补充（steer），当前工具轮次结束后接入；显式“排到下一任务”或 Ctrl+X 后 Enter 提交 follow-up，等当前任务完成。显示待接入与已接入；撤回与接入发生竞争时按 runtime 事实展示，不伪装撤回成功。运行中 `/improve` 单独排为改进分析请求，不作为 steer，也不替换当前任务的工具集合。\n3. **中止、退出与冻结队列**：先显示中止中/退出中，等待执行事实、清理和关闭确认。中止不等于退出，退出不承诺后台继续。中止、失败、退出或恢复核对时，未接入消息保存且冻结，不能在下次普通输入时自动执行。保留只保存文本；显式重新接入且满足恢复条件后才解除冻结。已中止工作不能恢复为普通 pending；新任务采用旧文本须重新明确提交。冻结必须由宿主执行层落实，不能只做 UI 禁用。\n4. **历史与恢复**：打开历史只读，不自动续跑、调用模型或重做工具；查看其他历史时禁止提交，并明确活动会话及中止目标。未知副作用先受限只读核对；关闭面板不解除限制。可靠证据确认完成后避免重做；证据不足的处置显示具体重复风险且保留原始未知记录。版本不兼容或授权失效不能通过普通确认弹层绕过 #3 的恢复检查。\n5. **improve 选择**：结构化逐项选择为正式入口，默认不选；区分“执行已声明范围”“仅验证”“暂缓”，汇总候选、模式和影响后一次提交。自然语言只补充意见，自由文本直接执行留给 #7。候选显示证据、假设、目标、动作、验证、生效范围、风险及版本；报告、候选 revision 或目标基线变化使旧选择失效。用户决定、执行结果、效果结论分别展示，验证通过仍可标为效果未验证。最终授权与启用语义由 #7 决定。\n6. **有界显示与终端范围**：长历史按窗口读取，大输出按需展开/分页，区分展示截断、原始记录不完整和原始内容不可取得。用户上滚后停止自动跟随，新输出不抢焦点、覆盖草稿或重置展开态；“回到底部”恢复跟随。小窗口压缩次要信息，必要时提示过小。首版完整验收目标为 macOS Terminal，覆盖中文 IME、宽字符、emoji、粘贴、缩放、鼠标、剪贴板和退出清理；最小行列数待实际终端测定，不以网页像素代替终端格宽。\n\n### 快捷键合同\n\n参考当日 Claude Code 官方习惯，保持 pi-durio 的执行和恢复边界：\n\n| 键位 | 采用行为 |\n| --- | --- |\n| Enter | 空闲提交新请求；运行中默认 steer。IME 组合未提交或候选选择中不误发。 |\n| Shift+Enter / Ctrl+J / 反斜杠后 Enter | 换行；反斜杠回退入口移除转义符。Option+Enter 仅在用户自行配置 Meta 后使用，不更改用户终端配置。真实 Terminal 编码仍须验证。 |\n| Ctrl+X 后 Enter | 显式 follow-up。借用排队键位，不引入强制即时发送。 |\n| Ctrl+C | 运行中请求中止；空闲首次暂存并清空输入，未编辑/未切换上下文时再按才请求退出。中止动作不算空闲退出的第一次按键；中止中/退出中连按不跳过确认事实。 |\n| Ctrl+D | 输入框非空且聚焦时向前删除一个字符簇或选区；空输入首次提示，800ms 内再次按才请求退出。其他按键、输入、焦点/场景变化或超时使确认失效；不穿透弹层。 |\n| Esc | 最上层菜单/弹层先关闭并消费按键；无弹层且任务运行时请求中止。关闭恢复面板不放行；双 Esc 不引入回退。 |\n| `/exit` / 可见退出入口 | 显式退出；有草稿时提供保留草稿的选择，等待受管执行清理及存储关闭。 |\n| Ctrl+O / Ctrl+L | 切换详情 / 重绘，不改变工作状态或证据。 |\n\nClaude Code 中断后发送原队列的行为不沿用；pi-durio 仍冻结队列。未引入回退代码、权限模式切换、后台运行或热切执行版本承诺。\n\n官方参照：[Interactive mode](https://code.claude.com/docs/en/interactive-mode)、[Keybindings](https://code.claude.com/docs/en/keybindings)、[Terminal configuration](https://code.claude.com/docs/en/terminal-config)。\n\n### 原型、反馈与证据\n\n以下资产保存在用户本机，尚未提交或发布到 GitHub。路径用于定位本地交付物，不代表远程可下载文件；本评论已独立写明设计结论。\n\n- 完整合同：`/Users/nineofour/Durio/docs/design/tui-minimum-interaction.md`\n- 可操作原型：`/Users/nineofour/Durio/docs/prototypes/tui-minimum-interaction-prototype.html`\n- 预览截图：`/Users/nineofour/Durio/docs/prototypes/tui-minimum-interaction-preview.png`\n- Q4 修订前原型与截图：`/Users/nineofour/Durio/docs/prototypes/archive/before-claude-code-keybindings/`\n- 精确 npm pi-tui 1.1.0 合成接口探查：`/Users/nineofour/Durio/docs/prototypes/pi-tui-1.1.0-probe/README.md`\n- 术语：`/Users/nineofour/Durio/GLOSSARY.md`\n\n所有原型任务、输出、用量、恢复证据和结果均为模拟夹具；无模型、真实命令、SQLite 或持久化。浏览器演练覆盖补充/排队、冻结后不能复活已中止任务、恢复面板关闭不放行、版本不兼容只读、improve revision 变化清选择、仅验证不启用、长输出不抢滚动等设计路径。\n\n修订后的实际浏览器按键观察：Esc 的弹层优先级、Ctrl+D 完整 emoji 字符簇删除、空输入双按及超时/其他按键失效、多行输入通过。Ctrl+C 的清空/暂存/恢复与再按退出仅通过模拟按钮及状态检查验证。第一次 Ctrl+X → Enter 得到 steer；进一步观察发现 Ctrl+X 本身没有触发页面提示，Ctrl+C 同样无页面动作，疑似内置浏览器拦截。保留失败观察，**Ctrl+C / Ctrl+X 浏览器键盘交付仍未验证**，不能用按钮或状态检查替代。\n\n内联 JavaScript 语法和本地文档链接检查通过。精确 npm pi-tui 1.1.0 的无模型合成 Terminal smoke 有 18 项观察通过，但不是 macOS Terminal.app 实测。npm 制品与研究快照的光标实现存在差异，不改变 #3 的候选基线；实际 IME/光标仍须验收。实现起点复用公开组件、可靠 copySelection 适配及 `stop({preserveScreen:true})` 后输出有界摘要；历史窗口/分页/保留上限由宿主实现，ScrollView 不等于历史虚拟化。\n\n### 保留的实现与后续设计义务\n\n- #5 衔接消息队列、冻结与恢复读取、用量未知/不完整标记及证据保留。\n- #7 确定 improve 的最终权限、动作范围与生效合同；此票不扩大授权。\n- #8 将真实 macOS Terminal 的 IME/候选窗、字符格宽、鼠标/剪贴板、PTY/raw mode、正常/异常退出清理、进程回收、长历史资源上限纳入验收；SIGKILL/掉电不承诺程序能自行清理，应有可用的终端恢复方法。\n- 实际 durable 接线、接入/撤回竞争、冻结约束、持久化与权限行为尚未实现验证。未调用真实模型、未执行性能基准、未提交或推送产品代码。\n\n发布时本地资产 SHA256（原规格保持不变）：\n\n- `docs/prototypes/tui-minimum-interaction-prototype.html`：`b4c15bd349166429c25bd457dbf0d3da10bacd336515cc68106ac5f058c3c16e`\n- `docs/prototypes/tui-minimum-interaction-preview.png`：`4266955a2705f963c10a77eab357558137a6716d11cc408df644ef95d706a2fa`\n- `pi-durable-coding-agent-spec.html`：`a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6`\n"
+          }
+        ]
+      }
+    },
+    "map": {
+      "number": 1,
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/1",
+      "state": "OPEN",
+      "body": "## Destination\n\n以现有 HTML 规格为起点，形成可交给实现 Agent 的 pi-durio 首版规格：明确轻量 coding 核心、evals / LLM Ops / tracing、长期运行证据，以及显式调用 improve 后由用户选择执行的行为合同与验收边界。\n\n地图完成意味着实现前的实质决策已经解决；产品实现及交付另行推进。\n\n## Notes\n\n- 当前用户要求：产品名 pi-durio；基于 pi-durable；参考官方 durable coding-agent demo 和 Grok Build TUI；尽量减少自有代码与体积；具备 evals / LLM Ops / tracing 和长期自我性能评估；内置 improve，先给有证据的候选，仅执行用户选择的范围。\n- 原始输入为本地 `/Users/nineofour/Durio/pi-durable-coding-agent-spec.html`，首先阅读第 22 章，按议题查阅相关章节。保留原文件；其中旧功能名 retro 按当前要求映射为 improve。其推荐方案、例子和未决参数不自动成为已确认决策。\n- TypeScript + Node、pi-tui、本地 SQLite、单进程、共用 runtime、本地观测为现有规格的推荐起点。只有发现冲突、测量结果或影响范围的新要求时重新讨论，避免逐项重问已有材料。\n- 已有正确性约束继续适用：未知用量不记为零；历史趋势不等于因果；用户采纳不等于效果；恢复不保证外部副作用恰好一次；分析只读由宿主落实；候选不能修改评分规则来证明自身有效。\n- 每次按 wayfinder 推进一个决策票；使用 grilling 与 domain-modeling。外部事实调查按需使用 research，体验问题使用 prototype。问题先查资料，再问用户偏好。\n- 建图终点已由用户于 2026-10-09 确认；这项确认不代替后续 HITL 决策。现有参考规格 SHA256：`a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6`。本地原文和研究报告尚未提交到 GitHub，不将本地路径当作远程已发布材料。\n- 上游来源：[pi-durable 固定快照](https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/durable)、[官方 durable demo](https://github.com/earendil-works/pi/tree/6fb2e7815167e6b19006fc526d1a5d0f5f998787/packages/coding-agent/src/experimental/durable)、[Grok Build](https://github.com/xai-org/grok-build/tree/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8)、[参考 retro](https://github.com/mattpocock/skills/blob/b0618bc436ad893b3c5e84e55fba86586d34a404/skills/engineering/retro/SKILL.md)。\n- Issue tracker：`nineofoursyrup/pi-durio`；正式地图使用 `wayfinder:map`，子票使用原生父子关系和原生依赖。\n- 规划范围内不运行付费模型、不创建产品实现、不提交或推送代码。远程 Issue 的创建与维护按用户显式调用的 wayfinder 流程执行。\n\n## Decisions so far\n\n- [首版范围与轻量目标](https://github.com/nineofoursyrup/pi-durio/issues/2#issuecomment-6066794453)：首版 macOS arm64 / Node CLI，先用 DeepSeek V4.1 Flash；少维护代码优先，按实测基线优化轻量开销。\n\n- [上游复用与执行恢复边界](https://github.com/nineofoursyrup/pi-durio/issues/3#issuecomment-6067523440)：普通 coding 采用可信本机执行；副作用不确定时先受限只读核对，证据不足再由用户决定；执行版本变化不自动续跑旧 pending。复用公开 Pi API，宿主承担权限、存储/工作区所有权与恢复前检查；本票为设计收敛，实际工件与恢复行为仍待实现验证。\n\n- [TUI 的最小交互合同](https://github.com/nineofoursyrup/pi-durio/issues/4#issuecomment-6073998011)：全屏单列、底部固定输入与状态，基本鼠标及键盘等价入口；忙时 Enter 为 steer，显式 follow-up，首版验收目标 macOS Terminal。快捷键参考 Claude Code，保留中止后冻结队列与只读恢复；improve 逐项选择、汇总后一次提交。用户已确认修订原型；浏览器模拟与合成接口检查仅支持设计，真实终端及执行层行为仍待实现验收。\n\n## Not yet specified\n\n后续决策可能暴露上游公共入口、TUI 能力或评估隔离方面的新取舍；以实际发现为准，不预先分拆成实现任务。\n\n## Out of scope\n\n本地图不承担产品代码实现、发布与部署。常驻 optimizer、日常自动 LLM critic、自动选择候选、自动启用新 skill、完整 Web 运维平台、向量数据库和 fine-tuning 不属于现有首版推荐路径；若改变产品范围，须单独作出决定。\n",
+      "subIssues": {
+        "nodes": [
+          {
+            "number": 2,
+            "title": "首版范围与轻量目标",
+            "url": "https://github.com/nineofoursyrup/pi-durio/issues/2",
+            "state": "CLOSED",
+            "assignees": {
+              "nodes": [
+                {
+                  "login": "nineofoursyrup"
+                }
+              ]
+            },
+            "blockedBy": {
+              "nodes": []
+            }
+          },
+          {
+            "number": 3,
+            "title": "上游复用与执行恢复边界",
+            "url": "https://github.com/nineofoursyrup/pi-durio/issues/3",
+            "state": "CLOSED",
+            "assignees": {
+              "nodes": [
+                {
+                  "login": "nineofoursyrup"
+                }
+              ]
+            },
+            "blockedBy": {
+              "nodes": [
+                {
+                  "number": 2,
+                  "state": "CLOSED"
+                }
+              ]
+            }
+          },
+          {
+            "number": 4,
+            "title": "TUI 的最小交互合同",
+            "url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+            "state": "CLOSED",
+            "assignees": {
+              "nodes": [
+                {
+                  "login": "nineofoursyrup"
+                }
+              ]
+            },
+            "blockedBy": {
+              "nodes": [
+                {
+                  "number": 3,
+                  "state": "CLOSED"
+                }
+              ]
+            }
+          },
+          {
+            "number": 5,
+            "title": "运行证据与长期记录合同",
+            "url": "https://github.com/nineofoursyrup/pi-durio/issues/5",
+            "state": "OPEN",
+            "assignees": {
+              "nodes": []
+            },
+            "blockedBy": {
+              "nodes": [
+                {
+                  "number": 3,
+                  "state": "CLOSED"
+                }
+              ]
+            }
+          },
+          {
+            "number": 6,
+            "title": "Eval 与性能改善的判定合同",
+            "url": "https://github.com/nineofoursyrup/pi-durio/issues/6",
+            "state": "OPEN",
+            "assignees": {
+              "nodes": []
+            },
+            "blockedBy": {
+              "nodes": [
+                {
+                  "number": 5,
+                  "state": "OPEN"
+                }
+              ]
+            }
+          },
+          {
+            "number": 7,
+            "title": "improve 的建议、选择与执行合同",
+            "url": "https://github.com/nineofoursyrup/pi-durio/issues/7",
+            "state": "OPEN",
+            "assignees": {
+              "nodes": []
+            },
+            "blockedBy": {
+              "nodes": [
+                {
+                  "number": 6,
+                  "state": "OPEN"
+                }
+              ]
+            }
+          },
+          {
+            "number": 8,
+            "title": "首版验收与实现交接边界",
+            "url": "https://github.com/nineofoursyrup/pi-durio/issues/8",
+            "state": "OPEN",
+            "assignees": {
+              "nodes": []
+            },
+            "blockedBy": {
+              "nodes": [
+                {
+                  "number": 7,
+                  "state": "OPEN"
+                },
+                {
+                  "number": 4,
+                  "state": "CLOSED"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "graphql_checks": {
+    "closed_completed": true,
+    "closed_at_matches_rest": true,
+    "map_body_matches_rest": true,
+    "resolution_body_matches_rest": true,
+    "parent_map_1": true
+  },
+  "children": [
+    {
+      "number": 2,
+      "title": "首版范围与轻量目标",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/2",
+      "state": "CLOSED",
+      "assignees": {
+        "nodes": [
+          {
+            "login": "nineofoursyrup"
+          }
+        ]
+      },
+      "blockedBy": {
+        "nodes": []
+      }
+    },
+    {
+      "number": 3,
+      "title": "上游复用与执行恢复边界",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/3",
+      "state": "CLOSED",
+      "assignees": {
+        "nodes": [
+          {
+            "login": "nineofoursyrup"
+          }
+        ]
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 2,
+            "state": "CLOSED"
+          }
+        ]
+      }
+    },
+    {
+      "number": 4,
+      "title": "TUI 的最小交互合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/4",
+      "state": "CLOSED",
+      "assignees": {
+        "nodes": [
+          {
+            "login": "nineofoursyrup"
+          }
+        ]
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 3,
+            "state": "CLOSED"
+          }
+        ]
+      }
+    },
+    {
+      "number": 5,
+      "title": "运行证据与长期记录合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/5",
+      "state": "OPEN",
+      "assignees": {
+        "nodes": []
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 3,
+            "state": "CLOSED"
+          }
+        ]
+      }
+    },
+    {
+      "number": 6,
+      "title": "Eval 与性能改善的判定合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/6",
+      "state": "OPEN",
+      "assignees": {
+        "nodes": []
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 5,
+            "state": "OPEN"
+          }
+        ]
+      }
+    },
+    {
+      "number": 7,
+      "title": "improve 的建议、选择与执行合同",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/7",
+      "state": "OPEN",
+      "assignees": {
+        "nodes": []
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 6,
+            "state": "OPEN"
+          }
+        ]
+      }
+    },
+    {
+      "number": 8,
+      "title": "首版验收与实现交接边界",
+      "url": "https://github.com/nineofoursyrup/pi-durio/issues/8",
+      "state": "OPEN",
+      "assignees": {
+        "nodes": []
+      },
+      "blockedBy": {
+        "nodes": [
+          {
+            "number": 7,
+            "state": "OPEN"
+          },
+          {
+            "number": 4,
+            "state": "CLOSED"
+          }
+        ]
+      }
+    }
+  ],
+  "closed_children": [
+    2,
+    3,
+    4
+  ],
+  "eligible_frontier": [
+    5
+  ],
+  "next_frontier": 5
+}

@@ -1,0 +1,139 @@
+{
+  "status": "PASS_SCOPED_INDEPENDENT_REVIEW",
+  "reviewedAt": "2026-10-10T06:26:44.844889+00:00",
+  "reviewer": {
+    "agent": "/root/review_usd3_supplement",
+    "independentOfImplementer": true,
+    "axes": "Standards and Spec reviewed by the same sole independent reviewer"
+  },
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/frozen-manifest.json",
+    "bytes": 10012,
+    "sha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e"
+  },
+  "batchId": "pi-durio-v1-live-r2-usd3-supplement",
+  "product": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "sourceBuild": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+  "documentationCommit": "fc9e2d446306036af85f75da13ba8228cc3a648a",
+  "documentationParent": "370d91875bd00bf25606fe469fb63ae89423f124",
+  "standards": {
+    "status": "PASS",
+    "hardFindings": [],
+    "optionalFindings": [],
+    "sources": [
+      "user-supplied global AGENTS instructions",
+      "/Users/nineofour/Durio/AGENTS.md",
+      "docs/agents/issue-tracker.md",
+      "docs/agents/domain.md",
+      "GLOSSARY.md",
+      "docs/adr/0003-eval-isolation-and-evidence-boundary.md",
+      "/Users/nineofour/.agents/skills/code-review/SKILL.md Fowler smell baseline"
+    ]
+  },
+  "spec": {
+    "status": "PASS",
+    "hardFindings": [],
+    "optionalFindings": [],
+    "sources": [
+      "docs/specs/pi-durio-v1-spec.md",
+      "/Users/nineofour/pi-durio-v1-run/remote/20261009T234529Z/issue-30.json",
+      "final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md",
+      "final-9aed1af-usd3-r2/postrun-diagnosis/NEXT-BATCH-PLAN.md",
+      "coordinator supplied exact approved preparation scope"
+    ]
+  },
+  "checksExecuted": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/r3/identity-check.json",
+      "bytes": 3376,
+      "sha256": "50f12001412b01c9f24d6b921f4497fdd855ee996b0f5e35cd8c9d406a783f6e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/r3/documentation-identity-check.json",
+      "bytes": 7193,
+      "sha256": "3dc4e689d304523f16fb7cb52b2fd7097b2bb6f2d0c63c422e6900370e4833c9"
+    }
+  ],
+  "existingChecksReviewed": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/supplement-check-r2.json",
+      "bytes": 45449,
+      "sha256": "d9b01fa7bebbf035aeae2590ba773724d913191b98efc47314e674e7e7ddc69c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/budget-check-r1.json",
+      "bytes": 1841,
+      "sha256": "76428bdfb41ce5a3393b06d7f72034a08c6c738fac84e0097590483dec929486"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/wrapper-check-r1.json",
+      "bytes": 706,
+      "sha256": "9a99edda9edfa343e589d17171dccc12688690915c7b717161eac20a3a97158b"
+    }
+  ],
+  "checkReuse": "No deterministic source checks rerun; existing exact-source results reviewed and hashes verified. Identity reads are independent checks, not product behavioral tests.",
+  "preservedFailures": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/supplement-check-r1.json",
+      "bytes": 8042,
+      "sha256": "d72bde048b04f308f44e035baead4741cdb8be87925ac811dac3fac72e2f6fde"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+      "bytes": 907,
+      "sha256": "341b2233193117b0c05ccda0042a9ac8ab3d5c8ef34b48f45583b3612f36da07"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/r3/documentation-check-r1-failure.json",
+      "bytes": 400,
+      "sha256": "dc2fa427e3f9053ef024dd9128a5b5c99d2ee6be3da9009d7e240ddaa935979c"
+    }
+  ],
+  "coverage": [
+    "new exact-manifest authorization versus consumed prior grant and standing credential-source permission",
+    "zero credential/provider work before authorization gate",
+    "one-start replay/concurrent exclusive receipt rejection",
+    "post-install actual-start expiry check",
+    "host-only cross-batch ledger and conservative held unknown reservation",
+    "shared external start+60min cancellation deadline",
+    "three exact completed/valid/PASS trials and known usage required before improve",
+    "preserved original first failure/UNKNOWN/not-run and exact prior local-fix PASS",
+    "source/build/install/runtime/case/grader identity",
+    "synthetic seed workspace reused read-only with new analysis identity; no future candidate selected"
+  ],
+  "authorization": {
+    "newPaidStartAuthorized": false,
+    "actualGrantPresent": false,
+    "paidStartPresent": false,
+    "required": "New explicit human reply bound to this exact manifest, new32/cumulative47 requests and cumulative USD3/token limits; coordinator must preserve source and original receivedAt."
+  },
+  "limits": {
+    "credentialReads": 0,
+    "providerCalls": 0,
+    "actualPaidLauncherRuns": 0,
+    "productHarnessOpens": 0,
+    "restrictedVmStarts": 0,
+    "builds": 0,
+    "fullTestRuns": 0,
+    "implementationEdits": 0,
+    "gitWrites": 0,
+    "githubWrites": 0
+  },
+  "nonClaims": [
+    "No current authenticated provider availability or actual account bill established",
+    "No new real eval outcome or improve candidate established",
+    "No #30/#31/product acceptance or daily-use acceptance established",
+    "Public frozen tariff observation is not an account hard cap",
+    "Hypothetical successful supplement would not turn original r2 into first-attempt 4/4 PASS"
+  ],
+  "report": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/r3/review.md",
+    "bytes": 7187,
+    "sha256": "bb4b23fe023b3fa75d8dcf5286793d66c3eb860416e24ed0ec43d84e355d758d"
+  },
+  "readIdentities": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/r3/read-identities.json",
+    "bytes": 7942264,
+    "sha256": "c2a50618328f6727a38896b7d847ad8e497ecb36b1ff104e3e9aaa48524be464"
+  }
+}

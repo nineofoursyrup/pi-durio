@@ -1,0 +1,75 @@
+{
+  "at": "2026-10-09T15:16:27.618678+00:00",
+  "issue": 17,
+  "candidate": "66c7fcafb34e722eafd738140f9305e5a235db80",
+  "run": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/manual/2026-10-09T15-09-57-976Z",
+  "userObservation": "\"按 w 撤回，Esc 返回。工具会自动结束。 等完成\" 没有自动结束，没有完成，状态还是执行中",
+  "status": "FAIL observed wait; native acceptance incomplete",
+  "machine": {
+    "requiredFacts": {
+      "codingAccepted": true,
+      "actualBash": true,
+      "actualLocalEffect": true,
+      "steerSameTask": false,
+      "withdrawn": true,
+      "independentFollow": false,
+      "ctrlXDelivered": true,
+      "ctrlCDelivered": true,
+      "actualStopTool": false,
+      "separateIdleExitPair": false,
+      "stopped": false,
+      "frozenFollow": false,
+      "frozenManagement": false
+    },
+    "requiredFactsComplete": false,
+    "rawRestored": true,
+    "sttyRestored": true,
+    "taskSummary": [
+      {
+        "input": "队列开始",
+        "status": "aborted"
+      },
+      {
+        "input": "保留后续",
+        "status": "frozen"
+      }
+    ],
+    "queueSummary": [
+      {
+        "input": "补充当前任务",
+        "kind": "steer",
+        "status": "frozen"
+      },
+      {
+        "input": "撤回后续",
+        "kind": "steer",
+        "status": "withdrawn"
+      },
+      {
+        "input": "保留后续",
+        "kind": "follow-up",
+        "status": "frozen"
+      },
+      {
+        "input": "停止开始",
+        "kind": "steer",
+        "status": "frozen"
+      }
+    ]
+  },
+  "diagnosis": "撤回后续 was submitted by Enter before Ctrl+X and stored as steer; only one follow-up existed. Fixture releases only after >=2 follow-up admissions with one follow-up withdrawal. Later 停止开始 was also submitted to the still-running original task as steer. No product deadlock demonstrated.",
+  "firstFailurePreserved": true,
+  "retryRequest": "Same frozen candidate new manual directory; split into queue segment, then stop segment and reopen segment after factual checks. Paste fixture text and Ctrl+X before Enter for follow-ups.",
+  "sourceHashes": {
+    "environment.json": "8008761fe3469b9707c81c886f74fa86eb12418cd522a745bfeda31b7d547f19",
+    "plan.json": "2ee8e78dbb9a079c9e2a9f79b1aa7135f7b500e857b60efaff645d412a1a4db6",
+    "queue-stop/input.jsonl": "d3f8adae37b2567850ce1e1462fde715ebc9ab6d7689580d2bf07ada76745b62",
+    "queue-stop/output.ansi": "dc3f56eac565431bf383ebea0e4c0942ca155d7ed1bd75a1e622d165a29964c6",
+    "queue-stop/machine.json": "30b3cf7d51d44d7a389fa4a9cb7adc63c2ab2c4d1b4c18eaa8596a1a3b039472"
+  },
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/native-r1-attempt1-feedback.json",
+    "sha256": "6c044d85828ed8a497a01e870bfb637a9b32de202b59f7a5a7d40607f4dfb5e2"
+  },
+  "scope": "First native attempt remained incomplete; no acceptance or dependency unlock. Human chat observation retained; the runner operator.json was not supplied at this checkpoint."
+}

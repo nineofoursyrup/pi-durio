@@ -1,0 +1,45 @@
+{
+  "issue": 21,
+  "acceptedAt": "2026-10-09T16:22:38.570901+00:00",
+  "status": "integrated-accepted",
+  "scope": "T11 applicable controlled-provider actual restricted product runtime acceptance; no paid model quality or complete v1 claim",
+  "productSource": "a06e266c946e24c529b5bd344b98a1f0f6b61cb1",
+  "ticketTip": "87eb35e40f62db0285c88399c58be112f27f72a9",
+  "integrationMerge": "c99360ff412b51c10041e6cea3a94d7b90213f8d",
+  "mergeTree": "691a436b8642419eb1be6d43f24d15809e690ce2",
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/merge-integration-readback.json",
+    "sha256": "32058959d41b7c7bbbdbab3bc04a5f6888ab311432cfe307c9b2d5417a4cd16e"
+  },
+  "criteria": {
+    "plan": "PASS: fixed fixture, content, identity, budgets, order, limits and append-only trial outcomes",
+    "restrictedProduct": "PASS: actual full Pi runtime in fresh VM, trusted host mediation and separately restricted grading",
+    "boundary": "PASS: 26 product, 9 descendant and 26 grading checks with asset/termination evidence",
+    "budget": "PASS: dispatch reservation, unknown usage, deadline, actual automatic compaction ceiling, owner loss and immutable first failures",
+    "report": "PASS: all plan items, necessary FAIL vs grader unknown, additive consistent regrading, original outcome retention and read-only reopen",
+    "artifact": "PASS: 95 source,135 compiled and exact installed set,12742 runtime content entries,68 source records and13091 retained objects"
+  },
+  "checks": {
+    "full": "114/114 on integrated product before final eval-only changes",
+    "affected": "5/5 final eval,10/10 provider/runtime seam,6/6 unchanged isolation; actual matrix and installed readbacks",
+    "reuse": "Merged product exactly matches tested candidate; no redundant build or rerun"
+  },
+  "preserved": [
+    "First response overflow RED and raw-acquisition repair",
+    "VM preparation/Git initial-state failures remain separate from product acceptance",
+    "Old no-change PASS retained with appended unknown; new full explanatory case passed",
+    "Original necessary FAIL and grader unknown",
+    "Owner loss unknown/G0 and unapplied old pending"
+  ],
+  "unlocks": [
+    22
+  ],
+  "remaining": [
+    "#22 comparison and bounded conclusions",
+    "#30 paid provider batch NOT AUTHORIZED / NOT RUN",
+    "#31 complete native product and resource measurement",
+    "#32 explicit human daily-use acceptance",
+    "global fixed-candidate independent review"
+  ],
+  "rootDist": "not rebuilt; previous ignored dist is not the current candidate installation"
+}

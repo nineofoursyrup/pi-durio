@@ -1,0 +1,105 @@
+{
+  "status": "STATIC_SOURCE_AND_INSTALLED_IDENTITY_BINDING",
+  "productCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "producer": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+    "bytes": 92984,
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "sources": [
+    {
+      "source": "src/improve-decisions.ts",
+      "buildInput": {
+        "path": "src/improve-decisions.ts",
+        "sha256": "8109df0a81e5c5358dcfb5e63d27050608c8ce48b77b77a520d4c2bcfe1d8069",
+        "bytes": 21819
+      },
+      "readIdentity": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/improve-decisions.ts",
+        "sha256": "8109df0a81e5c5358dcfb5e63d27050608c8ce48b77b77a520d4c2bcfe1d8069",
+        "bytes": 21819
+      }
+    },
+    {
+      "source": "src/improve-formal.ts",
+      "buildInput": {
+        "path": "src/improve-formal.ts",
+        "sha256": "818ed5a144291595a9846fd0017df7e8ffa5126e462e692c35fdefed244e8ef7",
+        "bytes": 9225
+      },
+      "readIdentity": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/improve-formal.ts",
+        "sha256": "818ed5a144291595a9846fd0017df7e8ffa5126e462e692c35fdefed244e8ef7",
+        "bytes": 9225
+      }
+    },
+    {
+      "source": "src/improve-validation.ts",
+      "buildInput": {
+        "path": "src/improve-validation.ts",
+        "sha256": "0d7a297f17428e0cd56e14683cc2a77b0195f8b958594d950d93313725221ef3",
+        "bytes": 22824
+      },
+      "readIdentity": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/improve-validation.ts",
+        "sha256": "0d7a297f17428e0cd56e14683cc2a77b0195f8b958594d950d93313725221ef3",
+        "bytes": 22824
+      }
+    },
+    {
+      "source": "src/improve-history.ts",
+      "buildInput": {
+        "path": "src/improve-history.ts",
+        "sha256": "5984451f966cd0f7f6393f861632731d1cedf550f4f116cbbfde1dd152573217",
+        "bytes": 11552
+      },
+      "readIdentity": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/improve-history.ts",
+        "sha256": "5984451f966cd0f7f6393f861632731d1cedf550f4f116cbbfde1dd152573217",
+        "bytes": 11552
+      }
+    },
+    {
+      "source": "src/improve.ts",
+      "buildInput": {
+        "path": "src/improve.ts",
+        "sha256": "85ecc8bd1cf206911bf83911fc5ea4cea84f2e836f6983bedb4dee4ae604a7fa",
+        "bytes": 25404
+      },
+      "readIdentity": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/improve.ts",
+        "sha256": "85ecc8bd1cf206911bf83911fc5ea4cea84f2e836f6983bedb4dee4ae604a7fa",
+        "bytes": 25404
+      }
+    },
+    {
+      "source": "src/query.ts",
+      "buildInput": {
+        "path": "src/query.ts",
+        "sha256": "faacfd68c44af99e6cdc3ef3d0b9874aff0499bfd53eaf437f2540d2b17e4b18",
+        "bytes": 4423
+      },
+      "readIdentity": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/query.ts",
+        "sha256": "faacfd68c44af99e6cdc3ef3d0b9874aff0499bfd53eaf437f2540d2b17e4b18",
+        "bytes": 4423
+      }
+    },
+    {
+      "source": "scripts/demo-improve-execution.mjs",
+      "buildInput": {
+        "path": "scripts/demo-improve-execution.mjs",
+        "sha256": "69c19ce75423b6fcee2b7bc7d1bc7433eb428ba904074d5613604a2e3131478a",
+        "bytes": 30086
+      },
+      "readIdentity": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/scripts/demo-improve-execution.mjs",
+        "sha256": "69c19ce75423b6fcee2b7bc7d1bc7433eb428ba904074d5613604a2e3131478a",
+        "bytes": 30086
+      }
+    }
+  ],
+  "precedent": "scripts/demo-improve-execution.mjs choice(report,...): exact target/steps/revision, one regression group, explicit formal.writeback true/activate null/failureCompensation none. Source-only reference; demo not run.",
+  "preparedCalls": []
+}

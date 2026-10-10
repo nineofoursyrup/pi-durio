@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-10T11:14:35.730Z",
+  "status": "PASS",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/recovery-manifest.json",
+  "manifestSha256": "a9de035f7eaa3c229a71b2982921884b2828902c5652bb69de924bd290487511",
+  "runnerSha256": "86ee066764eabc5fd242e4773023019d82dea82d2cfa288fb231af7ac811d8be",
+  "packageRoot": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio",
+  "requiredFacts": {
+    "noRuntimeError": true,
+    "finalCleanupConfirmed": true,
+    "recoveryReportSaved": true,
+    "noWidthTimeout": true,
+    "noRetryNeeded": true,
+    "measured": true,
+    "sourceExplicitlyEnded": true,
+    "sourceOriginalPreserved": true,
+    "newTaskCompleted": true,
+    "newTaskOnly": true,
+    "oldQueueFrozen": true,
+    "rawRestored": true,
+    "sttyRestored": true
+  },
+  "automationFailure": null,
+  "elapsedMs": 6242.273583,
+  "syntheticRequests": 2,
+  "realProviderRequests": 0,
+  "vmStarts": 0,
+  "rawRestored": true,
+  "sttyRestored": true,
+  "humanAcceptance": "NOT CLAIMED"
+}

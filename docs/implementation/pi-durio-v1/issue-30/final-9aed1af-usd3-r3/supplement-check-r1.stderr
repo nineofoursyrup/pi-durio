@@ -1,0 +1,21 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ undefined
+- 'STOPPED'
+
+    at fixture (file:///Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/check-supplement.mjs:91:10)
+    at async file:///Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/check-supplement.mjs:114:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: 'STOPPED',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.8.2
