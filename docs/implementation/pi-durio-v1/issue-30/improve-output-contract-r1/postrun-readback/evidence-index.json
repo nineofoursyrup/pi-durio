@@ -1,0 +1,129 @@
+{
+  "status": "READ_ONLY_POSTRUN_VERIFIED_NOT_CANDIDATE_ACCEPTANCE",
+  "root": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback",
+  "files": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/REPORT.md",
+      "bytes": 3417,
+      "sha256": "d17aaf104ddb35039ba5d3a692903218cdbdb62d5b54f1076d0f3300733f9c0d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/canonical-candidate-copy.json",
+      "bytes": 8837,
+      "sha256": "6ef254121b198beb905a70396f4909131c90912773f720ed50030291104b889f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/collect.py",
+      "bytes": 18661,
+      "sha256": "a1e5c0ad28da3c5acc08232b6e93becf49c071ec0c490eb0c6e4779b38a815f3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/collect.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/collect.stdout",
+      "bytes": 374,
+      "sha256": "2509e5e2141b50874438cc96c306fd5fe83d4bb0a23ca5da2b154cd776777923"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/evidence-summary-100.json",
+      "bytes": 5194,
+      "sha256": "6e6450e99c09eaedc5be3560d8a42d790184f7e9822cde115f88d2e14126914e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/fixture-readback.json",
+      "bytes": 963,
+      "sha256": "fb38f34615d8616fc464b34c5e240ccd257d83f0f7a5bd8fb798609541c2bf3a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw/request-01.json",
+      "bytes": 4853,
+      "sha256": "f8c8cd131c036334d409ceaded7e84c912827ce3f72324dae76dc599fb919aba"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw/request-02.json",
+      "bytes": 9686,
+      "sha256": "a0402dafb1bb18acccf840dd6ad91e095283b52840dbf2e11b6a9479a2aec54a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw/request-03.json",
+      "bytes": 31249,
+      "sha256": "f551e6a471b3ed91ee5570372ca7c9f31e4b260348140f20bf4ce97b8c229b15"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw/request-04.json",
+      "bytes": 34803,
+      "sha256": "a74d838723867fc282691da10221dc556e24a1a63712dec69efca192e4ca60cd"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw/response-01.sse",
+      "bytes": 5009,
+      "sha256": "760c05014517c451d0abd81d10ec5b2f5f85c389afc076652b58b3c4b6da941d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw/response-02.sse",
+      "bytes": 105610,
+      "sha256": "20468538963d1cb43c43370d83d837a95e2fe8daf8228f5f97079c82d59b6337"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw/response-03.sse",
+      "bytes": 33372,
+      "sha256": "03b82144055c8754b7a7aa80496d98765bc2de283ac4fcd06f87fe4df4bde550"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw/response-04.sse",
+      "bytes": 762119,
+      "sha256": "1bc040cbfd3be5d0fce0a51f0666cfb11566c2d438fcd5239ed84d7604cb5e02"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw-analysis-answer.txt",
+      "bytes": 9764,
+      "sha256": "13ea1c557af31625295535a896ab7ddd6105daf61f34d568b0a6dd671f37422c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw-answer-index.json",
+      "bytes": 4002,
+      "sha256": "2994b331bce53ac905fcb840fef606155a876b40fdf8c1903ef18e4238d73023"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw-chunk-index.json",
+      "bytes": 911203,
+      "sha256": "126eabd8b9ecebc631201edf9a8d3b71e52496d840248fb673ea6ad554d385fb"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/read-identities.json",
+      "bytes": 4377156,
+      "sha256": "a2bab1af6c8c026798b3d39091d407680ab701219c68ba845703c130f754ff1c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/report.json",
+      "bytes": 17439,
+      "sha256": "cf2e811046179892f3b699d3d238dd7a3c36e2c8467128082c4b9f9250cd508f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/requests.json",
+      "bytes": 18927,
+      "sha256": "c909e9f83c62ff131ac8a005b9e62e378241b6d5a769cf9567cf544ccbc4da34"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/static-review/STATIC-ANALYSIS.md",
+      "bytes": 2319,
+      "sha256": "338289197a41ee57af99148fd389d00f8b602dea876e9b8d4a75c89ac4924eb8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/static-review/static-analysis.json",
+      "bytes": 3819,
+      "sha256": "f1eca720d5005ba5c90908ba87b7876bd96fe486cabf3dda9c55ba46e86dcf77"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/timeline.json",
+      "bytes": 51465,
+      "sha256": "321b86368c6386aee852771e5232d408a694d385d5745b94adcf3c38235ab4d5"
+    }
+  ],
+  "currentAuthorizationForCandidate": false,
+  "providerCallsByReadback": 0,
+  "productExecutionsByReadback": 0
+}
