@@ -1,0 +1,35 @@
+{
+  "at": "2026-10-10T11:25:27.768831+00:00",
+  "files": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.md",
+      "bytes": 5589,
+      "sha256": "1b624b38a26a88fac164082e885cc1883356da648cca61ee094bf27115dece0f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.json",
+      "bytes": 6495,
+      "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/identity-and-index-readback.json",
+      "bytes": 105797,
+      "sha256": "97b56ee5b01654cea886d20883ba245f628964b15e5e01e6b0cbc1332db7d85f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/native-independent-readback.json",
+      "bytes": 1014112,
+      "sha256": "2a26594cfce0a512688a9cf862f95d4fc6a44ea497e5d5b8b8b91bc03aca1ebf"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/accounting-and-reuse-readback.json",
+      "bytes": 11096,
+      "sha256": "87cd7319d2cb6ec4c99f05fe9b758d02ef4e91c7494e9434748a3882e7847b66"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/identity-and-index-readback.initial.json",
+      "bytes": 113432,
+      "sha256": "c540a9fc4bf14f7c36ced623a2208a3f98bd71594dbec0d963b8a70d5d37c6de"
+    }
+  ]
+}

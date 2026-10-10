@@ -2,7 +2,7 @@
 
 面向 macOS arm64 / Node >=22.19.0 的本地 coding agent，复用 Pi runtime，保留运行原文，并由用户明确控制恢复、eval 和 improve。
 
-首版尚未完成全部验收。[22票状态与证据](docs/implementation/pi-durio-v1/status.md)和[integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#30 的本票适用验收完成。产品候选 `f26ae8f` 已完成独立修复复核；四类真实 coding 场景以及[真实 improve 完整链](docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md)已取得适用证据。原失败、模型推理错误和 UNKNOWN 保留。#31 最终技术验收正在核对，#32 本机日用接受待完成，不声明完整首版 ready for review。
+技术验收完成，日用接受待确认。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录 #11–#31 的适用验收完成。产品候选 `f26ae8f` 的真实 DeepSeek coding / improve 闭环、当前本机资源测量和独立 Standards / Spec 复审均有适用证据；历史失败、模型推理错误和 UNKNOWN 保留。见[最终技术接受](docs/implementation/pi-durio-v1/issue-31/TECHNICAL-ACCEPTANCE.md)。#32 仍需用户实际试用并明确接受。
 
 ## 安装与本地演示
 
