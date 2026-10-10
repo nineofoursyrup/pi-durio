@@ -1,0 +1,361 @@
+{
+  "status": "PASS_IDENTITY_AND_REUSE_BINDINGS",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/frozen-manifest.json",
+    "bytes": 74214,
+    "sha256": "9a948eb693a20f5ca4d17443152fff0639465160628432d8d1f2eaa6b8cb1f8e"
+  },
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "producer": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "checkedEntries": [
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/common.mjs",
+        "bytes": 2998,
+        "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/freeze.mjs",
+        "bytes": 4155,
+        "sha256": "1bd42f9aa15b2d4f4d90b1396527b9a8856f39ad04de08c9d190d8b0ddf9b0e6"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/launch.py",
+        "bytes": 2523,
+        "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/ledger.mjs",
+        "bytes": 3187,
+        "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/preflight.mjs",
+        "bytes": 12402,
+        "sha256": "ec752343e4bed892a06ad684aae697ae350716f78f4af61a7e33058cc7c51230"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/prepare-repair.py",
+        "bytes": 7952,
+        "sha256": "90d44f27886bb9c85c7f8d099ed5eac2f2699e3271eb2b7d350c0b7161af515c"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/run.mjs",
+        "bytes": 6091,
+        "sha256": "45dcdd649a6f71bd680f1540d054a3a38bcc6bc858eb3ad194f040e902bf102d"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/artifact.json",
+        "bytes": 2792,
+        "sha256": "6608f6149f3e45051fc73eadcdb1dac8b77aa0d070070ef642ed3e26cd276661"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
+        "bytes": 4084,
+        "sha256": "21271432e2d61a85048c5be7d9679328b49286bf96ae86e299eb6801f945a47d"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/proposed-batch-reviewed.json",
+        "bytes": 7669,
+        "sha256": "6f450286691dc7e2c1feba54031572ec2bfa7225c24c19cd769268d1e4bcc335"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/provider-observation.json",
+        "bytes": 1560,
+        "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/retrieval.json",
+        "bytes": 715,
+        "sha256": "facf0c8d8c857ad49b2df669ebab2c72e79388f1c4ccdd9fef8f575eaab96b13"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/pricing.html",
+        "bytes": 23982,
+        "sha256": "210f102275ccf1a6542f08a3bc9e4b4c7c83278cb74b35217bffa112df6363b2"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/models.html",
+        "bytes": 39323,
+        "sha256": "41551c3c498a93b6e6459eaeee89829940ca8acf999b24436a38a2231c7e091b"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r5.json",
+        "bytes": 99079,
+        "sha256": "d35f10a2d9a3c5f28b1bf06c16b92419e55292f415b246e6f9f11a2d1e4f8975"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r3.json",
+        "bytes": 648,
+        "sha256": "347265fcbb619ab2673810f9e85a81bee47e5dbc11990108f2c2b06359660bb9"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-repair.mjs",
+        "bytes": 17378,
+        "sha256": "fc777642c6c3610a76844c399c086bee845bf74d0241684b4fc98163b36ec7c0"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-wrapper.py",
+        "bytes": 2274,
+        "sha256": "4a4ce4ad10730c685939ccf8109dc5f5d83546c2493bcf4e253d293e80083d70"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/artifact-binding-precheck.json",
+        "bytes": 1095,
+        "sha256": "5f13db4f80d8718e5c2af47516c82d4736add9e5783b893d43b00f02a43fa5d8"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r1.json",
+        "bytes": 4260,
+        "sha256": "86bb7cae6385c68ba99221178ba78c38155917a72b38eb4ef143dd83f4dbfebe"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2.json",
+        "bytes": 75560,
+        "sha256": "36ec4661e8dfaf30acbbf418a8cd0d081590942045a64ce36c7b9eae7892b7d3"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r1-source.mjs",
+        "bytes": 16854,
+        "sha256": "055ed24e2368c28d49bdf021b2c545930c3e8a00c13907745ae983389b7f7cde"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2-source.mjs",
+        "bytes": 16870,
+        "sha256": "36c998deb82e260b9c4b1446ee641cf427af83cc4898efd4dc347ba70e5958ad"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2-preflight-source.mjs",
+        "bytes": 12194,
+        "sha256": "18dbd6f5689a3d748a6310d2f2e2598f85f3ac4e5209bb2a0076e5017400e0e8"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/review.json",
+        "bytes": 14768,
+        "sha256": "1f2e634e921422680862d079e8a47fd94d752cfc60ee203fc445d1a32fbc7244"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/identity-readback.json",
+        "bytes": 21004,
+        "sha256": "500f6800eccfd4504448c5c957a4a82b5ad308c60269aa1051cc434986953b4f"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/applicable-check-gate.json",
+        "bytes": 8135,
+        "sha256": "652ef66e419d30a5a960d0d97506f445cba127892866693b2d776d6d1ca4996c"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/result.json",
+        "bytes": 969,
+        "sha256": "bbc68a12cb79278d86114edcb0577e479b9de5f13f572522243f2666a2da8a26"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/evidence-applicability.json",
+        "bytes": 22510,
+        "sha256": "36da7ef8eec3f12fb22a853206a92ee750a43f1b5c65df8e4a91b59fb7291da3"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/readonly-applicability-result.json",
+        "bytes": 301453,
+        "sha256": "1305bbabbb812cd3051c81f238197c6eb58b9f754ef2ea66850b91e87ad34516"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/candidate-identity.json",
+        "bytes": 5258817,
+        "sha256": "ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+        "bytes": 92984,
+        "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/source.tar.gz",
+        "bytes": 3167614,
+        "sha256": "508268f5708ba67e169a24ad71103bb9a560293983d0fad7b8991e29aefb73b4"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/pack/pi-durio-0.1.0.tgz",
+        "bytes": 19222769,
+        "sha256": "0be03d6d7e090f3ba58f55297f1c9dd50b28540fbba0ed76ae55d34419f1221b"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/applicable-check-gate.json",
+        "bytes": 8135,
+        "sha256": "652ef66e419d30a5a960d0d97506f445cba127892866693b2d776d6d1ca4996c"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/linux-runtime-derivation.json",
+        "bytes": 1509,
+        "sha256": "244df4541bd47b3c2260a8df009b47a519aa5d9c96127cd0ef6b63423f12654e"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/dependency-check-applicability.json",
+        "bytes": 833,
+        "sha256": "4227b4fc176dda7776530f0cb5488d905e3732c6d49e3083e32d7214576cb1b8"
+      },
+      "status": "PASS"
+    },
+    {
+      "entry": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-final-preflight.mjs",
+        "bytes": 4945,
+        "sha256": "008d63faee4ac605d03fae7f4b95c3fd7a923a93d171827cfa9ee9179b6bc8fb"
+      },
+      "status": "PASS"
+    }
+  ],
+  "unchangedForCheckReuse": [
+    {
+      "new": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/common.mjs",
+        "bytes": 2998,
+        "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+      },
+      "old": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/harness/common.mjs",
+        "bytes": 2998,
+        "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+      }
+    },
+    {
+      "new": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/launch.py",
+        "bytes": 2523,
+        "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+      },
+      "old": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/harness/launch.py",
+        "bytes": 2523,
+        "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+      }
+    }
+  ],
+  "reusedExactSourceCases": 30,
+  "reusedFinalPreflight": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-preflight-check-r1.json",
+    "bytes": 1398,
+    "sha256": "6d4d6a0029833ada479f0a593b7f94692729f9a2b0fbf7d220433b216ff224c9"
+  },
+  "reusedFinalDenials": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-denials-r1.json",
+    "bytes": 814,
+    "sha256": "41ce179b97692469ff670e509e4f5f20de33aaf8ce029f8d0647eecf0093b230"
+  },
+  "actualGrantPresent": false,
+  "paidStartPresent": false,
+  "authorizedPlanPresent": false,
+  "credentialReads": 0,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "productExecutions": 0,
+  "scope": "Read-only bytes and referenced evidence identities; installed 12925-file behavior/identity checks are reused from independently bound source review, not re-executed here."
+}

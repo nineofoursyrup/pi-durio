@@ -42,4 +42,6 @@
 
 原生首批三个 idle 和 60+2 个任务测量完成；组合步骤因 harness 在异步报告生成前读取而失败，原件保留。定向补测只修复该轮询，并完成 compaction、合成 improve 选择、隔离回归、fixture 正式写回、下一任务读取，以及 30 次查询和 5 次 1 MiB 完整导出。它们不代替真实 improve 或 #32 人工接受。
 
-当前前沿：补充批次 `07ed36fd…0251e` 已按新的明确授权唯一启动并停止。两批累计 34 次物理请求；host ledger 已知 61,560 token，另有 1,056,768 token 的 UNKNOWN 预留，保守占额合计 1,118,328 token / USD 1.3419936，账户账单未读取。原始响应中的 952 token 仅用于诊断，不覆盖原 UNKNOWN 或释放预留。LIVE-USD3-R3-01 已修复并独立复核通过，新候选 f26ae8f 的构建/安装/体积已核对；正在冻结并独立审核具体只 improve 批次。新的付费启动仍须另行批准，未来实际候选仍须用户选择。#31/#32 未完成。
+当前前沿：补充批次 `07ed36fd…0251e` 已按新的明确授权唯一启动并停止。两批累计 34 次物理请求；host ledger 已知 61,560 token，另有 1,056,768 token 的 UNKNOWN 预留，保守占额合计 1,118,328 token / USD 1.3419936，账户账单未读取。原始响应中的 952 token 仅用于诊断，不覆盖原 UNKNOWN 或释放预留。LIVE-USD3-R3-01 已修复并独立复核通过，新候选 f26ae8f 的构建/安装/体积已核对；只 improve r2 批次已冻结并完成独立 Standards/Spec 复核（均 PASS，0 未解决问题），42 个本轮离线检查通过。Manifest `c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a`；新上限 8 请求/1,200,000 tokens，累计 42 请求/2,318,328 charged tokens，固定价目估算上界 USD2.7819936，累计帽仍 USD3。新的付费启动仍须另行批准，未来实际候选仍须用户选择。#31/#32 未完成。
+
+[当前只 improve 批次](issue-30/improve-only-repair-r2/README.md) · [独立批次复核](review/improve-only-repair-r2/independent-review.md) · [具体一次启动授权请求](review/improve-only-repair-r2/authorization-request.md)。原 r1 批次脚本的两项 P2 与失败探针保留在[原评审](review/improve-only-repair-r1/independent-review.md)，当前 r2 修复不会改写原失败。
