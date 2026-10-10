@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "cases": 2,
+  "rows": [
+    {
+      "name": "missing",
+      "returnCode": 1,
+      "stdout": "",
+      "stderr": "PREFLIGHT_DENIED: EXPLICIT_NEW_PAID_GRANT_REQUIRED\n",
+      "status": "PASS",
+      "credentialReaderCalled": false
+    },
+    {
+      "name": "false",
+      "returnCode": 1,
+      "stdout": "",
+      "stderr": "PREFLIGHT_DENIED: EXPLICIT_NEW_PAID_GRANT_REQUIRED\n\nfalse !== true\n\n",
+      "status": "PASS",
+      "credentialReaderCalled": false
+    }
+  ],
+  "scope": "Actual unchanged wrapper and new preflight, false/missing fixture grant; load_key replaced with forbidden-access marker; child environment contains PATH only; no real credentials/provider/VM"
+}

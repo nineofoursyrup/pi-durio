@@ -1,0 +1,19 @@
+{
+  "kind": "supplemental-one-start",
+  "manifestSha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e",
+  "batchId": "pi-durio-v1-live-r2-usd3-supplement",
+  "priorManifestSha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486",
+  "receivedAt": null,
+  "exactHumanReply": null,
+  "limits": {
+    "maxRequests": 32,
+    "maxTokens": 2372501,
+    "cumulativeMaxRequests": 47,
+    "cumulativeMaxTokens": 2400000,
+    "usdCeiling": 3,
+    "grantToStartMs": 86400000,
+    "activeMs": 3600000,
+    "starts": 1
+  },
+  "note": "Template only; no user authorization has been received for this supplemental start."
+}

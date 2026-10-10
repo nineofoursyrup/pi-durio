@@ -1,0 +1,18 @@
+{
+  "prior": {
+    "requests": 15,
+    "knownTokens": 27499,
+    "reservedTokens": 0,
+    "unknown": 0,
+    "conservativeEstimateUsd": 0.0329988
+  },
+  "originalStatus": "STOPPED",
+  "localFixTrialId": "v1-live-r1-local-fix",
+  "localFixOutcome": "e1:684:3452d528da95ff7f4aabe09522fa8bdbcefb3df57b71c8bafabe02094670a180",
+  "localFixGrade": "e1:687:d3f92c3c6db88c384d5220ce9c3267c4e48a6a802704f68469a8afabdb27c947",
+  "failedTrialId": "v1-live-r1-multi-file",
+  "failedOutcome": "e1:1056:cd824aa1cb59cdc8f3ece1a898745b31cf1ba28aa90e4dc3e373d308736e4515",
+  "failedGrade": "e1:1058:47e49b00b8d022212b6325ce5bb0234c70fc80ea0840e7f351c7851492839627",
+  "originalGrade": "unknown",
+  "basis": "15 distinct host requests; retained raw usage matched every settlement; guest/SDK usage mirrors are not added; account billing not observed"
+}
