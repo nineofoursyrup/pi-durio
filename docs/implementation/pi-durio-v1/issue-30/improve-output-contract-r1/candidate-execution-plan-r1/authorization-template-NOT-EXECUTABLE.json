@@ -1,0 +1,16 @@
+{
+  "authorized": false,
+  "choice": null,
+  "manifestSha256": null,
+  "author": null,
+  "source": {
+    "kind": null,
+    "requestToolCallId": null,
+    "userMessageId": null
+  },
+  "exactHumanReply": null,
+  "grantedAt": null,
+  "acknowledgesOriginalReasoningError": false,
+  "starts": 1,
+  "note": "Only coordinator records actual new direct human choice after review. Existing paid-analysis authorizations are consumed and do not authorize this decision."
+}
