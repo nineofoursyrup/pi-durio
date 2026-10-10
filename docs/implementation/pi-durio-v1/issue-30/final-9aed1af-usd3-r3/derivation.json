@@ -1,0 +1,33 @@
+{
+  "status": "PREPARED_NOT_STARTED_PENDING_CHECK_AND_REVIEW",
+  "product": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "previousManifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+    "bytes": 8105,
+    "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+  },
+  "checkedManifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/checked-manifest.json",
+    "bytes": 10012,
+    "sha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e"
+  },
+  "initialDataRoots": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/eval-data/host.sqlite",
+      "bytes": 45056,
+      "sha256": "267e8b8cb057553c5addd13c3e9fa6965f34d3e46359491ef3efaa9b1f5238dc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/improve-data/host.sqlite",
+      "bytes": 24576,
+      "sha256": "e53c3e492ac4e2520008788e56f5b00dc47f92ad8684a0e465054873cccc0bc8"
+    }
+  ],
+  "originalFilesPreserved": 3167,
+  "originalChanges": 0,
+  "realCredentialReads": 0,
+  "providerRequests": 0,
+  "restrictedVmStarts": 0,
+  "productBuilds": 0,
+  "clones": "Independent APFS inodes; only original closed seed roots; existing synthetic seed provenance unchanged"
+}

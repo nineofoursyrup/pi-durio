@@ -1,0 +1,1313 @@
+{
+  "status": "PASS",
+  "cases": 25,
+  "manifestSha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e",
+  "scope": "Exact candidate source in node:vm JavaScript module sandbox; all grants/auth records/API/clock/receipts are memory-only fixtures. No actual credential, provider, restricted VM, installed product execution or paid-start.",
+  "results": [
+    {
+      "name": "grant-false",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "EXPLICIT_NEW_PAID_GRANT_REQUIRED\n\nfalse !== true\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "old-40-request-grant",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "EXACT_SUPPLEMENT_LIMITS_REQUIRED\n+ actual - expected\n\n  {\n    activeMs: 3600000,\n    cumulativeMaxRequests: 47,\n    cumulativeMaxTokens: 2400000,\n    grantToStartMs: 86400000,\n+   maxRequests: 40,\n-   maxRequests: 32,\n    maxTokens: 2372501,\n    starts: 1,\n    usdCeiling: 3\n  }\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "old-authorization-source",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "OLD_AUTHORIZATION_NOT_REUSABLE",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "new-grant-source-time-mismatch",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "NEW_GRANT_TIME_MUST_MATCH_SOURCE\n+ actual - expected\n\n+ '2026-10-10T06:30:00.001Z'\n- '2026-10-10T06:30:00.000Z'\n                         ^\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "new-grant-before-original-stop",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "NEW_GRANT_EXPIRED_OR_INVALID",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "new-grant-expired",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "NEW_GRANT_EXPIRED_OR_INVALID",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "new-grant-in-future",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "NEW_GRANT_EXPIRED_OR_INVALID",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "repeat-start",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "BATCH_ALREADY_STARTED\n\ntrue !== false\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "prior-result-tampered",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "FROZEN_CONTENT_CHANGED:/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/live-eval-result.json\n+ actual - expected\n\n  {\n+   bytes: 23,\n-   bytes: 713898,\n    path: '/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/live-eval-result.json',\n+   sha256: 'edd08a507cb4689983041aba6edee8656f0c3d4f5587c1dc68d0fd6a356907d0'\n-   sha256: 'be42c821efef34d0bd9adc13696057a666432c823385db9ee1246e657cbc6669'\n  }\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "prior-unknown-ledger-rejected",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "PRIOR_LEDGER_CHANGED\n+ actual - expected\n\n  {\n    conservativeEstimateUsd: 0.0329988,\n    knownTokens: 27499,\n    requests: 15,\n    reservedTokens: 0,\n+   unknown: 1\n-   unknown: 0\n  }\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "eval-stage-expanded",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "PROPOSAL_NOT_EXACT_SUPPLEMENT\n+ actual - expected\n... Skipped lines\n\n  {\n    aggregate: {\n      accountBill: 'Not observed; token-price estimate only',\n      conservativePriceEstimateUsd: 2.8470012,\n      cumulative: {\n...\n        maxRequests: 24,\n+       maxTokens: 1200000,\n-       maxTokens: 1172501,\n        unknownUpperBound: {\n          source: 'https://api-docs.deepseek.com/api/list-models/',\n          tokens: 1052672\n        }\n      },\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "improve-truncated",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "PROPOSAL_NOT_EXACT_SUPPLEMENT\n+ actual - expected\n... Skipped lines\n\n  {\n    aggregate: {\n      accountBill: 'Not observed; token-price estimate only',\n      conservativePriceEstimateUsd: 2.8470012,\n      cumulative: {\n...\n          maxRequestTokens: 1056768,\n+         maxRequests: 1,\n-         maxRequests: 8,\n          maxTokens: 1200000\n        },\n        purpose: 'Analyze the retained failed clamp check and the explicitly registered project sources. Explain the observed defect and propose a minimal deterministic repair only if supported by acquired evidence. Only clamp.ts may be proposed for change; README.md, check.mjs and package.json are protected. No performance improvement is claimed. Return your own structured candidate, or zero candidates with the actual gaps. This is analysis only; user selection is separate.',\n        query: {\n          maxEvidenceBytes: 32768,\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "extra-fourth-trial",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "PROPOSAL_NOT_EXACT_SUPPLEMENT\n+ actual - expected\n... Skipped lines\n\n  {\n    aggregate: {\n      accountBill: 'Not observed; token-price estimate only',\n      conservativePriceEstimateUsd: 2.8470012,\n      cumulative: {\n...\n        },\n+       {\n+         caseId: 'multi-file',\n+         id: 'unexpected-fourth',\n+         pair: null,\n+         repeat: 1,\n+         side: 'candidate',\n+         version: '5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a'\n+       }\n      ]\n    },\n    futureSelection: 'No candidate is prefilled or selected. Actual report/candidate revision, target baseline/content/check/writeback proposal must return to human.',\n    improve: {\n      allowedWriteback: [\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "expires-during-installation",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": "GRANT_EXPIRED_BEFORE_START",
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve"
+      ],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "start-exactly-at-window-boundary",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval",
+        "analyzeImprove"
+      ],
+      "resultStatus": "AWAITING_ACTUAL_CANDIDATE_SELECTION",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 3,
+            "dispatches": 3,
+            "knownTokens": 450,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 250,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "offline-improve-request",
+                "reservation": "e1:10:offline-10",
+                "settlement": "e1:12:offline-12",
+                "dispatch": "e1:11:offline-11"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 19,
+        "requestCompleteness": "known",
+        "knownTokens": 28199,
+        "reservedTokens": 0,
+        "chargedUpperTokens": 28199,
+        "conservativeKnownUsd": 0.033838799999999995,
+        "conservativeChargedUpperUsd": 0.033838799999999995,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "exact-three-passes-enter-improve",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval",
+        "analyzeImprove"
+      ],
+      "resultStatus": "AWAITING_ACTUAL_CANDIDATE_SELECTION",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 3,
+            "dispatches": 3,
+            "knownTokens": 450,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 250,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "offline-improve-request",
+                "reservation": "e1:10:offline-10",
+                "settlement": "e1:12:offline-12",
+                "dispatch": "e1:11:offline-11"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 19,
+        "requestCompleteness": "known",
+        "knownTokens": 28199,
+        "reservedTokens": 0,
+        "chargedUpperTokens": 28199,
+        "conservativeKnownUsd": 0.033838799999999995,
+        "conservativeChargedUpperUsd": 0.033838799999999995,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "two-pass-does-not-enter-improve",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval"
+      ],
+      "resultStatus": "STOPPED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 3,
+            "dispatches": 3,
+            "knownTokens": 450,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": null,
+            "entered": false,
+            "requests": 0,
+            "dispatches": 0,
+            "knownTokens": 0,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "not-started",
+            "violation": false
+          }
+        ],
+        "knownRequests": 18,
+        "requestCompleteness": "known",
+        "knownTokens": 27949,
+        "reservedTokens": 0,
+        "chargedUpperTokens": 27949,
+        "conservativeKnownUsd": 0.033538799999999994,
+        "conservativeChargedUpperUsd": 0.033538799999999994,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "old-four-count-not-accepted",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval"
+      ],
+      "resultStatus": "STOPPED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 3,
+            "dispatches": 3,
+            "knownTokens": 450,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": null,
+            "entered": false,
+            "requests": 0,
+            "dispatches": 0,
+            "knownTokens": 0,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "not-started",
+            "violation": false
+          }
+        ],
+        "knownRequests": 18,
+        "requestCompleteness": "known",
+        "knownTokens": 27949,
+        "reservedTokens": 0,
+        "chargedUpperTokens": 27949,
+        "conservativeKnownUsd": 0.033538799999999994,
+        "conservativeChargedUpperUsd": 0.033538799999999994,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "old-trial-id-not-accepted",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval"
+      ],
+      "resultStatus": "STOPPED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 3,
+            "dispatches": 3,
+            "knownTokens": 450,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": null,
+            "entered": false,
+            "requests": 0,
+            "dispatches": 0,
+            "knownTokens": 0,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "not-started",
+            "violation": false
+          }
+        ],
+        "knownRequests": 18,
+        "requestCompleteness": "known",
+        "knownTokens": 27949,
+        "reservedTokens": 0,
+        "chargedUpperTokens": 27949,
+        "conservativeKnownUsd": 0.033538799999999994,
+        "conservativeChargedUpperUsd": 0.033538799999999994,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "first-failure-cancels-and-retains",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval",
+        "first-failure-aborted"
+      ],
+      "resultStatus": "STOPPED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 3,
+            "dispatches": 3,
+            "knownTokens": 450,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": null,
+            "entered": false,
+            "requests": 0,
+            "dispatches": 0,
+            "knownTokens": 0,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "not-started",
+            "violation": false
+          }
+        ],
+        "knownRequests": 18,
+        "requestCompleteness": "known",
+        "knownTokens": 27949,
+        "reservedTokens": 0,
+        "chargedUpperTokens": 27949,
+        "conservativeKnownUsd": 0.033538799999999994,
+        "conservativeChargedUpperUsd": 0.033538799999999994,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "unknown-usage-stops-and-retains-reservation",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval"
+      ],
+      "resultStatus": "STOPPED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 4,
+            "dispatches": 4,
+            "knownTokens": 450,
+            "reservedTokens": 1052672,
+            "unknown": 1,
+            "completeness": "unknown",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              },
+              {
+                "id": "offline-unknown",
+                "reservation": "e1:10:offline-10",
+                "settlement": "e1:12:offline-12",
+                "dispatch": "e1:11:offline-11"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": null,
+            "entered": false,
+            "requests": 0,
+            "dispatches": 0,
+            "knownTokens": 0,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "not-started",
+            "violation": false
+          }
+        ],
+        "knownRequests": 19,
+        "requestCompleteness": "known",
+        "knownTokens": 27949,
+        "reservedTokens": 1052672,
+        "chargedUpperTokens": 1080621,
+        "conservativeKnownUsd": 0.033538799999999994,
+        "conservativeChargedUpperUsd": 1.2967452,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "http401-blocks-next-reservation",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval"
+      ],
+      "resultStatus": "STOPPED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 3,
+            "dispatches": 3,
+            "knownTokens": 450,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": null,
+            "entered": false,
+            "requests": 0,
+            "dispatches": 0,
+            "knownTokens": 0,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "not-started",
+            "violation": false
+          }
+        ],
+        "knownRequests": 18,
+        "requestCompleteness": "known",
+        "knownTokens": 27949,
+        "reservedTokens": 0,
+        "chargedUpperTokens": 27949,
+        "conservativeKnownUsd": 0.033538799999999994,
+        "conservativeChargedUpperUsd": 0.033538799999999994,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "repeated-cancel-retains-cleanup-handlers",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval",
+        "cleanup-with-handlers"
+      ],
+      "resultStatus": "CANCELLED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 3,
+            "dispatches": 3,
+            "knownTokens": 450,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": null,
+            "entered": false,
+            "requests": 0,
+            "dispatches": 0,
+            "knownTokens": 0,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "not-started",
+            "violation": false
+          }
+        ],
+        "knownRequests": 18,
+        "requestCompleteness": "known",
+        "knownTokens": 27949,
+        "reservedTokens": 0,
+        "chargedUpperTokens": 27949,
+        "conservativeKnownUsd": 0.033538799999999994,
+        "conservativeChargedUpperUsd": 0.033538799999999994,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "zero-candidate-kept-without-retry",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED_NO_EXECUTABLE_CHAIN",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": 3,
+            "dispatches": 3,
+            "knownTokens": 450,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "v1-live-r2-multi-file",
+                "reservation": "e1:1:offline-1",
+                "settlement": "e1:3:offline-3",
+                "dispatch": "e1:2:offline-2"
+              },
+              {
+                "id": "v1-live-r2-regression",
+                "reservation": "e1:4:offline-4",
+                "settlement": "e1:6:offline-6",
+                "dispatch": "e1:5:offline-5"
+              },
+              {
+                "id": "v1-live-r2-no-change",
+                "reservation": "e1:7:offline-7",
+                "settlement": "e1:9:offline-9",
+                "dispatch": "e1:8:offline-8"
+              }
+            ]
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 250,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "offline-improve-request",
+                "reservation": "e1:10:offline-10",
+                "settlement": "e1:12:offline-12",
+                "dispatch": "e1:11:offline-11"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 19,
+        "requestCompleteness": "known",
+        "knownTokens": 28199,
+        "reservedTokens": 0,
+        "chargedUpperTokens": 28199,
+        "conservativeKnownUsd": 0.033838799999999995,
+        "conservativeChargedUpperUsd": 0.033838799999999995,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    },
+    {
+      "name": "unavailable-ledger-holds-full-stage-allowances",
+      "status": "PASS",
+      "scope": "memory-only exact-source runner/gate fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "prepareEval",
+        "runEval",
+        "analyzeImprove"
+      ],
+      "resultStatus": "AWAITING_ACTUAL_CANDIDATE_SELECTION",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 15,
+          "knownTokens": 27499,
+          "reservedTokens": 0,
+          "unknown": 0,
+          "conservativeEstimateUsd": 0.0329988
+        },
+        "stages": [
+          {
+            "stage": "eval",
+            "limits": {
+              "maxRequests": 24,
+              "maxTokens": 1172501,
+              "maxRequestTokens": 1052672,
+              "maxOutputTokens": 4096
+            },
+            "runId": "pi-durio-v1-live-r2-usd3-supplement",
+            "entered": true,
+            "requests": null,
+            "dispatches": null,
+            "knownTokens": 0,
+            "reservedTokens": 1172501,
+            "unknown": null,
+            "completeness": "unavailable-full-stage-held",
+            "violation": null,
+            "error": "Error: OFFLINE_CONTROLLED_READ_GAP",
+            "warning": "Hold the full authorized stage allowance; unavailable evidence is never treated as zero usage or permission to resume"
+          },
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": null,
+            "dispatches": null,
+            "knownTokens": 0,
+            "reservedTokens": 1200000,
+            "unknown": null,
+            "completeness": "unavailable-full-stage-held",
+            "violation": null,
+            "error": "Error: OFFLINE_CONTROLLED_READ_GAP",
+            "warning": "Hold the full authorized stage allowance; unavailable evidence is never treated as zero usage or permission to resume"
+          }
+        ],
+        "knownRequests": 15,
+        "requestCompleteness": "unknown",
+        "knownTokens": 27499,
+        "reservedTokens": 2372501,
+        "chargedUpperTokens": 2400000,
+        "conservativeKnownUsd": 0.032998799999999995,
+        "conservativeChargedUpperUsd": 2.88,
+        "limits": {
+          "maxRequests": 32,
+          "maxTokens": 2372501,
+          "cumulativeMaxRequests": 47,
+          "cumulativeMaxTokens": 2400000,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerFilesWritten": 0
+    }
+  ],
+  "realCredentialReads": 0,
+  "newProviderRequests": 0,
+  "restrictedVmStarts": 0,
+  "actualRunnerFilesWritten": 0,
+  "script": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/check-supplement.mjs",
+    "sha256": "808b99ea0290d9a85c09f262853d4ad718173641e1ea68994a7cbbbb9fe3c407"
+  }
+}
