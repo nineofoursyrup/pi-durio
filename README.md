@@ -2,7 +2,7 @@
 
 面向 macOS arm64 / Node >=22.19.0 的本地 coding agent，复用 Pi runtime，保留运行原文，并由用户明确控制恢复、eval 和 improve。
 
-首版尚未完成全部验收。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#29 除 #23 的本票适用验收保持完成；原生 Terminal 技术批次已有适用证据。四类真实 coding 场景已分别取得 PASS，原失败保留；补充真实 improve 暴露用量结算缺陷 LIVE-USD3-R3-01，当前修复与复核进行中，0 个候选。[真实结果和诊断](docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/postrun-readback/REPORT.md)与原 250 PASS / 1 FAIL、受影响修复记录分别保存。完整技术验收与本机日用接受尚未完成，不声明完整首版 ready for review。
+首版尚未完成全部验收。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#29 的本票适用验收完成；原生 Terminal 技术批次已有适用证据。四类真实 coding 场景已分别取得 PASS，原失败保留；补充真实 improve 暴露的用量结算缺陷 LIVE-USD3-R3-01 已在新候选 `f26ae8f` 修复并独立复核通过，原真实失败和 0 个候选保留，尚待新的真实 improve 批次。[真实结果和诊断](docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/postrun-readback/REPORT.md)与原 250 PASS / 1 FAIL、受影响修复记录分别保存。完整技术验收与本机日用接受尚未完成，不声明完整首版 ready for review。
 
 ## 安装与本地演示
 
@@ -31,7 +31,7 @@ node dist/src/cli.js run --workspace "$PWD/test/fixtures/project" \
 
 `npm pack` 生成包含锁定生产依赖的分发包，供当前 macOS arm64 目标独立安装；Node 本身不打包。各票的已验证安装有自己的源码、构建、依赖与包身份，最新源码状态不能自动替代这些身份。
 
-固定分发包已验证首次及重复离线 `npm install --omit=dev --ignore-scripts --no-audit --no-fund --offline /absolute/pi-durio-0.1.0.tgz`，以及 CLI 和 12 个公开 import。npm `11.19.1` 下，bundled `file:` 依赖会使 `npm ls` 报 invalid，消费端新生成的 lock 也不能用于上述离线 `npm ci`；两项失败及最小复现见[安装诊断](docs/implementation/pi-durio-v1/delivery-9aed1af/npm-diagnosis-REPORT.md)。这与上方使用仓库完整 lock 的源码 `npm ci` 是不同路径。
+旧固定分发包已验证首次及重复离线 `npm install --omit=dev --ignore-scripts --no-audit --no-fund --offline /absolute/pi-durio-0.1.0.tgz`，以及 CLI 和 12 个公开 import。npm `11.19.1` 下，bundled `file:` 依赖会使 `npm ls` 报 invalid，消费端新生成的 lock 也不能用于上述离线 `npm ci`；两项失败及最小复现见[安装诊断](docs/implementation/pi-durio-v1/delivery-9aed1af/npm-diagnosis-REPORT.md)。这与上方使用仓库完整 lock 的源码 `npm ci` 是不同路径。 新修复候选的独立离线安装、CLI 和公开 import 也已通过，依赖字节不变，原 npm 兼容性限制继续适用，见[当前交付记录](docs/implementation/pi-durio-v1/delivery-f26ae8f/README.md)。
 
 ## 真实 coding 与终端操作
 

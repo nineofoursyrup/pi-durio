@@ -1,0 +1,56 @@
+{
+  "kind": "New fixed repaired source and independently installed product; previous real evidence keeps old execution identity",
+  "producer": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "integratedSource": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "installation": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install",
+  "linux": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/linux-runtime",
+  "producerIdentity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/candidate-identity.json",
+    "bytes": 5258817,
+    "sha256": "ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091"
+  },
+  "sourceArchive": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/source.tar.gz",
+    "bytes": 3167614,
+    "sha256": "508268f5708ba67e169a24ad71103bb9a560293983d0fad7b8991e29aefb73b4"
+  },
+  "package": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/pack/pi-durio-0.1.0.tgz",
+    "bytes": 19222769,
+    "sha256": "0be03d6d7e090f3ba58f55297f1c9dd50b28540fbba0ed76ae55d34419f1221b"
+  },
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+    "bytes": 92984,
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "sourceInputsMatched": 169,
+  "compiledOutputsMatched": 246,
+  "installedFilesMatched": 12925,
+  "linuxRuntimeIdentity": "173a8fcf34c463c7bcf2527c16c7852ead668fc9c69c26acf3d7d0d2991e1d9c",
+  "environment": {
+    "node": "v24.8.0",
+    "platform": "linux",
+    "arch": "arm64",
+    "image": "pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c",
+    "preparation": "Copied previously prepared Linux dependencies with exact lock and complete content verification; own candidate dist copied unchanged; no new install or network."
+  },
+  "localChecks": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/applicable-check-gate.json",
+    "bytes": 8135,
+    "sha256": "652ef66e419d30a5a960d0d97506f445cba127892866693b2d776d6d1ca4996c"
+  },
+  "linuxDerivation": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/linux-runtime-derivation.json",
+    "bytes": 1509,
+    "sha256": "244df4541bd47b3c2260a8df009b47a519aa5d9c96127cd0ef6b63423f12654e"
+  },
+  "dependencyCompatibility": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/dependency-check-applicability.json",
+    "bytes": 833,
+    "sha256": "4227b4fc176dda7776530f0cb5488d905e3732c6d49e3083e32d7214576cb1b8"
+  },
+  "independentReview": "PENDING_SEPARATE_GATE_REQUIRED",
+  "providerCalls": 0,
+  "vmStarts": 0
+}

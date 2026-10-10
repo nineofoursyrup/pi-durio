@@ -1,0 +1,16 @@
+{
+  "status": "KNOWN_COMPATIBILITY_FAILURES_REUSED_NOT_RERUN",
+  "priorCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "priorIdentity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/candidate-identity.json",
+    "bytes": 5219556,
+    "sha256": "f56d137950dbe52af7854df4d360699fe8612fa45aeb4208e2def0d6a5d0de03"
+  },
+  "disposition": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/dependency-report-disposition.json",
+    "bytes": 3230,
+    "sha256": "1b93c4965e57e2d01af0c9a9fe0d6a4aa00ef4f7fe3f36f6db3c0741adc9cd46"
+  },
+  "policy": "npm ls and consumer offline npm ci remain FAIL; same Node/npm, package/lock/prepare-pack and exact bundled dependency/vendor bytes. No new PASS or general npm compatibility claim.",
+  "matchingDependencyItems": 12640
+}

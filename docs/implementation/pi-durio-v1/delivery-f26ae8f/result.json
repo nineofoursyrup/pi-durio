@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-10T07:11:18.706512+00:00",
+  "status": "CONTENT_AND_RUNTIME_VERIFIED_WITH_REUSED_NPM_COMPATIBILITY_LIMITATIONS",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "sourceBuild": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+  "identity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/candidate-identity.json",
+    "bytes": 5258817,
+    "sha256": "ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091"
+  },
+  "install": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install",
+  "package": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/pack/pi-durio-0.1.0.tgz",
+    "bytes": 19222769,
+    "sha256": "0be03d6d7e090f3ba58f55297f1c9dd50b28540fbba0ed76ae55d34419f1221b"
+  },
+  "counts": {
+    "source": 574,
+    "installed": 12925,
+    "packaged": 12921
+  },
+  "realProviderRequests": 0,
+  "nativeTerminal": "NOT RUN"
+}

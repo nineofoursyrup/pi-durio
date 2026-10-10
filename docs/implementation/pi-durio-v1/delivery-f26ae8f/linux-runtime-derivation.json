@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-10T07:11:38.050300+00:00",
+  "status": "DERIVED_CONTENT_VERIFIED_NO_VM_EXECUTION",
+  "sourceInstallation": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install",
+  "oldLinux": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/linux-runtime",
+  "oldRuntimeIdentity": "5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a",
+  "newLinux": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/linux-runtime",
+  "newRuntimeIdentity": "173a8fcf34c463c7bcf2527c16c7852ead668fc9c69c26acf3d7d0d2991e1d9c",
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/linux-runtime/dist/execution/source-build.json",
+    "bytes": 92984,
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "environment": {
+    "node": "v24.8.0",
+    "platform": "linux",
+    "arch": "arm64",
+    "image": "pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c",
+    "preparation": "Copied previously prepared Linux dependencies with exact lock and complete content verification; own candidate dist copied unchanged; no new install or network."
+  },
+  "installedCompilerOutputsExact": true,
+  "dependencyFilesAndModesExact": true,
+  "oldRuntimeUnchanged": true,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "note": "Existing exact Linux dependencies/environment plus new independently installed candidate dist; original candidate/runtime never modified."
+}
