@@ -3,7 +3,7 @@
   "integration_branch": "codex/pi-durio-v1",
   "draft_pr": "https://github.com/nineofoursyrup/pi-durio/pull/33",
   "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
-  "provider_authorization": "Latest r2 one-start consumed, real 7 requests known but report incomplete. Output-contract input revision frozen and independently reviewed; no new paid start authorized.",
+  "provider_authorization": "output-r1 analysis one-start consumed; complete report and one actual unselected candidate. Independently reviewed candidate plan awaits direct human selection; no new provider or candidate operation authorized.",
   "human_acceptance": "NOT RUN",
   "tickets": {
     "11": {
@@ -731,7 +731,7 @@
         "review": "docs/implementation/pi-durio-v1/review/f26ae8f/review.json",
         "realNewImprove": "NOT RUN; remains #30 gate"
       },
-      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/23#issuecomment-6095224081"
+      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/23#issuecomment-6096421035"
     },
     "24": {
       "number": 24,
@@ -1086,7 +1086,12 @@
         "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/REPORT.md",
         "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/README.md",
         "docs/implementation/pi-durio-v1/review/improve-output-contract-r1/independent-review.md",
-        "docs/implementation/pi-durio-v1/review/improve-output-contract-r1/authorization-request.md"
+        "docs/implementation/pi-durio-v1/review/improve-output-contract-r1/authorization-request.md",
+        "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/postrun-readback/REPORT.md",
+        "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/README.md",
+        "docs/implementation/pi-durio-v1/review/improve-output-contract-r1-candidate/STATIC-ANALYSIS.md",
+        "docs/implementation/pi-durio-v1/review/improve-output-contract-r1-candidate/independent-review.md",
+        "docs/implementation/pi-durio-v1/review/improve-output-contract-r1-candidate/selection-request.md"
       ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T234529Z/issue-30.json",
       "preparation": {
@@ -1134,7 +1139,7 @@
         "record": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/coordinator-preparation.json",
         "sha256": "ffd01ee7e18ef48929bb67089ed4205b21483e2fe29a7055d3ddcc9a82b5c57e"
       },
-      "note": "Four coding scenarios have real PASS on 9aed1af across prior batches. Current f26ae8f improve r2 made 7 real requests with known usage and confirmed cleanup, but report remains incomplete/0 candidates due to model output violations. New input revision reviewed; fresh paid start and later actual candidate choice pending.",
+      "note": "Four real coding scenarios PASS across retained original batches. Current f26ae8f output-r1 analysis complete with 4 known requests and one actual stable candidate. Original reasoning error retained and disclosed; candidate selection/validation/writeback/reopen still pending.",
       "progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/30#issuecomment-6088950683",
       "status_before_review": "integrated-preparation-awaiting-authorization",
       "review_repair": {
@@ -1165,7 +1170,7 @@
         "requestedAt": "2026-10-09T23:52:52.841212+00:00",
         "current_applicability": "SUPERSEDED_BY_USER_USD3_CAP; no start authorized at old USD5 limits"
       },
-      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/30#issuecomment-6095224611",
+      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/30#issuecomment-6096421394",
       "user_budget_reply": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/user-budget-20261010.json",
       "credential_readiness": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/credential-readiness-20261010.json",
       "usd3_preparation": {
@@ -1299,7 +1304,7 @@
         "review": "docs/implementation/pi-durio-v1/review/f26ae8f/review.json",
         "applicability": "docs/implementation/pi-durio-v1/review/f26ae8f/evidence-applicability.json",
         "candidateGate": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
-        "scope": "Source repair and bounded old evidence reuse PASS; real r2 now confirms 7 known settlements. Report output contract failed, with no demonstrated new product bug. New input batch independently reviewed; no paid start granted."
+        "scope": "Source repair and bounded prior evidence reuse PASS; actual output-r1 confirms 4 new known settlements and one complete canonical candidate. Reasoning error preserved; no candidate action authorized."
       },
       "improve_only_repair": {
         "status": "ONE_START_CONSUMED_STOPPED_INCOMPLETE_REPORT",
@@ -1362,7 +1367,7 @@
         }
       },
       "improve_output_contract": {
-        "status": "FROZEN_INDEPENDENT_REVIEW_PASS_AWAITING_NEW_ONE_START",
+        "status": "ONE_START_CONSUMED_AWAITING_ACTUAL_CANDIDATE_SELECTION",
         "batchId": "pi-durio-v1-live-r4-improve-report",
         "manifest": {
           "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/frozen-manifest.json",
@@ -1391,10 +1396,10 @@
         "retainedUnknownReservation": 1056768,
         "conservativeUsdUpper": 2.8353528,
         "cumulativeUsdCeiling": 3,
-        "grantReceived": false,
+        "grantReceived": true,
         "paidStartAuthorized": false,
-        "actualGrantFileCreated": false,
-        "paidStartCreated": false,
+        "actualGrantFileCreated": true,
+        "paidStartCreated": true,
         "checks": {
           "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/checks.json",
           "bytes": 2373,
@@ -1402,7 +1407,98 @@
         },
         "newOfflineCases": 16,
         "scope": "Exactly one improve analysis with clarified output contract; same product and original protected fixture. No eval, selection, validation, activation or writeback; actual candidate choice remains separate.",
-        "credentialSource": "Standing permission: /Users/nineofour/Durio/api.env; frozen wrapper only after new direct approval"
+        "credentialSource": "Standing permission: /Users/nineofour/Durio/api.env; frozen wrapper only after new direct approval",
+        "question": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1/publication/authorization-question.json",
+        "requestToolCallId": "call_2366d4d8dee44f8a9d3e4ec84160df92",
+        "requestedAt": "2026-10-10T10:09:18.791Z",
+        "receivedAt": "2026-10-10T10:16:01.155Z",
+        "authorizationSource": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/authorization-source.json",
+          "bytes": 1061,
+          "sha256": "3770836ee5a056a29e94fd8bd7412117c0dbfe1388a17997a2ac5d97d51a4fd5"
+        },
+        "grant": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/explicit-human-grant.json",
+          "bytes": 1034,
+          "sha256": "b6975843457e92c3f08196230e5b5db5e156bb1b40b7222ae9de6ed9a880ba4a"
+        },
+        "paidStart": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/paid-start.json",
+          "bytes": 1324,
+          "sha256": "0c932be246961a5a3f4bdbc6401dd6b7d332414cb1310a011aa9dd8d00549543"
+        },
+        "startedAt": "2026-10-10T10:17:20.019Z",
+        "deadline": "2026-10-10T11:17:20.019Z",
+        "batchResult": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/batch-result.json",
+        "cumulativeBudget": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/cumulative-budget.json",
+        "actualRunId": "93d85e4a-d4ef-472d-add8-610e2c1de44a",
+        "reportId": "v1-live-r4-improve",
+        "reportRevision": "b8e9b7c7c08d06d5ed955339630fac5e1b8fe59e6e700acd6499863d932aad2a",
+        "candidateCount": 1,
+        "postrunReadback": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/report.json",
+          "bytes": 17439,
+          "sha256": "cf2e811046179892f3b699d3d238dd7a3c36e2c8467128082c4b9f9250cd508f"
+        },
+        "actualReadback": {
+          "newRequests": 4,
+          "newKnownTokens": 24585,
+          "newUnknown": 0,
+          "reportState": "complete",
+          "candidateCount": 1,
+          "selection": "unselected",
+          "execution": "not-started",
+          "effect": "unverified",
+          "cumulativeRequests": 45,
+          "cumulativeKnownTokens": 130611,
+          "retainedUnknownReservedTokens": 1056768,
+          "cumulativeChargedUpperTokens": 1187379,
+          "conservativeUsdUpper": 1.4248548,
+          "accountBillObserved": false
+        }
+      },
+      "actual_candidate_selection": {
+        "status": "FROZEN_INDEPENDENT_REVIEW_PASS_AWAITING_ACTUAL_CANDIDATE_SELECTION",
+        "manifest": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/frozen-plan-manifest.json",
+          "bytes": 8942,
+          "sha256": "686b5c023020444104cd711b809dfd01442b0568a79fa36e42484716c8f1f3fe"
+        },
+        "selectionRequest": {
+          "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/selection-request.md",
+          "bytes": 4424,
+          "sha256": "82e1206df829b09b2bdc0664004ad268deaf41901c09c127e0ceae623737e981"
+        },
+        "review": {
+          "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/independent-review.json",
+          "bytes": 54202,
+          "sha256": "13ff826922bbc13b81fd348c86cf990e63c36555602d38dfc4fa0e9e473f5065"
+        },
+        "sourceCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+        "reportId": "v1-live-r4-improve",
+        "reportRevision": "b8e9b7c7c08d06d5ed955339630fac5e1b8fe59e6e700acd6499863d932aad2a",
+        "candidateId": "candidate:197afe0a113c5c58ad0810ca24a4ad98",
+        "candidateRevision": "49e9331f282cda12efe5fb89f4b6ef35b8e50a8dc2d8140fa48c5fe3824c91c8",
+        "mode": "execute-declared-scope",
+        "scope": [
+          "clamp.ts"
+        ],
+        "maxChecks": 1,
+        "maxRequests": 0,
+        "maxTokens": 0,
+        "extraProviderCost": 0,
+        "cumulativeRequests": 45,
+        "cumulativeChargedUpperUsd": 1.4248548,
+        "grantReceived": false,
+        "actualChoice": null,
+        "candidateActionAuthorized": false,
+        "reasoningErrorDisclosed": true,
+        "plan": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/proposed-plan.json",
+          "bytes": 8875,
+          "sha256": "d2b24e14e3bf4c2b1b1af3cef6255bd5f9e3f97d58693b30854ae37c8bfb4391"
+        },
+        "integratedDocsTip": "dae7462a3b341be5c782ecac2fe561210a81d366"
       }
     },
     "31": {
@@ -1446,7 +1542,9 @@
         "docs/implementation/pi-durio-v1/issue-31/provider-terminal-repair-r1/MEASUREMENT.md",
         "docs/implementation/pi-durio-v1/issue-31/provider-terminal-repair-r1/CONTRACT-DELTA.md",
         "docs/implementation/pi-durio-v1/issue-31/improve-only-repair-r2/contract-delta.json",
-        "docs/implementation/pi-durio-v1/issue-31/improve-only-repair-r2/CONTRACT-DELTA.md"
+        "docs/implementation/pi-durio-v1/issue-31/improve-only-repair-r2/CONTRACT-DELTA.md",
+        "docs/implementation/pi-durio-v1/issue-31/improve-output-contract-r1/contract-delta.json",
+        "docs/implementation/pi-durio-v1/issue-31/improve-output-contract-r1/CONTRACT-DELTA.md"
       ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T234529Z/issue-31.json",
       "independent_preparation": {
@@ -1471,7 +1569,7 @@
           "requires": "Final repaired candidate plus actual source/build identity and applicable-check gate; original failed combination preserved."
         }
       },
-      "note": "New real f26ae8f usage/cleanup evidence added, but improve report incomplete/0 candidates; full technical acceptance remains PARTIAL. Existing inventory and bounded prior native reuse retain original identities and limits.",
+      "note": "Complete actual improve report and unselected candidate added, original model reasoning error retained; actual selected execution chain remains pending. Technical acceptance PARTIAL; old inventory/native/timing/RSS identities retained.",
       "native_request": {
         "status": "MEASURED_WITH_FAILURES_FIRST_RUN_RETAINED",
         "config": {
@@ -1485,7 +1583,7 @@
         "failure": "composition analysis IMPROVE_REPORT_NOT_FOUND before async report published; harness-only targeted repair preparing; readonly not run",
         "passed_scope": "3 idle and long-session62tasks/124synthetic/0real; terminal restored; no human acceptance"
       },
-      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/31#issuecomment-6095225142",
+      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/31#issuecomment-6096421840",
       "native_first_readback": {
         "summary": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-summary.json",
         "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-report.md",
@@ -1515,7 +1613,7 @@
           "sha256": "a8022a362c954c916f300de88f3b46b86f6c7fd44b966fcbf9f5165c5264a78c"
         },
         "integrated_sha": "61b5934e1adc805310a1afcc6cad749dd075d5d2",
-        "newDelta": "docs/implementation/pi-durio-v1/issue-31/improve-only-repair-r2/contract-delta.json"
+        "newDelta": "docs/implementation/pi-durio-v1/issue-31/improve-output-contract-r1/contract-delta.json"
       }
     },
     "32": {
@@ -1540,11 +1638,47 @@
   "frontier": [
     {
       "ticket": 30,
-      "status": "FROZEN_INDEPENDENT_REVIEW_PASS_AWAITING_NEW_ONE_START",
-      "scope": "Exactly one improve analysis with clarified output contract; same product and original protected fixture. No eval, selection, validation, activation or writeback; actual candidate choice remains separate.",
-      "manifestSha256": "809aa5350c2d1d3cd3fac9281210ce41e2ff643e889a565bd15f25ae02e30856",
+      "status": "FROZEN_INDEPENDENT_REVIEW_PASS_AWAITING_ACTUAL_CANDIDATE_SELECTION",
+      "manifest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/frozen-plan-manifest.json",
+        "bytes": 8942,
+        "sha256": "686b5c023020444104cd711b809dfd01442b0568a79fa36e42484716c8f1f3fe"
+      },
+      "selectionRequest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/selection-request.md",
+        "bytes": 4424,
+        "sha256": "82e1206df829b09b2bdc0664004ad268deaf41901c09c127e0ceae623737e981"
+      },
+      "review": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/independent-review.json",
+        "bytes": 54202,
+        "sha256": "13ff826922bbc13b81fd348c86cf990e63c36555602d38dfc4fa0e9e473f5065"
+      },
       "sourceCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
-      "paidStartAuthorized": false
+      "reportId": "v1-live-r4-improve",
+      "reportRevision": "b8e9b7c7c08d06d5ed955339630fac5e1b8fe59e6e700acd6499863d932aad2a",
+      "candidateId": "candidate:197afe0a113c5c58ad0810ca24a4ad98",
+      "candidateRevision": "49e9331f282cda12efe5fb89f4b6ef35b8e50a8dc2d8140fa48c5fe3824c91c8",
+      "mode": "execute-declared-scope",
+      "scope": [
+        "clamp.ts"
+      ],
+      "maxChecks": 1,
+      "maxRequests": 0,
+      "maxTokens": 0,
+      "extraProviderCost": 0,
+      "cumulativeRequests": 45,
+      "cumulativeChargedUpperUsd": 1.4248548,
+      "grantReceived": false,
+      "actualChoice": null,
+      "candidateActionAuthorized": false,
+      "reasoningErrorDisclosed": true,
+      "plan": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/proposed-plan.json",
+        "bytes": 8875,
+        "sha256": "d2b24e14e3bf4c2b1b1af3cef6255bd5f9e3f97d58693b30854ae37c8bfb4391"
+      },
+      "integratedDocsTip": "dae7462a3b341be5c782ecac2fe561210a81d366"
     },
     {
       "ticket": 31,
@@ -1556,7 +1690,7 @@
     }
   ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "80b4e3f036786113bb62bc17194675f691d324f9",
+  "integration_tip": "dae7462a3b341be5c782ecac2fe561210a81d366",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -1566,7 +1700,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-10T10:07:31.678097+00:00",
+  "updated_at": "2026-10-10T10:40:53.220786+00:00",
   "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/review/usd3/publication-r3-postrun/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
@@ -1623,7 +1757,7 @@
   "root_write_owner": "/root",
   "heavy_validation_window": {
     "owner": "NONE_ACTIVE",
-    "scope": "Documentation/readback only; no provider, VM, Terminal or repeated product checks"
+    "scope": "Documentation and independent static review only; no candidate action, provider, VM or repeated product check"
   },
   "latest_contract_refresh": "/Users/nineofour/pi-durio-v1-run/remote/20261009T234529Z/summary.json",
   "review": {
@@ -1820,39 +1954,39 @@
       "sha256": "a8022a362c954c916f300de88f3b46b86f6c7fd44b966fcbf9f5165c5264a78c"
     },
     "repairedCandidateInventory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/provider-terminal-repair-r1/measurement-summary.json",
-    "currentDelta": "docs/implementation/pi-durio-v1/issue-31/improve-only-repair-r2/contract-delta.json"
+    "currentDelta": "docs/implementation/pi-durio-v1/issue-31/improve-output-contract-r1/contract-delta.json"
   },
   "publication": {
     "status": "PREPARED_DOCUMENTATION_SNAPSHOT_PENDING_PUBLICATION",
-    "at": "2026-10-10T07:42:14.827411+00:00",
-    "documentationTip": "70842fcba8375cf549f664e2ec147d4871461fa5",
+    "at": "2026-10-10T10:09:02.480513+00:00",
+    "documentationTip": "cbd196dab2485758ad2f8eec258a0ff6187905d9",
     "sourceCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
-    "manifestSha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a",
+    "manifestSha256": "809aa5350c2d1d3cd3fac9281210ce41e2ff643e889a565bd15f25ae02e30856",
     "url": "https://github.com/nineofoursyrup/pi-durio/pull/33",
     "isDraft": true,
     "mainSha": "25d311616136766b37c0274f3f490ec1105f9592",
     "closingIssuesReferences": [],
-    "bodySha256": "38e90589ce634f494900e9555aaba3f335f713f1e30864cb0ae1f432b1955522",
+    "bodySha256": "3af30018d00874209bd1f7737cf15be46009b1d156c3b1fd7f67b9d96a764937",
     "comments": {
       "23": {
-        "id": 6095224081,
-        "url": "https://github.com/nineofoursyrup/pi-durio/issues/23#issuecomment-6095224081",
-        "bodySha256": "700dc9731a18daa2e30b32258d2ed6447512a4dbd37c50448cfdd9ce4f5b6189"
+        "id": 6096421035,
+        "url": "https://github.com/nineofoursyrup/pi-durio/issues/23#issuecomment-6096421035",
+        "bodySha256": "933fe365691217331ef9ece27bf27c87f260b35eeef858cea6f50bc2c0e4bca2"
       },
       "30": {
-        "id": 6095224611,
-        "url": "https://github.com/nineofoursyrup/pi-durio/issues/30#issuecomment-6095224611",
-        "bodySha256": "aa258676949ed70dc56260016f653c004f4edab2e0ca3a87260056a84f239c72"
+        "id": 6096421394,
+        "url": "https://github.com/nineofoursyrup/pi-durio/issues/30#issuecomment-6096421394",
+        "bodySha256": "6e546f8a75d4c408fad5d8b31cac44b39173412816851f4c6074663fe4d57b91"
       },
       "31": {
-        "id": 6095225142,
-        "url": "https://github.com/nineofoursyrup/pi-durio/issues/31#issuecomment-6095225142",
-        "bodySha256": "8113467887479096fad0c3acdeae80068f4b755813a229da90e62725df1f03d2"
+        "id": 6096421840,
+        "url": "https://github.com/nineofoursyrup/pi-durio/issues/31#issuecomment-6096421840",
+        "bodySha256": "c0f778dd187df1601a40bebd006f6a83a2094c0edd60d9cd33a5cb86d6fb42aa"
       },
       "10": {
-        "id": 6095225615,
-        "url": "https://github.com/nineofoursyrup/pi-durio/issues/10#issuecomment-6095225615",
-        "bodySha256": "b1a9f199071b7c21b664ca4e6952bff898ea0eea757818c206da6bec3b5fd88b"
+        "id": 6096422405,
+        "url": "https://github.com/nineofoursyrup/pi-durio/issues/10#issuecomment-6096422405",
+        "bodySha256": "29a2506deabd497e02d22d783555c70755efec075379ce1329f0e2ccf9ec8081"
       }
     },
     "issueStates": {
@@ -1886,9 +2020,9 @@
       "interpretation": "Empty checks do not establish CI PASS"
     },
     "newPaidGrant": false,
-    "readback": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/publication/readback.json",
-    "preparedAtDocumentationBase": "80b4e3f036786113bb62bc17194675f691d324f9",
-    "pendingPublicationDirectory": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1/publication"
+    "readback": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1/publication/readback.json",
+    "preparedAtDocumentationBase": "dae7462a3b341be5c782ecac2fe561210a81d366",
+    "pendingPublicationDirectory": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/publication"
   },
   "pending_user_inputs": {
     "paidBatch": {
@@ -1985,7 +2119,7 @@
       }
     },
     "improveOutputContract": {
-      "status": "FROZEN_INDEPENDENT_REVIEW_PASS_AWAITING_NEW_ONE_START",
+      "status": "ONE_START_CONSUMED_AWAITING_ACTUAL_CANDIDATE_SELECTION",
       "batchId": "pi-durio-v1-live-r4-improve-report",
       "manifest": {
         "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/frozen-manifest.json",
@@ -2014,10 +2148,10 @@
       "retainedUnknownReservation": 1056768,
       "conservativeUsdUpper": 2.8353528,
       "cumulativeUsdCeiling": 3,
-      "grantReceived": false,
+      "grantReceived": true,
       "paidStartAuthorized": false,
-      "actualGrantFileCreated": false,
-      "paidStartCreated": false,
+      "actualGrantFileCreated": true,
+      "paidStartCreated": true,
       "checks": {
         "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/checks.json",
         "bytes": 2373,
@@ -2025,7 +2159,98 @@
       },
       "newOfflineCases": 16,
       "scope": "Exactly one improve analysis with clarified output contract; same product and original protected fixture. No eval, selection, validation, activation or writeback; actual candidate choice remains separate.",
-      "credentialSource": "Standing permission: /Users/nineofour/Durio/api.env; frozen wrapper only after new direct approval"
+      "credentialSource": "Standing permission: /Users/nineofour/Durio/api.env; frozen wrapper only after new direct approval",
+      "question": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1/publication/authorization-question.json",
+      "requestToolCallId": "call_2366d4d8dee44f8a9d3e4ec84160df92",
+      "requestedAt": "2026-10-10T10:09:18.791Z",
+      "receivedAt": "2026-10-10T10:16:01.155Z",
+      "authorizationSource": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/authorization-source.json",
+        "bytes": 1061,
+        "sha256": "3770836ee5a056a29e94fd8bd7412117c0dbfe1388a17997a2ac5d97d51a4fd5"
+      },
+      "grant": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/explicit-human-grant.json",
+        "bytes": 1034,
+        "sha256": "b6975843457e92c3f08196230e5b5db5e156bb1b40b7222ae9de6ed9a880ba4a"
+      },
+      "paidStart": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/paid-start.json",
+        "bytes": 1324,
+        "sha256": "0c932be246961a5a3f4bdbc6401dd6b7d332414cb1310a011aa9dd8d00549543"
+      },
+      "startedAt": "2026-10-10T10:17:20.019Z",
+      "deadline": "2026-10-10T11:17:20.019Z",
+      "batchResult": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/batch-result.json",
+      "cumulativeBudget": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/cumulative-budget.json",
+      "actualRunId": "93d85e4a-d4ef-472d-add8-610e2c1de44a",
+      "reportId": "v1-live-r4-improve",
+      "reportRevision": "b8e9b7c7c08d06d5ed955339630fac5e1b8fe59e6e700acd6499863d932aad2a",
+      "candidateCount": 1,
+      "postrunReadback": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/report.json",
+        "bytes": 17439,
+        "sha256": "cf2e811046179892f3b699d3d238dd7a3c36e2c8467128082c4b9f9250cd508f"
+      },
+      "actualReadback": {
+        "newRequests": 4,
+        "newKnownTokens": 24585,
+        "newUnknown": 0,
+        "reportState": "complete",
+        "candidateCount": 1,
+        "selection": "unselected",
+        "execution": "not-started",
+        "effect": "unverified",
+        "cumulativeRequests": 45,
+        "cumulativeKnownTokens": 130611,
+        "retainedUnknownReservedTokens": 1056768,
+        "cumulativeChargedUpperTokens": 1187379,
+        "conservativeUsdUpper": 1.4248548,
+        "accountBillObserved": false
+      }
+    },
+    "improveCandidateSelection": {
+      "status": "FROZEN_INDEPENDENT_REVIEW_PASS_AWAITING_ACTUAL_CANDIDATE_SELECTION",
+      "manifest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/frozen-plan-manifest.json",
+        "bytes": 8942,
+        "sha256": "686b5c023020444104cd711b809dfd01442b0568a79fa36e42484716c8f1f3fe"
+      },
+      "selectionRequest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/selection-request.md",
+        "bytes": 4424,
+        "sha256": "82e1206df829b09b2bdc0664004ad268deaf41901c09c127e0ceae623737e981"
+      },
+      "review": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/independent-review.json",
+        "bytes": 54202,
+        "sha256": "13ff826922bbc13b81fd348c86cf990e63c36555602d38dfc4fa0e9e473f5065"
+      },
+      "sourceCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+      "reportId": "v1-live-r4-improve",
+      "reportRevision": "b8e9b7c7c08d06d5ed955339630fac5e1b8fe59e6e700acd6499863d932aad2a",
+      "candidateId": "candidate:197afe0a113c5c58ad0810ca24a4ad98",
+      "candidateRevision": "49e9331f282cda12efe5fb89f4b6ef35b8e50a8dc2d8140fa48c5fe3824c91c8",
+      "mode": "execute-declared-scope",
+      "scope": [
+        "clamp.ts"
+      ],
+      "maxChecks": 1,
+      "maxRequests": 0,
+      "maxTokens": 0,
+      "extraProviderCost": 0,
+      "cumulativeRequests": 45,
+      "cumulativeChargedUpperUsd": 1.4248548,
+      "grantReceived": false,
+      "actualChoice": null,
+      "candidateActionAuthorized": false,
+      "reasoningErrorDisclosed": true,
+      "plan": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/proposed-plan.json",
+        "bytes": 8875,
+        "sha256": "d2b24e14e3bf4c2b1b1af3cef6255bd5f9e3f97d58693b30854ae37c8bfb4391"
+      },
+      "integratedDocsTip": "dae7462a3b341be5c782ecac2fe561210a81d366"
     }
   },
   "provider_terminal_review": {
@@ -2038,6 +2263,7 @@
     "review": "docs/implementation/pi-durio-v1/review/f26ae8f/review.json",
     "applicability": "docs/implementation/pi-durio-v1/review/f26ae8f/evidence-applicability.json",
     "candidateGate": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
-    "scope": "Source repair and bounded old evidence reuse PASS; real r2 now confirms 7 known settlements. Report output contract failed, with no demonstrated new product bug. New input batch independently reviewed; no paid start granted."
-  }
+    "scope": "Source repair and bounded prior evidence reuse PASS; actual output-r1 confirms 4 new known settlements and one complete canonical candidate. Reasoning error preserved; no candidate action authorized."
+  },
+  "root_write_lock_note": "Coordinator owns root after sole merger handback"
 }
