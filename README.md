@@ -2,7 +2,7 @@
 
 面向 macOS arm64 / Node >=22.19.0 的本地 coding agent，复用 Pi runtime，保留运行原文，并由用户明确控制恢复、eval 和 improve。
 
-首版尚未完成全部验收。[22票状态与证据](docs/implementation/pi-durio-v1/status.md)和[integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#29的本票适用验收完成。四类真实coding场景分别取得PASS，用量结算缺陷已在产品候选 `f26ae8f` 修复并独立复核，原失败保留。最新[真实improve分析](docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/postrun-readback/REPORT.md)完成4请求且全部known，生成1个未选择候选；原报告推理错误已披露，[精确执行计划](docs/implementation/pi-durio-v1/review/improve-output-contract-r1-candidate/selection-request.md)经独立复核，尚待用户选择、实际验证及条件写回。完整技术验收与本机日用接受未完成，不声明完整首版ready for review。
+首版尚未完成全部验收。[22票状态与证据](docs/implementation/pi-durio-v1/status.md)和[integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#30 的本票适用验收完成。产品候选 `f26ae8f` 已完成独立修复复核；四类真实 coding 场景以及[真实 improve 完整链](docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md)已取得适用证据。原失败、模型推理错误和 UNKNOWN 保留。#31 最终技术验收正在核对，#32 本机日用接受待完成，不声明完整首版 ready for review。
 
 ## 安装与本地演示
 
@@ -35,7 +35,7 @@ node dist/src/cli.js run --workspace "$PWD/test/fixtures/project" \
 
 ## 真实 coding 与终端操作
 
-默认 provider 为 `deepseek/deepseek-flash`，地址为 `https://api.deepseek.com`，认证从 `DEEPSEEK_API_KEY` 读取。**去掉 `--offline-demo` 后，提交任务会发出可能计费的请求。** 本轮 USD 3 总帽内的两次固定真实批次均已使用各自单次启动并停止，不能使用原授权重复启动；[实施状态](docs/implementation/pi-durio-v1/status.md)记录结果与剩余条件。缺凭据或认证失败不会静默切换 provider。
+默认 provider 为 `deepseek/deepseek-flash`，地址为 `https://api.deepseek.com`，认证从 `DEEPSEEK_API_KEY` 读取。**去掉 `--offline-demo` 后，提交任务会发出可能计费的请求。** 本轮各固定真实批次均已消费各自单次启动授权，不能使用原授权重复启动；[实施状态](docs/implementation/pi-durio-v1/status.md)记录结果与剩余条件。缺凭据或认证失败不会静默切换 provider。
 
 `run` / `tui` 默认只提供 `read`。为明确指定的项目和任务加入 `--coding`，才开放 `read/write/edit/bash`。普通 coding 是可信本机执行，没有 OS 沙箱保证；工作区锁防止本产品内部重叠写入，不能隔离外部编辑器或其他本机程序。文件工具当前支持最多 256 KiB，普通任务最多 8 次 provider 尝试，输入最多 32 KiB。
 

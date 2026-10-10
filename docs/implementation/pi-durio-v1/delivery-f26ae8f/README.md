@@ -8,8 +8,8 @@ LIVE-USD3-R3-01 已修复：完整raw SSE usage与DONE到达后，实际SDK正�
 
 新包19,222,769bytes，完整安装90,158,076logical bytes；自有product80文件/7,531物理行。见[新体积实测](../issue-31/provider-terminal-repair-r1/MEASUREMENT.md)。旧时序/RSS/native测量仍只属于原候选，不声称新候选资源等价。独立[适用性报告](../review/f26ae8f/evidence-applicability.json)核对四类旧PASS的25次raw响应及3次native合成预算响应，允许在原范围复用未改行为；不增添人工IME、复制、小窗口或日用接受结论。
 
-[当前22票状态](../status.md)与[最新合同增量](../issue-31/improve-output-contract-r1/CONTRACT-DELTA.md)保留未完成项。当前候选的[output-r1真实分析](../issue-30/improve-output-contract-r1/postrun-readback/REPORT.md)完成4请求、24585tokens全部known、cleanup confirmed，正式report complete并有1个未选择候选。累计保守占额USD1.4248548，非账户账单。原r2契约失败、所有旧UNKNOWN和首败保留。
+[当前22票状态](../status.md)记录 #11–#30 本票适用验收完成。当前候选的真实 improve 经用户明确选择 R1 后，唯一执行完成 1 次保护回归/6 原用例 PASS、仅 clamp.ts 精确写回和只读重开一致，0 新 provider。[完整回读](../issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md)保留全部身份；原模型推理错误、r2 输出契约失败、旧 UNKNOWN 和首败均未改写。
 
-原报告推理错误已在[静态说明](../review/improve-output-contract-r1-candidate/STATIC-ANALYSIS.md)披露，精确补丁尚未验证。[具体选择请求](../review/improve-output-contract-r1-candidate/selection-request.md)和冻结计划已完成[独立两轴复核](../review/improve-output-contract-r1-candidate/independent-review.md)；只有用户选择后才运行1次受限保护回归，通过后写回clamp.ts，0新provider。#30闭环、#31完整技术验收及#32用户日用接受均未完成。
+累计 45 次物理请求，保守占额 USD 1.4248548，非账户账单。#31 正核对最终候选的完整技术证据与必要测量；#32 用户在自己的 Mac 实际试用与明确接受仍未完成。此处的确定性修复成功不代表性能或模型质量改善。
 
 全部Issue OPEN、PR Draft；main仍空仓bootstrap，没有产品main合并或release。原四个untracked、api.env ignore及旧dist完整保全；所需证据仍引用的worktree保留。大型清单和原始记录留在外部证据目录，`evidence-index.json`提供精确指纹。

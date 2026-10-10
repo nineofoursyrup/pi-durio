@@ -1,0 +1,406 @@
+{
+  "status": "PASS",
+  "startedAt": "2026-10-10T10:53:04.955542+00:00",
+  "repository": "/Users/nineofour/Durio",
+  "branch": "codex/pi-durio-v1",
+  "preMergeHead": "fc6a62dc3de5726a845ffdeb61b5bd5543cd51d1",
+  "producer": "a7aaaeab6f26e107dbb27d0c0c4042b378205248",
+  "producerCommit": "a7aaaeab6f26e107dbb27d0c0c4042b378205248",
+  "producerParent": "fc6a62dc3de5726a845ffdeb61b5bd5543cd51d1",
+  "scope": "16 added actual R1 postrun evidence docs only; no existing tracked files modified",
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoningEffort": "xhigh",
+  "actualBackendAttestation": "NOT_ATTESTED",
+  "acceptedReport": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/report.json",
+    "bytes": 20333,
+    "sha256": "52eea9ebdbdae1f25a7cf1811f4ca53144b962bd9c82299c1bcbe5c07351e3fb",
+    "status": "ISSUE_30_REAL_IMPROVE_CHAIN_OBSERVED_COMPLETE"
+  },
+  "reviewMode": "Coordinator accepted exact report and actual execution receipts; no new independent review required for this evidence-only merge",
+  "originalUntrackedBefore": {
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+    },
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+    },
+    "docs/wayfinder-proposal.md": {
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+    },
+    "docs/wayfinder-readback-2026-10-09.json": {
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+    }
+  },
+  "apiEnv": {
+    "readContent": false,
+    "addedToGit": false,
+    "beforeStat": {
+      "size": 118,
+      "mode": 33152,
+      "inode": 108595560,
+      "mtimeNs": 1791610965598957000,
+      "ctimeNs": 1791610965609405872
+    }
+  },
+  "distBefore": {
+    "fileCount": 370,
+    "aggregateSha256": "a73e298a6375c50fe9d16da3a4fe6a7170b1756a6d08a256f85bcdf39f3ef450"
+  },
+  "preservationReused": {
+    "mode": "REUSED_ACCEPTED_ACTUAL_POSTRUN_READBACK_IDENTITIES",
+    "readbackInputsUnchanged": 3509,
+    "originalAnalysisFiles": 3427,
+    "originalAnalysisAllMatchedFrozenSeed": true,
+    "bindingFilesBefore": {
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/report.json": {
+        "bytes": 20333,
+        "sha256": "52eea9ebdbdae1f25a7cf1811f4ca53144b962bd9c82299c1bcbe5c07351e3fb"
+      },
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md": {
+        "bytes": 3698,
+        "sha256": "d14f6088c0bd9585dce17075ec041c583db5bca98efed2519d56e88008321d93"
+      },
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/evidence-index.json": {
+        "bytes": 5287,
+        "sha256": "9c2e30ed7b1f00aed549983740efb13ba934ba88e77f6b4ed92ea6b963084cc5"
+      },
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/read-identities.json": {
+        "bytes": 1005950,
+        "sha256": "0f6a75c94e4598edc3ac55cf688ee1e63bae915744e8921cfac89f8e12356536"
+      }
+    },
+    "historical15558ObjectsRescanned": false,
+    "historicalBeforeIndexRewritten": false,
+    "authorizedFormalTargetAfter": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project/clamp.ts",
+      "bytes": 111,
+      "sha256": "45e016afe980df19159fc0679a6e44d88838a7a5afc398820309b576884f003c"
+    },
+    "authorizedAfterTreatedAsDrift": false,
+    "checksRerun": false,
+    "reason": "Reuses the accepted actual postrun preservation record, which accounts for the authorized clamp.ts writeback; no obsolete before-target comparison is rerun."
+  },
+  "docsContentIdentitiesBefore": {
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md": {
+      "bytes": 3698,
+      "sha256": "d14f6088c0bd9585dce17075ec041c583db5bca98efed2519d56e88008321d93"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.py": {
+      "bytes": 15949,
+      "sha256": "f7ece3ede9e314b8f0eeed9869eef9c2319455f6b47fc7e2dd2bdf9bb69cf0ed"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.stdout": {
+      "bytes": 428,
+      "sha256": "e72bdab464fe92684c5478147f94aa856964dcc9c56882a4a6f503b41a3928c6"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/evidence-index.json": {
+      "bytes": 5287,
+      "sha256": "9c2e30ed7b1f00aed549983740efb13ba934ba88e77f6b4ed92ea6b963084cc5"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/actual-selection.json": {
+      "bytes": 834,
+      "sha256": "48a40d980bed8f81ccbc9c06888e432bffdce084bcf3320150c58a4bd507317e"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-exit.json": {
+      "bytes": 397,
+      "sha256": "866ce3c827bbb10a2dcbdcb3eae201c0cb85ecb6f23ec52bd859e0a623994a27"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-result.json": {
+      "bytes": 771,
+      "sha256": "b035091f16ab9f2412a77a807355e57c03bfccf6152d557111dd2692ec5ac8e8"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-start.json": {
+      "bytes": 1130,
+      "sha256": "cb512d046d946b087482fd689d6102a87ea5df09b61b1dd1c7ca9507fc87086c"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/formal-file-readback.json": {
+      "bytes": 1021,
+      "sha256": "06978db8667e9560e4c36f8573057a905fd1e15be6d20ac41829ce4bc8f47e64"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.decision.json": {
+      "bytes": 6086,
+      "sha256": "12d8398e46913fe3f079f99a5a408aef165247664c5c84376acce2b8e69ac490"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.formal.json": {
+      "bytes": 772,
+      "sha256": "80def17d9c98b556bb3ce669c1f07cce759a7211723168119f67a0743cf0ee49"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.write-result.json": {
+      "bytes": 746,
+      "sha256": "1c24e3a0138256e97a61e45e710ae4f50cdac5379c21b494ea1b05a24fea4554"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/new-records-index.json": {
+      "bytes": 3460,
+      "sha256": "8657bcce71a4d4510f4d32cbedbfd75c0395cc3fef873203a21b3aaf89217894"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/protected-check-execution.json": {
+      "bytes": 25376,
+      "sha256": "41d8b0a3fa30d1b89e310577d003fa2a3995b6f7901909b30e08adc74ef2da8b"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/report.json": {
+      "bytes": 20333,
+      "sha256": "52eea9ebdbdae1f25a7cf1811f4ca53144b962bd9c82299c1bcbe5c07351e3fb"
+    }
+  },
+  "productChecksRerun": false,
+  "productApiCalls": 0,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "terminalRuns": 0,
+  "statusWrites": 0,
+  "pushes": 0,
+  "remoteWrites": 0,
+  "repackaging": false,
+  "newAuthorizationCreated": false,
+  "actualSelectionMirrorFromProducer": true,
+  "candidateActionsByMerger": 0,
+  "externalWrites": "Only this new independent merge receipt directory",
+  "completedAt": "2026-10-10T10:53:05.666574+00:00",
+  "mergeCommit": "c9dc3d0f6e3ccd959dce6f0292cf5bc0a3cea20e",
+  "tree": "0e5a8e702ba69d395da3babbf9b34f939e8470b7",
+  "mergeTree": "0e5a8e702ba69d395da3babbf9b34f939e8470b7",
+  "parents": [
+    "fc6a62dc3de5726a845ffdeb61b5bd5543cd51d1",
+    "a7aaaeab6f26e107dbb27d0c0c4042b378205248"
+  ],
+  "producerTree": "0e5a8e702ba69d395da3babbf9b34f939e8470b7",
+  "mergeTreeEqualsProducer": true,
+  "addedDocsCount": 16,
+  "addedDocsBytes": 86288,
+  "addedDocs": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md",
+      "bytes": 3698,
+      "sha256": "d14f6088c0bd9585dce17075ec041c583db5bca98efed2519d56e88008321d93",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.py",
+      "bytes": 15949,
+      "sha256": "f7ece3ede9e314b8f0eeed9869eef9c2319455f6b47fc7e2dd2bdf9bb69cf0ed",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.stdout",
+      "bytes": 428,
+      "sha256": "e72bdab464fe92684c5478147f94aa856964dcc9c56882a4a6f503b41a3928c6",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/evidence-index.json",
+      "bytes": 5287,
+      "sha256": "9c2e30ed7b1f00aed549983740efb13ba934ba88e77f6b4ed92ea6b963084cc5",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/actual-selection.json",
+      "bytes": 834,
+      "sha256": "48a40d980bed8f81ccbc9c06888e432bffdce084bcf3320150c58a4bd507317e",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-exit.json",
+      "bytes": 397,
+      "sha256": "866ce3c827bbb10a2dcbdcb3eae201c0cb85ecb6f23ec52bd859e0a623994a27",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-result.json",
+      "bytes": 771,
+      "sha256": "b035091f16ab9f2412a77a807355e57c03bfccf6152d557111dd2692ec5ac8e8",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-start.json",
+      "bytes": 1130,
+      "sha256": "cb512d046d946b087482fd689d6102a87ea5df09b61b1dd1c7ca9507fc87086c",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/formal-file-readback.json",
+      "bytes": 1021,
+      "sha256": "06978db8667e9560e4c36f8573057a905fd1e15be6d20ac41829ce4bc8f47e64",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.decision.json",
+      "bytes": 6086,
+      "sha256": "12d8398e46913fe3f079f99a5a408aef165247664c5c84376acce2b8e69ac490",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.formal.json",
+      "bytes": 772,
+      "sha256": "80def17d9c98b556bb3ce669c1f07cce759a7211723168119f67a0743cf0ee49",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.write-result.json",
+      "bytes": 746,
+      "sha256": "1c24e3a0138256e97a61e45e710ae4f50cdac5379c21b494ea1b05a24fea4554",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/new-records-index.json",
+      "bytes": 3460,
+      "sha256": "8657bcce71a4d4510f4d32cbedbfd75c0395cc3fef873203a21b3aaf89217894",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/protected-check-execution.json",
+      "bytes": 25376,
+      "sha256": "41d8b0a3fa30d1b89e310577d003fa2a3995b6f7901909b30e08adc74ef2da8b",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/report.json",
+      "bytes": 20333,
+      "sha256": "52eea9ebdbdae1f25a7cf1811f4ca53144b962bd9c82299c1bcbe5c07351e3fb",
+      "equalsProducerAndExternal": true
+    }
+  ],
+  "docsContentIdentitiesAfter": {
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md": {
+      "bytes": 3698,
+      "sha256": "d14f6088c0bd9585dce17075ec041c583db5bca98efed2519d56e88008321d93"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.py": {
+      "bytes": 15949,
+      "sha256": "f7ece3ede9e314b8f0eeed9869eef9c2319455f6b47fc7e2dd2bdf9bb69cf0ed"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.stdout": {
+      "bytes": 428,
+      "sha256": "e72bdab464fe92684c5478147f94aa856964dcc9c56882a4a6f503b41a3928c6"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/evidence-index.json": {
+      "bytes": 5287,
+      "sha256": "9c2e30ed7b1f00aed549983740efb13ba934ba88e77f6b4ed92ea6b963084cc5"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/actual-selection.json": {
+      "bytes": 834,
+      "sha256": "48a40d980bed8f81ccbc9c06888e432bffdce084bcf3320150c58a4bd507317e"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-exit.json": {
+      "bytes": 397,
+      "sha256": "866ce3c827bbb10a2dcbdcb3eae201c0cb85ecb6f23ec52bd859e0a623994a27"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-result.json": {
+      "bytes": 771,
+      "sha256": "b035091f16ab9f2412a77a807355e57c03bfccf6152d557111dd2692ec5ac8e8"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-start.json": {
+      "bytes": 1130,
+      "sha256": "cb512d046d946b087482fd689d6102a87ea5df09b61b1dd1c7ca9507fc87086c"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/formal-file-readback.json": {
+      "bytes": 1021,
+      "sha256": "06978db8667e9560e4c36f8573057a905fd1e15be6d20ac41829ce4bc8f47e64"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.decision.json": {
+      "bytes": 6086,
+      "sha256": "12d8398e46913fe3f079f99a5a408aef165247664c5c84376acce2b8e69ac490"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.formal.json": {
+      "bytes": 772,
+      "sha256": "80def17d9c98b556bb3ce669c1f07cce759a7211723168119f67a0743cf0ee49"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.write-result.json": {
+      "bytes": 746,
+      "sha256": "1c24e3a0138256e97a61e45e710ae4f50cdac5379c21b494ea1b05a24fea4554"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/new-records-index.json": {
+      "bytes": 3460,
+      "sha256": "8657bcce71a4d4510f4d32cbedbfd75c0395cc3fef873203a21b3aaf89217894"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/protected-check-execution.json": {
+      "bytes": 25376,
+      "sha256": "41d8b0a3fa30d1b89e310577d003fa2a3995b6f7901909b30e08adc74ef2da8b"
+    },
+    "docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/report.json": {
+      "bytes": 20333,
+      "sha256": "52eea9ebdbdae1f25a7cf1811f4ca53144b962bd9c82299c1bcbe5c07351e3fb"
+    }
+  },
+  "existingTrackedUnchanged": true,
+  "productAndBuildInputChanges": [],
+  "originalUntrackedAfter": {
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+    },
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+    },
+    "docs/wayfinder-proposal.md": {
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+    },
+    "docs/wayfinder-readback-2026-10-09.json": {
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+    }
+  },
+  "originalUntrackedUnchanged": true,
+  "apiEnvAfterStat": {
+    "size": 118,
+    "mode": 33152,
+    "inode": 108595560,
+    "mtimeNs": 1791610965598957000,
+    "ctimeNs": 1791610965609405872
+  },
+  "apiEnvStatUnchanged": true,
+  "distAfter": {
+    "fileCount": 370,
+    "aggregateSha256": "a73e298a6375c50fe9d16da3a4fe6a7170b1756a6d08a256f85bcdf39f3ef450"
+  },
+  "distUnchanged": true,
+  "reusedPreservationBindingFilesAfter": {
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/report.json": {
+      "bytes": 20333,
+      "sha256": "52eea9ebdbdae1f25a7cf1811f4ca53144b962bd9c82299c1bcbe5c07351e3fb"
+    },
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md": {
+      "bytes": 3698,
+      "sha256": "d14f6088c0bd9585dce17075ec041c583db5bca98efed2519d56e88008321d93"
+    },
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/evidence-index.json": {
+      "bytes": 5287,
+      "sha256": "9c2e30ed7b1f00aed549983740efb13ba934ba88e77f6b4ed92ea6b963084cc5"
+    },
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/read-identities.json": {
+      "bytes": 1005950,
+      "sha256": "0f6a75c94e4598edc3ac55cf688ee1e63bae915744e8921cfac89f8e12356536"
+    }
+  },
+  "preservationEvidenceUnchanged": true,
+  "acceptedReportUnchanged": true,
+  "docsDiffCheck": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "trackedCleanAfter": true,
+  "gitStatus": "?? docs/prototypes/archive/\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json\n",
+  "mergeOutput": "Merge made by the 'ort' strategy.\n .../postrun-readback/REPORT.md                     |  26 ++\n .../postrun-readback/collect.py                    | 221 +++++++++++\n .../postrun-readback/collect.stderr                |   0\n .../postrun-readback/collect.stdout                |   1 +\n .../postrun-readback/evidence-index.json           |  98 +++++\n .../receipts/actual-selection.json                 |  17 +\n .../postrun-readback/receipts/execution-exit.json  |   8 +\n .../receipts/execution-result.json                 |  22 ++\n .../postrun-readback/receipts/execution-start.json |  24 ++\n .../receipts/formal-file-readback.json             |  27 ++\n .../receipts/improve.decision.json                 |   1 +\n .../postrun-readback/receipts/improve.formal.json  |   1 +\n .../receipts/improve.write-result.json             |   1 +\n .../receipts/new-records-index.json                | 133 +++++++\n .../receipts/protected-check-execution.json        |   1 +\n .../postrun-readback/report.json                   | 425 +++++++++++++++++++++\n 16 files changed, 1006 insertions(+)\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.stderr\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/collect.stdout\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/evidence-index.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/actual-selection.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-exit.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-result.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/execution-start.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/formal-file-readback.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.decision.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.formal.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/improve.write-result.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/new-records-index.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/receipts/protected-check-execution.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/report.json\n",
+  "rootWriteLock": "RETURNED_TO_MAIN_AFTER_RECEIPT"
+}
