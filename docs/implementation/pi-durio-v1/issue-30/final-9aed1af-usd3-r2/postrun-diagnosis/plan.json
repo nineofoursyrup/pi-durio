@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "status": "PROPOSAL_ONLY_NOT_AUTHORIZED_NOT_MATERIALIZED",
+  "at": "2026-10-10T06:07:59.364612+00:00",
+  "title": "One bounded supplemental eval and improve batch after retained first failure",
+  "newPaidAuthorizationPresent": false,
+  "grantsCreated": 0,
+  "productCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "originalManifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+    "bytes": 8105,
+    "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+  },
+  "diagnosis": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/report.json",
+    "bytes": 10878,
+    "sha256": "dfff9764f280a29eec514a59efc471cb3b1f9ad29707039e070f1f268f9fc733"
+  },
+  "proposedIdentity": {
+    "batchId": "pi-durio-v1-live-r2-usd3-supplement",
+    "output": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3",
+    "newPlanAndTrialIdsRequired": true,
+    "newOutputCreated": false
+  },
+  "sequence": [
+    {
+      "order": 0,
+      "action": "Read and hash-verify prior local-fix PASS for the exact unchanged candidate/case/grader; do not spend a repeat request",
+      "originalTrialId": "v1-live-r1-local-fix",
+      "originalOutcomeSource": "e1:684:3452d528da95ff7f4aabe09522fa8bdbcefb3df57b71c8bafabe02094670a180",
+      "originalGradeSource": "e1:687:d3f92c3c6db88c384d5220ce9c3267c4e48a6a802704f68469a8afabdb27c947"
+    },
+    {
+      "order": 1,
+      "action": "One fresh multi-file trial from the original fixture, input and grader; retain failed first trial as a separate record",
+      "caseId": "multi-file",
+      "proposedTrialId": "v1-live-r2-multi-file",
+      "maxRuntimeAttempts": 8,
+      "retryOf": "v1-live-r1-multi-file"
+    },
+    {
+      "order": 2,
+      "action": "One fresh regression trial using the unchanged original fixture/input/grader",
+      "caseId": "regression",
+      "proposedTrialId": "v1-live-r2-regression",
+      "maxRuntimeAttempts": 8
+    },
+    {
+      "order": 3,
+      "action": "One fresh no-change trial using the unchanged original fixture/input/grader",
+      "caseId": "no-change",
+      "proposedTrialId": "v1-live-r2-no-change",
+      "maxRuntimeAttempts": 8
+    },
+    {
+      "order": 4,
+      "action": "Only after all three fresh outcomes completed and deterministic grades PASS, run the original bounded real improve analysis once over the frozen clamp fixture and retained synthetic seed",
+      "maxRequests": 8,
+      "candidateSelection": "Return exact actual report/revision/baseline/check/protected files for separate human selection before any writeback"
+    }
+  ],
+  "unchanged": {
+    "runtimeCodingAttemptLimit": 8,
+    "productSourceBuildPackageInstallDependencies": true,
+    "fixedCaseInputsInitialFilesDirtyFilesWritableScopesGraders": true,
+    "improveFixtureSeedProvenanceOutputLimitAndScope": true,
+    "retryAndCompactionChargeSharedStageBudget": true,
+    "firstNonpassStopsWholeBatch": true,
+    "noAutomaticRestartResumeOrReplacementTrial": true
+  },
+  "changesRequiredBeforeReview": {
+    "productImplementation": "None supported by current evidence",
+    "formalRuntimeLimit": "No change; ordinary coding remains fixed at eight attempts",
+    "externalHarness": "New supplement-specific plan/output/trial identities, verified prior PASS prerequisite, exactly-three-fresh-PASS gate, explicit cumulative cost ledger, and fresh one-start binding; preserve original r2 harness and receipts",
+    "acceptanceProtocol": "Explicit supplemental-case evidence disposition must be accepted; never rewrite original STOPPED or report original first-attempt 4/4 PASS"
+  },
+  "budgetProposal": {
+    "currency": "USD",
+    "cumulativeUsdCeiling": 3,
+    "priceAssumptionUsdPerMillionTokens": 1.2,
+    "prior": {
+      "requests": 15,
+      "knownTokens": 27499,
+      "unknownSettlements": 0,
+      "reservedTokens": 0,
+      "conservativeEstimateUsd": 0.0329988
+    },
+    "new": {
+      "requests": 32,
+      "tokens": 2372501,
+      "eval": {
+        "requests": 24,
+        "tokens": 1172501,
+        "maxRequestTokens": 1052672,
+        "maxOutputTokens": 4096
+      },
+      "improve": {
+        "requests": 8,
+        "tokens": 1200000,
+        "maxRequestTokens": 1056768,
+        "maxOutputTokens": 8192
+      },
+      "maximumConservativeEstimateUsd": 2.8470012
+    },
+    "cumulative": {
+      "maximumRequests": 47,
+      "maximumTokens": 2400000,
+      "maximumConservativeEstimateUsd": 2.88
+    },
+    "requestChange": "Old 40 was the consumed first-batch cap. Proposed new batch adds up to 32, giving cumulative 47; this is a new explicit authorization request, not unchanged original request allowance.",
+    "tokenAllocation": "All prior 27499 tokens came from eval; deduct from eval token share. Improve retains full 8 requests/1200000 tokens.",
+    "limitations": "Large reservations, deadline or token budget can stop work before request ceilings; ceilings are maxima, not completion guarantees or an account-level billing cap. Keep failed/unknown reservations chargeable; never erase them to retry."
+  },
+  "newGrantRequirements": {
+    "required": true,
+    "status": "NO_GRANT_CREATED",
+    "starts": 1,
+    "grantToStartMs": 86400000,
+    "activeMs": 3600000,
+    "scope": "Exact independently reviewed supplemental manifest, cumulative prior ledger, new 32/cumulative 47 request limits, cumulative USD3 and token allocation; actual startedAt revalidated after installation checks",
+    "originalGrant": "Consumed and never reusable, even while original wall-clock window remains open",
+    "candidateSelectionIncluded": false
+  },
+  "requiredPreparationBeforeAnyStart": [
+    "Freeze new external harness, exact three trials and improve request in a separate immutable manifest; prior local PASS identity is a mandatory dependency",
+    "Offline checks for altered three-trial gate, immutable original receipts, cumulative ledger and insufficient/unknown budget, one-start replay rejection, auth-stop/cancellation, and after-install grant expiry; reuse unchanged applicable checks",
+    "Independent scoped review of exact new manifest/harness; verify unchanged candidate/source/build/install and current price assumptions before start",
+    "Coordinator obtains new explicit one-start approval tied to exact reviewed manifest; this proposal and old credential readiness do not confer it",
+    "Credential source remains fixed secure wrapper; only authorized coordinator may read it after the new grant gate"
+  ],
+  "reporting": {
+    "originalFourTrialResult": "STOPPED forever: local-fix PASS, multi-file error/grade unknown, regression/no-change not-run",
+    "supplementalThreeTrialResult": "Separate result with new identities and retryOf relation; no deletion or replacement",
+    "combinedCoverage": "If supplement passes, four distinct cases have supported PASS evidence across two batches, with one retained executed failure; distinguish this from a four-of-four first-attempt pass",
+    "denominator": "Original four planned records plus three supplemental planned records yields seven trial records, up to five executed coding trials, including the failed first multi-file trial",
+    "ifSecondFailure": "Stop; retain exact failure, remaining not-run and cost; no automatic third attempt or model/prompt/runtime change"
+  }
+}

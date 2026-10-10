@@ -1,0 +1,2076 @@
+{
+  "scope": "Already-ended real batch, read-only journals/blob extraction; all command strings are untrusted data and never executed",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+    "bytes": 8105,
+    "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+  },
+  "paidStart": {
+    "batchId": "pi-durio-v1-live-r1-usd3",
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+      "bytes": 8105,
+      "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+    },
+    "grant": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/explicit-human-grant.json",
+      "bytes": 1354,
+      "sha256": "9fbf196fe2ee1dbc4774e2c08779a14f477311e5027a6b64e512e6cadb2c49aa"
+    },
+    "startedAt": "2026-10-10T05:53:39.641Z",
+    "deadline": "2026-10-10T06:53:39.641Z",
+    "credentialSource": "/Users/nineofour/Durio/api.env",
+    "credentialValue": "never retained",
+    "scope": "one start; all SDK retries and compactions share stage budgets; no resume"
+  },
+  "batchResult": {
+    "status": "STOPPED",
+    "stage": "eval",
+    "reason": "Error: BATCH_TRIAL_NOT_PASS",
+    "improve": "not-run",
+    "at": "2026-10-10T05:54:47.608Z",
+    "deadline": "2026-10-10T06:53:39.641Z",
+    "remoteTermination": "unknown",
+    "firstFailuresRetained": true,
+    "modelIdentity": "Requested alias is not immutable served model proof; inspect retained raw response",
+    "cost": "Use host stage budget facts; guest coding mirrors eval usage and must not be summed again"
+  },
+  "hostKindCounts": {
+    "eval.content": 155,
+    "eval.plan": 1,
+    "evidence.fixed": 2,
+    "eval.started": 1,
+    "budget.plan": 1,
+    "eval.preparation": 1,
+    "eval.trial-started": 2,
+    "budget.reserve": 15,
+    "provider.dispatch": 15,
+    "eval.provider-link": 15,
+    "provider.http": 15,
+    "provider.bytes": 676,
+    "budget.settle": 15,
+    "execution.output": 3,
+    "eval.outcome": 4,
+    "eval.budget-snapshot": 2,
+    "eval.grade": 2,
+    "eval.timing": 2,
+    "eval.closed": 1
+  },
+  "hostBudgetSnapshots": [
+    {
+      "source": {
+        "seq": 685,
+        "kind": "eval.budget-snapshot",
+        "ref": {
+          "sha256": "bee978309cefa4194155f08205efe2ed2d426bdd0bc19cab78499158a88c63d4",
+          "bytes": 177
+        },
+        "at": "2026-10-10T05:54:14.929Z"
+      },
+      "data": {
+        "trialId": "v1-live-r1-local-fix",
+        "requests": 7,
+        "knownTokens": 13370,
+        "reservedTokens": 0,
+        "unknown": 0,
+        "violation": false,
+        "completeness": "known",
+        "deadline": "2026-10-10T06:53:39.641Z"
+      }
+    },
+    {
+      "source": {
+        "seq": 1057,
+        "kind": "eval.budget-snapshot",
+        "ref": {
+          "sha256": "191fd52772cd8c966a4316d7d93e2dc6fbd759c8cbd71f831bedebced6bda4bf",
+          "bytes": 179
+        },
+        "at": "2026-10-10T05:54:45.557Z"
+      },
+      "data": {
+        "trialId": "v1-live-r1-multi-file",
+        "requests": 15,
+        "knownTokens": 27499,
+        "reservedTokens": 0,
+        "unknown": 0,
+        "violation": false,
+        "completeness": "known",
+        "deadline": "2026-10-10T06:53:39.641Z"
+      }
+    }
+  ],
+  "hostRequests": [
+    {
+      "id": "b61813aa-1246-4eee-900f-624e8fa4f9a6",
+      "trialId": "v1-live-r1-local-fix",
+      "guestOrdinal": 1,
+      "dispatch": {
+        "seq": 276,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "b300652b25e223d263fdf09501b13269eed9d808b7c747d766c37892c07f33a3",
+          "bytes": 271
+        },
+        "at": "2026-10-10T05:53:50.513Z"
+      },
+      "reservation": {
+        "seq": 275,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "f6aab59c29c11d2f9081f6b05094b11cb9765a752a31c11330c798bd06d6f050",
+          "bytes": 194
+        },
+        "at": "2026-10-10T05:53:50.490Z"
+      },
+      "http": {
+        "seq": 278,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "170294d977c3f27fb17004d184e710851bd887426fb11b2b3089668554fe56dc",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:53:50.906Z"
+      },
+      "settlement": {
+        "seq": 301,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "54323faaf2d7cced35422a1a7b58fc2d169d5dc899bb4916c5584c751d971538",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:53:51.760Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 1122,
+      "rawResponseChunkCount": 22,
+      "rawResponseAssembledSha256": "9aac6dde30e6ed57fa3ac28633c71cc44abd16b03e981bfbb5c4242ae6933351",
+      "rawResponseFirstRef": {
+        "sha256": "0e73165b9c6b82a428f2ab6016a9df2293c83ff3627b5ff629547685611fba38",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "d155fd35c09a44381651b4dc8b113ab580789d57638bc026613f918ee6358a93",
+        "bytes": 471
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 979,
+        "completion_tokens": 143,
+        "total_tokens": 1122,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 979
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "7db3f7e64f31a12fa47f4be0c0ea3c3e58ac9a26bd328379b8fb1c2b0617b75c",
+        "bytes": 3529
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "e7ddc18e-8de3-4a75-a87c-2642553f0622",
+      "trialId": "v1-live-r1-local-fix",
+      "guestOrdinal": 2,
+      "dispatch": {
+        "seq": 303,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "d05da4c6652b756a9075343257d724b0d81e887c2f083c5c1afeda2335ac1479",
+          "bytes": 271
+        },
+        "at": "2026-10-10T05:53:52.245Z"
+      },
+      "reservation": {
+        "seq": 302,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "71179033d46ffba12ba7b89e5eb267a1820c96f82d0872e32b761e3a44f79c25",
+          "bytes": 194
+        },
+        "at": "2026-10-10T05:53:52.222Z"
+      },
+      "http": {
+        "seq": 305,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "fd22a944029a0a3ceeaaf3cf5346ccc3c42f47a8944d572c667be52430d92c69",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:53:52.389Z"
+      },
+      "settlement": {
+        "seq": 319,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "f0ff61156780557a423ba0f084255886cf2f2a63c4098d9c13db6c84dc0cc4ec",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:53:53.096Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 1402,
+      "rawResponseChunkCount": 13,
+      "rawResponseAssembledSha256": "e6f37b8340c667e2c644e04c17796ff69a145b719232edef5f656241b46886b8",
+      "rawResponseFirstRef": {
+        "sha256": "8634ab736436d5c7bc213536bdf9c5e714db50cd156eae08cb121963a20fc36c",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "b42703faba0aff829dd4a83897fc3926f29d67d40dc8884f07e7b57a096b9fe1",
+        "bytes": 477
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 1352,
+        "completion_tokens": 50,
+        "total_tokens": 1402,
+        "prompt_tokens_details": {
+          "cached_tokens": 1024
+        },
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 328
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "161971b87e97caec393a9d1c7d14b62fbf313dbb88e331b6974e2a031bb5a401",
+        "bytes": 4926
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "fe3f0920-5b98-4abe-9427-34595ca3676e",
+      "trialId": "v1-live-r1-local-fix",
+      "guestOrdinal": 3,
+      "dispatch": {
+        "seq": 321,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "be900ec6061f9bf5d05e385d9f08bd3046c9715afe0654bbe3cd5beb08892bd5",
+          "bytes": 271
+        },
+        "at": "2026-10-10T05:53:53.313Z"
+      },
+      "reservation": {
+        "seq": 320,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "05fdccb8932e4387ad4d54478fcabbd10a3149b5bfbb68423be7ab60401e5d5b",
+          "bytes": 194
+        },
+        "at": "2026-10-10T05:53:53.291Z"
+      },
+      "http": {
+        "seq": 323,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "287c352fb931d3384ff309978ab066d18510b9768ceed4299bf2f9332eb3863e",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:53:53.437Z"
+      },
+      "settlement": {
+        "seq": 346,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "de06b6836eafb6f565b67bf8e2ceefaf60fd6ef0072a95a4de463915ca8779b2",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:53:54.297Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 1542,
+      "rawResponseChunkCount": 22,
+      "rawResponseAssembledSha256": "b5e01b9ad12d699a750a8ca1ecaddf5f2112f5bebf934de0a0bd2b0b14e217ed",
+      "rawResponseFirstRef": {
+        "sha256": "7df2adbd9ab39fb4e98ed79b7317a8cbd40933233d5bd61db460cc306e3e9203",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "0cdf3c1f4ade6e7dbd5d9f59b0968b4ec1ab75d1b5c2522c11d93a5d5584b1de",
+        "bytes": 478
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 1440,
+        "completion_tokens": 102,
+        "total_tokens": 1542,
+        "prompt_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 160
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "9c8c6a893e15003a216da7e8ce18bbeb97cab563e9afedd75efce9489fcabfab",
+        "bytes": 5350
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "4707057b-6137-426f-9c2e-9d81892912a5",
+      "trialId": "v1-live-r1-local-fix",
+      "guestOrdinal": 4,
+      "dispatch": {
+        "seq": 348,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "3c2358eea1fedc16107dac14de54a9940cdc74b6118ffafee1c9d002486ed956",
+          "bytes": 271
+        },
+        "at": "2026-10-10T05:53:54.640Z"
+      },
+      "reservation": {
+        "seq": 347,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "ecd61ff1582a494e9bd79e9d2fa4c093f66b9a89883e444b944dd73afd113f12",
+          "bytes": 194
+        },
+        "at": "2026-10-10T05:53:54.614Z"
+      },
+      "http": {
+        "seq": 350,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "d04e763c8534db36e9aa0a3f03393bfbc2df4cf52c72ced385d380152229ce79",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:53:54.815Z"
+      },
+      "settlement": {
+        "seq": 423,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "19614fe909cef60afc712545146de0ede7b7092dbe8a538785bde8ddf3e43814",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:53:56.883Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 1829,
+      "rawResponseChunkCount": 72,
+      "rawResponseAssembledSha256": "caa7d47ce7cf2d8517545e6f7eb2695d4c7d1a6b0e62dde6a171539a542029c1",
+      "rawResponseFirstRef": {
+        "sha256": "3a895a1b595f52d3e22d4ff15a651a0cadba81b90bc04fc812a7ab6aaed238ba",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "2af23a3558f09ec8ecf6f7357e881e42845113cc080e0aa18ffa312dfe84b6a9",
+        "bytes": 478
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 1565,
+        "completion_tokens": 264,
+        "total_tokens": 1829,
+        "prompt_tokens_details": {
+          "cached_tokens": 1408
+        },
+        "prompt_cache_hit_tokens": 1408,
+        "prompt_cache_miss_tokens": 157
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "1400eab8d5d59de3ccbff92b7ba2f4a81b0cdfde2f13f2060951a8e66f0db046",
+        "bytes": 5821
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "e25879a2-e59c-47ee-bd9a-e13bdd644708",
+      "trialId": "v1-live-r1-local-fix",
+      "guestOrdinal": 5,
+      "dispatch": {
+        "seq": 425,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "8ba4382838b2f7f31ee9633f90f1f867ebb9292d585a7de1593cdd46a7127c8c",
+          "bytes": 271
+        },
+        "at": "2026-10-10T05:53:57.743Z"
+      },
+      "reservation": {
+        "seq": 424,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "3fd4342ffe54d134822999828ea9f9aa7838b9de6d3c4d9e2763b2281a2172ac",
+          "bytes": 194
+        },
+        "at": "2026-10-10T05:53:57.722Z"
+      },
+      "http": {
+        "seq": 427,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "1bfc9f29b5638000223bc8300c78235d8bbeac97840ed203a613ee3c1f2afe3e",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:53:57.849Z"
+      },
+      "settlement": {
+        "seq": 454,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "f8bd029b837c346ecadf4048aaeda1a5b83b0b527e52fbacced5cc73a40c2038",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:53:58.795Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 2076,
+      "rawResponseChunkCount": 26,
+      "rawResponseAssembledSha256": "c43afe8f120ac31a15019b2dfb237f49ae22ea06066f4487050d60b1ce9798e2",
+      "rawResponseFirstRef": {
+        "sha256": "1c412dc46fce301bc9194b871a8878c60b7861494477a37e438fc83d9dbf2aca",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "8d06ad282dab41df6b58ededda0b19eaa66496db20ac9bc3b68fcb6576d2d80f",
+        "bytes": 478
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 1968,
+        "completion_tokens": 108,
+        "total_tokens": 2076,
+        "prompt_tokens_details": {
+          "cached_tokens": 1792
+        },
+        "prompt_cache_hit_tokens": 1792,
+        "prompt_cache_miss_tokens": 176
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "d8284ba8dba2822f2c4b712765b546d8ac62e69702ed26b59ccba0b8cf3a3d24",
+        "bytes": 7085
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "09e9f707-31ae-45a4-8a09-754c74d4c005",
+      "trialId": "v1-live-r1-local-fix",
+      "guestOrdinal": 6,
+      "dispatch": {
+        "seq": 456,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "1e5e4310bf3bd64b0b784b06bb2150c13def7be8a8e2ee131e672dad52227079",
+          "bytes": 271
+        },
+        "at": "2026-10-10T05:53:59.166Z"
+      },
+      "reservation": {
+        "seq": 455,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "dbfe16773b3fcf9fc1fca914a97935b98d92a19344d9a2bdb8be4ea3a0903dfa",
+          "bytes": 194
+        },
+        "at": "2026-10-10T05:53:59.146Z"
+      },
+      "http": {
+        "seq": 458,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "c25f53ffdbfd3ee95e6ab4fdcecfa9f3fad22d22484d546518321552dd28e6b6",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:53:59.280Z"
+      },
+      "settlement": {
+        "seq": 509,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "551311ba3c0681041e29925b447bada650e886e8238ce6f6c230b29dd0ffd096",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:00.767Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 2426,
+      "rawResponseChunkCount": 50,
+      "rawResponseAssembledSha256": "3820611d29f403f94c9888c202a4547f0ee6e59a6f8a09482c41184f22e5c525",
+      "rawResponseFirstRef": {
+        "sha256": "7ba1f4bbbb4ecefdda8989893fd976f0e2a91de9e304c8684db4d145b5f41c10",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "5b14c7d53047b4d82342ee16d648b5efd468451b4ffb8484ef8d36151b7deb04",
+        "bytes": 478
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 2274,
+        "completion_tokens": 152,
+        "total_tokens": 2426,
+        "prompt_tokens_details": {
+          "cached_tokens": 2048
+        },
+        "prompt_cache_hit_tokens": 2048,
+        "prompt_cache_miss_tokens": 226
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "abfbbab26a270ced103c392a27609c8a5b73bd1d2505dde7e96f22e3acf43eb8",
+        "bytes": 8237
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "2cb66332-20b0-4e76-86f4-5d2221a1012c",
+      "trialId": "v1-live-r1-local-fix",
+      "guestOrdinal": 7,
+      "dispatch": {
+        "seq": 511,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "1878254943d97f80da7720ef2cfe2d6162ddaa25318b04e3f4e38ebdf334766d",
+          "bytes": 271
+        },
+        "at": "2026-10-10T05:54:01.270Z"
+      },
+      "reservation": {
+        "seq": 510,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "1a6469c48fb40182ee8a4ef5ba4c70d23766a2144759d2322bcf93f64342117a",
+          "bytes": 194
+        },
+        "at": "2026-10-10T05:54:01.248Z"
+      },
+      "http": {
+        "seq": 513,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "9e5ed836906229d9ba45998b9241df60ae66499e38ab272c6a2c7bf90f20380b",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:54:01.394Z"
+      },
+      "settlement": {
+        "seq": 671,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "a32a5f62023ea4fb3303a1de322df103b68aa6a9d7389a6a70d83c897ad7c1d3",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:04.800Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 2973,
+      "rawResponseChunkCount": 157,
+      "rawResponseAssembledSha256": "0e825f4435ff8b95cf2bd0b420d2a18770b085c55bfdae764f106b51168e7d44",
+      "rawResponseFirstRef": {
+        "sha256": "81b759c906476e76786c3bc9c7df18fcf802e7bd4d07ccc3b3cf6aef6fea4b06",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "fe8b1e7ceaaf52cbef794256230fbc74fc81ef6a4378ecb05fc8283b2e0714dc",
+        "bytes": 472
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 2514,
+        "completion_tokens": 459,
+        "total_tokens": 2973,
+        "prompt_tokens_details": {
+          "cached_tokens": 2304
+        },
+        "prompt_cache_hit_tokens": 2304,
+        "prompt_cache_miss_tokens": 210
+      },
+      "finishReasons": [
+        "stop"
+      ],
+      "requestPayload": {
+        "sha256": "bbbc953b3612f3544efc54acf23900e64fb9a340cdd00cbadd7aa25cf986162e",
+        "bytes": 9185
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "96c81214-ba0a-4d41-85aa-e5eaecec0679",
+      "trialId": "v1-live-r1-multi-file",
+      "guestOrdinal": 1,
+      "dispatch": {
+        "seq": 691,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "a130f74d9a9e0388f24995cca87141cb1bb11050ebdda92e86e61ccc06637ee9",
+          "bytes": 272
+        },
+        "at": "2026-10-10T05:54:22.273Z"
+      },
+      "reservation": {
+        "seq": 690,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "fdef1214b7cdb59bfb82a9300edb6ac3b385f043d5d0a0fff8e1187a5d663996",
+          "bytes": 195
+        },
+        "at": "2026-10-10T05:54:22.249Z"
+      },
+      "http": {
+        "seq": 693,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "a9f036158fdc80e9a3e3ddee355de59fd673e6530c5c3db9324a7eec24e483c1",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:54:22.459Z"
+      },
+      "settlement": {
+        "seq": 710,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "14e55831f94a6e9335ea9671f0798d5a3f55a7af183403c51b1f4c3bc7e86a1c",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:23.218Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 1058,
+      "rawResponseChunkCount": 16,
+      "rawResponseAssembledSha256": "155a8cce2994f9130443d43e38167c892b65701883187ccf6a87327ac01fa8b4",
+      "rawResponseFirstRef": {
+        "sha256": "64ff3bf7ea4bc43ef8d305046af801e59af884a28cd677b90b25608774d7de14",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "718550641f9919b1a9fe59969bdecd94c630c1b3c4a53489747f040c47adb618",
+        "bytes": 474
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 986,
+        "completion_tokens": 72,
+        "total_tokens": 1058,
+        "prompt_tokens_details": {
+          "cached_tokens": 768
+        },
+        "prompt_cache_hit_tokens": 768,
+        "prompt_cache_miss_tokens": 218
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "5f5793af15f4bb0dfd57e71e601b1b75da730d0143e30d8ceee4740b30249aa8",
+        "bytes": 3564
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "2a467e03-6c85-4325-855f-65a80dd3200c",
+      "trialId": "v1-live-r1-multi-file",
+      "guestOrdinal": 2,
+      "dispatch": {
+        "seq": 712,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "cabfad1da974560743963d86f4b992062fb5895f99b8574f37093c50954d67ef",
+          "bytes": 272
+        },
+        "at": "2026-10-10T05:54:23.528Z"
+      },
+      "reservation": {
+        "seq": 711,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "8e7c3b7593909d2bc8a5e02bfd38a13a3277cd6162d4e0e8726b42590ff972a1",
+          "bytes": 195
+        },
+        "at": "2026-10-10T05:54:23.508Z"
+      },
+      "http": {
+        "seq": 714,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "58ee83541d7ae077b0cd1c22e37db5322a8b05dd6d62c3fe50c6c5562e6908cf",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:54:23.655Z"
+      },
+      "settlement": {
+        "seq": 731,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "4d1322498267eb257c1056b6343a44535d670fd8ad01e182db268aa30003d42e",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:24.302Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 1192,
+      "rawResponseChunkCount": 16,
+      "rawResponseAssembledSha256": "e06b48ed5dcb9727b7a3a2ee9d98529256ceeeb370163311fa5c18e310ea2bfd",
+      "rawResponseFirstRef": {
+        "sha256": "9f8f2698f2ee983206d5f0d70e918935a67269e9f8b61326c407e133dc854c76",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "c9c34a77f8284f5c1a2dda21319787a266fec28b86af9beb053404fede4a706e",
+        "bytes": 475
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 1098,
+        "completion_tokens": 94,
+        "total_tokens": 1192,
+        "prompt_tokens_details": {
+          "cached_tokens": 896
+        },
+        "prompt_cache_hit_tokens": 896,
+        "prompt_cache_miss_tokens": 202
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "67754b48501e6765d5e642b5e333c264817030bec1663f2d6029c97c4719b1c7",
+        "bytes": 4077
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "1fe1e5d8-2c18-4f19-ab49-b9b11189be93",
+      "trialId": "v1-live-r1-multi-file",
+      "guestOrdinal": 3,
+      "dispatch": {
+        "seq": 733,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "c208c8a88781a81785887fc01e19b3f9ac1a412a7f69ff0c74b894e29b5359c0",
+          "bytes": 272
+        },
+        "at": "2026-10-10T05:54:24.633Z"
+      },
+      "reservation": {
+        "seq": 732,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "63850a71cb312cbd1aa81c51de01cd638e5e354150140d8249cd78432a855ba5",
+          "bytes": 195
+        },
+        "at": "2026-10-10T05:54:24.614Z"
+      },
+      "http": {
+        "seq": 735,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "0de7cc40191aa256c55f03bcb81fc069b53bc565e2bf60346a181ebcce739f42",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:54:24.806Z"
+      },
+      "settlement": {
+        "seq": 742,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "ed02167c7647ad38a2ca577b68db1e40367f1846c0f8a8a9bbec25deb661926b",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:25.400Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 1310,
+      "rawResponseChunkCount": 6,
+      "rawResponseAssembledSha256": "6c3a212077705691998cc1619a8de0a8f2504863b9831f92cc6b95562285a412",
+      "rawResponseFirstRef": {
+        "sha256": "b62ec693225f44e12b3661cf6d3c60a22e3094a8bf9ef2213d81a8ff049ff212",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "75f683d7b2959202c0bbaeb579cc8dbf73debea07758077582862f553787e7b9",
+        "bytes": 477
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 1273,
+        "completion_tokens": 37,
+        "total_tokens": 1310,
+        "prompt_tokens_details": {
+          "cached_tokens": 1024
+        },
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 249
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "367e685c54e4f6e5248c2bd80c0a9aed7242939a05bb1ab481d580553072a2a2",
+        "bytes": 4980
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "50898d81-3227-453a-a1a8-6d5fa9acda6a",
+      "trialId": "v1-live-r1-multi-file",
+      "guestOrdinal": 4,
+      "dispatch": {
+        "seq": 744,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "9e834eafecee53f8b30acee15a5027e625cda6854f100e8e887a05e94ebc41ee",
+          "bytes": 272
+        },
+        "at": "2026-10-10T05:54:25.583Z"
+      },
+      "reservation": {
+        "seq": 743,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "f9fc112d946ad74bec5b8477e9387eeb0764bbb53e0ff57e580e01c8175753b6",
+          "bytes": 195
+        },
+        "at": "2026-10-10T05:54:25.562Z"
+      },
+      "http": {
+        "seq": 746,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "f3d742774156cf1d37eedf13b71f61ffd4b5499132466d51b68c3e69cfd425c6",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:54:25.752Z"
+      },
+      "settlement": {
+        "seq": 814,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "440912f56a29e81f33e7cb15e6ae6d11cbb2b9b5b61dec65b2f91a801aff183a",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:27.345Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 1576,
+      "rawResponseChunkCount": 67,
+      "rawResponseAssembledSha256": "ba3dcc4d09c82e5fc9ba044ef59d275caccef83ee8daca66ce415b906d51bba2",
+      "rawResponseFirstRef": {
+        "sha256": "523ce87fa4cc0f1e86626b535c9d87cb8a025f21f9585b920404b2df3c1aaa60",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "f8181ea47d0d574d10f03e2fac39f6e2ff71167b18eb070fcb80284d74e488c1",
+        "bytes": 478
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 1336,
+        "completion_tokens": 240,
+        "total_tokens": 1576,
+        "prompt_tokens_details": {
+          "cached_tokens": 1152
+        },
+        "prompt_cache_hit_tokens": 1152,
+        "prompt_cache_miss_tokens": 184
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "0cde0b9ea69633781bff13bb44fd27689d90e30d5bffa1ff3b98dea5419d436c",
+        "bytes": 5337
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "34e91871-92ba-43c8-99b3-52f1fabab9ba",
+      "trialId": "v1-live-r1-multi-file",
+      "guestOrdinal": 5,
+      "dispatch": {
+        "seq": 816,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "143b071a6dff4456a4bd03e4d85b83ef592010007c4d47b3ef31d44a6bb6f089",
+          "bytes": 272
+        },
+        "at": "2026-10-10T05:54:28.025Z"
+      },
+      "reservation": {
+        "seq": 815,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "d70db4b27dc43444459dd1fbf25045740aec65bfdf7c6a1fedcff8b7d1945c06",
+          "bytes": 195
+        },
+        "at": "2026-10-10T05:54:28.006Z"
+      },
+      "http": {
+        "seq": 818,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "78bbc784f345cc4b70fe6ba7d250664a06d77e6c8b305d11a23779e4d01b2d80",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:54:28.301Z"
+      },
+      "settlement": {
+        "seq": 841,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "138199c833330feec215eec569f75ff3373ed5bfc8f4f14378e7814207f91e7d",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:29.424Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 1707,
+      "rawResponseChunkCount": 22,
+      "rawResponseAssembledSha256": "1655f045aa373fef214f3dccf26241abc3793d9070c720a972640addf7600a87",
+      "rawResponseFirstRef": {
+        "sha256": "fd1495197118c1664e50188bdc35d8f672c5b0eeec66b16e59b8fb8c6b461bf0",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "517bf4a6149e89ce1f03b5d3735d72de8b1675e4f49e13f0e52a07173497f32e",
+        "bytes": 477
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 1618,
+        "completion_tokens": 89,
+        "total_tokens": 1707,
+        "prompt_tokens_details": {
+          "cached_tokens": 1408
+        },
+        "prompt_cache_hit_tokens": 1408,
+        "prompt_cache_miss_tokens": 210
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "260ccef523bc1cfa2a7e57141e840de3d56c1a729c2dd6d8dcbd46ccf7ac4eca",
+        "bytes": 6482
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "6b49b7e5-0ae9-4031-b1fa-8c3427badb4d",
+      "trialId": "v1-live-r1-multi-file",
+      "guestOrdinal": 6,
+      "dispatch": {
+        "seq": 843,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "53a2ba34c13a39a41b7646669fc0ac37dd4fd8495d8cf8d46f0113f18d19c7e2",
+          "bytes": 272
+        },
+        "at": "2026-10-10T05:54:29.763Z"
+      },
+      "reservation": {
+        "seq": 842,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "d36909cb52c06f279d31d0cb9590ab16c398804c0bb4763288b2dc7647159550",
+          "bytes": 195
+        },
+        "at": "2026-10-10T05:54:29.742Z"
+      },
+      "http": {
+        "seq": 845,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "e1fe060b572008c8f22e131df49e897f35f6029e93f4bbf2904ba3f2d0220046",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:54:29.882Z"
+      },
+      "settlement": {
+        "seq": 909,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "03e05805cf2a3b2f1e8f879042639abc42af84f30ef600e39cc29c98dc518060",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:31.514Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 2026,
+      "rawResponseChunkCount": 63,
+      "rawResponseAssembledSha256": "0f013dc08fda9d0cade7675e9a1d54eff223336a13d562a00ba0d02f0e3fbf27",
+      "rawResponseFirstRef": {
+        "sha256": "ec6812b8415b398497c1ca4f50e50589db0e55064fa63d6d685cb50b84003ffd",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "31d6599e4f3cee938b2d0b1f222c21708556f780305696bf38acffd4bd3db28a",
+        "bytes": 478
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 1826,
+        "completion_tokens": 200,
+        "total_tokens": 2026,
+        "prompt_tokens_details": {
+          "cached_tokens": 1664
+        },
+        "prompt_cache_hit_tokens": 1664,
+        "prompt_cache_miss_tokens": 162
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "9014611a6450f15a13125cf577592e0a31d8ec6aa48486167ddf714692addf47",
+        "bytes": 7339
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "e37fee9d-adf5-483e-a6be-940354e8dc44",
+      "trialId": "v1-live-r1-multi-file",
+      "guestOrdinal": 7,
+      "dispatch": {
+        "seq": 911,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "8486e65a1ad3b1cab4aa509d52d97789c0be3f8c3ae960c225b4b4123fe55460",
+          "bytes": 272
+        },
+        "at": "2026-10-10T05:54:32.154Z"
+      },
+      "reservation": {
+        "seq": 910,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "9ec6e4833d6a3252901dae1db2945b8b9c67b67d099507caf0e36ffba1d79413",
+          "bytes": 195
+        },
+        "at": "2026-10-10T05:54:32.130Z"
+      },
+      "http": {
+        "seq": 913,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "9e1e824ba0533e55dff6885017193a841e8203392f5cffb4a257c5da71e9eedd",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:54:32.294Z"
+      },
+      "settlement": {
+        "seq": 971,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "5f91ab686e249eec02822b00f5a823318f21b5181afc50590420be565171921d",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:34.116Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 2472,
+      "rawResponseChunkCount": 57,
+      "rawResponseAssembledSha256": "21b1bf3ee9f26789ea285c136473083c6a1b7e2fbaaf0f4b92b3a4ee8face808",
+      "rawResponseFirstRef": {
+        "sha256": "035d34fcdf91d20e54d89b519f4ef965d5089bf8ce91e425d0158734ba0e3d71",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "5735db445f5c248d333b4d04b9387682fff9c821a855d12ad60751c5d545872d",
+        "bytes": 478
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 2284,
+        "completion_tokens": 188,
+        "total_tokens": 2472,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 364
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "822300918188b584918a11a3a3c1b6ac2236c7999205619de3936e3b7269d506",
+        "bytes": 9055
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    },
+    {
+      "id": "a28f20c2-aa73-4475-939e-870cbb859642",
+      "trialId": "v1-live-r1-multi-file",
+      "guestOrdinal": 8,
+      "dispatch": {
+        "seq": 973,
+        "kind": "provider.dispatch",
+        "ref": {
+          "sha256": "4da9ae26820a21a2af06b656eed980803ec0619047e55b592f1b5c9aec4c5d23",
+          "bytes": 273
+        },
+        "at": "2026-10-10T05:54:34.779Z"
+      },
+      "reservation": {
+        "seq": 972,
+        "kind": "budget.reserve",
+        "ref": {
+          "sha256": "1f378bb81df6a265e2671021efbca9e4f5da4bb5f6891844b3c44a590a5a3970",
+          "bytes": 195
+        },
+        "at": "2026-10-10T05:54:34.757Z"
+      },
+      "http": {
+        "seq": 975,
+        "kind": "provider.http",
+        "ref": {
+          "sha256": "8022ab7c1e2b174e1cf1812dc644442f4722da30fb58dd5ac318ee6d69443dba",
+          "bytes": 58
+        },
+        "at": "2026-10-10T05:54:34.926Z"
+      },
+      "settlement": {
+        "seq": 1043,
+        "kind": "budget.settle",
+        "ref": {
+          "sha256": "0956a9fc27654f6ea269d26399bc9615c397ed846d402e9c8d37848ab55d3f2d",
+          "bytes": 117
+        },
+        "at": "2026-10-10T05:54:36.644Z"
+      },
+      "status": 200,
+      "reservedTokens": 1052672,
+      "settledTokens": 2788,
+      "rawResponseChunkCount": 67,
+      "rawResponseAssembledSha256": "c2f789ce4a26e31ed01b784a92b1d14b193f1b44fc632174bc228ecc92ce77e7",
+      "rawResponseFirstRef": {
+        "sha256": "05c1bf69c5694d17ec7a703eca6838d865829bc0ae9ce72be5a4cc1172fa9fc6",
+        "bytes": 304
+      },
+      "rawResponseLastRef": {
+        "sha256": "506043548d41164673562aed547e29a3ee6f8828434c32b34950a73f87e61f4f",
+        "bytes": 478
+      },
+      "rawReturnedModels": [
+        "deepseek-flash"
+      ],
+      "systemFingerprints": [
+        "aeb56401ca74e127821c4f9126dcb669"
+      ],
+      "rawUsage": {
+        "prompt_tokens": 2524,
+        "completion_tokens": 264,
+        "total_tokens": 2788,
+        "prompt_tokens_details": {
+          "cached_tokens": 2304
+        },
+        "prompt_cache_hit_tokens": 2304,
+        "prompt_cache_miss_tokens": 220
+      },
+      "finishReasons": [
+        "tool_calls"
+      ],
+      "requestPayload": {
+        "sha256": "bed09ed512e5aa789fffb789463e696ad9609c206f3f3470a8acaaac81d3e6cc",
+        "bytes": 10116
+      },
+      "fixedUserPromptMatched": true,
+      "requestMaxOutputTokens": 4096
+    }
+  ],
+  "trials": [
+    {
+      "id": "v1-live-r1-local-fix",
+      "caseId": "local-fix",
+      "originalOutcome": {
+        "status": "completed",
+        "started": true,
+        "valid": true,
+        "reason": null,
+        "source": "e1:684:3452d528da95ff7f4aabe09522fa8bdbcefb3df57b71c8bafabe02094670a180"
+      },
+      "originalGrade": {
+        "judgment": "PASS",
+        "reason": "All fixed necessary requirements verified",
+        "checks": [
+          {
+            "name": "scope",
+            "passed": true
+          },
+          {
+            "name": "task",
+            "passed": true
+          }
+        ],
+        "source": "e1:687:d3f92c3c6db88c384d5220ce9c3267c4e48a6a802704f68469a8afabdb27c947",
+        "execution": {
+          "sha256": "366754f8f1ceab7c546180124ebef4d5dec244ded6659e9e00aba39e590dadb7",
+          "bytes": 25261
+        }
+      },
+      "hostRequests": 7,
+      "hostTokens": 13370,
+      "fixedInput": "Fix add in math.ts so signed integer addition works. Preserve README.md. Only math.ts may change; run a Node check.",
+      "runtimeResult": {
+        "ref": {
+          "sha256": "2d397957e4af4f0a7d1e33e431190e2b9280fc38b9fce5256041a32a8547a1e4",
+          "bytes": 2703
+        },
+        "runId": "546b9cde-76a5-4fe9-8ae9-f0e343a4f589",
+        "status": "completed",
+        "reason": null,
+        "cleanup": "confirmed",
+        "executionCleanup": {
+          "managedCommands": "settled",
+          "started": 4,
+          "settled": 4,
+          "externalProcesses": "unknown"
+        },
+        "usage": {
+          "source": "pi.usage",
+          "scope": "session:69f80a7e-a764-45cd-8f5e-3fdfe6bed476",
+          "completeness": "known",
+          "value": {
+            "models": {
+              "deepseek/deepseek-flash": {
+                "input": 2236,
+                "output": 1278,
+                "cacheRead": 9856,
+                "cacheWrite": 0,
+                "reasoning": 0,
+                "totalTokens": 13370,
+                "cost": {
+                  "input": 0.0006708,
+                  "output": 0.0015336,
+                  "cacheRead": 5.9136000000000004e-05,
+                  "cacheWrite": 0,
+                  "total": 0.002263536
+                }
+              }
+            },
+            "tools": {}
+          },
+          "cost": {
+            "kind": "estimate",
+            "currency": "USD",
+            "source": "@earendil-works/pi-ai@1.1.0 model price catalog",
+            "observedAt": "2026-10-10T05:54:06.242Z"
+          }
+        }
+      },
+      "projectArtifacts": [
+        {
+          "path": "project/math.ts",
+          "ref": {
+            "sha256": "8d344bcb231aaa7f94df684340b260c5edc259441a6e56f600f23f736b3f2f5e",
+            "bytes": 52
+          },
+          "content": "export const add = (a: number, b: number) => a + b;\n"
+        },
+        {
+          "path": "project/package-lock.json",
+          "ref": {
+            "sha256": "50900de0c74ae6ac8361252423e384d28f8a3139940fb936d36200459f92c51f",
+            "bytes": 131
+          },
+          "content": "{\"lockfileVersion\":3,\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"packages\":{\"\":{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\"}}}"
+        },
+        {
+          "path": "project/package.json",
+          "ref": {
+            "sha256": "d644a714b141b08d9d8bc4bb765d01494e75a27a04d0313a61aa033474668fc9",
+            "bytes": 78
+          },
+          "content": "{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}"
+        },
+        {
+          "path": "project/README.md",
+          "ref": {
+            "sha256": "5c8fa4e78c32a978b39b8f28c702b756dc5ebd37a553aed24d1093f922859530",
+            "bytes": 38
+          },
+          "content": "User draft: preserve this exact note.\n"
+        }
+      ],
+      "guestDatabase": {
+        "sha256": "a80134eea1b841c22dbc21df115e4a0c88ce903a6b6db08a8bc2057ec34020a6",
+        "bytes": 307200
+      },
+      "guestKindCounts": {
+        "preflight": 1,
+        "task.accepted": 1,
+        "ownership.acquired": 1,
+        "workspace.owner": 1,
+        "execution.artifact": 1,
+        "execution.config": 1,
+        "ownership.session": 1,
+        "run.started": 1,
+        "submission.intent": 1,
+        "submission.accepted": 1,
+        "generation.request": 7,
+        "model.intent": 7,
+        "model.payload": 7,
+        "model.fetch-intent": 7,
+        "model.dispatch": 7,
+        "model.http": 7,
+        "model.provider-event": 1097,
+        "model.response": 7,
+        "tool.intent": 8,
+        "tool.dispatch": 8,
+        "shell.started": 4,
+        "tool.output": 12,
+        "shell.completed": 4,
+        "tool.result": 8,
+        "tool.summary": 8,
+        "read.open": 3,
+        "read.bytes": 9,
+        "read.text": 1,
+        "file.write-intent": 1,
+        "file.write-result": 1,
+        "submission.settled": 1,
+        "context.snapshot": 1,
+        "usage.projection": 1,
+        "lifecycle.close-started": 1,
+        "lifecycle.storage-closing": 1,
+        "lifecycle.storage-closed": 1,
+        "durable.closed-snapshot": 2,
+        "run.closed": 1
+      },
+      "taskAccepted": {
+        "source": {
+          "seq": 2,
+          "kind": "task.accepted",
+          "ref": {
+            "sha256": "53421b18db6916ec2e23064383063ae19f89e3b18efbae7fe3909cc4ca382559",
+            "bytes": 723
+          },
+          "at": "2026-10-10T05:53:46.731Z"
+        },
+        "input": "Fix add in math.ts so signed integer addition works. Preserve README.md. Only math.ts may change; run a Node check.",
+        "authorization": {
+          "tools": [
+            "read",
+            "write",
+            "edit",
+            "bash"
+          ],
+          "execution": "trusted-local-coding",
+          "requestLimit": 8,
+          "fileLimitBytes": 262144,
+          "replay": "unsafe"
+        }
+      },
+      "submissionSettled": {
+        "source": {
+          "seq": 1224,
+          "kind": "submission.settled",
+          "ref": {
+            "sha256": "a3df144f1c0ea0754f30ef4f76dcd7b6eff4d8e9e3bfd2e11f12e55934c1a949",
+            "bytes": 131
+          },
+          "at": "2026-10-10T05:54:06.191Z"
+        },
+        "data": {
+          "conversationId": 1,
+          "requestId": "9abd75ef-cc42-4fb6-bc1a-d6b9dde36e65",
+          "type": "input",
+          "status": "done",
+          "entry": 7,
+          "id": 8,
+          "answer": 39
+        }
+      }
+    },
+    {
+      "id": "v1-live-r1-multi-file",
+      "caseId": "multi-file",
+      "originalOutcome": {
+        "status": "error",
+        "started": true,
+        "valid": true,
+        "reason": "execution_error",
+        "source": "e1:1056:cd824aa1cb59cdc8f3ece1a898745b31cf1ba28aa90e4dc3e373d308736e4515"
+      },
+      "originalGrade": {
+        "judgment": "unknown",
+        "reason": "grader cancelled before start; no deterministic judgment",
+        "checks": [
+          {
+            "name": "scope",
+            "passed": true
+          }
+        ],
+        "source": "e1:1058:47e49b00b8d022212b6325ce5bb0234c70fc80ea0840e7f351c7851492839627",
+        "execution": {
+          "sha256": "488090138b362fdeedc8a70968832468a5caecff9aa14bd33312c19675be9824",
+          "bytes": 531
+        }
+      },
+      "hostRequests": 8,
+      "hostTokens": 14129,
+      "fixedInput": "Add named greeting(name) in greeting.ts, and use it in main.ts. greeting must return Hello, NAME! and main greet Ada. Only these two files may change.",
+      "runtimeResult": {
+        "ref": {
+          "sha256": "32e5fddc74eebc4a7c0e9fc93c982bc42952a436f103425a89b17c52f5860ed9",
+          "bytes": 1891
+        },
+        "runId": "84d303a9-8049-4c35-a8f2-5818a8eb0f23",
+        "status": "failed",
+        "reason": "TASK_UNANSWERED",
+        "cleanup": "confirmed",
+        "executionCleanup": {
+          "managedCommands": "settled",
+          "started": 4,
+          "settled": 4,
+          "externalProcesses": "unknown"
+        },
+        "usage": {
+          "source": "pi.usage",
+          "scope": "session:5a268a51-5ade-4981-9d82-21fd88689ed0",
+          "completeness": "known",
+          "value": {
+            "models": {
+              "deepseek/deepseek-flash": {
+                "input": 1809,
+                "output": 1184,
+                "cacheRead": 11136,
+                "cacheWrite": 0,
+                "reasoning": 0,
+                "totalTokens": 14129,
+                "cost": {
+                  "input": 0.0005427,
+                  "output": 0.0014207999999999998,
+                  "cacheRead": 6.681599999999999e-05,
+                  "cacheWrite": 0,
+                  "total": 0.002030316
+                }
+              }
+            },
+            "tools": {}
+          },
+          "cost": {
+            "kind": "estimate",
+            "currency": "USD",
+            "source": "@earendil-works/pi-ai@1.1.0 model price catalog",
+            "observedAt": "2026-10-10T05:54:37.817Z"
+          }
+        }
+      },
+      "projectArtifacts": [
+        {
+          "path": "project/greeting.ts",
+          "ref": {
+            "sha256": "087823927c237d65b49ca53dda65ad0bd2eb2b2a24bb3922484cb7734a35c953",
+            "bytes": 61
+          },
+          "content": "export const greeting = (name: string) => `Hello, ${name}!`;\n"
+        },
+        {
+          "path": "project/main.ts",
+          "ref": {
+            "sha256": "44e74018b054b9fd0820a3602418018e6574892ef2578207282f0c5f279ebb28",
+            "bytes": 138
+          },
+          "content": "import {greeting, namedGreeting} from './greeting.ts'; export const message = greeting(); export const adaMessage = namedGreeting(\"Ada\");\n"
+        },
+        {
+          "path": "project/package-lock.json",
+          "ref": {
+            "sha256": "50900de0c74ae6ac8361252423e384d28f8a3139940fb936d36200459f92c51f",
+            "bytes": 131
+          },
+          "content": "{\"lockfileVersion\":3,\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"packages\":{\"\":{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\"}}}"
+        },
+        {
+          "path": "project/package.json",
+          "ref": {
+            "sha256": "d644a714b141b08d9d8bc4bb765d01494e75a27a04d0313a61aa033474668fc9",
+            "bytes": 78
+          },
+          "content": "{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}"
+        },
+        {
+          "path": "project/README.md",
+          "ref": {
+            "sha256": "2989d8de107dd405df3dcbbaeb4bdea7fbac8349c02d4e62eecaca959211b713",
+            "bytes": 77
+          },
+          "content": "Public Node/TypeScript fixture. No network or package installation required.\n"
+        }
+      ],
+      "guestDatabase": {
+        "sha256": "4b4d6c92bd99112703acd9ac1b8149f36f471fb4a9fdad4321516d4a21671508",
+        "bytes": 270336
+      },
+      "guestKindCounts": {
+        "preflight": 1,
+        "task.accepted": 1,
+        "ownership.acquired": 1,
+        "workspace.owner": 1,
+        "execution.artifact": 1,
+        "execution.config": 1,
+        "ownership.session": 1,
+        "run.started": 1,
+        "submission.intent": 1,
+        "submission.accepted": 1,
+        "generation.request": 9,
+        "model.intent": 8,
+        "model.payload": 8,
+        "model.fetch-intent": 8,
+        "model.dispatch": 8,
+        "model.http": 8,
+        "model.provider-event": 918,
+        "model.response": 8,
+        "tool.intent": 11,
+        "tool.dispatch": 11,
+        "shell.started": 4,
+        "tool.output": 8,
+        "shell.completed": 4,
+        "tool.result": 11,
+        "tool.summary": 11,
+        "read.open": 4,
+        "read.bytes": 12,
+        "read.text": 2,
+        "file.write-intent": 3,
+        "file.write-result": 3,
+        "submission.settled": 1,
+        "context.snapshot": 1,
+        "usage.projection": 1,
+        "lifecycle.close-started": 1,
+        "lifecycle.storage-closing": 1,
+        "lifecycle.storage-closed": 1,
+        "durable.closed-snapshot": 2,
+        "run.closed": 1
+      },
+      "taskAccepted": {
+        "source": {
+          "seq": 2,
+          "kind": "task.accepted",
+          "ref": {
+            "sha256": "f1c50670058ad2f76f79da5c1318f004843c1a4954e4ec42557bfc8f272b02f2",
+            "bytes": 759
+          },
+          "at": "2026-10-10T05:54:18.780Z"
+        },
+        "input": "Add named greeting(name) in greeting.ts, and use it in main.ts. greeting must return Hello, NAME! and main greet Ada. Only these two files may change.",
+        "authorization": {
+          "tools": [
+            "read",
+            "write",
+            "edit",
+            "bash"
+          ],
+          "execution": "trusted-local-coding",
+          "requestLimit": 8,
+          "fileLimitBytes": 262144,
+          "replay": "unsafe"
+        }
+      },
+      "submissionSettled": {
+        "source": {
+          "seq": 1070,
+          "kind": "submission.settled",
+          "ref": {
+            "sha256": "7ad8b9bf1a30bb61b87cc5bc40fda0096165e8f7b467cc106e2b8e2d91ce568d",
+            "bytes": 215
+          },
+          "at": "2026-10-10T05:54:37.768Z"
+        },
+        "data": {
+          "conversationId": 1,
+          "requestId": "7c034ee5-b840-44ba-9722-2d5900b7f825",
+          "type": "input",
+          "status": "unanswered",
+          "entry": 7,
+          "id": 8,
+          "reason": "faulted",
+          "detail": "REQUEST_LIMIT: this task reached its provider attempt limit"
+        }
+      },
+      "responseTimeline": [
+        {
+          "ordinal": 1,
+          "intent": {
+            "seq": 12,
+            "kind": "model.intent",
+            "ref": {
+              "sha256": "06c10a8b0d6174402086b8d1ef773a459b54a850d51b372ff15b41f909f9d59e",
+              "bytes": 3903
+            },
+            "at": "2026-10-10T05:54:22.497Z"
+          },
+          "response": {
+            "seq": 66,
+            "kind": "model.response",
+            "ref": {
+              "sha256": "f173c70b2f50dc81da43d6303fa74d2f634989dadc1a8e7911bdc4e2c20a4b91",
+              "bytes": 1073
+            },
+            "at": "2026-10-10T05:54:23.804Z"
+          },
+          "stopReason": "toolUse",
+          "usage": "reported",
+          "assistantText": [
+            "I'll start by exploring the relevant files."
+          ],
+          "tools": [
+            {
+              "name": "bash",
+              "argumentsAsUntrustedData": {
+                "command": "ls; echo \"---\"; find . -name \"greeting.ts\" -o -name \"main.ts\" | grep -v node_modules"
+              }
+            }
+          ]
+        },
+        {
+          "ordinal": 2,
+          "intent": {
+            "seq": 76,
+            "kind": "model.intent",
+            "ref": {
+              "sha256": "b591592c387e7c9694305f306205b87a57bc12de8de49735bee8849f2c748398",
+              "bytes": 4916
+            },
+            "at": "2026-10-10T05:54:23.889Z"
+          },
+          "response": {
+            "seq": 117,
+            "kind": "model.response",
+            "ref": {
+              "sha256": "82c7f98dc74d59f58ddaa70bf7fab5f01da78a9d5c3a003655688160ec034432",
+              "bytes": 1162
+            },
+            "at": "2026-10-10T05:54:24.847Z"
+          },
+          "stopReason": "toolUse",
+          "usage": "reported",
+          "assistantText": [],
+          "tools": [
+            {
+              "name": "read",
+              "argumentsAsUntrustedData": {
+                "path": "greeting.ts"
+              }
+            },
+            {
+              "name": "read",
+              "argumentsAsUntrustedData": {
+                "path": "main.ts"
+              }
+            },
+            {
+              "name": "read",
+              "argumentsAsUntrustedData": {
+                "path": "package.json"
+              }
+            }
+          ]
+        },
+        {
+          "ordinal": 3,
+          "intent": {
+            "seq": 143,
+            "kind": "model.intent",
+            "ref": {
+              "sha256": "22937081a438613b9964b498c7dfe77221c4324cd455e27978d0725b079c7142",
+              "bytes": 6498
+            },
+            "at": "2026-10-10T05:54:24.993Z"
+          },
+          "response": {
+            "seq": 161,
+            "kind": "model.response",
+            "ref": {
+              "sha256": "7dc8bb53629a8324d4c2f6852aac87c3f20ce18193729066a8b1244287378f1e",
+              "bytes": 921
+            },
+            "at": "2026-10-10T05:54:25.880Z"
+          },
+          "stopReason": "toolUse",
+          "usage": "reported",
+          "assistantText": [],
+          "tools": [
+            {
+              "name": "read",
+              "argumentsAsUntrustedData": {
+                "path": "README.md"
+              }
+            }
+          ]
+        },
+        {
+          "ordinal": 4,
+          "intent": {
+            "seq": 171,
+            "kind": "model.intent",
+            "ref": {
+              "sha256": "42375417ad8308e5095eb4aa2b4748e911f9106e7215f229c78568177347b054",
+              "bytes": 7339
+            },
+            "at": "2026-10-10T05:54:25.940Z"
+          },
+          "response": {
+            "seq": 356,
+            "kind": "model.response",
+            "ref": {
+              "sha256": "bd102c960bde6472bcd5df51bb5e5e85abf36bf60aabe5a77ad25ae57bb54fc0",
+              "bytes": 1591
+            },
+            "at": "2026-10-10T05:54:28.293Z"
+          },
+          "stopReason": "toolUse",
+          "usage": "reported",
+          "assistantText": [
+            "Now I'll make the changes (the existing `greeting` export stays intact to preserve user changes)."
+          ],
+          "tools": [
+            {
+              "name": "edit",
+              "argumentsAsUntrustedData": {
+                "path": "greeting.ts",
+                "edits": [
+                  {
+                    "oldText": "export const greeting = () => \"Hello!\";",
+                    "newText": "export const greeting = () => \"Hello!\";\n\nexport const namedGreeting = (name: string) => `Hello, ${name}!`;"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "edit",
+              "argumentsAsUntrustedData": {
+                "path": "main.ts",
+                "edits": [
+                  {
+                    "oldText": "import {greeting} from './greeting.ts'; export const message = greeting();",
+                    "newText": "import {greeting, namedGreeting} from './greeting.ts'; export const message = greeting(); export const adaMessage = namedGreeting(\"Ada\");"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "ordinal": 5,
+          "intent": {
+            "seq": 372,
+            "kind": "model.intent",
+            "ref": {
+              "sha256": "2f48dcb76b375b0d74637236f12b736f153fa72689994438610a56b9e062f77c",
+              "bytes": 9923
+            },
+            "at": "2026-10-10T05:54:28.385Z"
+          },
+          "response": {
+            "seq": 442,
+            "kind": "model.response",
+            "ref": {
+              "sha256": "d7b1891f9bcfba941a05c02d4c5bc731fa8df0a98fdf7f981eb7264a8409ed1b",
+              "bytes": 1083
+            },
+            "at": "2026-10-10T05:54:30.060Z"
+          },
+          "stopReason": "toolUse",
+          "usage": "reported",
+          "assistantText": [],
+          "tools": [
+            {
+              "name": "bash",
+              "argumentsAsUntrustedData": {
+                "command": "cd \"$(pwd)\"; echo \"== greeting.ts ==\"; cat greeting.ts; echo; echo \"== main.ts ==\"; cat main.ts; echo; echo \"== git diff ==\"; git diff --stat 2>/dev/null || true"
+              }
+            }
+          ]
+        },
+        {
+          "ordinal": 6,
+          "intent": {
+            "seq": 453,
+            "kind": "model.intent",
+            "ref": {
+              "sha256": "daf453507068c8c0b4ed2ea699ba6bd97231cf5f0a9c56e2a52b79de788f9403",
+              "bytes": 11245
+            },
+            "at": "2026-10-10T05:54:30.123Z"
+          },
+          "response": {
+            "seq": 635,
+            "kind": "model.response",
+            "ref": {
+              "sha256": "9c38a112c532976b017de6b4d2741e8ca97709e1806a4df7ab514c5b044bf66b",
+              "bytes": 1610
+            },
+            "at": "2026-10-10T05:54:32.440Z"
+          },
+          "stopReason": "toolUse",
+          "usage": "reported",
+          "assistantText": [
+            "The task asked for a function *named* `greeting(name)`. But there's already an existing `greeting` export in the file (a pre-existing user change), and the task also says to preserve existing user changes. Those conflict, so let me verify what actually fulfills the literal requirement and test it."
+          ],
+          "tools": [
+            {
+              "name": "bash",
+              "argumentsAsUntrustedData": {
+                "command": "cd \"$(pwd)\"; cat > /tmp/check.mjs <<'EOF'\nconst g = await import('./greeting.ts');\nconsole.log('greeting type:', typeof g.greeting);\nconsole.log('greeting(\"Ada\") =>', g.greeting('Ada'));\nconst m = await import('./main.ts');\nconsole.log('main.message =>', m.message);\nEOF\nnode --experimental-strip-types /tmp/check.mjs 2>&1 | head -30"
+              }
+            }
+          ]
+        },
+        {
+          "ordinal": 7,
+          "intent": {
+            "seq": 645,
+            "kind": "model.intent",
+            "ref": {
+              "sha256": "e586b61e93bd47747881c6ffcedead9f5f572767d3cab48cacf6bab2606c93bb",
+              "bytes": 13484
+            },
+            "at": "2026-10-10T05:54:32.506Z"
+          },
+          "response": {
+            "seq": 815,
+            "kind": "model.response",
+            "ref": {
+              "sha256": "0b717fea43c81fd8da59ad7847e9dcf05792f628620f6ffd36e20f3f1470f43e",
+              "bytes": 1564
+            },
+            "at": "2026-10-10T05:54:35.042Z"
+          },
+          "stopReason": "toolUse",
+          "usage": "reported",
+          "assistantText": [
+            "/tmp is read-only. Let me test another way without creating files (to respect the two-file constraint)."
+          ],
+          "tools": [
+            {
+              "name": "bash",
+              "argumentsAsUntrustedData": {
+                "command": "cd \"$(pwd)\"; node --experimental-strip-types --input-type=module -e \"\nimport {greeting, namedGreeting} from './greeting.ts';\nimport {message, adaMessage} from './main.ts';\nconsole.log('greeting:', typeof greeting, JSON.stringify(greeting()));\nconsole.log('namedGreeting(Ada):', JSON.stringify(namedGreeting('Ada')));\nconsole.log('main message:', JSON.stringify(message));\nconsole.log('main adaMessage:', JSON.stringify(adaMessage));\nconsole.log('tick', JSON.stringify(namedGreeting('Bob')));\n\" 2>&1 | head -30"
+              }
+            }
+          ]
+        },
+        {
+          "ordinal": 8,
+          "intent": {
+            "seq": 824,
+            "kind": "model.intent",
+            "ref": {
+              "sha256": "429455663e9a37e62d56c969e703351b9ae7036e1782135eece082f73cdbc6d8",
+              "bytes": 15040
+            },
+            "at": "2026-10-10T05:54:35.137Z"
+          },
+          "response": {
+            "seq": 1062,
+            "kind": "model.response",
+            "ref": {
+              "sha256": "ac8ecdd9f660637f72264114dcdebb8f5f989e9a77914bfab075dffa2f2d6759",
+              "bytes": 1864
+            },
+            "at": "2026-10-10T05:54:37.718Z"
+          },
+          "stopReason": "toolUse",
+          "usage": "reported",
+          "assistantText": [
+            "The code works. Now about the naming — let me reconsider. The task literally says: *\"Add **named greeting(name)**\"* — meaning a function called `greeting` that takes a name. But `greeting` already exists as the old no-arg function. I preserved it as `namedGreeting`, which doesn't match the literal spec.\n\nLet me think about the right resolution. The requirement \"greeting must return `Hello, NAME!`\" is explicit. The cleanest reading: the exported `greeting` should become `greeting(name)` returning `Hello, NAME!`. The \"preserve existing user changes\" instruction is about not clobbering unrelated edits — but here the whole point of the task is to change `greeting`'s behavior, so the old no-arg body is exactly what's being replaced.\n\nI'll rename to make `greeting(name)` the actual API, matching the spec precisely."
+          ],
+          "tools": [
+            {
+              "name": "write",
+              "argumentsAsUntrustedData": {
+                "path": "greeting.ts",
+                "content": "export const greeting = (name: string) => `Hello, ${name}!`;\n"
+              }
+            }
+          ]
+        }
+      ],
+      "lastWrite": {
+        "source": {
+          "seq": 1066,
+          "kind": "file.write-result",
+          "ref": {
+            "sha256": "fab7c13882475cb223765d5a3b279526c1b3e9a72fdd994a82704e5d4fa9fd6b",
+            "bytes": 221
+          },
+          "at": "2026-10-10T05:54:37.742Z"
+        },
+        "data": {
+          "toolAttempt": {
+            "attemptId": "267c50ef-e187-425f-93a0-9ef43695fbd1",
+            "durableTaskId": 46
+          },
+          "acquired": {
+            "path": "/work/project/greeting.ts",
+            "ok": true,
+            "sha256": "087823927c237d65b49ca53dda65ad0bd2eb2b2a24bb3922484cb7734a35c953"
+          }
+        }
+      },
+      "ninthGenerationRequest": {
+        "seq": 1069,
+        "kind": "generation.request",
+        "ref": {
+          "sha256": "1c2a5ce3139cf327277d954c2090630b407f3d84193dcb3b4ea76c8874b34c0e",
+          "bytes": 16251
+        },
+        "at": "2026-10-10T05:54:37.761Z"
+      }
+    },
+    {
+      "id": "v1-live-r1-regression",
+      "caseId": "regression",
+      "originalOutcome": {
+        "status": "not-run",
+        "started": false,
+        "valid": false,
+        "reason": "cancelled",
+        "source": "e1:1060:f7bbbefd9fbf03272d2c8b431d70271406e7e249d623035dba68c6f5fcb1a3f9"
+      },
+      "originalGrade": null,
+      "hostRequests": 0,
+      "hostTokens": 0,
+      "fixedInput": "Verify the fixed mean.ts: empty input returns null, signed numbers average correctly. Do not change files when checks pass."
+    },
+    {
+      "id": "v1-live-r1-no-change",
+      "caseId": "no-change",
+      "originalOutcome": {
+        "status": "not-run",
+        "started": false,
+        "valid": false,
+        "reason": "cancelled",
+        "source": "e1:1061:77be8bef55d3d82fc5675407b7c2171f7af4dcb09378da27c037c5b5dd807838"
+      },
+      "originalGrade": null,
+      "hostRequests": 0,
+      "hostTokens": 0,
+      "fixedInput": "Analyze math.ts only. Do not modify any file. Return ONLY JSON with operator: subtraction, examples: [3,-5] for subtract(5,2) and subtract(-2,3), and changeNeeded: false."
+    }
+  ],
+  "accounting": {
+    "physicalHostDispatches": 15,
+    "http200": 15,
+    "knownSettlements": 15,
+    "knownTokens": 27499,
+    "unknownSettlements": 0,
+    "conservativeHostEstimateUsd": 0.032998799999999995,
+    "sdkCatalogEstimateUsd": 0.004293852,
+    "accountBilling": "NOT OBSERVED",
+    "combinationRule": "Host estimate and SDK catalog estimate describe the same 27499 tokens; never add them. Guest dispatch mirrors also must not be double-counted."
+  },
+  "originalsRead": 3167,
+  "realCredentialReads": 0,
+  "newProviderRequests": 0,
+  "productExecution": 0
+}
