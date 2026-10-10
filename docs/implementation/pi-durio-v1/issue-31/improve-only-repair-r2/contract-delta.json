@@ -1,0 +1,82 @@
+{
+  "schema": "pi-durio.issue-31.contract-delta.v1",
+  "at": "2026-10-10T09:56:05.244740+00:00",
+  "status": "PARTIAL_TECHNICAL_ACCEPTANCE_NOT_COMPLETE",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+    "bytes": 92984,
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "priorDelta": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/provider-terminal-repair-r1/contract-delta.json",
+    "bytes": 5283,
+    "sha256": "285089cd7833a39dfb8772cdd9f929ad7747f266eb60f25894cc1632c2c2ac21"
+  },
+  "method": "Additive observations only, preserving original contract/ACC/MET rows and all earlier execution identities, failures and reservations. No whole-contract automatic PASS.",
+  "observations": [
+    {
+      "ids": [
+        "S2",
+        "S4",
+        "E1",
+        "E2",
+        "E6",
+        "V6",
+        "V7",
+        "I1"
+      ],
+      "observation": "Current f26ae8f installed product completed 7 real DeepSeek physical requests in improve analysis; all returned known terminal usage, exactly one complete DONE each, 44466 tokens total. Normal runtime cleanup confirmed and storage closed. This is new real coverage of repaired terminal settlement.",
+      "remaining": "Remote termination remains unknown as recorded. Old host UNKNOWN reservation is retained. No attestation of immutable provider weights. Successful transport does not make the structured report or improve chain successful."
+    },
+    {
+      "ids": [
+        "I2",
+        "I5",
+        "I8",
+        "I9",
+        "I10",
+        "A3"
+      ],
+      "observation": "Official report v1-live-r3-improve revision aaaa4af52f3e34ecb287d99b27d861da3baf3d5c21b1a48987b9cd12daf0fd90 remains incomplete with zero candidates and selected items. Strict JSON rejection reproduced; diagnostic-only fenced extraction also fails the exact installed candidate validator. Raw proposals have unsupported or inaccurate statements; no candidate was reconstructed or executed.",
+      "remaining": "A valid real report with an eligible candidate is still needed, followed by explicit human choice, applicable protected validation, effect/writeback and reopen readback. Latest one-start is consumed; next prepared input revision needs its own approval."
+    },
+    {
+      "ids": [
+        "M2",
+        "M7",
+        "A2"
+      ],
+      "observation": "Cumulative host accounting now records 41 physical requests, 106026 known tokens, 1056768 retained UNKNOWN reservation and 1162794 charged upper tokens; conservative fixed-price upper estimate USD 1.3953528. SDK mirror not double counted.",
+      "remaining": "No account invoice observed; no new resource/timing measurement or general lightweight claim. The prior raw 952 remains diagnostic only and does not release reservation."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/report.json",
+      "bytes": 12036,
+      "sha256": "d0a1f3e9860b082fbcb0c127461ca4f0a830865aead08b883dd47317427e81d8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/requests.json",
+      "bytes": 32065,
+      "sha256": "8d7cf0228a0b2161f5ab877a405e74d52e466299ec987c1d76e5fce07d99103a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/cumulative-budget.json",
+      "bytes": 3927,
+      "sha256": "70ed19f4d827abdc020eada8fddeca2316ece0fee3617381d96b0eb7a6eadc28"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2-output/probe-result.json",
+      "bytes": 2588,
+      "sha256": "b88599097ceb636ac9bb0524fbac0f4156277fac758e2f67c190523e1ce3ecc0"
+    }
+  ],
+  "paidAuthorization": "LATEST_ONE_START_CONSUMED_NO_NEW_START_AUTHORIZED",
+  "remaining": [
+    "Real improve candidate/report and human choice/validation/effect/reopen",
+    "Full technical acceptance and disposition of final manual Terminal requirements",
+    "User Mac trial and explicit daily-use acceptance"
+  ]
+}

@@ -2,7 +2,7 @@
 
 面向 macOS arm64 / Node >=22.19.0 的本地 coding agent，复用 Pi runtime，保留运行原文，并由用户明确控制恢复、eval 和 improve。
 
-首版尚未完成全部验收。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#29 的本票适用验收完成；原生 Terminal 技术批次已有适用证据。四类真实 coding 场景已分别取得 PASS，原失败保留；补充真实 improve 暴露的用量结算缺陷 LIVE-USD3-R3-01 已在新候选 `f26ae8f` 修复并独立复核通过，原真实失败和 0 个候选保留，尚待新的真实 improve 批次。[真实结果和诊断](docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/postrun-readback/REPORT.md)与原 250 PASS / 1 FAIL、受影响修复记录分别保存。完整技术验收与本机日用接受尚未完成，不声明完整首版 ready for review。
+首版尚未完成全部验收。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#29 的本票适用验收完成；原生 Terminal 技术批次已有适用证据。四类真实 coding 场景已分别取得 PASS，原失败保留；补充真实 improve 暴露的用量结算缺陷 LIVE-USD3-R3-01 已在新候选 `f26ae8f` 修复并独立复核通过，原真实失败保留；当前候选的后续 improve 已完成 7 次请求且全部 known、正常清理，但正式报告因模型输出契约失败而保持 incomplete / 0 candidates，新分析输入已独立复核、待新的单次付费授权。[最新真实结果和诊断](docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/REPORT.md)与原 250 PASS / 1 FAIL、受影响修复记录分别保存。完整技术验收与本机日用接受尚未完成，不声明完整首版 ready for review。
 
 ## 安装与本地演示
 

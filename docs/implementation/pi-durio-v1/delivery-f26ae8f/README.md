@@ -8,6 +8,8 @@ LIVE-USD3-R3-01 已修复：完整raw SSE usage与DONE到达后，实际SDK正�
 
 新包19,222,769bytes，完整安装90,158,076logical bytes；自有product80文件/7,531物理行。见[新体积实测](../issue-31/provider-terminal-repair-r1/MEASUREMENT.md)。旧时序/RSS/native测量仍只属于原候选，不声称新候选资源等价。独立[适用性报告](../review/f26ae8f/evidence-applicability.json)核对四类旧PASS的25次raw响应及3次native合成预算响应，允许在原范围复用未改行为；不增添人工IME、复制、小窗口或日用接受结论。
 
-[当前22票状态](../status.md)与[合同补充](../issue-31/provider-terminal-repair-r1/CONTRACT-DELTA.md)保留未完成项：#30真实improve闭环，#31完整技术验收，#32用户自己的实际试用与明确接受。[新只 improve r2 批次](../issue-30/improve-only-repair-r2/README.md)已冻结并完成[独立两轴复核](../review/improve-only-repair-r2/independent-review.md)，42个离线检查通过；[新一次启动授权](../review/improve-only-repair-r2/authorization-request.md)仍待直接人类回复。原两次启动已消费，原UNKNOWN预算占额不释放，未来实际候选仍须人类选择。
+[当前22票状态](../status.md)与[最新合同增量](../issue-31/improve-only-repair-r2/CONTRACT-DELTA.md)保留未完成项。当前候选的[真实 improve r2](../issue-30/improve-only-repair-r2/postrun-readback/REPORT.md)已完成7次请求、44466tokens全部known且cleanup confirmed，但正式report因模型输出契约失败incomplete / 0 candidates；旧UNKNOWN与首败保留，未证实新的产品解析缺陷。累计保守占额USD1.3953528，非账户账单。
+
+[后继输入 revision](../issue-30/improve-output-contract-r1/README.md)保持同一产品和原fixture，仅明确输出合同，已完成[独立两轴复核](../review/improve-output-contract-r1/independent-review.md)。[新一次启动请求](../review/improve-output-contract-r1/authorization-request.md)尚未获准；新上限8请求/1200000tokens，累计估价上界USD2.8353528≤USD3。未来实际候选仍须人类选择；#30真实improve闭环、#31完整技术验收、#32用户本机试用与明确接受均未完成。
 
 全部Issue OPEN、PR Draft；main仍空仓bootstrap，没有产品main合并或release。原四个untracked、api.env ignore及旧dist完整保全；所需证据仍引用的worktree保留。大型清单和原始记录留在外部证据目录，`evidence-index.json`提供精确指纹。
