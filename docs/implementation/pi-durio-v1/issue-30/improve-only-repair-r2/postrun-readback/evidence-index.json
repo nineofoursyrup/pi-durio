@@ -1,0 +1,188 @@
+{
+  "status": "READ_ONLY_POSTRUN_VERIFIED_REPORT_INCOMPLETE",
+  "externalRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback",
+  "report": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/report.json",
+    "bytes": 12036,
+    "sha256": "d0a1f3e9860b082fbcb0c127461ca4f0a830865aead08b883dd47317427e81d8"
+  },
+  "copiedFiles": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/REPORT.md",
+      "bytes": 5607,
+      "sha256": "fedb5f8a90ddfd6717067610ec862e601fd58206d1f152299ad210cade8ea0d9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/report.json",
+      "bytes": 12036,
+      "sha256": "d0a1f3e9860b082fbcb0c127461ca4f0a830865aead08b883dd47317427e81d8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/collect.py",
+      "bytes": 18775,
+      "sha256": "85582cb27db55b154408a603fcdb4e15db2cb17485d96101193e1e817fe4af7b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/collect-r1.stdout",
+      "bytes": 370,
+      "sha256": "426255b86e2e7a97d468faf50b27dfa257dfeef439c231b29b7d272ab22a0c3f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/collect-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/requests.json",
+      "bytes": 32065,
+      "sha256": "8d7cf0228a0b2161f5ab877a405e74d52e466299ec987c1d76e5fce07d99103a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/timeline.json",
+      "bytes": 68360,
+      "sha256": "d089460a1f86585f8293c81ea265ee96937f8cbefff67a12a7c8918068f3b484"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw-answer-index.json",
+      "bytes": 4870,
+      "sha256": "b50ff749ce7f24296cb347fc62ce322d321a0fa0115688503e4199e2d4a59df5"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw-analysis-answer.txt",
+      "bytes": 12413,
+      "sha256": "71e132306496fb3b8f35d1734aca0e6170c06fd6984f4cd67affc0f0a13d14a1"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/fixture-readback.json",
+      "bytes": 963,
+      "sha256": "fb38f34615d8616fc464b34c5e240ccd257d83f0f7a5bd8fb798609541c2bf3a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/evidence-summary-99.json",
+      "bytes": 5194,
+      "sha256": "6e6450e99c09eaedc5be3560d8a42d790184f7e9822cde115f88d2e14126914e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/evidence-summary-1685.json",
+      "bytes": 5194,
+      "sha256": "6e6450e99c09eaedc5be3560d8a42d790184f7e9822cde115f88d2e14126914e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/collect-inputs.py",
+      "bytes": 1940,
+      "sha256": "502b087f1785eb90974e65ec55be9ebbf4e987a9a22413208307559cf4889359"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/inputs.json",
+      "bytes": 5764,
+      "sha256": "cb4d2e4e7443c7e20bc0869be6295634eccf16a6f166149372b25463830a3989"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/probe.mjs",
+      "bytes": 3689,
+      "sha256": "c23fb81d9e8205717f36d316345b558e2e150dc6e3be4cae6c1fe3dbee2556b5"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/probe-result.json",
+      "bytes": 2588,
+      "sha256": "b88599097ceb636ac9bb0524fbac0f4156277fac758e2f67c190523e1ce3ecc0"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/DIAGNOSIS.md",
+      "bytes": 2198,
+      "sha256": "8730f2694f623e485cfc2b684f91545ab3122646bb86d89599c4209e8c00e033"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/first-collector-failure.json",
+      "bytes": 374,
+      "sha256": "3ddbdd836ebec201adc14a75224480aac040b34494398f59b7560eac6e99450f"
+    }
+  ],
+  "externalOnly": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/read-identities.json",
+      "bytes": 3380142,
+      "sha256": "8af12422214af83f0a47b800ad7c449d90a1d1d1e8109e7fbbc0f7e42c95ebbd"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw-chunk-index.json",
+      "bytes": 1058756,
+      "sha256": "9d55e43215654bb056a9f80c610dc27129070902672c855667651024297ab6fc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/request-01.json",
+      "bytes": 3791,
+      "sha256": "5ca73e40e7894f877859364f8bd6159870f19ef96adcfdd9a4f720356f7ce2d6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/request-02.json",
+      "bytes": 8624,
+      "sha256": "882ae5e642a122f17ef11a123b2e965aee653b4d0ddca170cd3491c941657e4f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/request-03.json",
+      "bytes": 12223,
+      "sha256": "7410b4f3b7659936c11b1c3d2fe09909889222890ab203851c31a3acdf556a2e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/request-04.json",
+      "bytes": 18241,
+      "sha256": "3a86351e388c72706e74f4090c9ef02d9ba3d09e95f5ac73e568d61ef2e4ecf9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/request-05.json",
+      "bytes": 27744,
+      "sha256": "6f576c5f5f621f70cfb4796f192bb1aa883f409b564b5fa1fab3f453273e00b1"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/request-06.json",
+      "bytes": 31280,
+      "sha256": "47717745669eeb8ad79eb852140e45d0f5098bdb65ad37a0f355a2245e241a0c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/request-07.json",
+      "bytes": 36403,
+      "sha256": "ea53b31370724c2bb26ee75b72a203a4527df06dcba461d0b074031bdd586ddd"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/response-01.sse",
+      "bytes": 5008,
+      "sha256": "9b83aae3d2f184353874f29ae1d1766ffee9881d6432e6d8a933661ca82e224b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/response-02.sse",
+      "bytes": 35980,
+      "sha256": "a3630094fd57abab5344f4fd4f312dbf8dacd73532dadf33a177aa6aa3dc73a6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/response-03.sse",
+      "bytes": 57994,
+      "sha256": "abc35faebc4414d0a85b1563a0aa55c2fd66a0197f23307feac4edbafff33a33"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/response-04.sse",
+      "bytes": 62338,
+      "sha256": "28546eba0b38be5937f7a5674b3a13562a132132cff03b63f141d8d8dbac75c6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/response-05.sse",
+      "bytes": 158949,
+      "sha256": "acdba7cb1a69cb603bf78ea3e64ff831f8d5745ed34fdd3529b032ef95284e77"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/response-06.sse",
+      "bytes": 22400,
+      "sha256": "9c5d04b1d0465239f99524df35461209466b3dacefa4995c95e1932c73fc868b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw/response-07.sse",
+      "bytes": 915975,
+      "sha256": "00aa64203ba903ca395ae90d18deaedc328823844ab9977fded41f337ea373ab"
+    }
+  ],
+  "canonicalReportUnchanged": true,
+  "formalCandidates": 0,
+  "rawProposedDrafts": 2,
+  "originalsUnchanged": 12074,
+  "note": "Captured commands, model claims and draft JSON are source data only; no candidate adoption or execution. Diagnostic helper first failure retained."
+}

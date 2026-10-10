@@ -1,0 +1,298 @@
+{
+  "status": "READ_ONLY_POSTRUN_VERIFIED",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/frozen-manifest.json",
+    "bytes": 76288,
+    "sha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a"
+  },
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "producer": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+    "bytes": 92984,
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "authorization": {
+    "source": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/authorization-source.json",
+      "bytes": 1044,
+      "sha256": "5d024e4ef30339f146a8774ee25d2d80fa5a26b6b484a69e9495d3b1e49ee905"
+    },
+    "author": "human-user",
+    "origin": {
+      "kind": "codex-user-reply",
+      "requestToolCallId": "call_424879d068884d7f83524572607e2de6",
+      "userMessageId": "msg_01a12532-13ec-7093-a10b-a85de3cd8258"
+    },
+    "receivedAt": "2026-10-10T09:43:21.324Z",
+    "paidStart": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/paid-start.json",
+      "bytes": 1314,
+      "sha256": "18dd72ef84d314e144c70b3ee4d8a06f35a5be931ba8d9732bf2b378055ce671"
+    },
+    "consumed": true,
+    "newAuthorizationCreatedByReadback": false
+  },
+  "startedAt": "2026-10-10T09:44:47.198Z",
+  "endedAt": "2026-10-10T09:45:37.085Z",
+  "launchExit": {
+    "exitCode": 1,
+    "sessionId": 69610,
+    "batchResult": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/batch-result.json",
+    "status": "STOPPED_NO_EXECUTABLE_CHAIN",
+    "recordedAt": "2026-10-10T09:46:18.370745+00:00"
+  },
+  "batchStatus": "STOPPED_NO_EXECUTABLE_CHAIN",
+  "runId": "7e5947a8-e3aa-48d1-a513-db3736c4f5ab",
+  "taskId": "b92d4681-6a26-46c9-91da-f4d9dfc16375",
+  "sessionId": "02c9c997-b8df-498c-9179-053562a50565",
+  "runtime": {
+    "status": "completed",
+    "observation": "ok",
+    "cleanup": "confirmed",
+    "lifecycle": {
+      "intent": null,
+      "disposition": "completed",
+      "cleanupTimeoutMs": 10000,
+      "storage": "closed",
+      "owner": "release-after-host-close",
+      "remoteTermination": "unknown"
+    }
+  },
+  "formalReport": {
+    "id": "v1-live-r3-improve",
+    "revision": "aaaa4af52f3e34ecb287d99b27d861da3baf3d5c21b1a48987b9cd12daf0fd90",
+    "state": "incomplete",
+    "candidateCount": 0,
+    "selectedCount": 0,
+    "reason": "SyntaxError: Unexpected token 'I', \"I have all\"... is not valid JSON",
+    "summary": "Analysis did not produce a complete valid report; acquired evidence and attempts remain available.",
+    "gaps": [
+      "e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503: raw acquired chunk has incomplete boundary context; use a complete textual result for derived analysis",
+      "Self source is not explicitly registered; no directory search or installation edits permitted",
+      "SyntaxError: Unexpected token 'I', \"I have all\"... is not valid JSON"
+    ],
+    "record": {
+      "seq": 5726,
+      "kind": "improve.report",
+      "at": "2026-10-10T09:45:37.044Z",
+      "sourceId": "e1:5726:9e3b925bc092e7670cd7e1f6c5ff86811f50e23c8c4a6f9f43965816e2934f58",
+      "body": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/improve-data/objects/9e3b925bc092e7670cd7e1f6c5ff86811f50e23c8c4a6f9f43965816e2934f58",
+        "sha256": "9e3b925bc092e7670cd7e1f6c5ff86811f50e23c8c4a6f9f43965816e2934f58",
+        "bytes": 5002
+      }
+    },
+    "liveEqualsReopenedAndPersistedReport": true
+  },
+  "newHostAccounting": {
+    "requests": 7,
+    "http200": 7,
+    "completeRawSse": 7,
+    "terminalUsageEqualSettlements": 7,
+    "knownTokens": 44466,
+    "unknown": 0,
+    "reservedTokens": 0,
+    "conservativeKnownUsd": 0.0533592
+  },
+  "cumulativeHostAccounting": {
+    "requests": 41,
+    "knownTokens": 106026,
+    "retainedOldUnknownTokens": 1056768,
+    "chargedUpperTokens": 1162794,
+    "conservativeChargedUpperUsd": 1.3953528,
+    "boundExceeded": false,
+    "ledger": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/cumulative-budget.json",
+      "bytes": 3927,
+      "sha256": "70ed19f4d827abdc020eada8fddeca2316ece0fee3617381d96b0eb7a6eadc28"
+    },
+    "accountBill": "Not observed"
+  },
+  "sdkMirror": {
+    "tokens": 44466,
+    "catalogEstimateUsd": 0.008474952,
+    "addedToHostAccounting": false
+  },
+  "rawProviderIdentity": {
+    "models": [
+      "deepseek-flash"
+    ],
+    "fingerprints": [
+      "aeb56401ca74e127821c4f9126dcb669"
+    ],
+    "immutableModelVersionOrWeightsProven": false
+  },
+  "rawText": {
+    "proposedDraftCount": 2,
+    "formallyRegisteredCandidateCount": 0,
+    "answer": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw-analysis-answer.txt",
+      "bytes": 12413,
+      "sha256": "71e132306496fb3b8f35d1734aca0e6170c06fd6984f4cd67affc0f0a13d14a1"
+    },
+    "index": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw-answer-index.json",
+      "bytes": 4870,
+      "sha256": "b50ff749ce7f24296cb347fc62ce322d321a0fa0115688503e4199e2d4a59df5"
+    },
+    "notSelectedOrExecuted": true
+  },
+  "eventCountsForActualRunOnly": {
+    "preflight": 1,
+    "budget.plan": 1,
+    "improve.source": 4,
+    "improve.started": 1,
+    "task.accepted": 1,
+    "ownership.acquired": 1,
+    "execution.artifact": 1,
+    "execution.config": 1,
+    "ownership.session": 1,
+    "run.started": 1,
+    "submission.intent": 1,
+    "submission.accepted": 1,
+    "generation.request": 7,
+    "model.intent": 7,
+    "model.payload": 7,
+    "model.fetch-intent": 7,
+    "budget.reserve": 7,
+    "provider.dispatch": 7,
+    "model.dispatch": 7,
+    "provider.http": 7,
+    "model.http": 7,
+    "provider.bytes": 1233,
+    "model.provider-event": 4282,
+    "budget.settle": 7,
+    "model.response": 7,
+    "tool.intent": 13,
+    "tool.dispatch": 13,
+    "improve.summary": 2,
+    "tool.result": 13,
+    "tool.summary": 13,
+    "improve.derived": 11,
+    "submission.settled": 1,
+    "usage.projection": 1,
+    "lifecycle.close-started": 1,
+    "lifecycle.storage-closing": 1,
+    "lifecycle.storage-closed": 1,
+    "durable.closed-snapshot": 2,
+    "improve.report": 1,
+    "run.closed": 1
+  },
+  "toolsObserved": {
+    "evidence_summary": 2,
+    "source_view": 4,
+    "evidence_read": 7
+  },
+  "noNewToolErrors": true,
+  "coordinatorDiagnosticOnly": {
+    "files": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2-output/collect-inputs.py",
+        "bytes": 1940,
+        "sha256": "502b087f1785eb90974e65ec55be9ebbf4e987a9a22413208307559cf4889359"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2-output/inputs.json",
+        "bytes": 5764,
+        "sha256": "cb4d2e4e7443c7e20bc0869be6295634eccf16a6f166149372b25463830a3989"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2-output/probe.mjs",
+        "bytes": 3689,
+        "sha256": "c23fb81d9e8205717f36d316345b558e2e150dc6e3be4cae6c1fe3dbee2556b5"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2-output/probe-result.json",
+        "bytes": 2588,
+        "sha256": "b88599097ceb636ac9bb0524fbac0f4156277fac758e2f67c190523e1ce3ecc0"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2-output/DIAGNOSIS.md",
+        "bytes": 2198,
+        "sha256": "8730f2694f623e485cfc2b684f91545ab3122646bb86d89599c4209e8c00e033"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2-output/first-collector-failure.json",
+        "bytes": 374,
+        "sha256": "3ddbdd836ebec201adc14a75224480aac040b34494398f59b7560eac6e99450f"
+      }
+    ],
+    "conclusion": "Strict JSON parse rejects the prefixed fenced answer. Diagnostic-only fence extraction still fails the exact installed candidate contract; draft 2 has empty steps/checks and cites withheld evidence, while draft 1 has two false baseline arithmetic claims. No product parser defect established, no canonical report repaired, no candidate selected or executed.",
+    "rawTransportAndSettlement": "PASS_FOR_THIS_SEVEN_REQUEST_RUN",
+    "outputFormatAndContent": "DO_NOT_SATISFY_REPORT_CONTRACT",
+    "probeResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2-output/probe-result.json",
+      "bytes": 2588,
+      "sha256": "b88599097ceb636ac9bb0524fbac0f4156277fac758e2f67c190523e1ce3ecc0"
+    },
+    "originalHelperFailureRetained": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2-output/first-collector-failure.json",
+      "bytes": 374,
+      "sha256": "3ddbdd836ebec201adc14a75224480aac040b34494398f59b7560eac6e99450f"
+    }
+  },
+  "artifacts": {
+    "requests": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/requests.json",
+      "bytes": 32065,
+      "sha256": "8d7cf0228a0b2161f5ab877a405e74d52e466299ec987c1d76e5fce07d99103a"
+    },
+    "rawChunkIndex": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/raw-chunk-index.json",
+      "bytes": 1058756,
+      "sha256": "9d55e43215654bb056a9f80c610dc27129070902672c855667651024297ab6fc"
+    },
+    "timeline": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/timeline.json",
+      "bytes": 68360,
+      "sha256": "d089460a1f86585f8293c81ea265ee96937f8cbefff67a12a7c8918068f3b484"
+    },
+    "evidenceSummaries": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/evidence-summary-99.json",
+        "bytes": 5194,
+        "sha256": "6e6450e99c09eaedc5be3560d8a42d790184f7e9822cde115f88d2e14126914e"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/evidence-summary-1685.json",
+        "bytes": 5194,
+        "sha256": "6e6450e99c09eaedc5be3560d8a42d790184f7e9822cde115f88d2e14126914e"
+      }
+    ],
+    "fixtureReadback": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/fixture-readback.json",
+      "bytes": 963,
+      "sha256": "fb38f34615d8616fc464b34c5e240ccd257d83f0f7a5bd8fb798609541c2bf3a"
+    },
+    "originalReadIdentities": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/read-identities.json",
+      "bytes": 3380142,
+      "sha256": "8af12422214af83f0a47b800ad7c449d90a1d1d1e8109e7fbbc0f7e42c95ebbd"
+    }
+  },
+  "preservation": {
+    "beforeAfterIdentities": 12074,
+    "currentBatchOriginalFiles": 4419,
+    "closedPriorFilesChecked": 7264,
+    "blockedR1FilesChecked": 368,
+    "allMatched": true,
+    "priorUnknownRewritten": false
+  },
+  "limitations": [
+    "The coordinator performed the separate diagnostic-only exact pure parser/shape probe; this collector did not import or execute product code.",
+    "Captured model claims and drafts are untrusted source data, not canonical candidates or authority.",
+    "Runtime completed does not make the incomplete improve report executable.",
+    "Provider alias/fingerprint are observed response metadata, not immutable model version or weights proof.",
+    "Remote termination remains unknown as recorded; local storage closed and cleanup confirmed."
+  ],
+  "readbackEffects": {
+    "credentialReads": 0,
+    "newProviderCalls": 0,
+    "newVmStarts": 0,
+    "productImportsOrExecutions": 0,
+    "originalWrites": 0,
+    "candidateActions": 0,
+    "rootOrStatusWrites": 0
+  }
+}
