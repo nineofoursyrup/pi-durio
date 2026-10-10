@@ -1,0 +1,69 @@
+{
+  "status": "REPAIRED_FOR_SUCCESSOR_FREEZE",
+  "previousManifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/frozen-manifest.json",
+    "bytes": 74214,
+    "sha256": "9a948eb693a20f5ca4d17443152fff0639465160628432d8d1f2eaa6b8cb1f8e"
+  },
+  "finding1": {
+    "behaviorBefore": "Final cumulative-budget save/readback failure retained AWAITING_ACTUAL_CANDIDATE_SELECTION and exit 0.",
+    "behaviorAfter": "STOPPED_BUDGET_RECEIPT_FAILURE, budgetCompleteness unknown, exit 1; retain paid-start, analysis, reopened report and exact failure; no repeat or candidate execution.",
+    "independentProbe": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/reviewer-ledger-failure-probe.json",
+      "bytes": 4181,
+      "sha256": "1fdd8f28e039e61cf07c963886a6997d06c4828b2e48a94152f19ccc05ada26a"
+    }
+  },
+  "finding2": {
+    "behaviorBefore": "Authorization source lacked explicit direct-human author and request call binding.",
+    "behaviorAfter": "Require author human-user, source.kind codex-user-reply and nonempty source.requestToolCallId together with existing exact reply/time/manifest hash; coordinator records actual direct reply, no identity authentication system.",
+    "templates": "No actual call id, reply, time or grant written."
+  },
+  "candidateUnchanged": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "budgetUnchanged": {
+    "maxRequests": 8,
+    "maxTokens": 1200000,
+    "cumulativeMaxRequests": 42,
+    "cumulativeMaxTokens": 2318328,
+    "usdCeiling": 3,
+    "grantToStartMs": 86400000,
+    "activeMs": 3600000,
+    "starts": 1
+  },
+  "checks": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/review-repair-check-r1.json",
+    "bytes": 4973,
+    "sha256": "80d548a7e9344119ca981d2918972fbfbe9f10eac942e142b294874193dac732"
+  },
+  "reuse": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/check-reuse.json",
+    "bytes": 5339,
+    "sha256": "a46f020d647358990486e30ee93e3dfa4f3eeea123fe6cadbe51ca85ffe58293"
+  },
+  "r1Preserved": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/retained-r1-identities.json",
+    "bytes": 103621,
+    "sha256": "2b0edb5323cb9fe6cb38a953c261115223faf10292be6169657a61dcf5c49cbf"
+  },
+  "freshSeedFiles": 296,
+  "credentialReads": 0,
+  "providerRequests": 0,
+  "restrictedVmStarts": 0,
+  "priorIndependentReview": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/independent-review.json",
+      "bytes": 18464,
+      "sha256": "873680e102700a4321210235bf3960343ac4a4c1f28a219e09cea84bc0d2b5a9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/independent-review.md",
+      "bytes": 6460,
+      "sha256": "af863c12ad4df734e6d737bc378682c21874fde5235b8b6c34f7388aa4304f46"
+    }
+  ],
+  "newAdmissionSuite": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/admission-check-r1.json",
+    "bytes": 99079,
+    "sha256": "8288ca5aa1a17ce637db5d82a8b2cbe6eb50e972bb975ee6415bf2b115adf697"
+  }
+}

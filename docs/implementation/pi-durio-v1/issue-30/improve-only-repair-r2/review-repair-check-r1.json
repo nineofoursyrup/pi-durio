@@ -1,0 +1,149 @@
+{
+  "status": "PASS",
+  "cases": 8,
+  "scope": "Exact source in node:vm module sandbox; candidate/grant/review records, API and receipts are artificial memory-only fixtures. No real repaired candidate or authorization implied.",
+  "results": [
+    {
+      "name": "final-ledger-write-failure-stops-and-retains-results",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED_BUDGET_RECEIPT_FAILURE",
+      "exitCode": 1,
+      "retainedAnalysis": true,
+      "retainedPaidStart": true,
+      "cumulativeBudgetSaved": false,
+      "budgetCompleteness": "unknown",
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "final-ledger-readback-failure-stops-and-retains-results",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED_BUDGET_RECEIPT_FAILURE",
+      "exitCode": 1,
+      "retainedAnalysis": true,
+      "retainedPaidStart": true,
+      "cumulativeBudgetSaved": true,
+      "budgetCompleteness": "unknown",
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "missing-author-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "HUMAN_USER_AUTHORIZATION_REQUIRED\n+ actual - expected\n\n+ undefined\n- 'human-user'\n",
+      "effects": [],
+      "resultStatus": null,
+      "exitCode": 0,
+      "retainedAnalysis": false,
+      "retainedPaidStart": false,
+      "cumulativeBudgetSaved": false,
+      "budgetCompleteness": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "assistant-author-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "HUMAN_USER_AUTHORIZATION_REQUIRED\n+ actual - expected\n\n+ 'assistant'\n- 'human-user'\n",
+      "effects": [],
+      "resultStatus": null,
+      "exitCode": 0,
+      "retainedAnalysis": false,
+      "retainedPaidStart": false,
+      "cumulativeBudgetSaved": false,
+      "budgetCompleteness": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "missing-source-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "DIRECT_USER_REPLY_SOURCE_REQUIRED\n+ actual - expected\n\n+ undefined\n- 'codex-user-reply'\n",
+      "effects": [],
+      "resultStatus": null,
+      "exitCode": 0,
+      "retainedAnalysis": false,
+      "retainedPaidStart": false,
+      "cumulativeBudgetSaved": false,
+      "budgetCompleteness": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "agent-source-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "DIRECT_USER_REPLY_SOURCE_REQUIRED\n+ actual - expected\n\n+ 'codex-agent-message'\n- 'codex-user-reply'\n         ^\n",
+      "effects": [],
+      "resultStatus": null,
+      "exitCode": 0,
+      "retainedAnalysis": false,
+      "retainedPaidStart": false,
+      "cumulativeBudgetSaved": false,
+      "budgetCompleteness": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "missing-request-call-id-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "AUTHORIZATION_REQUEST_TOOL_CALL_REQUIRED",
+      "effects": [],
+      "resultStatus": null,
+      "exitCode": 0,
+      "retainedAnalysis": false,
+      "retainedPaidStart": false,
+      "cumulativeBudgetSaved": false,
+      "budgetCompleteness": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "empty-request-call-id-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "AUTHORIZATION_REQUEST_TOOL_CALL_REQUIRED",
+      "effects": [],
+      "resultStatus": null,
+      "exitCode": 0,
+      "retainedAnalysis": false,
+      "retainedPaidStart": false,
+      "cumulativeBudgetSaved": false,
+      "budgetCompleteness": null,
+      "actualRunnerWrites": 0
+    }
+  ],
+  "realCredentialReads": 0,
+  "newProviderRequests": 0,
+  "newRestrictedVmStarts": 0,
+  "actualRunnerWrites": 0,
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/preflight.mjs",
+      "sha256": "4926e7978cf23eb642dc2ac78f61f68fe6d2c77f6f674a3571be3e0992a69bdc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/ledger.mjs",
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/run.mjs",
+      "sha256": "c2eb991f269fc3ccd6939da0f92135035f0956de3cfd013ec9d32bd3ef976a2c"
+    }
+  ]
+}
