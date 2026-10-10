@@ -1052,7 +1052,13 @@
         "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md",
         "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/report.json",
         "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/NEXT-BATCH-PLAN.md",
-        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/plan.json"
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/plan.json",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/README.md",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/frozen-manifest.json",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/checks.json",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/independent-review.json",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/independent-review-summary.md",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/authorization-request.md"
       ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T234529Z/issue-30.json",
       "preparation": {
@@ -1131,7 +1137,7 @@
         "requestedAt": "2026-10-09T23:52:52.841212+00:00",
         "current_applicability": "SUPERSEDED_BY_USER_USD3_CAP; no start authorized at old USD5 limits"
       },
-      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/30#issuecomment-6091313696",
+      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/30#issuecomment-6094561436",
       "user_budget_reply": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/user-budget-20261010.json",
       "credential_readiness": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/credential-readiness-20261010.json",
       "usd3_preparation": {
@@ -1210,6 +1216,37 @@
         },
         "integrated_sha": "005a2380a0e6895bf18bc5475437b0c07cc84f8e",
         "preparationStatus": "MATERIALIZING_NOT_AUTHORIZED_NOT_RUN"
+      },
+      "supplement": {
+        "status": "FROZEN_OFFLINE_CHECKS_AND_INDEPENDENT_REVIEW_PASS_PENDING_NEW_HUMAN_ONE_START",
+        "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/frozen-manifest.json",
+        "sha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e",
+        "newRequests": 32,
+        "newTokens": 2372501,
+        "cumulativeRequests": 47,
+        "cumulativeTokens": 2400000,
+        "cumulativeConservativeUsd": 2.88,
+        "usdCeiling": 3,
+        "reviewer": "/root/review_usd3_supplement",
+        "paidStartAuthorized": false,
+        "credentialReads": 0,
+        "providerRequests": 0,
+        "review": {
+          "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/r3/review.json",
+          "bytes": 5937,
+          "sha256": "a528593a75496b1e603adde3e2b4345073bc407d8969cae9fe31b70fd29a73a6"
+        },
+        "integrated_sha": "091b3d366a81dadb18fca53cb7f27892969832ae",
+        "authorizationRequest": {
+          "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/authorization-request.md",
+          "bytes": 1849,
+          "sha256": "daeb93512025ec54c09d529a6d98b4a580ed37631040fedd9f183ec845c1e892"
+        },
+        "currentPublicDocumentationCheck": {
+          "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-r3-prelaunch-20261010/observation.json",
+          "bytes": 1516,
+          "sha256": "c845ab782222039fc2c661b076ab4f8d14db682e59cbed2efa3a91d2157f6d2d"
+        }
       }
     },
     "31": {
@@ -1288,7 +1325,7 @@
         "failure": "composition analysis IMPROVE_REPORT_NOT_FOUND before async report published; harness-only targeted repair preparing; readonly not run",
         "passed_scope": "3 idle and long-session62tasks/124synthetic/0real; terminal restored; no human acceptance"
       },
-      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/31#issuecomment-6091314301",
+      "latest_progress_comment": "https://github.com/nineofoursyrup/pi-durio/issues/31#issuecomment-6094563072",
       "native_first_readback": {
         "summary": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-summary.json",
         "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-report.md",
@@ -1341,7 +1378,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "61b5934e1adc805310a1afcc6cad749dd075d5d2",
+  "integration_tip": "091b3d366a81dadb18fca53cb7f27892969832ae",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -1351,8 +1388,8 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-10T06:14:15.020386+00:00",
-  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/review/9aed1af/publication-final/readback.json",
+  "updated_at": "2026-10-10T06:31:26.204186+00:00",
+  "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/review/usd3/publication-r1/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
       "commit": "01f2d3a562b12a9917b3db1dc8111ea2717d386f",
@@ -1405,7 +1442,7 @@
       "acceptedMerge": "a35cb3b672f412d0e6330b43ad947c24a085b9b1"
     }
   },
-  "root_write_owner": "/root coordinator after #30 diagnosis and #31 r2 index serial merges",
+  "root_write_owner": "/root coordinator; r3 merge complete",
   "heavy_validation_window": {
     "owner": "NONE_ACTIVE",
     "scope": "paid one-start batch STOPPED; no implicit repeat; native followup complete; independent readonly diagnosis/docs continue"
@@ -1600,28 +1637,31 @@
     }
   },
   "publication": {
-    "status": "NEW_EVIDENCE_LOCAL_PENDING_PUBLICATION",
-    "documentationTip": "14787f0dfaadf69b6c235e5bb650d9f923a5d5a1",
+    "status": "R3_SUPPLEMENT_LOCAL_PENDING_PUBLICATION",
+    "documentationTip": "370d91875bd00bf25606fe469fb63ae89423f124",
     "sourceCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
-    "readback": "/Users/nineofour/pi-durio-v1-run/review/9aed1af/publication-final/readback.json",
-    "bodySha256": "194de4b66a18aeb06c2ef149ba7d2e11d345fc34455984c15843bbd4054167c6",
+    "readback": "/Users/nineofour/pi-durio-v1-run/review/usd3/publication-r1/readback.json",
+    "bodySha256": "cf89278cea2f1754880c821ce97d0d74403294a89606810bf953b1ff0792bbc3",
     "draft": true,
     "mainSha": "25d311616136766b37c0274f3f490ec1105f9592",
     "ci": {
-      "statusCheckRollup": null,
-      "trackedWorkflowPaths": [],
-      "interpretation": "No remote CI result is inferred when no check/workflow is present; local candidate-bound evidence is reported separately."
+      "statusCheckRollup": [],
+      "interpretation": "No remote CI PASS inferred from absent checks; local candidate-bound checks reported separately."
     }
   },
   "pending_user_inputs": {
     "paidBatch": {
-      "status": "ONE_START_CONSUMED_STOPPED",
-      "manifest": "evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
-      "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486",
-      "grantReceived": true,
-      "credentialSource": "/Users/nineofour/Durio/api.env; user explicitly permitted; value never retained",
-      "result": "evidence/issue-30/final-9aed1af-usd3-r2/batch-result.json",
-      "nextAction": "Diagnostic complete; materialize and independently review supplement harness before requesting new one-start authorization"
+      "status": "REQUESTED_PENDING_NEW_HUMAN_ONE_START",
+      "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/frozen-manifest.json",
+      "sha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e",
+      "newRequests": 32,
+      "newTokens": 2372501,
+      "cumulativeRequests": 47,
+      "cumulativeTokens": 2400000,
+      "usdCeiling": 3,
+      "credentialSource": "standing permission: /Users/nineofour/Durio/api.env",
+      "grantReceived": false,
+      "requiredReason": "Previous frozen one-start was consumed and stopped; new exact supplemental start requires a new human reply"
     },
     "nativeBatch": {
       "status": "COMPLETED_WITH_RETAINED_FIRST_FAILURE_AND_SUCCESSFUL_TARGETED_FOLLOWUP",

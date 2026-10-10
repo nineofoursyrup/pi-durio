@@ -8,7 +8,7 @@
 
 - [Spec 评审](review/9aed1af/spec-review.md) · [Standards 评审](review/9aed1af/standards-review.md) · [当前检查 gate](review/9aed1af/applicable-check-gate.json)。
 - [本地测量](issue-31/final-9aed1af/partial-report.md) · [原生 Terminal 首批](issue-31/final-9aed1af/native-report.md) · [定向补测](issue-31/final-9aed1af/native-followup-r1-report.md) · [当前 62 合同 / 22 ACC / 7 MET 索引](issue-31/final-9aed1af/contract-evidence-index-r2.md)。
-- [真实首批诊断](issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md) · [待落实的补充方案](issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/NEXT-BATCH-PLAN.md)。
+- [真实首批诊断](issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md) · [已准备并复核的补充批次启动申请](issue-30/final-9aed1af-usd3-r3/authorization-request.md)。
 - [安装及 npm 兼容性限制](delivery-9aed1af/npm-diagnosis-REPORT.md) · [完整交付边界](delivery-9aed1af/README.md)。
 
 | 票 | 实际状态 | 前置票 | 主要证据 / 未完成项 |
@@ -42,4 +42,4 @@
 
 原生首批三个 idle 和 60+2 个任务测量完成；组合步骤因 harness 在异步报告生成前读取而失败，原件保留。定向补测只修复该轮询，并完成 compaction、合成 improve 选择、隔离回归、fixture 正式写回、下一任务读取，以及 30 次查询和 5 次 1 MiB 完整导出。它们不代替真实 improve 或 #32 人工接受。
 
-当前前沿：#30 首失败诊断已完成，正在把补充方案落实为新的冻结批次和启动检查。新批次只执行剩余三例及 improve，新增最多 32 请求，连同原 15 次最多 47 次；新增最多 2,372,501 token，连同已用量累计 240 万 token / 保守估算 USD 2.88。原 USD 3 上限和许可凭据来源继续沿用，实际未来 improve 候选仍须用户具体选择。准备和独立复核完成后，再请求新的一次启动；原批次禁止自动重复，#31/#32 不能提前记为完成。
+当前前沿：补充批次 `07ed36fd…0251e` 已冻结，35 项新增离线检查通过，独立 Spec / Standards 均 0 硬问题。它只执行剩余三例及 improve，新增最多 32 请求，连同原 15 次最多 47 次；新增最多 2,372,501 token，连同已用量累计 240 万 token / 保守估算 USD 2.88。原 USD 3 上限和许可凭据来源继续沿用。新的单次启动申请已发出，尚未获批或执行；实际未来 improve 候选仍须用户具体选择。原批次禁止自动重复，#31/#32 不能提前记为完成。

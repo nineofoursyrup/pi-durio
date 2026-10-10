@@ -1,0 +1,35 @@
+{
+  "at": "2026-10-10T06:28:52.454439+00:00",
+  "scope": "Public documentation recheck only; no authenticated API or account billing request",
+  "provider": "deepseek",
+  "modelAlias": "deepseek-flash",
+  "displayVersion": "DeepSeek-V4.1-Flash",
+  "maximumListedUsdPerMillionAnyClass": 1.2,
+  "contextTokens": 1048576,
+  "maxOutputTokens": 393216,
+  "sources": [
+    {
+      "name": "pricing",
+      "url": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "status": 200,
+      "bytes": 23982,
+      "sha256": "210f102275ccf1a6542f08a3bc9e4b4c7c83278cb74b35217bffa112df6363b2",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-r3-prelaunch-20261010/pricing.html",
+      "requestedAt": "2026-10-10T06:28:28.539153+00:00"
+    },
+    {
+      "name": "models",
+      "url": "https://api-docs.deepseek.com/api/list-models/",
+      "status": 200,
+      "bytes": 39323,
+      "sha256": "41551c3c498a93b6e6459eaeee89829940ca8acf999b24436a38a2231c7e091b",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-r3-prelaunch-20261010/models.html",
+      "requestedAt": "2026-10-10T06:28:28.624914+00:00"
+    }
+  ],
+  "matchesFrozenR3Bounds": true,
+  "frozenManifestSha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e",
+  "newRequests": 0,
+  "credentialReads": 0,
+  "limits": "Documentation examples and public pricing are observations, not authenticated availability, immutable weight identity, account invoice or account-level spend cap"
+}
