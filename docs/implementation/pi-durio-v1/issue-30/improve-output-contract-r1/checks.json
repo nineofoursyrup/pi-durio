@@ -1,0 +1,62 @@
+{
+  "status": "PASS_OFFLINE_PREPARATION_PENDING_INDEPENDENT_REVIEW_AND_FRESH_GRANT",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/frozen-manifest.json",
+    "bytes": 77149,
+    "sha256": "809aa5350c2d1d3cd3fac9281210ce41e2ff643e889a565bd15f25ae02e30856"
+  },
+  "newChecks": [
+    {
+      "identity": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/input-check-r1.json",
+        "bytes": 12959,
+        "sha256": "554317e5824f6dde99d78416ef2bbab90ae5c5207e6be2132fe7b5ea7ec06da0"
+      },
+      "cases": 12,
+      "scope": "Changed purpose, IDs, latest closed ledger and original rejection chain, obsolete authorization, new unknown accounting"
+    },
+    {
+      "identity": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/final-preflight-check-r1.json",
+        "bytes": 1407,
+        "sha256": "9740835ddbed8fa195b814133ff3aa7f162478457e6ccece69072530876d1346"
+      },
+      "cases": 1,
+      "scope": "Full exact frozen inputs with memory-only authorization; 12110 real file references checked"
+    },
+    {
+      "identity": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/final-denials-r1.json",
+        "bytes": 814,
+        "sha256": "f16fa4c58101e163f52642c8b8d651b4c04096dff813a4fc812923e0621138fb"
+      },
+      "cases": 3,
+      "scope": "Actual false-pinned, missing grant and exact wrapper missing-grant denied before credentials"
+    }
+  ],
+  "totalNewCases": 16,
+  "reuse": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/check-reuse.json",
+    "bytes": 3817,
+    "sha256": "883bf8241886f3475428a0f194eacffc911f8ca0433c9ff1b52e08a967f07bff"
+  },
+  "product": {
+    "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "unchanged": true,
+    "newProductTests": 0,
+    "newPackOrInstallation": false
+  },
+  "priorOriginals": "12074 original identities unchanged after preparation, freezing and checks",
+  "staticChecks": {
+    "nodeSyntax": "PASS",
+    "pythonAst": "PASS",
+    "json": "PASS",
+    "allFrozenFileReferences": "PASS"
+  },
+  "newIndependentReview": "PENDING",
+  "actualGrant": "ABSENT",
+  "credentialReads": 0,
+  "newProviderCalls": 0,
+  "newVmStarts": 0,
+  "candidateActions": 0
+}

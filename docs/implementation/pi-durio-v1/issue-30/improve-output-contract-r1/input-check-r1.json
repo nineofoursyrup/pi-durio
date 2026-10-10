@@ -1,0 +1,322 @@
+{
+  "status": "PASS",
+  "cases": 12,
+  "scope": "Exact source in node:vm module sandbox; candidate/grant/review records, API and receipts are artificial memory-only fixtures. Fixed product metadata are read-only; no real authorization or product execution implied.",
+  "results": [
+    {
+      "name": "valid-confirmed-input-and-latest-cumulative-accounting",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "AWAITING_ACTUAL_CANDIDATE_SELECTION",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 41,
+          "knownTokens": 106026,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 952,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 42,
+        "requestCompleteness": "known",
+        "knownTokens": 106978,
+        "reservedTokens": 1056768,
+        "chargedUpperTokens": 1163746,
+        "conservativeKnownUsd": 0.1283736,
+        "conservativeChargedUpperUsd": 1.3964952,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 49,
+          "cumulativeMaxTokens": 2362794,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "old-r2-batch-grant-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "GRANT_BATCH_MISMATCH\n+ actual - expected\n\n+ 'pi-durio-v1-live-r3-improve-repair'\n- 'pi-durio-v1-live-r4-improve-report'\n                     ^\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "old-r2-authorization-kind-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "NEW_AUTHORIZATION_KIND_REQUIRED\n+ actual - expected\n\n+ 'improve-repair-one-start'\n- 'improve-output-contract-one-start'\n           ^\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "consumed-r2-source-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "LATEST_AUTHORIZATION_NOT_REUSABLE",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "grant-before-latest-closed-run-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "NEW_GRANT_EXPIRED_OR_INVALID",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "older-cumulative-ledger-not-latest-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "LATEST_LEDGER_REQUIRED\n+ actual - expected\n\n+ '07e58fa36dc54441da52658e2eed29a0ad35eff233b8b2817bc28b2fe1e3b997'\n- '70ed19f4d827abdc020eada8fddeca2316ece0fee3617381d96b0eb7a6eadc28'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "raw952-cannot-replace-old-unknown",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "LATEST_LEDGER_REQUIRED\n+ actual - expected\n\n+ 'fe9e4b78a0e585db147c8313bd4e49faa5c6a03929f017e4c1940468b492c181'\n- '70ed19f4d827abdc020eada8fddeca2316ece0fee3617381d96b0eb7a6eadc28'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "raw-draft-cannot-be-promoted",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "Expected values to be strictly equal:\n\n1 !== 0\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "purpose-drift-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "EXACT_APPROVED_PURPOSE_REQUIRED\n+ actual - expected\n\n+ '\"Return a candidate regardless of evidence.\"\\n'\n- 'Analyze the retained failed clamp check and the explicitly registered project sources. Explain only defects supported by acquired evidence. Only clamp.ts may be proposed for change; README.md, check.mjs and package.json are protected. No performance improvement is claimed. Return exactly one JSON object matching the supplied report and Candidate contracts, with no prose before or after it and no Markdown fences. Return zero candidates when evidence is insufficient, or at most one supported minimal project repair candidate with nonempty executable steps, explicit allowed scope and nonempty protected validation checks. Put missing or withheld evidence in report.gaps and candidate gaps, not in a gap-only candidate; never cite withheld body text as an acquired factual source. Facts and successCounterexamples must use actual acquired source IDs and accurately supported claims; distinguish static reasoning from observed execution. Do not invent a successful counterexample when none was acquired; use an empty successCounterexamples list and record the gap. activation.writeback describes intended future writeback only: a supported project repair that requires a file change may declare it true, conditional on a later explicit human choice and protected validation passing. This declaration does not authorize any current change. This is analysis only: do not execute, validate, activate or write back a candidate. Preserve the supplied field types and use report-local dependencies/conflicts only when supported.\\n'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "protected-scope-widening-denied",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "PROPOSAL_NOT_EXACT_INPUT_REVISION\n+ actual - expected\n... Skipped lines\n\n  {\n    aggregate: {\n      conservativeUsdUpper: 2.8353528,\n      cumulativeChargedTokens: 2362794,\n      cumulativeRequests: 49,\n...\n              'package.json',\n+             'other.ts'\n            ]\n          }\n        ]\n      },\n      seed: {\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "new-unknown-keeps-old-reservation-and-stops",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED_BUDGET_INCOMPLETE_OR_EXCEEDED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 41,
+          "knownTokens": 106026,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 0,
+            "reservedTokens": 1056768,
+            "unknown": 1,
+            "completeness": "unknown",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 42,
+        "requestCompleteness": "known",
+        "knownTokens": 106026,
+        "reservedTokens": 2113536,
+        "chargedUpperTokens": 2219562,
+        "conservativeKnownUsd": 0.1272312,
+        "conservativeChargedUpperUsd": 2.6634744,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 49,
+          "cumulativeMaxTokens": 2362794,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "unavailable-new-ledger-holds-full-stage",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED_BUDGET_INCOMPLETE_OR_EXCEEDED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 41,
+          "knownTokens": 106026,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": null,
+            "dispatches": null,
+            "knownTokens": 0,
+            "reservedTokens": 1200000,
+            "unknown": null,
+            "completeness": "unavailable-full-stage-held",
+            "violation": null,
+            "error": "Error: OFFLINE_READ_GAP",
+            "warning": "Hold the full authorized stage allowance; unavailable evidence is never treated as zero usage or permission to resume"
+          }
+        ],
+        "knownRequests": 41,
+        "requestCompleteness": "unknown",
+        "knownTokens": 106026,
+        "reservedTokens": 2256768,
+        "chargedUpperTokens": 2362794,
+        "conservativeKnownUsd": 0.1272312,
+        "conservativeChargedUpperUsd": 2.8353528,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 49,
+          "cumulativeMaxTokens": 2362794,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    }
+  ],
+  "realCredentialReads": 0,
+  "newProviderRequests": 0,
+  "newRestrictedVmStarts": 0,
+  "actualRunnerWrites": 0,
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/harness/preflight.mjs",
+      "sha256": "7f1589074f31de5b8e030256b5a003e78587dc621dabb84857b3db65b83d0452"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/harness/ledger.mjs",
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/harness/run.mjs",
+      "sha256": "dd37dad031bb87757a91357c75abe041d5a29804189d15cf433357c76a02f456"
+    }
+  ]
+}
