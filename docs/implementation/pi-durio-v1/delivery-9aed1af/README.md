@@ -24,10 +24,10 @@ npm 11.19.1 两项失败独立保留：bundled `file:` 来源元数据使 `npm l
 
 ## 未完成和保全
 
-- #30：当前付费清单已冻结，凭据读取及真实请求为 0；需明确批次授权和许可凭据来源，实际 improve 候选生成后还需具体选择。
-- #31：最终原生 Terminal 批次需用户启动；真实 #30 与完整技术验收仍缺失。
+- #30：获授权的 USD 3 批次已启动一次并按失败条件停止；15 次真实 HTTP 请求、27,499 token，按固定最高单价估算 USD 0.0329988（未查账户账单）。local-fix PASS，multi-file 达到单任务 8 次请求限制后未完成，其余两例及真实 improve 未运行。原批次不可自动重复，实际 improve 候选生成后仍需具体选择。
+- #31：最终原生 Terminal 的三个 idle、60+2 任务、组合流程、30 次查询和 5 次导出已有适用证据；首批 harness 轮询失败与后续定向补测分别保留，见[原生结果](../issue-31/final-9aed1af/native-followup-r1-report.md)。整体因真实 #30 未完成仍为 PARTIAL。
 - #32：只能由用户在自己的 Mac 实际试用并明确接受；当前 NOT RUN。
 - 全部 Issue OPEN，Draft PR 保持 Draft，main 仅原空仓 bootstrap；没有产品 main merge 或 release。
-- 29 个本轮临时 worktree 均已集成、tracked clean。它们仍可能被 immutable producer/compiled/evidence 路径引用，本次保留，未删除原始证据、未集成或无关材料。审计见 `worktree-preservation-audit.json`。
+- 早期 29 个本轮临时 worktree 的已集成、tracked clean 状态保留在原 `worktree-preservation-audit.json`；后续证据 worktree 的身份由各次 merge receipt 单独记录。它们仍可能被 immutable producer/compiled/evidence 路径引用，本次保留，未删除原始证据、未集成或无关材料。
 
 完整原始日志、安装 inventory、manifest、VM outcome 和失败记录保留在 `/Users/nineofour/pi-durio-v1-run/`；仓库内是可审阅报告、必要小型记录和精确 hash 指针。没有把这些部分完成状态宣称为首版 ready for review、日用接受或发布。
