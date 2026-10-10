@@ -1,0 +1,172 @@
+{
+  "id": "candidate:197afe0a113c5c58ad0810ca24a4ad98",
+  "display": "R1",
+  "title": "Repair clamp low-bound handling in clamp.ts",
+  "problem": "clamp.ts computes `Math.min(upper, Math.min(lower, value))`. Static tracing shows the inner `Math.min(lower, value)` collapses to `value` whenever `value < lower`, so the outer `Math.min(upper, ...)` returns the raw unclamped `value` for values below `lower`, violating the inclusive lower bound declared in README.md. The retained check run that invokes `node check.mjs` completed with exitCode 1.",
+  "objective": "bug",
+  "target": {
+    "id": "clamp-project",
+    "kind": "project",
+    "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project",
+    "files": [
+      {
+        "path": "clamp.ts",
+        "sha256": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+        "bytes": 111,
+        "content": {
+          "sha256": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+          "bytes": 111
+        },
+        "sourceId": "e1:49:a680a9179462aab085f0352e77a9e1c25a3d53ac56cf41015e1d20f913cf8ca7",
+        "state": "available",
+        "reason": []
+      },
+      {
+        "path": "check.mjs",
+        "sha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d",
+        "bytes": 357,
+        "content": {
+          "sha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d",
+          "bytes": 357
+        },
+        "sourceId": "e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2",
+        "state": "available",
+        "reason": []
+      },
+      {
+        "path": "README.md",
+        "sha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+        "bytes": 129,
+        "content": {
+          "sha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+          "bytes": 129
+        },
+        "sourceId": "e1:51:ccf3e336d85ab9b57c2361610ef0777fc8288d1d2cedec9ee0eef5133438c927",
+        "state": "available",
+        "reason": []
+      },
+      {
+        "path": "package.json",
+        "sha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+        "bytes": 87,
+        "content": {
+          "sha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+          "bytes": 87
+        },
+        "sourceId": "e1:52:8cc84f042f96e2325ad9daf05845f9fa1bcd0183132f01a0329b99a45bfa60b4",
+        "state": "available",
+        "reason": []
+      }
+    ],
+    "baseline": "46864e756634ac28260fe43119d15103008ce1a2fbc9b37b548c2b2027ab257f",
+    "applicableVersion": "c3a26d10711de3ae1afdd08698e4dd43a92f48d1bc591653e8778218aa373ffd",
+    "state": "verified",
+    "gaps": []
+  },
+  "facts": [
+    {
+      "claim": "clamp.ts defines `export const clamp = (value, lower, upper) => Math.min(upper, Math.min(lower, value));`, i.e. nested Math.min with lower in the inner call.",
+      "evidence": [
+        "e1:49:a680a9179462aab085f0352e77a9e1c25a3d53ac56cf41015e1d20f913cf8ca7"
+      ]
+    },
+    {
+      "claim": "check.mjs asserts clamp cases including [-4,0,10,0] and [-9,-5,-1,-5], so expected outputs enforce the inclusive lower bound.",
+      "evidence": [
+        "e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2"
+      ]
+    },
+    {
+      "claim": "README.md states the clamp is inclusive of lower and upper bounds and that lower is never greater than upper.",
+      "evidence": [
+        "e1:51:ccf3e336d85ab9b57c2361610ef0777fc8288d1d2cedec9ee0eef5133438c927"
+      ]
+    },
+    {
+      "claim": "package.json declares type module, name durio-live-improve-fixture, version 1.0.0, private true; it declares no test script.",
+      "evidence": [
+        "e1:52:8cc84f042f96e2325ad9daf05845f9fa1bcd0183132f01a0329b99a45bfa60b4"
+      ]
+    },
+    {
+      "claim": "Observed execution: the retained run ran `node check.mjs`; the managed command settled with exitCode 1.",
+      "evidence": [
+        "e1:20:d2a3b2bfd0115e74d33d8bca508339e1e25547a25a17ad40fc652542cc31e8f3",
+        "e1:25:35696d254652b487ec6bab04fddf29f7ca231e63adf5d1c69e777eb23954193c"
+      ]
+    },
+    {
+      "claim": "Observed execution: a tool.error for the same attempt recorded error 'Command exited with code 1'.",
+      "evidence": [
+        "e1:26:3f8896d0da5cc0426f7d92f9eed80708b8b289446b865d3eb47025d703e25edb"
+      ]
+    }
+  ],
+  "hypotheses": [
+    "The inner/outer argument order in the nested Math.min is the defect: `Math.min(lower, value)` should be candidate-bounded then floored, e.g. `Math.min(upper, Math.max(lower, value))`, so low values return `lower` and high values return `upper`.",
+    "The check.mjs failure is caused specifically by the below-lower cases while in-range and above-upper cases already pass; this is a static inference from the expression and case list, not from the withheld assertion output."
+  ],
+  "successCounterexamples": [],
+  "gaps": [
+    "The raw failure output body is withheld (e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503 is [WITHHELD]); the exact failing assertion line and observed values were not acquired.",
+    "No successful post-fix run or passing counterexample was acquired; successCounterexamples is therefore empty by design, not because a passing case is known.",
+    "The run.closed record (e1:46:58cfd7f733809326c38cc1ebed548ce80c49ac7bebbc08ffa3e97d5808db0627) reports observation 'ok' for the overall run, which does not contradict the individual command exitCode 1; the relationship is inferred and not host-verified.",
+    "No reference implementation or type-level spec beyond README.md and check.mjs was available."
+  ],
+  "mechanismsReviewed": [
+    "clamp.ts nested Math.min bound logic",
+    "check.mjs assertion case table",
+    "package.json module/script configuration",
+    "retained managed-command exit status"
+  ],
+  "steps": [
+    "In clamp.ts, replace the nested expression with `Math.min(upper, Math.max(lower, value))` so the value is first floored to `lower` and then capped to `upper`.",
+    "Keep the exported name, arity and TypeScript signature `(value: number, lower: number, upper: number)` unchanged to preserve the check.mjs import contract.",
+    "Do not modify check.mjs, README.md or package.json.",
+    "After the edit, re-run the existing protected check (`node check.mjs`) unchanged to confirm all declared cases pass."
+  ],
+  "scope": [
+    "clamp.ts"
+  ],
+  "validation": {
+    "method": "Run the existing protected check.mjs unmodified against the edited clamp.ts and require exit code 0 with the declared pass message.",
+    "checks": [
+      "node check.mjs exits 0 and prints its declared pass message",
+      "clamp(-4,0,10) === 0 (below-lower clamp)",
+      "clamp(14,0,10) === 10 (above-upper clamp)",
+      "clamp(6,0,10) === 6 (in-range unchanged)",
+      "clamp(-9,-5,-1) === -5 (below-lower with negative bounds)",
+      "check.mjs, README.md and package.json remain byte-identical to their registered digests"
+    ],
+    "budget": "One edit to clamp.ts plus one run of the existing check; no new dependencies or tooling.",
+    "protections": [
+      "check.mjs is protected and must be used unchanged as the acceptance check",
+      "README.md is protected; the user draft note must be preserved untouched",
+      "package.json is protected; no script or dependency edits",
+      "No performance requirement is changed or claimed"
+    ]
+  },
+  "risks": [
+    "If any caller relied on the current low-value pass-through behavior, fixing it changes observed output for below-lower inputs; README.md declares inclusive bounds, so this is an intentional correction.",
+    "Behavior for lower > upper is undefined by README.md; the proposed expression would return upper in that case, which is not covered by any acquired check case."
+  ],
+  "rollback": "Revert clamp.ts to the previously registered content (sha256 b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc); no other file changes, so rollback is a single-file restore.",
+  "activation": {
+    "writeback": true,
+    "enable": false,
+    "conditions": [
+      "Only clamp.ts may be written back; check.mjs, README.md and package.json must remain unchanged",
+      "A later explicit human choice must approve the writeback",
+      "Protected validation (unmodified node check.mjs) must pass before any activation is considered"
+    ],
+    "timing": "Deferred; no writeback, validation or activation occurs during this analysis."
+  },
+  "dependencies": [],
+  "conflicts": [],
+  "execution": "not-started",
+  "effect": "unverified",
+  "selection": "unselected",
+  "suggestionOnly": false,
+  "conditionKey": "2b0d2f5cc94ec16c8ae984afdd659866788ef20395d862a39f21da155bfdc3fe",
+  "revision": "49e9331f282cda12efe5fb89f4b6ef35b8e50a8dc2d8140fa48c5fe3824c91c8"
+}
