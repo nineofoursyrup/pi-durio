@@ -2,7 +2,7 @@
 
 面向 macOS arm64 / Node >=22.19.0 的本地 coding agent，复用 Pi runtime，保留运行原文，并由用户明确控制恢复、eval 和 improve。
 
-首版尚未完成全部验收。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#29 的本票适用验收完成；最终原生 Terminal 的技术批次已取得适用证据。#30 真实 DeepSeek 首批在第二个案例达到 8 次请求上限后停止，真实 improve、完整技术验收和本机日用接受仍未完成。固定产品候选 `9aed1af` 的独立 Spec / Standards 受影响复审均通过；[当前适用检查](docs/implementation/pi-durio-v1/review/9aed1af/applicable-check-gate.json)保留原 250 PASS / 1 FAIL 和修复后的相关验证，没有改写成新全套 PASS。[本地测量](docs/implementation/pi-durio-v1/issue-31/final-9aed1af/partial-report.md)与 [Terminal 定向补测](docs/implementation/pi-durio-v1/issue-31/final-9aed1af/native-followup-r1-report.md)均保留各自执行范围；不声明完整首版 ready for review。
+首版尚未完成全部验收。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录当前范围：#11–#29 除 #23 的本票适用验收保持完成；原生 Terminal 技术批次已有适用证据。四类真实 coding 场景已分别取得 PASS，原失败保留；补充真实 improve 暴露用量结算缺陷 LIVE-USD3-R3-01，当前修复与复核进行中，0 个候选。[真实结果和诊断](docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/postrun-readback/REPORT.md)与原 250 PASS / 1 FAIL、受影响修复记录分别保存。完整技术验收与本机日用接受尚未完成，不声明完整首版 ready for review。
 
 ## 安装与本地演示
 
@@ -35,7 +35,7 @@ node dist/src/cli.js run --workspace "$PWD/test/fixtures/project" \
 
 ## 真实 coding 与终端操作
 
-默认 provider 为 `deepseek/deepseek-flash`，地址为 `https://api.deepseek.com`，认证从 `DEEPSEEK_API_KEY` 读取。**去掉 `--offline-demo` 后，提交任务会发出可能计费的请求。** 本轮 USD 3 内的固定真实批次已运行一次并按失败条件停止，不能使用原授权重复启动；[实施状态](docs/implementation/pi-durio-v1/status.md)记录结果与剩余条件。缺凭据或认证失败不会静默切换 provider。
+默认 provider 为 `deepseek/deepseek-flash`，地址为 `https://api.deepseek.com`，认证从 `DEEPSEEK_API_KEY` 读取。**去掉 `--offline-demo` 后，提交任务会发出可能计费的请求。** 本轮 USD 3 总帽内的两次固定真实批次均已使用各自单次启动并停止，不能使用原授权重复启动；[实施状态](docs/implementation/pi-durio-v1/status.md)记录结果与剩余条件。缺凭据或认证失败不会静默切换 provider。
 
 `run` / `tui` 默认只提供 `read`。为明确指定的项目和任务加入 `--coding`，才开放 `read/write/edit/bash`。普通 coding 是可信本机执行，没有 OS 沙箱保证；工作区锁防止本产品内部重叠写入，不能隔离外部编辑器或其他本机程序。文件工具当前支持最多 256 KiB，普通任务最多 8 次 provider 尝试，输入最多 32 KiB。
 

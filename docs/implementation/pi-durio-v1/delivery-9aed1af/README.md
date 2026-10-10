@@ -2,7 +2,7 @@
 
 产品候选 `9aed1af6ee3b156bb7354961496217aa5e64843e`，tree `d76896b400bb90c3beb82d847d9b43ba86fc5a07`。sourceBuild SHA256 `0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886`；固定分发包 SHA256 `3628f9fd3e6c66cf7cd123dd9ea3dc6260c3be07ffb556d0972197e221d66d9a`。文档回写 tip 另外通过 Git/PR 读回，不覆盖上述实际执行身份。
 
-适用独立评审和检查已完成；全产品技术及日用验收仍未完成。[22 票状态](../status.md)与[合同逐项索引 r2](../issue-31/final-9aed1af/contract-evidence-index-r2.json)记录完成范围及缺口，原索引和首失败仍保留。
+原适用独立评审和检查保留历史范围；补充真实批次新发现 LIVE-USD3-R3-01，当前真实 improve 路径等待修复与受影响复核，全产品技术及日用验收仍未完成。[22 票状态](../status.md)与[合同逐项索引 r2](../issue-31/final-9aed1af/contract-evidence-index-r2.json)记录完成范围及缺口，原索引和首失败仍保留。
 
 ## 检查与修复
 
@@ -24,7 +24,7 @@ npm 11.19.1 两项失败独立保留：bundled `file:` 来源元数据使 `npm l
 
 ## 未完成和保全
 
-- #30：获授权的 USD 3 批次已启动一次并按失败条件停止；15 次真实 HTTP 请求、27,499 token，按固定最高单价估算 USD 0.0329988（未查账户账单）。local-fix PASS，multi-file 达到单任务 8 次请求限制后未完成，其余两例及真实 improve 未运行。原批次不可自动重复，实际 improve 候选生成后仍需具体选择。
+- #30：原首批 local-fix PASS、multi-file error/unknown 和两项 not-run 保留；补充批次 multi-file/regression/no-change 全部 PASS。真实 improve 首响应后因 LIVE-USD3-R3-01 失败，0 候选。两批累计 34 请求、61,560 已知 token + 1,056,768 UNKNOWN 预留；保守占额 USD 1.3419936（非账户账单）。[完整结果与诊断](../issue-30/final-9aed1af-usd3-r3/postrun-readback/REPORT.md)。产品修复、受影响复核、新批次授权以及实际候选选择仍待完成。
 - #31：最终原生 Terminal 的三个 idle、60+2 任务、组合流程、30 次查询和 5 次导出已有适用证据；首批 harness 轮询失败与后续定向补测分别保留，见[原生结果](../issue-31/final-9aed1af/native-followup-r1-report.md)。整体因真实 #30 未完成仍为 PARTIAL。
 - #32：只能由用户在自己的 Mac 实际试用并明确接受；当前 NOT RUN。
 - 全部 Issue OPEN，Draft PR 保持 Draft，main 仅原空仓 bootstrap；没有产品 main merge 或 release。
