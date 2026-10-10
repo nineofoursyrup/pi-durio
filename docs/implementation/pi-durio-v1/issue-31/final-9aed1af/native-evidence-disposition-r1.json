@@ -1,0 +1,115 @@
+{
+  "schema": "pi-durio.issue-31.native-evidence-disposition.v1",
+  "at": "2026-10-10T05:57:12.780789+00:00",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "scope": "Current native technical evidence across original batch and targeted follow-up; not a whole-issue or daily-use acceptance result.",
+  "originalBatch": {
+    "status": "MEASURED_WITH_FAILURES",
+    "result": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/result.json",
+      "bytes": 5351,
+      "sha256": "5062ec149ebc874839d4dc799937e8cff993e4c64580ed14949b9eca082c72d6"
+    },
+    "failure": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/composition/failure.json",
+      "bytes": 5680,
+      "sha256": "cf3c34090a4b138b1676343b05a5fa13fbce2bd2493badceb700263cdc5d2c8a"
+    },
+    "summary": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-summary.json",
+      "bytes": 46845,
+      "sha256": "cf9457281285f8d5bdc76fd5f8604136dedb3235e61877e5a4780fcf92ec02dc"
+    },
+    "report": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-report.md",
+      "bytes": 5423,
+      "sha256": "77cfdf8b8ff89b111db7a6bde5da593b29df4b5b9fdbacda2bba1c4dd44fdb34"
+    },
+    "disposition": "Preserved immutable first failure; remains failed as executed."
+  },
+  "followupBatch": {
+    "status": "MEASURED",
+    "result": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/result.json",
+      "bytes": 2587,
+      "sha256": "c952c92b48cf9d7f1a7dcd4c83f6bf7e109143ef11236b351817f92fa4f4d0e6"
+    },
+    "summary": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-summary.json",
+      "bytes": 87837,
+      "sha256": "a508257a7d366a69f490e43f1b8c94ba33b49065328b7a2c624e6e5a7640c03d"
+    },
+    "report": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-report.md",
+      "bytes": 5453,
+      "sha256": "f3edb4c2d3dc450887383f56786ae95932df238dc78c3bcec34f84abc6603b67"
+    },
+    "config": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-config.json",
+      "bytes": 3639,
+      "sha256": "e4be939ec2e27357db9e081fe1613f992d55fdeb1083905c38b4d1417d8a9132"
+    },
+    "disposition": "Only composition rerun and originally-not-run readonly; successful targeted evidence supplements the original without relabelling it."
+  },
+  "scopeResults": [
+    {
+      "scope": "3 idle starts",
+      "original": "MEASURED",
+      "followup": "NOT REPEATED",
+      "applicableSource": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/idle-1/result.json",
+        "bytes": 14292,
+        "sha256": "4e0d34510d280252b5790a8c6d7c3191e508a549f3cda43de654ef01c8bf78da"
+      }
+    },
+    {
+      "scope": "60 paced ordinary tasks + 1 MiB output + next ordinary task",
+      "original": "MEASURED; 62 accepted/completed, 124 synthetic/0 real",
+      "followup": "NOT REPEATED",
+      "applicableSource": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/result.json",
+        "bytes": 930461,
+        "sha256": "1fb56666475f780092e95270a4992493a8967ac3df726f4123c2a9a49bbdcccf"
+      }
+    },
+    {
+      "scope": "compaction + improve selection + isolated regression + fixture formal write + subsequent read",
+      "original": "FAIL at analysis report not yet found",
+      "followup": "PASS; automated synthetic fixture only",
+      "applicableSource": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/result.json",
+        "bytes": 89966,
+        "sha256": "f8ff08d6ffb52ef1ad19983ff95b9ec47495cd79917dd9da2ef5ef648b4957fb"
+      }
+    },
+    {
+      "scope": "30 read-only queries + 5 full-output acquisitions",
+      "original": "NOT RUN due to previous failure",
+      "followup": "MEASURED; sourceUnchanged=true",
+      "applicableSource": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/result.json",
+        "bytes": 21873,
+        "sha256": "5783357ebe52b3fe111bba59910d6dd618e9a38459613cb6fcd1d2cd2c18c5c2"
+      }
+    }
+  ],
+  "nativeTechnicalDisposition": "Planned original native workload now has successful applicable evidence through two distinct runs; first failure remains part of the evidence. No human acceptance is inferred.",
+  "technicalAcceptance": "PARTIAL",
+  "remaining": [
+    "Separate #30 real-provider result and real improve human selection evidence",
+    "Full contract applicability disposition by coordinator",
+    "Explicit #32 daily-use acceptance"
+  ],
+  "preservation": "No existing partial/native reports, first-failure raw files, fixed product source or earlier commit contents were rewritten.",
+  "separatePaidBatch": {
+    "status": "STOPPED",
+    "at": "2026-10-10T05:54:47.608Z",
+    "reason": "Error: BATCH_TRIAL_NOT_PASS",
+    "evidence": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/batch-result.json",
+      "bytes": 465,
+      "sha256": "44fcd0fcc08784463c157329cb4bbeff00f8981762cf16273dfe42c6b9688c7f"
+    },
+    "issue30": "INCOMPLETE"
+  }
+}
