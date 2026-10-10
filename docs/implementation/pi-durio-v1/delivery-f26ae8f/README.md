@@ -10,6 +10,6 @@ LIVE-USD3-R3-01 已修复：完整raw SSE usage与DONE到达后，实际SDK正�
 
 [当前22票状态](../status.md)记录 #11–#31 本票适用验收完成；[最终技术接受](../issue-31/TECHNICAL-ACCEPTANCE.md)及[独立两轴复审](../review/final-technical-f26ae8f/review.md)已完成。当前候选的真实 improve 经用户明确选择 R1 后，唯一执行完成 1 次保护回归/6 原用例 PASS、仅 clamp.ts 精确写回和只读重开一致，0 新 provider。[完整回读](../issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md)保留全部身份；原模型推理错误、r2 输出契约失败、旧 UNKNOWN 和首败均未改写。
 
-累计 45 次物理请求，保守占额 USD 1.4248548，非账户账单。#31 完整技术证据与当前必要测量已接受；[当前技术报告](../issue-31/final-f26ae8f/REPORT.md)列出准确口径。#32 用户在自己的 Mac 实际试用与明确接受仍未完成。此处的确定性修复成功不代表性能或模型质量改善。
+累计 45 次物理请求，保守占额 USD 1.4248548，非账户账单。#31 完整技术证据与当前必要测量已接受；[当前技术报告](../issue-31/final-f26ae8f/REPORT.md)列出准确口径。#32 [本机试用入口](../issue-32/TRIAL.md)已准备，用户在自己的 Mac 实际试用与明确接受仍未完成。此处的确定性修复成功不代表性能或模型质量改善。
 
 全部Issue OPEN、PR Draft；main仍空仓bootstrap，没有产品main合并或release。原四个untracked、api.env ignore及旧dist完整保全；所需证据仍引用的worktree保留。大型清单和原始记录留在外部证据目录，`evidence-index.json`提供精确指纹。

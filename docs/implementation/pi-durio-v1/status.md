@@ -7,6 +7,7 @@
 新候选的独立 Standards / Spec 修复复核均 PASS：0 硬问题，1 非阻塞命名建议；旧评审及其可选建议保留历史范围。最终 boundary 11/11、Pi runtime 2/2、7 块原始响应离线重放 952→7 通过。独立适用性读回另确认四类旧 PASS 的 25 个响应及 3 个 native 合成预算响应与新 parser 一致。原组合 **251 / 250 PASS / 1 FAIL** 保持原记录，未改检查继续按内容身份和适用性复用，没有新全套 PASS 声明。
 
 - [当前独立 Standards / Spec 评审](review/f26ae8f/review.md) · [当前检查 gate](review/f26ae8f/applicable-check-gate.json) · [旧证据适用性](review/f26ae8f/evidence-applicability.json)。
+- [本机试用入口](issue-32/TRIAL.md) · [交接增量独立复审](review/final-technical-f26ae8f/handoff-final/review.md)；#32 尚未完成。
 - [最终技术接受](issue-31/TECHNICAL-ACCEPTANCE.md) · [当前技术报告](issue-31/final-f26ae8f/REPORT.md) · [当前 91 行索引](issue-31/final-f26ae8f/contract-evidence-index.md) · [最终独立复审](review/final-technical-f26ae8f/review.md)。
 - [旧本地测量](issue-31/final-9aed1af/partial-report.md) · [原生 Terminal 首批](issue-31/final-9aed1af/native-report.md) · [定向补测](issue-31/final-9aed1af/native-followup-r1-report.md) · [原合同索引](issue-31/final-9aed1af/contract-evidence-index-r2.md) · [当前合同补充](issue-31/improve-output-contract-r1/CONTRACT-DELTA.md) · [新体积实测](issue-31/provider-terminal-repair-r1/MEASUREMENT.md)。
 - [真实首批诊断](issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md) · [补充批次结果与诊断](issue-30/final-9aed1af-usd3-r3/postrun-readback/REPORT.md)。
@@ -35,7 +36,7 @@
 | [#29](https://github.com/nineofoursyrup/pi-durio/issues/29) 低打扰人工介入与交付后返工报告 | 本票适用验收完成 | #27 | [证据](issue-29/README.md) |
 | [#30](https://github.com/nineofoursyrup/pi-durio/issues/30) 真实 DeepSeek 代表任务与 improve 执行闭环 | 本票适用验收完成 | #25 | [实际选择至重开完整链](issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md)；6 例保护回归 PASS，仅 clamp.ts 精确写回，0 新 provider；旧失败/UNKNOWN 保留 |
 | [#31](https://github.com/nineofoursyrup/pi-durio/issues/31) 首版技术验收与轻量实测报告 | 本票适用验收完成 | #19, #28, #29, #26, #20, #30 | [技术接受](issue-31/TECHNICAL-ACCEPTANCE.md)；91 行证据、当前实测、独立两轴 PASS；原限制保留 |
-| [#32](https://github.com/nineofoursyrup/pi-durio/issues/32) 本机试用与明确日用接受 | 技术前置已满足，试用交接准备中 | #31 | 用户实际试用与明确决定仍待取得，agent 不代答 |
+| [#32](https://github.com/nineofoursyrup/pi-durio/issues/32) 本机试用与明确日用接受 | 试用交接已准备，用户试用与决定待取得 | #31 | [试用入口](issue-32/TRIAL.md)；[待接受记录](issue-32/pending-acceptance.json)，agent 不代答 |
 
 完整 per-ticket worktree、原票 commit、集成 SHA、修复链、原始 FAIL/UNKNOWN 和证据路径见 `status.json`。本票验收只满足内部任务图的适用条件，不替代全产品真实调用、技术验收或用户接受。
 
@@ -43,7 +44,7 @@
 
 原生首批三个 idle 和 60+2 个任务测量完成；组合步骤因 harness 在异步报告生成前读取而失败，原件保留。定向补测只修复该轮询，并完成 compaction、合成 improve 选择、隔离回归、fixture 正式写回、下一任务读取，以及 30 次查询和 5 次 1 MiB 完整导出。它们不代替真实 improve 或 #32 人工接受。
 
-当前前沿：#31 已通过独立复审并完成技术验收，#32 本机试用交接准备中。用户在 2026-10-10T10:44:25.791Z 明确选择实际 R1；冻结计划于 10:45:25.690Z 唯一启动，10:45:29.192Z 成功结束。1 次保护回归、6 个原用例 PASS，VM 终止；仅正式项目 clamp.ts 的 111 bytes 由内层 min 改为 max，另三保护文件不变。公共 decision 和 report 重开一致。[执行回读](issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md)保存选择、执行、写回及重开身份，14 条新增记录中没有 provider 请求。
+当前前沿：#31 已通过独立复审并完成技术验收，#32 [本机试用交接](issue-32/TRIAL.md)已准备，实际试用和明确决定待取得。用户在 2026-10-10T10:44:25.791Z 明确选择实际 R1；冻结计划于 10:45:25.690Z 唯一启动，10:45:29.192Z 成功结束。1 次保护回归、6 个原用例 PASS，VM 终止；仅正式项目 clamp.ts 的 111 bytes 由内层 min 改为 max，另三保护文件不变。公共 decision 和 report 重开一致。[执行回读](issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/REPORT.md)保存选择、执行、写回及重开身份，14 条新增记录中没有 provider 请求。
 
 原报告 summary 自相矛盾，hypotheses[1]误称旧区间内/超上界案例已通过。[原错误说明](review/improve-output-contract-r1-candidate/STATIC-ANALYSIS.md)继续保留；保护回归通过仅证明本次声明范围内的确定性修复，不证明模型质量、性能或逐项因果改善。原 3,427 文件分析树未改变，授权写回只影响独立正式目标；旧 before 对象和首失败可追查。
 

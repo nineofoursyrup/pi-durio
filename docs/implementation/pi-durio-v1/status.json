@@ -1698,30 +1698,48 @@
       "number": 32,
       "title": "本机试用与明确日用接受",
       "state": "open",
-      "assignees": [],
+      "assignees": [
+        "nineofoursyrup"
+      ],
       "comments": 0,
       "blocked_by": [
         31
       ],
       "body_matches": true,
       "dependencies_match": true,
-      "status": "ready-for-user-trial-preparation",
-      "worktree": null,
-      "commit": null,
-      "integrated_sha": null,
-      "evidence": [],
+      "status": "integrated-preparation-awaiting-user-trial-and-decision",
+      "worktree": "/Users/nineofour/.codex/worktrees/issue32-daily-trial/Durio",
+      "commit": "4cbebb8dc1f475945483f8b38eec48eab401327f",
+      "integrated_sha": "3c3f067c4bdf5d8ac3544d1507fd1a9bb802cd2d",
+      "evidence": [
+        "docs/implementation/pi-durio-v1/issue-32/TRIAL.md",
+        "docs/implementation/pi-durio-v1/issue-32/pending-acceptance.json",
+        "docs/implementation/pi-durio-v1/issue-32/documentation-checks.json",
+        "docs/implementation/pi-durio-v1/issue-32/merge-readback.json"
+      ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T234529Z/issue-32.json",
-      "note": "Technical prerequisite accepted; prepare candidate-bound startup/recovery/resources/limitations and await actual user trial and explicit decision."
+      "note": "Candidate-bound trial handoff integrated and independently reviewed. #32 NOT COMPLETE: actual user trial and explicit daily acceptance pending; no agent answer or automatic acceptance.",
+      "integration_base": "af559570433282249f32154f3c547246225f2dc9",
+      "claim_readback": "/Users/nineofour/pi-durio-v1-run/evidence/issue-32/claim-readback.json",
+      "agent": "/root/issue32_trial",
+      "model_requested": "gpt-6-astra",
+      "reasoning_requested": "xhigh",
+      "branch": "codex/issue-32-daily-trial",
+      "affected_review": {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final/review.json",
+        "bytes": 3530,
+        "sha256": "fb6b6897b1c570a54f23d4af0442461463add516ae03d067c5c972f00d9ab95a"
+      }
     }
   },
   "frontier": [
     {
       "ticket": 32,
-      "status": "USER_TRIAL_HANDOFF_PREPARATION_READY"
+      "status": "WAITING_DIRECT_USER_TRIAL_AND_EXPLICIT_ACCEPTANCE"
     }
   ],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "7664210c38d0073d3c134f0668c6a51e0ebb4f49",
+  "integration_tip": "3c3f067c4bdf5d8ac3544d1507fd1a9bb802cd2d",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -1731,7 +1749,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-10T11:27:48.471648+00:00",
+  "updated_at": "2026-10-10T11:37:07.208644+00:00",
   "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/review/usd3/publication-r3-postrun/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
@@ -2000,7 +2018,7 @@
     }
   },
   "publication": {
-    "status": "TECHNICAL_ACCEPTANCE_CHANGED_PENDING_PUBLICATION",
+    "status": "TRIAL_HANDOFF_INTEGRATED_PENDING_PUBLICATION",
     "at": "2026-10-10T10:56:19.545268+00:00",
     "documentationTip": "780a4a072ffaf45dfcdf947607008f393cfae1a4",
     "sourceCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
@@ -2096,7 +2114,21 @@
       "result": "evidence/issue-31/final-9aed1af/native/result.json",
       "followupResult": "evidence/issue-31/final-9aed1af/native-followup-r1/result.json"
     },
-    "dailyUse": "TECHNICAL_PREREQUISITE_COMPLETE_HANDOFF_PREPARING",
+    "dailyUse": {
+      "status": "HANDOFF_READY_USER_TRIAL_AND_DECISION_PENDING",
+      "guide": {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-32/TRIAL.md",
+        "bytes": 6661,
+        "sha256": "ce8ad1e3682eac601f7fe0398cae9fb1d5e81cd26dc857c324c57b95932bd197"
+      },
+      "pendingRecord": {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-32/pending-acceptance.json",
+        "bytes": 8196,
+        "sha256": "d03ca2a1679ca03fdd9eaeb0e46621c803ee58342f27353334fc2428ec3452ec"
+      },
+      "userDecision": null,
+      "firstVersionComplete": false
+    },
     "improveOnlyRepair": {
       "status": "ONE_START_CONSUMED_STOPPED_INCOMPLETE_REPORT",
       "manifest": {
@@ -2372,7 +2404,7 @@
     "candidateGate": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
     "scope": "Source repair and bounded prior evidence reuse PASS; actual output-r1 confirms 4 new known settlements and one complete canonical candidate. Reasoning error preserved; no candidate action authorized."
   },
-  "root_write_lock_note": "Coordinator owns root after #31 sole merger explicit handback.",
+  "root_write_lock_note": "Coordinator owns root after #32 preparation-only merge explicit handback.",
   "technical_acceptance": {
     "schema": "pi-durio.coordinator-technical-acceptance.v1",
     "at": "2026-10-10T11:27:48.471648+00:00",
@@ -2442,5 +2474,16 @@
     "prState": "DRAFT",
     "mainProductMerge": false,
     "release": false
+  },
+  "final_handoff_review": {
+    "status": "STANDARDS_PASS_SPEC_PASS",
+    "candidate": "4cbebb8dc1f475945483f8b38eec48eab401327f",
+    "integratedSha": "3c3f067c4bdf5d8ac3544d1507fd1a9bb802cd2d",
+    "review": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final/review.json",
+      "bytes": 3530,
+      "sha256": "fb6b6897b1c570a54f23d4af0442461463add516ae03d067c5c972f00d9ab95a"
+    },
+    "issue32Complete": false
   }
 }
