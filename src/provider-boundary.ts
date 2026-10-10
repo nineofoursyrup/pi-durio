@@ -36,6 +36,50 @@ export class PersistentBudget {
  settle(value:Settlement){if(value.tokens!==null&&(!Number.isSafeInteger(value.tokens)||value.tokens<0))throw Error('INVALID_PROVIDER_USAGE');if(this.facts('budget.settle').some(f=>f.id===value.id))throw Error('BUDGET_ALREADY_SETTLED');this.evidence.append('budget.settle',{budgetId:this.id,...value});}
 }
 export interface ProviderBoundary {budget?:PersistentBudget;purpose:RequestPurpose;operationId:string;transport?:typeof fetch;onDispatch?:(id:string)=>void;maxResponseBytes?:number}
+/** Only complete raw SSE events establish completion. SDK mirrors are not
+ * admission evidence, and seeing usage alone does not prove a complete reply. */
+class ResponseUsage {
+ private pending='';private data:string[]=[];private event='';private frameBytes=0;private skipLF=false;
+ private sse:boolean;private terminal=false;private invalid=false;private tokens:number|null=null;
+ constructor(contentType:string|null){this.sse=contentType?.split(';')[0].trim().toLowerCase()==='text/event-stream';}
+ private line(line:string){
+  if(line===''){
+   if(this.data.length){
+    const data=this.data.join('\n');
+    if(this.event==='error')this.invalid=true;
+    if(this.terminal)this.invalid=true;
+    else if(data==='[DONE]')this.terminal=true;
+    else try{
+     const value=JSON.parse(data),usage=value?.usage;
+     if(value?.error)this.invalid=true;
+     if(usage!=null){
+      const sum=usage.prompt_tokens+usage.completion_tokens;
+      if(!Number.isSafeInteger(usage.prompt_tokens)||usage.prompt_tokens<0||!Number.isSafeInteger(usage.completion_tokens)||usage.completion_tokens<0||!Number.isSafeInteger(sum)||usage.total_tokens!==undefined&&usage.total_tokens!==sum||this.tokens!==null&&this.tokens!==sum)this.invalid=true;
+      else this.tokens=sum;
+     }
+    }catch{this.invalid=true;}
+   }
+   this.data=[];this.event='';this.frameBytes=0;return;
+  }
+  this.frameBytes+=line.length;if(this.frameBytes>262144)throw Error('PROVIDER_FRAME_LIMIT');
+  const colon=line.indexOf(':'),field=colon<0?line:line.slice(0,colon),value=colon<0?'':line.slice(colon+1).replace(/^ /,'');
+  if(field==='data'){this.sse=true;this.data.push(value);}else if(field==='event')this.event=value;
+ }
+ add(text:string,atEOF=false){
+  // CR is itself a line ending; skip a following LF, even across chunks.
+  if(this.skipLF&&text){if(text.startsWith('\n'))text=text.slice(1);this.skipLF=false;}
+  this.pending+=text;let match;
+  while((match=/\r\n|\r|\n/.exec(this.pending))){
+   this.skipLF=match[0]==='\r'&&match.index===this.pending.length-1;
+   this.line(this.pending.slice(0,match.index));this.pending=this.pending.slice(match.index+match[0].length);
+  }
+  if(this.pending.length+this.frameBytes>262144)throw Error('PROVIDER_FRAME_LIMIT');
+  if(atEOF&&this.pending){this.line(this.pending);this.pending='';}
+ }
+ completeSSE(){return this.sse&&this.terminal&&!this.invalid&&this.data.length===0&&this.pending==='';}
+ atEOF(){return !this.invalid&&(!this.sse||this.completeSSE())?this.tokens:null;}
+ atCancel(){return this.completeSSE()?this.tokens:null;}
+}
 /** The one actual-dispatch gate: SDK retries and compaction fetches use the same call. */
 export async function dispatchProvider(boundary:ProviderBoundary|undefined,url:Parameters<typeof fetch>[0],init?:RequestInit):Promise<Response>{
  if(!boundary)return fetch(url,init);
@@ -50,17 +94,23 @@ export async function dispatchProvider(boundary:ProviderBoundary|undefined,url:P
   const response=await (boundary.transport??fetch)(url,init);
   evidence?.append('provider.http',{id,status:response.status});
   const reader=response.body?.getReader();if(!reader){settle(null,'unknown','empty response');return response;}
-  const decoder=new TextDecoder();let pending='',total=0,tokens:number|null=null;
-  const parse=(line:string)=>{if(!line.startsWith('data:'))return;try{const event=JSON.parse(line.slice(5));const usage=event.usage;if(Number.isSafeInteger(usage?.prompt_tokens)&&Number.isSafeInteger(usage?.completion_tokens)&&usage.prompt_tokens>=0&&usage.completion_tokens>=0)tokens=usage.prompt_tokens+usage.completion_tokens;}catch{/* acquired raw bytes remain authoritative */}};
+  const decoder=new TextDecoder(),usage=new ResponseUsage(response.headers.get('content-type'));let total=0,consumerClosing=false;
   const body=new ReadableStream<Uint8Array>({
-   async pull(controller){try{const next=await reader.read();if(next.done){pending+=decoder.decode();for(const line of pending.split('\n'))parse(line);settle(tokens,response.ok?'returned':'error');controller.close();return;}
+   async pull(controller){try{const next=await reader.read();if(next.done){if(consumerClosing)return;usage.add(decoder.decode(),true);settle(response.ok&&!init?.signal?.aborted?usage.atEOF():null,init?.signal?.aborted?'cancelled':response.ok?'returned':'error');controller.close();return;}
     // The current block has already been acquired: retain it even when it
     // crosses the consumption limit, then stop without another read.
     evidence?.append('provider.bytes',{id,bytes:evidence.blob(next.value)});
     total+=next.value.length;if(total>(boundary.maxResponseBytes??1_048_576))throw Error('PROVIDER_RESPONSE_LIMIT');
-    pending+=decoder.decode(next.value,{stream:true});let index;while((index=pending.indexOf('\n'))>=0){parse(pending.slice(0,index));pending=pending.slice(index+1);}if(pending.length>262144)throw Error('PROVIDER_FRAME_LIMIT');controller.enqueue(next.value);
+    usage.add(decoder.decode(next.value,{stream:true}));if(!consumerClosing)controller.enqueue(next.value);
    }catch(error){try{settle(null,init?.signal?.aborted?'cancelled':'error',String(error));}finally{await reader.cancel().catch(()=>{});controller.error(error);}}},
-   async cancel(reason){try{settle(null,'cancelled',String(reason));}finally{await reader.cancel(reason);}}
+   async cancel(reason){consumerClosing=true;try{
+    // openai@7.19.0 closes its reader at [DONE], before transport EOF, without
+    // aborting the request. Wait for cleanup: a failed cancel or concurrent abort
+    // must remain unknown, and its pending pull must not mistake cancel for EOF.
+    await reader.cancel(reason);
+    const tokens=reason===undefined&&!init?.signal?.aborted&&response.ok?usage.atCancel():null;
+    settle(tokens,tokens===null?'cancelled':'returned',tokens===null?String(reason):undefined);
+   }catch(error){settle(null,init?.signal?.aborted?'cancelled':'error',String(error));throw error;}}
   });return new Response(body,{status:response.status,statusText:response.statusText,headers:response.headers});
  }catch(error){settle(null,init?.signal?.aborted?'cancelled':'error',String(error));throw error;}
 }

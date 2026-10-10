@@ -15,18 +15,26 @@ function transport(steps:Parameters<typeof scriptedTransport>[0],answer:unknown=
 
 test('explicit improve uses the public restricted runtime and zero candidates reopen without dispatch or mutation',async()=>{
  const f=await fixture(),provider=transport([{name:'evidence_summary',args:{}}]);
+ let normalCloses=0;
+ const streamTransport:typeof fetch=async(url,init)=>{
+  const response=await provider.fetch(url,init),bytes=new Uint8Array(await response.arrayBuffer());
+  // Match LIVE-USD3-R3-01: the provider has emitted usage and DONE, while its
+  // transport remains open until the actual Pi/OpenAI SDK closes the reader.
+  return new Response(new ReadableStream<Uint8Array>({start(controller){controller.enqueue(bytes);},cancel(reason){assert.equal(reason,undefined);assert.equal(init?.signal?.aborted,false);normalCloses++;}}),{headers:response.headers});
+ };
  const request={id:'zero',purpose:'Find only supported changes',limits};
  const extraneousControl=new runtime.TaskControl();
- const result=await runtime.analyzeImprove({dataRoot:f.dataRoot,workspace:f.workspace,targetRunId:f.source.runId,request,mode:'offline',transport:provider.fetch,contextRunId:f.source.runId,control:extraneousControl} as any);
+ const result=await runtime.analyzeImprove({dataRoot:f.dataRoot,workspace:f.workspace,targetRunId:f.source.runId,request,mode:'offline',transport:streamTransport,contextRunId:f.source.runId,control:extraneousControl} as any);
  assert.equal(result.status,'completed',JSON.stringify(result));assert.equal(result.improve?.state,'complete');assert.deepEqual(result.improve?.candidates,[]);assert.deepEqual(result.improve?.selected,[]);
  assert.equal(provider.calls.length,2);const names=(provider.calls[0] as any).tools.map((t:any)=>t.function.name).sort();assert.deepEqual(names,['evidence_read','evidence_summary','source_view']);
+ assert.equal(normalCloses,2);assert.equal(result.improve?.budget.knownTokens,28);assert.equal(result.improve?.budget.unknown,0);
  assert.doesNotMatch(JSON.stringify(provider.calls),/Inspect fixture/,'does not import unredacted coding context');
  assert.equal(extraneousControl.target(),null,'extraneous JavaScript options cannot attach coding controls');
  const facts=recoveryRecords(f.dataRoot,result.runId);assert.equal((facts.find(r=>r.kind==='task.accepted')?.data as any).kind,'improve');
  const {readImproveReport}=await import('../src/improve.js');
  const before=digest(await readFile(join(f.dataRoot,'host.sqlite')));
  assert.equal(readImproveReport(f.dataRoot,'zero').report?.id,'zero');
- const repeated=await runtime.analyzeImprove({dataRoot:f.dataRoot,workspace:f.workspace,targetRunId:f.source.runId,request,mode:'offline',transport:provider.fetch});
+ const repeated=await runtime.analyzeImprove({dataRoot:f.dataRoot,workspace:f.workspace,targetRunId:f.source.runId,request,mode:'offline',transport:streamTransport});
  assert.equal(repeated.runId,result.runId);assert.equal(provider.calls.length,2);assert.equal(digest(await readFile(join(f.dataRoot,'host.sqlite'))),before);
 });
 

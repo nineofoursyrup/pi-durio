@@ -1,0 +1,19 @@
+✔ installed SDK completion sentinel closes a live SSE body without discarding known usage or blocking the next request (155.499958ms)
+✔ raw SSE terminal framing survives chunk splits, CRLF and CR while EOF and normal consumer close settle once (2121.052541ms)
+✔ incomplete or anomalous SSE keeps its unknown reservation at EOF and consumer close (1998.034708ms)
+✔ abort, explicit cancellation, HTTP errors and transport failures stay unknown even after raw usage and DONE (527.84875ms)
+✔ a failed consumer cleanup or abort during it cannot release a reservation from terminal usage (153.306792ms)
+✔ consumer cancellation retains bytes already acquired by a pending read (77.031958ms)
+✔ non-SSE JSON keeps its existing EOF behavior without inventing usage from another response format (66.187ms)
+✔ one persisted budget admits generation, compaction, retry and grading; reopening never resets reservations (252.730333ms)
+✔ unknown and cancelled requests retain admission across restart and block new work without a proven bound (164.987417ms)
+✔ budget rejects expired plans and never sends when acquired original cannot be retained (63.257042ms)
+✔ response limit preserves the acquired offending bytes and never refunds its dispatch (79.594791ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5779.54175

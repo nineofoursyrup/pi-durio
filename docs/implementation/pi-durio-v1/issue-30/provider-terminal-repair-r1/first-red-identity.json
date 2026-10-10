@@ -1,0 +1,10 @@
+{
+  "base": "80b912a0d02b1dab7df8afc909fdd9359769ed07",
+  "sourceFiles": {
+    "src/provider-boundary.ts": "ddd688163aa6dd431609b9857fdd5c24d37a06741b9bff05083e7656da0974c5",
+    "test/provider-boundary.test.ts": "0c2459075d4e00fd87f7ff0b9316e9ec2c560822af34895a21016920dfc5d178",
+    "package-lock.json": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67",
+    "node_modules/openai/core/streaming.mjs": "1b8fa8338dc28913351993382187962082f0af42c5274a009060de3263579842"
+  },
+  "node": "v26.8.2"
+}
