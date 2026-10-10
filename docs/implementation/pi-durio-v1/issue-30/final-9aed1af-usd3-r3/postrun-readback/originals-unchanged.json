@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "scope": "Hash and byte count reread of every collector input after extraction; original r2 identities also verified",
+  "count": 7280,
+  "priorCount": 3167,
+  "identitiesFile": "read-identities.json"
+}
