@@ -1,0 +1,76 @@
+{
+  "at": "2026-10-10T11:07:32.078Z",
+  "config": {
+    "status": "FROZEN_FOR_LOCAL_NATIVE_MEASUREMENT",
+    "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "sourceTree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+    "docsBase": "780a4a072ffaf45dfcdf947607008f393cfae1a4",
+    "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+    "nodeVersion": "v26.8.2",
+    "install": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install",
+    "output": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1",
+    "installInventory": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install-complete-tree.json",
+      "bytes": 3555012,
+      "sha256": "8800e7bfd67290ac39f7269799fc185998df46877b4a48062b5d4a1549591eb8"
+    },
+    "identity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/candidate-identity.json",
+      "bytes": 5258817,
+      "sha256": "ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091"
+    },
+    "packageDisposition": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/dependency-check-applicability.json",
+      "bytes": 833,
+      "sha256": "4227b4fc176dda7776530f0cb5488d905e3732c6d49e3083e32d7214576cb1b8"
+    },
+    "harnesses": {
+      "native-batch.mjs": "e0aeb3f6e6344ee7a13c1760b36f16b1a10c0fa85ae9caa1a5ce03fd05b4dc8f",
+      "native-idle.mjs": "e40078530911a41e6d0dc562ee77ac6eef28bd9e6fc247043f33efab403936de",
+      "native-session.mjs": "9759643db32363fbae68fb85b1582149b619983b24357f1bf7c9ce22ebd0b2ca",
+      "readonly-data.mjs": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655",
+      "native-recovery.mjs": "86ee066764eabc5fd242e4773023019d82dea82d2cfa288fb231af7ac811d8be"
+    },
+    "recoveryManifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/recovery-manifest.json",
+      "bytes": 2279557,
+      "sha256": "a9de035f7eaa3c229a71b2982921884b2828902c5652bb69de924bd290487511"
+    },
+    "providerPolicy": "Only fixed synthetic transports; no model key inherited; no VM",
+    "humanAcceptance": "NOT CLAIMED",
+    "viewportPolicy": "At least80x24 for measurement UI; record actual dimensions; keep dimensions unchanged during batch; prior112x35 is a comparison context, not fabricated current dimensions",
+    "resourcePolicy": "Coordinator assigned exclusive heavy window; native measurements user-launched because computer-use safety refusal, no alternate UI automation route.",
+    "preparationRevision": "r2-bounded-recovery-scroll",
+    "priorFreeze": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/native-config.json",
+      "bytes": 2526,
+      "sha256": "61a0c12ef0c9737f7fd54e72ba5b302844bfa423f13899112d897c87d1626c92"
+    }
+  },
+  "configSha256": "bb6cbc77100405825395a8dc8bbfd6986edb37b2e799a5fea4ebd8a590532385",
+  "originalTty": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+  "loadAverage": [
+    3.50927734375,
+    3.4140625,
+    3.63330078125
+  ],
+  "terminal": {
+    "program": "Apple_Terminal",
+    "version": "488.7",
+    "columns": 120,
+    "rows": 30,
+    "profile": "UNKNOWN"
+  },
+  "operator": "User launches this batch in actual macOS Terminal; subsequent fixture interactions are automated and are not human daily-use acceptance.",
+  "environmentNames": [
+    "HOME",
+    "PATH",
+    "TERM",
+    "TERM_PROGRAM",
+    "TERM_PROGRAM_VERSION",
+    "LANG",
+    "TMPDIR"
+  ],
+  "cacheNote": "Full installation read preflight warms caches; no machine-cold claim."
+}

@@ -1,0 +1,99 @@
+# 当前候选合同证据索引
+
+候选 `f26ae8f4b8039608a1fa796e1c69da4d8173d112`；62 合同 + 22 ACC + 7 MET = 91 行。**当前技术证据已齐，待独立审查及协调验收；#32 日用接受仍待用户。**
+
+完整合同、候选/环境、原始失败和证据引用见 [JSON 索引](contract-evidence-index.json)。全部 91 行有适用范围内支持；ACC/MET 是合同映射，不是额外独立测试数量。A2/A3/A4 与 ACC-22 的日用接受字段仍保持 PENDING_USER。
+
+| ID | 当前技术状态 | 当前补测解决项 |
+| --- | --- | --- |
+| S1 | SUPPORTED_BY_APPLICABLE_EVIDENCE | M2-current-native-idle, M3-current-native-long-RSS-storage-output, M4-current-query-and-acquisition-write |
+| S2 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| S3 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| S4 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| S5 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| S6 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| R1 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| R2 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| R3 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| R4 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| R5 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| R6 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| R7 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| T1 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| T2 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| T3 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| T4 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| T5 | SUPPORTED_BY_APPLICABLE_EVIDENCE | N1-current-native-cold-recovery |
+| T6 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| T7 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E1 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E2 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E3 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E4 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E5 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E6 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E7 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E8 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E9 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| E10 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| V1 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| V2 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| V3 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| V4 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| V5 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| V6 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| V7 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| V8 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| V9 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I1 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I2 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I3 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I4 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I5 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I6 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I7 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I8 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I9 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| I10 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| M0 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| M1 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| M2 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| M3 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| M4 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| M5 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| M6 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| M7 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| A1 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| A2 | SUPPORTED_BY_APPLICABLE_EVIDENCE | M2-current-native-idle, M3-current-native-long-RSS-storage-output, M4-current-query-and-acquisition-write |
+| A3 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| A4 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| A5 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-01 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-02 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-03 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-04 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-05 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-06 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-07 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-08 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-09 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-10 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-11 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-12 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-13 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-14 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-15 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-16 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-17 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-18 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-19 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-20 | SUPPORTED_BY_APPLICABLE_EVIDENCE | M3-current-native-long-RSS-storage-output, N1-current-native-cold-recovery |
+| ACC-21 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| ACC-22 | SUPPORTED_BY_APPLICABLE_EVIDENCE | M2-current-native-idle, M3-current-native-long-RSS-storage-output, M4-current-query-and-acquisition-write |
+| MET-01 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| MET-02 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| MET-03 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| MET-04 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| MET-05 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| MET-06 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |
+| MET-07 | SUPPORTED_BY_APPLICABLE_EVIDENCE | 适用既有证据；见完整引用 |

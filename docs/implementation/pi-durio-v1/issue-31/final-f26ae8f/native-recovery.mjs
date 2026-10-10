@@ -1,0 +1,92 @@
+#!/usr/bin/env node
+/** Automated native cold recovery integration check; no human usability or acceptance rating. */
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {readFileSync,writeFileSync,mkdirSync,readdirSync,lstatSync,readlinkSync,openSync,writeSync,closeSync,existsSync} from 'node:fs';
+import {join,resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {parseArgs} from 'node:util';
+import {spawnSync} from 'node:child_process';
+import {setTimeout as delay} from 'node:timers/promises';
+const {values}=parseArgs({options:{manifest:{type:'string'},'verify-only':{type:'boolean'},'prepare-only':{type:'boolean'}}});
+if(!values.manifest)throw Error('Usage: node recovery-start-terminal-validation.mjs --manifest /absolute/manifest.json [--verify-only|--prepare-only]');
+const manifestPath=resolve(values.manifest),manifestBytes=readFileSync(manifestPath),manifest=JSON.parse(manifestBytes),sha=value=>createHash('sha256').update(value).digest('hex');
+if(sha(readFileSync(new URL(import.meta.url)))!==manifest.runnerSha256)throw Error('CANDIDATE_RUNNER_CHANGED');
+function inventory(root){const files=[];function walk(relative=''){for(const name of readdirSync(join(root,relative)).sort()){const path=join(relative,name),full=join(root,path),stat=lstatSync(full);if(stat.isDirectory())walk(path);else if(stat.isSymbolicLink())files.push({path,sha256:`link:${readlinkSync(full)}`});else if(stat.isFile())files.push({path,sha256:sha(readFileSync(full))});else throw Error(`CANDIDATE_UNEXPECTED_FILE_TYPE: ${path}`);}}walk();return files;}
+const actual=inventory(manifest.packageRoot),expectedPaths=new Set(manifest.files.map(file=>file.path)),actualPaths=new Set(actual.map(file=>file.path));
+const missing=[...expectedPaths].filter(path=>!actualPaths.has(path)),extra=[...actualPaths].filter(path=>!expectedPaths.has(path));
+if(missing.length||extra.length||expectedPaths.size!==manifest.files.length)throw Error(`CANDIDATE_FILE_SET_CHANGED: missing ${JSON.stringify(missing)}; extra ${JSON.stringify(extra)}`);
+for(const file of manifest.files)if(actual.find(item=>item.path===file.path)?.sha256!==file.sha256)throw Error(`CANDIDATE_CHANGED: ${file.path}`);
+if(values['verify-only']){console.log(JSON.stringify({verified:true,commit:manifest.commit,files:actual.length,packageRoot:manifest.packageRoot}));process.exit(0);}
+if(!values['prepare-only']&&(process.platform!=='darwin'||process.arch!=='arm64'||process.env.TERM_PROGRAM!=='Apple_Terminal'||!process.stdin.isTTY||!process.stdout.isTTY))throw Error('REAL_MACOS_TERMINAL_REQUIRED');
+const root=resolve(manifest.evidenceRoot);if(existsSync(root))throw Error('OUTPUT_ALREADY_EXISTS: preserve original recovery attempt');mkdirSync(root,{recursive:true,mode:0o700});
+const save=(name,value)=>writeFileSync(join(root,name),JSON.stringify(value,null,2),{flag:'wx',mode:0o600});
+const workspace=join(root,'project'),dataRoot=join(root,'data');mkdirSync(workspace);writeFileSync(join(workspace,'README.md'),'Cold recovery startup fixture; deterministic offline transport only.\n',{flag:'wx'});
+const binding={candidate:manifest.commit,manifest:manifestPath,manifestSha256:sha(manifestBytes),runnerSha256:manifest.runnerSha256,packageRoot:manifest.packageRoot};
+save('environment.json',{at:new Date().toISOString(),...binding,node:process.version,platform:process.platform,arch:process.arch,TERM_PROGRAM:process.env.TERM_PROGRAM??null,columns:process.stdout.columns??null,rows:process.stdout.rows??null,paidProvider:'NOT RUN'});
+const {runCodingTask,TaskControl,readQueue,readAcceptedTasks,readRun}=await import(pathToFileURL(join(manifest.packageRoot,'dist/src/runtime.js')).href);
+const {scriptedTransport}=await import(pathToFileURL(join(manifest.packageRoot,'dist/src/offline.js')).href);
+const controller=new AbortController(),control=new TaskControl();let prepRequests=0,admissions;
+console.log('准备独立 stopped + frozen fixture（headless，不计入原生按键验收）…');
+const original=await runCodingTask({workspace,dataRoot,input:'恢复启动准备',mode:'offline',control,signal:controller.signal,cancellation:'stop',transport:async(_url,init)=>new Promise((_resolve,reject)=>{
+  prepRequests++;init.signal.addEventListener('abort',()=>reject(Error('headless fixture stop')),{once:true});
+  admissions=(async()=>{const target=control.target();assert.ok(target);for(const [id,kind,input] of [['frozen-follow','follow-up','冻结后续'],['frozen-compact','compact','冻结压缩']])await control.submit({id,kind,input,target});controller.abort();})();
+  admissions.catch(reject);
+})});await admissions;
+const frozen=readQueue(dataRoot,{limit:200}).items;
+assert.equal(original.status,'aborted');assert.equal(original.cleanup,'confirmed');assert.equal(prepRequests,1);assert.equal(frozen.length,2);assert.ok(frozen.every(item=>item.status==='frozen'&&item.target.runId===original.runId));
+save('preparation.json',{at:new Date().toISOString(),...binding,method:'Real public offline coding runtime and TaskControl; headless fixture preparation only',native:'NOT RUN',workspace,dataRoot,original,prepRequests,queue:frozen,fixtureFiles:[...inventory(workspace).map(file=>({...file,path:join('project',file.path)})),...inventory(dataRoot).map(file=>({...file,path:join('data',file.path)}))]});
+if(values['prepare-only']){console.log(JSON.stringify({prepared:true,native:'NOT RUN',root,runId:original.runId,queue:frozen.length}));process.exit(0);}
+save('automation-plan.json',{scenario:'Fresh native recovery TUI, end stopped source, complete exactly one new task, inspect old frozen queue, normal exit',humanRating:'NOT REQUESTED',commands:['e','全新任务','/queue','RIGHT','ESC','/exit'],environment:'Actual Apple Terminal required; no injected terminal and no paid requests',...binding});
+const {ReadOnlyTui}=await import(pathToFileURL(join(manifest.packageRoot,'dist/src/tui/app.js')).href);
+const {ProcessTerminal}=await import(pathToFileURL(join(manifest.packageRoot,'node_modules/@earendil-works/pi-tui/dist/index.js')).href);
+let inject;const terminal=new ProcessTerminal(),start=terminal.start.bind(terminal),events=openSync(join(root,'input.jsonl'),'wx',0o600),output=openSync(join(root,'output.ansi'),'wx',0o600);
+const inputs=[],prompts=[];terminal.start=(input,resize)=>{inject=data=>{const event={at:new Date().toISOString(),data,source:'automated-native-fixture'};inputs.push(event);writeSync(events,JSON.stringify(event)+'\n');input(data);};return start(data=>{const event={at:new Date().toISOString(),data,source:'actual-terminal-input'};inputs.push(event);writeSync(events,JSON.stringify(event)+'\n');input(data);},resize);};
+const stty=()=>{const result=spawnSync('/bin/stty',['-g'],{stdio:['inherit','pipe','pipe'],encoding:'utf8'});if(result.status!==0)throw Error(`STTY_READ_FAILED: ${result.stderr}`);return result.stdout.trim();};
+const before={raw:!!process.stdin.isRaw,stty:stty()},stdout=process.stdout.write;
+process.stdout.write=function(...args){writeSync(output,typeof args[0]==='string'?args[0]:Buffer.from(args[0]));return stdout.apply(this,args);};
+let result,automationFailure=null,app,closed=false;
+const began=performance.now();
+const until=async(fn,label,timeoutMs=45000)=>{const deadline=performance.now()+timeoutMs;while(performance.now()<deadline){if(closed)throw Error('APP_CLOSED_EARLY: '+label);const value=fn();if(value)return value;await delay(100);}throw Error('NATIVE_RECOVERY_WAIT_TIMEOUT: '+label);};
+const frame=()=>app.screen().join('\n');
+const capture=name=>save(name+'.json',{at:new Date().toISOString(),columns:process.stdout.columns,rows:process.stdout.rows,screen:frame(),source:'actual ProcessTerminal app.screen; not external pixels or human rating'});
+const enter=async(text)=>{inject(text);await delay(750);inject('\r');};
+try{app=new ReadOnlyTui({workspace,dataRoot,runId:original.runId,mode:'offline',coding:true,terminal,draftRoot:join(root,'drafts'),transport:async(url,init)=>{prompts.push(JSON.parse(String(init.body)));return scriptedTransport([]).fetch(url,init);}});
+ try{
+  void app.closed.then(()=>{closed=true;});app.start();
+  await until(()=>frame().includes('恢复核对 ·'),'initial recovery panel');capture('recovery-first-frame');
+  const recoveryScroll=[];
+  for(let step=1;!frame().includes('e 明确结束旧工作')&&step<=64;step++){
+    inject('\x1b[B');await delay(300);
+    recoveryScroll.push({step,at:new Date().toISOString(),screen:frame()});
+  }
+  save('recovery-scroll.json',{maxSteps:64,steps:recoveryScroll,actionVisible:frame().includes('e 明确结束旧工作'),source:'bounded normal Down input in actual native panel; no hidden action submission'});
+  assert.ok(frame().includes('e 明确结束旧工作'),'RECOVERY_END_ACTION_NOT_VISIBLE_AFTER_BOUNDED_SCROLL');capture('recovery-action-frame');
+  inject('e');await until(()=>frame().includes('恢复决定：ended'),'explicit end');capture('ended-frame');
+  await enter('全新任务');await until(()=>readAcceptedTasks(dataRoot,{limit:200}).tasks.some(t=>t.input==='全新任务'&&t.status==='completed')&&frame().includes('已完成'),'new task');capture('new-task-frame');
+  await enter('/queue');await until(()=>frame().includes('已冻结，普通输入不会执行'),'frozen queue first item');capture('queue-first-frame');
+  inject('\x1b[C');await delay(750);capture('queue-second-frame');inject('\x1b');await delay(750);
+  await enter('/exit');result=await app.closed;
+ }catch(error){automationFailure=String(error);save('first-failure.json',{at:new Date().toISOString(),error:automationFailure,...binding});}
+ finally{const exiting=await app.exit();result??=exiting;}
+}
+finally{process.stdout.write=stdout;closeSync(events);closeSync(output);}
+const after={raw:!!process.stdin.isRaw,stty:stty()},tasks=readAcceptedTasks(dataRoot,{limit:200}).tasks,queue=readQueue(dataRoot,{limit:200}).items,source=await readRun(dataRoot,original.runId),newTask=tasks.find(task=>task.input==='全新任务'),ansi=readFileSync(join(root,'output.ansi'),'utf8');
+const requiredFacts={
+  noRuntimeError:result.error===undefined,finalCleanupConfirmed:result.result?.cleanup==='confirmed',
+  recoveryReportSaved:source.records.some(record=>record.kind==='recovery.report'),
+  noWidthTimeout:!ansi.includes('WIDTH_CPR_TIMEOUT'),noRetryNeeded:!inputs.some(input=>input.data==='\x0c'),measured:result.widthCalibration?.status==='measured',
+  sourceExplicitlyEnded:tasks.find(task=>task.runId===original.runId)?.status==='ended',sourceOriginalPreserved:source.result.status==='aborted',
+  newTaskCompleted:!!newTask&&newTask.runId!==original.runId&&newTask.status==='completed'&&result.result?.runId===newTask.runId&&result.result.status==='completed',
+  newTaskOnly:prompts.length===1&&prompts[0].messages.findLast(message=>message.role==='user')?.content==='全新任务'&&!JSON.stringify(prompts).includes('冻结后续')&&!JSON.stringify(prompts).includes('冻结压缩'),
+  oldQueueFrozen:frozen.every(previous=>queue.some(item=>item.requestId===previous.requestId&&item.status==='frozen'&&item.target.runId===original.runId)),
+  rawRestored:before.raw===after.raw,sttyRestored:before.stty===after.stty
+};
+save('provider-payloads.json',prompts);save('machine.json',{at:new Date().toISOString(),...binding,result,before,after,tasks,queue,source,providerRequests:prompts.length,requiredFacts,requiredFactsComplete:Object.values(requiredFacts).every(value=>value===true),nativeObservation:'UNVERIFIED by machine facts'});
+console.log(`\n必需事实 ${Object.values(requiredFacts).every(value=>value===true)}；raw/stty ${requiredFacts.rawRestored}/${requiredFacts.sttyRestored}；证据 ${root}`);
+const gaps=Object.entries(requiredFacts).filter(([,value])=>value!==true).map(([key])=>key);if(gaps.length)console.log('未满足：'+gaps.join(', '));
+save('operator.json',{at:new Date().toISOString(),...binding,status:'NOT_REQUESTED_AUTOMATED_NATIVE_INTEGRATION',source:'automated native fixture; no human P/F/U rating'});
+const machinePass=Object.values(requiredFacts).every(value=>value===true)&&automationFailure===null;
+save('workflow.json',{...binding,operator:'NOT REQUESTED',machine:machinePass?'PASS':'FAIL',humanAcceptance:'NOT CLAIMED',automationFailure,paidProvider:'NOT RUN',notes:'Native ProcessTerminal with synthetic input through normal callback; original historical human observations remain separate.'});
+save('result.json',{at:new Date().toISOString(),status:machinePass?'PASS':'FAIL',...binding,requiredFacts,automationFailure,elapsedMs:performance.now()-began,syntheticRequests:prepRequests+prompts.length,realProviderRequests:0,vmStarts:0,rawRestored:requiredFacts.rawRestored,sttyRestored:requiredFacts.sttyRestored,humanAcceptance:'NOT CLAIMED'});
+console.log(`Native cold recovery retained: ${root}`);process.exitCode=machinePass?0:1;
