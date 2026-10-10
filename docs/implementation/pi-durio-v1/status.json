@@ -1048,7 +1048,11 @@
         "docs/implementation/pi-durio-v1/issue-30/coordinator-preparation.json",
         "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/merge-preparation-readback.json",
         "docs/implementation/pi-durio-v1/issue-30/final-9aed1af/authorization-request.md",
-        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af/grant-preflight.json"
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af/grant-preflight.json",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/report.json",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/NEXT-BATCH-PLAN.md",
+        "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/plan.json"
       ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T234529Z/issue-30.json",
       "preparation": {
@@ -1181,6 +1185,31 @@
         "accountLimit": "NOT CONFIGURED",
         "singleStart": "CONSUMED; no automatic repeat",
         "diagnosisOwner": "/root/budget3_batch"
+      },
+      "postrun_diagnosis": {
+        "status": "COMPLETE_READ_ONLY",
+        "report": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md",
+          "bytes": 4886,
+          "sha256": "53cda0295f5ee5f5b95c59b54007059bd6d895c7da7f74878fe6f1ba9e91583f"
+        },
+        "facts": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/observed-facts.json",
+          "bytes": 66812,
+          "sha256": "0a1fde9544203d4004a0bed65af2b977024747e22bb04d3345fb085443c35925"
+        },
+        "sourcePreservation": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/preservation-check.json",
+          "bytes": 572,
+          "sha256": "ca267726abea5bc06d5341aa39d26a29b4041674ccb8bd00dfea5a0a47006417"
+        },
+        "nextBatchPlan": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/plan.json",
+          "bytes": 7409,
+          "sha256": "f05396132b9c3b42670a91c015a5898cb019f9a17f9122fc1d0257c92be2fa6c"
+        },
+        "integrated_sha": "005a2380a0e6895bf18bc5475437b0c07cc84f8e",
+        "preparationStatus": "MATERIALIZING_NOT_AUTHORIZED_NOT_RUN"
       }
     },
     "31": {
@@ -1217,7 +1246,10 @@
         "docs/implementation/pi-durio-v1/issue-31/final-9aed1af/native-report.md",
         "docs/implementation/pi-durio-v1/issue-31/final-9aed1af/native-followup-r1-summary.json",
         "docs/implementation/pi-durio-v1/issue-31/final-9aed1af/native-followup-r1-report.md",
-        "docs/implementation/pi-durio-v1/issue-31/final-9aed1af/native-evidence-disposition-r1.json"
+        "docs/implementation/pi-durio-v1/issue-31/final-9aed1af/native-evidence-disposition-r1.json",
+        "docs/implementation/pi-durio-v1/issue-31/final-9aed1af/contract-evidence-index-r2.json",
+        "docs/implementation/pi-durio-v1/issue-31/final-9aed1af/contract-evidence-index-r2.md",
+        "docs/implementation/pi-durio-v1/issue-31/final-9aed1af/contract-evidence-index-r2-static-check.json"
       ],
       "remote_snapshot": "/Users/nineofour/pi-durio-v1-run/remote/20261009T234529Z/issue-31.json",
       "independent_preparation": {
@@ -1277,6 +1309,15 @@
         "summary": "evidence/issue-31/final-9aed1af/native-followup-r1-summary.json",
         "report": "evidence/issue-31/final-9aed1af/native-followup-r1-report.md",
         "integrated_sha": "3b983727ed65726eaf59c56af10816410025f080"
+      },
+      "current_index": {
+        "status": "PARTIAL",
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/contract-evidence-index-r2.json",
+          "bytes": 334921,
+          "sha256": "a8022a362c954c916f300de88f3b46b86f6c7fd44b966fcbf9f5165c5264a78c"
+        },
+        "integrated_sha": "61b5934e1adc805310a1afcc6cad749dd075d5d2"
       }
     },
     "32": {
@@ -1300,7 +1341,7 @@
   },
   "frontier": [],
   "bootstrap_sha": "25d311616136766b37c0274f3f490ec1105f9592",
-  "integration_tip": "3b983727ed65726eaf59c56af10816410025f080",
+  "integration_tip": "61b5934e1adc805310a1afcc6cad749dd075d5d2",
   "model_execution": {
     "coordinator": "actual model not attestable with current tools",
     "children": {
@@ -1310,7 +1351,7 @@
       "backend_attestation": "not exposed"
     }
   },
-  "updated_at": "2026-10-10T06:03:06.371194+00:00",
+  "updated_at": "2026-10-10T06:14:15.020386+00:00",
   "last_remote_readback": "/Users/nineofour/pi-durio-v1-run/review/9aed1af/publication-final/readback.json",
   "shared_interfaces": {
     "accepted_task_queue": {
@@ -1364,7 +1405,7 @@
       "acceptedMerge": "a35cb3b672f412d0e6330b43ad947c24a085b9b1"
     }
   },
-  "root_write_owner": "/root coordinator; merger handoff complete",
+  "root_write_owner": "/root coordinator after #30 diagnosis and #31 r2 index serial merges",
   "heavy_validation_window": {
     "owner": "NONE_ACTIVE",
     "scope": "paid one-start batch STOPPED; no implicit repeat; native followup complete; independent readonly diagnosis/docs continue"
@@ -1551,7 +1592,12 @@
       "paid #30 remaining cases and actual improve closure",
       "full technical acceptance",
       "human daily-use acceptance"
-    ]
+    ],
+    "currentIndex": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/contract-evidence-index-r2.json",
+      "bytes": 334921,
+      "sha256": "a8022a362c954c916f300de88f3b46b86f6c7fd44b966fcbf9f5165c5264a78c"
+    }
   },
   "publication": {
     "status": "NEW_EVIDENCE_LOCAL_PENDING_PUBLICATION",
@@ -1575,7 +1621,7 @@
       "grantReceived": true,
       "credentialSource": "/Users/nineofour/Durio/api.env; user explicitly permitted; value never retained",
       "result": "evidence/issue-30/final-9aed1af-usd3-r2/batch-result.json",
-      "nextAction": "Prepare read-only failure diagnosis and concrete next batch before requesting another paid start"
+      "nextAction": "Diagnostic complete; materialize and independently review supplement harness before requesting new one-start authorization"
     },
     "nativeBatch": {
       "status": "COMPLETED_WITH_RETAINED_FIRST_FAILURE_AND_SUCCESSFUL_TARGETED_FOLLOWUP",

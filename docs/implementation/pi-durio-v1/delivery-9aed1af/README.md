@@ -2,7 +2,7 @@
 
 产品候选 `9aed1af6ee3b156bb7354961496217aa5e64843e`，tree `d76896b400bb90c3beb82d847d9b43ba86fc5a07`。sourceBuild SHA256 `0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886`；固定分发包 SHA256 `3628f9fd3e6c66cf7cd123dd9ea3dc6260c3be07ffb556d0972197e221d66d9a`。文档回写 tip 另外通过 Git/PR 读回，不覆盖上述实际执行身份。
 
-适用独立评审和检查已完成；全产品技术及日用验收仍未完成。[22 票状态](../status.md)与[合同逐项索引](../issue-31/final-9aed1af/contract-evidence-index.json)记录完成范围及缺口。
+适用独立评审和检查已完成；全产品技术及日用验收仍未完成。[22 票状态](../status.md)与[合同逐项索引 r2](../issue-31/final-9aed1af/contract-evidence-index-r2.json)记录完成范围及缺口，原索引和首失败仍保留。
 
 ## 检查与修复
 

@@ -7,7 +7,8 @@
 固定候选独立 Spec / Standards 的受影响复审均 PASS，硬问题为 0，保留 2 个可选 smell。原组合测试 **251 / 250 PASS / 1 FAIL** 保持原记录；当前采用有内容身份和适用性说明的旧检查复用，加截止时间/取消及受影响真实 VM 路径验证，没有新全套 PASS 声明。
 
 - [Spec 评审](review/9aed1af/spec-review.md) · [Standards 评审](review/9aed1af/standards-review.md) · [当前检查 gate](review/9aed1af/applicable-check-gate.json)。
-- [本地测量](issue-31/final-9aed1af/partial-report.md) · [原生 Terminal 首批](issue-31/final-9aed1af/native-report.md) · [定向补测](issue-31/final-9aed1af/native-followup-r1-report.md) · [原合同索引](issue-31/final-9aed1af/contract-evidence-index.md)。
+- [本地测量](issue-31/final-9aed1af/partial-report.md) · [原生 Terminal 首批](issue-31/final-9aed1af/native-report.md) · [定向补测](issue-31/final-9aed1af/native-followup-r1-report.md) · [当前 62 合同 / 22 ACC / 7 MET 索引](issue-31/final-9aed1af/contract-evidence-index-r2.md)。
+- [真实首批诊断](issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md) · [待落实的补充方案](issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/NEXT-BATCH-PLAN.md)。
 - [安装及 npm 兼容性限制](delivery-9aed1af/npm-diagnosis-REPORT.md) · [完整交付边界](delivery-9aed1af/README.md)。
 
 | 票 | 实际状态 | 前置票 | 主要证据 / 未完成项 |
@@ -31,7 +32,7 @@
 | [#27](https://github.com/nineofoursyrup/pi-durio/issues/27) 任务验收三率与执行、验收双时钟 | 本票适用验收完成 | #17, #18 | [证据](issue-27/README.md) |
 | [#28](https://github.com/nineofoursyrup/pi-durio/issues/28) 全样本成本与任务、尝试故障报告 | 本票适用验收完成 | #27 | [证据](issue-28/README.md) |
 | [#29](https://github.com/nineofoursyrup/pi-durio/issues/29) 低打扰人工介入与交付后返工报告 | 本票适用验收完成 | #27 | [证据](issue-29/README.md) |
-| [#30](https://github.com/nineofoursyrup/pi-durio/issues/30) 真实 DeepSeek 代表任务与 improve 执行闭环 | 首次付费批次 STOPPED，未完成 | #25 | local-fix PASS；multi-file 未完成；regression/no-change 和真实 improve 未运行。保留首次失败，追加启动需具体批次授权 |
+| [#30](https://github.com/nineofoursyrup/pi-durio/issues/30) 真实 DeepSeek 代表任务与 improve 执行闭环 | 首次付费批次 STOPPED，未完成 | #25 | [诊断](issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md)：local-fix PASS；multi-file 未完成；regression/no-change 和真实 improve 未运行。保留首次失败，追加启动需具体批次授权 |
 | [#31](https://github.com/nineofoursyrup/pi-durio/issues/31) 首版技术验收与轻量实测报告 | 原生技术批次已补齐，整体 PARTIAL | #19, #28, #29, #26, #20, #30 | [定向补测与边界](issue-31/final-9aed1af/native-followup-r1-report.md)；待 #30 及完整技术验收 |
 | [#32](https://github.com/nineofoursyrup/pi-durio/issues/32) 本机试用与明确日用接受 | 未运行，等待 #31 | #31 | 需用户在自己的 Mac 实际试用并明确接受；agent 不代答 |
 
@@ -41,4 +42,4 @@
 
 原生首批三个 idle 和 60+2 个任务测量完成；组合步骤因 harness 在异步报告生成前读取而失败，原件保留。定向补测只修复该轮询，并完成 compaction、合成 improve 选择、隔离回归、fixture 正式写回、下一任务读取，以及 30 次查询和 5 次 1 MiB 完整导出。它们不代替真实 improve 或 #32 人工接受。
 
-当前前沿：完成 #30 首失败诊断并准备新的具体付费批次，再请求新的一次启动；原 USD 3 上限和许可凭据来源继续沿用，实际未来 improve 候选仍须用户具体选择。原批次禁止自动重复，#31/#32 不能提前记为完成。
+当前前沿：#30 首失败诊断已完成，正在把补充方案落实为新的冻结批次和启动检查。新批次只执行剩余三例及 improve，新增最多 32 请求，连同原 15 次最多 47 次；新增最多 2,372,501 token，连同已用量累计 240 万 token / 保守估算 USD 2.88。原 USD 3 上限和许可凭据来源继续沿用，实际未来 improve 候选仍须用户具体选择。准备和独立复核完成后，再请求新的一次启动；原批次禁止自动重复，#31/#32 不能提前记为完成。
