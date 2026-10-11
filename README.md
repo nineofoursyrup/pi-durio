@@ -2,7 +2,7 @@
 
 面向 macOS arm64 / Node >=22.19.0 的本地 coding agent，复用 Pi runtime，保留运行原文，并由用户明确控制恢复、eval 和 improve。
 
-技术验收完成，日用接受待确认。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录 #11–#31 的适用验收完成。产品候选 `f26ae8f` 的真实 DeepSeek coding / improve 闭环、当前本机资源测量和独立 Standards / Spec 复审均有适用证据；历史失败、模型推理错误和 UNKNOWN 保留。见[最终技术接受](docs/implementation/pi-durio-v1/issue-31/TECHNICAL-ACCEPTANCE.md)。#32 的[固定候选试用入口](docs/implementation/pi-durio-v1/issue-32/TRIAL.md)已准备，仍需用户实际试用并明确接受。
+首版实现、技术验收与日用接受已完成。[22 票状态与证据](docs/implementation/pi-durio-v1/status.md)和 [integration Draft PR #33](https://github.com/nineofoursyrup/pi-durio/pull/33)记录 #11–#32 的适用验收完成。产品候选 `f26ae8f` 的真实 DeepSeek coding / improve 闭环、当前本机资源测量和独立 Standards / Spec 复审均有适用证据；历史失败、模型推理错误和 UNKNOWN 保留。用户在 2026-10-11 明确回复“已试用当前版本，日用接受，收尾”，见[日用接受记录](docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/DAILY-ACCEPTANCE.md)和[首版接受汇总](docs/implementation/pi-durio-v1/first-version-acceptance.json)。PR 保持 Draft，Issue 保持 OPEN；尚未将产品合并到 main 或发布 release。
 
 ## 安装与本地演示
 
