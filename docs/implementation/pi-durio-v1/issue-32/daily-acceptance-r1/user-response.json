@@ -1,0 +1,22 @@
+{
+  "schema": "pi-durio.direct-user-daily-acceptance-source.v1",
+  "recordedAt": "2026-10-11T11:14:32.716104+00:00",
+  "userLocalDate": "2026-10-11",
+  "userTimezone": "Asia/Shanghai",
+  "source": {
+    "type": "direct-user-message",
+    "conversation": "current pi-durio implementation conversation",
+    "userText": "已试用当前版本，日用接受，收尾",
+    "exactMessageTimestamp": "NOT_EXPOSED",
+    "timeNote": "recordedAt is the coordinator recording time, not an invented exact message-sent or trial time"
+  },
+  "decision": "DAILY_USE_ACCEPTED",
+  "actualUseAttestedByUser": true,
+  "candidateBinding": {
+    "reference": "当前版本 in direct reply to supplied fixed candidate and #32 trial handoff",
+    "productCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "integrationDocumentationTip": "f346f77e8a9438aeeabb0a0dad67aaff7aa8bbbc",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "scope": "Record #32 acceptance and finish authorized implementation branch/PR progress closeout. Existing restrictions on main product merge, release and Issue closure remain; no new paid batch."
+}
