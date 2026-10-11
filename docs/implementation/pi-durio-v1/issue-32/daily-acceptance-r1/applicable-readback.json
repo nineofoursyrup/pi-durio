@@ -1,0 +1,767 @@
+{
+  "schema": "pi-durio.daily-acceptance-readback.v1",
+  "at": "2026-10-11T11:19:17.705778+00:00",
+  "status": "PASS_APPLICABILITY_AND_READONLY_TRIAL_READBACK",
+  "documentationBase": {
+    "commit": "f346f77e8a9438aeeabb0a0dad67aaff7aa8bbbc",
+    "tree": "6eab9eb1c55e88bed1f4d2e45da01b543737a992",
+    "priorIssue32Commit": "4cbebb8dc1f475945483f8b38eec48eab401327f",
+    "fastForwardOnly": true
+  },
+  "issueReadback": {
+    "number": 32,
+    "title": "本机试用与明确日用接受",
+    "state": "OPEN",
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/32",
+    "updatedAt": "2026-10-10T11:37:54Z",
+    "bodyBytes": 1591,
+    "bodySha256": "50d7764c69a3d445f231643bde4e80c19fdae2c0ddae7a6fb3a2fdfb08accacf",
+    "observedAt": "2026-10-11T11:19:17.705778+00:00",
+    "writePerformed": false
+  },
+  "technicalApplicability": {
+    "sourceCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "sourceTree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+    "technicalAcceptedTickets": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "independentStandards": "PASS",
+    "independentSpec": "PASS",
+    "unchangedProductPaths": [
+      "src",
+      "test",
+      "scripts",
+      "vendor",
+      "package.json",
+      "package-lock.json",
+      "tsconfig.json"
+    ],
+    "productDiffFromCandidateToBase": [],
+    "identityChecks": {
+      "sourceBuild": {
+        "expected": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+          "bytes": 92984,
+          "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+        },
+        "observed": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/execution/source-build.json",
+          "bytes": 92984,
+          "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+        },
+        "match": true
+      },
+      "cli": {
+        "expected": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/src/cli.js",
+          "bytes": 21189,
+          "sha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b"
+        },
+        "observed": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/src/cli.js",
+          "bytes": 21189,
+          "sha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b"
+        },
+        "match": true
+      },
+      "node": {
+        "expected": {
+          "path": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+          "bytes": 50288,
+          "sha256": "3e401401d90e7f0367b7737a613801242c9a6b2966fb50c2e48eb1c45d701c6a"
+        },
+        "observed": {
+          "path": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+          "bytes": 50288,
+          "sha256": "3e401401d90e7f0367b7737a613801242c9a6b2966fb50c2e48eb1c45d701c6a"
+        },
+        "match": true
+      }
+    },
+    "fullInstallationInventoryRescanned": false,
+    "references": {
+      "technicalAcceptance": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/technical-acceptance.json",
+        "bytes": 2210,
+        "sha256": "a5dcd3f6796cb82270385e5c4e806a10e009a283ae4476a7092dd157e34d0c12"
+      },
+      "technicalAcceptanceSummary": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/TECHNICAL-ACCEPTANCE.md",
+        "bytes": 1619,
+        "sha256": "137a93e07b7d3492aea0e15f06f8d3bf2a96a7a272f4282ea6f1544e179b2184"
+      },
+      "independentReview": {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/review.json",
+        "bytes": 6495,
+        "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a"
+      },
+      "technicalReport": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/REPORT.md",
+        "bytes": 8986,
+        "sha256": "2e2178e818bd6cd4d72d63e575ea419fe9685e873b4d7e8cead1b6d96880f601"
+      },
+      "contractIndex": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.json",
+        "bytes": 140385,
+        "sha256": "228624816baedb82189d9b5f7539e72bbbe2001f430b29094feab156d6215fa5"
+      },
+      "startupRecovery": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/STARTUP-RECOVERY.md",
+        "bytes": 3868,
+        "sha256": "4e0e3366b61669b1327447b1855fc9e16c98f7aa67574148c803d80e417f7536"
+      },
+      "nativeMeasurements": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/NATIVE-REPORT.md",
+        "bytes": 4303,
+        "sha256": "9619c65c7b5aabb521bbe799c94d148dda0607d8d09b586e5162206495e23336"
+      },
+      "evidenceApplicability": {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.json",
+        "bytes": 45425,
+        "sha256": "6f5e56fac683f032d6c5c7352f403c9300add6056b985d3bcae43a3e16c4bb9d"
+      },
+      "installLimits": {
+        "path": "docs/implementation/pi-durio-v1/delivery-9aed1af/npm-diagnosis-REPORT.md",
+        "bytes": 10646,
+        "sha256": "08d5f92945847b0a67f7a7beee1777b3addf657615befa52a84f4281f6a6a161"
+      }
+    },
+    "historicalHandoffReview": {
+      "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/handoff-final/review.json",
+      "bytes": 3530,
+      "sha256": "fb6b6897b1c570a54f23d4af0442461463add516ae03d067c5c972f00d9ab95a"
+    },
+    "scope": "Reuse unchanged technical inputs and accepted bounded evidence. This is document/read-only applicability verification, not a new whole-suite, Terminal, provider or installation test."
+  },
+  "userResponseSource": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-32/daily-acceptance-r1/user-response.json",
+    "bytes": 1168,
+    "sha256": "29c3447c9906774c867fc17a82d09fdbb3e50369f538fcd482e00c937accad0c"
+  },
+  "trialReadback": {
+    "dataRoot": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo",
+    "mode": "offline",
+    "workspace": "/Users/nineofour/Durio/test/fixtures/project",
+    "method": "Python sqlite3 URI mode=ro&immutable=1 after confirming no WAL or SHM; schema inspected before SELECT. No product import, Harness.open, recovery or writable SQLite connection.",
+    "schema": [
+      {
+        "name": "records",
+        "sql": "CREATE TABLE records (seq INTEGER PRIMARY KEY, run_id TEXT NOT NULL, kind TEXT NOT NULL, at TEXT NOT NULL, body TEXT NOT NULL)"
+      }
+    ],
+    "recordCount": 77,
+    "runs": [
+      {
+        "runId": "86be33b0-b74a-48ac-b3b7-94f00aeedca6",
+        "taskId": "301a1276-535b-4f9d-9d01-375aad8025b8",
+        "sessionId": "613e0f5d-0109-4aca-af35-c6f4a1bd23d8",
+        "acceptedAt": "2026-10-10T11:51:16.832Z",
+        "startedAt": "2026-10-10T11:51:22.099Z",
+        "closedAt": "2026-10-10T11:51:22.579Z",
+        "mode": "offline",
+        "status": "completed",
+        "observation": "ok",
+        "cleanup": "confirmed",
+        "sourceRecords": [
+          {
+            "seq": 2,
+            "kind": "task.accepted",
+            "sha256": "59749b89b9c97603c744e90af69b44b86ffee29f7d0adeedb05fe5eacc3fb679"
+          },
+          {
+            "seq": 4,
+            "kind": "execution.artifact",
+            "sha256": "0cad1c2da4afeacf8fe90462bbadb7a62059c9a8153a23d49676d96a7b487dfe"
+          },
+          {
+            "seq": 5,
+            "kind": "execution.config",
+            "sha256": "1ca45ddf92eea8dc5fdfcb4a3cb0f5a8686f25b6dab084fdeef7b9b0f81ff8fb"
+          },
+          {
+            "seq": 7,
+            "kind": "run.started",
+            "sha256": "a23b40bc9e4354871657c40d0f74d4f44ceb91cba30723d4b276ff53ab834960"
+          },
+          {
+            "seq": 47,
+            "kind": "run.closed",
+            "sha256": "812a6b99f64c9fcf30c67e61af2292b2dd12d480fcd960d84682b73a63fddc3e"
+          }
+        ]
+      },
+      {
+        "runId": "6141c3c6-84f1-4010-ad28-cdff115e3fc2",
+        "taskId": "ca20b46b-629c-49dc-bde3-89551ece0e79",
+        "sessionId": "10bb5d34-3995-45f2-8c90-2b46beb5e598",
+        "acceptedAt": "2026-10-10T11:52:51.930Z",
+        "startedAt": "2026-10-10T11:52:52.480Z",
+        "closedAt": "2026-10-10T11:52:52.715Z",
+        "mode": "offline",
+        "status": "completed",
+        "observation": "ok",
+        "cleanup": "confirmed",
+        "sourceRecords": [
+          {
+            "seq": 49,
+            "kind": "task.accepted",
+            "sha256": "e2c9174715a4042b98d438eab6599c764ea21874aad04afd1e9e4f37924e0033"
+          },
+          {
+            "seq": 51,
+            "kind": "execution.artifact",
+            "sha256": "0cad1c2da4afeacf8fe90462bbadb7a62059c9a8153a23d49676d96a7b487dfe"
+          },
+          {
+            "seq": 52,
+            "kind": "execution.config",
+            "sha256": "1ca45ddf92eea8dc5fdfcb4a3cb0f5a8686f25b6dab084fdeef7b9b0f81ff8fb"
+          },
+          {
+            "seq": 55,
+            "kind": "run.started",
+            "sha256": "eef0b219af70576258cde053c610af0448d56847a3efcc69f42196106928a413"
+          },
+          {
+            "seq": 77,
+            "kind": "run.closed",
+            "sha256": "9ade41537a9feef4593c5762db0a122724ea821379ec3cf0497bb80803ead966"
+          }
+        ]
+      }
+    ],
+    "selectedRecords": [
+      {
+        "seq": 2,
+        "runId": "86be33b0-b74a-48ac-b3b7-94f00aeedca6",
+        "kind": "task.accepted",
+        "at": "2026-10-10T11:51:16.832Z",
+        "object": {
+          "sha256": "59749b89b9c97603c744e90af69b44b86ffee29f7d0adeedb05fe5eacc3fb679",
+          "bytes": 616
+        },
+        "selected": {
+          "taskId": "301a1276-535b-4f9d-9d01-375aad8025b8",
+          "sessionId": "613e0f5d-0109-4aca-af35-c6f4a1bd23d8",
+          "workspace": "/Users/nineofour/Durio/test/fixtures/project",
+          "mode": "offline",
+          "origin": {
+            "kind": "coding",
+            "source": "synthetic"
+          }
+        }
+      },
+      {
+        "seq": 4,
+        "runId": "86be33b0-b74a-48ac-b3b7-94f00aeedca6",
+        "kind": "execution.artifact",
+        "at": "2026-10-10T11:51:22.059Z",
+        "object": {
+          "sha256": "0cad1c2da4afeacf8fe90462bbadb7a62059c9a8153a23d49676d96a7b487dfe",
+          "bytes": 32534
+        },
+        "selected": {
+          "id": "f320da6db52a8c1703e2b08e7a0feb9ece4e8bb289704e77c77cc1ce924cf860",
+          "node": "v26.8.2",
+          "platform": "darwin",
+          "arch": "arm64",
+          "workspace": "/Users/nineofour/Durio/test/fixtures/project",
+          "candidateFiles": [
+            {
+              "path": "dist/execution/source-build.json",
+              "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+              "bytes": 92984
+            },
+            {
+              "path": "dist/src/cli.js",
+              "sha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b",
+              "bytes": 21189
+            }
+          ]
+        }
+      },
+      {
+        "seq": 5,
+        "runId": "86be33b0-b74a-48ac-b3b7-94f00aeedca6",
+        "kind": "execution.config",
+        "at": "2026-10-10T11:51:22.067Z",
+        "object": {
+          "sha256": "1ca45ddf92eea8dc5fdfcb4a3cb0f5a8686f25b6dab084fdeef7b9b0f81ff8fb",
+          "bytes": 1351
+        },
+        "selected": {
+          "mode": "offline",
+          "modelConfiguration": {
+            "id": "deepseek-flash",
+            "provider": "deepseek",
+            "type": "chat"
+          },
+          "modelConfigurationIsInferenceEvidence": false
+        }
+      },
+      {
+        "seq": 7,
+        "runId": "86be33b0-b74a-48ac-b3b7-94f00aeedca6",
+        "kind": "run.started",
+        "at": "2026-10-10T11:51:22.099Z",
+        "object": {
+          "sha256": "a23b40bc9e4354871657c40d0f74d4f44ceb91cba30723d4b276ff53ab834960",
+          "bytes": 245
+        },
+        "selected": {
+          "taskId": "301a1276-535b-4f9d-9d01-375aad8025b8",
+          "sessionId": "613e0f5d-0109-4aca-af35-c6f4a1bd23d8",
+          "conversationId": 1
+        }
+      },
+      {
+        "seq": 47,
+        "runId": "86be33b0-b74a-48ac-b3b7-94f00aeedca6",
+        "kind": "run.closed",
+        "at": "2026-10-10T11:51:22.579Z",
+        "object": {
+          "sha256": "812a6b99f64c9fcf30c67e61af2292b2dd12d480fcd960d84682b73a63fddc3e",
+          "bytes": 1144
+        },
+        "selected": {
+          "status": "completed",
+          "observation": "ok",
+          "cleanup": "confirmed",
+          "lifecycle": {
+            "intent": null,
+            "disposition": "completed",
+            "cleanupTimeoutMs": 10000,
+            "storage": "closed",
+            "owner": "release-after-host-close",
+            "remoteTermination": "unknown"
+          }
+        }
+      },
+      {
+        "seq": 49,
+        "runId": "6141c3c6-84f1-4010-ad28-cdff115e3fc2",
+        "kind": "task.accepted",
+        "at": "2026-10-10T11:52:51.930Z",
+        "object": {
+          "sha256": "e2c9174715a4042b98d438eab6599c764ea21874aad04afd1e9e4f37924e0033",
+          "bytes": 621
+        },
+        "selected": {
+          "taskId": "ca20b46b-629c-49dc-bde3-89551ece0e79",
+          "sessionId": "10bb5d34-3995-45f2-8c90-2b46beb5e598",
+          "workspace": "/Users/nineofour/Durio/test/fixtures/project",
+          "mode": "offline",
+          "origin": {
+            "kind": "coding",
+            "source": "synthetic"
+          }
+        }
+      },
+      {
+        "seq": 51,
+        "runId": "6141c3c6-84f1-4010-ad28-cdff115e3fc2",
+        "kind": "execution.artifact",
+        "at": "2026-10-10T11:52:52.451Z",
+        "object": {
+          "sha256": "0cad1c2da4afeacf8fe90462bbadb7a62059c9a8153a23d49676d96a7b487dfe",
+          "bytes": 32534
+        },
+        "selected": {
+          "id": "f320da6db52a8c1703e2b08e7a0feb9ece4e8bb289704e77c77cc1ce924cf860",
+          "node": "v26.8.2",
+          "platform": "darwin",
+          "arch": "arm64",
+          "workspace": "/Users/nineofour/Durio/test/fixtures/project",
+          "candidateFiles": [
+            {
+              "path": "dist/execution/source-build.json",
+              "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+              "bytes": 92984
+            },
+            {
+              "path": "dist/src/cli.js",
+              "sha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b",
+              "bytes": 21189
+            }
+          ]
+        }
+      },
+      {
+        "seq": 52,
+        "runId": "6141c3c6-84f1-4010-ad28-cdff115e3fc2",
+        "kind": "execution.config",
+        "at": "2026-10-10T11:52:52.452Z",
+        "object": {
+          "sha256": "1ca45ddf92eea8dc5fdfcb4a3cb0f5a8686f25b6dab084fdeef7b9b0f81ff8fb",
+          "bytes": 1351
+        },
+        "selected": {
+          "mode": "offline",
+          "modelConfiguration": {
+            "id": "deepseek-flash",
+            "provider": "deepseek",
+            "type": "chat"
+          },
+          "modelConfigurationIsInferenceEvidence": false
+        }
+      },
+      {
+        "seq": 55,
+        "runId": "6141c3c6-84f1-4010-ad28-cdff115e3fc2",
+        "kind": "run.started",
+        "at": "2026-10-10T11:52:52.480Z",
+        "object": {
+          "sha256": "eef0b219af70576258cde053c610af0448d56847a3efcc69f42196106928a413",
+          "bytes": 246
+        },
+        "selected": {
+          "taskId": "ca20b46b-629c-49dc-bde3-89551ece0e79",
+          "sessionId": "10bb5d34-3995-45f2-8c90-2b46beb5e598",
+          "conversationId": 1
+        }
+      },
+      {
+        "seq": 77,
+        "runId": "6141c3c6-84f1-4010-ad28-cdff115e3fc2",
+        "kind": "run.closed",
+        "at": "2026-10-10T11:52:52.715Z",
+        "object": {
+          "sha256": "9ade41537a9feef4593c5762db0a122724ea821379ec3cf0497bb80803ead966",
+          "bytes": 1145
+        },
+        "selected": {
+          "status": "completed",
+          "observation": "ok",
+          "cleanup": "confirmed",
+          "lifecycle": {
+            "intent": null,
+            "disposition": "completed",
+            "cleanupTimeoutMs": 10000,
+            "storage": "closed",
+            "owner": "release-after-host-close",
+            "remoteTermination": "unknown"
+          }
+        }
+      }
+    ],
+    "environmentFromExecutionArtifact": {
+      "platform": "darwin",
+      "architecture": "arm64",
+      "nodeVersion": "v26.8.2",
+      "sourceSequences": [
+        4,
+        51
+      ]
+    },
+    "terminalObservation": {
+      "application": "UNKNOWN_NOT_RECORDED_IN_RUN_METADATA",
+      "profile": "UNKNOWN",
+      "font": "UNKNOWN",
+      "dimensions": "UNKNOWN",
+      "expectedEntry": "Apple Terminal per original TRIAL.md; actual application/profile/font were not independently captured by this readback."
+    },
+    "scope": "Two recorded offline fixture runs with synthetic source and read-only tool authorization; supplementary evidence for user-attested actual use. No new real-provider/coding capability claim.",
+    "dispatchInterpretation": "Recorded model.dispatch events belong to configured offline transport. Provider/model names and endpoint text do not attest physical provider requests or real inference; supplied --offline-demo maps to deterministic demoTransport in unchanged src/cli.ts and src/offline.ts.",
+    "realTaskSuggestedDataRoot": {
+      "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial",
+      "existsAtReadback": false,
+      "otherUserRealTaskActivity": "UNKNOWN_NOT_INFERRED"
+    },
+    "timing": "Run timestamps are persisted execution events, not human trial start/end or total trial duration. Exact human trial duration UNKNOWN.",
+    "databasesBefore": [
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/host.sqlite",
+        "bytes": 28672,
+        "sha256": "04ead612f90aa059a3f08b96f444dd3b4401ccaa0bfdff9b53946295ee94ac9c"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/sessions/10bb5d34-3995-45f2-8c90-2b46beb5e598/durable.sqlite",
+        "bytes": 118784,
+        "sha256": "015c3ebcde6d10d1da1d8f12a67a2b7b76b7fe871883e837838be84579182164"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/sessions/613e0f5d-0109-4aca-af35-c6f4a1bd23d8/durable.sqlite",
+        "bytes": 118784,
+        "sha256": "f4b80adff8d2f06588355f2868f427800fea012ae9823b13028ca8bc804f72cb"
+      }
+    ],
+    "databasesAfter": [
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/host.sqlite",
+        "bytes": 28672,
+        "sha256": "04ead612f90aa059a3f08b96f444dd3b4401ccaa0bfdff9b53946295ee94ac9c"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/sessions/10bb5d34-3995-45f2-8c90-2b46beb5e598/durable.sqlite",
+        "bytes": 118784,
+        "sha256": "015c3ebcde6d10d1da1d8f12a67a2b7b76b7fe871883e837838be84579182164"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/sessions/613e0f5d-0109-4aca-af35-c6f4a1bd23d8/durable.sqlite",
+        "bytes": 118784,
+        "sha256": "f4b80adff8d2f06588355f2868f427800fea012ae9823b13028ca8bc804f72cb"
+      }
+    ],
+    "walAndShmAbsentBeforeAndAfter": true,
+    "selectedObjects": [
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/59749b89b9c97603c744e90af69b44b86ffee29f7d0adeedb05fe5eacc3fb679",
+        "bytes": 616,
+        "sha256": "59749b89b9c97603c744e90af69b44b86ffee29f7d0adeedb05fe5eacc3fb679"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/0cad1c2da4afeacf8fe90462bbadb7a62059c9a8153a23d49676d96a7b487dfe",
+        "bytes": 32534,
+        "sha256": "0cad1c2da4afeacf8fe90462bbadb7a62059c9a8153a23d49676d96a7b487dfe"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+        "bytes": 92984,
+        "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b",
+        "bytes": 21189,
+        "sha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/1ca45ddf92eea8dc5fdfcb4a3cb0f5a8686f25b6dab084fdeef7b9b0f81ff8fb",
+        "bytes": 1351,
+        "sha256": "1ca45ddf92eea8dc5fdfcb4a3cb0f5a8686f25b6dab084fdeef7b9b0f81ff8fb"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/a23b40bc9e4354871657c40d0f74d4f44ceb91cba30723d4b276ff53ab834960",
+        "bytes": 245,
+        "sha256": "a23b40bc9e4354871657c40d0f74d4f44ceb91cba30723d4b276ff53ab834960"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/812a6b99f64c9fcf30c67e61af2292b2dd12d480fcd960d84682b73a63fddc3e",
+        "bytes": 1144,
+        "sha256": "812a6b99f64c9fcf30c67e61af2292b2dd12d480fcd960d84682b73a63fddc3e"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/e2c9174715a4042b98d438eab6599c764ea21874aad04afd1e9e4f37924e0033",
+        "bytes": 621,
+        "sha256": "e2c9174715a4042b98d438eab6599c764ea21874aad04afd1e9e4f37924e0033"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/eef0b219af70576258cde053c610af0448d56847a3efcc69f42196106928a413",
+        "bytes": 246,
+        "sha256": "eef0b219af70576258cde053c610af0448d56847a3efcc69f42196106928a413"
+      },
+      {
+        "path": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo/objects/9ade41537a9feef4593c5762db0a122724ea821379ec3cf0497bb80803ead966",
+        "bytes": 1145,
+        "sha256": "9ade41537a9feef4593c5762db0a122724ea821379ec3cf0497bb80803ead966"
+      }
+    ],
+    "selectedObjectSizeAndSha256Verified": true,
+    "privacy": "Only candidate/environment/run outcome metadata is exported. User prompts, response text, credentials and unrelated payload content are omitted; session durable databases are hashed without SQL queries."
+  },
+  "preservedOriginals": {
+    "before": [
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-32/TRIAL.md",
+        "bytes": 6661,
+        "sha256": "ce8ad1e3682eac601f7fe0398cae9fb1d5e81cd26dc857c324c57b95932bd197"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-32/pending-acceptance.json",
+        "bytes": 8196,
+        "sha256": "d03ca2a1679ca03fdd9eaeb0e46621c803ee58342f27353334fc2428ec3452ec"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-32/documentation-checks.json",
+        "bytes": 3906,
+        "sha256": "684e6691feafa8a3a5d1cea7d9feb2d475b4f2ba3f909f665607f7029b3216a0"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-32/merge-readback.json",
+        "bytes": 9889,
+        "sha256": "a0c809c4783d25471bd66593deca97c970304c39e54dc4d651f3984e0dcd13b5"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/technical-acceptance.json",
+        "bytes": 2210,
+        "sha256": "a5dcd3f6796cb82270385e5c4e806a10e009a283ae4476a7092dd157e34d0c12"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/TECHNICAL-ACCEPTANCE.md",
+        "bytes": 1619,
+        "sha256": "137a93e07b7d3492aea0e15f06f8d3bf2a96a7a272f4282ea6f1544e179b2184"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/review.json",
+        "bytes": 6495,
+        "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/REPORT.md",
+        "bytes": 8986,
+        "sha256": "2e2178e818bd6cd4d72d63e575ea419fe9685e873b4d7e8cead1b6d96880f601"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.json",
+        "bytes": 140385,
+        "sha256": "228624816baedb82189d9b5f7539e72bbbe2001f430b29094feab156d6215fa5"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/STARTUP-RECOVERY.md",
+        "bytes": 3868,
+        "sha256": "4e0e3366b61669b1327447b1855fc9e16c98f7aa67574148c803d80e417f7536"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/NATIVE-REPORT.md",
+        "bytes": 4303,
+        "sha256": "9619c65c7b5aabb521bbe799c94d148dda0607d8d09b586e5162206495e23336"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.json",
+        "bytes": 45425,
+        "sha256": "6f5e56fac683f032d6c5c7352f403c9300add6056b985d3bcae43a3e16c4bb9d"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/delivery-9aed1af/npm-diagnosis-REPORT.md",
+        "bytes": 10646,
+        "sha256": "08d5f92945847b0a67f7a7beee1777b3addf657615befa52a84f4281f6a6a161"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/handoff-final/review.md",
+        "bytes": 2981,
+        "sha256": "7c6b144ec9882971095429d41deafc774a0b2df4f5eda30cfefea8b29fabaa88"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/handoff-final/review.json",
+        "bytes": 3530,
+        "sha256": "fb6b6897b1c570a54f23d4af0442461463add516ae03d067c5c972f00d9ab95a"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/handoff-final/manifest.json",
+        "bytes": 1047,
+        "sha256": "dd52f308e1dea577ed277b74545e42de280cde82f52fe687c61ee4e8ad4e3940"
+      }
+    ],
+    "after": [
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-32/TRIAL.md",
+        "bytes": 6661,
+        "sha256": "ce8ad1e3682eac601f7fe0398cae9fb1d5e81cd26dc857c324c57b95932bd197"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-32/pending-acceptance.json",
+        "bytes": 8196,
+        "sha256": "d03ca2a1679ca03fdd9eaeb0e46621c803ee58342f27353334fc2428ec3452ec"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-32/documentation-checks.json",
+        "bytes": 3906,
+        "sha256": "684e6691feafa8a3a5d1cea7d9feb2d475b4f2ba3f909f665607f7029b3216a0"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-32/merge-readback.json",
+        "bytes": 9889,
+        "sha256": "a0c809c4783d25471bd66593deca97c970304c39e54dc4d651f3984e0dcd13b5"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/technical-acceptance.json",
+        "bytes": 2210,
+        "sha256": "a5dcd3f6796cb82270385e5c4e806a10e009a283ae4476a7092dd157e34d0c12"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/TECHNICAL-ACCEPTANCE.md",
+        "bytes": 1619,
+        "sha256": "137a93e07b7d3492aea0e15f06f8d3bf2a96a7a272f4282ea6f1544e179b2184"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/review.json",
+        "bytes": 6495,
+        "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/REPORT.md",
+        "bytes": 8986,
+        "sha256": "2e2178e818bd6cd4d72d63e575ea419fe9685e873b4d7e8cead1b6d96880f601"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.json",
+        "bytes": 140385,
+        "sha256": "228624816baedb82189d9b5f7539e72bbbe2001f430b29094feab156d6215fa5"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/STARTUP-RECOVERY.md",
+        "bytes": 3868,
+        "sha256": "4e0e3366b61669b1327447b1855fc9e16c98f7aa67574148c803d80e417f7536"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/NATIVE-REPORT.md",
+        "bytes": 4303,
+        "sha256": "9619c65c7b5aabb521bbe799c94d148dda0607d8d09b586e5162206495e23336"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.json",
+        "bytes": 45425,
+        "sha256": "6f5e56fac683f032d6c5c7352f403c9300add6056b985d3bcae43a3e16c4bb9d"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/delivery-9aed1af/npm-diagnosis-REPORT.md",
+        "bytes": 10646,
+        "sha256": "08d5f92945847b0a67f7a7beee1777b3addf657615befa52a84f4281f6a6a161"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/handoff-final/review.md",
+        "bytes": 2981,
+        "sha256": "7c6b144ec9882971095429d41deafc774a0b2df4f5eda30cfefea8b29fabaa88"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/handoff-final/review.json",
+        "bytes": 3530,
+        "sha256": "fb6b6897b1c570a54f23d4af0442461463add516ae03d067c5c972f00d9ab95a"
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/handoff-final/manifest.json",
+        "bytes": 1047,
+        "sha256": "dd52f308e1dea577ed277b74545e42de280cde82f52fe687c61ee4e8ad4e3940"
+      }
+    ],
+    "unchanged": true
+  },
+  "effects": {
+    "productCommands": 0,
+    "productImports": 0,
+    "productTests": 0,
+    "TUIStarts": 0,
+    "TerminalOperations": 0,
+    "providerRequestsAdded": 0,
+    "VMStarts": 0,
+    "credentialsRead": false,
+    "originalEvidenceWrites": 0,
+    "sharedStatusWrites": 0,
+    "GitHubWrites": 0
+  },
+  "model": {
+    "requested": "gpt-6-astra",
+    "reasoningRequested": "xhigh",
+    "actualBackend": "NOT_ATTESTED"
+  }
+}
