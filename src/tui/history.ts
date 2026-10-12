@@ -1,6 +1,7 @@
 import { matchesKey,stripTerminalSequences,wrapTextWithAnsi,truncateToWidth } from '@earendil-works/pi-tui';
 import { queryHistory,queryEvidence,queryAttempts,readEvidence,resolveEvidence,type HistoryFilter,type HistoryCursor,type EvidenceReference } from '../history.js';
 import { queryUsage } from '../usage-query.js';
+import { withTraceCosts,withUsageCosts } from '../cost-estimate.js';
 import { scopedEvidence } from '../derived-evidence.js';
 
 /** Presentation-only: it has no execution handle, active-session setter or management writer. */
@@ -44,7 +45,7 @@ export class HistoryView {
       if(data==='n'&&this.evidence.next){this.evidencePrevious.push(this.evidence.items[0]?.seq?this.evidence.items[0].seq-1:0);if(this.evidencePrevious.length>64)this.evidencePrevious.shift();this.evidence=queryEvidence(this.root,this.evidence.runId,{snapshot:this.evidence.snapshot,after:this.evidence.next,limit:8});this.selected=0;}
       if(data==='p'&&this.evidencePrevious.length){this.evidence=queryEvidence(this.root,this.evidence.runId,{snapshot:this.evidence.snapshot,after:this.evidencePrevious.pop(),limit:8});this.selected=0;}
       if(data==='t'){this.traceAfter=0;this.tracePrevious=[];this.line=0;this.mode='trace';this.loadTrace();}
-      if(data==='u'){this.content=JSON.stringify(queryUsage(this.root,[this.evidence.runId],this.evidence.snapshot),null,2);this.line=0;this.mode='usage';}
+      if(data==='u'){this.content=JSON.stringify(withUsageCosts(this.root,queryUsage(this.root,[this.evidence.runId],this.evidence.snapshot)),null,2);this.line=0;this.mode='usage';}
       if(matchesKey(data,'enter')&&this.evidence.items[this.selected]){this.detail=this.evidence.items[this.selected];this.offset=0;this.offsets=[];this.line=0;this.mode='detail';this.load();}
       return;
     }
@@ -58,7 +59,7 @@ export class HistoryView {
       if(data==='p'&&this.tracePrevious.length){this.traceAfter=this.tracePrevious.pop()!;this.line=0;this.loadTrace();}
     }
   }
-  private loadTrace(){const page=queryAttempts(this.root,this.evidence!.runId,{snapshot:this.evidence!.snapshot,after:this.traceAfter,limit:4});this.traceNext=page.next;this.content=JSON.stringify(page,null,2);}
+  private loadTrace(){const page=queryAttempts(this.root,this.evidence!.runId,{snapshot:this.evidence!.snapshot,after:this.traceAfter,limit:4});this.traceNext=page.next;this.content=JSON.stringify(withTraceCosts(this.root,page),null,2);}
   private load(){const page=readEvidence(this.root,this.detail!.id,{offset:this.offset,limit:2048});this.content=JSON.stringify(page,null,2);this.next='next'in page?page.next??null:null;}
   scroll(delta:number){this.line=Math.max(0,this.line+delta);this.followSelection=false;}
   render(width:number,height:number) {

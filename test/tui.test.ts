@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { CURSOR_MARKER, TuiAltScreen, stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
-import { ReadOnlyTui } from '../src/tui/app.js';
+import { ReadOnlyTui, exitCostSummary } from '../src/tui/app.js';
 import { HardwareCursorEditor } from '../src/tui/cursor.js';
 import { demoTransport, scriptedTransport } from '../src/offline.js';
 import { readRun, readQueue, readAcceptedTasks, runReadTask } from '../src/runtime.js';
@@ -152,11 +152,41 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     assert.deepEqual(await readRun(join(f.root,'data'),runId),before);
     assert.match(f.screen(),/known/);
     assert.match(f.screen(),/已完成 · ctx 14 \/ 1M · usage/,'final reply usage is exact');
+    // Fixture usage is tiny: a non-zero CNY estimate below one fen is never shown as zero.
+    assert.match(f.screen(),/usage known · in \d+ out \d+ · < ¥0\.01\n/); assert.match(f.screen(),/清理已确认；run r-[0-9a-f]{4,} · 费用 < ¥0\.01/);
     key('\x03'); key('\x03'); const closed=await f.app.closed;
     assert.equal(closed.result?.status,'completed'); assert.equal(closed.result?.cleanup,'confirmed');
+    assert.match(exitCostSummary(join(f.root,'data'),closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01（估算 · 非账单）$/);
     // Without a live runtime the latest reported total stands in, marked as an estimate.
     const terminal=new TestTerminal(),viewer=new ReadOnlyTui({workspace:f.workspace,dataRoot:join(f.root,'data'),runId,draftRoot:join(f.root,'drafts'),mode:'offline',transport:f.transport.fetch,terminal,widthCalibration:false});viewer.start();
     try{await until(()=>viewer.screen().map(stripTerminalSequences).join('\n').includes('ctx ≈14 / 1M'));}finally{await viewer.exit();}
+  } finally { await f.app.exit(); }
+});
+
+test('usage line and exit summary show CNY estimates with unknown and partial requests', async () => {
+  // Rewrites the offline fixture's usage frame per call; undefined drops it so usage stays unknown.
+  const demo=demoTransport(),usages:(Record<string,number>|undefined)[]=[
+    {prompt_tokens:1_000_000,completion_tokens:1_000_000,total_tokens:2_000_000,prompt_cache_hit_tokens:0,prompt_cache_miss_tokens:1_000_000},undefined,
+    {prompt_tokens:10,completion_tokens:4,total_tokens:14}];
+  let call=0;
+  const transport:typeof fetch=async(url,init)=>{
+    const usage=usages[call++],frames=(await (await demo.fetch(url,init)).text()).split('\n\n');
+    const body=frames.flatMap(frame=>!frame.includes('"usage"')?[frame]:usage?[`data: ${JSON.stringify({...JSON.parse(frame.slice(6)),usage})}`]:[]).join('\n\n');
+    return new Response(body,{headers:{'content-type':'text/event-stream'}});
+  };
+  const f=fixture(transport),key=(s:string)=>f.terminal.input(s),dataRoot=join(f.root,'data');
+  f.terminal.columns=140;f.terminal.resize();
+  try {
+    key('Read the readme');key('\r');await until(()=>f.screen().includes('已完成'));
+    // 1M cache-miss input plus 1M output: ¥10.00 at peak, ¥5.00 off-peak; the second response has no usage.
+    assert.match(f.screen(),/ · ≈ ¥(10|5)\.00 \+1 unknown\n/);assert.match(f.screen(),/费用 ≈ ¥(10|5)\.00 \+1 unknown/);
+    const first=(await readRun(dataRoot,readAcceptedTasks(dataRoot).tasks[0].runId!)).result as {sessionId:string};
+    key('Again');key('\r');await until(()=>readAcceptedTasks(dataRoot).tasks.length===2&&f.screen().includes('已完成')&&f.screen().includes('partial'));
+    // No cache-hit count in the provider usage report: the estimate is partial.
+    assert.match(f.screen(),/ · < ¥0\.01 partial\n/);
+    key('\x03');key('\x03');const closed=await f.app.closed;
+    assert.match(exitCostSummary(dataRoot,closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01 partial（估算 · 非账单）$/);
+    assert.match(exitCostSummary(dataRoot,{...closed.result!,sessionId:first.sessionId}),/费用 ≈ ¥(10|5)\.00 \+1 unknown（估算 · 非账单）$/);
   } finally { await f.app.exit(); }
 });
 
