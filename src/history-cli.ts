@@ -3,6 +3,7 @@ import { queryHistory,queryEvidence,queryAttempts,readEvidence,watermark } from 
 import { queryUsage } from './usage-query.js';
 import { scopedEvidence } from './derived-evidence.js';
 import { fixEvidence,verifyFixed,estimateUsage } from './fixed-evidence.js';
+import { withTraceCosts,withUsageCosts } from './cost-estimate.js';
 
 export async function historyCommand(command:string|undefined,root:string,values:Record<string,unknown>) {
   if(!command||!['history','evidence','trace','usage','derive','fix','fixed','estimate','export'].includes(command))return false;
@@ -13,8 +14,8 @@ export async function historyCommand(command:string|undefined,root:string,values
   const options={after:number('after'),limit:number('limit'),snapshot:number('snapshot')};
   let result:unknown;
   if(command==='history')result=queryHistory(root,str('filter')?JSON.parse(str('filter')!):{}, {limit:options.limit,cursor:str('cursor')?JSON.parse(str('cursor')!):undefined});
-  else if(command==='trace')result=queryAttempts(root,required('run'),options);
-  else if(command==='usage')result=queryUsage(root,required('run').split(','),options.snapshot);
+  else if(command==='trace')result=withTraceCosts(root,queryAttempts(root,required('run'),options));
+  else if(command==='usage')result=withUsageCosts(root,queryUsage(root,required('run').split(','),options.snapshot));
   else if(command==='fix')result=await fixEvidence(root,{id:required('id'),sources:required('evidence').split(','),dependencies:str('dependencies')?.split(','),purpose:required('purpose')});
   else if(command==='fixed')result=verifyFixed(root,required('evidence'));
   else if(command==='estimate')result=await estimateUsage(root,{id:required('id'),runIds:required('run').split(','),through:options.snapshot??watermark(root),price:JSON.parse(required('price'))});
