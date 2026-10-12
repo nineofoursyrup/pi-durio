@@ -9,6 +9,7 @@ import { ReadOnlyTui } from '../src/tui/app.js';
 import { HardwareCursorEditor } from '../src/tui/cursor.js';
 import { demoTransport, scriptedTransport } from '../src/offline.js';
 import { readRun, readQueue, readAcceptedTasks, runReadTask } from '../src/runtime.js';
+import { resolveDisplayInput } from '../src/display-number.js';
 
 class TestTerminal implements Terminal {
   columns = 80; rows = 24; kittyProtocolActive = false; writes: string[] = []; stopped = false;
@@ -140,7 +141,11 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     assert.match(f.screen(),/保留草稿/); assert.equal(f.transport.calls.length,2);
     assert.doesNotMatch(f.screen(),/model\.provider-event|tool\.summary|attemptId|"runId"/);
     assert.equal(f.screen().match(/Offline fixture readback/g)?.length,1);
-    const runId=f.screen().match(/run ([a-f0-9-]{36})/)?.[1]; assert.ok(runId);
+    // Header, status notice and readback use display numbers; the full identity resolves from them.
+    assert.doesNotMatch(f.screen(),/[a-f0-9]{8}-[a-f0-9]{4}-/);
+    const shown=f.screen().match(/清理已确认；run (r-[0-9a-f]{4,})/)?.[1]; assert.ok(shown);
+    assert.match(f.screen(),/session s-[0-9a-f]{4,} · /);
+    const runId=resolveDisplayInput(join(f.root,'data'),'run',shown); assert.equal(runId,readAcceptedTasks(join(f.root,'data')).tasks[0].runId);
     const before=await readRun(join(f.root,'data'),runId);
     key('\x0f'); key('n'); key('p'); key('\x0c'); key('\x1b'); assert.equal(f.transport.calls.length,2);
     assert.deepEqual(await readRun(join(f.root,'data'),runId),before);

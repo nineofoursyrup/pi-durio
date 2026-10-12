@@ -13,6 +13,7 @@ import { improveCommand } from './improve-cli.js';
 import { evalCommand } from './eval/cli.js';
 import { metricsCommand } from './metrics/cli.js';
 import { storageCommand } from './storage-cli.js';
+import { resolveDisplayInput, readDisplayIndex, DisplayInputError } from './display-number.js';
 
 function lifecycleSignals() {
   const controller=new AbortController();let intent:'stop'|'exit'='exit';
@@ -35,7 +36,7 @@ async function main() {
   } });
   const command = positionals[0];
   if (values.help || !command) {
-    console.log('pi-durio run --workspace PATH --prompt TEXT [--data-root PATH] [--offline-demo] [--coding] [--tool-env-config PATH] [--cleanup-timeout-ms N]\npi-durio tui --workspace PATH [--data-root PATH] [--offline-demo] [--coding] [--run UUID]\npi-durio show --run UUID [--data-root PATH] [--originals] [--after SEQ] [--limit N]\nrun defaults to DeepSeek/deepseek-flash at https://api.deepseek.com; DEEPSEEK_API_KEY is required.\n--offline-demo uses a deterministic README.md fixture transport, with no network or model inference.\nDefault run grants read only; --coding explicitly grants read/write/edit/bash for the stated task. Trusted local bash is not an OS sandbox. File tools support files up to 256 KiB; at most 8 provider attempts.\n--tool-env-config supplies JSON {version,variables} for coding only; values are not added to configuration records. Model API keys are not inherited. Old pending work blocks new execution.\nSIGINT persists stop intent; SIGTERM exits and preserves unfinished work. The first intent is retained. Both show processing and await cleanup (default 10000 ms); timeout leaves unknown and owner evidence for recovery. Cancellation does not undo changes or refund costs.');
+    console.log('pi-durio run --workspace PATH --prompt TEXT [--data-root PATH] [--offline-demo] [--coding] [--tool-env-config PATH] [--cleanup-timeout-ms N]\npi-durio tui --workspace PATH [--data-root PATH] [--offline-demo] [--coding] [--run UUID]\npi-durio show --run UUID [--data-root PATH] [--originals] [--after SEQ] [--limit N]\n--run and --context-run accept a full run UUID or its display number (r-xxxx); an ambiguous display number is rejected with its candidates.\nrun defaults to DeepSeek/deepseek-flash at https://api.deepseek.com; DEEPSEEK_API_KEY is required.\n--offline-demo uses a deterministic README.md fixture transport, with no network or model inference.\nDefault run grants read only; --coding explicitly grants read/write/edit/bash for the stated task. Trusted local bash is not an OS sandbox. File tools support files up to 256 KiB; at most 8 provider attempts.\n--tool-env-config supplies JSON {version,variables} for coding only; values are not added to configuration records. Model API keys are not inherited. Old pending work blocks new execution.\nSIGINT persists stop intent; SIGTERM exits and preserves unfinished work. The first intent is retained. Both show processing and await cleanup (default 10000 ms); timeout leaves unknown and owner evidence for recovery. Cancellation does not undo changes or refund costs.');
     console.log('pi-durio recover --run UUID [--data-root PATH] [--inspect] [--authorization FILE] [--decision FILE] [--offline-demo]\n--inspect reads facts without changing source databases. Detail pages: --after OFFSET --limit N (max 32) --snapshot ID. Original entry JSON: --inspect --snapshot ID --evidence ENTRY_ID|task:TASK_ID [--offset N --limit N] (max 4096 UTF-16 code units). Default recover saves a separate report and exits 75 when input is needed. Authorization JSON declares {workspace,mode,tools,toolEnvironment?}; decision JSON binds {id,snapshotId,action,acceptAdditionalModelAttempts?,resolutions?}. Actions: continue, end, confirm-cleanup. A decision never changes the original unknown facts.\npi-durio control --workspace PATH --prompt TEXT [--coding] [--offline-demo]: NDJSON stdin controls; ready event supplies immutable target. Inputs {action:steer|follow-up|compact|improve,id,input,target}; withdrawal {action:withdraw,decision:{id,requestId,action:withdraw,target,receiptSeq}}; {action:stop|exit}.\npi-durio queue [--inspect] [--data-root PATH] [--run SOURCE_UUID --decision FILE --authorization FILE --offline-demo]: readonly inspect or saved recovery/queue decisions; unresolved queue exits 75.\npi-durio tui --workspace PATH [--coding] [--run UUID]: coding uses the same runtime; --run opens recovery facts without auto continuation.');
     console.log('pi-durio compact --run UUID --id REQUEST_ID --authorization FILE [--data-root PATH] [--offline-demo]; compact --inspect --run UUID is read-only. Compaction retains originals and records generation separately from application. run --context-run UUID imports a verified completed context into a new independent task.');
     console.log('Improve: improve analyze --spec FILE [--offline-demo]; improve list; improve report --id ID [--format text]. Spec explicitly declares workspace, targetRunId, mode and request {id,purpose,limits:{maxRequests,maxTokens,maxRequestTokens,maxDurationMs,maxOutputTokens},sources?}. Analysis only; no candidates selected or executed. Missing limits block before dispatch. Reports and lists are read-only. TUI /improve JSON uses the same request; /improves opens reports. Selection: improve preview|submit --spec FILE; improve decision --id ID; improve continue --spec FILE; improve suppressions; improve restore-suggestion --spec FILE. TUI /improve-select JSON starts unselected and requires aggregate submission. Execute-declared-scope requires explicit formal writeback/activation scope; project/config/prompt/skill, registered self-source builds and independent eval assets are supported. improve defaults --workspace PATH reads current project defaults; improve rollback --spec FILE explicitly restores unchanged batch bytes and subsequent defaults. improve build-default --workspace PATH reads the selected future entry; improve launch --spec FILE explicitly starts a new build process. improve assets --id ID reads independent asset revisions; improve regrade --spec FILE applies a selected grader to saved outcomes on both sides.');
@@ -46,6 +47,8 @@ async function main() {
     return;
   }
   const dataRoot = values['data-root'] ?? join(homedir(), 'Library', 'Application Support', 'pi-durio');
+  // Resolve display numbers before any command opens storage, takes ownership or writes facts.
+  for (const key of ['run', 'context-run'] as const) if (values[key]) values[key] = values[key].split(',').map(input => resolveDisplayInput(dataRoot, 'run', input)).join(',');
   if(metricsCommand(command,dataRoot,values))return;
   if(command==='improve'){await improveCommand(positionals[1],dataRoot,values);return;}
   if(command==='eval'){await evalCommand(positionals[1],dataRoot,values);return;}
@@ -59,7 +62,7 @@ async function main() {
     const exit = await runTui({ dataRoot, workspace: values.workspace, mode: values['offline-demo'] ? 'offline' : 'live', transport: values['offline-demo'] ? demoTransport().fetch : undefined,coding:values.coding,toolEnvironment,runId:values.run });
     const result = exit.result;
     console.log(JSON.stringify({ tui: 'closed', runId: result?.runId, sessionId: result?.sessionId, status: result?.status ?? 'no-task', cleanup: result?.cleanup, usage: result?.usage.completeness ?? 'unknown', draftSaved: exit.draftSaved, error: exit.error?.slice(0,1024) }));
-    if (result) console.log(`Read back: pi-durio show --data-root '${dataRoot.replaceAll("'", "'\\''")}' --run ${result.runId}`);
+    if (result) console.log(`Read back: pi-durio show --data-root '${dataRoot.replaceAll("'", "'\\''")}' --run ${readDisplayIndex(dataRoot).label('run', result.runId)}`);
     process.exitCode = exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : result?.controls?.exitCode??0;
     exitHostIfUnconfirmed(result);
     return;
@@ -141,6 +144,6 @@ async function main() {
 main().catch(error => {
   const message = error instanceof Error ? error.message : String(error);
   const code = message.split(':')[0].split(' ')[0];
-  console.error(JSON.stringify({ error: { code, message } }));
+  console.error(JSON.stringify({ error: { code, message, ...(error instanceof DisplayInputError ? { candidates: error.candidates } : {}) } }));
   process.exitCode = code === 'AUTH_MISSING' ? 78 : code === 'OWNER_CONFLICT' ? 73 : /RECOVERY|DECISION|OWNER_(STILL|CHANGED|IDENTITY|HOST)/.test(code) ? 75 : code === 'RUN_CANCELLED_BEFORE_ACCEPTANCE' ? 130 : 1;
 });
