@@ -6,6 +6,7 @@ import {Evidence,digest,openHostReadonly,readQueue,type ControlTarget} from './e
 import {records,decode,watermark,summarizeRun,queryEvidence,readEvidence,reference,type EvidenceReference} from './history.js';
 import {scopedEvidence} from './derived-evidence.js';
 import {PersistentBudget} from './provider-boundary.js';
+import {readDisplayIndex} from './display-number.js';
 import {scopedImproveDecisions,listImproveSuppressions,suppressionMatch,conditionIdentity,readImproveDecision,improveFacts} from './improve-history.js';
 
 export interface ImproveLimits {maxRequests:number;maxTokens:number;maxRequestTokens:number;maxDurationMs:number;maxOutputTokens:number}
@@ -113,9 +114,9 @@ export function prepareImprove(evidence:Evidence,request:ImproveRequest,target:C
  }};
 }
 
-export function formatImproveReport(value:ReturnType<typeof readImproveReport>) {
- const r=value.report;if(!r)return `improve ${value.id} · ${value.state}\nNo complete report receipt; inspect original run/queue. No implicit continuation.\nSelected: none; execution not started; effect unverified.`;
- return `improve ${r.id} · ${r.state}\nrevision ${r.revision}\nTarget ${r.target.workspace} / session ${r.target.sessionId} / run ${r.target.runId}\nEvidence cutoff ${r.cutoff}; deadline ${r.deadline}\nReport default — Selected: none. Report itself authorizes no execution. Activation: not enabled.\n${r.summary}\nCandidates: ${r.candidates.length} (zero is a valid result)\n`+r.candidates.map(c=>`${c.display} ${c.title}\n${JSON.stringify(c,null,2)}`).join('\n')+`\nSuppressed advice: ${JSON.stringify(r.suppressed??[])}\nSaved decisions and validation facts: ${JSON.stringify(value.decisions??[])}\nCoverage/gaps: ${r.gaps.join('; ')||'none reported; coverage remains scoped'}\nBudget: ${JSON.stringify(r.budget)}\nCurrent evidence availability: ${JSON.stringify(value.availability)}`;
+export function formatImproveReport(value:ReturnType<typeof readImproveReport>,root:string) {
+ const index=readDisplayIndex(root),r=value.report;if(!r)return `improve ${index.label('improve-report',value.id)} · ${value.state}\nNo complete report receipt; inspect original run/queue. No implicit continuation.\nSelected: none; execution not started; effect unverified.`;
+ return `improve ${index.label('improve-report',r.id)} · ${r.state}\nrevision ${r.revision}\nTarget ${r.target.workspace} / session ${r.target.sessionId} / run ${r.target.runId}\nEvidence cutoff ${r.cutoff}; deadline ${r.deadline}\nReport default — Selected: none. Report itself authorizes no execution. Activation: not enabled.\n${r.summary}\nCandidates: ${r.candidates.length} (zero is a valid result)\n`+r.candidates.map(c=>`${index.candidate(c)} ${c.title}\n${JSON.stringify(c,null,2)}`).join('\n')+`\nSuppressed advice: ${JSON.stringify(r.suppressed??[])}\nSaved decisions and validation facts: ${JSON.stringify(value.decisions??[])}\nCoverage/gaps: ${r.gaps.join('; ')||'none reported; coverage remains scoped'}\nBudget: ${JSON.stringify(r.budget)}\nCurrent evidence availability: ${JSON.stringify(value.availability)}`;
 }
 /** Explicit controlled fixture, never used as fallback from live analysis. */
 export function offlineImproveTransport(){const source=scriptedTransport([{name:'evidence_summary',args:{}}]);return {calls:source.calls,fetch:(async(url,init)=>{const response=await source.fetch(url,init);const answer=JSON.stringify({summary:'Controlled zero-candidate report; no model inference.',candidates:[],gaps:['Offline fixture only; true provider analysis remains unverified.']});return new Response((await response.text()).replace('Controlled response: inspect actual tool evidence for acceptance.',JSON.stringify(answer).slice(1,-1)),{headers:{'content-type':'text/event-stream'}});}) as typeof fetch};}

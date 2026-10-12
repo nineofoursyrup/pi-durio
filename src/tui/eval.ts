@@ -1,16 +1,17 @@
 import {matchesKey,stripTerminalSequences,wrapTextWithAnsi,truncateToWidth} from '@earendil-works/pi-tui';
 import {evalReport,formatEvalReport,listEvalPlans} from '../eval/runner.js';
 import {queryEvidence,readEvidence,type EvidenceReference} from '../history.js';
+import {readDisplayIndex,type DisplayIndex} from '../display-number.js';
 /** Readonly report/source viewer. No runner, write operation or current-session capability. */
 export class EvalView{
- private plans:ReturnType<typeof listEvalPlans>;private selected=0;private line=0;private followSelection=true;private content:string|null=null;private planId?:string;
+ private plans:ReturnType<typeof listEvalPlans>;private selected=0;private line=0;private followSelection=true;private content:string|null=null;private planId?:string;private index:DisplayIndex;
  private revisions:(number|undefined)[]=[undefined];private revisionIndex=0;
  private records?:ReturnType<typeof queryEvidence>;private after=0;private afters:number[]=[];private detail?:EvidenceReference;private offset=0;private offsets:number[]=[];private next:number|null=null;
- constructor(private root:string,id?:string){this.plans=listEvalPlans(root);if(id)this.report(id);}
- private report(id:string){this.planId=id;const report=evalReport(this.root,id);this.revisions=[undefined,...report.gradingRevisions.toReversed().map(r=>Number(r.source.split(':')[1])-1)];this.revisionIndex=0;this.content=formatEvalReport(report);this.line=0;this.records=undefined;this.detail=undefined;}
+ constructor(private root:string,id?:string){this.plans=listEvalPlans(root);this.index=readDisplayIndex(root);if(id)this.report(id);}
+ private report(id:string){this.planId=id;const report=evalReport(this.root,id);this.revisions=[undefined,...report.gradingRevisions.toReversed().map(r=>Number(r.source.split(':')[1])-1)];this.revisionIndex=0;this.content=formatEvalReport(report,this.root);this.line=0;this.records=undefined;this.detail=undefined;}
  private load(){const page=readEvidence(this.root,this.detail!.id,{offset:this.offset,limit:2048});this.content=JSON.stringify(page,null,2);this.next='next'in page?page.next??null:null;this.line=0;}
  handleInput(data:string){
-  if(data==='r'&&this.planId&&!this.records&&!this.detail){this.revisionIndex=(this.revisionIndex+1)%this.revisions.length;this.content=formatEvalReport(evalReport(this.root,this.planId,{asOf:this.revisions[this.revisionIndex]}));this.line=0;return;}
+  if(data==='r'&&this.planId&&!this.records&&!this.detail){this.revisionIndex=(this.revisionIndex+1)%this.revisions.length;this.content=formatEvalReport(evalReport(this.root,this.planId,{asOf:this.revisions[this.revisionIndex]}),this.root);this.line=0;return;}
   if(data==='b'){if(this.detail){this.detail=undefined;this.content=null;}else if(this.records&&this.planId)this.report(this.planId);else{this.content=null;this.planId=undefined;}this.line=0;return;}
   if(data==='e'&&this.planId){this.after=0;this.afters=[];this.records=queryEvidence(this.root,this.planId,{limit:8});this.detail=undefined;this.content=null;this.selected=0;this.line=0;return;}
   if(matchesKey(data,'up')){this.followSelection=true;if(this.content)this.line=Math.max(0,this.line-1);else this.selected=Math.max(0,this.selected-1);}
@@ -26,7 +27,7 @@ export class EvalView{
  }
  scroll(delta:number){this.line=Math.max(0,this.line+delta);this.followSelection=false;}
  render(width:number,height:number){
-  const rows=this.records?this.records.items.map((item,i)=>`${i===this.selected?'›':' '} #${item.seq} ${item.kind}\n${item.id}`):this.plans.map((p,i)=>`${i===this.selected?'›':' '} ${p.id} · ${p.mode}\n${p.purpose}`);
+  const rows=this.records?this.records.items.map((item,i)=>`${i===this.selected?'›':' '} #${item.seq} ${item.kind}\n${item.id}`):this.plans.map((p,i)=>`${i===this.selected?'›':' '} ${this.index.label('eval-plan',p.id)} · ${p.mode}\n${p.purpose}`);
   const wrap=(text:string)=>wrapTextWithAnsi(stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,'�'),Math.max(1,width-2));
   const lines=wrap('Eval · 只读固定报告与原文'),starts:number[]=[];
   if(this.content)lines.push(...wrap(this.content));else for(const row of rows){starts.push(lines.length);lines.push(...wrap(row));}

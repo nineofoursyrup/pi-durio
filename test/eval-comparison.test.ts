@@ -110,7 +110,7 @@ async function syntheticReport(options:{missingPrice?:boolean;missingUsage?:bool
 test('machine/text/TUI use host costs, keep both sides and reopen without writes; partial regrading cannot mix rules',async()=>{
  const {root,plan}=await syntheticReport(),before=readFileSync(join(root,'host.sqlite')),original=evalReport(root,plan.id);
  assert.equal(original.improvement,'改善');assert.equal(original.cost.totalValue,0.12);assert.equal(original.cost.bySide.baseline.knownTokens,80);assert.equal(original.cost.bySide.candidate.knownTokens,40);
- assert.deepEqual(original.comparison!.pairs.map(p=>p.delta),[2,2]);assert.match(formatEvalReport(original),/改善/);
+ assert.deepEqual(original.comparison!.pairs.map(p=>p.delta),[2,2]);assert.match(formatEvalReport(original,root),/改善/);
  const view=new EvalView(root,plan.id);assert.match(view.render(200,200).join('\n'),/改善/);assert.deepEqual(readFileSync(join(root,'host.sqlite')),before);
  const e=new Evidence(root,plan.id),revision=appendFact(e,'eval.grader-revision',{id:'corrected-rule',graders:{'local-fix':{...plan.cases[0].grader,version:'v2'}},previousReport:e.blob(JSON.stringify(original))});
  const t=original.trials[0];const last=appendFact(e,'eval.grade',{...t.grade,source:undefined,graderVersion:'v2',revision});e.close();await fixEvidence(root,{id:'eval-grade:paired:partial',sources:[last],purpose:'preserve interrupted revision'});

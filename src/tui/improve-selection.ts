@@ -1,14 +1,15 @@
 import {matchesKey,stripTerminalSequences,wrapTextWithAnsi,truncateToWidth} from '@earendil-works/pi-tui';
 import {readImproveReport,type ImproveReport} from '../improve.js';
 import {previewImproveDecision,type ImproveDecision,type ImproveMode} from '../improve-decisions.js';
+import {readDisplayIndex,type DisplayIndex} from '../display-number.js';
 
 /** A local unselected draft. Only a rendered aggregate followed by Enter calls
  * the shared host submission API supplied by the application's lifecycle. */
 export class ImproveSelectionView {
  private report:ImproveReport;private selected=0;private line=0;private revealSelection=true;private viewport='';private modes=new Map<string,ImproveMode>();
- private stage:'select'|'summary'|'result'='select';private shown=false;private busy=false;private message='';private prepared?:ImproveDecision;
+ private stage:'select'|'summary'|'result'='select';private shown=false;private busy=false;private message='';private prepared?:ImproveDecision;private index:DisplayIndex;
  constructor(private root:string,private template:ImproveDecision,private submit:(d:ImproveDecision)=>Promise<unknown>,private changed:()=>void=()=>{}){
-  const report=readImproveReport(root,template.reportId).report;if(!report||report.revision!==template.reportRevision)throw Error('IMPROVE_REPORT_REVISION_DRIFT');this.report=report;
+  const report=readImproveReport(root,template.reportId).report;if(!report||report.revision!==template.reportRevision)throw Error('IMPROVE_REPORT_REVISION_DRIFT');this.report=report;this.index=readDisplayIndex(root);
   // template supplies declared content/checks, never preselects its candidates.
  }
  get inProgress(){return this.busy;}
@@ -26,7 +27,7 @@ export class ImproveSelectionView {
    if(matchesKey(data,'up')){this.selected=Math.max(0,this.selected-1);this.revealSelection=true;}if(matchesKey(data,'down')){this.selected=Math.min(this.report!.candidates.length-1,this.selected+1);this.revealSelection=true;}
    const c=this.report!.candidates[this.selected],mode=({v:'validate-only',d:'defer',n:'do-not-suggest',e:'execute-declared-scope'} as const)[data as 'v'|'d'|'n'|'e'];
    if(c&&mode){this.modes.set(c.id,mode);this.message='';this.revealSelection=true;}if(c&&data==='0'){this.modes.delete(c.id);this.revealSelection=true;}
-   if(data==='s')try{const d=this.draft(),preview=previewImproveDecision(this.root,d);this.prepared=d;this.message=JSON.stringify(preview,null,2);this.stage='summary';this.shown=false;this.line=0;}catch(error){this.message=String(error);}
+   if(data==='s')try{const d=this.draft(),preview=previewImproveDecision(this.root,d);this.prepared=d;this.message=[...d.selections.map(s=>`${this.index.qualifiedCandidate(this.report.id,this.report.candidates.find(c=>c.id===s.candidateId)!)} ${s.mode}`),JSON.stringify(preview,null,2)].join('\n');this.stage='summary';this.shown=false;this.line=0;}catch(error){this.message=String(error);}
   }else if(this.stage==='summary'&&this.shown&&matchesKey(data,'enter')&&this.prepared){
    const d=this.prepared;this.busy=true;this.stage='result';this.message='正在保存明确决定并执行声明的检查/写回/启用…';this.changed();
    try{this.message=JSON.stringify(await this.submit(d),null,2);}catch(error){this.message=String(error);}finally{this.busy=false;this.line=0;}
@@ -36,8 +37,10 @@ export class ImproveSelectionView {
  render(width:number,height:number){
   if(this.stage==='summary')this.shown=true;
   const viewport=`${width}x${height}`;if(this.viewport!==viewport){this.viewport=viewport;this.revealSelection=true;}
-  const head=`improve 结构化选择 · ${this.report!.id}\n默认不选；e 仅执行精确声明范围；查看/普通文本不会提交`;
-  const cards=this.stage==='select'?this.report!.candidates.map((c,i)=>`${i===this.selected?'›':' '} ${c.display} [${this.modes.get(c.id)??'unselected'}] ${c.title}\n目标 ${c.target.workspace}; scope ${c.scope.join(', ')}\n依赖 ${c.dependencies.join(', ')||'none'} / 冲突 ${c.conflicts.join(', ')||'none'}\n${c.validation.method}: ${c.validation.checks.join('; ')}`):[];
+  const head=`improve 结构化选择 · ${this.index.label('improve-report',this.report!.id)}\n默认不选；e 仅执行精确声明范围；查看/普通文本不会提交`;
+  // Links are candidate IDs of this report; one that is not listed (suppressed) keeps its full ID.
+  const links=(ids:string[])=>ids.map(id=>{const c=this.report!.candidates.find(c=>c.id===id);return c?this.index.candidate(c):id;}).join(', ');
+  const cards=this.stage==='select'?this.report!.candidates.map((c,i)=>`${i===this.selected?'›':' '} ${this.index.candidate(c)} [${this.modes.get(c.id)??'unselected'}] ${c.title}\n目标 ${c.target.workspace}; scope ${c.scope.join(', ')}\n依赖 ${links(c.dependencies)||'none'} / 冲突 ${links(c.conflicts)||'none'}\n${c.validation.method}: ${c.validation.checks.join('; ')}`):[];
   const wrap=(text:string)=>wrapTextWithAnsi(stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,'�'),Math.max(1,width-2));
   const sections=[head,...cards,this.message].map(wrap),lines=sections.flat(),count=Math.max(1,height-1);
   if(this.stage==='select'&&this.revealSelection&&cards[this.selected]){

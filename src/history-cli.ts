@@ -1,5 +1,5 @@
 import { writeFileSync } from 'node:fs';
-import { queryHistory,queryEvidence,queryAttempts,readEvidence,watermark } from './history.js';
+import { queryHistory,queryEvidence,queryAttempts,readEvidence,watermark,traceNumbers } from './history.js';
 import { queryUsage } from './usage-query.js';
 import { scopedEvidence } from './derived-evidence.js';
 import { fixEvidence,verifyFixed,estimateUsage } from './fixed-evidence.js';
@@ -24,5 +24,5 @@ export async function historyCommand(command:string|undefined,root:string,values
     if(command==='export'){const destination=required('destination');writeFileSync(destination,JSON.stringify(result,null,2),{flag:'wx',mode:0o600});result={destination,scope,exported:true};}
   }else result=str('evidence')?readEvidence(root,str('evidence')!,{offset:number('offset'),limit:options.limit,decodedOutput:values.decoded===true}):queryEvidence(root,required('run'),options);
   // Human and machine output serialize the same result, never independently compute facts.
-  console.log(str('format')==='text'?`pi-durio ${command}\n${JSON.stringify(result,null,2)}`:JSON.stringify(result,null,2));return true;
+  console.log(str('format')==='text'?`pi-durio ${command}\n${command==='trace'?`${traceNumbers(root,result as ReturnType<typeof queryAttempts>)}\n`:''}${JSON.stringify(result,null,2)}`:JSON.stringify(result,null,2));return true;
 }
