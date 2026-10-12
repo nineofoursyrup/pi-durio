@@ -161,3 +161,43 @@ export function formatCostTotals(totals:CostTotals){
  if(!known&&!totals.unknownRequests)return totals.partial?'unknown':formatAmount(0,HOST_PRICE_TABLE.currency);
  return [known,totals.unknownRequests?`+${totals.unknownRequests} unknown`:'',totals.partial?'partial':''].filter(Boolean).join(' ');
 }
+
+/** Runs accepted into any of `sessionIds`. Recovery and maintenance reuse the accepted run, so these are all runs of the sessions. */
+export function sessionRunIds(root:string,sessionIds:readonly string[],options:{through?:number}={}){
+ const sessions=new Set(sessionIds),runIds=new Set<string>();
+ for(const ref of records(root,{through:options.through,kinds:['task.accepted']}))if(sessions.has(decode(root,ref).sessionId))runIds.add(ref.runId);
+ return [...runIds];
+}
+
+/** Every model request of every run in the sessions: the exit summary's "本次会话" and the usage scope. */
+export function estimateSessionRequests(root:string,sessionIds:readonly string[],options:{through?:number}={}){
+ const runIds=sessionRunIds(root,sessionIds,options),requests=runIds.flatMap(runId=>estimateRunRequests(root,runId,options).requests);
+ return {runIds,requests,totals:sumCostEstimates(requests)};
+}
+
+/** Human-facing request estimate for trace/usage: display amount plus price version, period and consulted date. */
+export function requestCostView(request:ModelRequestCost|undefined){
+ if(!request)return null;
+ const display=request.state==='not-applicable'?'not applicable':request.amount===null||!request.currency?'unknown':`${formatAmount(request.amount,request.currency)}${request.state==='partial'?' partial':''}`;
+ return {display,state:request.state,currency:request.currency,amount:request.amount,gaps:request.gaps,price:{version:request.price?.version??null,period:PERIOD_LABEL[request.period],consultedAt:request.price?.consultedAt??null,...(request.price?.effectiveAt?{effectiveAt:request.price.effectiveAt}:{})}};
+}
+
+/** Human-facing totals: display string and the "估算 · 非账单" notice beside the per-currency sums. */
+export function costTotalsView(totals:CostTotals){return {display:formatCostTotals(totals),notice:COST_ESTIMATE_NOTICE,...totals};}
+
+/** Trace page plus each model item's estimate and the whole run's totals at the page snapshot. */
+export function withTraceCosts<T extends {runId:string;snapshot:number;items:{kind:string;source:{id:string}}[]}>(root:string,page:T){
+ const scope=`run:${page.runId}`;let cost;
+ // Trace keeps reading around unreadable records; an unreadable cost source leaves the amount unknown instead.
+ try{cost=estimateRunRequests(root,page.runId,{through:page.snapshot});}catch(error){return {...page,costEstimate:{scope,display:'unknown',notice:COST_ESTIMATE_NOTICE,error:String(error)}};}
+ return {...page,items:page.items.map(item=>item.kind==='model'?{...item,cost:requestCostView(cost.requests.find(r=>r.source===item.source.id))}:item),costEstimate:{scope,...costTotalsView(cost.totals)}};
+}
+
+/** Usage projection plus each request allocation's estimate and the totals of every run in the projected sessions. */
+export function withUsageCosts<T extends {through:number;items:{sessionId:string}[];requestAllocations:{source:string;sessionId:string}[]}>(root:string,usage:T){
+ const scope='every run of the projected sessions';let cost;
+ // Usage keeps unreadable records as gaps; an unreadable cost source leaves the amount unknown instead.
+ try{cost=estimateSessionRequests(root,[...new Set([...usage.items,...usage.requestAllocations].map(item=>item.sessionId))],{through:usage.through});}catch(error){return {...usage,costEstimate:{scope,display:'unknown',notice:COST_ESTIMATE_NOTICE,error:String(error)}};}
+ const bySource=new Map(cost.requests.map(r=>[r.source,r]));
+ return {...usage,requestAllocations:usage.requestAllocations.map(item=>({...item,cost:requestCostView(bySource.get(item.source))})),costEstimate:{scope,runIds:cost.runIds,...costTotalsView(cost.totals)}};
+}
