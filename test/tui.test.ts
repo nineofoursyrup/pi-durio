@@ -134,6 +134,7 @@ test('controlled exit of a running task preserves unknown result and restores th
 test('real runtime facts stream into bounded read-only UI without changing drafts, usage or executing busy text', async () => {
   const f=fixture(); const key=(s:string)=>f.terminal.input(s);
   try {
+    assert.match(f.screen(),/等待输入 · ctx ≈\d+ \/ 1M · usage/,'before acceptance: estimated fixed prefix');
     key('\x1b[200~中文\n第二行\x1b[201~'); assert.equal(f.transport.calls.length,0);
     key('\n'); key('第三行\\'); key('\r'); assert.equal(f.transport.calls.length,0);
     key('\r'); key('保留草稿'); key('\r');
@@ -150,8 +151,12 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     key('\x0f'); key('n'); key('p'); key('\x0c'); key('\x1b'); assert.equal(f.transport.calls.length,2);
     assert.deepEqual(await readRun(join(f.root,'data'),runId),before);
     assert.match(f.screen(),/known/);
+    assert.match(f.screen(),/已完成 · ctx 14 \/ 1M · usage/,'final reply usage is exact');
     key('\x03'); key('\x03'); const closed=await f.app.closed;
     assert.equal(closed.result?.status,'completed'); assert.equal(closed.result?.cleanup,'confirmed');
+    // Without a live runtime the latest reported total stands in, marked as an estimate.
+    const terminal=new TestTerminal(),viewer=new ReadOnlyTui({workspace:f.workspace,dataRoot:join(f.root,'data'),runId,draftRoot:join(f.root,'drafts'),mode:'offline',transport:f.transport.fetch,terminal,widthCalibration:false});viewer.start();
+    try{await until(()=>viewer.screen().map(stripTerminalSequences).join('\n').includes('ctx ≈14 / 1M'));}finally{await viewer.exit();}
   } finally { await f.app.exit(); }
 });
 
