@@ -2,6 +2,7 @@ import {withOwnerSync} from '../ownership.js';
 import {Evidence,digest,readObject} from '../evidence.js';
 import {decode,records,resolveEvidence,watermark} from '../history.js';
 import {queryUsage} from '../usage-query.js';
+import {estimateRequestCost,sumCostEstimates,PRICE_EFFECTIVE_UNPROVEN,PRICE_UNCOVERED,USAGE_CATEGORY_UNREPORTED,USAGE_MISSING} from '../cost-estimate.js';
 import type {TaskMetricsReport} from './report.js';
 import type {OperationRun} from './operations.js';
 export interface CostEstimateInput {id:string;requestSource:string;amount:number;currency:string;price:{source:string;version:string;effectiveAt:string;provider:string;model:string};usageSources:string[];reason:string;revisionOf?:string}
@@ -46,8 +47,11 @@ export function costReport(parentRoot:string,sample:TaskMetricsReport,runs:Opera
    if(!dispatches.length)request.gaps.push('transport entry not proven');if(dispatches.length>1)request.gaps.push('multiple observable requests share one model response; per-request usage incomplete');
    if(responses.length>1&&new Set(responses.map(r=>JSON.stringify(r.data.message?.usage))).size>1)request.gaps.push('conflicting usage for one model request identity');
    if(!response||response.data.usage!=='reported')request.gaps.push('usage missing or request in flight');
+   // The first version's pi-ai USD estimate stays in history only; the host CNY price table is recomputed at query time.
    const original=response?.data.message?.usage?.cost?.total;
-   if(validAmount(original)&&response?.data.usage==='reported'){request.currency='USD';request.amount=original;request.price={source:'@earendil-works/pi-ai@1.1.0 model price catalog',version:'1.1.0',effectiveAt:null,observedAt:response.ref.at,provider:d.model?.provider??null,model:d.model?.id??null,currency:'USD'};request.history.push({source:response.ref.id,amount:original,currency:'USD',price:request.price});request.gaps.push('original catalog effective time is unavailable');}
+   if(validAmount(original)&&response?.data.usage==='reported')request.history.push({source:response.ref.id,amount:original,currency:'USD',price:{source:'@earendil-works/pi-ai@1.1.0 model price catalog',version:'1.1.0',effectiveAt:null,observedAt:response.ref.at,provider:d.model?.provider??null,model:d.model?.id??null,currency:'USD'},role:'original estimate; not the displayed amount'});
+   const host=estimateRequestCost({provider:d.model?.provider,model:d.model?.id,usage:request.usage,at:request.at});
+   request.price=host.price;request.amount=host.amount;request.currency=host.currency;request.gaps.push(...host.gaps.filter(g=>g!==USAGE_MISSING||!request.gaps.includes('usage missing or request in flight')));
    applyEstimate(root,request,facts);
    requests.push(request);
   }
@@ -80,7 +84,7 @@ export function costReport(parentRoot:string,sample:TaskMetricsReport,runs:Opera
   const amounts:Record<string,number>={};for(const r of selected)if(r.currency&&r.amount!==null)amounts[r.currency]=(amounts[r.currency]??0)+r.amount;
   const state=incomplete?(Object.keys(amounts).length?'partial':'unknown'):'complete';
   const currencies=Object.fromEntries(Object.entries(amounts).map(([currency,knownAmount])=>[currency,{knownAmount,perSuccess:{state:denominator===undefined?'N/A':denominator===0?'N/A':state,value:denominator&&state==='complete'?knownAmount/denominator:null,knownPartPerSuccess:denominator?knownAmount/denominator:null,denominator:denominator??null,unit:`${currency}/successful task`,interpretation:'partial estimate, not a proven lower bound; no currency conversion'}}]));
-  return{state,perSuccessState:denominator===undefined||denominator===0?'N/A':state,currencies,requestIds:selected.map(r=>r.id),gaps:extra,missingRequests:selected.filter(r=>r.gaps.length).map(r=>({id:r.id,gaps:r.gaps})),groups:Object.fromEntries([...new Set(selected.map(r=>r.kind))].sort().map(kind=>[kind,selected.filter(r=>r.kind===kind).map(r=>r.id)]))};
+  return{state,totals:sumCostEstimates(selected,{partial:extra.length>0}),perSuccessState:denominator===undefined||denominator===0?'N/A':state,currencies,requestIds:selected.map(r=>r.id),gaps:extra,missingRequests:selected.filter(r=>r.gaps.length).map(r=>({id:r.id,gaps:r.gaps})),groups:Object.fromEntries([...new Set(selected.map(r=>r.kind))].sort().map(kind=>[kind,selected.filter(r=>r.kind===kind).map(r=>r.id)]))};
  }
  const sampleRequests=requests.filter(r=>r.taskId!==null),periodRequests=requests.filter(r=>Date.parse(r.at)>=Date.parse(sample.scope.from)&&Date.parse(r.at)<Date.parse(sample.scope.to));
  return{sample:{...aggregate(sampleRequests,gaps.filter(g=>g.mayAffectSample),sample.counts.S),basis:'all accepted sample tasks accumulated through same asOf; denominator is current effective S',sampleId:sample.id},period:{...aggregate(periodRequests,gaps),basis:'request transport occurrence in [from,to), all selected work kinds; never divided by admission sample S'},requests,gaps,sessionUsage:[...sessionUsage.values()],sessionEstimates,evalStages:runs.filter(r=>r.kind==='eval').map(r=>({dataRoot:r.root,planId:r.id,parentImprove:r.parentImprove??null,stages:Object.fromEntries(['preparation','execution','grading'].map(stage=>[stage,{requests:requests.filter(q=>q.dataRoot===r.root&&q.runId===r.id&&q.stage===stage).map(q=>q.id),sources:r.facts.filter(f=>stage==='preparation'?f.ref.kind==='eval.preparation':stage==='grading'?['eval.grade','eval.timing'].includes(f.ref.kind):['eval.trial-started','eval.outcome'].includes(f.ref.kind)).map(f=>f.ref.id)}])),basis:'same request IDs as the total; deterministic preparation/grading do not create additional model charges'})),rule:'raw request identity once; cumulative session pi.usage is evidence, not an additional cost; explicit sourced estimates append revisions'};
@@ -90,7 +94,7 @@ function applyEstimate(root:string,request:CostRequest,facts:OperationRun['facts
  request.history.push(...revisions.map(f=>({source:f.ref.id,...f.data})));const superseded=new Set(revisions.map(f=>f.data.revisionOf));const active=revisions.filter(f=>!superseded.has(f.data.id));
  if(active.length>1){request.gaps.push('conflicting estimate revisions');request.amount=null;request.currency=null;}
  if(active.length===1){const f=active[0];let valid=f.data.method==='explicit-sourced-estimate-v1'&&validAmount(f.data.amount)&&typeof f.data.currency==='string'&&!!f.data.price?.source&&!!f.data.price?.version&&!!f.data.price?.provider&&!!f.data.price?.model&&Number.isFinite(Date.parse(f.data.price?.effectiveAt))&&Date.parse(f.data.price.effectiveAt)<=Date.parse(request.at)&&Array.isArray(f.data.usageSources)&&f.data.usageSources.length>0;for(const id of f.data.usageSources??[])try{decode(root,resolveEvidence(root,id));}catch{valid=false;}
-  if(valid){request.amount=f.data.amount;request.currency=f.data.currency;request.price={...f.data.price,currency:f.data.currency,observedAt:f.ref.at};request.gaps=request.gaps.filter(g=>!['original catalog effective time is unavailable','price unavailable'].includes(g));}else request.gaps.push('estimate metadata or usage source unavailable');
+  if(valid){request.amount=f.data.amount;request.currency=f.data.currency;request.price={...f.data.price,currency:f.data.currency,observedAt:f.ref.at};request.gaps=request.gaps.filter(g=>!['original catalog effective time is unavailable','price unavailable',PRICE_UNCOVERED,PRICE_EFFECTIVE_UNPROVEN].includes(g)&&!g.startsWith(USAGE_CATEGORY_UNREPORTED));}else request.gaps.push('estimate metadata or usage source unavailable');
  }
- if(request.amount===null&&!request.gaps.includes('price unavailable'))request.gaps.push('price unavailable');request.state=request.gaps.length?(request.amount===null?'unknown':'partial'):'complete';
+ if(request.amount===null&&!request.gaps.includes('price unavailable')&&!request.gaps.includes(PRICE_UNCOVERED))request.gaps.push('price unavailable');request.state=request.gaps.length?(request.amount===null?'unknown':'partial'):'complete';
 }

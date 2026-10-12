@@ -1,0 +1,76 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {HOST_PRICE_TABLE,pricePeriod,estimateRequestCost,sumCostEstimates,formatAmount,formatCostTotals,hostPlanPrice,upperBoundAmount} from '../src/cost-estimate.js';
+
+const flash={provider:'deepseek',model:'deepseek-flash'};
+const usage=(u:Partial<Record<'input'|'cacheRead'|'cacheWrite'|'output',number>>)=>({input:0,cacheRead:0,cacheWrite:0,output:0,totalTokens:0,cost:{total:99},...u});
+
+test('price table version 1 is the fixed DeepSeek CNY table with consulted date and holiday note',()=>{
+ assert.equal(HOST_PRICE_TABLE.currency,'CNY');assert.equal(HOST_PRICE_TABLE.consultedAt,'2026-10-12');assert.match(HOST_PRICE_TABLE.source,/api-docs\.deepseek\.com\/zh-cn\/quick_start\/pricing/);assert.match(HOST_PRICE_TABLE.note,/节假日/);
+ assert.deepEqual(Object.keys(HOST_PRICE_TABLE.models),['deepseek/deepseek-flash']);
+ assert.deepEqual(HOST_PRICE_TABLE.models['deepseek/deepseek-flash'].peak,{input:2,cacheRead:0.04,cacheWrite:0,output:8});
+ assert.deepEqual(HOST_PRICE_TABLE.models['deepseek/deepseek-flash']['off-peak'],{input:1,cacheRead:0.02,cacheWrite:0,output:4});
+});
+
+test('period boundaries use Beijing time on weekdays and weekends',()=>{
+ // 2026-10-14 is a Wednesday, 2026-10-17 a Saturday.
+ const at=(day:number,time:string)=>`2026-10-${day}T${time}:00+08:00`;
+ const expected:[string,'peak'|'off-peak'][]=[['08:59','off-peak'],['09:00','peak'],['11:59','peak'],['12:00','off-peak'],['13:59','off-peak'],['14:00','peak'],['17:59','peak'],['18:00','off-peak']];
+ for(const [time,period]of expected)assert.equal(pricePeriod(at(14,time)),period,time);
+ for(const time of ['09:00','10:30','14:00','17:59'])assert.equal(pricePeriod(at(17,time)),'off-peak',`weekend ${time}`);
+ // The same instant written in UTC is judged by its Beijing clock: 01:00Z is 09:00 Beijing.
+ assert.equal(pricePeriod('2026-10-14T01:00:00Z'),'peak');assert.equal(pricePeriod('2026-10-14T00:59:00Z'),'off-peak');
+ // Friday 23:00 UTC is Saturday 07:00 Beijing.
+ assert.equal(pricePeriod('2026-10-16T02:00:00Z'),'peak');assert.equal(pricePeriod('2026-10-16T23:00:00Z'),'off-peak');
+});
+
+test('each usage category maps to its unit price; cache writes cost 0; the pi-ai USD cost is ignored',()=>{
+ const peak='2026-10-14T10:00:00+08:00',idle='2026-10-14T20:00:00+08:00';
+ const cases:[Parameters<typeof usage>[0],number,number][]=[[{input:1e6},2,1],[{cacheRead:1e6},0.04,0.02],[{cacheWrite:1e6},0,0],[{output:1e6},8,4],[{input:1e6,cacheRead:1e6,cacheWrite:1e6,output:1e6},10.04,5.02]];
+ for(const [u,peakAmount,idleAmount]of cases){
+  const p=estimateRequestCost({...flash,usage:usage(u),at:peak}),i=estimateRequestCost({...flash,usage:usage(u),at:idle});
+  assert.ok(Math.abs(p.amount!-peakAmount)<1e-12,JSON.stringify(u));assert.ok(Math.abs(i.amount!-idleAmount)<1e-12,JSON.stringify(u));
+  assert.equal(p.state,'complete');assert.equal(p.currency,'CNY');assert.equal(p.period,'peak');assert.equal(i.period,'off-peak');
+ }
+ const e=estimateRequestCost({...flash,usage:usage({input:1000}),at:peak});
+ assert.deepEqual({version:e.price!.version,consultedAt:e.price!.consultedAt,period:e.price!.period,provider:e.price!.provider,model:e.price!.model,currency:e.price!.currency},{version:'deepseek-cny-v1',consultedAt:'2026-10-12',period:'peak',provider:'deepseek',model:'deepseek-flash',currency:'CNY'});
+});
+
+test('missing usage is unknown and never zero; a missing category is partial',()=>{
+ for(const u of [null,undefined,{},{totalTokens:3}]){const e=estimateRequestCost({...flash,usage:u,at:'2026-10-14T10:00:00+08:00'});assert.equal(e.state,'unknown');assert.equal(e.amount,null);assert.equal(e.currency,null);assert.deepEqual(e.gaps,['用量未知']);}
+ const partial=estimateRequestCost({...flash,usage:{input:1e6,output:1e6},at:'2026-10-14T10:00:00+08:00'});
+ assert.equal(partial.state,'partial');assert.equal(partial.amount,10);assert.deepEqual(partial.gaps,['用量类别未上报：cacheRead','用量类别未上报：cacheWrite']);
+});
+
+test('requests before the consulted date are estimated but partial with the effective-date gap',()=>{
+ const before=estimateRequestCost({...flash,usage:usage({output:1e6}),at:'2026-10-11T23:59:00+08:00'});
+ assert.equal(before.state,'partial');assert.equal(before.amount,4);assert.deepEqual(before.gaps,['价目在请求时的生效情况无法证明']);
+ const on=estimateRequestCost({...flash,usage:usage({output:1e6}),at:'2026-10-12T00:00:00+08:00'});assert.equal(on.state,'complete');assert.deepEqual(on.gaps,[]);
+});
+
+test('models outside the price table are unknown with "价目未覆盖" and no conversion',()=>{
+ for(const model of [{provider:'deepseek',model:'deepseek-v4-pro'},{provider:'fixture',model:'fixed'},{provider:null,model:null}]){
+  const e=estimateRequestCost({...model,usage:usage({input:1e6}),at:'2026-10-14T10:00:00+08:00'});
+  assert.equal(e.state,'unknown');assert.equal(e.amount,null);assert.equal(e.price,null);assert.deepEqual(e.gaps,['价目未覆盖']);
+ }
+ assert.equal(hostPlanPrice('deepseek','deepseek-v4-pro'),null);assert.equal(upperBoundAmount(1e6,'fixture','fixed'),null);
+});
+
+test('plan price and token upper bounds use the peak output price',()=>{
+ assert.deepEqual(hostPlanPrice('deepseek','deepseek-flash'),{version:'deepseek-cny-v1',source:HOST_PRICE_TABLE.source,consultedAt:'2026-10-12',currency:'CNY',perMillionTokens:8});
+ assert.deepEqual(upperBoundAmount(250000,'deepseek','deepseek-flash'),{amount:2,currency:'CNY',version:'deepseek-cny-v1'});
+});
+
+test('amount display: ≈ and symbol, two decimals, < ¥0.01, +N unknown, partial, per currency',()=>{
+ assert.equal(formatAmount(0.06,'CNY'),'≈ ¥0.06');assert.equal(formatAmount(12.345,'CNY'),'≈ ¥12.35');assert.equal(formatAmount(0,'CNY'),'≈ ¥0.00');
+ assert.equal(formatAmount(0.004,'CNY'),'< ¥0.01');assert.equal(formatAmount(0.0099,'CNY'),'< ¥0.01');assert.equal(formatAmount(0.01,'CNY'),'≈ ¥0.01');
+ assert.equal(formatAmount(1.5,'USD'),'≈ $1.50');assert.equal(formatAmount(7,'EUR'),'≈ EUR 7.00');
+ const totals=sumCostEstimates([{currency:'CNY',amount:0.05,state:'complete'},{currency:'CNY',amount:0.01,state:'partial'},{currency:null,amount:null,state:'unknown'},{currency:null,amount:null,state:'unknown'},{currency:null,amount:null,state:'not-applicable'},{currency:'USD',amount:0.1,state:'complete'}]);
+ assert.ok(Math.abs(totals.amounts.CNY-0.06)<1e-12);assert.equal(totals.amounts.USD,0.1);assert.equal(totals.unknownRequests,2);assert.equal(totals.partial,true);
+ assert.equal(formatCostTotals(totals),'≈ ¥0.06 · ≈ $0.10 +2 unknown partial');
+ assert.equal(formatCostTotals(sumCostEstimates([{currency:'CNY',amount:0.003,state:'complete'}])),'< ¥0.01');
+ assert.equal(formatCostTotals(sumCostEstimates([{currency:null,amount:null,state:'unknown'}])),'+1 unknown');
+ assert.equal(formatCostTotals(sumCostEstimates([])),'≈ ¥0.00');
+ assert.equal(formatCostTotals(sumCostEstimates([],{partial:true})),'unknown');
+ assert.equal(formatCostTotals(sumCostEstimates([{currency:'CNY',amount:2,state:'complete'}],{partial:true})),'≈ ¥2.00 partial');
+});

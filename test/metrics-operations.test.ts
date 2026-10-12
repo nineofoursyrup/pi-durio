@@ -5,14 +5,17 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {Evidence} from '../src/evidence.js';
 import {records} from '../src/history.js';
-import {recordAcceptance,queryOperationsMetrics,recordCostEstimate} from '../src/metrics/index.js';
+import {recordAcceptance,queryOperationsMetrics,formatOperationsMetrics,recordCostEstimate} from '../src/metrics/index.js';
+import {pricePeriod} from '../src/cost-estimate.js';
+import {watermark} from '../src/history.js';
 const scope={from:'2000-01-01T00:00:00Z',to:'2100-01-01T00:00:00Z',asOf:'2100-01-01T00:00:00Z',source:'synthetic' as const};
 const root=()=>mkdtempSync(join(tmpdir(),'durio-cost-fault-'));
 function task(root:string,id:string,kind='coding',status='completed'){
  const e=new Evidence(root,id);e.append('task.accepted',{taskId:id,sessionId:id,workspace:'/fixture',input:'known facts',origin:{kind,source:'synthetic'}});e.append('run.started',{});return{e,close(reason?:string){e.append('run.closed',{status,reason,cleanup:'confirmed',observation:'ok',lifecycle:{storage:'closed'},usage:{completeness:'known'}});e.close();}};}
-function request(e:Evidence,id:string,amount:number,options:{allocation?:string;purpose?:string;error?:boolean}={}){
- e.append('model.intent',{attemptId:id,durableTaskId:'known-generation-operation',model:{provider:'fixture',id:'fixed'},purpose:options.purpose??'generation',allocation:options.allocation??'task'});
- e.append('model.dispatch',{attemptId:id,transportEntered:true});e.append('model.response',{attemptId:id,usage:'reported',completeness:'complete',message:{stopReason:options.error?'error':'stop',...(options.error?{errorMessage:'controlled service error'}:{}),usage:{input:1,output:1,cacheRead:0,cacheWrite:0,totalTokens:2,cost:{total:amount}}}});
+function request(e:Evidence,id:string,amount:number,options:{allocation?:string;purpose?:string;error?:boolean;model?:{provider:string;id:string};usage?:{input:number;output:number;cacheRead:number;cacheWrite:number}}={}){
+ e.append('model.intent',{attemptId:id,durableTaskId:'known-generation-operation',model:options.model??{provider:'fixture',id:'fixed'},purpose:options.purpose??'generation',allocation:options.allocation??'task'});
+ const usage=options.usage??{input:1,output:1,cacheRead:0,cacheWrite:0};
+ e.append('model.dispatch',{attemptId:id,transportEntered:true});e.append('model.response',{attemptId:id,usage:'reported',completeness:'complete',message:{stopReason:options.error?'error':'stop',...(options.error?{errorMessage:'controlled service error'}:{}),usage:{...usage,totalTokens:usage.input+usage.output+usage.cacheRead+usage.cacheWrite,cost:{total:amount}}}});
 }
 function price(root:string,id:string,amount:number,currency='CNY'){
  const refs=[...records(root,{runId:id,kinds:['model.intent','model.response']})];
@@ -50,7 +53,7 @@ test('period occurrence and admission accumulation use distinct windows and curr
  const later=new Evidence(r,'old');request(later,'later',1);later.close();
  const freshIntents=[...records(r,{runId:'fresh',kinds:['model.intent']})],freshResponses=[...records(r,{runId:'fresh',kinds:['model.response']})];
  for(const [i,ref]of freshIntents.entries())recordCostEstimate(r,{id:`different-${i}`,requestSource:ref.id,amount:i===2?7:3,currency:i===2?'EUR':'CNY',price:{provider:'fixture',model:'fixed',source:'explicit fixture tariff',version:'v1',effectiveAt:'2000-01-01T00:00:00Z'},usageSources:[freshResponses[i].id],reason:'Known currency fixture'});
- const report=queryOperationsMetrics(r,{...scope,from});assert.equal(report.sample.counts.N,1);assert.equal(report.costs.sample.currencies.CNY.knownAmount,6);assert.equal(report.costs.sample.currencies.EUR,undefined);assert.equal(report.costs.period.currencies.EUR.knownAmount,7);assert.equal(report.costs.period.requestIds.length,4);assert.equal(report.costs.sample.requestIds.length,2);assert.equal(report.costs.period.currencies.USD.knownAmount,1);
+ const report=queryOperationsMetrics(r,{...scope,from});assert.equal(report.sample.counts.N,1);assert.equal(report.costs.sample.currencies.CNY.knownAmount,6);assert.equal(report.costs.sample.currencies.EUR,undefined);assert.equal(report.costs.period.currencies.EUR.knownAmount,7);assert.equal(report.costs.period.requestIds.length,4);assert.equal(report.costs.sample.requestIds.length,2);assert.equal(report.costs.period.currencies.USD,undefined);const uncovered=report.costs.requests.find(q=>q.runId==='old'&&q.amount===null)!;assert.equal(uncovered.state,'unknown');assert.ok(uncovered.gaps.includes('价目未覆盖'));assert.deepEqual(uncovered.history.map(h=>[h.currency,h.amount]),[['USD',1]]);assert.equal(report.costs.period.totals.unknownRequests,1);
 });
 test('owned child eval follows a scoped fixed plan and parent snapshot, counts trusted requests once, and never widens to later child work',()=>{
  const parent=root(),directory=join(parent,'validation'),child=join(directory,'prompt.v1','check-0','eval-data');const p=task(parent,'analysis','improve');p.close();
@@ -62,4 +65,22 @@ test('owned child eval follows a scoped fixed plan and parent snapshot, counts t
  const report=queryOperationsMetrics(parent,scope);assert.equal(report.sample.counts.N,0);assert.equal(report.costs.requests.length,1);assert.equal(report.costs.period.currencies.CNY.knownAmount,1);assert.equal(report.costs.requests[0].kind,'eval');assert.equal(report.costs.requests[0].parentImprove?.decisionId,'decision');assert.equal(report.faults.separate.otherWorkAttempts.length,1);assert.equal(report.ownedChildren.snapshots[0].through,through);
  assert.throws(()=>recordCostEstimate(child,{id:'wrong-model',requestSource:report.costs.requests[0].source,amount:1,currency:'CNY',price:{source:'fixture',version:'v1',effectiveAt:'2000-01-01T00:00:00Z',provider:'fixture',model:'other'},usageSources:report.costs.requests[0].usageSources,reason:'reject changed model'}),/PRICE_MODEL_SCOPE_CHANGED/);
  const later=new Evidence(child,'plan');later.append('provider.dispatch',{id:'later',operationId:'trial',purpose:'eval-runtime'});later.close();assert.equal(queryOperationsMetrics(parent,{...scope,through:report.sample.scope.through}).id,report.id);
+});
+test('first-version requests are re-estimated in CNY at query time; the pi-ai USD estimate stays in history; explicit revisions still win',()=>{
+ const r=root(),flash={provider:'deepseek',id:'deepseek-flash'},t=task(r,'cny');request(t.e,'flash',0.5,{model:flash,usage:{input:1000,output:500,cacheRead:2000,cacheWrite:300}});t.close();
+ const lost=task(r,'lost');lost.e.append('model.intent',{attemptId:'lost',allocation:'task',model:flash});lost.e.append('model.dispatch',{attemptId:'lost',transportEntered:true});lost.close();
+ const through=watermark(r),report=queryOperationsMetrics(r,scope);assert.equal(watermark(r),through);
+ const priced=report.costs.requests.find(q=>q.runId==='cny')!,period=pricePeriod(priced.at),unit=period==='peak'?{input:2,cacheRead:0.04,output:8}:{input:1,cacheRead:0.02,output:4};
+ assert.equal(priced.at,[...records(r,{runId:'cny',kinds:['model.dispatch']})][0].at);
+ assert.equal(priced.currency,'CNY');assert.ok(Math.abs(priced.amount!-(1000*unit.input+2000*unit.cacheRead+500*unit.output)/1e6)<1e-15);assert.equal(priced.state,'complete');assert.deepEqual(priced.gaps,[]);
+ assert.deepEqual([priced.price.version,priced.price.consultedAt,priced.price.period,priced.price.provider,priced.price.model],['deepseek-cny-v1','2026-10-12',period,'deepseek','deepseek-flash']);
+ assert.deepEqual(priced.history.map(h=>[h.currency,h.amount,h.price.version]),[['USD',0.5,'1.1.0']]);
+ const missing=report.costs.requests.find(q=>q.runId==='lost')!;assert.equal(missing.state,'unknown');assert.equal(missing.amount,null);assert.ok(missing.gaps.includes('usage missing or request in flight'));
+ assert.equal(report.costs.sample.currencies.USD,undefined);assert.deepEqual({...report.costs.sample.totals,amounts:Object.keys(report.costs.sample.totals.amounts)},{amounts:['CNY'],unknownRequests:1,partial:false});
+ const text=formatOperationsMetrics(report);assert.match(text,/费用估算 · 非账单 · 价目 deepseek-cny-v1（查阅 2026-10-12；未对法定节假日建模）/);assert.match(text,/全样本成本 < ¥0\.01 \+1 unknown\n/);assert.match(text,/CNY 已知 < ¥0\.01 \/ S0/);
+ const usageSource=priced.usageSources[0];recordCostEstimate(r,{id:'explicit',requestSource:priced.source,amount:3,currency:'CNY',price:{source:'explicit negotiated tariff',version:'explicit-v1',effectiveAt:'2000-01-01T00:00:00Z',provider:'deepseek',model:'deepseek-flash'},usageSources:[usageSource],reason:'Explicit sourced re-estimate'});
+ const revised=queryOperationsMetrics(r,scope),explicit=revised.costs.requests.find(q=>q.runId==='cny')!;assert.equal(explicit.amount,3);assert.equal(explicit.price.version,'explicit-v1');assert.equal(explicit.state,'complete');assert.deepEqual(explicit.history.map(h=>h.currency),['USD','CNY']);
+ assert.match(formatOperationsMetrics(revised),/全样本成本 ≈ ¥3\.00 \+1 unknown\n/);
+ const old=task(r,'partial');request(old.e,'early',0.1,{model:flash,usage:{input:1,output:1,cacheRead:0,cacheWrite:0}});old.e.append('model.dispatch',{attemptId:'early',transportEntered:true});old.close();
+ assert.match(formatOperationsMetrics(queryOperationsMetrics(r,scope)),/全样本成本 ≈ ¥3\.00 \+1 unknown partial\n/);
 });
