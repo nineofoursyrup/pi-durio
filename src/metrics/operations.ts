@@ -5,6 +5,7 @@ import {records,decode,resolveEvidence,watermark,type EvidenceReference} from '.
 import {queryTaskMetrics,type MetricsScope} from './report.js';
 import {costReport} from './costs.js';
 import {faultReport} from './faults.js';
+import {COST_ESTIMATE_NOTICE,HOST_PRICE_TABLE,formatAmount,formatCostTotals} from '../cost-estimate.js';
 export interface OperationFact {ref:EvidenceReference;data:any;missing?:string}
 export interface OperationRun {root:string;parentImprove?:{dataRoot:string;decisionId:string;decisionSource:string;linkSource:string};id:string;facts:OperationFact[];admission?:OperationFact;kind:string;source:string|null;project:string|null}
 const excludedKinds=new Set(['model.payload','model.provider-event','model.fetch-intent','generation.request','context.snapshot','compaction.source','durable.closed-snapshot','tool.output','shell.stdout','shell.stderr','eval.content','execution.artifact']);
@@ -30,7 +31,7 @@ export function queryOperationsMetrics(root:string,scope:MetricsScope={}) {
  return {id:`operations:${digest(JSON.stringify({...body,sample:{...sampleIdentity,snapshot:{...sample.snapshot,current:sample.scope.through}}}))}`,generatedAt:new Date().toISOString(),...body};
 }
 export type OperationsMetricsReport=ReturnType<typeof queryOperationsMetrics>;
-export function formatOperationsMetrics(report:OperationsMetricsReport){const f=report.faults;return `成本与故障 · 只读 · ${report.id}\n样本 N/B/S = ${report.sample.counts.N}/${report.sample.counts.B}/${report.sample.counts.S} · 全样本成本 ${report.costs.sample.state}\n${Object.entries(report.costs.sample.currencies).map(([currency,v])=>`${currency} 已知 ${v.knownAmount} / S${report.sample.counts.S}：${v.perSuccess.state} ${v.perSuccess.value??'unknown'}；已知部分/S ${v.perSuccess.knownPartPerSuccess??'N/A'}（非下界）`).join('\n')}\n故障 B/F/Zf/Uf = ${f.tasks.counts.B}/${f.tasks.counts.F}/${f.tasks.counts.Zf}/${f.tasks.counts.Uf}\n${JSON.stringify(report,null,2)}`;}
+export function formatOperationsMetrics(report:OperationsMetricsReport){const f=report.faults,c=report.costs,S=report.sample.counts.S,amount=(value:number|null,currency:string)=>value===null?'unknown':formatAmount(value,currency);return `成本与故障 · 只读 · ${report.id}\n费用${COST_ESTIMATE_NOTICE} · 价目 ${HOST_PRICE_TABLE.version}（查阅 ${HOST_PRICE_TABLE.consultedAt}；未对法定节假日建模）· 按币种分别汇总，不换算\n样本 N/B/S = ${report.sample.counts.N}/${report.sample.counts.B}/${S} · 全样本成本 ${formatCostTotals(c.sample.totals)}\n${Object.entries(c.sample.currencies).map(([currency,v])=>`${currency} 已知 ${formatAmount(v.knownAmount,currency)} / S${S}：${v.perSuccess.state} ${amount(v.perSuccess.value,currency)}；已知部分/S ${v.perSuccess.knownPartPerSuccess===null?'N/A':formatAmount(v.perSuccess.knownPartPerSuccess,currency)}（非下界）`).join('\n')}\n期间成本 ${formatCostTotals(c.period.totals)}\n故障 B/F/Zf/Uf = ${f.tasks.counts.B}/${f.tasks.counts.F}/${f.tasks.counts.Zf}/${f.tasks.counts.Uf}\n${JSON.stringify(report,null,2)}`;}
 
 /** Follow only host-owned, parent-decision-bound child roots. A retained parent
  * report fixes the child sequence; a bare link exposes only the fixed plan. */
