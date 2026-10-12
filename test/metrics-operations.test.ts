@@ -84,3 +84,13 @@ test('first-version requests are re-estimated in CNY at query time; the pi-ai US
  const old=task(r,'partial');request(old.e,'early',0.1,{model:flash,usage:{input:1,output:1,cacheRead:0,cacheWrite:0}});old.e.append('model.dispatch',{attemptId:'early',transportEntered:true});old.close();
  assert.match(formatOperationsMetrics(queryOperationsMetrics(r,scope)),/全样本成本 ≈ ¥3\.00 \+1 unknown partial\n/);
 });
+test('eval plan prices from the host table use the consulted-date rule; first-version USD plans keep their path and sum separately',()=>{
+ const r=root();
+ for(const [id,price] of [['plan-cny',{version:'deepseek-cny-v1',source:'host price table',consultedAt:'2026-10-12',currency:'CNY',perMillionTokens:8}],['plan-usd',{version:'v1',source:'first-version fixed price',currency:'USD',perMillionTokens:1}]] as const){
+  const e=new Evidence(r,id);e.append('eval.plan',{id,mode:'offline',model:{provider:'deepseek',id:'deepseek-flash'},trials:[{id:'trial',side:'candidate'}],price});e.append('provider.dispatch',{id:'outer',operationId:'trial',purpose:'eval-runtime'});e.append('provider.bytes',{id:'outer',bytes:e.blob('data: {"usage":{"prompt_tokens":6,"completion_tokens":4}}\n')});e.append('budget.settle',{id:'outer',tokens:1e6,status:'returned'});e.close();
+ }
+ const report=queryOperationsMetrics(r,scope),cny=report.costs.requests.find(q=>q.runId==='plan-cny')!,usd=report.costs.requests.find(q=>q.runId==='plan-usd')!;
+ assert.equal(cny.state,'complete');assert.deepEqual(cny.gaps,[]);assert.equal(cny.amount,8);assert.equal(cny.currency,'CNY');
+ assert.equal(usd.state,'partial');assert.deepEqual(usd.gaps,['original catalog effective time is unavailable']);assert.equal(usd.amount,1);assert.equal(usd.currency,'USD');
+ assert.equal(report.costs.period.currencies.CNY.knownAmount,8);assert.equal(report.costs.period.currencies.USD.knownAmount,1);assert.match(formatOperationsMetrics(report),/期间成本 ≈ ¥8\.00 · ≈ \$1\.00 partial\n/);
+});

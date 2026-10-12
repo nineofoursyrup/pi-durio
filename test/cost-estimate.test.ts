@@ -1,6 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {HOST_PRICE_TABLE,pricePeriod,estimateRequestCost,sumCostEstimates,formatAmount,formatCostTotals,hostPlanPrice,upperBoundAmount} from '../src/cost-estimate.js';
+import {mkdtempSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {Evidence} from '../src/evidence.js';
+import {records} from '../src/history.js';
+import {recordCostEstimate} from '../src/metrics/index.js';
+import {HOST_PRICE_TABLE,pricePeriod,estimateRequestCost,sumCostEstimates,formatAmount,formatCostTotals,hostPlanPrice,upperBoundAmount,consultedDateGap,estimateRunRequests} from '../src/cost-estimate.js';
 
 const flash={provider:'deepseek',model:'deepseek-flash'};
 const usage=(u:Partial<Record<'input'|'cacheRead'|'cacheWrite'|'output',number>>)=>({input:0,cacheRead:0,cacheWrite:0,output:0,totalTokens:0,cost:{total:99},...u});
@@ -36,16 +42,15 @@ test('each usage category maps to its unit price; cache writes cost 0; the pi-ai
  assert.deepEqual({version:e.price!.version,consultedAt:e.price!.consultedAt,period:e.price!.period,provider:e.price!.provider,model:e.price!.model,currency:e.price!.currency},{version:'deepseek-cny-v1',consultedAt:'2026-10-12',period:'peak',provider:'deepseek',model:'deepseek-flash',currency:'CNY'});
 });
 
-test('missing usage is unknown and never zero; a missing category is partial',()=>{
- for(const u of [null,undefined,{},{totalTokens:3}]){const e=estimateRequestCost({...flash,usage:u,at:'2026-10-14T10:00:00+08:00'});assert.equal(e.state,'unknown');assert.equal(e.amount,null);assert.equal(e.currency,null);assert.deepEqual(e.gaps,['用量未知']);}
- const partial=estimateRequestCost({...flash,usage:{input:1e6,output:1e6},at:'2026-10-14T10:00:00+08:00'});
- assert.equal(partial.state,'partial');assert.equal(partial.amount,10);assert.deepEqual(partial.gaps,['用量类别未上报：cacheRead','用量类别未上报：cacheWrite']);
+test('usage without all four reported categories is unknown and never zero',()=>{
+ for(const u of [null,undefined,{},{totalTokens:3},{input:1e6,output:1e6}]){const e=estimateRequestCost({...flash,usage:u,at:'2026-10-14T10:00:00+08:00'});assert.equal(e.state,'unknown');assert.equal(e.amount,null);assert.equal(e.currency,null);assert.deepEqual(e.gaps,['用量未知']);}
 });
 
 test('requests before the consulted date are estimated but partial with the effective-date gap',()=>{
  const before=estimateRequestCost({...flash,usage:usage({output:1e6}),at:'2026-10-11T23:59:00+08:00'});
  assert.equal(before.state,'partial');assert.equal(before.amount,4);assert.deepEqual(before.gaps,['价目在请求时的生效情况无法证明']);
  const on=estimateRequestCost({...flash,usage:usage({output:1e6}),at:'2026-10-12T00:00:00+08:00'});assert.equal(on.state,'complete');assert.deepEqual(on.gaps,[]);
+ assert.equal(consultedDateGap('2026-10-11T15:59:59Z'),'价目在请求时的生效情况无法证明');assert.equal(consultedDateGap('2026-10-11T15:59:59Z','2026-10-12'),'价目在请求时的生效情况无法证明');assert.equal(consultedDateGap('2026-10-12T00:00:00+08:00'),null);assert.equal(consultedDateGap('2026-10-11T16:00:00Z'),null);
 });
 
 test('models outside the price table are unknown with "价目未覆盖" and no conversion',()=>{
@@ -73,4 +78,29 @@ test('amount display: ≈ and symbol, two decimals, < ¥0.01, +N unknown, partia
  assert.equal(formatCostTotals(sumCostEstimates([])),'≈ ¥0.00');
  assert.equal(formatCostTotals(sumCostEstimates([],{partial:true})),'unknown');
  assert.equal(formatCostTotals(sumCostEstimates([{currency:'CNY',amount:2,state:'complete'}],{partial:true})),'≈ ¥2.00 partial');
+});
+
+test('shared run entry: transport time, reported-usage gate, one incomplete-usage definition, revisions first, not-applicable',()=>{
+ const root=mkdtempSync(join(tmpdir(),'durio-run-cost-')),e=new Evidence(root,'run'),model={provider:'deepseek',id:'deepseek-flash'};
+ const usage={input:1e6,output:1e6,cacheRead:0,cacheWrite:0,totalTokens:2e6,cost:{total:0.5}},zeros={input:0,output:0,cacheRead:0,cacheWrite:0,totalTokens:0,cost:{total:0}};
+ const call=(id:string,o:{dispatches?:number;usage?:'reported'|'unknown';completeness?:string;raw?:object|null;failed?:boolean}={})=>{
+  e.append('model.intent',{attemptId:id,model,purpose:'generation',allocation:'task'});
+  if(o.failed){e.append('model.dispatch-failed',{attemptId:id,dispatched:false,attemptDispatched:false,reason:'not admitted'});return;}
+  for(let n=0;n<(o.dispatches??1);n++)e.append('model.dispatch',{attemptId:id,transportEntered:true});
+  if(o.raw!==null)e.append('model.provider-event',{attemptId:id,event:{usage:o.raw??{prompt_tokens:1e6,completion_tokens:1e6,prompt_cache_hit_tokens:0}}});
+  e.append('model.response',{attemptId:id,usage:o.usage??'reported',completeness:o.completeness??'complete',message:{usage:o.usage==='unknown'?zeros:usage}});
+ };
+ call('ok');call('unreported',{usage:'unknown'});call('aborted',{completeness:'partial'});call('shared',{dispatches:2});call('no-cache-hit',{raw:{prompt_tokens:1e6,completion_tokens:1e6}});call('no-raw',{raw:null});call('skipped',{failed:true});call('revised');e.close();
+ const {requests,totals}=estimateRunRequests(root,'run'),by=Object.fromEntries(requests.map(r=>[r.attemptId,r]));
+ const dispatch=[...records(root,{runId:'run',kinds:['model.dispatch']})][0];assert.equal(by.ok.at,dispatch.at);assert.equal(by.ok.state,'complete');assert.equal(by.ok.currency,'CNY');assert.equal(by.ok.price.version,'deepseek-cny-v1');assert.deepEqual(by.ok.history.map((h:any)=>[h.currency,h.amount]),[['USD',0.5]]);
+ const amount=by.ok.period==='peak'?10:5;assert.equal(by.ok.amount,amount);
+ assert.equal(by.unreported.state,'unknown');assert.equal(by.unreported.amount,null);assert.equal(by.unreported.usage,null);assert.deepEqual(by.unreported.history,[]);assert.ok(by.unreported.gaps.includes('usage missing or request in flight'));
+ assert.equal(by.aborted.state,'partial');assert.ok(by.aborted.gaps.includes('usage incomplete: response ended with error or abort'));
+ assert.equal(by.shared.state,'partial');assert.ok(by.shared.gaps.includes('multiple observable requests share one model response; per-request usage incomplete'));
+ assert.equal(by['no-cache-hit'].state,'partial');assert.deepEqual(by['no-cache-hit'].gaps,['usage incomplete: provider did not report cache-hit tokens']);
+ assert.equal(by['no-raw'].state,'complete');assert.equal(by.skipped.state,'not-applicable');
+ assert.deepEqual({unknownRequests:totals.unknownRequests,partial:totals.partial},{unknownRequests:1,partial:true});
+ const intent=[...records(root,{runId:'run',kinds:['model.intent']})].at(-1)!,response=[...records(root,{runId:'run',kinds:['model.response']})].at(-1)!;
+ recordCostEstimate(root,{id:'explicit',requestSource:intent.id,amount:3,currency:'CNY',price:{source:'explicit tariff',version:'explicit-v1',effectiveAt:'2000-01-01T00:00:00Z',provider:'deepseek',model:'deepseek-flash'},usageSources:[response.id],reason:'Explicit sourced re-estimate'});
+ const revised=estimateRunRequests(root,'run').requests.find(r=>r.attemptId==='revised')!;assert.equal(revised.amount,3);assert.equal(revised.price.version,'explicit-v1');assert.equal(revised.state,'complete');
 });
