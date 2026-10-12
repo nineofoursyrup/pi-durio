@@ -6,7 +6,8 @@ import {tmpdir} from 'node:os';
 import {Evidence,digest} from '../src/evidence.js';
 import {fixEvidence} from '../src/fixed-evidence.js';
 import {representativeCases} from '../src/eval/fixtures.js';
-import {verifiedImage,validatePlan,type EvalPlan} from '../src/eval/plan.js';
+import {verifiedImage,validatePlan,prepareEval,loadEvalPlan,type EvalPlan} from '../src/eval/plan.js';
+import {hostPlanPrice} from '../src/cost-estimate.js';
 import {evalReport,formatEvalReport} from '../src/eval/runner.js';
 import {appendFact,evalFacts,installedRuntimeFiles,captureFiles,materialize} from '../src/eval/store.js';
 import {PersistentBudget} from '../src/provider-boundary.js';
@@ -75,3 +76,23 @@ test('same per-trial limit blocks a noisy side without consuming the next side a
  for(let index=0;index<8;index++){const e=new Evidence(root,`plan-${index}`),p=plan(e);p.id=`plan-${index}`;p.purpose='长目的说明 '.repeat(50);appendFact(e,'eval.plan',p);e.close();}
  const view=new EvalView(root);view.render(40,12);for(let index=0;index<7;index++){view.handleInput('\x1b[B');view.render(40,12);}assert.match(view.render(40,12).join('\n'),/› plan-0/);
  });
+
+test('plan prices are fixed in CNY or USD; live plans need a non-zero fixed price',()=>{
+ const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-plan-price-')),'plan'),p=plan(e),cny=hostPlanPrice('deepseek','deepseek-flash')!;e.close();
+ validatePlan(p);validatePlan({...p,price:cny});validatePlan({...p,price:{version:'explicit-cny',source:'explicit',currency:'CNY',perMillionTokens:4}});
+ assert.throws(()=>validatePlan({...p,price:{...cny,currency:'EUR' as any}}),/INVALID_EVAL_LIMITS/);assert.throws(()=>validatePlan({...p,price:{...cny,consultedAt:'not a date'}}),/INVALID_EVAL_LIMITS/);
+ const live:EvalPlan={...p,mode:'live',authorization:{scope:'run-all-listed-trials',paid:true},budget:{...p.budget,maxTokens:2_000_000,maxRequestTokens:1_100_000,unknownUpperBound:{tokens:1_100_000,source:'https://api-docs.deepseek.com/quick_start/pricing/'}},price:cny};
+ validatePlan(live);
+ for(const version of ['offline-zero-v1','offline-zero-cny-v1'])assert.throws(()=>validatePlan({...live,price:{version,source:'deterministic local transport',currency:'CNY',perMillionTokens:0}}),/PROVEN_TOKEN_BOUND/);
+});
+
+test('new paid plans default to the host CNY peak output price with its version; offline defaults are CNY zero; explicit USD stays USD',async()=>{
+ const root=mkdtempSync(join(tmpdir(),'durio-eval-price-')),installation=join(root,'installation'),data=join(root,'data');mkdirSync(join(installation,'dist/src'),{recursive:true});mkdirSync(join(installation,'dist/execution'),{recursive:true});
+ for(const [path,content]of Object.entries({'package.json':'{}','dist/execution/package-lock.json':'{"packages":{}}','dist/execution/source-build.json':'{}','eval-environment.json':JSON.stringify({platform:'linux',arch:'arm64',node:'v24.8.0',image:verifiedImage}),'dist/src/runtime.js':'runtime'}))writeFileSync(join(installation,path),content);
+ const budget={maxRequests:8,maxTokens:1000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null};
+ const prepare=async(id:string,extra:{paid?:boolean;price?:EvalPlan['price']})=>(await prepareEval({dataRoot:data,id,installation,purpose:'fixed price default fixture',budget,cases:[representativeCases[0]],...extra})).plan.price;
+ assert.deepEqual(await prepare('paid',{paid:true}),{version:'deepseek-cny-v1',source:hostPlanPrice('deepseek','deepseek-flash')!.source,consultedAt:'2026-10-12',currency:'CNY',perMillionTokens:8});
+ assert.deepEqual(loadEvalPlan(data,'paid').price,hostPlanPrice('deepseek','deepseek-flash'));
+ assert.deepEqual(await prepare('offline',{}),{version:'offline-zero-cny-v1',source:'deterministic local transport; no model inference or paid network',currency:'CNY',perMillionTokens:0});
+ const usd={version:'first-version-usd',source:'explicit fixed price',currency:'USD' as const,perMillionTokens:2};assert.deepEqual(await prepare('usd',{paid:true,price:usd}),usd);
+});

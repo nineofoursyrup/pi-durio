@@ -92,5 +92,5 @@ test('eval plan prices from the host table use the consulted-date rule; first-ve
  const report=queryOperationsMetrics(r,scope),cny=report.costs.requests.find(q=>q.runId==='plan-cny')!,usd=report.costs.requests.find(q=>q.runId==='plan-usd')!;
  assert.equal(cny.state,'complete');assert.deepEqual(cny.gaps,[]);assert.equal(cny.amount,8);assert.equal(cny.currency,'CNY');
  assert.equal(usd.state,'partial');assert.deepEqual(usd.gaps,['original catalog effective time is unavailable']);assert.equal(usd.amount,1);assert.equal(usd.currency,'USD');
- assert.equal(report.costs.period.currencies.CNY.knownAmount,8);assert.equal(report.costs.period.currencies.USD.knownAmount,1);assert.match(formatOperationsMetrics(report),/期间成本 ≈ ¥8\.00 · ≈ \$1\.00 partial\n/);
+ assert.equal(report.costs.period.currencies.CNY.knownAmount,8);assert.equal(report.costs.period.currencies.USD.knownAmount,1);assert.match(formatOperationsMetrics(report),/期间成本 ≈ ¥8\.00 · ≈ \$1\.00 partial\n首版美元 eval 计划（按原币种，不重算，与人民币分开汇总）：plan-usd ≈ \$1\.00\n/);
 });

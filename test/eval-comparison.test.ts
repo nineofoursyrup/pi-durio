@@ -11,6 +11,7 @@ import {verifiedImage,trialVersion,validatePlan,type EvalPlan} from '../src/eval
 import {evalReport,formatEvalReport,regradeEval} from '../src/eval/runner.js';
 import {EvalView} from '../src/tui/eval.js';
 import {compareTrials,pairedTrials,validateComparison,type ComparisonPlan,type ComparisonTrial} from '../src/eval/comparison.js';
+import {hostPlanPrice} from '../src/cost-estimate.js';
 
 function specification():ComparisonPlan{return {
  kind:'deterministic',repetitions:2,repetitionBasis:'exact controlled regression, not stochastic stability',
@@ -86,13 +87,13 @@ test('known request or latency gains cannot upgrade a batch with missing price o
  }
 });
 
-async function syntheticReport(options:{missingPrice?:boolean;missingUsage?:boolean;unattributed?:boolean}={}){
+async function syntheticReport(options:{missingPrice?:boolean;missingUsage?:boolean;unattributed?:boolean;price?:EvalPlan['price']}={}){
  const root=mkdtempSync(join(tmpdir(),'durio-paired-report-')),e=new Evidence(root,'paired');
  const c=specification();c.roles={'local-fix':'objective'};c.protections=[{id:'scope',kind:'hard',check:'scope',cases:['local-fix']}];
  c.sides.baseline.runtime=c.sides.candidate.runtime={id:'fixed-runtime',manifest:e.blob('[]'),bytes:2};
  const p:EvalPlan={id:'paired',purpose:'Known-result synthetic reporting only, no product runtime execution',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:c.sides.candidate.runtime,cases:[representativeCases[0]],trials:[],comparison:c,budget:{maxRequests:32,maxTokens:32000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null},trialTimeoutMs:1000,gradingTimeoutMs:1000,maxOutputTokens:32,requestRetryLimit:0,price:{version:'known-price-v1',source:'synthetic arithmetic oracle',currency:'USD',perMillionTokens:1000},authorization:{scope:'run-all-listed-trials',paid:false},environment:{node:'v24.8.0',isolation:'synthetic facts, not actual execution',writable:'fixed',cache:'none'},mainObjective:'requests',protection:['scope'],improvementConclusion:'not-evaluated'};
  p.trials=pairedTrials(p.id,['local-fix'],2).map(t=>({...t,version:trialVersion(p,t.side)}));validatePlan(p);
- if(options.missingPrice)p.price=null;
+ if(options.missingPrice)p.price=null;if(options.price)p.price=options.price;
  const source=appendFact(e,'eval.plan',p);e.close();await fixEvidence(root,{id:'eval-plan:paired',sources:[source],purpose:'synthetic comparison plan'});
  const facts=new Evidence(root,'paired');
  for(const t of p.trials){
@@ -129,4 +130,16 @@ test('the shared report retains missing prices, unknown usage and unassigned cos
   if('missingUsage'in options){assert.equal(report.cost.totalValue,null);assert.equal(report.cost.missing,2);assert.equal(report.cost.knownTokens,100);assert.equal(report.cost.bySide.candidate.knownValue,0.02);}
   if('unattributed'in options){assert.equal(report.cost.totalValue,0.14);assert.equal(report.cost.unattributed.knownValue,0.02);assert.equal(report.cost.bySide.candidate.knownValue,0.04);}
  }
+});
+
+test('first-version USD plans stay USD in the eval report; CNY host-price plans follow the display rule and bound budgets at the peak price',async()=>{
+ const usd=evalReport((await syntheticReport()).root,'paired'),usdText=formatEvalReport(usd);
+ assert.equal(usd.cost.currency,'USD');assert.equal(usd.cost.totalValue,0.12);assert.deepEqual(usd.budget.amounts.limit,{tokens:32000,amount:32,currency:'USD',version:'known-price-v1'});
+ assert.match(usdText,/费用估算 · 非账单 · 计划固定价 known-price-v1（USD 1000\/百万 tokens） · 首版美元计划：按原币种，不重算，与人民币分开汇总/);
+ assert.match(usdText,/\n费用 ≈ \$0\.12 · 请求 12 /);assert.match(usdText,/分项 baseline ≈ \$0\.08 · candidate ≈ \$0\.04 · /);assert.match(usdText,/预算上限 总 32000 tokens ≈ \$32\.00 · 每 trial \d+ tokens ≈ \$/);assert.doesNotMatch(usdText,/¥/);
+ const missing=formatEvalReport(evalReport((await syntheticReport({missingUsage:true})).root,'paired'));assert.match(missing,/\n费用 ≈ \$0\.10 \+2 unknown · /);assert.match(missing,/candidate ≈ \$0\.02 \+2 unknown/);
+ assert.match(formatEvalReport(evalReport((await syntheticReport({missingPrice:true})).root,'paired')),/\n费用 unknown（计划未固定价格） · 请求 12 /);
+ const cny=evalReport((await syntheticReport({price:hostPlanPrice('deepseek','deepseek-flash')})).root,'paired'),cnyText=formatEvalReport(cny);
+ assert.equal(cny.cost.currency,'CNY');assert.ok(Math.abs(cny.cost.totalValue!-120*8/1e6)<1e-15);assert.deepEqual(cny.budget.amounts.limit,{tokens:32000,amount:0.256,currency:'CNY',version:'deepseek-cny-v1'});
+ assert.match(cnyText,/计划固定价 deepseek-cny-v1（CNY 8\/百万 tokens，查阅 2026-10-12）\n/);assert.match(cnyText,/\n费用 < ¥0\.01 · /);assert.match(cnyText,/预算上限 总 32000 tokens ≈ ¥0\.26 .*（按计划固定单价折算，即宿主价目高峰输出价）/);assert.doesNotMatch(cnyText,/\$/);
 });

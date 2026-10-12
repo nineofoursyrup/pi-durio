@@ -16,6 +16,8 @@ import {assertWorkspaceUnfenced} from './workspace-fence.js';
 import {plannedDefaults,validateDefaultScope} from './improve-defaults.js';
 import {effectiveProfileChanges,validateProfileBasis,type EffectiveProfileChange} from './improve-profile-validation.js';
 import {readImproveBuildDefault} from './improve-process.js';
+import {hostPlanPrice} from './cost-estimate.js';
+import {decisionBudgetAmount} from './improve-history.js';
 export {readImproveBuildDefault,launchImproveBuild,type ImproveBuildLaunch} from './improve-process.js';
 export {readImproveDefaults} from './improve-defaults.js';
 export {readImproveEffectiveConfig,type EffectiveConfig,type EffectiveProfileChange} from './improve-profile-validation.js';
@@ -89,7 +91,7 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
  const total=groups.reduce((n,g)=>{const r=groupReservation(g);return {checks:n.checks+r.checks,requests:n.requests+r.requests,tokens:n.tokens+r.tokens};},{checks:0,requests:0,tokens:0});
  if(total.checks>l.maxChecks||total.requests>l.maxRequests||total.tokens>l.maxTokens)throw Error('IMPROVE_TOTAL_BUDGET_EXCEEDED');
  if(groups.length){checkTemporaryDirectory(d.directory,candidates.map(c=>c.target));if(candidates.some(c=>c.target.workspace&&contains(c.target.workspace,realpathSync(root))))throw Error('IMPROVE_RECORDING_ROOT_OVERLAPS_FORMAL_TARGET');if(Date.parse(l.deadline)<=Date.now())throw Error('IMPROVE_DEADLINE');}
- return {...d,summary:{order:d.selections.map(s=>s.candidateId),executionOrder:groups.map(g=>({group:g.id,candidates:g.candidateIds})),targets:candidates.map(c=>c.target.workspace),dependencies:candidates.map(c=>({candidateId:c.id,dependencies:c.dependencies,conflicts:c.conflicts})),totalBudget:d.limits,plannedReservation:total,effectiveProfiles,writeback:'not-written',activation:'not-enabled'}};
+ return {...d,summary:{order:d.selections.map(s=>s.candidateId),executionOrder:groups.map(g=>({group:g.id,candidates:g.candidateIds})),targets:candidates.map(c=>c.target.workspace),dependencies:candidates.map(c=>({candidateId:c.id,dependencies:c.dependencies,conflicts:c.conflicts})),totalBudget:d.limits,budgetAmount:decisionBudgetAmount(l.maxTokens,hostPlanPrice('deepseek','deepseek-flash')),plannedReservation:total,effectiveProfiles,writeback:'not-written',activation:'not-enabled'}};
 }
 type SubmitOptions={dataRoot:string;decision:ImproveDecision;fault?:(kind:string)=>void;signal?:AbortSignal};
 async function workspaceLeases(decision:ImproveDecision,onCompromised:(error:Error)=>void){
@@ -145,7 +147,8 @@ export async function submitImproveDecision(options:SubmitOptions){
   const guard=()=>{owner.assertHeld();for(const lease of leases)lease.assertHeld();};
   evidence=new Evidence(dataRoot,report.runId,kind=>{guard();options.fault?.(kind);});
   const executionVersion=currentVersion();
-  const sourceId=appendFact(evidence,'improve.decision',{id:decision.id,workspace:report.target.workspace,requestDigest,executionVersion,decision,decisions:decision.selections.map(s=>{const c=report.candidates.find(c=>c.id===s.candidateId)!;return {candidateId:c.id,mode:s.mode,problem:problemIdentity(c),condition:conditionIdentity(c),conditionFiles:conditionFiles(c)};})});
+  // The host fixes the selection's budget price when the decision is saved; the request digest stays the user's structured data.
+  const sourceId=appendFact(evidence,'improve.decision',{id:decision.id,workspace:report.target.workspace,requestDigest,executionVersion,price:hostPlanPrice('deepseek','deepseek-flash'),decision,decisions:decision.selections.map(s=>{const c=report.candidates.find(c=>c.id===s.candidateId)!;return {candidateId:c.id,mode:s.mode,problem:problemIdentity(c),condition:conditionIdentity(c),conditionFiles:conditionFiles(c)};})});
   await executeGroups({...options,signal},evidence,sourceId,decision.groups,executionVersion,guard,leases.map(l=>l.root));
  }finally{evidence?.close();for(const lease of leases.reverse())await lease.release();await owner.release();}
  return readImproveDecision(dataRoot,decision.id);

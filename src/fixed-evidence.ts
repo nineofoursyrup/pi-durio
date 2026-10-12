@@ -103,8 +103,8 @@ export function fixedDependencies(root:string) {
   for(const ref of iterateFixedDependencies(root)){if(dependencies.size>=20000&&!dependencies.has(ref.sha256))throw Error('FIX_PROTECTION_QUERY_LIMIT: consume iterateFixedDependencies');dependencies.set(ref.sha256,ref);}
   return [...dependencies.values()];
 }
-export async function estimateUsage(root:string,request:{id:string;runIds:string[];through:number;price:{version:string;source:string;currency:'USD';effectiveAt:string;perMillion:{input:number;output:number;cacheRead:number;cacheWrite:number}}}) {
-  if(!request.id||!request.price.version||!request.price.source||!Number.isFinite(Date.parse(request.price.effectiveAt))||request.price.currency!=='USD'||Object.values(request.price.perMillion).some(n=>!Number.isFinite(n)||n<0))throw Error('INVALID_PRICE_VERSION');
+export async function estimateUsage(root:string,request:{id:string;runIds:string[];through:number;price:{version:string;source:string;currency:'CNY'|'USD';effectiveAt:string;perMillion:{input:number;output:number;cacheRead:number;cacheWrite:number}}}) {
+  if(!request.id||!request.price.version||!request.price.source||!Number.isFinite(Date.parse(request.price.effectiveAt))||!['CNY','USD'].includes(request.price.currency)||Object.values(request.price.perMillion).some(n=>!Number.isFinite(n)||n<0))throw Error('INVALID_PRICE_VERSION');
   const projection=queryUsage(root,request.runIds,request.through),rates=request.price.perMillion;
   const parts=Object.entries(rates).map(([key,price])=>({key,tokens:projection.totals[key as keyof typeof rates],price}));
   const known=parts.filter(part=>part.tokens!==null);const value=known.length?known.reduce((sum,part)=>sum+part.tokens!*part.price/1e6,0):null;

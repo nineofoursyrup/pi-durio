@@ -75,6 +75,8 @@ test('committed cumulative usage deduplicates across runs and reopen, reasoning 
   const first=await estimateUsage(root,{id:'estimate-1',runIds:['a','b'],through,price});assert.ok(Math.abs(first.value!-0.000038)<1e-12);
   const second=await estimateUsage(root,{id:'estimate-2',runIds:['a','b'],through,price:{...price,version:'p2',perMillion:{...price.perMillion,input:2}}});assert.ok(Math.abs(second.value!-0.000068)<1e-12);
   assert.equal([...records(root,{kinds:['usage.estimate']})].length,2);assert.equal(decode(root,[...records(root,{kinds:['usage.estimate']})][0]).price.version,'p1');assert.equal(queryUsage(root,['a','b']).totals.input,30);
+  const yuan=await estimateUsage(root,{id:'estimate-cny',runIds:['a','b'],through,price:{...price,version:'cny-1',currency:'CNY'}});assert.equal(yuan.price.currency,'CNY');assert.ok(Math.abs(yuan.value!-0.000038)<1e-12);
+  await assert.rejects(estimateUsage(root,{id:'estimate-eur',runIds:['a','b'],through,price:{...price,currency:'EUR' as any}}),/INVALID_PRICE_VERSION/);
   assert.equal(queryUsage(root,['a','missing-run']).completeness,'partial');
   const multi=new Evidence(root,'a');multi.append('usage.projection',{conversationId:2,value:usage(3),completeness:'known'});multi.append('durable.closed-snapshot',{usage:[{conversationId:1,documentId:7,value:usage(30)},{conversationId:2,documentId:8,value:usage(3)}]});multi.close();
   const multiple=queryUsage(root,['a','b']);assert.equal(multiple.totals.input,33);assert.equal(multiple.totals.cacheRead,null);assert.ok(multiple.items.every(item=>item.categoryCoverage.cacheRead==='not fully reported'));
