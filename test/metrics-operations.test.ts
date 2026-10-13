@@ -6,6 +6,7 @@ import {join} from 'node:path';
 import {Evidence} from '../src/evidence.js';
 import {records} from '../src/history.js';
 import {recordAcceptance,queryOperationsMetrics,formatOperationsMetrics,recordCostEstimate} from '../src/metrics/index.js';
+import {readDisplayIndex} from '../src/display-number.js';
 import {pricePeriod} from '../src/cost-estimate.js';
 import {watermark} from '../src/history.js';
 const scope={from:'2000-01-01T00:00:00Z',to:'2100-01-01T00:00:00Z',asOf:'2100-01-01T00:00:00Z',source:'synthetic' as const};
@@ -84,6 +85,14 @@ test('first-version requests are re-estimated in CNY at query time; the pi-ai US
  const old=task(r,'partial');request(old.e,'early',0.1,{model:flash,usage:{input:1,output:1,cacheRead:0,cacheWrite:0}});old.e.append('model.dispatch',{attemptId:'early',transportEntered:true});old.close();
  assert.match(formatOperationsMetrics(queryOperationsMetrics(r,scope)),/全样本成本 ≈ ¥3\.00 \+1 unknown partial\n/);
 });
+test('an eval request with a fixed plan price but missing usage is unknown without "price unavailable"',()=>{
+ const r=root(),e=new Evidence(r,'plan-missing');
+ e.append('eval.plan',{id:'plan-missing',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash'},trials:[{id:'trial',side:'candidate'}],price:{version:'deepseek-cny-v1',source:'host price table',consultedAt:'2026-10-12',currency:'CNY',perMillionTokens:8}});
+ e.append('provider.dispatch',{id:'outer',operationId:'trial',purpose:'eval-runtime'});e.append('budget.settle',{id:'outer',tokens:null,status:'unknown'});e.close();
+ const request=queryOperationsMetrics(r,scope).costs.requests.find(q=>q.runId==='plan-missing')!;
+ assert.equal(request.state,'unknown');assert.equal(request.amount,null);assert.equal(request.price.version,'deepseek-cny-v1');
+ assert.ok(request.gaps.includes('usage missing or request in flight'));assert.ok(!request.gaps.includes('price unavailable'));
+});
 test('eval plan prices from the host table use the consulted-date rule; first-version USD plans keep their path and sum separately',()=>{
  const r=root();
  for(const [id,price] of [['plan-cny',{version:'deepseek-cny-v1',source:'host price table',consultedAt:'2026-10-12',currency:'CNY',perMillionTokens:8}],['plan-usd',{version:'v1',source:'first-version fixed price',currency:'USD',perMillionTokens:1}]] as const){
@@ -92,5 +101,6 @@ test('eval plan prices from the host table use the consulted-date rule; first-ve
  const report=queryOperationsMetrics(r,scope),cny=report.costs.requests.find(q=>q.runId==='plan-cny')!,usd=report.costs.requests.find(q=>q.runId==='plan-usd')!;
  assert.equal(cny.state,'complete');assert.deepEqual(cny.gaps,[]);assert.equal(cny.amount,8);assert.equal(cny.currency,'CNY');
  assert.equal(usd.state,'partial');assert.deepEqual(usd.gaps,['original catalog effective time is unavailable']);assert.equal(usd.amount,1);assert.equal(usd.currency,'USD');
- assert.equal(report.costs.period.currencies.CNY.knownAmount,8);assert.equal(report.costs.period.currencies.USD.knownAmount,1);assert.match(formatOperationsMetrics(report),/期间成本 ≈ ¥8\.00 · ≈ \$1\.00 partial\n首版美元 eval 计划（按原币种，不重算，与人民币分开汇总）：plan-usd ≈ \$1\.00\n/);
+ assert.equal(report.costs.period.currencies.CNY.knownAmount,8);assert.equal(report.costs.period.currencies.USD.knownAmount,1);const plan=readDisplayIndex(r).label('eval-plan','plan-usd');assert.match(plan,/^ep-[0-9a-f]{4,}$/);
+ assert.ok(formatOperationsMetrics(report).includes(`期间成本 ≈ ¥8.00 · ≈ $1.00 partial\n首版美元 eval 计划（按原币种，不重算，与人民币分开汇总）：${plan} ≈ $1.00\n`));
 });

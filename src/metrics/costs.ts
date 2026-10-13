@@ -57,8 +57,10 @@ export function costReport(parentRoot:string,sample:TaskMetricsReport,runs:Opera
    if(!usage.length)request.gaps.push('original provider usage bytes unavailable');
    for(const f of usage)try{readObject(root,f.data.bytes);}catch{request.gaps.push(`provider bytes unavailable: ${f.ref.id}`);}
    // Host-table plan prices carry a consulted date instead of an effective time; first-version USD plans keep the effective-time gap.
-   if(plan?.price&&validAmount(settlement?.data.tokens)){request.amount=settlement!.data.tokens*plan.price.perMillionTokens/1e6;request.currency=plan.price.currency;request.price={...plan.price,effectiveAt:plan.price.effectiveAt??null,provider:plan.model?.provider??null,model:plan.model?.id??null};request.history.push({source:facts.find(f=>f.ref.kind==='eval.plan')!.ref.id,amount:request.amount,currency:request.currency,price:request.price});if(!request.price.effectiveAt&&plan.price.consultedAt){const gap=consultedDateGap(request.at,plan.price.consultedAt);if(gap)request.gaps.push(gap);}else if(!request.price.effectiveAt)request.gaps.push('original catalog effective time is unavailable');}
-   else request.gaps.push('price unavailable');applyRevisions(root,request,facts);requests.push(request);
+   // A fixed plan price is known even when usage is missing; only a plan without a price lacks one.
+   if(plan?.price)request.price={...plan.price,effectiveAt:plan.price.effectiveAt??null,provider:plan.model?.provider??null,model:plan.model?.id??null};
+   if(plan?.price&&validAmount(settlement?.data.tokens)){request.amount=settlement!.data.tokens*plan.price.perMillionTokens/1e6;request.currency=plan.price.currency;request.history.push({source:facts.find(f=>f.ref.kind==='eval.plan')!.ref.id,amount:request.amount,currency:request.currency,price:request.price});if(!request.price.effectiveAt&&plan.price.consultedAt){const gap=consultedDateGap(request.at,plan.price.consultedAt);if(gap)request.gaps.push(gap);}else if(!request.price.effectiveAt)request.gaps.push('original catalog effective time is unavailable');}
+   else if(!plan?.price)request.gaps.push('price unavailable');applyRevisions(root,request,facts);requests.push(request);
   }
   // A recorded external tool fee uses the same attempt identity and estimator contract.
   for(const intent of facts.filter(f=>f.ref.kind==='tool.intent'&&facts.some(e=>e.ref.kind==='cost.estimate'&&e.data.requestSource===f.ref.id))){

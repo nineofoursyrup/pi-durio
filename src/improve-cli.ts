@@ -2,6 +2,7 @@ import {readFile} from 'node:fs/promises';
 import {analyzeImprove} from './runtime.js';
 import {listImproveReports,readImproveReport,formatImproveReport,offlineImproveTransport} from './improve.js';
 import {exitHostIfUnconfirmed} from './headless-lifecycle.js';
+import {resolveDisplayInput} from './display-number.js';
 import {previewImproveDecision,submitImproveDecision,readImproveDecision,resumeImproveDecision,listImproveSuppressions,restoreImproveSuggestion,rollbackImproveDecision,readImproveDefaults,readImproveBuildDefault,launchImproveBuild,readImproveEvalAssets,regradeImproveAsset} from './improve-decisions.js';
 
 export async function improveCommand(action:string|undefined,dataRoot:string,values:Record<string,string|boolean|undefined>) {
@@ -13,6 +14,9 @@ export async function improveCommand(action:string|undefined,dataRoot:string,val
  if(['preview','submit','continue','restore-suggestion','rollback','launch','regrade'].includes(action??'')){
   if(typeof values.spec!=='string')throw Error('USAGE: improve preview|submit|continue|restore-suggestion --spec FILE');
   const spec=JSON.parse(await readFile(values.spec,'utf8'));
+  // Display numbers in the spec are resolved before anything is recorded; a regrade plan belongs to its own eval data root.
+  if((action==='preview'||action==='submit')&&typeof spec?.reportId==='string')spec.reportId=resolveDisplayInput(dataRoot,'improve-report',spec.reportId);
+  if(action==='regrade'&&typeof spec?.planId==='string'&&typeof spec.evalDataRoot==='string')spec.planId=resolveDisplayInput(spec.evalDataRoot,'eval-plan',spec.planId);
   if(action==='preview'){console.log(JSON.stringify(previewImproveDecision(dataRoot,spec),null,2));return;}
   const controller=new AbortController(),stop=()=>controller.abort();process.on('SIGINT',stop);process.on('SIGTERM',stop);
   try{const result=action==='launch'?await launchImproveBuild({...spec,dataRoot,signal:controller.signal}):action==='regrade'?await regradeImproveAsset({...spec,dataRoot,signal:controller.signal}):action==='submit'?await submitImproveDecision({dataRoot,decision:spec,signal:controller.signal}):action==='continue'?await resumeImproveDecision({...spec,dataRoot,signal:controller.signal}):action==='rollback'?await rollbackImproveDecision({...spec,dataRoot,signal:controller.signal}):await restoreImproveSuggestion({...spec,dataRoot});console.log(JSON.stringify(result,null,2));if('regrading'in result&&result.regrading?.state!=='completed')process.exitCode=result.regrading?.state==='cancelled'?130:75;if('state'in result&&result.state!=='completed'&&!(action==='rollback'&&'groups'in result&&result.groups.filter((g:any)=>spec.groupIds.includes(g.id)).every((g:any)=>g.rollback?.state==='completed')))process.exitCode=result.state==='frozen'?75:1;}
@@ -23,6 +27,7 @@ export async function improveCommand(action:string|undefined,dataRoot:string,val
  if(action!=='analyze'||typeof values.spec!=='string')throw Error('USAGE: improve analyze --spec FILE; improve list; improve report --id ID [--format text]');
  const spec=JSON.parse(await readFile(values.spec,'utf8'));
  if(!['live','offline'].includes(spec.mode)||typeof spec.workspace!=='string'||typeof spec.targetRunId!=='string')throw Error('IMPROVE_SPEC_REQUIRED: explicit workspace, targetRunId, mode and request');
+ spec.targetRunId=resolveDisplayInput(dataRoot,'run',spec.targetRunId);
  if(spec.mode==='offline'&&!values['offline-demo'])throw Error('OFFLINE_TRANSPORT_REQUIRED: --offline-demo is an explicit controlled zero-candidate fixture');
  if(spec.mode==='live'&&values['offline-demo'])throw Error('IMPROVE_MODE_CONFLICT');
  const controller=new AbortController();let cancellation:'stop'|'exit'='exit';

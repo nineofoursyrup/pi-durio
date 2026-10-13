@@ -328,14 +328,14 @@ export class ReadOnlyTui {
       try{this.metricsView=new MetricsView(this.options.dataRoot,command==='/metrics'?{}:JSON.parse(command.slice(9)));this.openPanel('metrics');}catch(error){this.notice=`任务指标不可读取：${String(error)}`;this.tui.requestRender();}
     }
     else if(command.startsWith('/acceptance ')){
-      try{const receipt=recordAcceptance(this.options.dataRoot,JSON.parse(command.slice(12)));this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();
+      try{const input=JSON.parse(command.slice(12));if(typeof input?.taskId==='string')input.taskId=resolveDisplayInput(this.options.dataRoot,'task',input.taskId);const receipt=recordAcceptance(this.options.dataRoot,input);this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();
     }
     else if(command==='/eval'||command.startsWith('/eval ')){
       try{const id=command.slice(6).trim();this.evalView=new EvalView(this.options.dataRoot,id?resolveDisplayInput(this.options.dataRoot,'eval-plan',id):undefined);this.openPanel('eval');}catch(error){this.notice=`Eval记录不可读取：${String(error)}`;this.tui.requestRender();}
     }
     else if(command==='/storage') {this.storageView=new StorageView(this.options.dataRoot,()=>this.tui.requestRender());this.openPanel('storage');}
     else if(command==='/history'||command.startsWith('/history ')) {
-      try{this.historyView=new HistoryView(this.options.dataRoot,command==='/history'?{}:JSON.parse(command.slice(9)));this.openPanel('history');}
+      try{const filter=command==='/history'?{}:JSON.parse(command.slice(9));if(typeof filter?.session==='string')filter.session=resolveDisplayInput(this.options.dataRoot,'session',filter.session);this.historyView=new HistoryView(this.options.dataRoot,filter);this.openPanel('history');}
       catch(error){this.notice=`历史查询失败（当前工作未改变）：${safe(String(error))}`;this.tui.requestRender();}
     }
     else if(command==='/details')this.openDetail(this.records.at(-1));
@@ -357,7 +357,7 @@ export class ReadOnlyTui {
     }
     else if(command==='/improve-select'||command.startsWith('/improve-select ')){
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';return true;}
-      try{const template=JSON.parse(command.slice(16).trim()) as ImproveDecision;this.improveSelectionView=new ImproveSelectionView(this.options.dataRoot,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
+      try{const template=JSON.parse(command.slice(16).trim()) as ImproveDecision;if(typeof template?.reportId==='string')template.reportId=resolveDisplayInput(this.options.dataRoot,'improve-report',template.reportId);this.improveSelectionView=new ImproveSelectionView(this.options.dataRoot,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
     }
     else if(command==='/improve'||command.startsWith('/improve '))void this.improve(command.slice(8).trim());
     else return false;
@@ -371,7 +371,7 @@ export class ReadOnlyTui {
     if(this.phase!=='idle'||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前仍在清理或结果未知；尚未启动分析，先完成恢复核对';this.tui.requestRender();return;}
     if(!this.runId){this.notice='尚无活动任务；先完成一项工作再针对其证据分析';this.tui.requestRender();return;}
     const targetRunId=this.result?.improve?.runId===this.runId?this.result.improve.target.runId:this.runId;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
-    this.notice=`improve 分析中 · 目标 ${targetRunId}；默认不选中任何候选`;
+    this.notice=`improve 分析中 · 目标 ${this.shown('run',targetRunId)}；默认不选中任何候选`;
     this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);this.notice=`improve ${result.improve?.state??result.status} · ${this.shown('improve-report',request.id)}；/improves 查看；没有执行候选`;}).catch(error=>{this.notice=`分析未完成：${String(error)}`;}).finally(()=>this.finished());this.tui.requestRender();
   }
   private async submitImproveChoice(decision:ImproveDecision){

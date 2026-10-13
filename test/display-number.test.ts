@@ -5,7 +5,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { Evidence } from '../src/evidence.js';
+import { Evidence, digest } from '../src/evidence.js';
+import { readAcceptance } from '../src/metrics/index.js';
+import { formatImproveReport } from '../src/improve.js';
 import { watermark, records } from '../src/history.js';
 import { runReadTask } from '../src/runtime.js';
 import { demoTransport } from '../src/offline.js';
@@ -94,6 +96,52 @@ test('CLI --run accepts display numbers and full UUIDs; ambiguity exits nonzero 
   assert.equal(JSON.parse(recovered.stdout).runId, result.runId);
   assert.equal(resolveDisplayInput(dataRoot, 'run', result.runId), result.runId);
   assert.throws(() => resolveDisplayInput(dataRoot, 'run', 'r-abcd'), DisplayInputError);
+});
+
+test('JSON and unit inputs accept display numbers: history filter, storage session units, acceptance task, improve specs', async () => {
+  const base = mkdtempSync(join(tmpdir(), 'durio-display-json-')), dataRoot = join(base, 'data'), workspace = join(base, 'project');
+  mkdirSync(workspace); writeFileSync(join(workspace, 'README.md'), 'display fixture\n');
+  const result = await runReadTask({ dataRoot, workspace, input: 'Read README.md', mode: 'offline', transport: demoTransport().fetch });
+  assert.equal(result.status, 'completed');
+  const cli = (...args: string[]) => spawnSync(process.execPath, ['dist/src/cli.js', ...args, '--data-root', dataRoot], { encoding: 'utf8' });
+  const spec = (name: string, value: unknown) => { const file = join(base, name); writeFileSync(file, JSON.stringify(value)); return file; };
+  // improve analyze --spec: the target run number reaches the analysis as the full identity (before unclosed legacy runs exist).
+  const analysis = { mode: 'offline', workspace, targetRunId: readDisplayIndex(dataRoot).label('run', result.runId), request: { id: 'display-analysis', purpose: 'fixture', limits: { maxRequests: 4, maxTokens: 1024, maxRequestTokens: 256, maxDurationMs: 30000, maxOutputTokens: 128 } } };
+  const analyzed = cli('improve', 'analyze', '--offline-demo', '--spec', spec('analyze-run.json', analysis));
+  assert.equal(analyzed.status, 0, analyzed.stderr);
+  assert.equal(JSON.parse(analyzed.stdout).report.target.runId, result.runId);
+  legacyRun(dataRoot, A, SA, '/p1'); legacyRun(dataRoot, B, SB, '/p2');
+  const index = readDisplayIndex(dataRoot), session = index.label('session', result.sessionId), task = index.label('task', result.taskId);
+  const rejected = (args: string[], code: string) => {
+    const before = readFileSync(join(dataRoot, 'host.sqlite')), seq = watermark(dataRoot), child = cli(...args);
+    assert.notEqual(child.status, 0, args.join(' ')); assert.equal(JSON.parse(child.stderr).error.code, code, child.stderr); assert.equal(child.stdout, '');
+    assert.equal(watermark(dataRoot), seq); assert.deepEqual(readFileSync(join(dataRoot, 'host.sqlite')), before);
+  };
+
+  // history --filter: the session number selects the session; the echoed filter keeps the full identity.
+  const history = cli('history', '--filter', JSON.stringify({ session }));
+  assert.equal(history.status, 0, history.stderr);
+  const page = JSON.parse(history.stdout);
+  assert.equal(page.filter.session, result.sessionId); assert.deepEqual(page.items.map((i: any) => i.runId), [result.runId]);
+  rejected(['history', '--filter', JSON.stringify({ session: 's-5e55' })], 'DISPLAY_AMBIGUOUS');
+
+  // storage preview --units session:<s- number>: the immutable plan names the full session.
+  rejected(['storage', 'preview', '--id', 'ambiguous', '--units', 'session:s-5e55', '--reason', 'display fixture'], 'DISPLAY_AMBIGUOUS');
+  const preview = cli('storage', 'preview', '--id', 'by-number', '--units', `session:${session}`, '--reason', 'display fixture');
+  assert.equal(preview.status, 0, preview.stderr);
+  assert.deepEqual(JSON.parse(preview.stdout).plan.request.units, [`session:${result.sessionId}`]);
+
+  // acceptance --spec: a t- number is resolved before the input is digested and recorded.
+  const requirements = { type: 'requirements', id: 'by-number', taskId: task, source: { kind: 'human', actor: 'fixture user', statement: 'README must be read', refs: [] }, ruleVersion: 'v1', necessary: [{ id: 'read', description: 'README is read' }] };
+  rejected(['acceptance', '--spec', spec('missing-task.json', { ...requirements, taskId: 't-ffffffff' })], 'DISPLAY_NOT_FOUND');
+  const accepted = cli('acceptance', '--spec', spec('acceptance.json', requirements));
+  assert.equal(accepted.status, 0, accepted.stderr);
+  const [fact] = readAcceptance(dataRoot, result.taskId);
+  assert.equal(fact.data.taskId, result.taskId); assert.equal(fact.data.requestIdentity, digest(JSON.stringify({ ...requirements, taskId: result.taskId })));
+
+  // improve specs: an ambiguous target run or an unknown report number is rejected before analysis or decisions.
+  rejected(['improve', 'analyze', '--offline-demo', '--spec', spec('analyze.json', { ...analysis, targetRunId: 'r-abcd', request: { ...analysis.request, id: 'other' } })], 'DISPLAY_AMBIGUOUS');
+  rejected(['improve', 'preview', '--spec', spec('preview.json', { id: 'choice', reportId: 'ir-ffffffff', reportRevision: 'x', selections: [], groups: [], limits: {} })], 'DISPLAY_NOT_FOUND');
 });
 
 const sha = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -190,4 +238,19 @@ test('candidates show C-NN@r<n> from the recorded R number and the revision ordi
   assert.equal(index.candidate({ id: 'candidate:new', revision: 'x', display: 'R12' }), 'C-12@r1');
   assert.equal(index.label('improve-report', 'my-report'), report);
   assert.equal(index.qualifiedCandidate('my-report', second), `${report}·C-03@r1`);
+});
+
+test('improve report text names candidates and their links only by C-NN@rN; the record keeps R and full IDs', () => {
+  const root = mkdtempSync(join(tmpdir(), 'durio-display-report-text-'));
+  const candidate = (id: string, display: string, links: Partial<{ dependencies: string[]; conflicts: string[] }> = {}) => ({ id, revision: `rev-${id}`, display, title: `title ${id}`, dependencies: [], conflicts: [], ...links });
+  const one = candidate('cand-one', 'R1', { dependencies: ['cand-two'], conflicts: ['cand-three'] }), two = candidate('cand-two', 'R2'), three = candidate('cand-three', 'R3');
+  const report = { id: 'text-report', revision: 'rev', state: 'complete', target: { workspace: '/p1', sessionId: SA, runId: A }, cutoff: 1, deadline: 'later', summary: 'summary', candidates: [one, two], suppressed: [{ candidate: three, matches: [] }], gaps: [], budget: {} };
+  const e = new Evidence(root, A);
+  try { e.append('improve.started', { request: { id: report.id }, target: report.target }); e.append('improve.report', report); } finally { e.close(); }
+  const text = formatImproveReport({ id: report.id, state: 'complete', report, decisions: [], availability: [] } as any, root);
+  assert.match(text, /^C-01@r1 title cand-one\n/m);
+  assert.match(text, /"display": "C-01@r1"/); assert.match(text, /"dependencies": \[\n\s+"C-02@r1"\n\s+\]/); assert.match(text, /"conflicts": \[\n\s+"C-03@r1"\n\s+\]/);
+  assert.match(text, /"display":"C-03@r1"/);
+  assert.doesNotMatch(text, /"R\d+"/);
+  assert.equal(report.candidates[0].display, 'R1'); assert.deepEqual(report.candidates[0].dependencies, ['cand-two']);
 });
