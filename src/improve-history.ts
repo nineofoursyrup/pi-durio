@@ -1,5 +1,6 @@
 import {openHostReadonly,readObject,digest} from './evidence.js';
 import type {ImproveCandidate} from './improve.js';
+import {formatAmount} from './cost-estimate.js';
 
 export interface ImproveFact {sourceId:string;runId:string;seq:number;kind:string;data:any}
 /** Facts remain in the existing host journal; no separate decision database. */
@@ -57,6 +58,12 @@ function validationView(root:string,result:any){
   catch(error){return {...check,report:null,reportAvailability:'unavailable',reportReason:String(error)};}
  })};
 }
+/** A selection's total token limit priced at its fixed price (host peak output price, CNY).
+ * First-version decisions fixed no price: their token limits are shown as recorded and never repriced. */
+export function decisionBudgetAmount(maxTokens:number,price:{version:string;currency:string;perMillionTokens:number}|null){
+ if(!price)return {tokens:maxTokens,amount:null,currency:null,version:null,display:'首版选择未固定价格；按记录只显示 token 上限，不重算'};
+ const amount=maxTokens*price.perMillionTokens/1e6;return {tokens:maxTokens,amount,currency:price.currency,version:price.version,display:`${formatAmount(amount,price.currency)}（${price.version}，高峰输出价）`};
+}
 export function readImproveDecision(root:string,id:string){
  const facts=improveFacts(root),accepted=facts.find(f=>f.kind==='improve.decision'&&f.data.id===id);
  if(!accepted)throw Error('IMPROVE_DECISION_NOT_FOUND');
@@ -71,7 +78,7 @@ export function readImproveDecision(root:string,id:string){
   return {id:g.id,candidateIds:g.candidateIds,state:result?.data.state??(starts.length?'unknown':'not-run'),result:validationView(root,result?.data.result),reason:result?(result.data.reason??null):(starts.length?'Interrupted group has no committed result; never replayed.':null),sourceId:result?.sourceId??starts.at(-1)?.sourceId??null,formal:formal?.data??(formalStart?{state:'unknown',writeback:'partial-or-unknown',activation:'unknown'}:null),formalSource:formal?.sourceId??formalStart?.sourceId??null,writes,rollback:rollback?.data??null,activation:activation?{sourceId:activation.sourceId,...activation.data}:null,observed:observed.map(f=>({sourceId:f.sourceId,runId:f.runId,...f.data})),build:build?.data??(buildStarted?{state:buildOutcome?.data.state==='failed'?'failed':'unknown',reason:buildOutcome?.data.state==='failed'?'Recorded build/startup failed; no candidate output accepted':'Build started without a verified output receipt',executionSource:buildOutcome?.sourceId??null}:null),buildActivation:buildActivation?.data??null,processes};
  });
  const unresolved=groups.some((g:any)=>g.state==='unknown'||['unknown','frozen'].includes(g.formal?.state)&&g.rollback?.state!=='completed'),notRun=groups.some((g:any)=>g.state==='not-run'),failed=groups.some((g:any)=>['failed','cancelled'].includes(g.state));
- return {id,decision:accepted.data.decision,requestDigest:accepted.data.requestDigest,executionVersion:accepted.data.executionVersion,sourceId:accepted.sourceId,runId:accepted.runId,
+ return {id,decision:accepted.data.decision,requestDigest:accepted.data.requestDigest,executionVersion:accepted.data.executionVersion,sourceId:accepted.sourceId,runId:accepted.runId,price:accepted.data.price??null,budgetAmount:decisionBudgetAmount(accepted.data.decision.limits.maxTokens,accepted.data.price??null),
   state:unresolved||notRun?'frozen':last?.data.state==='completed'&&failed?'completed-with-failures':last?.data.state??(groups.length?'frozen':'completed'),reason:unresolved?'A started group has no certain recorded outcome.':last?.data.reason??(notRun?'Independent not-run groups remain frozen until an explicit valid continuation.':null),groups,
   activation:groups.some((g:any)=>g.buildActivation?.state==='rolled-back')?'see-groups':groups.some((g:any)=>g.buildActivation?.state==='new-process-entry')?'new-process-entry':groups.some((g:any)=>g.activation?.state==='rolled-back')?'see-groups':groups.some((g:any)=>g.activation?.state==='new-default')?'new-default':'not-enabled',writeback:groups.some((g:any)=>g.rollback?.state==='completed')?'see-groups':groups.some((g:any)=>['frozen','unknown'].includes(g.formal?.state))?'partial-or-unknown':groups.some((g:any)=>g.formal?.writeback==='written')?'written':'not-written',effect:groups.length?'see combination results; no separate causal credit':'unverified',
   facts:related.map(f=>({sourceId:f.sourceId,kind:f.kind,runId:f.runId,state:f.data.state??null,reason:f.data.reason??null})),
