@@ -14,6 +14,7 @@ import { evalCommand } from './eval/cli.js';
 import { metricsCommand } from './metrics/cli.js';
 import { storageCommand } from './storage-cli.js';
 import { resolveDisplayInput, readDisplayIndex, DisplayInputError } from './display-number.js';
+import { estimateRunRequests, costTotalsView } from './cost-estimate.js';
 
 function lifecycleSignals() {
   const controller=new AbortController();let intent:'stop'|'exit'='exit';
@@ -60,10 +61,11 @@ async function main() {
     if (!values.workspace || values.prompt) throw new Error('USAGE: tui requires --workspace; enter requests in the input area');
     if(values['tool-env-config']&&!values.coding)throw Error('USAGE: --tool-env-config requires --coding');
     const toolEnvironment=values['tool-env-config']?JSON.parse(await readFile(values['tool-env-config'],'utf8')):undefined;
-    const { runTui } = await import('./tui/app.js');
+    const { runTui, exitCostSummary } = await import('./tui/app.js');
     const exit = await runTui({ dataRoot, workspace: values.workspace, mode: values['offline-demo'] ? 'offline' : 'live', transport: values['offline-demo'] ? demoTransport().fetch : undefined,coding:values.coding,toolEnvironment,runId:values.run });
     const result = exit.result;
     console.log(JSON.stringify({ tui: 'closed', runId: result?.runId, sessionId: result?.sessionId, status: result?.status ?? 'no-task', cleanup: result?.cleanup, usage: result?.usage.completeness ?? 'unknown', draftSaved: exit.draftSaved, error: exit.error?.slice(0,1024) }));
+    if (result) console.log(exitCostSummary(dataRoot, result));
     if (result) console.log(`Read back: pi-durio show --data-root '${dataRoot.replaceAll("'", "'\\''")}' --run ${readDisplayIndex(dataRoot).label('run', result.runId)}`);
     process.exitCode = exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : result?.controls?.exitCode??0;
     exitHostIfUnconfirmed(result);
@@ -92,7 +94,9 @@ async function main() {
   if (command === 'show') {
     if (!values.run) throw new Error('USAGE: show requires --run');
     const page = await readRun(dataRoot, values.run, { after: values.after ? Number(values.after) : undefined, limit: values.limit ? Number(values.limit) : undefined });
-    console.log(JSON.stringify(values.originals ? page : { ...page, records: page.records.map(({ seq, kind, at }) => ({ seq, kind, at })) }, null, 2));
+    // The estimate is a sibling of the recorded RunResult, which stays exactly as runtime returned it.
+    const costEstimate = { scope: `run:${values.run}`, ...costTotalsView(estimateRunRequests(dataRoot, values.run).totals) };
+    console.log(JSON.stringify(values.originals ? { ...page, costEstimate } : { ...page, records: page.records.map(({ seq, kind, at }) => ({ seq, kind, at })), costEstimate }, null, 2));
     return;
   }
   if (command === 'recover') {

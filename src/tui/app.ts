@@ -21,6 +21,7 @@ import { StorageView } from './storage.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
 import { readDisplayIndex, readRunOrdinals, modelRequestNumber, resolveDisplayInput, type DisplayIndex, type DisplayKind } from '../display-number.js';
+import { estimateRunRequests, estimateSessionRequests, sessionRunIds, sumCostEstimates, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
@@ -114,6 +115,8 @@ export class ReadOnlyTui {
   private displayIndex?:DisplayIndex;
   private displayMisses=new Set<string>();
   private runOrdinals?:{runId:string}&ReturnType<typeof readRunOrdinals>;
+  /** Session estimate for the usage line, recomputed only when the run has a newer model response. */
+  private cost?:{sessionId:string;through:number;runIds:string[];text:string};
 
   constructor(private readonly options:TuiOptions) {
     if(options.widthCalibration===false&&!options.terminal)throw Error('WIDTH_CALIBRATION_TEST_TERMINAL_REQUIRED');
@@ -182,7 +185,7 @@ export class ReadOnlyTui {
     process.on('unhandledRejection',rejection); this.removeSignals.push(()=>process.off('unhandledRejection',rejection));
     this.restoreTerminalWrite=hideCursorDuringPaint(this.terminal);
     if(this.options.widthCalibration!==false)this.widths=new TerminalWidthGate({terminal:this.terminal,tui:this.tui,
-      sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,...this.displaySources],
+      sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,this.usage(),...this.displaySources],
       priorityInput:data=>{
         // Preserve the normal modal/focus order. A nonempty Ctrl+D is still editor deletion.
         if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+d')&&!matchesKey(data,'escape')&&!matchesKey(data,'ctrl+l')&&data!=='\x1b[I'&&data!=='\x1b[O')return false;
@@ -220,10 +223,23 @@ export class ReadOnlyTui {
   }
   private status() {const target=this.control.target();return this.phase==='running'?`运行中 ${target?this.shown('run',target.runId):'受理中'}`:this.phase==='stopping'?'中止中（等待实际清理）':this.phase==='exiting'?'退出中（等待实际清理）':this.viewingRecovery?'恢复核对（只读）':label(this.result);}
   private usage() {
-    if(!this.result) return 'unknown';
+    const cost=this.cost&&this.cost.sessionId===this.sessionId?` · ${this.cost.text}`:'';
+    if(!this.result) return `unknown${cost}`;
     const usage=this.result.usage;
     const model=usage.value?.models['deepseek/deepseek-flash'];
-    return `${usage.completeness}${model?` · in ${model.input} out ${model.output} · $${model.cost.total.toFixed(6)}估算`:''}`;
+    return `${usage.completeness}${model?` · in ${model.input} out ${model.output}`:''}${cost}`;
+  }
+  /** CNY estimate of every run in the current session (the same scope as the exit summary). Display only. */
+  private updateCost() {
+    if(!this.sessionId||!this.runId)return;
+    const {sessionId,runId}=this,previous=this.cost?.sessionId===sessionId?this.cost:undefined;
+    try{
+      const through=readRunRecords(this.options.dataRoot,runId,{tail:true,limit:1,kinds:['model.response']}).records.at(-1)?.seq??0;
+      if(previous?.through===through)return;
+      const runIds=previous?.runIds.length?previous.runIds:sessionRunIds(this.options.dataRoot,[sessionId]);
+      if(!runIds.includes(runId))runIds.push(runId);
+      this.cost={sessionId,through,runIds,text:formatCostTotals(sumCostEstimates(runIds.flatMap(id=>estimateRunRequests(this.options.dataRoot,id).requests)))};
+    }catch{this.cost={sessionId,through:-1,runIds:[],text:'unknown'};}
   }
   private input(data:string) {
     const ctrlC=matchesKey(data,'ctrl+c'),ctrlD=matchesKey(data,'ctrl+d');
@@ -375,7 +391,8 @@ export class ReadOnlyTui {
   private applyResult(result:RunResult) {
     this.result=result;this.sessionId=result.sessionId;this.runId=result.runId;
     this.viewingRecovery=result.status==='unknown'||result.cleanup==='unknown';
-    this.notice=result.controls?'队列已冻结；/queue 查看目标与原因，普通输入不会接入旧项':result.improve?`improve ${result.improve.state} · ${this.shown('improve-report',result.improve.id)}；/improves 查看；没有执行候选`:result.cleanup==='confirmed'?`清理已确认；run ${this.shown('run',result.runId)}`:'清理未知；原工作保留，/recover 核对';
+    this.updateCost();
+    this.notice=(result.controls?'队列已冻结；/queue 查看目标与原因，普通输入不会接入旧项':result.improve?`improve ${result.improve.state} · ${this.shown('improve-report',result.improve.id)}；/improves 查看；没有执行候选`:result.cleanup==='confirmed'?`清理已确认；run ${this.shown('run',result.runId)}`:'清理未知；原工作保留，/recover 核对')+(this.cost?.sessionId===result.sessionId?` · 费用 ${this.cost.text}`:'');
   }
   private finished() {
     this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting')this.phase='idle';this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
@@ -471,6 +488,7 @@ export class ReadOnlyTui {
           if(bytes.next===null) {const data=JSON.parse(bytes.bytes.toString());this.model=`${data.model.provider} / ${data.model.id}${data.mode==='offline'?' · offline fixture':''}`;}
         }
       }
+      this.updateCost();
       if(!this.historyWindow&&this.scroll.isFollowingEnd&&!this.panel) {this.records=current.records;this.rebuild();}
       else this.notice='新事实已持久保存；当前阅读位置保留。/bottom 回到最新';
       this.tui.requestRender();
@@ -705,6 +723,13 @@ export class ReadOnlyTui {
     const result={result:this.result,error:this.failure,draftSaved,widthCalibration:this.widths?.snapshot()};
     this.resolveClosed(result);return result;
   }
+}
+
+/** Exit summary line for "本次会话": every run of the session the summary reports, estimated in CNY. */
+export function exitCostSummary(dataRoot:string,result:RunResult) {
+  // The exit status reflects the run; an unreadable cost source only leaves the amount unknown.
+  let amount:string;try{amount=formatCostTotals(estimateSessionRequests(dataRoot,[result.sessionId]).totals);}catch{amount='unknown';}
+  return `本次会话 ${readDisplayIndex(dataRoot).label('session',result.sessionId)} 费用 ${amount}（${COST_ESTIMATE_NOTICE}）`;
 }
 
 export async function runTui(options:TuiOptions) {

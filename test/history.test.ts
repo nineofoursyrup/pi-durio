@@ -118,3 +118,23 @@ test('real offline failed task: large output, unknown usage, slow consumer, fixa
 
 import { createHash } from 'node:crypto';
 function createHashForOutput(){return createHash('sha256');}
+
+test('trace, usage and show CLI output display CNY estimates with price version, period and consulted date',()=>{
+  const root=fixture(),e=accept(root,'cny');
+  const request=(id:string,usage:{input:number;output:number}|null,raw:Record<string,number>={prompt_cache_hit_tokens:0})=>{
+    e.append('model.intent',{attemptId:id,purpose:'generation',model:{provider:'deepseek',id:'deepseek-flash'}});e.append('model.dispatch',{attemptId:id,transportEntered:true});
+    if(usage)e.append('model.provider-event',{attemptId:id,event:{usage:raw}});
+    e.append('model.response',{attemptId:id,message:{stopReason:'stop',usage:{...usage??{input:0,output:0},cacheRead:0,cacheWrite:0}},completeness:'complete',usage:usage?'reported':'unknown'});
+  };
+  request('big',{input:1_000_000,output:1_000_000});request('tiny',{input:10,output:4});request('missing',null);request('no-cache-hit',{input:10,output:4},{prompt_tokens:10});close(e,'completed','known');
+  const cli=(args:string[])=>{const child=spawnSync(process.execPath,['dist/src/cli.js',...args,'--data-root',root],{encoding:'utf8'});assert.equal(child.status,0,child.stderr);return child.stdout;};
+  const text=cli(['trace','--run','cny','--format','text']);assert.match(text,/^pi-durio trace\n/);
+  const trace=JSON.parse(text.slice(text.indexOf('\n')+1));
+  assert.deepEqual(trace.items.map((i:any)=>i.cost.display.replace(/¥(10|5)\.00/,'¥N')),['≈ ¥N','< ¥0.01','unknown','< ¥0.01 partial']);
+  for(const item of trace.items){assert.equal(item.cost.price.version,'deepseek-cny-v1');assert.equal(item.cost.price.consultedAt,'2026-10-12');assert.match(item.cost.price.period,/^(高峰|空闲)$/);}
+  assert.match(trace.costEstimate.display,/^≈ ¥(10|5)\.00 \+1 unknown partial$/);assert.equal(trace.costEstimate.notice,'估算 · 非账单');
+  const usage=JSON.parse(cli(['usage','--run','cny']));
+  assert.deepEqual(usage.requestAllocations.map((a:any)=>a.cost.display),trace.items.map((i:any)=>i.cost.display));assert.equal(usage.costEstimate.display,trace.costEstimate.display);assert.equal(usage.costEstimate.notice,'估算 · 非账单');
+  assert.match(usage.price.role,/not the displayed amount/);
+  const show=JSON.parse(cli(['show','--run','cny']));assert.equal(show.costEstimate.display,trace.costEstimate.display);assert.equal(show.costEstimate.notice,'估算 · 非账单');
+});
