@@ -1,5 +1,6 @@
 import { openHostReadonly, readObject, digest, readAcceptedTasks, type AcceptedTaskFact, type BlobRef } from './evidence.js';
 import { readObjectRange, readTextPage } from './query.js';
+import { readDisplayIndex, readRunOrdinals, modelRequestNumber } from './display-number.js';
 
 export type Availability = 'complete'|'source-not-returned'|'collection-gap'|'archived'|'cleaned'|'corrupt'|'temporarily-unreadable';
 export interface EvidenceReference { id:string; runId:string; seq:number; kind:string; at:string; ref:BlobRef }
@@ -109,6 +110,11 @@ export function queryEvidence(root:string,runId:string,options:{after?:number;sn
   return {runId,snapshot,items,next:more?items.at(-1)!.seq:null,current:watermark(root)};
 }
 
+/** Human lines naming each attempt of a trace page by its hierarchical display number; the page keeps full IDs. */
+export function traceNumbers(root:string,page:ReturnType<typeof queryAttempts>) {
+  const ordinals=readRunOrdinals(root,page.runId),index=readDisplayIndex(root);
+  return page.items.map(item=>{const ordinal=ordinals[item.kind==='tool'?'tool':'model'].get(item.id);return `${ordinal===undefined?'—':item.kind==='tool'?index.toolCall(page.runId,ordinal):modelRequestNumber(ordinal)} ${item.kind} ${item.tool??item.purpose??''} ${item.id}`;}).join('\n');
+}
 /** Attempt projections use acquired source rows, never create another trace or usage ledger. */
 export function queryAttempts(root:string,runId:string,options:{after?:number;snapshot?:number;limit?:number}={}) {
   const page=queryEvidence(root,runId,{...options,kinds:['model.intent','tool.intent']});

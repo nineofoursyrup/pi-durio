@@ -146,6 +146,8 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     assert.doesNotMatch(f.screen(),/[a-f0-9]{8}-[a-f0-9]{4}-/);
     const shown=f.screen().match(/清理已确认；run (r-[0-9a-f]{4,})/)?.[1]; assert.ok(shown);
     assert.match(f.screen(),/session s-[0-9a-f]{4,} · /);
+    // Transcript attempts carry hierarchical numbers: the tool call under the run's hex part, the answer as the run's second model request.
+    assert.match(f.screen(),new RegExp(`tc-${shown.slice(2)}-01 · `)); assert.match(f.screen(),/llm #2 · 助手/);
     const runId=resolveDisplayInput(join(f.root,'data'),'run',shown); assert.equal(runId,readAcceptedTasks(join(f.root,'data')).tasks[0].runId);
     const before=await readRun(join(f.root,'data'),runId);
     key('\x0f'); key('n'); key('p'); key('\x0c'); key('\x1b'); assert.equal(f.transport.calls.length,2);
