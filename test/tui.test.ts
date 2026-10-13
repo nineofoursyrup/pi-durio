@@ -9,7 +9,7 @@ import { ReadOnlyTui, exitCostSummary } from '../src/tui/app.js';
 import { HardwareCursorEditor } from '../src/tui/cursor.js';
 import { demoTransport, scriptedTransport } from '../src/offline.js';
 import { readRun, readQueue, readAcceptedTasks, runReadTask } from '../src/runtime.js';
-import { resolveDisplayInput } from '../src/display-number.js';
+import { resolveDisplayInput, readDisplayIndex } from '../src/display-number.js';
 
 class TestTerminal implements Terminal {
   columns = 80; rows = 24; kittyProtocolActive = false; writes: string[] = []; stopped = false;
@@ -314,7 +314,12 @@ test('history overlay is reachable and consumes command-like text without changi
     key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);assert.equal(f.transport.calls.length,0);key('\x1b');
     key('Read README');key('\r');await until(()=>f.screen().includes('已完成'));
     const calls=f.transport.calls.length;
-    key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);key('\r');assert.match(f.screen(),/task.accepted/);key('\r');
+    key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);
+    // A session display number in the /history filter selects the same session; the filter keeps the full identity.
+    const sessionId=(f.app as any).historyView.history.items[0].sessionId as string;key('\x1b');
+    key('/history '+JSON.stringify({session:readDisplayIndex(join(f.root,'data')).label('session',sessionId)}));key('\r');
+    assert.equal((f.app as any).historyView.history.filter.session,sessionId);assert.equal((f.app as any).historyView.history.items.length,1);
+    key('\r');assert.match(f.screen(),/task.accepted/);key('\r');
     key('/compact');key('\r');key('/exit');key('\r');assert.equal(f.terminal.stopped,false);assert.equal(f.transport.calls.length,calls);
     key('\x03');key('\x04');assert.equal(f.terminal.stopped,false);key('\x1b');
     assert.match(f.screen(),/已完成/);assert.equal(f.transport.calls.length,calls);
@@ -347,10 +352,13 @@ test('improve is reachable with explicit limits; report navigation and ordinary 
  const transport:typeof fetch=async(url,init)=>JSON.parse(String(init?.body)).tools.some((t:any)=>t.function.name==='evidence_summary')?analysis.fetch(url,init):coding.fetch(url,init);
  const f=fixture(transport),key=(text:string)=>f.terminal.input(text);
  try{key('Original task');key('\r');await until(()=>f.screen().includes('已完成'));key('/improve');key('\r');assert.match(f.screen(),/尚未启动/);assert.equal(analysis.calls.length,0);
- key('/improve '+JSON.stringify({id:'tui-report',purpose:'Inspect current task',limits:{maxRequests:4,maxTokens:1024,maxRequestTokens:256,maxDurationMs:30000,maxOutputTokens:128}}));key('\r');await until(()=>f.screen().includes('improve complete'));assert.equal(analysis.calls.length,2);
+ key('/improve '+JSON.stringify({id:'tui-report',purpose:'Inspect current task',limits:{maxRequests:4,maxTokens:1024,maxRequestTokens:256,maxDurationMs:30000,maxOutputTokens:128}}));key('\r');
+ // The analysis notice names the target run by its display number, never the full UUID.
+ const target=readAcceptedTasks(join(f.root,'data')).tasks[0].runId!;assert.ok(f.screen().includes(`improve 分析中 · 目标 ${readDisplayIndex(join(f.root,'data')).label('run',target)}；`));assert.ok(!f.screen().includes(target));
+ await until(()=>f.screen().includes('improve complete'));assert.equal(analysis.calls.length,2);
  key('/improves tui-report');key('\r');assert.match(f.screen(),/只读报告/);key('please execute all');key('\r');assert.equal(analysis.calls.length,2);key('\x1b');
  const report=readImproveReport(join(f.root,'data'),'tui-report').report!;
- key('/improve-select '+JSON.stringify({id:'tui-empty-choice',reportId:report.id,reportRevision:report.revision,selections:[],groups:[],limits:{deadline:new Date(Date.now()+30000).toISOString(),maxChecks:0,maxRequests:0,maxTokens:0}}));key('\r');assert.match(f.screen(),/结构化选择/);key('s');f.screen();key('\r');await until(()=>{try{return readImproveDecision(join(f.root,'data'),'tui-empty-choice').state==='completed';}catch{return false;}});await until(()=>/已完成 · ctx [^·]+ · usage/.test(f.screen())&&!f.screen().includes('正在保存明确决定'));assert.equal(analysis.calls.length,2);key('\x1b');assert.match(f.screen(),/决定 tui-empty-choice · completed；具体写回\/启用见结果/);assert.doesNotMatch(f.screen(),/正式目标未写回、未启用/);
+ key('/improve-select '+JSON.stringify({id:'tui-empty-choice',reportId:readDisplayIndex(join(f.root,'data')).label('improve-report',report.id),reportRevision:report.revision,selections:[],groups:[],limits:{deadline:new Date(Date.now()+30000).toISOString(),maxChecks:0,maxRequests:0,maxTokens:0}}));key('\r');assert.match(f.screen(),/结构化选择/);key('s');f.screen();key('\r');await until(()=>{try{return readImproveDecision(join(f.root,'data'),'tui-empty-choice').state==='completed';}catch{return false;}});await until(()=>/已完成 · ctx [^·]+ · usage/.test(f.screen())&&!f.screen().includes('正在保存明确决定'));assert.equal(analysis.calls.length,2);key('\x1b');assert.match(f.screen(),/决定 tui-empty-choice · completed；具体写回\/启用见结果/);assert.ok(JSON.stringify(readImproveDecision(join(f.root,'data'),'tui-empty-choice')).includes(`"reportId":"${report.id}"`));assert.doesNotMatch(f.screen(),/正式目标未写回、未启用/);
  key('/older');key('\r');key('/improve {}');key('\r');assert.match(f.screen(),/只读历史\/恢复视图不能发起分析/);assert.equal(listImproveReports(join(f.root,'data')).items.length,1);
  }finally{await f.app.exit();}
 });

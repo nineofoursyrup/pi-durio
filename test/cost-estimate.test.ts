@@ -95,6 +95,8 @@ test('shared run entry: transport time, reported-usage gate, one incomplete-usag
  const dispatch=[...records(root,{runId:'run',kinds:['model.dispatch']})][0];assert.equal(by.ok.at,dispatch.at);assert.equal(by.ok.state,'complete');assert.equal(by.ok.currency,'CNY');assert.equal(by.ok.price.version,'deepseek-cny-v1');assert.deepEqual(by.ok.history.map((h:any)=>[h.currency,h.amount]),[['USD',0.5]]);
  const amount=by.ok.period==='peak'?10:5;assert.equal(by.ok.amount,amount);
  assert.equal(by.unreported.state,'unknown');assert.equal(by.unreported.amount,null);assert.equal(by.unreported.usage,null);assert.deepEqual(by.unreported.history,[]);assert.ok(by.unreported.gaps.includes('usage missing or request in flight'));
+ // Missing usage with a known host price is not a missing price.
+ assert.equal(by.unreported.price.version,'deepseek-cny-v1');assert.ok(!by.unreported.gaps.includes('price unavailable'));
  assert.equal(by.aborted.state,'partial');assert.ok(by.aborted.gaps.includes('usage incomplete: response ended with error or abort'));
  assert.equal(by.shared.state,'partial');assert.ok(by.shared.gaps.includes('multiple observable requests share one model response; per-request usage incomplete'));
  assert.equal(by['no-cache-hit'].state,'partial');assert.deepEqual(by['no-cache-hit'].gaps,['usage incomplete: provider did not report cache-hit tokens']);

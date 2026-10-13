@@ -9,6 +9,7 @@ import { queryHistory,queryEvidence,queryAttempts,readEvidence,watermark,records
 import { queryUsage } from '../src/usage-query.js';
 import { fixEvidence,verifyFixed,fixedDependencies,estimateUsage } from '../src/fixed-evidence.js';
 import { scopedEvidence } from '../src/derived-evidence.js';
+import { estimateRunRequests } from '../src/cost-estimate.js';
 import { acquireOwner } from '../src/ownership.js';
 import { runCodingTask } from '../src/runtime.js';
 import { scriptedTransport } from '../src/offline.js';
@@ -141,4 +142,21 @@ test('trace, usage and show CLI output display CNY estimates with price version,
   assert.deepEqual(usage.requestAllocations.map((a:any)=>a.cost.display),trace.items.map((i:any)=>i.cost.display));assert.equal(usage.costEstimate.display,trace.costEstimate.display);assert.equal(usage.costEstimate.notice,'估算 · 非账单');
   assert.match(usage.price.role,/not the displayed amount/);
   const show=JSON.parse(cli(['show','--run','cny']));assert.equal(show.costEstimate.display,trace.costEstimate.display);assert.equal(show.costEstimate.notice,'估算 · 非账单');
+});
+
+test('usage cost totals cover exactly the requested runs; totals.estimatedUSD is marked as the original USD estimate',()=>{
+  const root=fixture(),model={provider:'deepseek',id:'deepseek-flash'};
+  // Two runs of one session: the projection lists both runs' allocations, but `usage --run a` totals run a only.
+  for(const [runId,input] of [['a',1_000_000],['b',2_000_000]] as const){
+    const e=accept(root,runId,{sessionId:'shared-session'});
+    e.append('model.intent',{attemptId:`${runId}-1`,purpose:'generation',model});e.append('model.dispatch',{attemptId:`${runId}-1`,transportEntered:true});
+    e.append('model.provider-event',{attemptId:`${runId}-1`,event:{usage:{prompt_cache_hit_tokens:0}}});
+    e.append('model.response',{attemptId:`${runId}-1`,message:{stopReason:'stop',usage:{input,output:0,cacheRead:0,cacheWrite:0,cost:{total:1}}},completeness:'complete',usage:'reported'});close(e,'completed','known');
+  }
+  const child=spawnSync(process.execPath,['dist/src/cli.js','usage','--run','a','--data-root',root],{encoding:'utf8'});assert.equal(child.status,0,child.stderr);
+  const usage=JSON.parse(child.stdout),a=estimateRunRequests(root,'a').totals;
+  assert.deepEqual(usage.requestAllocations.map((item:any)=>item.runId),['a','b']);assert.ok(usage.requestAllocations.every((item:any)=>item.cost.amount>0));
+  assert.deepEqual(usage.costEstimate.runIds,['a']);assert.equal(usage.costEstimate.scope,'runs:a');assert.deepEqual(usage.costEstimate.amounts,a.amounts);
+  assert.equal(usage.costEstimate.amounts.CNY,usage.requestAllocations[0].cost.amount);
+  assert.match(usage.totals.estimatedUSDRole,/^original estimate; not the displayed amount/);assert.equal(usage.requestAllocations[0].estimatedCost.role.startsWith('original estimate; not the displayed amount'),true);
 });

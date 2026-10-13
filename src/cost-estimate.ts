@@ -119,7 +119,8 @@ export function applyRevisions(root:string,request:{source:string;at:string;amou
  if(active.length===1){const f=active[0],amountValid=typeof f.data.amount==='number'&&Number.isFinite(f.data.amount)&&f.data.amount>=0;let valid=f.data.method==='explicit-sourced-estimate-v1'&&amountValid&&typeof f.data.currency==='string'&&!!f.data.price?.source&&!!f.data.price?.version&&!!f.data.price?.provider&&!!f.data.price?.model&&Number.isFinite(Date.parse(f.data.price?.effectiveAt))&&Date.parse(f.data.price.effectiveAt)<=Date.parse(request.at)&&Array.isArray(f.data.usageSources)&&f.data.usageSources.length>0;for(const id of f.data.usageSources??[])try{decode(root,resolveEvidence(root,id));}catch{valid=false;}
   if(valid){request.amount=f.data.amount;request.currency=f.data.currency;request.price={...f.data.price,currency:f.data.currency,observedAt:f.ref.at};request.gaps=request.gaps.filter(g=>!['original catalog effective time is unavailable','price unavailable',PRICE_UNCOVERED,PRICE_EFFECTIVE_UNPROVEN].includes(g));}else request.gaps.push('estimate metadata or usage source unavailable');
  }
- if(request.amount===null&&!request.gaps.includes('price unavailable')&&!request.gaps.includes(PRICE_UNCOVERED))request.gaps.push('price unavailable');request.state=request.gaps.length?(request.amount===null?'unknown':'partial'):'complete';
+ // Missing usage with a known price is not a missing price.
+ if(request.amount===null&&!request.price&&!request.gaps.includes('price unavailable')&&!request.gaps.includes(PRICE_UNCOVERED))request.gaps.push('price unavailable');request.state=request.gaps.length?(request.amount===null?'unknown':'partial'):'complete';
 }
 
 /** Fixed plan price from the host table: the peak output price as a uniform upper-bound unit price. */
@@ -169,7 +170,7 @@ export function sessionRunIds(root:string,sessionIds:readonly string[],options:{
  return [...runIds];
 }
 
-/** Every model request of every run in the sessions: the exit summary's "本次会话" and the usage scope. */
+/** Every model request of every run in the sessions: the exit summary's "本次会话". */
 export function estimateSessionRequests(root:string,sessionIds:readonly string[],options:{through?:number}={}){
  const runIds=sessionRunIds(root,sessionIds,options),requests=runIds.flatMap(runId=>estimateRunRequests(root,runId,options).requests);
  return {runIds,requests,totals:sumCostEstimates(requests)};
@@ -193,11 +194,15 @@ export function withTraceCosts<T extends {runId:string;snapshot:number;items:{ki
  return {...page,items:page.items.map(item=>item.kind==='model'?{...item,cost:requestCostView(cost.requests.find(r=>r.source===item.source.id))}:item),costEstimate:{scope,...costTotalsView(cost.totals)}};
 }
 
-/** Usage projection plus each request allocation's estimate and the totals of every run in the projected sessions. */
-export function withUsageCosts<T extends {through:number;items:{sessionId:string}[];requestAllocations:{source:string;sessionId:string}[]}>(root:string,usage:T){
- const scope='every run of the projected sessions';let cost;
+/** Usage projection plus each request allocation's estimate; the totals cover exactly the projection's `runIds`.
+ * Allocations of other runs in the same sessions keep their own request estimate but are not added to the totals. */
+export function withUsageCosts<T extends {runIds:string[];through:number;requestAllocations:{source:string;runId:string}[]}>(root:string,usage:T){
+ const scope=`runs:${usage.runIds.join(',')}`;let requests:ModelRequestCost[],totals:CostTotals;
  // Usage keeps unreadable records as gaps; an unreadable cost source leaves the amount unknown instead.
- try{cost=estimateSessionRequests(root,[...new Set([...usage.items,...usage.requestAllocations].map(item=>item.sessionId))],{through:usage.through});}catch(error){return {...usage,costEstimate:{scope,display:'unknown',notice:COST_ESTIMATE_NOTICE,error:String(error)}};}
- const bySource=new Map(cost.requests.map(r=>[r.source,r]));
- return {...usage,requestAllocations:usage.requestAllocations.map(item=>({...item,cost:requestCostView(bySource.get(item.source))})),costEstimate:{scope,runIds:cost.runIds,...costTotalsView(cost.totals)}};
+ try{
+  const byRun=new Map([...new Set([...usage.runIds,...usage.requestAllocations.map(item=>item.runId)])].map(runId=>[runId,estimateRunRequests(root,runId,{through:usage.through}).requests]));
+  requests=[...byRun.values()].flat();totals=sumCostEstimates(usage.runIds.flatMap(runId=>byRun.get(runId)!));
+ }catch(error){return {...usage,costEstimate:{scope,display:'unknown',notice:COST_ESTIMATE_NOTICE,error:String(error)}};}
+ const bySource=new Map(requests.map(r=>[r.source,r]));
+ return {...usage,requestAllocations:usage.requestAllocations.map(item=>({...item,cost:requestCostView(bySource.get(item.source))})),costEstimate:{scope,runIds:usage.runIds,...costTotalsView(totals)}};
 }
