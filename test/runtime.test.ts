@@ -254,3 +254,36 @@ test('cancellation after a committed tool round retains known usage without inve
   assert.deepEqual(await readRun(dataRoot, result.runId), original);
   assert.equal(calls, 2);
 });
+
+test('context usage follows the to-model context across two requests without recording facts', async () => {
+  const workspace = resolve('test/fixtures/project');
+  // Reported prompt size grows with the request body, so the second reply's usage exceeds the first.
+  const transport = (withUsage: boolean) => {
+    const totals: number[] = [];
+    const fetch: typeof globalThis.fetch = async (_url, init) => {
+      const body = String(init?.body), first = totals.length === 0, total = Math.ceil(body.length / 4) + 4;
+      totals.push(total);
+      const delta = first ? { tool_calls: [{ index: 0, id: 'ctx-read', type: 'function', function: { name: 'read', arguments: JSON.stringify({ path: 'README.md' }) } }] } : { content: 'Context fixture done.' };
+      const frame = (choices: unknown[], usage?: unknown) => ({ id: `ctx-${totals.length}`, model: 'deepseek-flash-offline-fixture', choices, ...(usage ? { usage } : {}) });
+      const frames = [frame([{ index: 0, delta, finish_reason: null }]), frame([{ index: 0, delta: {}, finish_reason: first ? 'tool_calls' : 'stop' }]), ...(withUsage ? [frame([], { prompt_tokens: total - 4, completion_tokens: 4, total_tokens: total })] : [])];
+      return new Response(frames.map(f => `data: ${JSON.stringify(f)}\n\n`).join('') + 'data: [DONE]\n\n', { headers: { 'content-type': 'text/event-stream' } });
+    };
+    return { totals, fetch };
+  };
+  const reported = transport(true), seen: import('../src/runtime.js').ContextUsage[] = [];
+  const dataRoot = await mkdtemp(join(tmpdir(), 'durio-ctx-'));
+  const result = await runReadTask({ dataRoot, workspace, input: 'Read README.md', mode: 'offline', transport: reported.fetch, onContextUsage: usage => seen.push(usage) });
+  assert.equal(result.status, 'completed', JSON.stringify(result));
+  assert.equal(reported.totals.length, 2); assert.ok(reported.totals[1] > reported.totals[0]);
+  assert.ok(seen.length >= 2 && seen.every(usage => usage.runId === result.runId && usage.contextWindow === 1_000_000 && usage.tokens > 0));
+  assert.equal(seen[0].estimated, true, 'no usage yet: the fixed prefix and input are estimated');
+  assert.deepEqual(seen.map(usage => usage.tokens), [...seen.map(usage => usage.tokens)].sort((a, b) => a - b), 'numerator never drops without compaction');
+  assert.ok(seen.some(usage => usage.tokens >= reported.totals[0] && usage.tokens < reported.totals[1]), 'first reply usage plus estimated tool result');
+  assert.deepEqual(seen.at(-1), { runId: result.runId, tokens: reported.totals[1], estimated: false, contextWindow: 1_000_000 });
+  assert.doesNotMatch(JSON.stringify((await readRun(dataRoot, result.runId)).records.map(record => record.kind)), /context\.usage|ctx/);
+
+  const silent = transport(false), unreported: import('../src/runtime.js').ContextUsage[] = [];
+  const unknown = await runReadTask({ dataRoot: await mkdtemp(join(tmpdir(), 'durio-ctx-')), workspace, input: 'Read README.md', mode: 'offline', transport: silent.fetch, onContextUsage: usage => unreported.push(usage) });
+  assert.equal(unknown.status, 'completed', JSON.stringify(unknown));
+  assert.ok(unreported.length && unreported.every(usage => usage.estimated && usage.tokens > 0), 'without usage every value carries ≈');
+});
