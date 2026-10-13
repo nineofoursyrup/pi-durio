@@ -87,9 +87,10 @@ test('known request or latency gains cannot upgrade a batch with missing price o
  }
 });
 
-async function syntheticReport(options:{missingPrice?:boolean;missingUsage?:boolean;unattributed?:boolean;price?:EvalPlan['price']}={}){
+async function syntheticReport(options:{missingPrice?:boolean;missingUsage?:boolean;unattributed?:boolean;price?:EvalPlan['price'];costObjective?:boolean}={}){
  const root=mkdtempSync(join(tmpdir(),'durio-paired-report-')),e=new Evidence(root,'paired');
  const c=specification();c.roles={'local-fix':'objective'};c.protections=[{id:'scope',kind:'hard',check:'scope',cases:['local-fix']}];
+ if(options.costObjective){c.objective={...c.objective,metric:'cost',delta:0.0001};c.protections.push({id:'spend',kind:'soft',metric:'cost',direction:'lower',tolerance:1,basis:'fixture spend tolerance',cases:['local-fix']});}
  c.sides.baseline.runtime=c.sides.candidate.runtime={id:'fixed-runtime',manifest:e.blob('[]'),bytes:2};
  const p:EvalPlan={id:'paired',purpose:'Known-result synthetic reporting only, no product runtime execution',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:c.sides.candidate.runtime,cases:[representativeCases[0]],trials:[],comparison:c,budget:{maxRequests:32,maxTokens:32000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null},trialTimeoutMs:1000,gradingTimeoutMs:1000,maxOutputTokens:32,requestRetryLimit:0,price:{version:'known-price-v1',source:'synthetic arithmetic oracle',currency:'USD',perMillionTokens:1000},authorization:{scope:'run-all-listed-trials',paid:false},environment:{node:'v24.8.0',isolation:'synthetic facts, not actual execution',writable:'fixed',cache:'none'},mainObjective:'requests',protection:['scope'],improvementConclusion:'not-evaluated'};
  p.trials=pairedTrials(p.id,['local-fix'],2).map(t=>({...t,version:trialVersion(p,t.side)}));validatePlan(p);
@@ -121,6 +122,13 @@ test('machine/text/TUI use host costs, keep both sides and reopen without writes
  assert.deepEqual(report.trials.map(t=>t.outcome.source),original.trials.map(t=>t.outcome.source));
  await assert.rejects(regradeEval({dataRoot:root,id:plan.id,directory:join(root,'bad-regrade'),revisionId:'bad-version-reuse',graders:{'local-fix':{...plan.cases[0].grader,expectedStdout:'changed rule'}}}),/GRADER_VERSION_CONTENT_CHANGED/);
  assert.equal(evalFacts(root,plan.id).filter(f=>f.kind==='eval.outcome').length,4);
+});
+
+test('comparison rows of the cost metric follow the amount display rule in the plan currency',async()=>{
+ const cnyRoot=(await syntheticReport({costObjective:true,price:hostPlanPrice('deepseek','deepseek-flash')})).root,cny=formatEvalReport(evalReport(cnyRoot,'paired'),cnyRoot);
+ assert.match(cny,/\n配对 \S+ objective: < ¥0\.01 → < ¥0\.01；d=< ¥0\.01\n/);assert.match(cny,/\n保护 spend\/local-fix\/1: < ¥0\.01 → < ¥0\.01 · /);assert.match(cny,/\n保护 scope\/local-fix\/1: true → true · /);
+ const usdRoot=(await syntheticReport({costObjective:true})).root,usd=formatEvalReport(evalReport(usdRoot,'paired'),usdRoot);
+ assert.match(usd,/\n配对 \S+ objective: ≈ \$0\.04 → ≈ \$0\.02；d=≈ \$0\.02\n/);assert.doesNotMatch(usd,/¥/);
 });
 
 test('the shared report retains missing prices, unknown usage and unassigned costs instead of assigning zeros or a winning side',async()=>{

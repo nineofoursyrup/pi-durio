@@ -71,17 +71,23 @@ export class DisplayIndex {
   }
   /** A candidate referenced outside its report: `<ir- number>·C-<NN>@r<n>`. */
   qualifiedCandidate(reportId: string, candidate: DisplayCandidateRef) { return `${this.label('improve-report', reportId)}·${this.candidate(candidate)}`; }
-  /** Exact full identity, or exact prefix match of a display number of this kind. Never fuzzy. */
+  /**
+   * Exact full identity, or exact prefix match of a display number of this kind. Never fuzzy.
+   * A user-chosen identity shaped like a display number (`ep-0a1b`) never shadows another object's display number.
+   */
   resolve(kind: DisplayKind, input: string): DisplayResolution {
-    const objects = this.objects(kind), exact = objects.get(input);
-    if (exact) return { status: 'found', object: exact };
-    const prefix = `${DISPLAY_PREFIXES[kind]}-`;
-    if (!DISPLAY_INPUT.test(input) || !input.toLowerCase().startsWith(prefix)) return { status: 'not-found', kind, input };
+    const objects = this.objects(kind), exact = objects.get(input), prefix = `${DISPLAY_PREFIXES[kind]}-`;
     const hex = input.slice(prefix.length).toLowerCase();
-    const matches = [...objects.values()].filter(object => displayHex(object.id).startsWith(hex));
+    const prefixed = DISPLAY_INPUT.test(input) && input.toLowerCase().startsWith(prefix)
+      ? [...objects.values()].filter(object => object !== exact && displayHex(object.id).startsWith(hex)) : [];
+    const matches = exact ? [exact, ...prefixed] : prefixed;
     if (matches.length === 1) return { status: 'found', object: matches[0] };
     if (!matches.length) return { status: 'not-found', kind, input };
-    const candidates = matches.map(object => ({ ...object, display: this.label(kind, object.id) })).sort((a, b) => a.display.localeCompare(b.display));
+    // Each candidate's number is longer than the input, so typing it cannot hit the same ambiguity again.
+    const candidates = matches.map(object => {
+      const length = Math.max(this.label(kind, object.id).length - prefix.length, hex.length + 1);
+      return { ...object, display: `${prefix}${displayHex(object.id).slice(0, length)}` };
+    }).sort((a, b) => a.display.localeCompare(b.display));
     return { status: 'ambiguous', kind, input, candidates };
   }
 }

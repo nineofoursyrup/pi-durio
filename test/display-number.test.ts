@@ -188,6 +188,19 @@ test('tasks, improve reports and eval plans: typed prefixes, SHA-256 for non-UUI
   assert.throws(() => resolveDisplayInput(root, 'improve-report', `ir-${sha(R1).slice(0, 4)}`), /DISPLAY_AMBIGUOUS/);
 });
 
+test('display numbers: a user-chosen ID shaped like another object\'s display number is ambiguous, not an exact hit', () => {
+  const shaped = `ep-${sha('nightly').slice(0, 4)}`;
+  const index = new DisplayIndex(['nightly', shaped].map(id => ({ kind: 'eval-plan' as const, id, project: null, at: null })));
+  assert.equal(index.label('eval-plan', 'nightly'), shaped);
+  const ambiguous = index.resolve('eval-plan', shaped);
+  assert.equal(ambiguous.status, 'ambiguous');
+  const candidates = (ambiguous as any).candidates as { id: string; display: string }[];
+  assert.deepEqual(candidates.map(c => c.id).sort(), ['nightly', shaped].sort());
+  // Every listed number resolves to its own candidate, so the refusal is never a dead end.
+  for (const c of candidates) assert.equal((index.resolve('eval-plan', c.display) as any).object.id, c.id, c.display);
+  assert.equal((index.resolve('eval-plan', 'nightly') as any).object.id, 'nightly');
+});
+
 test('hierarchical numbers: tool calls and model requests count in record order within their run', () => {
   const root = mkdtempSync(join(tmpdir(), 'durio-display-ordinals-'));
   legacyRun(root, A, SA, '/p1'); legacyRun(root, B, SB, '/p2');
