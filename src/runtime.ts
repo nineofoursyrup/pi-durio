@@ -8,6 +8,8 @@ import { randomUUID } from 'node:crypto';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { createModels, type AssistantMessage, type Models, type AssistantMessageEvent, type Usage } from '@earendil-works/pi-ai';
 import { deepseekProvider } from '@earendil-works/pi-ai/providers/deepseek';
+import { estimateContextTokens, estimateMessageTokens } from '@earendil-works/pi-ai/utils/estimate';
+import { toToolDeclaration } from '@earendil-works/pi-ai/utils/transcript';
 import { BACKGROUND_CONTEXT, withAbortSignal, awaitWithContext } from '@earendil-works/chord/context';
 import { Harness, createRegistry, defineExtension, GenerationTask, hook, type Conversation, type UsageState, type Storage, type ToolRegistration, type ToolDiagnostic, type TaskId, type CompactionResult } from '@earendil-works/pi-durable';
 import { createReadTool, createWriteTool, createEditTool, createBashTool } from '@earendil-works/pi-durable/tools';
@@ -54,6 +56,8 @@ export interface ReadTaskOptions {
   /** Host cleanup waiting policy, not a claim that work stops at the deadline. */
   cleanupTimeoutMs?: number;
   onObservation?: (event: { kind: string; runId: string }) => void;
+  /** Display only: current to-model context after each committed entry. Never recorded as a fact. */
+  onContextUsage?: (usage: ContextUsage) => void;
   fault?: FaultInjector;
   /** Injectable credential source for embedding/tests; value is never recorded. */
   apiKey?: string;
@@ -61,6 +65,20 @@ export interface ReadTaskOptions {
   control?:TaskControl;
   /** Import a verified, completed active context into this independent task. */
   contextRunId?:string;
+}
+/** Status-line context usage: pi-ai estimate over the durable context view, against the pinned model's context window. */
+export interface ContextUsage { runId: string; tokens: number; estimated: boolean; contextWindow: number }
+/** The leading `pi.system` entry durable commits before the first request: the instructions section plus tool declarations. */
+function prefixTokens(instructions: string, tools: readonly ToolRegistration[]) {
+  return estimateMessageTokens({ role: 'system', content: '', sections: { instructions: `<instructions>\n${instructions}\n</instructions>` }, toolsAdded: tools.map(toToolDeclaration), timestamp: 0 });
+}
+/** Display-only estimate of the fixed prefix (system prompt and tool definitions) a new task sends, before any task exists. */
+export function estimateTaskPrefix(options: { dataRoot: string; workspace: string; coding: boolean; mode: 'live' | 'offline'; toolEnvironment?: ToolEnvironmentConfig }): Omit<ContextUsage, 'runId'> {
+  let configuration = executionConfig(options.coding, options.mode, options.toolEnvironment);
+  try { const current = readImproveDefaults(options.dataRoot, options.workspace, options.coding ? 'coding' : 'read'); if (current.files.length) configuration = applyTaskProfile(configuration, current.profile); }
+  catch { /* An estimate only: unreadable defaults fail the actual task at acceptance, not this display. */ }
+  const tools = options.coding ? [createReadTool(), createWriteTool(), createEditTool(), createBashTool()] : [createReadTool()];
+  return { tokens: prefixTokens(configuration.instructions, tools), estimated: true, contextWindow: configuration.model.contextWindow };
 }
 export interface CodingTaskOptions extends ReadTaskOptions { toolEnvironment?: ToolEnvironmentConfig }
 export type { ToolEnvironmentConfig } from './coding-environment.js';
@@ -108,7 +126,7 @@ export function waitForRun(run: Promise<RunResult>, signal?: AbortSignal): Promi
 }
 
 /** Explicit recovery is a checked reopening of the same run, not a new scheduler or task loop. */
-export async function recoverRun(options: RecoveryOptions & { decision: RecoveryDecision; transport?: typeof fetch; apiKey?: string; signal?: AbortSignal; cancellation?: 'stop' | 'exit'; onObservation?: ReadTaskOptions['onObservation']; fault?: FaultInjector; control?:TaskControl }): Promise<RunResult | RecoveryReport> {
+export async function recoverRun(options: RecoveryOptions & { decision: RecoveryDecision; transport?: typeof fetch; apiKey?: string; signal?: AbortSignal; cancellation?: 'stop' | 'exit'; onObservation?: ReadTaskOptions['onObservation']; onContextUsage?: ReadTaskOptions['onContextUsage']; fault?: FaultInjector; control?:TaskControl }): Promise<RunResult | RecoveryReport> {
   if(options.decision.action==='continue'&&recoveryRecords(options.dataRoot,options.runId).some(record=>record.kind==='execution.config'&&(record.data as any).providerBoundary))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED: original dispatch capability cannot be reconstructed by this recovery entry; inspect or end old work, never resume with an unbudgeted provider');
   const stable = { ...options, authorization: options.authorization && structuredClone(options.authorization), decision: structuredClone(options.decision) };
   const prepared = await prepareRecovery(stable);
@@ -240,7 +258,7 @@ export async function checkQueue(dataRoot:string) {
 }
 
 /** Headless/TUI source-bound queue decision. Reattachment runs the same checked runtime. */
-export async function decideQueue(options:RecoveryOptions & {decision:QueueDecision;transport?:typeof fetch;apiKey?:string;signal?:AbortSignal;cancellation?:'stop'|'exit';control?:TaskControl;onObservation?:ReadTaskOptions['onObservation']}) : Promise<QueueItemFact|RunResult> {
+export async function decideQueue(options:RecoveryOptions & {decision:QueueDecision;transport?:typeof fetch;apiKey?:string;signal?:AbortSignal;cancellation?:'stop'|'exit';control?:TaskControl;onObservation?:ReadTaskOptions['onObservation'];onContextUsage?:ReadTaskOptions['onContextUsage']}) : Promise<QueueItemFact|RunResult> {
   const decision=structuredClone(options.decision);validControlId(decision.id);
   const owner=await acquireOwner(options.dataRoot,()=>{});let dispatch:{item:QueueItemFact;context:ContextSnapshot}|undefined;
   try {
@@ -345,6 +363,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
   let conversation: Conversation | undefined;
   let evidence: Evidence | undefined;
   let closePromise: Promise<void> | undefined;
+  let contextRead: Promise<void> | undefined, contextClosed = false, removeContextWatch: (() => void) | undefined;
   let cleanup: 'confirmed' | 'unknown' = 'confirmed';
   let compactions:CompactionFacts|undefined,compactResult:CompactionResultFact|undefined,compactTask:TaskId<CompactionResult>|undefined,compactBinding:ControlBinding|undefined;
   let controls:RunControls|undefined;
@@ -654,6 +673,24 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     }
     conversation = maintenance ? await harness.conversation(maintenance.source.sourceConversationId as any,CTX) : recovery ? await harness.conversation(recovery.started.conversationId,CTX) : await harness.root(CTX, { agent: { model: { provider: 'deepseek', modelId: 'deepseek-flash' }, cwd: workspace, instructions } });
     if (!conversation) throw new Error('RECOVERY_CONVERSATION_MISSING');
+    if (options.onContextUsage) {
+      // Display only: reads never record facts and failures never touch the result. Commit listeners
+      // must not call Session APIs, so each read is deferred; commits during a read schedule one more.
+      const onContextUsage = options.onContextUsage, current = conversation, prefix = prefixTokens(instructions, tools);
+      let dirty = true;
+      const read = () => {
+        if (contextRead || !dirty || contextClosed) return;
+        dirty = false;
+        contextRead = new Promise(resolve => setImmediate(resolve)).then(() => current.context(CTX)).then(view => {
+          const estimate = estimateContextTokens(view.messages);
+          // Until durable commits the leading pi.system entry it counts that entry as planned; so does this display.
+          const planned = view.messages.some(message => message.role === 'system') ? 0 : prefix;
+          if (!contextClosed) onContextUsage({ runId, tokens: estimate.tokens + planned, estimated: planned > 0 || estimate.trailingTokens > 0 || estimate.lastUsageIndex === null, contextWindow: model.contextWindow });
+        }).catch(() => {}).finally(() => { contextRead = undefined; read(); });
+      };
+      removeContextWatch = harness.subscribeCommits(publication => { if (publication.changes.some(change => change.type === 'entry')) { dirty = true; read(); } });
+      read();
+    }
     if(queued||continued) {
       const source=queued?.context??continued!;
       const messages=JSON.parse(readObject(dataRoot,source.messages).toString());
@@ -731,6 +768,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
   } catch (error) { if (!stopped || failure) failure ??= safeError(error); }
   finally {
     options.signal?.removeEventListener('abort', stop);
+    removeContextWatch?.();
     finalizing = true;
     controller.abort();
     if(compactBinding)options.control?.detach(compactBinding);
@@ -753,11 +791,12 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
         } catch (error) { cleanup = 'unknown'; failure ??= safeError(error); lifecycleRecord('lifecycle.abort-failed', { reason: safeError(error) }); }
       }
       lifecycleRecord('lifecycle.close-started', { action: cancellation ?? 'finish', admission: 'closed', dispatch: 'closed' });
+      while (contextRead) await contextRead; // The final reply's value is shown before the run returns.
       await close();
     })();
     try { await awaitWithContext(shutdown, withAbortSignal(deadline.signal, CTX)); }
     catch (error) { cleanup = 'unknown'; failure ??= safeError(error); lifecycleRecord(timedOut ? 'lifecycle.timeout' : 'lifecycle.close-failed', { cleanupTimeoutMs, reason: safeError(error), owner: 'retained', recoveryRequired: true }); }
-    finally { clearTimeout(timer); }
+    finally { clearTimeout(timer); contextClosed = true; }
     try { owner.assertHeld(); sessionOwner?.assertHeld(); workspaceOwner?.assertHeld(); }
     catch (error) { cleanup = 'unknown'; failure ??= safeError(error); lifecycleRecord('lifecycle.owner-lost', { reason: safeError(error), owner: 'retained', recoveryRequired: true }); }
     if (shellsStarted !== shellsSettled) { cleanup = 'unknown'; failure ??= 'SHELL_TERMINATION_UNKNOWN'; }

@@ -9,8 +9,9 @@ import { realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiAltScreen, VStack, matchesKey, isKeyRelease, isKeyRepeat, stripTerminalSequences, truncateToWidth, wrapTextWithAnsi, type Component, type AutocompleteProvider, type Terminal } from '@earendil-works/pi-tui';
-import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, inspectRecovery, checkRecovery, recoverRun, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
-import type { QueueItemFact } from '../evidence.js';
+import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, inspectRecovery, checkRecovery, recoverRun, estimateTaskPrefix, type ContextUsage, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
+import { readObject, type QueueItemFact } from '../evidence.js';
+import { calculateContextTokens } from '@earendil-works/pi-ai/utils/estimate';
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
 import { MetricsView } from './metrics.js';
@@ -37,6 +38,11 @@ const completion:AutocompleteProvider={
   applyCompletion(lines,line,col,item,prefix) { const next=[...lines]; next[line]=`${lines[line].slice(0,col-prefix.length)}${item.value}${lines[line].slice(col)}`; return {lines:next,cursorLine:line,cursorCol:col-prefix.length+item.value.length}; }
 };
 function safe(text:string) { return stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,'�'); }
+/** Status-line magnitude: 950, 18.2k, 1M. */
+function tokenCount(tokens:number) {
+  const [value,unit]=tokens>=999_950?[tokens/1e6,'M']:tokens>=1000?[tokens/1e3,'k']:[tokens,''];
+  return unit?`${value.toFixed(1).replace(/\.0$/,'')}${unit}`:String(value);
+}
 function label(result?:RunResult) { return result ? ({completed:'已完成',failed:'失败',aborted:'已中止',unknown:'结果未知；需恢复核对'}[result.status]) : '等待输入'; }
 export interface TuiOptions {
   workspace:string; dataRoot:string; mode:'live'|'offline'; transport?:typeof fetch;
@@ -114,6 +120,9 @@ export class ReadOnlyTui {
   private displaySources:string[]=[];
   private displayIndex?:DisplayIndex;
   private displayMisses=new Set<string>();
+  /** Live values come from the runtime; without one, the fixed-prefix estimate or the run's latest reported total. */
+  private context:Omit<ContextUsage,'runId'>&{runId?:string};
+  private readonly showContext=(usage:ContextUsage)=>{this.context=usage;this.tui.requestRender();};
   /** Session estimate for the usage line, recomputed only when the run has a newer model response. */
   private cost?:{sessionId:string;through:number;runIds:string[];text:string};
 
@@ -122,6 +131,7 @@ export class ReadOnlyTui {
     options.workspace=realpathSync(options.workspace);
     options.dataRoot=resolve(options.dataRoot);
     this.runId=options.runId;this.viewingRecovery=!!options.runId;
+    this.context=this.prefix();
     this.terminal=options.terminal??new ProcessTerminal();
     this.copy=options.copy??copyToMacClipboard;
     this.drafts=new Drafts(options.draftRoot??join(homedir(),'Library','Application Support','pi-durio','ui-drafts'),options.workspace,options.dataRoot);
@@ -143,7 +153,7 @@ export class ReadOnlyTui {
       truncateToWidth(`session ${this.sessionId?this.shown('session',this.sessionId):'未受理'} · ${this.model}`,width)
     ]};
     const status:Component={invalidate(){},render:width=>[
-      truncateToWidth(`${this.status()} · usage ${this.usage()}`,width),
+      truncateToWidth(`${this.status()} · ${this.contextUsage()} · usage ${this.usage()}`,width),
       truncateToWidth(this.notice,width),
       truncateToWidth(`${this.scroll.isFollowingEnd&&!this.historyWindow?'跟随':'已暂停跟随 /bottom'} · /help · Ctrl+O 详情 · Ctrl+C 中止/退出`,width)
     ]};
@@ -184,7 +194,7 @@ export class ReadOnlyTui {
     process.on('unhandledRejection',rejection); this.removeSignals.push(()=>process.off('unhandledRejection',rejection));
     this.restoreTerminalWrite=hideCursorDuringPaint(this.terminal);
     if(this.options.widthCalibration!==false)this.widths=new TerminalWidthGate({terminal:this.terminal,tui:this.tui,
-      sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,this.usage(),...this.displaySources],
+      sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,this.contextUsage(),this.usage(),...this.displaySources],
       priorityInput:data=>{
         // Preserve the normal modal/focus order. A nonempty Ctrl+D is still editor deletion.
         if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+d')&&!matchesKey(data,'escape')&&!matchesKey(data,'ctrl+l')&&data!=='\x1b[I'&&data!=='\x1b[O')return false;
@@ -213,6 +223,8 @@ export class ReadOnlyTui {
     return this.displayIndex.label(kind,id);
   }
   private status() {const target=this.control.target();return this.phase==='running'?`运行中 ${target?this.shown('run',target.runId):'受理中'}`:this.phase==='stopping'?'中止中（等待实际清理）':this.phase==='exiting'?'退出中（等待实际清理）':this.viewingRecovery?'恢复核对（只读）':label(this.result);}
+  private prefix() {return estimateTaskPrefix({dataRoot:this.options.dataRoot,workspace:this.options.workspace,coding:!!this.options.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}
+  private contextUsage() {return `ctx ${this.context.estimated?'≈':''}${tokenCount(this.context.tokens)} / ${tokenCount(this.context.contextWindow)}`;}
   private usage() {
     const cost=this.cost&&this.cost.sessionId===this.sessionId?` · ${this.cost.text}`:'';
     if(!this.result) return `unknown${cost}`;
@@ -287,10 +299,11 @@ export class ReadOnlyTui {
     if(this.result?.status==='unknown'||this.result?.cleanup==='unknown') {this.editor.setText(text);this.lastText=text;this.notice='旧工作存在未知；只读查看，不能由 TUI 绕过恢复核对';this.tui.requestRender();return;}
     const contextRunId=this.result?.status==='completed'&&this.result.improve?.runId!==this.result.runId&&this.result.cleanup==='confirmed'?this.result.runId:undefined;
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
+    if(!contextRunId)this.context=this.prefix();
     this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.summaries.clear();this.historyWindow=false;this.scroll.scrollToEnd();
     this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.notice='任务正在受理；忙时 Enter 补充当前任务，Ctrl+X → Enter 后续请求';this.rebuild();
     const self=this;
-    const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}};
+    const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}};
     const run=this.options.coding?runCodingTask:runReadTask;
     this.active=run(options).then(result=>this.applyResult(result)).catch(error=>{this.failure=String(error);this.notice=`未完成：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();
@@ -350,7 +363,7 @@ export class ReadOnlyTui {
     if(!this.runId){this.notice='尚无活动任务；先完成一项工作再针对其证据分析';this.tui.requestRender();return;}
     const targetRunId=this.result?.improve?.runId===this.runId?this.result.improve.target.runId:this.runId;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
     this.notice=`improve 分析中 · 目标 ${targetRunId}；默认不选中任何候选`;
-    this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);this.notice=`improve ${result.improve?.state??result.status} · ${request.id}；/improves 查看；没有执行候选`;}).catch(error=>{this.notice=`分析未完成：${String(error)}`;}).finally(()=>this.finished());this.tui.requestRender();
+    this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);this.notice=`improve ${result.improve?.state??result.status} · ${request.id}；/improves 查看；没有执行候选`;}).catch(error=>{this.notice=`分析未完成：${String(error)}`;}).finally(()=>this.finished());this.tui.requestRender();
   }
   private async submitImproveChoice(decision:ImproveDecision){
     if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery)throw Error('IMPROVE_SELECTION_CURRENT_STATE_BLOCKED');
@@ -364,7 +377,7 @@ export class ReadOnlyTui {
     if(this.phase==='running'){this.enqueue('compact','compact');return;}
     if(this.phase!=='idle'||this.result?.status!=='completed'||this.result.cleanup!=='confirmed'){this.notice='压缩需要已完成且清理确认的活动会话';this.tui.requestRender();return;}
     const runId=this.result.runId;this.controller=new AbortController();this.cancellation='exit';this.phase='running';this.notice='正在压缩当前上下文；原文保留，摘要生成与接入分别记录';const self=this;
-    this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:()=>{this.pendingRefresh=true;}}).then(result=>{
+    this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:()=>{this.pendingRefresh=true;}}).then(result=>{
       this.result=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；/compactions 查看源范围、摘要与接入事实；磁盘原文保留`;
     }).catch(error=>{this.notice=`压缩未执行：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();await this.active;
@@ -423,7 +436,7 @@ export class ReadOnlyTui {
         if(action==='reattach') {
           this.closePanel();this.phase='running';this.controller=new AbortController();this.cancellation='exit';
           const self=this;
-          this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
+          this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
           return;
         }
         const result=await decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision});this.notice=result.status==='withdrawn'?'撤回已提交':`未撤回：${result.status}`;
@@ -449,7 +462,7 @@ export class ReadOnlyTui {
   private async recoveryDecision(decision:RecoveryDecision) {
     if(this.phase!=='idle'||!this.recovery){this.notice='先 /recover 获取当前核对事实';return;}
     const runId=this.recovery.runId;this.closePanel();this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
-    this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{
+    this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{
       if('usage' in result){this.recovery=undefined;this.applyResult(result);}
       else {this.recovery=result;this.viewingRecovery=result.status!=='completed'&&result.status!=='ended';this.notice=`恢复决定：${result.status}；原未知和队列冻结仍保留`;if(this.viewingRecovery)this.openPanel('recovery');else this.result=undefined;}
     }).catch(error=>{this.notice=`决定受阻：${safe(String(error))}`;this.viewingRecovery=true;}).finally(()=>this.finished());
@@ -469,6 +482,7 @@ export class ReadOnlyTui {
       const current=readRunRecords(this.options.dataRoot,this.runId,{tail:true,limit:24,kinds:visibleKinds});
       // Read only bounded small identity/result records; authoritative RunResult arrives from runtime.
       const identityRecords=readRunRecords(this.options.dataRoot,this.runId,{limit:8}).records;
+      let contextWindow:number|undefined;
       for(const record of identityRecords) {
         if(record.kind==='task.accepted'||record.kind==='run.started') {
           const bytes=readObjectRange(this.options.dataRoot,record.ref,{limit:16384});
@@ -476,8 +490,13 @@ export class ReadOnlyTui {
         }
         if(record.kind==='execution.config') {
           const bytes=readObjectRange(this.options.dataRoot,record.ref,{limit:16384});
-          if(bytes.next===null) {const data=JSON.parse(bytes.bytes.toString());this.model=`${data.model.provider} / ${data.model.id}${data.mode==='offline'?' · offline fixture':''}`;}
+          if(bytes.next===null) {const data=JSON.parse(bytes.bytes.toString());this.model=`${data.model.provider} / ${data.model.id}${data.mode==='offline'?' · offline fixture':''}`;contextWindow=data.model.contextWindow;}
         }
+      }
+      if(this.phase==='idle'&&this.context.runId!==this.runId) {
+        // No live runtime for this run: show its latest provider-reported total; later content is not estimated.
+        const reported=readRunRecords(this.options.dataRoot,this.runId,{tail:true,limit:8,kinds:['model.response']}).records.map(record=>JSON.parse(readObject(this.options.dataRoot,record.ref).toString())).findLast(data=>data.usage==='reported'&&calculateContextTokens(data.message.usage)>0);
+        this.context=reported?{runId:this.runId,tokens:calculateContextTokens(reported.message.usage),estimated:true,contextWindow:contextWindow??this.context.contextWindow}:{...this.prefix(),runId:this.runId};
       }
       this.updateCost();
       if(!this.historyWindow&&this.scroll.isFollowingEnd&&!this.panel) {this.records=current.records;this.rebuild();}
