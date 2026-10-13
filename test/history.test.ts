@@ -129,7 +129,9 @@ test('trace, usage and show CLI output display CNY estimates with price version,
   request('big',{input:1_000_000,output:1_000_000});request('tiny',{input:10,output:4});request('missing',null);request('no-cache-hit',{input:10,output:4},{prompt_tokens:10});close(e,'completed','known');
   const cli=(args:string[])=>{const child=spawnSync(process.execPath,['dist/src/cli.js',...args,'--data-root',root],{encoding:'utf8'});assert.equal(child.status,0,child.stderr);return child.stdout;};
   const text=cli(['trace','--run','cny','--format','text']);assert.match(text,/^pi-durio trace\n/);
-  const trace=JSON.parse(text.slice(text.indexOf('\n')+1));
+  // Human attempt numbers precede the JSON page (display-number lines from #53).
+  assert.match(text,/^pi-durio trace\nllm #1 model generation big\nllm #2 model generation tiny\n/);
+  const trace=JSON.parse(text.slice(text.indexOf('\n{')+1));
   assert.deepEqual(trace.items.map((i:any)=>i.cost.display.replace(/¥(10|5)\.00/,'¥N')),['≈ ¥N','< ¥0.01','unknown','< ¥0.01 partial']);
   for(const item of trace.items){assert.equal(item.cost.price.version,'deepseek-cny-v1');assert.equal(item.cost.price.consultedAt,'2026-10-12');assert.match(item.cost.price.period,/^(高峰|空闲)$/);}
   assert.match(trace.costEstimate.display,/^≈ ¥(10|5)\.00 \+1 unknown partial$/);assert.equal(trace.costEstimate.notice,'估算 · 非账单');
