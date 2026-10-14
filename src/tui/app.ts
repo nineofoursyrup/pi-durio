@@ -23,9 +23,10 @@ import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
 import { readDisplayIndex, readRunOrdinals, modelRequestNumber, resolveDisplayInput, type DisplayIndex, type DisplayKind } from '../display-number.js';
 import { estimateRunRequests, estimateSessionRequests, sessionRunIds, sumCostEstimates, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
+import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, statusText, makeBorderColor } from './theme.js';
 
 const identity=(s:string)=>s;
-const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
+const theme={borderColor:makeBorderColor('border.input'), selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
 const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['metrics','任务验收与双时钟（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实'],['improve','受限分析（需声明范围和预算）'],['improves','查看 improve 报告（只读）'],['improve-select','结构化逐项选择与汇总提交'],['improve-suppressions','查看建议抑制'],['improve-restore','JSON明确恢复建议'],['improve-continue','JSON明确继续独立未跑项'],['improve-rollback','JSON明确回退本批精确产物']] as const;
 const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed','compaction.generated','compaction.finished'];
 const completion:AutocompleteProvider={
@@ -150,13 +151,13 @@ export class ReadOnlyTui {
     this.editor.onSubmit=text=>this.submit(text);
     this.scroll=new ScrollView(this.transcript,{follow:'end',primary:true});
     const header:Component={invalidate(){},render:width=>[
-      truncateToWidth(`pi-durio · [F2 菜单] · ${options.coding?'coding':'只读'} · ${safe(options.workspace)}`,width),
-      truncateToWidth(`session ${this.sessionId?this.shown('session',this.sessionId):'未受理'} · ${this.model}`,width)
+      styledLine([{text:'◆ pi-durio',fg:'ac.brand',bold:true},{text:` · ${options.coding?'coding':'只读'} · ${safe(options.workspace)}`,fg:'fg.faint'}],width),
+      styledLine([{text:`session ${this.sessionId?this.shown('session',this.sessionId):'未受理'}`,fg:'fg.body'},{text:` · ${this.model}`,fg:'fg.faint'}],width)
     ]};
     const status:Component={invalidate(){},render:width=>[
-      truncateToWidth(`${this.status()} · ${this.contextUsage()} · usage ${this.usage()}`,width),
-      truncateToWidth(this.notice,width),
-      truncateToWidth(`${this.scroll.isFollowingEnd&&!this.historyWindow?'跟随':'已暂停跟随 /bottom'} · /help · Ctrl+O 详情 · Ctrl+C 中止/退出`,width)
+      styledLine([{text:this.statusLine()},{text:` · ${this.contextUsage()} · usage ${this.usage()}`,fg:'fg.faint'}],width),
+      styledLine([{text:this.notice,fg:'fg.body'}],width),
+      styledLine([{text:`${this.scroll.isFollowingEnd&&!this.historyWindow?'跟随':'已暂停跟随 /bottom'} · /help · Ctrl+O 详情 · Ctrl+C 中止/退出`,fg:'fg.label'}],width)
     ]};
     const footer=new MouseRegion(status,event=>{if(event.type==='click'&&event.y===2) {this.bottom();return {handled:true};}});
     const menuHeader=new MouseRegion(header,event=>{if(event.type==='click'&&event.y===0){this.openPanel('actions');return {handled:true};}});
@@ -211,7 +212,7 @@ export class ReadOnlyTui {
     if(this.runId){this.pendingRefresh=true;void this.openRecovery(this.runId);}
     this.widths?.inspect();
     this.terminal.write('\x1b[?1004h'); // Focus reports invalidate any pending exit confirmation.
-    this.timer=setInterval(()=>{if(this.pendingRefresh) this.refresh();},75);
+    this.timer=setInterval(()=>{if(this.pendingRefresh)this.refresh();else if(this.phase!=='idle')this.tui.requestRender();},SPINNER_INTERVAL_MS);
     this.loadQueue();
     this.tui.requestRender();
   }
@@ -231,7 +232,12 @@ export class ReadOnlyTui {
     const ordinal=this.runOrdinals[kind].get(attempt);
     return ordinal===undefined?undefined:kind==='tool'?this.indexed('run',runId).toolCall(runId,ordinal):modelRequestNumber(ordinal);
   }
-  private status() {const target=this.control.target();return this.phase==='running'?`运行中 ${target?this.shown('run',target.runId):'受理中'}`:this.phase==='stopping'?'中止中（等待实际清理）':this.phase==='exiting'?'退出中（等待实际清理）':this.viewingRecovery?'恢复核对（只读）':label(this.result);}
+  private statusLine() {
+    const target=this.control.target();
+    const extra=this.phase==='running'?(target?this.shown('run',target.runId):'受理中'):'';
+    const frame=Math.floor(Date.now()/SPINNER_INTERVAL_MS)%SPINNER_FRAMES.length;
+    return statusText(this.phase,this.viewingRecovery,this.result,frame,extra,COLOR_TIER);
+  }
   private prefix() {return estimateTaskPrefix({dataRoot:this.options.dataRoot,workspace:this.options.workspace,coding:!!this.options.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}
   private contextUsage() {return `ctx ${this.context.estimated?'≈':''}${tokenCount(this.context.tokens)} / ${tokenCount(this.context.contextWindow)}`;}
   private usage() {
