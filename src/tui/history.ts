@@ -69,10 +69,10 @@ export class HistoryView {
     const lines=wrap('历史 · 只读；不会改变当前执行目标');const starts:number[]=[];
     if(this.mode==='runs'){
       lines.push(...wrap(`筛选 ${JSON.stringify(this.filter)}\n截至 ${this.history.coverage.snapshot} / 当前 ${this.history.coverage.current}${this.history.coverage.stale?' · 陈旧快照':''}`));
-      this.history.items.forEach((row,i)=>{starts.push(lines.length);lines.push(...wrap(`${i===this.selected?'›':' '} ${row.status} ${row.runId??`未运行 task ${this.index.label('task',row.taskId)}`}\n  ${row.project} · ${row.completeness} · usage ${row.usage}`));});
+      this.history.items.forEach((row,i)=>{starts.push(lines.length);lines.push(...wrap(`${i===this.selected?'›':' '} ${row.status} ${row.runId?this.index.label('run',row.runId):`未运行 task ${this.index.label('task',row.taskId)}`}${row.chain?` · ${this.index.label('session',row.chain.session)}${row.chain.task?` 任务 ${row.chain.task}`:''}`:''}\n  ${row.project} · ${row.completeness} · usage ${row.usage}`));});
       if(!this.history.items.length)lines.push(...wrap('没有匹配的已取得事实；不证明没有发生'));
     }else if(this.mode==='records'){
-      lines.push(...wrap(`run ${this.evidence?.runId}`));this.evidence?.items.forEach((row,i)=>{starts.push(lines.length);lines.push(...wrap(`${i===this.selected?'›':' '} #${row.seq} ${row.kind}\n  ${row.id}`));});
+      lines.push(...wrap(`run ${this.evidence?this.index.label('run',this.evidence.runId):''}`));this.evidence?.items.forEach((row,i)=>{starts.push(lines.length);lines.push(...wrap(`${i===this.selected?'›':' '} #${row.seq} ${row.kind}\n  ${row.id}`));});
     }else lines.push(...wrap(this.content));
     const chosen=starts[this.selected];if(this.followSelection&&chosen!==undefined){if(chosen<this.line)this.line=chosen;else if(chosen>=this.line+height-2)this.line=Math.max(0,chosen-height+3);}this.followSelection=false;
     this.line=Math.min(this.line,Math.max(0,lines.length-height+1));

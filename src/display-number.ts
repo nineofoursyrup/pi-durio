@@ -1,12 +1,13 @@
 import { openHostReadonly, readObject, digest } from './evidence.js';
 import { readObjectRange } from './query.js';
+import { readSessionChains } from './session-chain.js';
 
 /**
  * Display numbers are human-facing handles only. They are derived when shown and
  * resolved back to the full identity on input; records and machine output keep full identities.
  */
-export type DisplayKind = 'session' | 'run' | 'task' | 'improve-report' | 'eval-plan';
-export const DISPLAY_PREFIXES: Record<DisplayKind, string> = { session: 's', run: 'r', task: 't', 'improve-report': 'ir', 'eval-plan': 'ep' };
+export type DisplayKind = 'session' | 'run' | 'task' | 'improve-report' | 'eval-plan' | 'queue-request';
+export const DISPLAY_PREFIXES: Record<DisplayKind, string> = { session: 's', run: 'r', task: 't', 'improve-report': 'ir', 'eval-plan': 'ep', 'queue-request': 'q' };
 const MIN_HEX = 4;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DISPLAY_INPUT = new RegExp(`^(${Object.values(DISPLAY_PREFIXES).join('|')})-[0-9a-f]{${MIN_HEX},}$`, 'i');
@@ -20,7 +21,7 @@ export type DisplayResolution =
 
 /**
  * The hexadecimal part the display number is cut from: a UUID without hyphens, lowercase;
- * any other identity (a user-chosen plan or report ID) by the SHA-256 hex of the identity string.
+ * any other identity (a user-chosen plan, report or queue request ID) by the SHA-256 hex of the identity string.
  */
 export function displayHex(id: string) {
   return UUID.test(id) ? id.replaceAll('-', '').toLowerCase() : digest(id);
@@ -92,10 +93,14 @@ export class DisplayIndex {
   }
 }
 
+/** A full identity that is not a UUID; its detail header names it once as “原 id …”. */
+export function isUserChosenId(id: string) { return !UUID.test(id); }
+
 /**
- * Readonly scan of host facts in one data root: product runs, their sessions and accepted tasks
- * (`task.accepted`, follow-up `control.accepted`), improve reports (`improve.started`), eval plans
- * (`eval.plan`; plans have no project) and improve candidate revisions (`improve.report`).
+ * Readonly scan of host facts in one data root: product runs, sessions (derived chains: only a session's
+ * first task contributes its sessionId), accepted tasks (`task.accepted`, follow-up `control.accepted`),
+ * queue requests (`control.accepted`), improve reports (`improve.started`), eval plans (`eval.plan`; plans
+ * have no project) and improve candidate revisions (`improve.report`).
  */
 export function readDisplayIndex(root: string) {
   let db: ReturnType<typeof openHostReadonly>;
@@ -103,7 +108,8 @@ export function readDisplayIndex(root: string) {
   catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return new DisplayIndex([]); throw error; }
   // Copy rows out first so the shared read lock is not held while originals are decoded.
   let rows: Record<string, unknown>[];
-  try { rows = db.prepare("SELECT run_id,kind,at,body FROM records WHERE kind IN ('task.accepted','control.accepted','improve.started','improve.report','eval.plan') ORDER BY seq").all() as Record<string, unknown>[]; }
+  const chains = readSessionChains(root);
+  try { rows = db.prepare("SELECT run_id,kind,at,body FROM records WHERE kind IN ('task.accepted','control.accepted','improve.started','improve.report','eval.plan') AND seq<=? ORDER BY seq").all(chains.through) as Record<string, unknown>[]; }
   finally { db.close(); }
   const objects: DisplayObject[] = [], revisions = new Map<string, string[]>();
   for (const row of rows) {
@@ -113,9 +119,10 @@ export function readDisplayIndex(root: string) {
     if (kind === 'task.accepted') {
       const project = data.projectId ?? data.workspace ?? null;
       if (UUID.test(runId)) objects.push({ kind: 'run', id: runId, project, at });
-      if (typeof data.sessionId === 'string' && UUID.test(data.sessionId)) objects.push({ kind: 'session', id: data.sessionId, project, at });
+      if (typeof data.sessionId === 'string' && UUID.test(data.sessionId) && chains.isHead(runId)) objects.push({ kind: 'session', id: data.sessionId, project, at });
       if (typeof data.taskId === 'string') objects.push({ kind: 'task', id: data.taskId, project, at });
     } else if (kind === 'control.accepted') {
+      if (typeof data.requestId === 'string') objects.push({ kind: 'queue-request', id: data.requestId, project: data.target?.workspace ?? null, at });
       if (data.kind === 'follow-up' && typeof data.taskId === 'string') objects.push({ kind: 'task', id: data.taskId, project: data.target?.workspace ?? null, at });
     } else if (kind === 'improve.started') {
       if (typeof data.request?.id === 'string') objects.push({ kind: 'improve-report', id: data.request.id, project: data.target?.workspace ?? null, at });
