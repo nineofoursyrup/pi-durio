@@ -1,0 +1,25 @@
+36x12 truecolor
+00|╭──────────────────────────────────╮|
+   0-35 border.input/bg.block
+01|│ 删除会话存储                     │      |
+   0-1 border.input/bg.block ; 2-27 fg.primary/bg.block/b ; 28-29 border.input/bg.block ; 30-35 -/-
+02|│ s-9c01 · 会话存储 4 MB           │    |
+   0-1 border.input/bg.block ; 2-29 fg.body/bg.block ; 30-31 border.input/bg.block ; 32-35 -/-
+03|│ [✓] s-3f2a                       │|
+   0-1 border.input/bg.block ; 2-33 fg.primary/line.inner ; 34-35 border.input/bg.block
+04|│ 影响：删除 3 个会话存储 · 不可撤 │             |
+   0-1 border.input/bg.block ; 2-20 fg.label/bg.block ; 21-22 border.input/bg.block ; 23-35 -/-
+05|│ 销 · 宿主记录保留，trace 中对应  │           |
+   0-1 border.input/bg.block ; 2-22 fg.label/bg.block ; 23-24 border.input/bg.block ; 25-35 -/-
+06|│ 原文标“已清理”                   │      |
+   0-1 border.input/bg.block ; 2-27 fg.label/bg.block ; 28-29 border.input/bg.block ; 30-35 -/-
+07|│ 费用：不调用模型 · ≤ 0 请求 ·    │          |
+   0-1 border.input/bg.block ; 2-23 fg.label/bg.block ; 24-25 border.input/bg.block ; 26-35 -/-
+08|│ ≈¥0                              │|
+   0-1 border.input/bg.block ; 2-33 fg.label/bg.block ; 34-35 border.input/bg.block
+09|│ Enter 删除 · Esc 取消            │    |
+   0-1 border.input/bg.block ; 2-9 fg.body/bg.block ; 10-29 fg.label/bg.block ; 30-31 border.input/bg.block ; 32-35 -/-
+10|╰──────────────────────────────────╯|
+   0-35 border.input/bg.block
+11|                                    |
+   0-35 -/-

@@ -1,0 +1,15 @@
+36x7 truecolor
+00|╭──────────────────────────────────╮|
+   0-35 border.input/bg.block
+01|│ 删除会话存储                     │      |
+   0-1 border.input/bg.block ; 2-27 fg.primary/bg.block/b ; 28-29 border.input/bg.block ; 30-35 -/-
+02|│ Enter 窗口过小，无法确认 · Esc   │         |
+   0-1 border.input/bg.block ; 2-7 fg.gutter/bg.block ; 8-16 fg.muted/bg.block ; 17-24 fg.label/bg.block ; 25-26 border.input/bg.block ; 27-35 -/-
+03|│ 取消                             │  |
+   0-1 border.input/bg.block ; 2-31 fg.label/bg.block ; 32-33 border.input/bg.block ; 34-35 -/-
+04|╰──────────────────────────────────╯|
+   0-35 border.input/bg.block
+05|                                    |
+   0-35 -/-
+06|                                    |
+   0-35 -/-

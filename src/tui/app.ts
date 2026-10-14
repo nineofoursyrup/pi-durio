@@ -24,7 +24,11 @@ import { TerminalWidthGate } from './width-gate.js';
 import { readDisplayIndex, readRunOrdinals, modelRequestNumber, resolveDisplayInput, type DisplayIndex, type DisplayKind } from '../display-number.js';
 import { estimateRunRequests, estimateSessionRequests, sessionRunIds, sumCostEstimates, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
 import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, statusText, makeBorderColor } from './theme.js';
+import { ConfirmDialog, escHint, hintLine, viewKey, type ConfirmConfig } from './view-stack.js';
 
+/** 全屏视图（视图栈条目）的种类。 */
+type PanelKind='help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics';
+type ViewEntry={kind:PanelKind;ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
 const identity=(s:string)=>s;
 const theme={borderColor:makeBorderColor('border.input'), selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
 const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['metrics','任务验收与双时钟（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实'],['improve','受限分析（需声明范围和预算）'],['improves','查看 improve 报告（只读）'],['improve-select','结构化逐项选择与汇总提交'],['improve-suppressions','查看建议抑制'],['improve-restore','JSON明确恢复建议'],['improve-continue','JSON明确继续独立未跑项'],['improve-rollback','JSON明确回退本批精确产物']] as const;
@@ -99,7 +103,9 @@ export class ReadOnlyTui {
   private lastText='';
   private confirmation?:{key:string;at:number};
   private followChord=false;
-  private panel?:{kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics';ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
+  /** 视图栈：全屏视图逐层压入，栈顶 = 当前视图；Esc 逐层弹出，空时回到会话（T1、T6）。 */
+  private viewStack:ViewEntry[]=[];
+  private get panel(){return this.viewStack.at(-1);}
   private historyView?:HistoryView;
   private metricsView?:MetricsView;
   private evalView?:EvalView;
@@ -107,6 +113,10 @@ export class ReadOnlyTui {
   private improveSelectionView?:ImproveSelectionView;
   private storageView?:StorageView;
   private hidePanel?:()=>void;
+  /** 即时反馈：临时替换底栏键位提示行（全屏视图保留最右边的 Esc），下一次按键后恢复（U12）。 */
+  private hintFeedback?:string;
+  /** 视图或会话屏之上的确认框；打开时消费全部按键。 */
+  private dialog?:{box:ConfirmDialog;hide:()=>void;confirm:(selected:number[])=>void};
   private pendingRefresh=false;
   private timer?:ReturnType<typeof setInterval>;
   private started=false;
@@ -157,7 +167,7 @@ export class ReadOnlyTui {
     const status:Component={invalidate(){},render:width=>[
       styledLine([{text:this.statusLine()},{text:` · ${this.contextUsage()} · usage ${this.usage()}`,fg:'fg.faint'}],width),
       styledLine([{text:this.notice,fg:'fg.body'}],width),
-      styledLine([{text:`${this.scroll.isFollowingEnd&&!this.historyWindow?'跟随':'已暂停跟随 /bottom'} · /help · Ctrl+O 详情 · Ctrl+C 中止/退出`,fg:'fg.label'}],width)
+      styledLine([{text:this.hintFeedback??`${this.scroll.isFollowingEnd&&!this.historyWindow?'跟随':'已暂停跟随 /bottom'} · /help · Ctrl+O 详情 · Ctrl+C 中止/退出`,fg:'fg.label'}],width)
     ]};
     const footer=new MouseRegion(status,event=>{if(event.type==='click'&&event.y===2) {this.bottom();return {handled:true};}});
     const menuHeader=new MouseRegion(header,event=>{if(event.type==='click'&&event.y===0){this.openPanel('actions');return {handled:true};}});
@@ -263,7 +273,9 @@ export class ReadOnlyTui {
     const ctrlC=matchesKey(data,'ctrl+c'),ctrlD=matchesKey(data,'ctrl+d');
     if(isKeyRelease(data)||((ctrlC||ctrlD)&&isKeyRepeat(data)))return {consume:true};
     if(!ctrlC&&!ctrlD) this.confirmation=undefined;
+    if(this.hintFeedback){this.hintFeedback=undefined;this.tui.requestRender();}
     if(data==='\x1b[I'||data==='\x1b[O') {this.confirmation=undefined;return {consume:true};}
+    if(this.dialog) {this.dialogInput(data);return {consume:true};}
     if(this.panel) {this.panelInput(data);return {consume:true};}
     if(this.tui.hasOverlay()) return undefined;
     if(this.editor.isShowingAutocomplete()) {
@@ -277,7 +289,7 @@ export class ReadOnlyTui {
     if(matchesKey(data,'ctrl+l')) {if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return {consume:true};}
     if(matchesKey(data,'f2')) {this.openPanel('actions');return {consume:true};}
     if(matchesKey(data,'ctrl+o')) {this.openDetail(this.records.at(-1));return {consume:true};}
-    if(matchesKey(data,'ctrl+x')) {this.followChord=this.editor.focused;this.notice='按 Enter 明确排到下一任务；普通 Enter 默认补充当前任务';this.tui.requestRender();return {consume:true};}
+    if(matchesKey(data,'ctrl+x')) {this.followChord=this.editor.focused;this.feedback('按 Enter 明确排到下一任务；普通 Enter 默认补充当前任务');return {consume:true};}
     if(matchesKey(data,'escape')) {if(this.phase==='running')this.stop();return {consume:true};}
     if(ctrlC||ctrlD) {
       const key=ctrlC?'ctrl+c':'ctrl+d';
@@ -449,7 +461,7 @@ export class ReadOnlyTui {
       } else {
         if(this.phase!=='idle')throw Error('正在清理，暂不接受决定');
         if(action==='reattach') {
-          this.closePanel();this.phase='running';this.controller=new AbortController();this.cancellation='exit';
+          this.closeViews();this.phase='running';this.controller=new AbortController();this.cancellation='exit';
           const self=this;
           this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
           return;
@@ -476,7 +488,7 @@ export class ReadOnlyTui {
   }
   private async recoveryDecision(decision:RecoveryDecision) {
     if(this.phase!=='idle'||!this.recovery){this.notice='先 /recover 获取当前核对事实';return;}
-    const runId=this.recovery.runId;this.closePanel();this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
+    const runId=this.recovery.runId;this.closeViews();this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
     this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{
       if('usage' in result){this.recovery=undefined;this.applyResult(result);}
       else {this.recovery=result;this.viewingRecovery=result.status!=='completed'&&result.status!=='ended';this.notice=`恢复决定：${result.status}；原未知和队列冻结仍保留`;if(this.viewingRecovery)this.openPanel('recovery');else this.result=undefined;}
@@ -621,21 +633,38 @@ export class ReadOnlyTui {
     this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
     this.openPanel('detail',record);
   }
-  private openPanel(kind:'help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics',ref?:RecordReference) {
-    this.closePanel();this.confirmation=undefined;
-    this.panel={kind,ref,offset:0,previous:[],line:0,raw:'',next:null};
+  private openPanel(kind:PanelKind,ref?:RecordReference) {
+    // 从会话屏（或菜单）打开：替换整个视图栈，新视图为最上层。视图内进入下一层用 pushView。
+    this.closeViews();this.confirmation=undefined;
+    this.viewStack.push({kind,ref,offset:0,previous:[],line:0,raw:'',next:null});
     if(kind==='detail')this.loadDetail();
     const component:Component={invalidate(){},render:width=>this.panelLines(width),handleInput:data=>this.panelInput(data),handleMouse:event=>{
-      if(!this.panel)return;
-      if(event.type==='wheel'){if(this.panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(this.panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else this.panel.line=Math.max(0,this.panel.line+(event.wheelDelta??0));return {handled:true};}
-      if(event.type==='click'&&this.panel.kind==='actions'){
-        const index=event.y+this.panel.line-1;
-        if(commands[index]){const command=commands[index][0];this.closePanel();this.command(`/${command}`);return {handled:true};}
+      const panel=this.panel;if(!panel)return;
+      if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
+      if(event.type==='click'&&panel.kind==='actions'){
+        const index=event.y+panel.line-1;
+        if(commands[index]){const command=commands[index][0];this.closeViews();this.command(`/${command}`);return {handled:true};}
       }
     }};
     const overlay=this.tui.showOverlay(component,{width:'96%',maxHeight:'90%',anchor:'center'});this.hidePanel=()=>overlay.hide();this.tui.requestRender();
   }
+  /**
+   * 在当前视图之上压入下一层：共用同一个全屏浮层，Esc 回到当前层（closePanel）。
+   * 没有打开的视图时等同 openPanel。首版面板都是单层，尚无调用方。
+   */
+  private pushView(kind:PanelKind,ref?:RecordReference) {
+    if(!this.viewStack.length){this.openPanel(kind,ref);return;}
+    this.viewStack.push({kind,ref,offset:0,previous:[],line:0,raw:'',next:null});
+    if(kind==='detail')this.loadDetail();
+    this.tui.requestRender();
+  }
+  /** 视图各行；有即时反馈时替换末行（视图的键位提示行），保留最右边的 Esc。 */
   private panelLines(width:number) {
+    const lines=this.panelBody(width);
+    if(this.hintFeedback!==undefined&&lines.length)lines[lines.length-1]=hintLine([],width,{feedback:this.hintFeedback,esc:escHint(this.viewStack.length)});
+    return lines;
+  }
+  private panelBody(width:number):string[] {
     const panel=this.panel;if(!panel)return[];
     if(panel.kind==='improve-selection'){const lines=this.improveSelectionView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='improve'){const lines=this.improveView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
@@ -660,9 +689,12 @@ export class ReadOnlyTui {
   private panelInput(data:string) {
     const panel=this.panel;if(!panel)return;
     this.confirmation=undefined;
-    if(matchesKey(data,'escape')||matchesKey(data,'ctrl+o')) {if(panel.kind==='storage'&&this.storageView?.inProgress)return;if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
-    if(matchesKey(data,'ctrl+l')){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
-    if(matchesKey(data,'ctrl+c')||matchesKey(data,'ctrl+d')){if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
+    // 全屏视图层的全局键（T6）：Esc 返回上一层；Ctrl+C 只停本视图的操作，不传给会话屏；Ctrl+D/O/T/R、? 不起作用。
+    const key=viewKey(data);
+    if(key==='back') {if(panel.kind==='storage'&&this.storageView?.inProgress)return;if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
+    if(key==='redraw'){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
+    if(key==='stop'){if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
+    if(key==='inert')return;
     if(panel.kind==='improve-selection'){void this.improveSelectionView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='improve'){this.improveView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='eval'){this.evalView?.handleInput(data);this.tui.requestRender();return;}
@@ -673,13 +705,13 @@ export class ReadOnlyTui {
     if(panel.kind==='actions') {
       if(matchesKey(data,'up')) panel.offset=(panel.offset+commands.length-1)%commands.length;
       if(matchesKey(data,'down')||matchesKey(data,'tab')) panel.offset=(panel.offset+1)%commands.length;
-      if(matchesKey(data,'enter')) {const command=commands[panel.offset][0];this.closePanel();this.command(`/${command}`);return;}
+      if(matchesKey(data,'enter')) {const command=commands[panel.offset][0];this.closeViews();this.command(`/${command}`);return;}
       panel.line=Math.max(0,panel.offset-Math.floor(this.terminal.rows*0.9)+4);
     } else {
       if(matchesKey(data,'up'))panel.line=Math.max(0,panel.line-1);
       if(matchesKey(data,'down'))panel.line++;
     }
-    if(panel.kind==='exit'&&matchesKey(data,'enter')){this.closePanel();void this.exit();return;}
+    if(panel.kind==='exit'&&matchesKey(data,'enter')){this.closeViews();void this.exit();return;}
     if(panel.kind==='queue') {
       if(matchesKey(data,'left'))panel.offset=Math.max(0,panel.offset-1);
       if(matchesKey(data,'right')||matchesKey(data,'tab'))panel.offset=Math.min(this.queue.length-1,panel.offset+1);
@@ -713,7 +745,40 @@ export class ReadOnlyTui {
     try {const page=readTextPage(this.options.dataRoot,panel.ref.ref,panel.offset);panel.raw=page.text;panel.next=page.next;panel.error=undefined;}
     catch(error){panel.raw='';panel.next=null;panel.error=`原文不可取得：${String(error)}`;}
   }
-  private closePanel() {this.hidePanel?.();this.hidePanel=undefined;this.panel=undefined;this.confirmation=undefined;this.tui.setFocus(this.editor);this.tui.requestRender();}
+  /** Esc：弹出最上层视图；栈空时关闭浮层、焦点还给输入框（回到会话屏）。 */
+  private closePanel() {
+    this.viewStack.pop();
+    if(!this.viewStack.length){this.hidePanel?.();this.hidePanel=undefined;this.tui.setFocus(this.editor);}
+    this.confirmation=undefined;this.tui.requestRender();
+  }
+  /** 离开全部视图回到会话屏（开始执行、退出、从菜单换到另一视图）。 */
+  private closeViews() {
+    this.closeConfirm();
+    this.viewStack.length=0;this.hidePanel?.();this.hidePanel=undefined;this.tui.setFocus(this.editor);
+    this.confirmation=undefined;this.tui.requestRender();
+  }
+  /** 按键的即时反馈：替换底栏键位提示行，下一次按键后恢复。 */
+  private feedback(text:string) {this.hintFeedback=text;this.tui.requestRender();}
+  /**
+   * 在当前层（视图或会话屏）之上打开确认框（U12 版式）。Enter 可用时调用 confirm 并关闭；Esc 只关闭。
+   * 打开期间消费全部按键，不穿透到视图或会话屏。
+   */
+  private openConfirm(config:ConfirmConfig,confirm:(selected:number[])=>void) {
+    this.closeConfirm();
+    const box=new ConfirmDialog(config),terminal=this.terminal;
+    const component:Component={invalidate(){},render:()=>box.render(terminal.columns,terminal.rows),handleInput:data=>this.dialogInput(data)};
+    const overlay=this.tui.showOverlay(component,{get width(){return ConfirmDialog.width(terminal.columns);},anchor:'center'});
+    this.dialog={box,confirm,hide:()=>overlay.hide()};this.tui.requestRender();
+  }
+  private closeConfirm() {this.dialog?.hide();this.dialog=undefined;this.tui.requestRender();}
+  private dialogInput(data:string) {
+    const dialog=this.dialog;if(!dialog)return;
+    if(matchesKey(data,'ctrl+l')){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
+    const result=dialog.box.handleInput(data);
+    if(result.type==='cancel')this.closeConfirm();
+    else if(result.type==='confirm'){this.closeConfirm();dialog.confirm(result.selected);}
+    this.tui.requestRender();
+  }
   private requestExit() {
     if(this.editor.getExpandedText()||this.savedDraft)this.openPanel('exit');
     else void this.exit();

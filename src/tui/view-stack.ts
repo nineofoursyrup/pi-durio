@@ -1,0 +1,471 @@
+/**
+ * 全屏视图的共用基础（issue #68；规格 T1、T6、U12）。
+ *
+ * - viewKey：全屏视图层的全局键规则（Esc 逐层返回、Ctrl+C 只停本视图操作、其余全局键不起作用）
+ * - hintLine：底栏键位提示与即时反馈（Esc 始终保留在最右边）
+ * - ConfirmDialog：居中确认框 / 选择框（单选 ◉/○ 数字键，多选 [✓]/[ ] 空格）
+ * - statusError / statusEmpty / LoadingState：通用状态写法
+ * - widthTier / truncateMiddle / truncateEnd / wrapAuthorized / fixedFrame：窄终端与矮终端
+ * - PresetFilter：预设选项筛选层（1e 与历史视图复用）
+ */
+
+import { matchesKey, truncateToWidth, visibleWidth, wrapTextWithAnsi, stripTerminalSequences } from '@earendil-works/pi-tui';
+import {
+  styledLine, fgSgr, bgSgr, resetSgr,
+  GLYPHS, spinnerFrame, SPINNER_FRAMES, SPINNER_INTERVAL_MS,
+  type ColorTier, COLOR_TIER, type TextSegment, type TokenName,
+} from './theme.js';
+
+/** 显示前去掉控制字符与终端序列（原因码、路径、用户内容都经过这里）。 */
+export function clean(text: string): string {
+  return stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g, '');
+}
+
+// ─── 全屏视图的键规则（T6） ──────────────────────────────────────────────────
+
+/**
+ * 全屏视图层的全局键：
+ * - `back`：Esc，返回上一层，在最上层时回到会话
+ * - `stop`：Ctrl+C，只停止本视图中正在进行的操作；没有时不起作用，也不传给会话屏
+ * - `redraw`：Ctrl+L，重绘并重新测量字宽
+ * - `inert`：Ctrl+D、Ctrl+O、Ctrl+T、Ctrl+R、`?`，在视图内不起作用
+ * - undefined：交给视图自己的局部键
+ *
+ * 例外（历史正文层的 Ctrl+O、视图内的文字输入）由视图在调用前自行处理。
+ */
+export type ViewKeyAction = 'back' | 'stop' | 'redraw' | 'inert';
+export function viewKey(data: string): ViewKeyAction | undefined {
+  if (matchesKey(data, 'escape')) return 'back';
+  if (matchesKey(data, 'ctrl+c')) return 'stop';
+  if (matchesKey(data, 'ctrl+l')) return 'redraw';
+  if (data === '?' || matchesKey(data, 'ctrl+d') || matchesKey(data, 'ctrl+o') || matchesKey(data, 'ctrl+t') || matchesKey(data, 'ctrl+r')) return 'inert';
+  return undefined;
+}
+
+/** 底栏的 Esc 文案：最上层“返回会话”，下层“返回上层”（#42 第 4 节）。 */
+export function escHint(depth: number): string {
+  return depth <= 1 ? 'Esc 返回会话' : 'Esc 返回上层';
+}
+
+// ─── 底栏键位提示与即时反馈 ──────────────────────────────────────────────────
+
+/**
+ * 底栏键位提示行。
+ *
+ * - 有 `esc` 时（全屏视图），Esc 固定在最右边；宽度不够时从 Esc 左边一项起往左去掉。
+ * - 没有 `esc` 时（会话屏），从右往左去掉；`keepLast` 指定的一项最后去掉（如空闲时的 `? 帮助`）。
+ * - `feedback`：按键的即时反馈，临时替换提示项（保留 Esc），放不下时在末尾截断。
+ */
+export function hintLine(
+  items: string[],
+  width: number,
+  opts: { esc?: string; feedback?: string; keepLast?: string; tier?: ColorTier } = {},
+): string {
+  const tier = opts.tier ?? COLOR_TIER;
+  const sep = ' · ';
+  const escPart = opts.esc ? `${sep}${opts.esc}` : '';
+  const room = Math.max(0, width - visibleWidth(escPart));
+  let text: string;
+  if (opts.feedback !== undefined) text = truncateEnd(clean(opts.feedback), room);
+  else {
+    const kept = [...items];
+    while (kept.length && visibleWidth(kept.join(sep)) > room) {
+      // 从最靠近 Esc（最右）的一项开始去掉；keepLast 只在只剩它时才去掉。
+      let index = kept.length - 1;
+      if (kept[index] === opts.keepLast && kept.length > 1) index--;
+      kept.splice(index, 1);
+    }
+    text = kept.join(sep);
+  }
+  const segments: TextSegment[] = [{ text, fg: opts.feedback !== undefined ? 'fg.body' : 'fg.label' }];
+  if (opts.esc) segments.push({ text: text ? escPart : opts.esc, fg: 'fg.label' });
+  return styledLine(segments, width, undefined, tier);
+}
+
+// ─── 窄终端（U12） ───────────────────────────────────────────────────────────
+
+/** 两档断点：≥100 wide，60–99 medium，<60 narrow。 */
+export type WidthTier = 'wide' | 'medium' | 'narrow';
+export function widthTier(width: number): WidthTier {
+  return width >= 100 ? 'wide' : width >= 60 ? 'medium' : 'narrow';
+}
+
+/** 末尾加 `…` 截断。 */
+export function truncateEnd(text: string, width: number): string {
+  if (width <= 0) return '';
+  return truncateToWidth(text, width, '…');
+}
+
+/** 路径从中间省略：保留开头与结尾，中间写 `…`。 */
+export function truncateMiddle(text: string, width: number): string {
+  if (visibleWidth(text) <= width) return text;
+  if (width <= 1) return width === 1 ? '…' : '';
+  const chars = Array.from(text);
+  const budget = width - 1, headBudget = Math.ceil(budget / 2), tailBudget = budget - headBudget;
+  let head = '', used = 0;
+  for (const char of chars) { const w = visibleWidth(char); if (used + w > headBudget) break; head += char; used += w; }
+  let tail = ''; used = 0;
+  for (let i = chars.length - 1; i >= 0; i--) { const w = visibleWidth(chars[i]); if (used + w > tailBudget) break; tail = chars[i] + tail; used += w; }
+  return `${head}…${tail}`;
+}
+
+/** 授权内容（候选卡片、执行计划、确认框的影响与费用）：只换行、不截断。 */
+export function wrapAuthorized(text: string, width: number): string[] {
+  return clean(text.replace(/\r/g, '')).split('\n').flatMap(line => line ? wrapTextWithAnsi(line, Math.max(1, width)) : ['']);
+}
+
+/**
+ * 高度不够时头部与底栏固定、主体滚动。
+ * 返回恰好 `height` 行（主体不足时补空串）和夹紧后的主体偏移；连头部与底栏都放不下时先保留底栏。
+ */
+export function fixedFrame(header: string[], body: string[], footer: string[], height: number, offset: number): { lines: string[]; offset: number } {
+  const foot = footer.slice(Math.max(0, footer.length - height));
+  const head = header.slice(0, Math.max(0, height - foot.length));
+  const bodyHeight = Math.max(0, height - head.length - foot.length);
+  const clamped = Math.max(0, Math.min(offset, body.length - bodyHeight));
+  const visible = body.slice(clamped, clamped + bodyHeight);
+  while (visible.length < bodyHeight) visible.push('');
+  return { lines: [...head, ...visible, ...foot], offset: clamped };
+}
+
+// ─── 通用状态（U12） ─────────────────────────────────────────────────────────
+
+/**
+ * 错误：`✗ <一句中文> · <原因码>`，下一行写可以做什么。
+ * 原因码保留原文（便于 agent 检索），显示前去掉控制字符。
+ */
+export function statusError(message: string, code: string, action: string, width: number, tier: ColorTier = COLOR_TIER): string[] {
+  return [
+    styledLine([
+      { text: `${GLYPHS.err} `, fg: 'ac.err' },
+      { text: `${clean(message)} · `, fg: 'fg.body' },
+      { text: clean(code), fg: 'fg.muted' },
+    ], width, undefined, tier),
+    styledLine([{ text: `  ${clean(action)}`, fg: 'fg.label' }], width, undefined, tier),
+  ];
+}
+
+/** 空：`在 <范围> 内没有 <什么>[ · <入口>]`，fg.muted 一行；不写 0 或 N/A。 */
+export function statusEmpty(range: string, what: string, width: number, entry?: string, tier: ColorTier = COLOR_TIER): string {
+  return styledLine([{ text: `在 ${clean(range)} 内没有 ${clean(what)}${entry ? ` · ${clean(entry)}` : ''}`, fg: 'fg.muted' }], width, undefined, tier);
+}
+
+/** 加载态出现前的延迟。 */
+export const LOADING_DELAY_MS = 200;
+
+/**
+ * 异步操作的加载态：超过 200ms 才显示 `⠋ <动作>中 · <对象>`；期间 Esc 照常返回并丢弃结果。
+ *
+ * ```ts
+ * const loading = new LoadingState('统计', '数据根', () => tui.requestRender());
+ * const value = await loading.track(storageUsage(root));   // Esc 时 loading.cancel() → value 为 undefined
+ * if (value !== undefined) apply(value);
+ * // 渲染：if (loading.isShowing) lines.push(loading.renderLine(width));
+ * ```
+ */
+export class LoadingState {
+  private showing = false;
+  private cancelled = false;
+  private frame = 0;
+  private delay?: ReturnType<typeof setTimeout>;
+  private spin?: ReturnType<typeof setInterval>;
+
+  constructor(
+    private readonly action: string,
+    private readonly subject: string | undefined,
+    private readonly changed: () => void,
+    delayMs = LOADING_DELAY_MS,
+  ) {
+    this.delay = setTimeout(() => {
+      this.delay = undefined;
+      this.showing = true; this.changed();
+      this.spin = setInterval(() => { this.frame = (this.frame + 1) % SPINNER_FRAMES.length; this.changed(); }, SPINNER_INTERVAL_MS);
+    }, delayMs);
+  }
+
+  get isShowing(): boolean { return this.showing; }
+  get isCancelled(): boolean { return this.cancelled; }
+
+  /** 操作结束：停止计时，不再显示。返回 false 表示已取消，结果应丢弃。 */
+  complete(): boolean {
+    if (this.delay) { clearTimeout(this.delay); this.delay = undefined; }
+    if (this.spin) { clearInterval(this.spin); this.spin = undefined; }
+    this.showing = false;
+    return !this.cancelled;
+  }
+
+  /** Esc 返回：丢弃之后到达的结果。 */
+  cancel(): void { this.cancelled = true; this.complete(); }
+
+  /** 等待操作；已取消时得到 undefined。未取消时拒绝照常抛出，已取消时吞掉。 */
+  async track<T>(work: Promise<T>): Promise<T | undefined> {
+    try { const value = await work; return this.complete() ? value : undefined; }
+    catch (error) { if (this.complete()) throw error; return undefined; }
+  }
+
+  renderLine(width: number, tier: ColorTier = COLOR_TIER): string {
+    return styledLine([
+      { text: `${spinnerFrame(this.frame, tier)} ` },
+      { text: `${this.action}中${this.subject ? ` · ${clean(this.subject)}` : ''}`, fg: 'fg.body' },
+    ], width, undefined, tier);
+  }
+}
+
+// ─── 确认框与选择框（U12） ───────────────────────────────────────────────────
+
+export interface ConfirmOption { label: string; /** 不可选时的原因；渲染为 `不可选 · <原因>`，↑↓ 跳过 */ disabled?: string }
+
+export interface ConfirmConfig {
+  /** 粗体标题（首行） */
+  title: string;
+  /** 末行 `Enter <action> · Esc 取消` */
+  action: string;
+  /** 正文：高度不够时在框内滚动（逐行截断） */
+  body?: string[];
+  /** 单选（数字键）或多选（空格切换、↑↓ 换行）；排在正文之后，与正文一起滚动 */
+  choice?: { mode: 'single' | 'multi'; options: ConfirmOption[]; selected?: number[] };
+  /** 影响与费用行：固定显示、不随框内滚动，只换行不截断 */
+  fixed?: string[];
+  /** Enter 不可用的原因（冲突、截止时间已过、尚未选择…）；末行写明并灰显 Enter */
+  disabled?: string | ((selected: number[]) => string | undefined);
+}
+
+export type ConfirmResult =
+  | { type: 'confirm'; selected: number[] }
+  | { type: 'cancel' }
+  | { type: 'handled' }
+  | { type: 'noop' };
+
+/** 连固定行都放不下时 Enter 不可用的原因。 */
+export const TOO_SMALL_TO_CONFIRM = '窗口过小，无法确认';
+
+/**
+ * 居中浮层的确认框：圆角整框，宽度取 min(终端宽 − 4, 88)。
+ * 框内自上而下：粗体标题、正文与选项（滚动区）、固定行（影响与费用）、末行。
+ * `render(columns, rows)` 返回整框各行，高度不超过 rows；宿主用居中浮层显示（见 app.ts openConfirm）。
+ */
+export class ConfirmDialog {
+  private scroll = 0;
+  private cursor = 0;
+  private chosen: Set<number>;
+  private tooSmall = false;
+
+  constructor(private readonly config: ConfirmConfig) {
+    this.chosen = new Set(config.choice?.selected ?? []);
+    this.cursor = Math.max(0, config.choice?.options.findIndex(option => !option.disabled) ?? 0);
+  }
+
+  static width(columns: number): number { return Math.max(1, Math.min(columns - 4, 88)); }
+
+  get selected(): number[] { return [...this.chosen].sort((a, b) => a - b); }
+
+  /** 当前 Enter 不可用的原因；可用时 undefined。以最近一次 render 的尺寸判断“窗口过小”。 */
+  get disabledReason(): string | undefined {
+    if (this.tooSmall) return TOO_SMALL_TO_CONFIRM;
+    const disabled = this.config.disabled;
+    return typeof disabled === 'function' ? disabled(this.selected) : disabled;
+  }
+
+  render(columns: number, rows: number, tier: ColorTier = COLOR_TIER): string[] {
+    const width = ConfirmDialog.width(columns), inner = Math.max(1, width - 4);
+    const fixed = (this.config.fixed ?? []).flatMap(text => wrapAuthorized(text, inner));
+    // 末行放不下时换行（原因不截断，Esc 不去掉）；以“窗口过小”的写法计算高度，Enter 可用与否不改变框高。
+    const footer = (reason: string | undefined) => wrapSegments(reason
+      ? [{ text: 'Enter ', fg: 'fg.gutter' }, { text: clean(reason), fg: 'fg.muted' }, { text: ' · Esc 取消', fg: 'fg.label' }]
+      : [{ text: `Enter ${clean(this.config.action)}`, fg: 'fg.body' }, { text: ' · Esc 取消', fg: 'fg.label' }], inner);
+    const chrome = 3 + footer(TOO_SMALL_TO_CONFIRM).length; // 上框线、标题、末行、下框线
+    this.tooSmall = rows < chrome + fixed.length;
+    const border = (text: string) => (tier === 'none' ? '' : bgSgr('bg.block', tier) + fgSgr('border.input', tier)) + text + resetSgr();
+    const row = (segments: TextSegment[], lineBg: TokenName = 'bg.block') =>
+      border('│ ') + styledLine(segments.map(s => ({ bg: lineBg, ...s })), inner, lineBg, tier) + border(' │');
+    const lines = [border(`╭${'─'.repeat(Math.max(0, width - 2))}╮`), row([{ text: truncateEnd(clean(this.config.title), inner), fg: 'fg.primary', bold: true }])];
+    if (!this.tooSmall) {
+      const scrollable = this.scrollable(inner);
+      const height = Math.min(scrollable.length, rows - chrome - fixed.length);
+      const at = scrollable.findIndex(line => line.cursor);
+      if (at >= 0 && at < this.scroll) this.scroll = at;
+      if (at >= 0 && at >= this.scroll + height) this.scroll = at - height + 1;
+      this.scroll = Math.max(0, Math.min(this.scroll, scrollable.length - height));
+      for (const line of scrollable.slice(this.scroll, this.scroll + height)) lines.push(row(line.segments, line.cursor ? 'bg.selected' : 'bg.block'));
+      for (const text of fixed) lines.push(row([{ text, fg: 'fg.label' }]));
+    }
+    for (const segments of footer(this.disabledReason)) lines.push(row(segments));
+    lines.push(border(`╰${'─'.repeat(Math.max(0, width - 2))}╯`));
+    return lines.slice(0, Math.max(0, rows));
+  }
+
+  handleInput(data: string): ConfirmResult {
+    const choice = this.config.choice;
+    if (matchesKey(data, 'escape')) return { type: 'cancel' };
+    if (matchesKey(data, 'enter')) return this.disabledReason ? { type: 'noop' } : { type: 'confirm', selected: this.selected };
+    if (choice?.mode === 'single' && /^[1-9]$/.test(data)) {
+      const index = Number(data) - 1;
+      if (!choice.options[index] || choice.options[index].disabled) return { type: 'noop' };
+      this.chosen = new Set([index]); return { type: 'handled' };
+    }
+    if (choice?.mode === 'multi') {
+      if (data === ' ') {
+        if (choice.options[this.cursor]?.disabled) return { type: 'noop' };
+        if (this.chosen.has(this.cursor)) this.chosen.delete(this.cursor); else this.chosen.add(this.cursor);
+        return { type: 'handled' };
+      }
+      const step = matchesKey(data, 'up') ? -1 : matchesKey(data, 'down') ? 1 : 0;
+      if (!step) return { type: 'noop' };
+      for (let next = this.cursor + step; next >= 0 && next < choice.options.length; next += step)
+        if (!choice.options[next].disabled) { this.cursor = next; break; }
+      return { type: 'handled' };
+    }
+    if (matchesKey(data, 'up')) { this.scroll = Math.max(0, this.scroll - 1); return { type: 'handled' }; }
+    if (matchesKey(data, 'down')) { this.scroll++; return { type: 'handled' }; }
+    return { type: 'noop' };
+  }
+
+  private scrollable(inner: number): Array<{ segments: TextSegment[]; cursor?: boolean }> {
+    const lines: Array<{ segments: TextSegment[]; cursor?: boolean }> = (this.config.body ?? [])
+      .flatMap(text => clean(text.replace(/\r/g, '')).split('\n'))
+      .map(text => ({ segments: [{ text: truncateEnd(text, inner), fg: 'fg.body' as TokenName }] }));
+    const choice = this.config.choice;
+    choice?.options.forEach((option, index) => {
+      const on = this.chosen.has(index);
+      const mark = choice.mode === 'single' ? `${on ? '◉' : '○'} ${index + 1} ` : `${on ? `[${GLYPHS.ok}]` : '[ ]'} `;
+      const text = truncateEnd(`${mark}${clean(option.label)}${option.disabled ? ` · 不可选 · ${clean(option.disabled)}` : ''}`, inner);
+      lines.push({ segments: [{ text, fg: option.disabled ? 'fg.gutter' : on ? 'fg.primary' : 'fg.body' }], cursor: choice.mode === 'multi' && index === this.cursor });
+    });
+    return lines;
+  }
+}
+
+/** 把一串带样式的片段按显示宽度折成多行（逐字符，保留各片段样式）。 */
+function wrapSegments(segments: TextSegment[], width: number): TextSegment[][] {
+  const rows: TextSegment[][] = [[]];
+  let used = 0;
+  for (const segment of segments) for (const char of Array.from(segment.text)) {
+    const w = visibleWidth(char);
+    if (used + w > width && used > 0) { rows.push([]); used = 0; if (char === ' ') continue; }
+    const row = rows[rows.length - 1], last = row[row.length - 1];
+    if (last && last.fg === segment.fg && last.bold === segment.bold) last.text += char; else row.push({ ...segment, text: char });
+    used += w;
+  }
+  return rows;
+}
+
+// ─── 预设选项筛选层（U5、U13） ───────────────────────────────────────────────
+
+export interface FilterOption {
+  label: string;
+  /**
+   * 选中该项后按 Enter 才进入的二级输入：
+   * - `input`：输入一行文字（如自定义日期）；`validate` 返回错误时不接受
+   * - `list`：从列表中选一项（如项目列表）
+   */
+  custom?: { kind: 'input'; placeholder: string; validate?: (text: string) => string | undefined } | { kind: 'list'; items: string[] };
+}
+export interface FilterDimension { key: string; label: string; options: FilterOption[]; /** 默认选中项 */ selected?: number }
+/** 每个维度的结果：选中项下标，以及自定义输入或列表选中的值。 */
+export type FilterValues = Record<string, { option: number; value?: string }>;
+
+/**
+ * 筛选层：每个维度一行预设选项（◉/○），只有选中带 `custom` 的项并按 Enter 时才输入。
+ * 键：↑↓ 换维度，←→ 或数字键选项，Enter 应用（有未填的自定义项时先进入该项输入），Esc 返回上层。
+ * 输入中：文字照常输入（含 `?`），Enter 接受，Esc 放弃本次输入；列表中 ↑↓ 选、Enter 接受。
+ */
+export class PresetFilter {
+  private row = 0;
+  private values: FilterValues;
+  private editing?: { key: string; text: string; error?: string; listIndex: number };
+
+  constructor(private readonly dimensions: FilterDimension[], initial?: FilterValues) {
+    this.values = Object.fromEntries(dimensions.map(d => [d.key, { ...(initial?.[d.key] ?? { option: d.selected ?? 0 }) }]));
+  }
+
+  /** 正在输入自定义值时为 true：宿主应把全部按键（含 `?`）交给本组件，不按 viewKey 拦截。 */
+  get isEditing(): boolean { return !!this.editing; }
+  get result(): FilterValues { return structuredClone(this.values); }
+
+  handleInput(data: string): 'apply' | 'cancel' | 'handled' | 'noop' {
+    if (this.editing) return this.editInput(data);
+    if (matchesKey(data, 'escape')) return 'cancel';
+    if (matchesKey(data, 'up')) { this.row = Math.max(0, this.row - 1); return 'handled'; }
+    if (matchesKey(data, 'down') || matchesKey(data, 'tab')) { this.row = Math.min(this.dimensions.length - 1, this.row + 1); return 'handled'; }
+    const dimension = this.dimensions[this.row];
+    if (!dimension) return 'noop';
+    const current = this.values[dimension.key];
+    const pick = (option: number) => { if (option !== current.option) this.values[dimension.key] = { option }; return 'handled' as const; };
+    if (matchesKey(data, 'left')) return pick(Math.max(0, current.option - 1));
+    if (matchesKey(data, 'right')) return pick(Math.min(dimension.options.length - 1, current.option + 1));
+    if (/^[1-9]$/.test(data) && dimension.options[Number(data) - 1]) return pick(Number(data) - 1);
+    if (matchesKey(data, 'enter')) {
+      const here = dimension.options[current.option]?.custom && current.value === undefined ? this.row : -1;
+      const missing = here >= 0 ? here : this.dimensions.findIndex(d => d.options[this.values[d.key].option]?.custom && this.values[d.key].value === undefined);
+      if (missing < 0) return 'apply';
+      this.row = missing; this.editing = { key: this.dimensions[missing].key, text: '', listIndex: 0 };
+      return 'handled';
+    }
+    return 'noop';
+  }
+
+  render(width: number, tier: ColorTier = COLOR_TIER): string[] {
+    const lines: string[] = [];
+    const indent = Math.max(...this.dimensions.map(d => visibleWidth(d.label))) + 4;
+    const pad = ' '.repeat(indent);
+    this.dimensions.forEach((dimension, row) => {
+      const current = this.values[dimension.key], focused = row === this.row, lineBg: TokenName | undefined = focused ? 'bg.selected' : undefined;
+      const head = `${focused ? '›' : ' '} ${dimension.label}`;
+      let segments: TextSegment[] = [{ text: head + ' '.repeat(indent - visibleWidth(head)), fg: focused ? 'fg.primary' : 'fg.label' }];
+      let used = indent;
+      // 一行放不下时选项换到下一行（缩进对齐），不截断选项。
+      dimension.options.forEach((option, index) => {
+        const on = index === current.option;
+        const part = `${on ? '◉' : '○'} ${option.label}${on && current.value !== undefined ? `：${clean(current.value)}` : ''}`;
+        const gap = index && used > indent ? '  ' : '';
+        if (gap && used + visibleWidth(gap + part) > width) {
+          lines.push(styledLine(segments, width, lineBg, tier));
+          segments = [{ text: pad }]; used = indent;
+        }
+        const text = (used > indent ? gap : '') + part;
+        segments.push({ text, fg: on ? 'fg.primary' : 'fg.body' }); used += visibleWidth(text);
+      });
+      lines.push(styledLine(segments, width, lineBg, tier));
+      if (this.editing?.key !== dimension.key) return;
+      const editing = this.editing, custom = dimension.options[current.option].custom!;
+      if (custom.kind === 'input') {
+        lines.push(styledLine([{ text: pad }, { text: editing.text || custom.placeholder, fg: editing.text ? 'fg.primary' : 'fg.faint' }, { text: '▏', fg: 'fg.body' }], width, undefined, tier));
+        if (editing.error) lines.push(styledLine([{ text: pad }, { text: `${GLYPHS.err} ${clean(editing.error)}`, fg: 'ac.err' }], width, undefined, tier));
+      } else custom.items.forEach((item, index) => lines.push(styledLine([
+        { text: pad },
+        { text: `${index === editing.listIndex ? '›' : ' '} ${truncateMiddle(clean(item), Math.max(1, width - indent - 2))}`, fg: index === editing.listIndex ? 'fg.primary' : 'fg.body' },
+      ], width, index === editing.listIndex ? 'bg.selected' : undefined, tier)));
+    });
+    return lines;
+  }
+
+  /** 与 render 配套的底栏提示项（不含 Esc；Esc 由 hintLine 的 esc 参数给出）。 */
+  hints(): string[] {
+    if (!this.editing) return ['↑↓ 维度', '←→ 选项', 'Enter 应用'];
+    const dimension = this.dimensions.find(d => d.key === this.editing!.key)!;
+    return dimension.options[this.values[dimension.key].option].custom?.kind === 'list' ? ['↑↓ 选择', 'Enter 确定'] : ['Enter 确定'];
+  }
+
+  private editInput(data: string): 'handled' | 'noop' {
+    const editing = this.editing!;
+    const dimension = this.dimensions.find(d => d.key === editing.key)!;
+    const current = this.values[editing.key];
+    const custom = dimension.options[current.option].custom!;
+    if (matchesKey(data, 'escape')) { this.editing = undefined; return 'handled'; }
+    if (custom.kind === 'list') {
+      if (matchesKey(data, 'up')) editing.listIndex = Math.max(0, editing.listIndex - 1);
+      else if (matchesKey(data, 'down')) editing.listIndex = Math.min(custom.items.length - 1, editing.listIndex + 1);
+      else if (matchesKey(data, 'enter') && custom.items[editing.listIndex] !== undefined) { this.values[editing.key] = { option: current.option, value: custom.items[editing.listIndex] }; this.editing = undefined; }
+      else return 'noop';
+      return 'handled';
+    }
+    if (matchesKey(data, 'enter')) {
+      const text = editing.text.trim(), error = text ? custom.validate?.(text) : '不能为空';
+      if (error) { editing.error = error; return 'handled'; }
+      this.values[editing.key] = { option: current.option, value: text }; this.editing = undefined; return 'handled';
+    }
+    if (matchesKey(data, 'backspace')) { editing.text = Array.from(editing.text).slice(0, -1).join(''); editing.error = undefined; return 'handled'; }
+    if (data && clean(data) === data && !data.startsWith('\x1b')) { editing.text += data; editing.error = undefined; return 'handled'; }
+    return 'noop';
+  }
+}

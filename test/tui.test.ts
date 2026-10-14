@@ -377,3 +377,32 @@ test('recovery pages expose all unknown counts and navigate with one snapshot; a
     key('p'); await until(() => screen().includes('本页起点 0'));
   } finally { await app.exit(); }
 });
+
+test('full-screen views stack: Esc returns layer by layer; in-view Ctrl+C and global keys neither stop the session task nor leak', async () => {
+  const script=scriptedTransport([{name:'bash',args:{command:`'${process.execPath}' hold.cjs`}}]);
+  const f=fixture(script.fetch,true),key=(data:string)=>f.terminal.input(data);
+  writeFileSync(join(f.workspace,'hold.cjs'),"require('node:fs').writeFileSync('started.txt','started');setTimeout(()=>console.log('released'),1500);");
+  const views=f.app as unknown as {pushView(kind:string):void;openConfirm(config:object,confirm:(selected:number[])=>void):void};
+  try {
+    key('Run held tool');key('\r');await until(()=>existsSync(join(f.workspace,'started.txt')));
+    key('/help');key('\r');assert.match(f.screen(),/帮助/);
+    views.pushView('queue');assert.match(f.screen(),/队列/);
+    for(const k of ['\x03','\x03','\x04','\x0f','\x14','\x12','?'])key(k);
+    assert.match(f.screen(),/队列/,'global keys are inert inside a view');assert.doesNotMatch(f.screen(),/中止中|请求中止/);
+    key('\x1b');assert.match(f.screen(),/帮助/);assert.doesNotMatch(f.screen(),/队列：/,'Esc returns to the previous layer');
+    key('\x1b');assert.doesNotMatch(f.screen(),/Ctrl\+X → Enter 后续请求\nCtrl\+J/,'Esc on the top layer returns to the session');
+    // A confirm dialog consumes keys: Esc closes only the dialog, Enter confirms once.
+    key('/help');key('\r');let confirmed:number[]|undefined;
+    views.openConfirm({title:'测试确认',action:'确认',fixed:['不调用模型 · ≈¥0']},selected=>{confirmed=selected;});
+    assert.match(f.screen(),/测试确认/);assert.match(f.screen(),/Enter 确认 · Esc 取消/);
+    key('\x1b');assert.doesNotMatch(f.screen(),/测试确认/);assert.match(f.screen(),/帮助/,'dialog Esc does not pop the view');
+    views.openConfirm({title:'测试确认',action:'确认'},selected=>{confirmed=selected;});key('\r');assert.deepEqual(confirmed,[]);
+    key('\x1b');
+    await until(()=>f.screen().includes('已完成'));
+    assert.equal(script.calls.length,2,'session task finished normally');
+    // Instant feedback replaces the key-hint line until the next key.
+    key('\x18');assert.match(f.screen(),/按 Enter 明确排到下一任务/);
+    key('x');assert.doesNotMatch(f.screen(),/按 Enter 明确排到下一任务/);assert.match(f.screen(),/\/help · Ctrl\+O 详情/);
+    key('\x03');key('\x03');const exit=await f.app.closed;assert.equal(exit.result?.status,'completed');
+  }finally{await f.app.exit();}
+});
