@@ -155,7 +155,7 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     assert.match(f.screen(),/known/);
     assert.match(f.screen(),/已完成 · ctx 14 \/ 1M · usage/,'final reply usage is exact');
     // Fixture usage is tiny: a non-zero CNY estimate below one fen is never shown as zero.
-    assert.match(f.screen(),/usage known · in \d+ out \d+ · < ¥0\.01\n/); assert.match(f.screen(),/清理已确认；run r-[0-9a-f]{4,} · 费用 < ¥0\.01/);
+    assert.match(f.screen(),/usage known · in \d+ out \d+ · < ¥0\.01\s*\n/); assert.match(f.screen(),/清理已确认；run r-[0-9a-f]{4,} · 费用 < ¥0\.01/);
     key('\x03'); key('\x03'); const closed=await f.app.closed;
     assert.equal(closed.result?.status,'completed'); assert.equal(closed.result?.cleanup,'confirmed');
     assert.match(exitCostSummary(join(f.root,'data'),closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01（估算 · 非账单）$/);
@@ -181,11 +181,11 @@ test('usage line and exit summary show CNY estimates with unknown and partial re
   try {
     key('Read the readme');key('\r');await until(()=>f.screen().includes('已完成'));
     // 1M cache-miss input plus 1M output: ¥10.00 at peak, ¥5.00 off-peak; the second response has no usage.
-    assert.match(f.screen(),/ · ≈ ¥(10|5)\.00 \+1 unknown\n/);assert.match(f.screen(),/费用 ≈ ¥(10|5)\.00 \+1 unknown/);
+    assert.match(f.screen(),/ · ≈ ¥(10|5)\.00 \+1 unknown\s*\n/);assert.match(f.screen(),/费用 ≈ ¥(10|5)\.00 \+1 unknown/);
     const first=(await readRun(dataRoot,readAcceptedTasks(dataRoot).tasks[0].runId!)).result as {sessionId:string};
     key('Again');key('\r');await until(()=>readAcceptedTasks(dataRoot).tasks.length===2&&f.screen().includes('已完成')&&f.screen().includes('partial'));
     // No cache-hit count in the provider usage report: the estimate is partial.
-    assert.match(f.screen(),/ · < ¥0\.01 partial\n/);
+    assert.match(f.screen(),/ · < ¥0\.01 partial\s*\n/);
     key('\x03');key('\x03');const closed=await f.app.closed;
     assert.match(exitCostSummary(dataRoot,closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01 partial（估算 · 非账单）$/);
     assert.match(exitCostSummary(dataRoot,{...closed.result!,sessionId:first.sessionId}),/费用 ≈ ¥(10|5)\.00 \+1 unknown（估算 · 非账单）$/);
