@@ -5,7 +5,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {Evidence,digest,readObject} from '../src/evidence.js';
 import {captureImproveSources} from '../src/improve-source.js';
-import {submitImproveDecision,readImproveDecision,previewImproveDecision,resumeImproveDecision,suppressionMatch,listImproveSuppressions,restoreImproveSuggestion,type ImproveMode,type ImproveDecision} from '../src/improve-decisions.js';
+import {submitImproveDecision,readImproveDecision,previewImproveDecision,resumeImproveDecision,suppressionMatch,listImproveSuppressions,restoreImproveSuggestion,decisionDigest,type ImproveMode,type ImproveDecision} from '../src/improve-decisions.js';
+import {hostPlanPrice} from '../src/cost-estimate.js';
 import {scopedImproveDecisions} from '../src/improve-history.js';
 import {ImproveSelectionView} from '../src/tui/improve-selection.js';
 import {summarizeImproveValidation,scopedImproveSource} from '../src/improve-validation.js';
@@ -185,4 +186,12 @@ test('diagnostic effects remain visible beside required results and cannot hide 
  const required={kind:'resource',state:'completed',effect:'改善'},diagnostic={kind:'fresh',benefit:'diagnostic' as const,state:'completed',effect:'无明显差异'};
  const both=summarizeImproveValidation([required,diagnostic]);assert.equal(both.effect,'证据不足');assert.equal(both.allDeclaredBenefitsMet,false);assert.equal(both.allRequiredBenefitsMet,true);assert.equal(both.requiredBenefitCount,1);assert.equal(both.diagnosticBenefitCount,1);
  const missing=summarizeImproveValidation([required,{...diagnostic,state:'unknown',effect:'证据不足'}]);assert.equal(missing.allRequiredBenefitsMet,false);assert.equal(missing.allChecksPassed,false);
+});
+
+test('new selections fix the budget price in CNY at the host peak output price; first-version selections show recorded token limits only',async()=>{
+ const f=await fixture(),d={...decision(f),limits:{...decision(f).limits,maxTokens:250000}};
+ const preview=previewImproveDecision(f.dataRoot,d);assert.deepEqual(preview.summary.budgetAmount,{tokens:250000,amount:2,currency:'CNY',version:'deepseek-cny-v1',display:'≈ ¥2.00（deepseek-cny-v1，高峰输出价）'});
+ const saved=await submitImproveDecision({dataRoot:f.dataRoot,decision:d});assert.deepEqual(saved.price,hostPlanPrice('deepseek','deepseek-flash'));assert.deepEqual(saved.budgetAmount,preview.summary.budgetAmount);assert.equal(saved.requestDigest,decisionDigest(d));
+ const e=new Evidence(f.dataRoot,f.report.runId);e.append('improve.decision',{id:'legacy',workspace:f.workspace,requestDigest:'legacy',executionVersion:'v1',decision:{...d,id:'legacy'},decisions:[]});e.close();
+ const legacy=readImproveDecision(f.dataRoot,'legacy');assert.equal(legacy.price,null);assert.deepEqual(legacy.budgetAmount,{tokens:250000,amount:null,currency:null,version:null,display:'首版选择未固定价格；按记录只显示 token 上限，不重算'});
 });

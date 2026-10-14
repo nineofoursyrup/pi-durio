@@ -9,8 +9,9 @@ import { realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiAltScreen, VStack, matchesKey, isKeyRelease, isKeyRepeat, stripTerminalSequences, truncateToWidth, wrapTextWithAnsi, type Component, type AutocompleteProvider, type Terminal } from '@earendil-works/pi-tui';
-import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, inspectRecovery, checkRecovery, recoverRun, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
-import type { QueueItemFact } from '../evidence.js';
+import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, inspectRecovery, checkRecovery, recoverRun, estimateTaskPrefix, type ContextUsage, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
+import { readObject, type QueueItemFact } from '../evidence.js';
+import { calculateContextTokens } from '@earendil-works/pi-ai/utils/estimate';
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
 import { MetricsView } from './metrics.js';
@@ -20,6 +21,8 @@ import { EvalView } from './eval.js';
 import { StorageView } from './storage.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
+import { readDisplayIndex, readRunOrdinals, modelRequestNumber, resolveDisplayInput, type DisplayIndex, type DisplayKind } from '../display-number.js';
+import { estimateRunRequests, estimateSessionRequests, sessionRunIds, sumCostEstimates, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
 
 const identity=(s:string)=>s;
 const theme={borderColor:identity, selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
@@ -35,6 +38,11 @@ const completion:AutocompleteProvider={
   applyCompletion(lines,line,col,item,prefix) { const next=[...lines]; next[line]=`${lines[line].slice(0,col-prefix.length)}${item.value}${lines[line].slice(col)}`; return {lines:next,cursorLine:line,cursorCol:col-prefix.length+item.value.length}; }
 };
 function safe(text:string) { return stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,'�'); }
+/** Status-line magnitude: 950, 18.2k, 1M. */
+function tokenCount(tokens:number) {
+  const [value,unit]=tokens>=999_950?[tokens/1e6,'M']:tokens>=1000?[tokens/1e3,'k']:[tokens,''];
+  return unit?`${value.toFixed(1).replace(/\.0$/,'')}${unit}`:String(value);
+}
 function label(result?:RunResult) { return result ? ({completed:'已完成',failed:'失败',aborted:'已中止',unknown:'结果未知；需恢复核对'}[result.status]) : '等待输入'; }
 export interface TuiOptions {
   workspace:string; dataRoot:string; mode:'live'|'offline'; transport?:typeof fetch;
@@ -110,12 +118,21 @@ export class ReadOnlyTui {
   private removeSignals:Array<()=>void>=[];
   private widths?:TerminalWidthGate;
   private displaySources:string[]=[];
+  private displayIndex?:DisplayIndex;
+  private displayMisses=new Set<string>();
+  private runOrdinals?:{runId:string}&ReturnType<typeof readRunOrdinals>;
+  /** Live values come from the runtime; without one, the fixed-prefix estimate or the run's latest reported total. */
+  private context:Omit<ContextUsage,'runId'>&{runId?:string};
+  private readonly showContext=(usage:ContextUsage)=>{this.context=usage;this.tui.requestRender();};
+  /** Session estimate for the usage line, recomputed only when the run has a newer model response. */
+  private cost?:{sessionId:string;through:number;runIds:string[];text:string};
 
   constructor(private readonly options:TuiOptions) {
     if(options.widthCalibration===false&&!options.terminal)throw Error('WIDTH_CALIBRATION_TEST_TERMINAL_REQUIRED');
     options.workspace=realpathSync(options.workspace);
     options.dataRoot=resolve(options.dataRoot);
     this.runId=options.runId;this.viewingRecovery=!!options.runId;
+    this.context=this.prefix();
     this.terminal=options.terminal??new ProcessTerminal();
     this.copy=options.copy??copyToMacClipboard;
     this.drafts=new Drafts(options.draftRoot??join(homedir(),'Library','Application Support','pi-durio','ui-drafts'),options.workspace,options.dataRoot);
@@ -134,10 +151,10 @@ export class ReadOnlyTui {
     this.scroll=new ScrollView(this.transcript,{follow:'end',primary:true});
     const header:Component={invalidate(){},render:width=>[
       truncateToWidth(`pi-durio · [F2 菜单] · ${options.coding?'coding':'只读'} · ${safe(options.workspace)}`,width),
-      truncateToWidth(`session ${this.sessionId?this.sessionId.slice(0,8)+'…':'未受理'} · ${this.model}`,width)
+      truncateToWidth(`session ${this.sessionId?this.shown('session',this.sessionId):'未受理'} · ${this.model}`,width)
     ]};
     const status:Component={invalidate(){},render:width=>[
-      truncateToWidth(`${this.status()} · usage ${this.usage()}`,width),
+      truncateToWidth(`${this.status()} · ${this.contextUsage()} · usage ${this.usage()}`,width),
       truncateToWidth(this.notice,width),
       truncateToWidth(`${this.scroll.isFollowingEnd&&!this.historyWindow?'跟随':'已暂停跟随 /bottom'} · /help · Ctrl+O 详情 · Ctrl+C 中止/退出`,width)
     ]};
@@ -178,7 +195,7 @@ export class ReadOnlyTui {
     process.on('unhandledRejection',rejection); this.removeSignals.push(()=>process.off('unhandledRejection',rejection));
     this.restoreTerminalWrite=hideCursorDuringPaint(this.terminal);
     if(this.options.widthCalibration!==false)this.widths=new TerminalWidthGate({terminal:this.terminal,tui:this.tui,
-      sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,...this.displaySources],
+      sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,this.contextUsage(),this.usage(),...this.displaySources],
       priorityInput:data=>{
         // Preserve the normal modal/focus order. A nonempty Ctrl+D is still editor deletion.
         if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+d')&&!matchesKey(data,'escape')&&!matchesKey(data,'ctrl+l')&&data!=='\x1b[I'&&data!=='\x1b[O')return false;
@@ -200,12 +217,41 @@ export class ReadOnlyTui {
   }
   /** Visible frame for diagnostics/tests; no runtime internals or writable handles. */
   screen() { this.tui.renderNow(); return this.tui.getScreenLines(); }
-  private status() {return this.phase==='running'?`运行中 ${this.control.target()?.runId.slice(0,8)??'受理中'}`:this.phase==='stopping'?'中止中（等待实际清理）':this.phase==='exiting'?'退出中（等待实际清理）':this.viewingRecovery?'恢复核对（只读）':label(this.result);}
+  /** Display numbers are computed at render time; the index is reread only when an identity is new to it. */
+  private indexed(kind:DisplayKind,id:string) {
+    const key=`${kind}:${id}`;
+    if(!this.displayIndex||!this.displayIndex.has(kind,id)&&!this.displayMisses.has(key)){this.displayIndex=readDisplayIndex(this.options.dataRoot);if(!this.displayIndex.has(kind,id))this.displayMisses.add(key);}
+    return this.displayIndex;
+  }
+  private shown(kind:DisplayKind,id:string) {return this.indexed(kind,id).label(kind,id);}
+  /** `tc-…-NN` / `llm #N` of a transcript attempt; the run's ordinals are reread only when an attempt is new to them. */
+  private attemptNumber(runId:string,role:'tool'|'assistant',attempt:string) {
+    const kind=role==='tool'?'tool':'model',key=`${kind}:${runId}:${attempt}`;
+    if(this.runOrdinals?.runId!==runId||!this.runOrdinals[kind].has(attempt)&&!this.displayMisses.has(key)){this.runOrdinals={runId,...readRunOrdinals(this.options.dataRoot,runId)};if(!this.runOrdinals[kind].has(attempt))this.displayMisses.add(key);}
+    const ordinal=this.runOrdinals[kind].get(attempt);
+    return ordinal===undefined?undefined:kind==='tool'?this.indexed('run',runId).toolCall(runId,ordinal):modelRequestNumber(ordinal);
+  }
+  private status() {const target=this.control.target();return this.phase==='running'?`运行中 ${target?this.shown('run',target.runId):'受理中'}`:this.phase==='stopping'?'中止中（等待实际清理）':this.phase==='exiting'?'退出中（等待实际清理）':this.viewingRecovery?'恢复核对（只读）':label(this.result);}
+  private prefix() {return estimateTaskPrefix({dataRoot:this.options.dataRoot,workspace:this.options.workspace,coding:!!this.options.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}
+  private contextUsage() {return `ctx ${this.context.estimated?'≈':''}${tokenCount(this.context.tokens)} / ${tokenCount(this.context.contextWindow)}`;}
   private usage() {
-    if(!this.result) return 'unknown';
+    const cost=this.cost&&this.cost.sessionId===this.sessionId?` · ${this.cost.text}`:'';
+    if(!this.result) return `unknown${cost}`;
     const usage=this.result.usage;
     const model=usage.value?.models['deepseek/deepseek-flash'];
-    return `${usage.completeness}${model?` · in ${model.input} out ${model.output} · $${model.cost.total.toFixed(6)}估算`:''}`;
+    return `${usage.completeness}${model?` · in ${model.input} out ${model.output}`:''}${cost}`;
+  }
+  /** CNY estimate of every run in the current session (the same scope as the exit summary). Display only. */
+  private updateCost() {
+    if(!this.sessionId||!this.runId)return;
+    const {sessionId,runId}=this,previous=this.cost?.sessionId===sessionId?this.cost:undefined;
+    try{
+      const through=readRunRecords(this.options.dataRoot,runId,{tail:true,limit:1,kinds:['model.response']}).records.at(-1)?.seq??0;
+      if(previous?.through===through)return;
+      const runIds=previous?.runIds.length?previous.runIds:sessionRunIds(this.options.dataRoot,[sessionId]);
+      if(!runIds.includes(runId))runIds.push(runId);
+      this.cost={sessionId,through,runIds,text:formatCostTotals(sumCostEstimates(runIds.flatMap(id=>estimateRunRequests(this.options.dataRoot,id).requests)))};
+    }catch{this.cost={sessionId,through:-1,runIds:[],text:'unknown'};}
   }
   private input(data:string) {
     const ctrlC=matchesKey(data,'ctrl+c'),ctrlD=matchesKey(data,'ctrl+d');
@@ -262,10 +308,11 @@ export class ReadOnlyTui {
     if(this.result?.status==='unknown'||this.result?.cleanup==='unknown') {this.editor.setText(text);this.lastText=text;this.notice='旧工作存在未知；只读查看，不能由 TUI 绕过恢复核对';this.tui.requestRender();return;}
     const contextRunId=this.result?.status==='completed'&&this.result.improve?.runId!==this.result.runId&&this.result.cleanup==='confirmed'?this.result.runId:undefined;
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
+    if(!contextRunId)this.context=this.prefix();
     this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.summaries.clear();this.historyWindow=false;this.scroll.scrollToEnd();
     this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.notice='任务正在受理；忙时 Enter 补充当前任务，Ctrl+X → Enter 后续请求';this.rebuild();
     const self=this;
-    const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}};
+    const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}};
     const run=this.options.coding?runCodingTask:runReadTask;
     this.active=run(options).then(result=>this.applyResult(result)).catch(error=>{this.failure=String(error);this.notice=`未完成：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();
@@ -281,28 +328,28 @@ export class ReadOnlyTui {
       try{this.metricsView=new MetricsView(this.options.dataRoot,command==='/metrics'?{}:JSON.parse(command.slice(9)));this.openPanel('metrics');}catch(error){this.notice=`任务指标不可读取：${String(error)}`;this.tui.requestRender();}
     }
     else if(command.startsWith('/acceptance ')){
-      try{const receipt=recordAcceptance(this.options.dataRoot,JSON.parse(command.slice(12)));this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();
+      try{const input=JSON.parse(command.slice(12));if(typeof input?.taskId==='string')input.taskId=resolveDisplayInput(this.options.dataRoot,'task',input.taskId);const receipt=recordAcceptance(this.options.dataRoot,input);this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();
     }
     else if(command==='/eval'||command.startsWith('/eval ')){
-      try{this.evalView=new EvalView(this.options.dataRoot,command.slice(6).trim()||undefined);this.openPanel('eval');}catch(error){this.notice=`Eval记录不可读取：${String(error)}`;this.tui.requestRender();}
+      try{const id=command.slice(6).trim();this.evalView=new EvalView(this.options.dataRoot,id?resolveDisplayInput(this.options.dataRoot,'eval-plan',id):undefined);this.openPanel('eval');}catch(error){this.notice=`Eval记录不可读取：${String(error)}`;this.tui.requestRender();}
     }
     else if(command==='/storage') {this.storageView=new StorageView(this.options.dataRoot,()=>this.tui.requestRender());this.openPanel('storage');}
     else if(command==='/history'||command.startsWith('/history ')) {
-      try{this.historyView=new HistoryView(this.options.dataRoot,command==='/history'?{}:JSON.parse(command.slice(9)));this.openPanel('history');}
+      try{const filter=command==='/history'?{}:JSON.parse(command.slice(9));if(typeof filter?.session==='string')filter.session=resolveDisplayInput(this.options.dataRoot,'session',filter.session);this.historyView=new HistoryView(this.options.dataRoot,filter);this.openPanel('history');}
       catch(error){this.notice=`历史查询失败（当前工作未改变）：${safe(String(error))}`;this.tui.requestRender();}
     }
     else if(command==='/details')this.openDetail(this.records.at(-1));
     else if(command==='/copy')void this.copyOutput();
     else if(command==='/stop')this.stop();
     else if(command==='/queue'){this.loadQueue();this.openPanel('queue');}
-    else if(command==='/recover'||command.startsWith('/recover ')){const [requested,offset,snapshotId]=command.slice(9).trim().split(/\s+/);const run=requested||this.runId;if(run)void this.openRecovery(run,offset?Number(offset):undefined,snapshotId);else this.notice='暂无需核对的 run';}
+    else if(command==='/recover'||command.startsWith('/recover ')){const [requested,offset,snapshotId]=command.slice(9).trim().split(/\s+/);let run=this.runId;try{if(requested)run=resolveDisplayInput(this.options.dataRoot,'run',requested);}catch(error){this.notice=safe(String(error));return true;}if(run)void this.openRecovery(run,offset?Number(offset):undefined,snapshotId);else this.notice='暂无需核对的 run';}
     else if(command==='/follow-up'){const draft=this.editor.getExpandedText();if(draft)this.submit(draft,true);else this.notice='输入后按 Ctrl+X → Enter，明确排到下一任务';}
     else if(command.startsWith('/withdraw '))void this.queueDecision(command.slice(10).trim(),'withdraw');
     else if(command.startsWith('/reattach '))void this.queueDecision(command.slice(10).trim(),'reattach');
     else if(command.startsWith('/decide ')){try{void this.recoveryDecision(JSON.parse(command.slice(8)));}catch(error){this.notice=`决定 JSON 无效：${String(error)}`;}}
     else if(command==='/compact')void this.compact();
     else if(command==='/compactions')this.openPanel('compaction');
-    else if(command==='/improves'||command.startsWith('/improves ')){try{this.improveView=new ImproveView(this.options.dataRoot,command.slice(10).trim()||undefined);this.openPanel('improve');}catch(error){this.notice=`improve 报告不可读取：${String(error)}`;}}
+    else if(command==='/improves'||command.startsWith('/improves ')){try{const id=command.slice(10).trim();this.improveView=new ImproveView(this.options.dataRoot,id?resolveDisplayInput(this.options.dataRoot,'improve-report',id):undefined);this.openPanel('improve');}catch(error){this.notice=`improve 报告不可读取：${String(error)}`;}}
     else if(command==='/improve-suppressions'){try{this.improveView=new ImproveView(this.options.dataRoot,undefined,true);this.openPanel('improve');}catch(error){this.notice=String(error);}}
     else if(command.startsWith('/improve-restore ')||command.startsWith('/improve-continue ')||command.startsWith('/improve-rollback ')){
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许新决定';return true;}
@@ -310,7 +357,7 @@ export class ReadOnlyTui {
     }
     else if(command==='/improve-select'||command.startsWith('/improve-select ')){
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';return true;}
-      try{const template=JSON.parse(command.slice(16).trim()) as ImproveDecision;this.improveSelectionView=new ImproveSelectionView(this.options.dataRoot,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
+      try{const template=JSON.parse(command.slice(16).trim()) as ImproveDecision;if(typeof template?.reportId==='string')template.reportId=resolveDisplayInput(this.options.dataRoot,'improve-report',template.reportId);this.improveSelectionView=new ImproveSelectionView(this.options.dataRoot,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
     }
     else if(command==='/improve'||command.startsWith('/improve '))void this.improve(command.slice(8).trim());
     else return false;
@@ -320,12 +367,12 @@ export class ReadOnlyTui {
     if(this.historyWindow||this.viewingRecovery){this.notice='只读历史/恢复视图不能发起分析；返回活动目标并完成核对';this.tui.requestRender();return;}
     if(!input){this.notice='尚未启动。使用 /improve JSON 明确 purpose、limits（maxRequests/maxTokens/maxRequestTokens/maxDurationMs/maxOutputTokens）及 sources；/improves 只读查看报告';this.tui.requestRender();return;}
     let request:ImproveRequest;try{const parsed=JSON.parse(input);request=validateImproveRequest({...parsed,id:parsed.id??randomUUID()},this.options.mode);}catch(error){this.notice=`尚未启动：${String(error)}`;this.tui.requestRender();return;}
-    if(this.phase==='running'){const target=this.control.target();if(!target){this.notice='当前在收尾或分析中；未受理新的管理请求';this.tui.requestRender();return;}try{const item=await this.control.submit({id:request.id,kind:'improve',input:JSON.stringify(request),target});this.notice=`improve ${item.status} · ${item.requestId} → 原 run ${target.runId}`;this.loadQueue();}catch(error){this.notice=`未接入：${String(error)}`;}this.tui.requestRender();return;}
+    if(this.phase==='running'){const target=this.control.target();if(!target){this.notice='当前在收尾或分析中；未受理新的管理请求';this.tui.requestRender();return;}try{const item=await this.control.submit({id:request.id,kind:'improve',input:JSON.stringify(request),target});this.notice=`improve ${item.status} · ${this.shown('improve-report',item.requestId)} → 原 run ${this.shown('run',target.runId)}`;this.loadQueue();}catch(error){this.notice=`未接入：${String(error)}`;}this.tui.requestRender();return;}
     if(this.phase!=='idle'||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前仍在清理或结果未知；尚未启动分析，先完成恢复核对';this.tui.requestRender();return;}
     if(!this.runId){this.notice='尚无活动任务；先完成一项工作再针对其证据分析';this.tui.requestRender();return;}
     const targetRunId=this.result?.improve?.runId===this.runId?this.result.improve.target.runId:this.runId;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
-    this.notice=`improve 分析中 · 目标 ${targetRunId}；默认不选中任何候选`;
-    this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);this.notice=`improve ${result.improve?.state??result.status} · ${request.id}；/improves 查看；没有执行候选`;}).catch(error=>{this.notice=`分析未完成：${String(error)}`;}).finally(()=>this.finished());this.tui.requestRender();
+    this.notice=`improve 分析中 · 目标 ${this.shown('run',targetRunId)}；默认不选中任何候选`;
+    this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);this.notice=`improve ${result.improve?.state??result.status} · ${this.shown('improve-report',request.id)}；/improves 查看；没有执行候选`;}).catch(error=>{this.notice=`分析未完成：${String(error)}`;}).finally(()=>this.finished());this.tui.requestRender();
   }
   private async submitImproveChoice(decision:ImproveDecision){
     if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery)throw Error('IMPROVE_SELECTION_CURRENT_STATE_BLOCKED');
@@ -339,7 +386,7 @@ export class ReadOnlyTui {
     if(this.phase==='running'){this.enqueue('compact','compact');return;}
     if(this.phase!=='idle'||this.result?.status!=='completed'||this.result.cleanup!=='confirmed'){this.notice='压缩需要已完成且清理确认的活动会话';this.tui.requestRender();return;}
     const runId=this.result.runId;this.controller=new AbortController();this.cancellation='exit';this.phase='running';this.notice='正在压缩当前上下文；原文保留，摘要生成与接入分别记录';const self=this;
-    this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:()=>{this.pendingRefresh=true;}}).then(result=>{
+    this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:()=>{this.pendingRefresh=true;}}).then(result=>{
       this.result=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；/compactions 查看源范围、摘要与接入事实；磁盘原文保留`;
     }).catch(error=>{this.notice=`压缩未执行：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();await this.active;
@@ -357,7 +404,8 @@ export class ReadOnlyTui {
   private applyResult(result:RunResult) {
     this.result=result;this.sessionId=result.sessionId;this.runId=result.runId;
     this.viewingRecovery=result.status==='unknown'||result.cleanup==='unknown';
-    this.notice=result.controls?'队列已冻结；/queue 查看目标与原因，普通输入不会接入旧项':result.improve?`improve ${result.improve.state} · ${result.improve.id}；/improves 查看；没有执行候选`:result.cleanup==='confirmed'?`清理已确认；run ${result.runId}`:'清理未知；原工作保留，/recover 核对';
+    this.updateCost();
+    this.notice=(result.controls?'队列已冻结；/queue 查看目标与原因，普通输入不会接入旧项':result.improve?`improve ${result.improve.state} · ${this.shown('improve-report',result.improve.id)}；/improves 查看；没有执行候选`:result.cleanup==='confirmed'?`清理已确认；run ${this.shown('run',result.runId)}`:'清理未知；原工作保留，/recover 核对')+(this.cost?.sessionId===result.sessionId?` · 费用 ${this.cost.text}`:'');
   }
   private finished() {
     this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting')this.phase='idle';this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
@@ -367,7 +415,7 @@ export class ReadOnlyTui {
     if(!target){this.editor.setText(text);this.lastText=text;this.notice='当前仍在受理或收尾；文字保留，未受理';this.tui.requestRender();return;}
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
     void this.control.submit({id:randomUUID(),kind,input:text,target}).then(item=>{
-      this.loadQueue();this.notice=`${kind} ${item.status==='applied'?'已接入':'已受理、待接入'} · ${item.requestId.slice(0,8)} → ${item.target.taskId.slice(0,8)} · /queue`;
+      this.loadQueue();this.notice=`${kind} ${item.status==='applied'?'已接入':'已受理、待接入'} · ${item.requestId.slice(0,8)} → ${this.shown('task',item.target.taskId)} · /queue`;
     }).catch(error=>{
       this.drafts.save(text);this.savedDraft=text;if(!this.editor.getExpandedText()){this.editor.setText(text);this.lastText=text;}
       this.notice=`未接入，文本已保留：${safe(String(error))}`;
@@ -381,7 +429,7 @@ export class ReadOnlyTui {
     const item=this.queue[this.panel?.offset??0];
     if(!item)return '队列：当前窗口没有受理项\nEsc 返回；不改变执行限制';
     const status={pending:'已受理、待接入',dispatching:'接入意图已保存、结果待核对',applied:'已接入，不能撤回已发生的操作',withdrawn:'已撤回',frozen:'已冻结，普通输入不会执行'}[item.status];
-    return `队列 ${this.panel!.offset+1}/${this.queue.length} · ${item.kind}\n${item.requestId}\n${status}\n目标 ${item.target.workspace}\n原 session ${item.target.sessionId}\n原 task ${item.target.taskId}\n原 run ${item.target.runId}\n新 run ${item.kind==='follow-up'?(item.runId??'尚未开始'):item.runId??'无'}\n内容：${safe(item.input.slice(0,4096))}${item.input.length>4096?' [显示截断]':''}\n原因：${safe(item.reason)}\n←→/Tab 选项 n/p 窗口；w 撤回未接入项\nr 明确重新接入：仅已完成源的冻结 follow-up / 未执行 compact；重新执行可能收费\n旧 steer 或停止任务的文本需明确重新提交新任务\nEsc 返回，不解除冻结`;
+    return `队列 ${this.panel!.offset+1}/${this.queue.length} · ${item.kind}\n${item.requestId}\n${status}\n目标 ${item.target.workspace}\n原 session ${item.target.sessionId}\n原 task ${this.shown('task',item.target.taskId)}\n原 run ${item.target.runId}\n新 run ${item.kind==='follow-up'?(item.runId??'尚未开始'):item.runId??'无'}\n内容：${safe(item.input.slice(0,4096))}${item.input.length>4096?' [显示截断]':''}\n原因：${safe(item.reason)}\n←→/Tab 选项 n/p 窗口；w 撤回未接入项\nr 明确重新接入：仅已完成源的冻结 follow-up / 未执行 compact；重新执行可能收费\n旧 steer 或停止任务的文本需明确重新提交新任务\nEsc 返回，不解除冻结`;
   }
   private authorization():RecoveryAuthorization {return {workspace:this.options.workspace,mode:this.options.mode,tools:this.options.coding?['read','write','edit','bash']:['read'],toolEnvironment:this.options.toolEnvironment};}
   private async queueDecision(requestId:string,action:'withdraw'|'reattach') {
@@ -397,7 +445,7 @@ export class ReadOnlyTui {
         if(action==='reattach') {
           this.closePanel();this.phase='running';this.controller=new AbortController();this.cancellation='exit';
           const self=this;
-          this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
+          this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
           return;
         }
         const result=await decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision});this.notice=result.status==='withdrawn'?'撤回已提交':`未撤回：${result.status}`;
@@ -406,7 +454,7 @@ export class ReadOnlyTui {
     finally{this.loadQueue();this.tui.requestRender();}
   }
   private async openRecovery(runId:string,offset?:number,snapshotId?:string) {
-    if(this.phase!=='idle'){this.notice=`正在执行 ${this.control.target()?.runId??this.runId}；先停止或退出后核对`;this.tui.requestRender();return;}
+    if(this.phase!=='idle'){const running=this.control.target()?.runId??this.runId;this.notice=`正在执行 ${running?this.shown('run',running):'受理中'}；先停止或退出后核对`;this.tui.requestRender();return;}
     this.viewingRecovery=true;this.runId=runId;
     const inspect=()=>offset!==undefined?inspectRecovery({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),page:{offset,snapshotId}}):checkRecovery({dataRoot:this.options.dataRoot,runId,authorization:this.authorization()});
     try {this.recovery=await (this.widths?this.widths.withoutQueries(inspect):inspect());if(this.stopped||this.exiting)return;this.pendingRefresh=true;this.refresh();this.openPanel('recovery');}
@@ -423,7 +471,7 @@ export class ReadOnlyTui {
   private async recoveryDecision(decision:RecoveryDecision) {
     if(this.phase!=='idle'||!this.recovery){this.notice='先 /recover 获取当前核对事实';return;}
     const runId=this.recovery.runId;this.closePanel();this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
-    this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{
+    this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{
       if('usage' in result){this.recovery=undefined;this.applyResult(result);}
       else {this.recovery=result;this.viewingRecovery=result.status!=='completed'&&result.status!=='ended';this.notice=`恢复决定：${result.status}；原未知和队列冻结仍保留`;if(this.viewingRecovery)this.openPanel('recovery');else this.result=undefined;}
     }).catch(error=>{this.notice=`决定受阻：${safe(String(error))}`;this.viewingRecovery=true;}).finally(()=>this.finished());
@@ -432,7 +480,7 @@ export class ReadOnlyTui {
     this.confirmation=undefined;
     if(this.phase!=='running')return;
     this.widths?.retainPending('stop-preserve-unapplied-input');
-    this.cancellation='stop';this.phase='stopping';this.notice=`请求中止 run ${this.runId??'受理中'}；等待 runtime 确认`;this.controller?.abort();this.tui.requestRender();
+    this.cancellation='stop';this.phase='stopping';this.notice=`请求中止 run ${this.runId?this.shown('run',this.runId):'受理中'}；等待 runtime 确认`;this.controller?.abort();this.tui.requestRender();
   }
   private refresh() {
     if(this.widths?.blocked){this.pendingRefresh=true;return;}
@@ -443,6 +491,7 @@ export class ReadOnlyTui {
       const current=readRunRecords(this.options.dataRoot,this.runId,{tail:true,limit:24,kinds:visibleKinds});
       // Read only bounded small identity/result records; authoritative RunResult arrives from runtime.
       const identityRecords=readRunRecords(this.options.dataRoot,this.runId,{limit:8}).records;
+      let contextWindow:number|undefined;
       for(const record of identityRecords) {
         if(record.kind==='task.accepted'||record.kind==='run.started') {
           const bytes=readObjectRange(this.options.dataRoot,record.ref,{limit:16384});
@@ -450,9 +499,15 @@ export class ReadOnlyTui {
         }
         if(record.kind==='execution.config') {
           const bytes=readObjectRange(this.options.dataRoot,record.ref,{limit:16384});
-          if(bytes.next===null) {const data=JSON.parse(bytes.bytes.toString());this.model=`${data.model.provider} / ${data.model.id}${data.mode==='offline'?' · offline fixture':''}`;}
+          if(bytes.next===null) {const data=JSON.parse(bytes.bytes.toString());this.model=`${data.model.provider} / ${data.model.id}${data.mode==='offline'?' · offline fixture':''}`;contextWindow=data.model.contextWindow;}
         }
       }
+      if(this.phase==='idle'&&this.context.runId!==this.runId) {
+        // No live runtime for this run: show its latest provider-reported total; later content is not estimated.
+        const reported=readRunRecords(this.options.dataRoot,this.runId,{tail:true,limit:8,kinds:['model.response']}).records.map(record=>JSON.parse(readObject(this.options.dataRoot,record.ref).toString())).findLast(data=>data.usage==='reported'&&calculateContextTokens(data.message.usage)>0);
+        this.context=reported?{runId:this.runId,tokens:calculateContextTokens(reported.message.usage),estimated:true,contextWindow:contextWindow??this.context.contextWindow}:{...this.prefix(),runId:this.runId};
+      }
+      this.updateCost();
       if(!this.historyWindow&&this.scroll.isFollowingEnd&&!this.panel) {this.records=current.records;this.rebuild();}
       else this.notice='新事实已持久保存；当前阅读位置保留。/bottom 回到最新';
       this.tui.requestRender();
@@ -536,7 +591,8 @@ export class ReadOnlyTui {
     for(const entry of this.projectConversation()) {
       const clipped=entry.limited||(entry.role!=='assistant'&&entry.text.length>500);
       const text=safe(entry.role==='assistant'?entry.text:entry.text.slice(0,500));
-      const summary=`${entry.title}\n${text}${clipped?'… [显示截断，详情可继续阅读]':''}\n`;
+      const number=entry.attempt&&(entry.role==='tool'||entry.role==='assistant')?this.attemptNumber(this.runId!,entry.role,entry.attempt):undefined;
+      const summary=`${number?`${number} · `:''}${entry.title}\n${text}${clipped?'… [显示截断，详情可继续阅读]':''}\n`;
       this.displaySources.push(summary);
       this.summaries.set(entry.ref.seq,summary);this.latestText=text;
       this.transcript.addChild(new MouseRegion(new Text(summary,0,0),event=>{if(event.type==='press'||event.type==='drag')this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});if(event.type==='click'){this.openDetail(entry.ref);return {handled:true};}}));
@@ -686,6 +742,13 @@ export class ReadOnlyTui {
     const result={result:this.result,error:this.failure,draftSaved,widthCalibration:this.widths?.snapshot()};
     this.resolveClosed(result);return result;
   }
+}
+
+/** Exit summary line for "本次会话": every run of the session the summary reports, estimated in CNY. */
+export function exitCostSummary(dataRoot:string,result:RunResult) {
+  // The exit status reflects the run; an unreadable cost source only leaves the amount unknown.
+  let amount:string;try{amount=formatCostTotals(estimateSessionRequests(dataRoot,[result.sessionId]).totals);}catch{amount='unknown';}
+  return `本次会话 ${readDisplayIndex(dataRoot).label('session',result.sessionId)} 费用 ${amount}（${COST_ESTIMATE_NOTICE}）`;
 }
 
 export async function runTui(options:TuiOptions) {

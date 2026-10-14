@@ -1,8 +1,10 @@
 import { writeFileSync } from 'node:fs';
-import { queryHistory,queryEvidence,queryAttempts,readEvidence,watermark } from './history.js';
+import { queryHistory,queryEvidence,queryAttempts,readEvidence,watermark,traceNumbers } from './history.js';
 import { queryUsage } from './usage-query.js';
 import { scopedEvidence } from './derived-evidence.js';
 import { fixEvidence,verifyFixed,estimateUsage } from './fixed-evidence.js';
+import { withTraceCosts,withUsageCosts } from './cost-estimate.js';
+import { resolveDisplayInput } from './display-number.js';
 
 export async function historyCommand(command:string|undefined,root:string,values:Record<string,unknown>) {
   if(!command||!['history','evidence','trace','usage','derive','fix','fixed','estimate','export'].includes(command))return false;
@@ -12,9 +14,13 @@ export async function historyCommand(command:string|undefined,root:string,values
   const number=(key:string)=>str(key)===undefined?undefined:Number(str(key));
   const options={after:number('after'),limit:number('limit'),snapshot:number('snapshot')};
   let result:unknown;
-  if(command==='history')result=queryHistory(root,str('filter')?JSON.parse(str('filter')!):{}, {limit:options.limit,cursor:str('cursor')?JSON.parse(str('cursor')!):undefined});
-  else if(command==='trace')result=queryAttempts(root,required('run'),options);
-  else if(command==='usage')result=queryUsage(root,required('run').split(','),options.snapshot);
+  if(command==='history'){
+    // A session display number in the filter is resolved before the filter is digested into the cursor scope.
+    const filter=str('filter')?JSON.parse(str('filter')!):{};if(typeof filter?.session==='string')filter.session=resolveDisplayInput(root,'session',filter.session);
+    result=queryHistory(root,filter,{limit:options.limit,cursor:str('cursor')?JSON.parse(str('cursor')!):undefined});
+  }
+  else if(command==='trace')result=withTraceCosts(root,queryAttempts(root,required('run'),options));
+  else if(command==='usage')result=withUsageCosts(root,queryUsage(root,required('run').split(','),options.snapshot));
   else if(command==='fix')result=await fixEvidence(root,{id:required('id'),sources:required('evidence').split(','),dependencies:str('dependencies')?.split(','),purpose:required('purpose')});
   else if(command==='fixed')result=verifyFixed(root,required('evidence'));
   else if(command==='estimate')result=await estimateUsage(root,{id:required('id'),runIds:required('run').split(','),through:options.snapshot??watermark(root),price:JSON.parse(required('price'))});
@@ -24,5 +30,5 @@ export async function historyCommand(command:string|undefined,root:string,values
     if(command==='export'){const destination=required('destination');writeFileSync(destination,JSON.stringify(result,null,2),{flag:'wx',mode:0o600});result={destination,scope,exported:true};}
   }else result=str('evidence')?readEvidence(root,str('evidence')!,{offset:number('offset'),limit:options.limit,decodedOutput:values.decoded===true}):queryEvidence(root,required('run'),options);
   // Human and machine output serialize the same result, never independently compute facts.
-  console.log(str('format')==='text'?`pi-durio ${command}\n${JSON.stringify(result,null,2)}`:JSON.stringify(result,null,2));return true;
+  console.log(str('format')==='text'?`pi-durio ${command}\n${command==='trace'?`${traceNumbers(root,result as ReturnType<typeof queryAttempts>)}\n`:''}${JSON.stringify(result,null,2)}`:JSON.stringify(result,null,2));return true;
 }

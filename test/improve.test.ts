@@ -109,7 +109,9 @@ test('headless list/report and TUI viewer reopen the same persisted identity wit
  const f=await fixture(),provider=transport([{name:'evidence_summary',args:{}}]),result=await runtime.analyzeImprove({dataRoot:f.dataRoot,workspace:f.workspace,targetRunId:f.source.runId,request:{id:'read-only',purpose:'Inspect evidence',limits},mode:'offline',transport:provider.fetch});
  const {spawnSync}=await import('node:child_process'),{ImproveView}=await import('../src/tui/improve.js');
  const hash=digest(await readFile(join(f.dataRoot,'host.sqlite')));
- for(const args of [['list'],['report','--id','read-only'],['report','--id','read-only','--format','text']]){const processResult=spawnSync(process.execPath,['dist/src/cli.js','improve',...args,'--data-root',f.dataRoot],{encoding:'utf8'});assert.equal(processResult.status,0,processResult.stderr);assert.match(processResult.stdout,/read-only/);}
+ const {readDisplayIndex}=await import('../src/display-number.js'),label=readDisplayIndex(f.dataRoot).label('improve-report','read-only');
+ // Machine output keeps the full report ID; the text report names it by its display number, which is also accepted as input.
+ for(const [args,expected] of [[['list'],/read-only/],[['report','--id','read-only'],/read-only/],[['report','--id','read-only','--format','text'],new RegExp(`^improve ${label} · `)],[['report','--id',label,'--format','text'],new RegExp(`^improve ${label} · `)]] as const){const processResult=spawnSync(process.execPath,['dist/src/cli.js','improve',...args,'--data-root',f.dataRoot],{encoding:'utf8'});assert.equal(processResult.status,0,processResult.stderr);assert.match(processResult.stdout,expected);}
  const view=new ImproveView(f.dataRoot,'read-only');assert.match(view.render(160,40).join('\n'),/Selected: none/);view.handleInput('x');view.handleInput('\r');assert.match(view.render(160,40).join('\n'),/Selected: none/);
  assert.equal(digest(await readFile(join(f.dataRoot,'host.sqlite'))),hash);assert.equal(provider.calls.length,2);
 });

@@ -11,6 +11,7 @@ import {verifiedImage,trialVersion,validatePlan,type EvalPlan} from '../src/eval
 import {evalReport,formatEvalReport,regradeEval} from '../src/eval/runner.js';
 import {EvalView} from '../src/tui/eval.js';
 import {compareTrials,pairedTrials,validateComparison,type ComparisonPlan,type ComparisonTrial} from '../src/eval/comparison.js';
+import {hostPlanPrice} from '../src/cost-estimate.js';
 
 function specification():ComparisonPlan{return {
  kind:'deterministic',repetitions:2,repetitionBasis:'exact controlled regression, not stochastic stability',
@@ -86,13 +87,14 @@ test('known request or latency gains cannot upgrade a batch with missing price o
  }
 });
 
-async function syntheticReport(options:{missingPrice?:boolean;missingUsage?:boolean;unattributed?:boolean}={}){
+async function syntheticReport(options:{missingPrice?:boolean;missingUsage?:boolean;unattributed?:boolean;price?:EvalPlan['price'];costObjective?:boolean}={}){
  const root=mkdtempSync(join(tmpdir(),'durio-paired-report-')),e=new Evidence(root,'paired');
  const c=specification();c.roles={'local-fix':'objective'};c.protections=[{id:'scope',kind:'hard',check:'scope',cases:['local-fix']}];
+ if(options.costObjective){c.objective={...c.objective,metric:'cost',delta:0.0001};c.protections.push({id:'spend',kind:'soft',metric:'cost',direction:'lower',tolerance:1,basis:'fixture spend tolerance',cases:['local-fix']});}
  c.sides.baseline.runtime=c.sides.candidate.runtime={id:'fixed-runtime',manifest:e.blob('[]'),bytes:2};
  const p:EvalPlan={id:'paired',purpose:'Known-result synthetic reporting only, no product runtime execution',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:c.sides.candidate.runtime,cases:[representativeCases[0]],trials:[],comparison:c,budget:{maxRequests:32,maxTokens:32000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null},trialTimeoutMs:1000,gradingTimeoutMs:1000,maxOutputTokens:32,requestRetryLimit:0,price:{version:'known-price-v1',source:'synthetic arithmetic oracle',currency:'USD',perMillionTokens:1000},authorization:{scope:'run-all-listed-trials',paid:false},environment:{node:'v24.8.0',isolation:'synthetic facts, not actual execution',writable:'fixed',cache:'none'},mainObjective:'requests',protection:['scope'],improvementConclusion:'not-evaluated'};
  p.trials=pairedTrials(p.id,['local-fix'],2).map(t=>({...t,version:trialVersion(p,t.side)}));validatePlan(p);
- if(options.missingPrice)p.price=null;
+ if(options.missingPrice)p.price=null;if(options.price)p.price=options.price;
  const source=appendFact(e,'eval.plan',p);e.close();await fixEvidence(root,{id:'eval-plan:paired',sources:[source],purpose:'synthetic comparison plan'});
  const facts=new Evidence(root,'paired');
  for(const t of p.trials){
@@ -110,7 +112,7 @@ async function syntheticReport(options:{missingPrice?:boolean;missingUsage?:bool
 test('machine/text/TUI use host costs, keep both sides and reopen without writes; partial regrading cannot mix rules',async()=>{
  const {root,plan}=await syntheticReport(),before=readFileSync(join(root,'host.sqlite')),original=evalReport(root,plan.id);
  assert.equal(original.improvement,'改善');assert.equal(original.cost.totalValue,0.12);assert.equal(original.cost.bySide.baseline.knownTokens,80);assert.equal(original.cost.bySide.candidate.knownTokens,40);
- assert.deepEqual(original.comparison!.pairs.map(p=>p.delta),[2,2]);assert.match(formatEvalReport(original),/改善/);
+ assert.deepEqual(original.comparison!.pairs.map(p=>p.delta),[2,2]);assert.match(formatEvalReport(original,root),/改善/);
  const view=new EvalView(root,plan.id);assert.match(view.render(200,200).join('\n'),/改善/);assert.deepEqual(readFileSync(join(root,'host.sqlite')),before);
  const e=new Evidence(root,plan.id),revision=appendFact(e,'eval.grader-revision',{id:'corrected-rule',graders:{'local-fix':{...plan.cases[0].grader,version:'v2'}},previousReport:e.blob(JSON.stringify(original))});
  const t=original.trials[0];const last=appendFact(e,'eval.grade',{...t.grade,source:undefined,graderVersion:'v2',revision});e.close();await fixEvidence(root,{id:'eval-grade:paired:partial',sources:[last],purpose:'preserve interrupted revision'});
@@ -122,6 +124,13 @@ test('machine/text/TUI use host costs, keep both sides and reopen without writes
  assert.equal(evalFacts(root,plan.id).filter(f=>f.kind==='eval.outcome').length,4);
 });
 
+test('comparison rows of the cost metric follow the amount display rule in the plan currency',async()=>{
+ const cnyRoot=(await syntheticReport({costObjective:true,price:hostPlanPrice('deepseek','deepseek-flash')})).root,cny=formatEvalReport(evalReport(cnyRoot,'paired'),cnyRoot);
+ assert.match(cny,/\n配对 \S+ objective: < ¥0\.01 → < ¥0\.01；d=< ¥0\.01\n/);assert.match(cny,/\n保护 spend\/local-fix\/1: < ¥0\.01 → < ¥0\.01 · /);assert.match(cny,/\n保护 scope\/local-fix\/1: true → true · /);
+ const usdRoot=(await syntheticReport({costObjective:true})).root,usd=formatEvalReport(evalReport(usdRoot,'paired'),usdRoot);
+ assert.match(usd,/\n配对 \S+ objective: ≈ \$0\.04 → ≈ \$0\.02；d=≈ \$0\.02\n/);assert.doesNotMatch(usd,/¥/);
+});
+
 test('the shared report retains missing prices, unknown usage and unassigned costs instead of assigning zeros or a winning side',async()=>{
  for(const options of [{missingPrice:true},{missingUsage:true},{unattributed:true}]){
   const {root}=await syntheticReport(options),report=evalReport(root,'paired');assert.equal(report.improvement,'证据不足');assert.ok(report.comparison!.evidenceGaps.length);
@@ -129,4 +138,16 @@ test('the shared report retains missing prices, unknown usage and unassigned cos
   if('missingUsage'in options){assert.equal(report.cost.totalValue,null);assert.equal(report.cost.missing,2);assert.equal(report.cost.knownTokens,100);assert.equal(report.cost.bySide.candidate.knownValue,0.02);}
   if('unattributed'in options){assert.equal(report.cost.totalValue,0.14);assert.equal(report.cost.unattributed.knownValue,0.02);assert.equal(report.cost.bySide.candidate.knownValue,0.04);}
  }
+});
+
+test('first-version USD plans stay USD in the eval report; CNY host-price plans follow the display rule and bound budgets at the peak price',async()=>{
+ const usdRoot=(await syntheticReport()).root,usd=evalReport(usdRoot,'paired'),usdText=formatEvalReport(usd,usdRoot);
+ assert.equal(usd.cost.currency,'USD');assert.equal(usd.cost.totalValue,0.12);assert.deepEqual(usd.budget.amounts.limit,{tokens:32000,amount:32,currency:'USD',version:'known-price-v1'});
+ assert.match(usdText,/费用估算 · 非账单 · 计划固定价 known-price-v1（USD 1000\/百万 tokens） · 首版美元计划：按原币种，不重算，与人民币分开汇总/);
+ assert.match(usdText,/\n费用 ≈ \$0\.12 · 请求 12 /);assert.match(usdText,/分项 baseline ≈ \$0\.08 · candidate ≈ \$0\.04 · /);assert.match(usdText,/预算上限 总 32000 tokens ≈ \$32\.00 · 每 trial \d+ tokens ≈ \$/);assert.doesNotMatch(usdText,/¥/);
+ const missingRoot=(await syntheticReport({missingUsage:true})).root,missing=formatEvalReport(evalReport(missingRoot,'paired'),missingRoot);assert.match(missing,/\n费用 ≈ \$0\.10 \+2 unknown · /);assert.match(missing,/candidate ≈ \$0\.02 \+2 unknown/);
+ const noPriceRoot=(await syntheticReport({missingPrice:true})).root;assert.match(formatEvalReport(evalReport(noPriceRoot,'paired'),noPriceRoot),/\n费用 unknown（计划未固定价格） · 请求 12 /);
+ const cnyRoot=(await syntheticReport({price:hostPlanPrice('deepseek','deepseek-flash')})).root,cny=evalReport(cnyRoot,'paired'),cnyText=formatEvalReport(cny,cnyRoot);
+ assert.equal(cny.cost.currency,'CNY');assert.ok(Math.abs(cny.cost.totalValue!-120*8/1e6)<1e-15);assert.deepEqual(cny.budget.amounts.limit,{tokens:32000,amount:0.256,currency:'CNY',version:'deepseek-cny-v1'});
+ assert.match(cnyText,/计划固定价 deepseek-cny-v1（CNY 8\/百万 tokens，查阅 2026-10-12）\n/);assert.match(cnyText,/\n费用 < ¥0\.01 · /);assert.match(cnyText,/预算上限 总 32000 tokens ≈ ¥0\.26 .*（按计划固定单价折算，即宿主价目高峰输出价）/);assert.doesNotMatch(cnyText,/\$/);
 });

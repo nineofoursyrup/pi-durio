@@ -9,6 +9,7 @@ import { queryHistory,queryEvidence,queryAttempts,readEvidence,watermark,records
 import { queryUsage } from '../src/usage-query.js';
 import { fixEvidence,verifyFixed,fixedDependencies,estimateUsage } from '../src/fixed-evidence.js';
 import { scopedEvidence } from '../src/derived-evidence.js';
+import { estimateRunRequests } from '../src/cost-estimate.js';
 import { acquireOwner } from '../src/ownership.js';
 import { runCodingTask } from '../src/runtime.js';
 import { scriptedTransport } from '../src/offline.js';
@@ -75,6 +76,8 @@ test('committed cumulative usage deduplicates across runs and reopen, reasoning 
   const first=await estimateUsage(root,{id:'estimate-1',runIds:['a','b'],through,price});assert.ok(Math.abs(first.value!-0.000038)<1e-12);
   const second=await estimateUsage(root,{id:'estimate-2',runIds:['a','b'],through,price:{...price,version:'p2',perMillion:{...price.perMillion,input:2}}});assert.ok(Math.abs(second.value!-0.000068)<1e-12);
   assert.equal([...records(root,{kinds:['usage.estimate']})].length,2);assert.equal(decode(root,[...records(root,{kinds:['usage.estimate']})][0]).price.version,'p1');assert.equal(queryUsage(root,['a','b']).totals.input,30);
+  const yuan=await estimateUsage(root,{id:'estimate-cny',runIds:['a','b'],through,price:{...price,version:'cny-1',currency:'CNY'}});assert.equal(yuan.price.currency,'CNY');assert.ok(Math.abs(yuan.value!-0.000038)<1e-12);
+  await assert.rejects(estimateUsage(root,{id:'estimate-eur',runIds:['a','b'],through,price:{...price,currency:'EUR' as any}}),/INVALID_PRICE_VERSION/);
   assert.equal(queryUsage(root,['a','missing-run']).completeness,'partial');
   const multi=new Evidence(root,'a');multi.append('usage.projection',{conversationId:2,value:usage(3),completeness:'known'});multi.append('durable.closed-snapshot',{usage:[{conversationId:1,documentId:7,value:usage(30)},{conversationId:2,documentId:8,value:usage(3)}]});multi.close();
   const multiple=queryUsage(root,['a','b']);assert.equal(multiple.totals.input,33);assert.equal(multiple.totals.cacheRead,null);assert.ok(multiple.items.every(item=>item.categoryCoverage.cacheRead==='not fully reported'));
@@ -118,3 +121,42 @@ test('real offline failed task: large output, unknown usage, slow consumer, fixa
 
 import { createHash } from 'node:crypto';
 function createHashForOutput(){return createHash('sha256');}
+
+test('trace, usage and show CLI output display CNY estimates with price version, period and consulted date',()=>{
+  const root=fixture(),e=accept(root,'cny');
+  const request=(id:string,usage:{input:number;output:number}|null,raw:Record<string,number>={prompt_cache_hit_tokens:0})=>{
+    e.append('model.intent',{attemptId:id,purpose:'generation',model:{provider:'deepseek',id:'deepseek-flash'}});e.append('model.dispatch',{attemptId:id,transportEntered:true});
+    if(usage)e.append('model.provider-event',{attemptId:id,event:{usage:raw}});
+    e.append('model.response',{attemptId:id,message:{stopReason:'stop',usage:{...usage??{input:0,output:0},cacheRead:0,cacheWrite:0}},completeness:'complete',usage:usage?'reported':'unknown'});
+  };
+  request('big',{input:1_000_000,output:1_000_000});request('tiny',{input:10,output:4});request('missing',null);request('no-cache-hit',{input:10,output:4},{prompt_tokens:10});close(e,'completed','known');
+  const cli=(args:string[])=>{const child=spawnSync(process.execPath,['dist/src/cli.js',...args,'--data-root',root],{encoding:'utf8'});assert.equal(child.status,0,child.stderr);return child.stdout;};
+  const text=cli(['trace','--run','cny','--format','text']);assert.match(text,/^pi-durio trace\n/);
+  // Human attempt numbers precede the JSON page (display-number lines from #53).
+  assert.match(text,/^pi-durio trace\nllm #1 model generation big\nllm #2 model generation tiny\n/);
+  const trace=JSON.parse(text.slice(text.indexOf('\n{')+1));
+  assert.deepEqual(trace.items.map((i:any)=>i.cost.display.replace(/¥(10|5)\.00/,'¥N')),['≈ ¥N','< ¥0.01','unknown','< ¥0.01 partial']);
+  for(const item of trace.items){assert.equal(item.cost.price.version,'deepseek-cny-v1');assert.equal(item.cost.price.consultedAt,'2026-10-12');assert.match(item.cost.price.period,/^(高峰|空闲)$/);}
+  assert.match(trace.costEstimate.display,/^≈ ¥(10|5)\.00 \+1 unknown partial$/);assert.equal(trace.costEstimate.notice,'估算 · 非账单');
+  const usage=JSON.parse(cli(['usage','--run','cny']));
+  assert.deepEqual(usage.requestAllocations.map((a:any)=>a.cost.display),trace.items.map((i:any)=>i.cost.display));assert.equal(usage.costEstimate.display,trace.costEstimate.display);assert.equal(usage.costEstimate.notice,'估算 · 非账单');
+  assert.match(usage.price.role,/not the displayed amount/);
+  const show=JSON.parse(cli(['show','--run','cny']));assert.equal(show.costEstimate.display,trace.costEstimate.display);assert.equal(show.costEstimate.notice,'估算 · 非账单');
+});
+
+test('usage cost totals cover exactly the requested runs; totals.estimatedUSD is marked as the original USD estimate',()=>{
+  const root=fixture(),model={provider:'deepseek',id:'deepseek-flash'};
+  // Two runs of one session: the projection lists both runs' allocations, but `usage --run a` totals run a only.
+  for(const [runId,input] of [['a',1_000_000],['b',2_000_000]] as const){
+    const e=accept(root,runId,{sessionId:'shared-session'});
+    e.append('model.intent',{attemptId:`${runId}-1`,purpose:'generation',model});e.append('model.dispatch',{attemptId:`${runId}-1`,transportEntered:true});
+    e.append('model.provider-event',{attemptId:`${runId}-1`,event:{usage:{prompt_cache_hit_tokens:0}}});
+    e.append('model.response',{attemptId:`${runId}-1`,message:{stopReason:'stop',usage:{input,output:0,cacheRead:0,cacheWrite:0,cost:{total:1}}},completeness:'complete',usage:'reported'});close(e,'completed','known');
+  }
+  const child=spawnSync(process.execPath,['dist/src/cli.js','usage','--run','a','--data-root',root],{encoding:'utf8'});assert.equal(child.status,0,child.stderr);
+  const usage=JSON.parse(child.stdout),a=estimateRunRequests(root,'a').totals;
+  assert.deepEqual(usage.requestAllocations.map((item:any)=>item.runId),['a','b']);assert.ok(usage.requestAllocations.every((item:any)=>item.cost.amount>0));
+  assert.deepEqual(usage.costEstimate.runIds,['a']);assert.equal(usage.costEstimate.scope,'runs:a');assert.deepEqual(usage.costEstimate.amounts,a.amounts);
+  assert.equal(usage.costEstimate.amounts.CNY,usage.requestAllocations[0].cost.amount);
+  assert.match(usage.totals.estimatedUSDRole,/^original estimate; not the displayed amount/);assert.equal(usage.requestAllocations[0].estimatedCost.role.startsWith('original estimate; not the displayed amount'),true);
+});

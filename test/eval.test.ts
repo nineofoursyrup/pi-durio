@@ -6,13 +6,15 @@ import {tmpdir} from 'node:os';
 import {Evidence,digest} from '../src/evidence.js';
 import {fixEvidence} from '../src/fixed-evidence.js';
 import {representativeCases} from '../src/eval/fixtures.js';
-import {verifiedImage,validatePlan,type EvalPlan} from '../src/eval/plan.js';
+import {verifiedImage,validatePlan,prepareEval,loadEvalPlan,type EvalPlan} from '../src/eval/plan.js';
+import {hostPlanPrice} from '../src/cost-estimate.js';
 import {evalReport,formatEvalReport} from '../src/eval/runner.js';
 import {appendFact,evalFacts,installedRuntimeFiles,captureFiles,materialize} from '../src/eval/store.js';
 import {PersistentBudget} from '../src/provider-boundary.js';
 import {evalMediator} from '../src/eval/mediator.js';
 import {EvalView} from '../src/tui/eval.js';
 import {pairedTrials} from '../src/eval/comparison.js';
+import {readDisplayIndex} from '../src/display-number.js';
 function plan(e:Evidence):EvalPlan{return{id:'plan',purpose:'test fixed reporting',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:{id:'content-v1',manifest:e.blob('[]'),bytes:2},cases:representativeCases,trials:['good','failure','grader-error','not-run'].map(id=>({id,caseId:'local-fix',version:'content-v1',side:'candidate',repeat:1,pair:null})),budget:{maxRequests:8,maxTokens:1000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null},trialTimeoutMs:1000,gradingTimeoutMs:1000,maxOutputTokens:32,requestRetryLimit:0,price:{version:'test',source:'controlled',currency:'USD',perMillionTokens:0},authorization:{scope:'run-all-listed-trials',paid:false},environment:{node:'v24.8.0',isolation:'fixture only',writable:'new',cache:'empty'},mainObjective:'requirements',protection:['originals'],improvementConclusion:'not-evaluated'};}
 
 test('fixed eval runtime carries execution source identity but excludes host graders when materialized',()=>{
@@ -33,7 +35,7 @@ test('report preserves all planned identities, grader errors and first failure; 
  const root=mkdtempSync(join(tmpdir(),'durio-eval-report-')),e=new Evidence(root,'plan');const p=plan(e),source=appendFact(e,'eval.plan',p),artifact=e.blob('original product');e.close();await fixEvidence(root,{id:'eval-plan:plan',sources:[source],purpose:'test fixed plan'});
  const facts=new Evidence(root,'plan');
  for(const [trialId,status,judgment]of [['good','completed','PASS'],['failure','error','FAIL'],['grader-error','completed','unknown']]){const outcome=appendFact(facts,'eval.outcome',{trialId,status,started:true,valid:true,artifacts:[{path:'project/a.ts',ref:artifact}],isolation:null,timing:{preparationMs:1,taskMs:2}});appendFact(facts,'eval.grade',{id:trialId,trialId,outcome,graderVersion:'v1',judgment,reason:judgment==='unknown'?'grader crashed':'fixed rule',checks:[],at:new Date().toISOString()});}
- const last=evalFacts(root,'plan').at(-1)!.source;facts.close();assert.equal(evalReport(root,'plan').counts.gradable,0);await fixEvidence(root,{id:'eval-outcomes:plan',sources:[last],purpose:'protect report inputs'});const report=evalReport(root,'plan');assert.deepEqual(report.counts,{planned:4,started:3,completed:2,gradable:2,passed:1,passRate:0.5,completionRate:0.5,coverageRate:0.5});assert.equal(report.trials[3].outcome.status,'not-run');assert.equal(report.trials[2].grade.judgment,'unknown');assert.match(formatEvalReport(report),/grader crashed/);
+ const last=evalFacts(root,'plan').at(-1)!.source;facts.close();assert.equal(evalReport(root,'plan').counts.gradable,0);await fixEvidence(root,{id:'eval-outcomes:plan',sources:[last],purpose:'protect report inputs'});const report=evalReport(root,'plan');assert.deepEqual(report.counts,{planned:4,started:3,completed:2,gradable:2,passed:1,passRate:0.5,completionRate:0.5,coverageRate:0.5});assert.equal(report.trials[3].outcome.status,'not-run');assert.equal(report.trials[2].grade.judgment,'unknown');assert.match(formatEvalReport(report,root),/grader crashed/);
  const before=readFileSync(join(root,'host.sqlite'));const view=new EvalView(root,'plan');assert.ok(view.render(80,24).join('\n').includes('Eval'));view.handleInput('e');view.handleInput('\r');assert.match(view.render(80,24).join('\n'),/e1:/);view.handleInput('n');view.handleInput('p');view.handleInput('b');assert.deepEqual(readFileSync(join(root,'host.sqlite')),before);
  unlinkSync(join(root,'objects',artifact.sha256));const missing=evalReport(root,'plan');assert.equal(missing.counts.gradable,0);assert.equal(missing.trials[0].grade.judgment,'PASS');assert.equal(missing.trials[0].outcome.valid,false);assert.equal(missing.trials[1].gradeHistory[0].judgment,'FAIL');
 });
@@ -73,5 +75,25 @@ test('same per-trial limit blocks a noisy side without consuming the next side a
  test('wrapped eval plan selection remains visible in a narrow viewport',()=>{
  const root=mkdtempSync(join(tmpdir(),'durio-eval-view-'));
  for(let index=0;index<8;index++){const e=new Evidence(root,`plan-${index}`),p=plan(e);p.id=`plan-${index}`;p.purpose='长目的说明 '.repeat(50);appendFact(e,'eval.plan',p);e.close();}
- const view=new EvalView(root);view.render(40,12);for(let index=0;index<7;index++){view.handleInput('\x1b[B');view.render(40,12);}assert.match(view.render(40,12).join('\n'),/› plan-0/);
+ const view=new EvalView(root);view.render(40,12);for(let index=0;index<7;index++){view.handleInput('\x1b[B');view.render(40,12);}assert.ok(view.render(40,12).join('\n').includes(`› ${readDisplayIndex(root).label('eval-plan','plan-0')} · `));
  });
+
+test('plan prices are fixed in CNY or USD; live plans need a non-zero fixed price',()=>{
+ const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-plan-price-')),'plan'),p=plan(e),cny=hostPlanPrice('deepseek','deepseek-flash')!;e.close();
+ validatePlan(p);validatePlan({...p,price:cny});validatePlan({...p,price:{version:'explicit-cny',source:'explicit',currency:'CNY',perMillionTokens:4}});
+ assert.throws(()=>validatePlan({...p,price:{...cny,currency:'EUR' as any}}),/INVALID_EVAL_LIMITS/);assert.throws(()=>validatePlan({...p,price:{...cny,consultedAt:'not a date'}}),/INVALID_EVAL_LIMITS/);
+ const live:EvalPlan={...p,mode:'live',authorization:{scope:'run-all-listed-trials',paid:true},budget:{...p.budget,maxTokens:2_000_000,maxRequestTokens:1_100_000,unknownUpperBound:{tokens:1_100_000,source:'https://api-docs.deepseek.com/quick_start/pricing/'}},price:cny};
+ validatePlan(live);
+ for(const version of ['offline-zero-v1','offline-zero-cny-v1'])assert.throws(()=>validatePlan({...live,price:{version,source:'deterministic local transport',currency:'CNY',perMillionTokens:0}}),/PROVEN_TOKEN_BOUND/);
+});
+
+test('new paid plans default to the host CNY peak output price with its version; offline defaults are CNY zero; explicit USD stays USD',async()=>{
+ const root=mkdtempSync(join(tmpdir(),'durio-eval-price-')),installation=join(root,'installation'),data=join(root,'data');mkdirSync(join(installation,'dist/src'),{recursive:true});mkdirSync(join(installation,'dist/execution'),{recursive:true});
+ for(const [path,content]of Object.entries({'package.json':'{}','dist/execution/package-lock.json':'{"packages":{}}','dist/execution/source-build.json':'{}','eval-environment.json':JSON.stringify({platform:'linux',arch:'arm64',node:'v24.8.0',image:verifiedImage}),'dist/src/runtime.js':'runtime'}))writeFileSync(join(installation,path),content);
+ const budget={maxRequests:8,maxTokens:1000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null};
+ const prepare=async(id:string,extra:{paid?:boolean;price?:EvalPlan['price']})=>(await prepareEval({dataRoot:data,id,installation,purpose:'fixed price default fixture',budget,cases:[representativeCases[0]],...extra})).plan.price;
+ assert.deepEqual(await prepare('paid',{paid:true}),{version:'deepseek-cny-v1',source:hostPlanPrice('deepseek','deepseek-flash')!.source,consultedAt:'2026-10-12',currency:'CNY',perMillionTokens:8});
+ assert.deepEqual(loadEvalPlan(data,'paid').price,hostPlanPrice('deepseek','deepseek-flash'));
+ assert.deepEqual(await prepare('offline',{}),{version:'offline-zero-cny-v1',source:'deterministic local transport; no model inference or paid network',currency:'CNY',perMillionTokens:0});
+ const usd={version:'first-version-usd',source:'explicit fixed price',currency:'USD' as const,perMillionTokens:2};assert.deepEqual(await prepare('usd',{paid:true,price:usd}),usd);
+});
