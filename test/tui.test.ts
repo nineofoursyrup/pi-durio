@@ -161,7 +161,9 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     assert.match(exitCostSummary(join(f.root,'data'),closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01（估算 · 非账单）$/);
     // Without a live runtime the latest reported total stands in, marked as an estimate.
     const terminal=new TestTerminal(),viewer=new ReadOnlyTui({workspace:f.workspace,dataRoot:join(f.root,'data'),runId,draftRoot:join(f.root,'drafts'),mode:'offline',transport:f.transport.fetch,terminal,widthCalibration:false});viewer.start();
-    try{await until(()=>viewer.screen().map(stripTerminalSequences).join('\n').includes('ctx ≈14 / 1M'));}finally{await viewer.exit();}
+    // Opening a run starts its recovery check; the panel footer replaces the status line, so read it after Esc.
+    const shownViewer=()=>viewer.screen().map(stripTerminalSequences).join('\n');
+    try{await until(()=>shownViewer().includes('恢复核对 ·'));terminal.input('\x1b');await until(()=>shownViewer().includes('ctx ≈14 / 1M'));}finally{await viewer.exit();}
   } finally { await f.app.exit(); }
 });
 
