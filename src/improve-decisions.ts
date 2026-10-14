@@ -63,6 +63,18 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
   if(['validate-only','execute-declared-scope'].includes(s.mode)&&(c.suggestionOnly||c.target.state!=='verified'))throw Error('IMPROVE_SUGGESTION_ONLY');
   if(c.target.workspace)checkImproveBaseline(c.target);candidates.push(c);
  }
+ // AC3: each candidate may be finally decided only once per report; validate-only is exploratory and does not block.
+ // "Final" modes: execute-declared-scope (ran changes), defer (postponed), do-not-suggest (suppressed).
+ // validate-only is exploration — it does not count as a final decision, so execute-declared-scope naturally
+ // remains available after any number of validate-only runs (including after a passed validate-only).
+ const finalModes:ImproveMode[]=['execute-declared-scope','defer','do-not-suggest'];
+ const existingDecisions=improveFacts(root).filter(f=>f.kind==='improve.decision'&&f.data.decision.reportId===d.reportId&&f.data.id!==d.id);
+ for(const s of d.selections){
+  if(!finalModes.includes(s.mode))continue; // validate-only is exploratory; only final modes trigger the check
+  const prior=existingDecisions.find(f=>f.data.decision.selections.some((es:any)=>es.candidateId===s.candidateId&&finalModes.includes(es.mode)));
+  if(!prior)continue;
+  throw Error('IMPROVE_CANDIDATE_ALREADY_DECIDED');
+ }
  const active=candidates.filter(c=>['validate-only','execute-declared-scope'].includes(d.selections.find(s=>s.candidateId===c.id)!.mode)),groups=d.groups;
  if(new Set(groups.map(g=>g.id)).size!==groups.length)throw Error('IMPROVE_GROUP_ID_CONFLICT');
  if(active.some(c=>c.target.kind==='eval-asset'&&d.selections.find(s=>s.candidateId===c.id)!.mode==='execute-declared-scope')&&active.some(c=>c.target.kind!=='eval-asset'))throw Error('IMPROVE_EVAL_ASSET_INDEPENDENT_DECISION_REQUIRED');
@@ -92,6 +104,41 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
  if(total.checks>l.maxChecks||total.requests>l.maxRequests||total.tokens>l.maxTokens)throw Error('IMPROVE_TOTAL_BUDGET_EXCEEDED');
  if(groups.length){checkTemporaryDirectory(d.directory,candidates.map(c=>c.target));if(candidates.some(c=>c.target.workspace&&contains(c.target.workspace,realpathSync(root))))throw Error('IMPROVE_RECORDING_ROOT_OVERLAPS_FORMAL_TARGET');if(Date.parse(l.deadline)<=Date.now())throw Error('IMPROVE_DEADLINE');}
  return {...d,summary:{order:d.selections.map(s=>s.candidateId),executionOrder:groups.map(g=>({group:g.id,candidates:g.candidateIds})),targets:candidates.map(c=>c.target.workspace),dependencies:candidates.map(c=>({candidateId:c.id,dependencies:c.dependencies,conflicts:c.conflicts})),totalBudget:d.limits,budgetAmount:decisionBudgetAmount(l.maxTokens,hostPlanPrice('deepseek','deepseek-flash')),plannedReservation:total,effectiveProfiles,writeback:'not-written',activation:'not-enabled'}};
+}
+/** Derive a complete ImproveDecision from selected candidates' replacements and structuredChecks.
+ * Groups candidates by shared workspace or dependency; orders by topological sort then candidate index.
+ * Limits are derived from structuredChecks: maxChecks = total check count, maxRequests/maxTokens = 0. */
+export function deriveImproveDecision(root:string,reportId:string,selections:{candidateId:string;mode:ImproveMode}[],opts:{id:string;directory?:string;deadline:string;maxChecks?:number}):ImproveDecision{
+ const {report}=readImproveReport(root,reportId);if(!report)throw Error('IMPROVE_REPORT_NOT_FOUND');
+ const allCandidates=report.candidates;
+ const selected=selections.map(s=>{const c=allCandidates.find(c=>c.id===s.candidateId);if(!c)throw Error(`IMPROVE_CANDIDATE_NOT_IN_REPORT: ${s.candidateId}`);return {sel:s,c};});
+ const active=selected.filter(({sel})=>['validate-only','execute-declared-scope'].includes(sel.mode)).map(({c})=>c);
+ // Build adjacency: candidates that must go into the same group (shared workspace or dependency)
+ const union=new Map<string,string>();const find=(id:string):string=>{if(union.get(id)===id)return id;const p=find(union.get(id)!);union.set(id,p);return p;};
+ for(const c of active)union.set(c.id,c.id);
+ const merge=(a:string,b:string)=>{const ra=find(a),rb=find(b);if(ra!==rb)union.set(ra,rb);};
+ for(const c of active)for(const other of active){if(other.id===c.id)continue;
+  if(c.target.workspace&&c.target.workspace===other.target.workspace||c.dependencies.includes(other.id)||other.dependencies.includes(c.id)||(['prompt-skill','agent-config','self-source'].includes(c.target.kind)&&['prompt-skill','agent-config','self-source'].includes(other.target.kind)))merge(c.id,other.id);}
+ // Collect groups as sets of candidate IDs, keyed by root representative
+ const groupMap=new Map<string,string[]>();
+ for(const c of active){const root_=find(c.id);if(!groupMap.has(root_))groupMap.set(root_,[]);groupMap.get(root_)!.push(c.id);}
+ // Topological sort within each group (dependencies first), then sort group members by report index
+ const candidateIndex=(id:string)=>allCandidates.findIndex(c=>c.id===id);
+ const topoSort=(ids:string[]):string[]=>{const visited=new Set<string>(),result:string[]=[];const visit=(id:string)=>{if(visited.has(id))return;visited.add(id);const c=allCandidates.find(c=>c.id===id)!;for(const dep of c.dependencies)if(ids.includes(dep))visit(dep);result.push(id);};for(const id of [...ids].sort((a,b)=>candidateIndex(a)-candidateIndex(b)))visit(id);return result;};
+ // Sort groups by minimum candidate index
+ const groupEntries=[...groupMap.entries()].map(([k,ids])=>({key:k,ids:topoSort(ids),minIdx:Math.min(...ids.map(candidateIndex))})).sort((a,b)=>a.minIdx-b.minIdx);
+ // Build ValidationGroups from candidate replacements and structuredChecks
+ const groups:ValidationGroup[]=groupEntries.map((g,gi)=>{
+  const cands=g.ids.map(id=>allCandidates.find(c=>c.id===id)!);
+  const changes=cands.flatMap(c=>(c.replacements??[]).map(r=>({targetId:c.target.id,path:r.path,content:r.content})));
+  const checks=cands.flatMap(c=>(c.structuredChecks??[]).map(ch=>({kind:ch.kind as 'direct'|'regression',program:ch.program,timeoutMs:ch.timeoutMs})));
+  return {id:`g${gi+1}`,candidateIds:g.ids,changes,checks} as ValidationGroup;
+ }).filter(g=>g.checks.length>0);
+ // Non-active selections (defer/do-not-suggest) get no group
+ const deriveSelections:ImproveSelection[]=selected.map(({sel,c})=>({candidateId:c.id,candidateRevision:c.revision,target:c.target,mode:sel.mode,steps:c.steps}));
+ const totalChecks=groups.reduce((n,g)=>n+g.checks.length,0);
+ const limits={deadline:opts.deadline,maxChecks:opts.maxChecks??totalChecks,maxRequests:0,maxTokens:0};
+ return {id:opts.id,reportId,reportRevision:report.revision,selections:deriveSelections,groups,limits,...(opts.directory?{directory:opts.directory}:{})};
 }
 type SubmitOptions={dataRoot:string;decision:ImproveDecision;fault?:(kind:string)=>void;signal?:AbortSignal};
 async function workspaceLeases(decision:ImproveDecision,onCompromised:(error:Error)=>void){
