@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, existsSync, cpSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -375,5 +375,18 @@ test('recovery pages expose all unknown counts and navigate with one snapshot; a
     key('n'); await until(() => screen().includes('本页起点 32'));
     key('c'); await tick(); assert.equal(transport.calls.length, 0); assert.match(screen(), /未处置未知 40/);
     key('p'); await until(() => screen().includes('本页起点 0'));
+  } finally { await app.exit(); }
+});
+
+test('queue panel names requests by q- number and /withdraw accepts it (v1 fixture copy)', async () => {
+  const root=mkdtempSync(join(tmpdir(),'durio-tui-q-')),workspace=join(root,'project'),dataRoot=join(root,'data');mkdirSync(workspace);
+  cpSync(new URL('../../test/fixtures/v1-records/data',import.meta.url),dataRoot,{recursive:true});
+  const q=readDisplayIndex(dataRoot).label('queue-request','frozen-follow'),terminal=new TestTerminal();terminal.columns=120;
+  const app=new ReadOnlyTui({workspace,dataRoot,draftRoot:join(root,'drafts'),mode:'offline',transport:demoTransport().fetch,terminal,widthCalibration:false});app.start();
+  const key=(data:string)=>terminal.input(data),screen=()=>app.screen().map(stripTerminalSequences).join('\n');
+  try {
+    key('/queue');key('\r');await until(()=>/q-[0-9a-f]{4,} · 原 id /.test(screen()));assert.doesNotMatch(screen(),/原 run [0-9a-f]{8}-/);
+    key('\x1b');key(`/withdraw ${q}`);key('\r');
+    await until(()=>readQueue(dataRoot).items.find(item=>item.requestId==='frozen-follow')!.status==='withdrawn');
   } finally { await app.exit(); }
 });

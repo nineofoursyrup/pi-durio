@@ -15,18 +15,18 @@ import { runCodingTask } from '../src/runtime.js';
 import { scriptedTransport } from '../src/offline.js';
 
 function fixture(){return mkdtempSync(join(tmpdir(),'durio-history-'));}
-function accept(root:string,runId:string,extra:Record<string,unknown>={}){const e=new Evidence(root,runId);e.append('task.accepted',{taskId:`task-${runId}`,sessionId:`session-${runId}`,workspace:'/project',input:'fixture',kind:'coding',taskType:'bugfix',...extra});e.append('run.started',{sessionId:`session-${runId}`});e.append('execution.artifact',{id:'version-1'});e.append('execution.config',{model:{provider:'deepseek',id:'deepseek-flash'}});return e;}
+function accept(root:string,runId:string,extra:Record<string,unknown>={}){const e=new Evidence(root,runId);e.append('task.accepted',{taskId:`task-${runId}`,sessionId:`session-${runId}`,workspace:'/project',input:'fixture',kind:'coding',authorization:{execution:'trusted-local-coding'},...extra});e.append('run.started',{sessionId:`session-${runId}`});e.append('execution.artifact',{id:'version-1'});e.append('execution.config',{model:{provider:'deepseek',id:'deepseek-flash'}});return e;}
 function close(e:Evidence,status='failed',usage='unknown'){e.append('run.closed',{status,reason:'check failed',usage:{completeness:usage}});e.close();}
 const usage=(n:number)=>({models:{'deepseek/deepseek-flash':{input:n,output:4,cacheRead:0,cacheWrite:0,reasoning:3,totalTokens:n+4,cost:{input:0.001,output:0.002,cacheRead:0,cacheWrite:0,total:0.003}}},tools:{bash:{input:0,output:0,cacheRead:0,cacheWrite:0,totalTokens:0,cost:{input:0,output:0,cacheRead:0,cacheWrite:0,total:0.01}}}});
 
 test('all declared filters use acquired facts, pending tasks retain null run, and stable pages exclude later receipt changes',()=>{
-  const root=fixture();close(accept(root,'a'));close(accept(root,'b',{workspace:'/other',taskType:'feature'}),'completed');
+  const root=fixture();close(accept(root,'a'));close(accept(root,'b',{workspace:'/other',authorization:{execution:'trusted-local-read-only'}}),'completed');
   const first=queryHistory(root,{}, {limit:1});assert.equal(first.items[0].runId,'a');assert.ok(first.next);
   const source=new Evidence(root,'a');const target={workspace:'/project',sessionId:'session-a',taskId:'task-a',runId:'a'};
   source.append('control.accepted',{requestId:'queued',taskId:'task-queued',kind:'follow-up',input:'next',target,executionVersion:{artifactId:'version-1',artifactSeq:3,configSeq:4},authorization:{tools:['read']}});source.close();
   const second=queryHistory(root,{}, {limit:1,cursor:first.next!});assert.equal(second.items[0].runId,'b');assert.equal(second.next,null);assert.equal(second.coverage.stale,true);
   const pending=queryHistory(root,{status:'pending'}).items[0];assert.equal(pending.runId,null);assert.equal(pending.taskId,'task-queued');assert.equal(pending.attempts,0);assert.equal(pending.usage,'unknown');assert.equal(pending.acceptedTask.target?.runId,'a');
-  const filter={project:'/project',session:'session-a',from:'2000-01-01',to:'2100-01-01',kind:'coding',taskType:'bugfix',status:'failed',reason:'check failed',version:'version-1',provider:'deepseek',model:'deepseek-flash',completeness:'complete'};
+  const filter={project:'/project',session:'session-a',from:'2000-01-01',to:'2100-01-01',kind:'coding',taskType:'coding',status:'failed',reason:'check failed',version:'version-1',provider:'deepseek',model:'deepseek-flash',completeness:'complete'};
   assert.deepEqual(queryHistory(root,filter).items.map(i=>i.runId),['a']);
   const acceptedAt=queryHistory(root,filter).items[0].at!;
   assert.equal(queryHistory(root,{...filter,to:acceptedAt}).items.length,0);

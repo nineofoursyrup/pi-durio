@@ -1,3 +1,4 @@
+import {taskTypeOf} from '../task-type.js';
 import {digest,readAcceptedTasks,type AcceptedTaskFact} from '../evidence.js';
 import {records,decode,watermark,type EvidenceReference} from '../history.js';
 import {selectAcceptance} from './acceptance.js';
@@ -12,7 +13,7 @@ function origin(data:any,sourceData?:any):{kind:string|null;source:string|null;t
  const d=data.origin??{},legacy=data.taskKind??data.kind;
  const kind=d.kind??(['coding','eval','improve','maintenance'].includes(legacy)?legacy:data.mode?'coding':null);
  const source=d.source??data.sourceClass??(data.mode==='offline'?'synthetic':data.mode==='live'?'ordinary':sourceData?origin(sourceData).source:null);
- return{kind:kind??(data.kind==='follow-up'?'coding':null),source:source??null,taskType:d.taskType??data.taskType??null,parentTaskId:d.parentTaskId??data.parentTaskId??null,trialId:d.trialId??null};
+ return{kind:kind??(data.kind==='follow-up'?'coding':null),source:source??null,taskType:taskTypeOf(data),parentTaskId:d.parentTaskId??data.parentTaskId??null,trialId:d.trialId??null};
 }
 function validate(input:MetricsScope) {
  for(const key of Object.keys(input))if(!['from','to','asOf','project','taskType','version','source','through','revisionOf'].includes(key))throw Error('INVALID_METRICS_SCOPE');

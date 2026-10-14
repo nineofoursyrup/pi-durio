@@ -21,7 +21,8 @@ import { EvalView } from './eval.js';
 import { StorageView } from './storage.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
-import { readDisplayIndex, readRunOrdinals, modelRequestNumber, resolveDisplayInput, type DisplayIndex, type DisplayKind } from '../display-number.js';
+import { readDisplayIndex, readRunOrdinals, modelRequestNumber, resolveDisplayInput, isUserChosenId, type DisplayIndex, type DisplayKind } from '../display-number.js';
+import { readSessionChains } from '../session-chain.js';
 import { estimateRunRequests, estimateSessionRequests, sessionRunIds, sumCostEstimates, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
 import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, statusText, makeBorderColor } from './theme.js';
 
@@ -152,7 +153,7 @@ export class ReadOnlyTui {
     this.scroll=new ScrollView(this.transcript,{follow:'end',primary:true});
     const header:Component={invalidate(){},render:width=>[
       styledLine([{text:'◆ pi-durio',fg:'ac.brand',bold:true},{text:` · ${options.coding?'coding':'只读'} · ${safe(options.workspace)}`,fg:'fg.faint'}],width),
-      styledLine([{text:`session ${this.sessionId?this.shown('session',this.sessionId):'未受理'}`,fg:'fg.body'},{text:` · ${this.model}`,fg:'fg.faint'}],width)
+      styledLine([{text:`session ${this.sessionId?this.runId?this.sessionOf(this.runId):'…':'未受理'}`,fg:'fg.body'},{text:` · ${this.model}`,fg:'fg.faint'}],width)
     ]};
     const status:Component={invalidate(){},render:width=>[
       styledLine([{text:this.statusLine()},{text:` · ${this.contextUsage()} · usage ${this.usage()}`,fg:'fg.faint'}],width),
@@ -225,6 +226,12 @@ export class ReadOnlyTui {
     return this.displayIndex;
   }
   private shown(kind:DisplayKind,id:string) {return this.indexed(kind,id).label(kind,id);}
+  private chainSession?:{runId:string;id:string};
+  /** `s-` number of the derived session a run belongs to; rederived only when the run changes. */
+  private sessionOf(runId:string) {
+    if(this.chainSession?.runId!==runId){const session=readSessionChains(this.options.dataRoot).sessionOfRun(runId);if(!session)return '未记录';this.chainSession={runId,id:session.id};}
+    return this.shown('session',this.chainSession.id);
+  }
   /** `tc-…-NN` / `llm #N` of a transcript attempt; the run's ordinals are reread only when an attempt is new to them. */
   private attemptNumber(runId:string,role:'tool'|'assistant',attempt:string) {
     const kind=role==='tool'?'tool':'model',key=`${kind}:${runId}:${attempt}`;
@@ -421,7 +428,7 @@ export class ReadOnlyTui {
     if(!target){this.editor.setText(text);this.lastText=text;this.notice='当前仍在受理或收尾；文字保留，未受理';this.tui.requestRender();return;}
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
     void this.control.submit({id:randomUUID(),kind,input:text,target}).then(item=>{
-      this.loadQueue();this.notice=`${kind} ${item.status==='applied'?'已接入':'已受理、待接入'} · ${item.requestId.slice(0,8)} → ${this.shown('task',item.target.taskId)} · /queue`;
+      this.loadQueue();this.notice=`${kind} ${item.status==='applied'?'已接入':'已受理、待接入'} · ${this.shown('queue-request',item.requestId)} → ${this.shown('task',item.target.taskId)} · /queue`;
     }).catch(error=>{
       this.drafts.save(text);this.savedDraft=text;if(!this.editor.getExpandedText()){this.editor.setText(text);this.lastText=text;}
       this.notice=`未接入，文本已保留：${safe(String(error))}`;
@@ -435,12 +442,13 @@ export class ReadOnlyTui {
     const item=this.queue[this.panel?.offset??0];
     if(!item)return '队列：当前窗口没有受理项\nEsc 返回；不改变执行限制';
     const status={pending:'已受理、待接入',dispatching:'接入意图已保存、结果待核对',applied:'已接入，不能撤回已发生的操作',withdrawn:'已撤回',frozen:'已冻结，普通输入不会执行'}[item.status];
-    return `队列 ${this.panel!.offset+1}/${this.queue.length} · ${item.kind}\n${item.requestId}\n${status}\n目标 ${item.target.workspace}\n原 session ${item.target.sessionId}\n原 task ${this.shown('task',item.target.taskId)}\n原 run ${item.target.runId}\n新 run ${item.kind==='follow-up'?(item.runId??'尚未开始'):item.runId??'无'}\n内容：${safe(item.input.slice(0,4096))}${item.input.length>4096?' [显示截断]':''}\n原因：${safe(item.reason)}\n←→/Tab 选项 n/p 窗口；w 撤回未接入项\nr 明确重新接入：仅已完成源的冻结 follow-up / 未执行 compact；重新执行可能收费\n旧 steer 或停止任务的文本需明确重新提交新任务\nEsc 返回，不解除冻结`;
+    return `队列 ${this.panel!.offset+1}/${this.queue.length} · ${item.kind}\n${this.shown('queue-request',item.requestId)}${isUserChosenId(item.requestId)?` · 原 id ${safe(item.requestId)}`:''}\n${status}\n目标 ${item.target.workspace}\n原 session ${this.sessionOf(item.target.runId)}\n原 task ${this.shown('task',item.target.taskId)}\n原 run ${this.shown('run',item.target.runId)}\n新 run ${item.runId?this.shown('run',item.runId):item.kind==='follow-up'?'尚未开始':'无'}\n内容：${safe(item.input.slice(0,4096))}${item.input.length>4096?' [显示截断]':''}\n原因：${safe(item.reason)}\n←→/Tab 选项 n/p 窗口；w 撤回未接入项\nr 明确重新接入：仅已完成源的冻结 follow-up / 未执行 compact；重新执行可能收费\n旧 steer 或停止任务的文本需明确重新提交新任务\nEsc 返回，不解除冻结`;
   }
   private authorization():RecoveryAuthorization {return {workspace:this.options.workspace,mode:this.options.mode,tools:this.options.coding?['read','write','edit','bash']:['read'],toolEnvironment:this.options.toolEnvironment};}
-  private async queueDecision(requestId:string,action:'withdraw'|'reattach') {
+  private async queueDecision(input:string,action:'withdraw'|'reattach') {
+    let requestId:string;try{requestId=resolveDisplayInput(this.options.dataRoot,'queue-request',input);}catch(error){this.notice=`队列决定未执行：${safe(String(error))}`;this.tui.requestRender();return;}
     this.loadQueue();const item=this.queue.find(item=>item.requestId===requestId);
-    if(!item){this.notice='当前窗口没有该请求；/queue 核对完整 ID';return;}
+    if(!item){this.notice='当前窗口没有该请求；/queue 核对 q- 号';return;}
     const decision:QueueDecision={id:randomUUID(),requestId,action,target:item.target,receiptSeq:item.receipt.seq};
     try {
       if(this.phase==='running') {
@@ -470,9 +478,9 @@ export class ReadOnlyTui {
     const report=this.recovery;if(!report)return '恢复事实暂不可取得；关闭面板不解除限制';
     const original=report.original as Partial<RunResult>;
     const details=report.details;const next=details?Object.values({tools:details.tools,compactions:details.compactions,reasons:details.reasons,pending:details.pending,unknown:details.unknownModelAttempts}).find(detail=>detail.next!==null)?.next:undefined;
-    const pageText=details?`全部工具 ${details.tools.count}，未处置未知 ${details.unresolvedTools}；本页起点 ${details.tools.offset}\nn 下一页 / p 上一页；${next!==undefined?`Esc 后 /recover ${report.runId} ${next} ${report.snapshotId}`:'已到最后一页'}\n本页决定模板仅包含可见工具；继续前仍核对全部未知。`:'';
+    const pageText=details?`全部工具 ${details.tools.count}，未处置未知 ${details.unresolvedTools}；本页起点 ${details.tools.offset}\nn 下一页 / p 上一页；${next!==undefined?`Esc 后 /recover ${this.shown('run',report.runId)} ${next} ${report.snapshotId}`:'已到最后一页'}\n本页决定模板仅包含可见工具；继续前仍核对全部未知。`:'';
     const template={id:'choose-a-new-decision-id',snapshotId:report.snapshotId,action:'continue',acceptAdditionalModelAttempts:true,resolutions:report.tools.filter(tool=>tool.fact==='unknown'&&!tool.resolution).map(tool=>({taskId:tool.taskId,choice:'CHOOSE retry/skip/completed',reason:'提供依据'}))};
-    return `恢复核对 · ${report.status}\n工作 ${report.runId}\n原状态 ${original.status??'unknown'}；清理 ${original.cleanup??'unknown'}\n最后确认：${report.tools.filter(tool=>tool.fact==='committed').map(tool=>`tool ${tool.taskId}`).join(', ')||'无已确认工具结果'}\n未知模型 attempts：${details?.unknownModelAttempts.count??report.unknownModelAttempts.length}\n${pageText}\n${report.tools.map(tool=>`tool ${tool.taskId} ${tool.tool}: ${tool.fact}，证据 #${tool.evidence.join(',')||'缺失'}`).join('\n')}\n原因：${report.reasons.join('; ')||'需明确决定'}\n影响：${report.needsInput?.risks.join('\n')||'原事实保留，不重计量'}\n动作：${report.options.join(', ')}\ne 明确结束旧工作：不回滚、不宣称外部副作用未发生\nc 继续：仅全部工具无需未知处置时；可能新增模型费用\n有未知时 Esc 后 /decide ${JSON.stringify(template)}\n恢复与 headless 使用同一 snapshot/decision；Esc 仅返回查看`;
+    return `恢复核对 · ${report.status}\n工作 ${this.shown('run',report.runId)}\n原状态 ${original.status??'unknown'}；清理 ${original.cleanup??'unknown'}\n最后确认：${report.tools.filter(tool=>tool.fact==='committed').map(tool=>`tool ${tool.taskId}`).join(', ')||'无已确认工具结果'}\n未知模型 attempts：${details?.unknownModelAttempts.count??report.unknownModelAttempts.length}\n${pageText}\n${report.tools.map(tool=>`tool ${tool.taskId} ${tool.tool}: ${tool.fact}，证据 #${tool.evidence.join(',')||'缺失'}`).join('\n')}\n原因：${report.reasons.join('; ')||'需明确决定'}\n影响：${report.needsInput?.risks.join('\n')||'原事实保留，不重计量'}\n动作：${report.options.join(', ')}\ne 明确结束旧工作：不回滚、不宣称外部副作用未发生\nc 继续：仅全部工具无需未知处置时；可能新增模型费用\n有未知时 Esc 后 /decide ${JSON.stringify(template)}\n恢复与 headless 使用同一 snapshot/decision；Esc 仅返回查看`;
   }
   private async recoveryDecision(decision:RecoveryDecision) {
     if(this.phase!=='idle'||!this.recovery){this.notice='先 /recover 获取当前核对事实';return;}

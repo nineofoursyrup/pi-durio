@@ -1,6 +1,8 @@
 import { openHostReadonly, readObject, digest, readAcceptedTasks, type AcceptedTaskFact, type BlobRef } from './evidence.js';
 import { readObjectRange, readTextPage } from './query.js';
 import { readDisplayIndex, readRunOrdinals, modelRequestNumber } from './display-number.js';
+import { readSessionChains } from './session-chain.js';
+import { taskTypeOf } from './task-type.js';
 
 export type Availability = 'complete'|'source-not-returned'|'collection-gap'|'archived'|'cleaned'|'corrupt'|'temporarily-unreadable';
 export interface EvidenceReference { id:string; runId:string; seq:number; kind:string; at:string; ref:BlobRef }
@@ -59,13 +61,14 @@ export function summarizeRun(root:string,runId:string,through=watermark(root)) {
     if(ref.kind==='model.response')responses++;
   }
   if(attempts>responses&&availability==='complete')availability='source-not-returned';
-  return {runId,taskId:accepted?.taskId??null,sessionId:accepted?.sessionId??null,project:accepted?.projectId??accepted?.workspace??null,workspace:accepted?.workspace??null,kind:accepted?.kind??'coding',taskType:accepted?.taskType??null,at:first?.at??null,seq:first?.seq??0,source:first?.id??null,status:closed?.status??'unknown',reason:closed?.reason??(closed?null:'No confirmed close receipt'),version:artifact?.id??null,provider:config?.model?.provider??null,model:config?.model?.id??null,completeness:availability,usage:closed?.usage?.completeness??'unknown',attempts,responses,recovery:recovery??null,updatedThrough:last,missing,missingOmitted};
+  return {runId,taskId:accepted?.taskId??null,sessionId:accepted?.sessionId??null,project:accepted?.projectId??accepted?.workspace??null,workspace:accepted?.workspace??null,kind:accepted?.kind??'coding',taskType:taskTypeOf(accepted),at:first?.at??null,seq:first?.seq??0,source:first?.id??null,status:closed?.status??'unknown',reason:closed?.reason??(closed?null:'No confirmed close receipt'),version:artifact?.id??null,provider:config?.model?.provider??null,model:config?.model?.id??null,completeness:availability,usage:closed?.usage?.completeness??'unknown',attempts,responses,recovery:recovery??null,updatedThrough:last,missing,missingOmitted};
 }
-export type HistorySummary = Omit<ReturnType<typeof summarizeRun>,'runId'> & {runId:string|null; acceptedTask:AcceptedTaskFact};
+/** `chain`: the derived session (会话) and task number; a follow-up not yet run belongs to its target's session without a number. */
+export type HistorySummary = Omit<ReturnType<typeof summarizeRun>,'runId'> & {runId:string|null; acceptedTask:AcceptedTaskFact; chain:{session:string;task:number|null}|null};
 function matches(row:HistorySummary,filter:HistoryFilter) {
   return Object.entries(filter).every(([key,value])=>{
     if(value===undefined)return true;
-    if(key==='session')return row.sessionId===value;
+    if(key==='session')return row.chain?.session===value;
     if(key==='from')return row.at!==null&&Date.parse(row.at)>=Date.parse(value);
     if(key==='to')return row.at!==null&&Date.parse(row.at)<Date.parse(value);
     return String((row as any)[key])===value;
@@ -82,6 +85,7 @@ export function queryHistory(root:string,filter:HistoryFilter={},options:{limit?
   boundedInteger(snapshot,0,current);const filterId=digest(JSON.stringify(Object.entries(filter).filter(([,v])=>v!==undefined).sort()));
   if(options.cursor&&options.cursor.filter!==filterId)throw Error('QUERY_CURSOR_SCOPE_CHANGED');
   let after=boundedInteger(options.cursor?.after??0);const items:HistorySummary[]=[];let scanned=0,missing=0,more=false;
+  const chains=readSessionChains(root,{through:snapshot});
   let exhausted=false;
   while(items.length<limit&&scanned<500&&!exhausted) {
     const page=readAcceptedTasks(root,{through:snapshot,after,limit:Math.min(32,limit-items.length)});
@@ -93,7 +97,9 @@ export function queryHistory(root:string,filter:HistoryFilter={},options:{limit?
       const base=summarizeRun(root,task.runId??source.runId,snapshot);
       // A queued request retains its original target and its own acceptance. It never
       // inherits the target run's outcome, usage or run identity.
-      const row:HistorySummary={...base,runId:task.runId,taskId:task.taskId,sessionId:task.execution?.sessionId??task.target?.sessionId??initial.sessionId??null,project:initial.projectId??task.workspace,workspace:task.workspace,kind:initial.taskKind??(task.kind==='follow-up'?'coding':initial.kind??'coding'),taskType:initial.taskType??null,at:task.acceptedAt,seq:task.acceptedSeq,source:source.id,status:task.status,reason:task.reason,version:task.executionVersion?.artifactId??null,acceptedTask:task};
+      const row:HistorySummary={...base,runId:task.runId,taskId:task.taskId,sessionId:task.execution?.sessionId??task.target?.sessionId??initial.sessionId??null,project:initial.projectId??task.workspace,workspace:task.workspace,kind:initial.taskKind??(task.kind==='follow-up'?'coding':initial.kind??'coding'),taskType:taskTypeOf(initial),at:task.acceptedAt,seq:task.acceptedSeq,source:source.id,status:task.status,reason:task.reason,version:task.executionVersion?.artifactId??null,acceptedTask:task,chain:null};
+      const chain=task.runId?chains.sessionOfRun(task.runId):task.target?chains.sessionOfRun(task.target.runId):chains.sessionOfRun(source.runId);
+      if(chain)row.chain={session:chain.id,task:task.runId||!task.target?chain.number:null};
       if(!task.runId&&task.kind==='follow-up'){row.attempts=0;row.responses=0;row.usage='unknown';row.recovery=null;row.completeness='complete';row.missing=[];row.missingOmitted=0;}
       if(row.missing.length)missing++;
       if(matches(row,filter))items.push(row);
