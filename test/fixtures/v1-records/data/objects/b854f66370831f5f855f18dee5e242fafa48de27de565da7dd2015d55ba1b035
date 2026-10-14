@@ -1,0 +1,73 @@
+/** A latest committed pi.usage document replaces its earlier cumulative projections.
+ * Values are never differenced into runs or combined with model.response usage. */
+export declare function queryUsage(root: string, runIds: readonly string[], through?: number): {
+    runIds: string[];
+    through: number;
+    items: {
+        scope: string;
+        runId: string | null;
+        attribution: string;
+        value: any;
+        requestCoverage: {
+            scope: string;
+            dispatches: number;
+            unverifiedDispatchIntents: number;
+            reportedResponses: number;
+            boundary: string;
+        } | null;
+        categorySources: string[];
+        categorySourcesOmitted: number;
+        categoryCoverage: {
+            cacheRead: string;
+            cacheWrite: string;
+            reasoning: string;
+        };
+        source: string;
+        sessionId: string;
+        conversationId: number;
+        documentId: number | null;
+        completeness: string;
+        seq: number;
+    }[];
+    totals: {
+        input: number | null;
+        output: number | null;
+        cacheRead: number | null;
+        cacheWrite: number | null;
+        tokens: number | null;
+        estimatedUSD: number | null;
+    };
+    requestAllocations: {
+        scope: string;
+        source: string;
+        at: string;
+        runId: string;
+        sessionId: string;
+        purpose: string;
+        allocation: string;
+        maintenanceRequestId: string | null;
+        response?: string;
+        reportedUsage?: unknown;
+        estimatedCost?: unknown;
+        completeness: string;
+        dispatchState: "unknown" | "dispatched" | "not-dispatched";
+        dispatchSource?: string;
+        dispatchFailure?: {
+            source: string;
+            reason: string;
+        };
+        attemptId: string;
+    }[];
+    attemptsOmitted: number;
+    allocationRule: string;
+    completeness: string;
+    missingRuns: string[];
+    gaps: string[];
+    gapsOmitted: number;
+    price: {
+        kind: string;
+        currency: string;
+        source: string;
+    };
+    rules: string;
+};

@@ -1,0 +1,59 @@
+import { Evidence, type BlobRef } from './evidence.js';
+import type { ImproveCandidate } from './improve.js';
+import type { ImproveSelection } from './improve-decisions.js';
+import type { ValidationGroup } from './improve-validation.js';
+import { type DefaultChange, type DefaultScope } from './improve-defaults.js';
+export interface FormalSelection {
+    writeback: true;
+    activate: null | DefaultScope;
+    failureCompensation: 'none';
+    newProcess?: {
+        workspace: string;
+        baseline: string;
+    };
+}
+export interface PathIdentity {
+    path: string;
+    dev: number;
+    ino: number;
+    mode: number;
+}
+export declare function fileIdentity(root: string, path: string): PathIdentity[];
+export declare function assertFileIdentity(expected: PathIdentity[]): void;
+export declare function replaceExact(root: string, path: string, before: Buffer, after: Buffer, identity: PathIdentity[]): void;
+export declare function validateFormalSelection(selection: ImproveSelection, candidate: ImproveCandidate, workspace: string): void;
+export declare function captureGroupIdentities(candidates: ImproveCandidate[]): {
+    targetId: string;
+    path: string;
+    identity: PathIdentity[];
+}[];
+export interface FormalFile {
+    targetId: string;
+    root: string;
+    path: string;
+    before: BlobRef;
+    after: BlobRef;
+    identity: PathIdentity[];
+}
+export declare function applyImproveGroup(o: {
+    evidence: Evidence;
+    decisionId: string;
+    decisionSource: string;
+    group: ValidationGroup;
+    candidates: ImproveCandidate[];
+    selections: ImproveSelection[];
+    result: any;
+    identities: ReturnType<typeof captureGroupIdentities>;
+    defaults: DefaultChange[];
+    ownerRoots: string[];
+    record: (kind: string, data: any) => string;
+    guard: () => void;
+    baseline: () => void;
+    signal?: AbortSignal;
+}): Promise<{
+    state: string;
+    reason?: undefined;
+} | {
+    state: string;
+    reason: string;
+}>;

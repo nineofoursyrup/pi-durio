@@ -1,0 +1,29 @@
+import { type HistoryFilter } from '../history.js';
+/** Presentation-only: it has no execution handle, active-session setter or management writer. */
+export declare class HistoryView {
+    private root;
+    private filter;
+    private history;
+    private cursor?;
+    private previous;
+    private selected;
+    private evidence?;
+    private evidencePrevious;
+    private detail?;
+    private offset;
+    private offsets;
+    private next;
+    private content;
+    private traceAfter;
+    private traceNext;
+    private tracePrevious;
+    private line;
+    private followSelection;
+    private mode;
+    constructor(root: string, filter?: HistoryFilter);
+    handleInput(data: string): void;
+    private loadTrace;
+    private load;
+    scroll(delta: number): void;
+    render(width: number, height: number): string[];
+}

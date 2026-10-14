@@ -1,0 +1,1 @@
+export declare function historyCommand(command: string | undefined, root: string, values: Record<string, unknown>): Promise<boolean>;

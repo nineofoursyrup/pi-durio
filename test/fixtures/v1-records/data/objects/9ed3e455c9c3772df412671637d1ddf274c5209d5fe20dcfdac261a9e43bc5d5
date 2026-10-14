@@ -1,0 +1,1 @@
+{"attemptId":"16ddab0b-c653-4d90-b88f-fc17d3bb7444","durableTaskId":12,"conversationId":1,"callId":"step-1-0","tool":"bash","args":{"command":"'/opt/homebrew/Cellar/node/26.8.2/bin/node' -e \"setTimeout(()=>{},300);console.log('ok')\""}}

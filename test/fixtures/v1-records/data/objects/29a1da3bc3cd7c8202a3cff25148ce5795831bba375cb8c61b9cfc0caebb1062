@@ -1,0 +1,22 @@
+import { createHash } from 'node:crypto';
+export class DetailPage {
+    offset;
+    limit;
+    items = [];
+    count = 0;
+    hash = createHash('sha256');
+    constructor(offset = 0, limit = 32) {
+        this.offset = offset;
+        this.limit = limit;
+        if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(limit) || limit < 1 || limit > 32)
+            throw Error('INVALID_DETAIL_PAGE');
+    }
+    add(value) {
+        this.hash.update(JSON.stringify(value)).update('\n');
+        if (this.count >= this.offset && this.items.length < this.limit)
+            this.items.push(value);
+        this.count++;
+    }
+    summary() { return { count: this.count, sha256: this.hash.copy().digest('hex'), offset: this.offset, next: this.count > this.offset + this.limit ? this.offset + this.limit : null }; }
+}
+//# sourceMappingURL=detail-page.js.map

@@ -1,0 +1,1 @@
+{"attemptId":"392f98be-8d84-4c10-b4aa-c5da227f9ab0","purpose":"improve","event":{"id":"offline-imp-1","model":"offline","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]},"boundary":"parsed provider event before Pi normalization"}

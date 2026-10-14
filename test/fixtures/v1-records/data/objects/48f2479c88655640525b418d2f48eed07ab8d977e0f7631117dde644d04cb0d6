@@ -1,0 +1,38 @@
+export interface DerivedScope {
+    runIds: readonly string[];
+    through: number;
+    maxBytes: number;
+    purpose: string;
+    destination: {
+        kind: 'local' | 'model';
+        provider?: string;
+        model?: string;
+    };
+}
+/** A capability closure exposes only bounded redacted fragments of explicitly selected runs.
+ * There is no path/Harness/shell access and text never changes this capability. */
+export declare function scopedEvidence(root: string, scope: DerivedScope): Readonly<{
+    read(id: string, options?: {
+        offset?: number;
+        limit?: number;
+    }): {
+        source: import("./history.js").EvidenceReference;
+        scope: DerivedScope;
+        authority: string;
+        redaction: {
+            applied: boolean;
+            reasons: string[];
+            coverage: string;
+        };
+        truncation: {
+            offset: number;
+            bytes: number;
+            total: number;
+            truncated: boolean;
+        };
+        text: string;
+        remaining: number;
+        id: string;
+        state: string;
+    };
+}>;

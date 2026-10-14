@@ -1,0 +1,324 @@
+import { type OwnerLease } from './ownership.js';
+import { DetailPage, type RecoveryPage, type DetailSummary } from './recovery-projection.js';
+import { type RecoveryRecords } from './recovery-facts.js';
+export { recoveryRecords } from './recovery-facts.js';
+import type { ToolEnvironmentConfig } from './coding-environment.js';
+import type { EntryId } from '@earendil-works/pi-durable';
+import type { SubmissionId } from '@earendil-works/pi-durable';
+import type { RunResult } from './runtime.js';
+export type ToolName = 'read' | 'write' | 'edit' | 'bash';
+export interface RecoveryAuthorization {
+    workspace: string;
+    mode: 'live' | 'offline';
+    tools: readonly ToolName[];
+    toolEnvironment?: ToolEnvironmentConfig;
+}
+export interface RecoveryOptions {
+    dataRoot: string;
+    runId: string;
+    authorization?: RecoveryAuthorization;
+    page?: RecoveryPage;
+}
+export interface RecoveryTool {
+    taskId: number;
+    callId: string;
+    tool: string;
+    args: unknown;
+    fact: 'committed' | 'completed-uncommitted' | 'not-dispatched' | 'unknown';
+    evidence: number[];
+    evidenceSummary?: DetailSummary;
+    assistantEntryId?: number;
+    resolution?: {
+        decisionId: string;
+        choice: 'retry' | 'skip' | 'completed';
+        reason: string;
+    };
+}
+export interface RecoveryDecision {
+    id: string;
+    snapshotId: string;
+    action: 'continue' | 'end';
+    acceptAdditionalModelAttempts?: boolean;
+    resolutions?: {
+        taskId: number;
+        choice: 'retry' | 'skip' | 'completed';
+        reason: string;
+    }[];
+}
+export interface RecoveryReport {
+    runId: string;
+    snapshotId: string;
+    status: 'completed' | 'needs-decision' | 'blocked' | 'ended';
+    exitCode: 0 | 75;
+    reasons: string[];
+    options: string[];
+    original: unknown;
+    tools: RecoveryTool[];
+    unknownModelAttempts: string[];
+    remainingModelAttempts: number;
+    compactions?: {
+        taskId: number;
+        reason: string;
+        status: string;
+        submissionId?: number;
+        submissionStatus?: string;
+        entryId?: number;
+    }[];
+    session?: {
+        id: string;
+        sourceFiles: {
+            path: string;
+            sha256: string;
+        }[];
+        pending: {
+            kind: string;
+            id: number;
+            status: string;
+        }[];
+        taskCount: number;
+        submissionCount: number;
+        pendingCount?: number;
+    };
+    details?: {
+        tools: DetailSummary;
+        compactions: DetailSummary;
+        unknownModelAttempts: DetailSummary;
+        reasons: DetailSummary;
+        pending: DetailSummary;
+        toolCounts: Record<RecoveryTool['fact'], number>;
+        unresolvedTools: number;
+        navigation: string;
+    };
+    persistence?: 'saved' | 'not-requested' | 'owner-blocked' | 'saved-separate-owner-report';
+    ownerClaims?: OwnerClaim[];
+    needsInput?: {
+        reason: string;
+        options: string[];
+        risks: string[];
+    };
+    decisionId?: string;
+}
+interface OwnerClaim {
+    path: string;
+    markerSha256: string;
+    claim: {
+        pid: number;
+        host: string;
+        token?: string;
+    };
+    lock: {
+        ino: number;
+        mtimeMs: number;
+    } | null;
+}
+export declare function sessionWasEnded(records: RecoveryRecords, sessionId: string, files: {
+    path: string;
+    sha256: string;
+}[]): boolean;
+export declare function inspectOwnedRecovery(options: RecoveryOptions, owner: OwnerLease, resolutions?: NonNullable<RecoveryDecision['resolutions']>): Promise<{
+    report: RecoveryReport;
+    records: RecoveryRecords;
+    session: {
+        source: string;
+        method: string;
+        snapshotSha256: string;
+        sourceFiles: {
+            path: string;
+            sha256: string;
+        }[];
+    } & {
+        tools: DetailPage<RecoveryTool>;
+        compactions: DetailPage<{
+            taskId: number;
+            reason: string;
+            status: string;
+            submissionId?: number;
+            submissionStatus?: string;
+            entryId?: number;
+        }>;
+        unknownModelAttempts: DetailPage<string>;
+        pending: DetailPage<{
+            kind: string;
+            id: number;
+            status: string;
+        }>;
+        taskCount: number;
+        submissionCount: number;
+        main: ({
+            readonly id: SubmissionId;
+            readonly conversationId: import("@earendil-works/pi-durable").ConversationId;
+            readonly requestId?: string;
+        } & {
+            readonly type: "input";
+        } & {
+            readonly status: "queued";
+            readonly entry?: never;
+            readonly answer?: never;
+            readonly reason?: never;
+            readonly detail?: never;
+        }) | ({
+            readonly id: SubmissionId;
+            readonly conversationId: import("@earendil-works/pi-durable").ConversationId;
+            readonly requestId?: string;
+        } & {
+            readonly type: "input";
+        } & {
+            readonly status: "placed";
+            readonly entry: EntryId;
+            readonly answer?: never;
+            readonly reason?: never;
+            readonly detail?: never;
+        }) | ({
+            readonly id: SubmissionId;
+            readonly conversationId: import("@earendil-works/pi-durable").ConversationId;
+            readonly requestId?: string;
+        } & {
+            readonly type: "input";
+        } & {
+            readonly status: "done";
+            readonly entry: EntryId;
+            readonly answer: EntryId;
+            readonly reason?: never;
+            readonly detail?: never;
+        }) | ({
+            readonly id: SubmissionId;
+            readonly conversationId: import("@earendil-works/pi-durable").ConversationId;
+            readonly requestId?: string;
+        } & {
+            readonly type: "input";
+        } & {
+            readonly status: "unanswered";
+            readonly entry?: EntryId;
+            readonly answer?: never;
+            readonly reason: string;
+            readonly detail?: import("@earendil-works/chord").JsonValue;
+        }) | undefined;
+        placed: import("@earendil-works/pi-durable").SubmissionRecord | undefined;
+        modelAttempts: number;
+        toolCounts: {
+            committed: number;
+            'completed-uncommitted': number;
+            'not-dispatched': number;
+            unknown: number;
+        };
+        unknownTools: number;
+        unresolvedTools: number;
+        matchedResolutions: number;
+        readOnly: boolean;
+        agent: import("@earendil-works/pi-durable").JsonObject | undefined;
+    };
+    accepted: any;
+    started: any;
+    submission: ({
+        readonly id: SubmissionId;
+        readonly conversationId: import("@earendil-works/pi-durable").ConversationId;
+        readonly requestId?: string;
+    } & {
+        readonly type: "input";
+    } & {
+        readonly status: "queued";
+        readonly entry?: never;
+        readonly answer?: never;
+        readonly reason?: never;
+        readonly detail?: never;
+    }) | ({
+        readonly id: SubmissionId;
+        readonly conversationId: import("@earendil-works/pi-durable").ConversationId;
+        readonly requestId?: string;
+    } & {
+        readonly type: "input";
+    } & {
+        readonly status: "placed";
+        readonly entry: EntryId;
+        readonly answer?: never;
+        readonly reason?: never;
+        readonly detail?: never;
+    }) | ({
+        readonly id: SubmissionId;
+        readonly conversationId: import("@earendil-works/pi-durable").ConversationId;
+        readonly requestId?: string;
+    } & {
+        readonly type: "input";
+    } & {
+        readonly status: "done";
+        readonly entry: EntryId;
+        readonly answer: EntryId;
+        readonly reason?: never;
+        readonly detail?: never;
+    }) | ({
+        readonly id: SubmissionId;
+        readonly conversationId: import("@earendil-works/pi-durable").ConversationId;
+        readonly requestId?: string;
+    } & {
+        readonly type: "input";
+    } & {
+        readonly status: "unanswered";
+        readonly entry?: EntryId;
+        readonly answer?: never;
+        readonly reason: string;
+        readonly detail?: import("@earendil-works/chord").JsonValue;
+    }) | undefined;
+    config: any;
+    coding: boolean;
+    externalBlock: boolean;
+}>;
+/** No source database changes, model, tool, migration, or ordinary Harness open. Owner markers are temporary coordination only. */
+export declare function inspectRecovery(options: RecoveryOptions): Promise<RecoveryReport>;
+/** Original entry JSON is retrieved only on demand, in bounded UTF-16 text pages. Revalidate the
+ * exact recovery identity and the source copy; a saved display page is never scheduling authority. */
+export declare function readRecoveryDetail(options: RecoveryOptions & {
+    snapshotId: string;
+    entryId?: number;
+    taskId?: number;
+    offset?: number;
+    limit?: number;
+}): Promise<{
+    snapshotId: string;
+    source: string;
+    method: string;
+    snapshotSha256: string;
+    sourceFiles: {
+        path: string;
+        sha256: string;
+    }[];
+    entryId: number | undefined;
+    taskId: number | undefined;
+    commitSeq: import("@earendil-works/pi-durable").Seq | undefined;
+    sha256: string;
+    bytes: number;
+    length: number;
+    offset: number;
+    text: string;
+    next: number | null;
+    offsets: string;
+}>;
+/** Explicit check persists a separate report, without changing execution state. Read-only show/inspect never calls this. */
+export declare function checkRecovery(options: RecoveryOptions): Promise<RecoveryReport>;
+/** Only an observed, completed managed cleanup can settle a retained owner. A raw crash remains blocked. */
+export declare function settleRecoveryOwners(options: RecoveryOptions & {
+    decision: {
+        id: string;
+        snapshotId: string;
+        action: 'confirm-cleanup';
+        acceptUnknownExternalEffects: boolean;
+    };
+}): Promise<RecoveryReport>;
+export interface RecoveryPlan {
+    owner: OwnerLease;
+    report: RecoveryReport;
+    records: RecoveryRecords;
+    accepted: any;
+    started: any;
+    config: any;
+    coding: boolean;
+    submissionId: SubmissionId;
+    decision: RecoveryDecision;
+    readOnly: boolean;
+    previousRequests: number;
+    previousUsageUnknown: boolean;
+    adopted?: boolean;
+    frozenRequests?: Iterable<string>;
+}
+export declare function prepareRecovery(options: RecoveryOptions & {
+    decision: RecoveryDecision;
+}): Promise<RecoveryPlan | RecoveryReport | RunResult>;

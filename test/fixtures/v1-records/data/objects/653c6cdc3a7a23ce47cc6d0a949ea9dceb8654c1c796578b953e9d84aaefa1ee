@@ -1,0 +1,25 @@
+import type { Terminal } from '@earendil-works/pi-tui';
+type ProbeTerminal = Pick<Terminal, 'write' | 'columns' | 'rows'>;
+/** One ordered CPR + DA1 exchange at a time. A timed-out exchange retains its tombstone until DA1. */
+export declare class TerminalWidthProbe {
+    private readonly terminal;
+    private readonly timeoutMs;
+    private readonly cursorVisible;
+    private pending?;
+    private closed;
+    private boundaryWaiters;
+    readonly observations: Array<{
+        grapheme: string;
+        width: number;
+        elapsedMs: number;
+    }>;
+    constructor(terminal: ProbeTerminal, timeoutMs?: number, cursorVisible?: () => boolean);
+    get canRetry(): boolean;
+    /** Receives complete events from ProcessTerminal's public StdinBuffer path. Paste stays opaque. */
+    consume(data: string): boolean;
+    private query;
+    measure(grapheme: string, signal: AbortSignal): Promise<number>;
+    close(): void;
+    waitForBoundary(maxMs?: number): Promise<boolean>;
+}
+export {};

@@ -1,0 +1,27 @@
+export interface EvalCase {
+    id: string;
+    category: 'local-fix' | 'multi-file' | 'regression' | 'no-change';
+    visibility: 'public-development';
+    input: string;
+    files: Record<string, string>;
+    writable: string[];
+    dirty: Record<string, string>;
+    dependencyLock: string;
+    grader: {
+        version: string;
+        program: string;
+        expectedStdout: string;
+        required: string[];
+        observations?: {
+            name: string;
+            path: (string | number)[];
+            expected: unknown;
+        }[];
+    };
+}
+export declare const representativeCases: EvalCase[];
+/** Deterministic provider scripts exercise the product loop; they are not model inference. */
+export declare function controlledSteps(id: string): {
+    name: string;
+    args: unknown;
+}[];

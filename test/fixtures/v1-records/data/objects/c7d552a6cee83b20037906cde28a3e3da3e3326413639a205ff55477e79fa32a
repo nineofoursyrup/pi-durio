@@ -1,0 +1,58 @@
+import { type EvidenceReference } from '../history.js';
+export interface FeedbackSource {
+    kind: 'human' | 'action' | 'unverified';
+    actor: string;
+    statement: string;
+    refs: string[];
+}
+export interface FeedbackBase {
+    id: string;
+    taskId: string;
+    source: FeedbackSource;
+    reason?: string;
+}
+export type FeedbackInput = FeedbackBase & ({
+    type: 'observation';
+    dimension: 'intervention' | 'rework';
+    meaning: 'correction' | 'none' | 'normal-authorization' | 'clarification' | 'new-requirement' | 'improve-choice' | 'complaint' | 'unknown';
+    occurredAt: string | null;
+    requirements: string[];
+    originalRequirement?: 'unmet' | 'unknown';
+    correction?: 'requested' | 'started' | 'completed' | 'unknown';
+    coverage?: {
+        from: string;
+        to: string;
+    };
+    delivery?: string;
+    repairTaskId?: string;
+    repairSources?: string[];
+    resultSources?: string[];
+    revisionOf?: string;
+} | {
+    type: 'withdraw';
+    targets: string[];
+    reason: string;
+});
+export interface FeedbackFact {
+    ref: EvidenceReference;
+    data: FeedbackInput & {
+        requestIdentity: string;
+        receivedAt: string;
+        ruleVersion: string;
+        basisThrough: number;
+    };
+}
+export declare const feedbackKinds: string[];
+export declare function feedbackHistory(root: string, runId: string, taskId: string, through: number): {
+    facts: FeedbackFact[];
+    missing: {
+        source: string;
+        reason: string;
+    }[];
+};
+/** Optional explicit host/user input. Existing conversation/action refs and literal
+ * statements are retained; no language classifier or model tool is registered. */
+export declare function recordFeedback(root: string, input: FeedbackInput): {
+    source: string;
+    repeated: boolean;
+};

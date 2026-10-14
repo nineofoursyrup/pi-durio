@@ -1,0 +1,24 @@
+import { Evidence } from '../evidence.js';
+/** Synthetic assets only. The probe itself runs as an actual product bash tool. */
+export declare function prepareProbe(inputDir: string, descendants?: boolean): Promise<{
+    root: string;
+    targets: {
+        name: string;
+        path: string;
+        sha256: string;
+    }[];
+    verify(work: string, evidence: Evidence): Promise<{
+        valid: any;
+        probe: import("../evidence.js").BlobRef;
+        descendant: import("../evidence.js").BlobRef | null;
+        heartbeatStopped: boolean;
+        assetsUnchanged: boolean;
+        hostSentinelAlive: boolean;
+        syntheticAssets: {
+            name: string;
+            path: string;
+            sha256: string;
+        }[];
+    }>;
+    close(): Promise<void>;
+}>;

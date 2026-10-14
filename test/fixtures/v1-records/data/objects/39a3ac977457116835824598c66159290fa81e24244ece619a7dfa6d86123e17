@@ -1,0 +1,8 @@
+data: {"id":"offline-imp-1","model":"offline","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"imp-1","type":"function","function":{"name":"evidence_summary","arguments":"{}"}}]},"finish_reason":null}]}
+
+data: {"id":"offline-imp-1","model":"offline","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"offline-imp-1","model":"offline","choices":[],"usage":{"prompt_tokens":10,"completion_tokens":4,"total_tokens":14}}
+
+data: [DONE]
+

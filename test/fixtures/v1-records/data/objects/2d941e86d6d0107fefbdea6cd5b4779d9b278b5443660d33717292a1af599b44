@@ -1,0 +1,53 @@
+import { type Harness, type Conversation, type TaskId, type CompactionResult } from '@earendil-works/pi-durable';
+export { compactContext } from './runtime.js';
+export type { CompactOptions } from './runtime.js';
+export type CompactionState = 'noop' | 'generated' | 'applied' | 'stale' | 'cancelled' | 'failed' | 'interrupted';
+export interface CompactionResultFact {
+    requestId: string | null;
+    taskId: number;
+    state: CompactionState;
+    submissionId?: number;
+    entryId?: number;
+    reason?: string;
+}
+/** Read-only facts, bounded at a stable host watermark. No Harness is opened. */
+export declare function readCompactions(root: string, runId: string, options?: {
+    after?: number;
+    through?: number;
+    limit?: number;
+}): {
+    runId: string;
+    through: number;
+    items: {
+        seq: number;
+        kind: string;
+        source: string;
+        data: any;
+    }[];
+    next: number | null;
+    retention: string;
+};
+/** Observes public Pi commits; it never selects a cut, generates a summary or schedules a replacement loop. */
+export declare class CompactionFacts {
+    private readonly record;
+    private readonly guard;
+    private readonly failure;
+    private harness?;
+    private remove?;
+    private tasks;
+    private submissions;
+    private results;
+    private seen;
+    private manualRequest;
+    constructor(record: (kind: string, data: unknown) => number, guard: () => void, failure: (error: unknown) => void);
+    readonly hook: import("@earendil-works/pi-durable").HookRegistration;
+    attach(harness: Harness): void;
+    private once;
+    private finish;
+    private submission;
+    manual(conversation: Conversation, requestId: string, onTask: (id: TaskId<CompactionResult>) => void): Promise<CompactionResultFact>;
+    private refresh;
+    settle(): Promise<void>;
+    cancel(taskId: TaskId<CompactionResult>): Promise<CompactionResultFact | undefined>;
+    close(): void;
+}

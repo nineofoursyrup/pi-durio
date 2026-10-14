@@ -1,0 +1,473 @@
+import { type MetricsScope } from './report.js';
+/** Query only. Intervention uses admission population; rework independently uses
+ * first-delivery population, including tasks admitted before the window. */
+export declare function queryFeedbackMetrics(root: string, input?: MetricsScope): {
+    schema: string;
+    ruleVersion: string;
+    scope: {
+        through: number;
+        from: string;
+        to: string;
+        asOf: string;
+        source: "ordinary" | "synthetic" | "diagnostic";
+        project?: string;
+        taskType?: string;
+        version?: string;
+        revisionOf?: string;
+    };
+    snapshot: {
+        current: number;
+        through: number;
+        blockedAt: string | null;
+        rollback: boolean;
+        policy: string;
+    };
+    intervention: {
+        tasks: {
+            events: {
+                position: string;
+                linked: boolean;
+                observedPositive: boolean;
+                positive: boolean;
+                negative: boolean;
+                id: string;
+                source: string;
+                seq: number;
+                active: boolean;
+                conflict: boolean;
+                classification: "unknown" | "excluded" | "positive" | "negative";
+                reasons: string[];
+                missing: string[];
+                input: import("./feedback.js").FeedbackBase & {
+                    type: "observation";
+                    dimension: "intervention" | "rework";
+                    meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                    occurredAt: string | null;
+                    requirements: string[];
+                    originalRequirement?: "unmet" | "unknown";
+                    correction?: "requested" | "started" | "completed" | "unknown";
+                    coverage?: {
+                        from: string;
+                        to: string;
+                    };
+                    delivery?: string;
+                    repairTaskId?: string;
+                    repairSources?: string[];
+                    resultSources?: string[];
+                    revisionOf?: string;
+                } & {
+                    requestIdentity: string;
+                    receivedAt: string;
+                    ruleVersion: string;
+                    basisThrough: number;
+                };
+                occurredAt: string | null;
+                receivedAt: string;
+                sourceRefs: string[];
+            }[];
+            state: string;
+            positive: boolean;
+            feedback: {
+                items: {
+                    id: string;
+                    source: string;
+                    seq: number;
+                    active: boolean;
+                    conflict: boolean;
+                    classification: "unknown" | "excluded" | "positive" | "negative";
+                    reasons: string[];
+                    missing: string[];
+                    input: import("./feedback.js").FeedbackBase & {
+                        type: "observation";
+                        dimension: "intervention" | "rework";
+                        meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                        occurredAt: string | null;
+                        requirements: string[];
+                        originalRequirement?: "unmet" | "unknown";
+                        correction?: "requested" | "started" | "completed" | "unknown";
+                        coverage?: {
+                            from: string;
+                            to: string;
+                        };
+                        delivery?: string;
+                        repairTaskId?: string;
+                        repairSources?: string[];
+                        resultSources?: string[];
+                        revisionOf?: string;
+                    } & {
+                        requestIdentity: string;
+                        receivedAt: string;
+                        ruleVersion: string;
+                        basisThrough: number;
+                    };
+                    occurredAt: string | null;
+                    receivedAt: string;
+                    sourceRefs: string[];
+                }[];
+                history: {
+                    id: string;
+                    type: "withdraw" | "observation";
+                    source: string;
+                    receivedAt: string;
+                    input: import("./feedback.js").FeedbackInput & {
+                        requestIdentity: string;
+                        receivedAt: string;
+                        ruleVersion: string;
+                        basisThrough: number;
+                    };
+                    withdrawn: boolean;
+                    superseded: boolean;
+                }[];
+                missing: {
+                    source: string;
+                    reason: string;
+                }[];
+            };
+            delivery: {
+                source: string;
+                at: string;
+                answerSource: string;
+                clock: any;
+                definition: string;
+            } | null;
+            redeliveries: {
+                source: string;
+                at: string;
+            }[];
+            start: {
+                source: string;
+                at: string;
+            } | null;
+            end: {
+                source: string;
+                at: string;
+            } | null;
+            missing: {
+                source: string;
+                reason: string;
+            }[];
+            uncertain: boolean;
+            taskId: string;
+            runId: string | null;
+            version: string | null;
+            project: any;
+            acceptedSource: string;
+            acceptedAt: string;
+            acceptance: import("./acceptance.js").Verdict;
+            requirementsChanged: boolean;
+            requirements: {
+                id: string;
+                source: string;
+                ruleVersion: any;
+            }[];
+            results: {
+                id: string;
+                source: string;
+                evidence: any;
+            }[];
+        }[];
+        excluded: {
+            taskId: string;
+            source: string;
+            reasons: string[];
+            kind: string | null;
+            sourceClass: string | null;
+            version: string | null;
+            taskType: string | null;
+        }[];
+        rate: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+        coverage: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+        completeRate: string;
+        logicalRange: number[] | null;
+        rangeMeaning: string;
+        selection: string;
+        counts: {
+            Ni: number;
+            I: number;
+            Z: number;
+            U: number;
+            events: number;
+            unstarted: number;
+            open: number;
+            openPositive: number;
+        };
+    };
+    rework: {
+        tasks: {
+            window: {
+                from: string;
+                to: string;
+                unit: string;
+                duration: number;
+                bounds: string;
+            };
+            mature: boolean;
+            positive: boolean;
+            events: {
+                position: string;
+                linked: boolean;
+                observedPositive: boolean;
+                positive: boolean;
+                negative: boolean;
+                id: string;
+                source: string;
+                seq: number;
+                active: boolean;
+                conflict: boolean;
+                classification: "unknown" | "excluded" | "positive" | "negative";
+                reasons: string[];
+                missing: string[];
+                input: import("./feedback.js").FeedbackBase & {
+                    type: "observation";
+                    dimension: "intervention" | "rework";
+                    meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                    occurredAt: string | null;
+                    requirements: string[];
+                    originalRequirement?: "unmet" | "unknown";
+                    correction?: "requested" | "started" | "completed" | "unknown";
+                    coverage?: {
+                        from: string;
+                        to: string;
+                    };
+                    delivery?: string;
+                    repairTaskId?: string;
+                    repairSources?: string[];
+                    resultSources?: string[];
+                    revisionOf?: string;
+                } & {
+                    requestIdentity: string;
+                    receivedAt: string;
+                    ruleVersion: string;
+                    basisThrough: number;
+                };
+                occurredAt: string | null;
+                receivedAt: string;
+                sourceRefs: string[];
+            }[];
+            state: string;
+            feedback: {
+                items: {
+                    id: string;
+                    source: string;
+                    seq: number;
+                    active: boolean;
+                    conflict: boolean;
+                    classification: "unknown" | "excluded" | "positive" | "negative";
+                    reasons: string[];
+                    missing: string[];
+                    input: import("./feedback.js").FeedbackBase & {
+                        type: "observation";
+                        dimension: "intervention" | "rework";
+                        meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                        occurredAt: string | null;
+                        requirements: string[];
+                        originalRequirement?: "unmet" | "unknown";
+                        correction?: "requested" | "started" | "completed" | "unknown";
+                        coverage?: {
+                            from: string;
+                            to: string;
+                        };
+                        delivery?: string;
+                        repairTaskId?: string;
+                        repairSources?: string[];
+                        resultSources?: string[];
+                        revisionOf?: string;
+                    } & {
+                        requestIdentity: string;
+                        receivedAt: string;
+                        ruleVersion: string;
+                        basisThrough: number;
+                    };
+                    occurredAt: string | null;
+                    receivedAt: string;
+                    sourceRefs: string[];
+                }[];
+                history: {
+                    id: string;
+                    type: "withdraw" | "observation";
+                    source: string;
+                    receivedAt: string;
+                    input: import("./feedback.js").FeedbackInput & {
+                        requestIdentity: string;
+                        receivedAt: string;
+                        ruleVersion: string;
+                        basisThrough: number;
+                    };
+                    withdrawn: boolean;
+                    superseded: boolean;
+                }[];
+                missing: {
+                    source: string;
+                    reason: string;
+                }[];
+            };
+            delivery: {
+                source: string;
+                at: string;
+                answerSource: string;
+                clock: any;
+                definition: string;
+            } | null;
+            redeliveries: {
+                source: string;
+                at: string;
+            }[];
+            start: {
+                source: string;
+                at: string;
+            } | null;
+            end: {
+                source: string;
+                at: string;
+            } | null;
+            missing: {
+                source: string;
+                reason: string;
+            }[];
+            uncertain: boolean;
+            taskId: string;
+            runId: string | null;
+            version: string | null;
+            project: any;
+            acceptedSource: string;
+            acceptedAt: string;
+            acceptance: import("./acceptance.js").Verdict;
+            requirementsChanged: boolean;
+            requirements: {
+                id: string;
+                source: string;
+                ruleVersion: any;
+            }[];
+            results: {
+                id: string;
+                source: string;
+                evidence: any;
+            }[];
+        }[];
+        excluded: ({
+            taskId: string;
+            source: string;
+            reasons: string[];
+            kind: string | null;
+            sourceClass: string | null;
+            version: string | null;
+            taskType: string | null;
+        } | {
+            taskId: string;
+            source: string;
+            reasons: string[];
+            delivery: {
+                source: string;
+                at: string;
+                answerSource: string;
+                clock: any;
+                definition: string;
+            } | null;
+            feedback: {
+                items: {
+                    id: string;
+                    source: string;
+                    seq: number;
+                    active: boolean;
+                    conflict: boolean;
+                    classification: "unknown" | "excluded" | "positive" | "negative";
+                    reasons: string[];
+                    missing: string[];
+                    input: import("./feedback.js").FeedbackBase & {
+                        type: "observation";
+                        dimension: "intervention" | "rework";
+                        meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                        occurredAt: string | null;
+                        requirements: string[];
+                        originalRequirement?: "unmet" | "unknown";
+                        correction?: "requested" | "started" | "completed" | "unknown";
+                        coverage?: {
+                            from: string;
+                            to: string;
+                        };
+                        delivery?: string;
+                        repairTaskId?: string;
+                        repairSources?: string[];
+                        resultSources?: string[];
+                        revisionOf?: string;
+                    } & {
+                        requestIdentity: string;
+                        receivedAt: string;
+                        ruleVersion: string;
+                        basisThrough: number;
+                    };
+                    occurredAt: string | null;
+                    receivedAt: string;
+                    sourceRefs: string[];
+                }[];
+                history: {
+                    id: string;
+                    type: "withdraw" | "observation";
+                    source: string;
+                    receivedAt: string;
+                    input: import("./feedback.js").FeedbackInput & {
+                        requestIdentity: string;
+                        receivedAt: string;
+                        ruleVersion: string;
+                        basisThrough: number;
+                    };
+                    withdrawn: boolean;
+                    superseded: boolean;
+                }[];
+                missing: {
+                    source: string;
+                    reason: string;
+                }[];
+            };
+            missing: {
+                source: string;
+                reason: string;
+            }[];
+        })[];
+        rate: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+        coverage: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+        completeRate: string;
+        logicalRange: number[] | null;
+        rangeMeaning: string;
+        selection: string;
+        counts: {
+            Nr: number;
+            Rr: number;
+            Zr: number;
+            Ur: number;
+            events: number;
+            immature: number;
+            immaturePositive: number;
+        };
+    };
+    limits: string[];
+    id: string;
+    generatedAt: string;
+    revisionOf: string | null;
+};
+export type FeedbackMetricsReport = ReturnType<typeof queryFeedbackMetrics>;
+export declare function formatFeedbackMetrics(r: FeedbackMetricsReport): string;

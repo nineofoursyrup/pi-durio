@@ -1,0 +1,25 @@
+/** Readonly report/source viewer. No runner, write operation or current-session capability. */
+export declare class EvalView {
+    private root;
+    private plans;
+    private selected;
+    private line;
+    private followSelection;
+    private content;
+    private planId?;
+    private revisions;
+    private revisionIndex;
+    private records?;
+    private after;
+    private afters;
+    private detail?;
+    private offset;
+    private offsets;
+    private next;
+    constructor(root: string, id?: string);
+    private report;
+    private load;
+    handleInput(data: string): void;
+    scroll(delta: number): void;
+    render(width: number, height: number): string[];
+}

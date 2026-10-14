@@ -1,0 +1,21 @@
+import { type Evidence } from './evidence.js';
+export declare function captureArtifact(evidence: Evidence, workspace: string): {
+    id: string;
+    files: {
+        path: string;
+        sha256: string;
+        bytes: number;
+    }[];
+    installation: import("./evidence.js").BlobRef;
+    dependencies: {
+        name: string;
+        version: any;
+    }[];
+    node: string;
+    platform: NodeJS.Platform;
+    arch: NodeJS.Architecture;
+    workspace: string;
+    git: unknown;
+    dependencyContent: string;
+};
+export declare function verifyArtifact(root: string, artifact: ReturnType<typeof captureArtifact>): void;

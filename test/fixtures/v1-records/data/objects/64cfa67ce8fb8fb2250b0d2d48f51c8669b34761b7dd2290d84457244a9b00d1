@@ -1,0 +1,34 @@
+/** Deliberately excludes model/provider/auth/tools/retry/budget/maxTokens.
+ * Output limits belong to the common host grant, never candidate config. */
+export interface TaskProfile {
+    version: 1;
+    instructions: string;
+    compaction?: {
+        enabled?: boolean;
+        reserveTokens?: number;
+        keepRecentTokens?: number;
+    };
+    stream?: {
+        timeoutMs: number;
+    };
+}
+export interface EffectiveTask {
+    type: 'read' | 'coding';
+    profile: TaskProfile;
+}
+export interface ProfileContent {
+    targetId: string;
+    path: string;
+    kind: 'agent-config' | 'prompt-skill';
+    text: string;
+}
+export declare function validateTaskProfile(value: TaskProfile): TaskProfile;
+export declare function profileFromContent(files: ProfileContent[]): TaskProfile;
+export declare function profileIdentity(profile: TaskProfile): string;
+export declare function applyTaskProfile<T extends {
+    instructions: string;
+    settings: {
+        compaction: object;
+        stream: object;
+    };
+}>(base: T, profile?: TaskProfile): T;
