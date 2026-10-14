@@ -1,0 +1,1 @@
+{"status": "PASS_STATIC_AND_UNAUTHORIZED_ENTRY_ONLY", "staticChecks": 10, "entryDenials": 2, "originalsUnchanged": 15558, "candidateValidated": false}

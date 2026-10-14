@@ -1,0 +1,251 @@
+{
+  "at": "2026-10-09T23:33:06.976439+00:00",
+  "status": "PASS",
+  "identity": {
+    "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+    "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+    "status": "?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png\n?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json\n",
+    "tracked_clean": true,
+    "executable_delta_sha256": "2b179955372baf20f4b68d229488ccc902c3be2772b506adcf1d52da3f2e2500"
+  },
+  "source_build": {
+    "expected": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "evidence": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "current": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+  },
+  "counts": {
+    "inputs": 169,
+    "compiler": 140,
+    "outputs": 246
+  },
+  "compiled_test_fixture_count": 123,
+  "compiled_test_set_exact": true,
+  "before_after_bound_entries_exact": true,
+  "before_after_compiled_tests_exact": true,
+  "original_first_failure_references": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/execution/plan.json",
+      "bytes": 2715,
+      "sha256": "c61b32e01fd7d364797b04bcb4d8c6151006afba1f3c67ae6f4e81b387f91774"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/execution/outcome.json",
+      "bytes": 26832,
+      "sha256": "8bf41c8e3169e0f425a64071c9c29e73e642deffb7d6e38d47ec88476e4e8744"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/startup/plan.json",
+      "bytes": 2692,
+      "sha256": "17a2b309298008b51a5786473c48e2c61b88a071f15e6d9a7765263e884acbb8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/build/startup/outcome.json",
+      "bytes": 41799,
+      "sha256": "7965768ff986671b5eccaebc0ac98e4f6bb69c5a7241f0eb01a8c517bdba37a6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/plan.json",
+      "bytes": 2670,
+      "sha256": "b1cb11ab79e65040d2ce23caec5fbcbf4432a94094c6b78263e029258a8e9f4b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/outcome.json",
+      "bytes": 26374,
+      "sha256": "3ef9865ce9208e67784154c16a2844472a67a19c458e479b0eb3cddef032ac6d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/5711b21e66f92589237fb84e3d6a79ecf0ffac27f968149d6ca729d4d93a40ad",
+      "bytes": 22466,
+      "sha256": "5711b21e66f92589237fb84e3d6a79ecf0ffac27f968149d6ca729d4d93a40ad"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/438fbc0c3ec2ab8c249a7c107c6159ffde85dbe02bcb70293feabcb7f7ceec18",
+      "bytes": 581,
+      "sha256": "438fbc0c3ec2ab8c249a7c107c6159ffde85dbe02bcb70293feabcb7f7ceec18"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/48d311d67fd792767b696763b103836c0d27ef27496ea41aecffe39b7962f168",
+      "bytes": 1017,
+      "sha256": "48d311d67fd792767b696763b103836c0d27ef27496ea41aecffe39b7962f168"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/0d938e72f4bca950a215c0b5af8e518ee6b03d62e0bb8cee7bbeb93d67da0564",
+      "bytes": 1897,
+      "sha256": "0d938e72f4bca950a215c0b5af8e518ee6b03d62e0bb8cee7bbeb93d67da0564"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/45132e114fe970a22594c0751ada5164cb63feeb70f00a68c1e7b4379b686940",
+      "bytes": 200,
+      "sha256": "45132e114fe970a22594c0751ada5164cb63feeb70f00a68c1e7b4379b686940"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/data/objects/3495cfcfed47a11ce9bd672d161878d2b50213ed6da1e150fc59858e6d63c06b",
+      "bytes": 290,
+      "sha256": "3495cfcfed47a11ce9bd672d161878d2b50213ed6da1e150fc59858e6d63c06b"
+    }
+  ],
+  "evidence_references_verified": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/handoff.json",
+      "bytes": 4597,
+      "sha256": "82408c894b4829149e796eef93cfdfd80c977d714a4d42831fa0c88723f9580d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-integration-readback.json",
+      "bytes": 19397,
+      "sha256": "939b1f36258578123ce2c0b45d05376c2af489d6b20c3f833bbccbf9ad39ed95"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-postflight.json",
+      "bytes": 76767,
+      "sha256": "c785110638674e127d1a70fbc21737010a4e615aabb2b869aa874884560393f8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-after-identity.json",
+      "bytes": 129664,
+      "sha256": "324a69a835d3e7fd1ed2f3706ec70a75d9cd0e273d5f70d2c7c3088819e9f177"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/boundary-green-r1.tap",
+      "bytes": 786,
+      "sha256": "c8aba1e3f13fb2d3c9c93b9ff3fde60f65b15683eb855c92b0f7b922ed7b0b29"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/improve-eval-green-r4.tap",
+      "bytes": 2974,
+      "sha256": "fd2593715802c91d4c560fdfc6408dd40e16c1cee56591d3c4271a13593fbd63"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/vm-boundary.tap",
+      "bytes": 580,
+      "sha256": "f723e04d5b4f9721117639a88cf4978f79be6f185988e879f4ba19c130e4e107"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/source-happy-path.tap",
+      "bytes": 390,
+      "sha256": "606a110d8a10fbf92b07472253536199fd0e02980a156f464e941af8ad4e1ff7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/real-output-retention.tap",
+      "bytes": 652,
+      "sha256": "d9f6cf286b0da6eef92e03a266da73308666789b1ab22d9bbeac8f338c2b19a6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/real-eval-verification.json",
+      "bytes": 722,
+      "sha256": "fdc4eed3f4d387f5d020fadd75f2f4b8736ead22a839ed9337e91bad41447f44"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/vm-outcomes.json",
+      "bytes": 9597,
+      "sha256": "35c20c5cc8fd1b8c87f96408bbefba1f34b06d43bd7530bb18414f032fd71dd8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/original-first-failure-readback.json",
+      "bytes": 3756,
+      "sha256": "de8438689d2094acc82efcf3b98debc59e28aa00912995f88a8b9a5778001c67"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/test-result.json",
+      "bytes": 917,
+      "sha256": "01f79bfe66d82c1e790b90698c57912be95c9ef325a20becb0abf734141033d6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tests.tap",
+      "bytes": 72079,
+      "sha256": "c16faf0ca5218e555ff82bdbd216c4cf3a0dba87ad4592e28f6ecbbae7dd9d6f"
+    }
+  ],
+  "vm_cleanup": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/execution/outcome.json",
+      "id": "durio-i12-9cd9607e-e3ae-43ef-95dd-4b8da3f2eeee",
+      "status": "completed",
+      "reason": null,
+      "deadline": "2026-10-09T23:22:06.729Z",
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/startup/outcome.json",
+      "id": "durio-i12-e296dd1c-fa6d-4394-8d0e-eea758bb87ac",
+      "status": "completed",
+      "reason": null,
+      "deadline": "2026-10-09T23:22:06.729Z",
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-tmp/durio-build-execution-w0YTtr/temporary/build/check-0/execution/outcome.json",
+      "id": "durio-i12-f12862b7-7a1b-424c-aa9c-f23fd10b28ed",
+      "status": "completed",
+      "reason": null,
+      "deadline": "2026-10-09T23:22:06.729Z",
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-tmp/durio-build-profile-5zq4tj/default/outcome.json",
+      "id": "durio-i12-a48df67b-98e1-4b0b-813a-2211923caa08",
+      "status": "completed",
+      "reason": null,
+      "deadline": null,
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-tmp/durio-build-profile-5zq4tj/typescript-build/outcome.json",
+      "id": "durio-i12-39ed3a23-ffbe-400f-b906-6241a4e95e3a",
+      "status": "completed",
+      "reason": null,
+      "deadline": null,
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-tmp/durio-decisions-FPNWsx/output-validation/math/check-0/execution/outcome.json",
+      "id": "durio-i12-6d6f1fb0-b720-437c-911d-eceec4ef29df",
+      "status": "failed",
+      "reason": "output_limit",
+      "deadline": "2026-10-09T23:17:54.409Z",
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-tmp/durio-decisions-j4nQiV/output-validation/math/check-0/execution/outcome.json",
+      "id": "durio-i12-067328a9-5823-4132-9dac-68bea069b0be",
+      "status": "failed",
+      "reason": "output_limit",
+      "deadline": "2026-10-09T23:17:51.358Z",
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-tmp/durio-model-budget-mgD9d0/pending/outcome.json",
+      "id": "durio-i12-9cc41148-e88f-46f6-848c-5b13dd001db6",
+      "status": "failed",
+      "reason": "timeout",
+      "deadline": null,
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-tmp/durio-model-budget-mgD9d0/quota/outcome.json",
+      "id": "durio-i12-3c504959-3a31-4ea3-9025-9aa043c2017d",
+      "status": "failed",
+      "reason": "model_request_denied",
+      "deadline": null,
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-execution/outcome.json",
+      "id": "durio-i12-7695ce7d-11e0-45b1-813c-620d2aa85580",
+      "status": "completed",
+      "reason": null,
+      "deadline": "2026-10-09T23:27:26.345Z",
+      "cleanup_verified": true
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-grading-0c2e8179-4301-4f50-bb52-3a686c5fc4b0/outcome.json",
+      "id": "durio-i12-b6746ab1-5fc5-463c-a066-9305d5965a91",
+      "status": "completed",
+      "reason": null,
+      "deadline": "2026-10-09T23:27:26.345Z",
+      "cleanup_verified": true
+    }
+  ],
+  "mismatches": [],
+  "scope": "Read-only current identity/hash and retained evidence verification. No new behavior test, build, VM, provider or native Terminal execution."
+}

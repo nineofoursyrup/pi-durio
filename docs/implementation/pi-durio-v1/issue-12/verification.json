@@ -1,0 +1,1109 @@
+{
+  "schema": 1,
+  "scope": "issue-12 mechanism probe only; product eval NOT VERIFIED",
+  "image": "pi-durio-isolation@sha256:998e7dbfb5f4f7abfb8ada97a6706bb6fe0f0a1b98a789873b4d2b6a7b78f62b",
+  "status": "PASS",
+  "scenarios": [
+    {
+      "mode": "good",
+      "status": "PASS",
+      "execution": {
+        "id": "durio-i12-3e744214-05f3-458e-88ab-7e7d9b853063",
+        "status": "completed",
+        "reason": null,
+        "terminated": true
+      },
+      "providerCalls": 1,
+      "probeFiles": [
+        {
+          "name": "probes.json",
+          "bytes": 5684,
+          "sha256": "5eddbf30099edcf2cd69492293c20ff534d5496e0cc403e1020a272116bdf8e1"
+        },
+        {
+          "name": "descendant.json",
+          "bytes": 2438,
+          "sha256": "d1e672b4c0d7e005c825f66cd9d83105d11a12a614b2206c954806d4ba6df848"
+        },
+        {
+          "name": "heartbeat.txt",
+          "bytes": 5,
+          "sha256": "eaf16bc07968e013f3f94ab1342472434a39fc3475f11cf341a6c3965974f8e9"
+        },
+        {
+          "name": "public-test.mjs",
+          "bytes": 20,
+          "sha256": "043d3741b829da7e5bcc3475e828925520dae2d27cd40ceb1b24c83d22829a58"
+        }
+      ],
+      "probes": [
+        {
+          "name": "host_home_credential_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "host_home_credential_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "other_trial_history_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "other_trial_history_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_grader_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_grader_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "hidden_expected_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "hidden_expected_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "shared_git_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "shared_git_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_fixture_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_fixture_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "trusted_report_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "trusted_report_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "readonly:/usr/local/bin/node",
+          "blocked": true,
+          "code": "EACCES"
+        },
+        {
+          "name": "readonly:/input/public-test.mjs",
+          "blocked": true,
+          "code": "EROFS"
+        },
+        {
+          "name": "readonly:/boundary/restrict.py",
+          "blocked": true,
+          "code": "EROFS"
+        },
+        {
+          "name": "host_process_signal",
+          "blocked": true,
+          "code": "ESRCH"
+        },
+        {
+          "name": "host_control_socket",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "host_credential_environment",
+          "blocked": true
+        },
+        {
+          "name": "ipv4_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "ipv6_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "vsock_control_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "netlink_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "packet_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "restore_root",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "ptrace_process_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "process_vm_read_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "new_network_namespace",
+          "blocked": true,
+          "code": 1,
+          "stderr": "unshare: unshare failed: Operation not permitted"
+        },
+        {
+          "name": "descendant:ipv4_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:ipv6_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:vsock_control_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:netlink_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:packet_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:restore_root",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:ptrace_process_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:process_vm_read_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:new_network_namespace",
+          "blocked": true,
+          "code": 1,
+          "stderr": "unshare: unshare failed: Operation not permitted"
+        }
+      ],
+      "residualCheck": {
+        "beforeHash": "eaf16bc07968e013f3f94ab1342472434a39fc3475f11cf341a6c3965974f8e9",
+        "afterHash": "eaf16bc07968e013f3f94ab1342472434a39fc3475f11cf341a6c3965974f8e9",
+        "stoppedThenDeleted": true,
+        "elapsedMs": 250
+      },
+      "artifacts": [
+        {
+          "name": "program.mjs",
+          "bytes": 1577,
+          "sha256": "1dc58e15d9f9c52b76ec1924a97de9069c13ea9096142b426ea4b3ececd89884"
+        }
+      ],
+      "grading": {
+        "status": "completed",
+        "reason": null,
+        "terminated": true,
+        "id": "durio-i12-d16665af-b2ec-41e1-859c-2bfe43ba828b",
+        "probes": [
+          {
+            "name": "host_home_credential_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "host_home_credential_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "other_trial_history_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "other_trial_history_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "original_grader_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "original_grader_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "hidden_expected_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "hidden_expected_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "shared_git_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "shared_git_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "original_fixture_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "original_fixture_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "trusted_report_read",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "trusted_report_write",
+            "blocked": true,
+            "code": "ENOENT"
+          },
+          {
+            "name": "ipv4_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "ipv6_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "vsock_control_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "netlink_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "packet_socket",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "restore_root",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "ptrace_process_channel",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "process_vm_read_channel",
+            "blocked": true,
+            "errno": 1
+          },
+          {
+            "name": "new_network_namespace",
+            "blocked": true,
+            "code": 1,
+            "stderr": "unshare: unshare failed: Operation not permitted"
+          }
+        ]
+      },
+      "measurement": {
+        "code": 0,
+        "stdout": "42\n",
+        "stderr": ""
+      },
+      "trustedGrade": "PASS"
+    },
+    {
+      "mode": "bad-score",
+      "status": "PASS",
+      "execution": {
+        "id": "durio-i12-c457ae16-c662-43ef-9124-4427f048d1ca",
+        "status": "completed",
+        "reason": null,
+        "terminated": true
+      },
+      "providerCalls": 0,
+      "probeFiles": [
+        {
+          "name": "probes.json",
+          "bytes": 5684,
+          "sha256": "db574c443a0de56e69f0af6dc86f4563c74a17ee8810fe7de9b33adb9e5f2e7d"
+        },
+        {
+          "name": "descendant.json",
+          "bytes": 2438,
+          "sha256": "a6522ebd384115281015b3d4d247b416c65e4d78dfcab708c0503f369b4fcc5f"
+        },
+        {
+          "name": "heartbeat.txt",
+          "bytes": 5,
+          "sha256": "eaf16bc07968e013f3f94ab1342472434a39fc3475f11cf341a6c3965974f8e9"
+        },
+        {
+          "name": "public-test.mjs",
+          "bytes": 20,
+          "sha256": "043d3741b829da7e5bcc3475e828925520dae2d27cd40ceb1b24c83d22829a58"
+        }
+      ],
+      "probes": [
+        {
+          "name": "host_home_credential_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "host_home_credential_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "other_trial_history_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "other_trial_history_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_grader_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_grader_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "hidden_expected_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "hidden_expected_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "shared_git_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "shared_git_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_fixture_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_fixture_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "trusted_report_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "trusted_report_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "readonly:/usr/local/bin/node",
+          "blocked": true,
+          "code": "EACCES"
+        },
+        {
+          "name": "readonly:/input/public-test.mjs",
+          "blocked": true,
+          "code": "EROFS"
+        },
+        {
+          "name": "readonly:/boundary/restrict.py",
+          "blocked": true,
+          "code": "EROFS"
+        },
+        {
+          "name": "host_process_signal",
+          "blocked": true,
+          "code": "ESRCH"
+        },
+        {
+          "name": "host_control_socket",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "host_credential_environment",
+          "blocked": true
+        },
+        {
+          "name": "ipv4_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "ipv6_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "vsock_control_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "netlink_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "packet_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "restore_root",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "ptrace_process_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "process_vm_read_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "new_network_namespace",
+          "blocked": true,
+          "code": 1,
+          "stderr": "unshare: unshare failed: Operation not permitted"
+        },
+        {
+          "name": "descendant:ipv4_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:ipv6_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:vsock_control_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:netlink_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:packet_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:restore_root",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:ptrace_process_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:process_vm_read_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:new_network_namespace",
+          "blocked": true,
+          "code": 1,
+          "stderr": "unshare: unshare failed: Operation not permitted"
+        }
+      ],
+      "residualCheck": {
+        "beforeHash": "eaf16bc07968e013f3f94ab1342472434a39fc3475f11cf341a6c3965974f8e9",
+        "afterHash": "eaf16bc07968e013f3f94ab1342472434a39fc3475f11cf341a6c3965974f8e9",
+        "stoppedThenDeleted": true,
+        "elapsedMs": 250
+      },
+      "artifacts": [
+        {
+          "name": "program.mjs",
+          "bytes": 145,
+          "sha256": "0c6e98629ded0e27533c4d1aba97b2542b78d5f3b0d123aa86de91a26922dc98"
+        }
+      ],
+      "grading": {
+        "status": "completed",
+        "reason": null,
+        "terminated": true,
+        "id": "durio-i12-f243c876-2439-4e26-81fe-741341feacb9"
+      },
+      "measurement": {
+        "code": 0,
+        "stdout": "PASS\n",
+        "stderr": ""
+      },
+      "trustedGrade": "FAIL"
+    },
+    {
+      "mode": "timeout",
+      "status": "PASS",
+      "execution": {
+        "id": "durio-i12-3a60b6b3-d3bb-4e18-8221-ccffbbc22822",
+        "status": "failed",
+        "reason": "timeout",
+        "terminated": true
+      },
+      "providerCalls": 0,
+      "probeFiles": [
+        {
+          "name": "probes.json",
+          "bytes": 5684,
+          "sha256": "90936df0e1625eec0b7b47b891fc95294beef7fd8f16b98cc5942c8d6e0565b5"
+        },
+        {
+          "name": "descendant.json",
+          "bytes": 2438,
+          "sha256": "d1e672b4c0d7e005c825f66cd9d83105d11a12a614b2206c954806d4ba6df848"
+        },
+        {
+          "name": "heartbeat.txt",
+          "bytes": 41,
+          "sha256": "3164596df4fdd018b2c567ec8c03e79bd76f4e4ca2a3fd020b577300ff9d2aca"
+        },
+        {
+          "name": "public-test.mjs",
+          "bytes": 20,
+          "sha256": "043d3741b829da7e5bcc3475e828925520dae2d27cd40ceb1b24c83d22829a58"
+        }
+      ],
+      "probes": [
+        {
+          "name": "host_home_credential_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "host_home_credential_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "other_trial_history_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "other_trial_history_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_grader_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_grader_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "hidden_expected_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "hidden_expected_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "shared_git_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "shared_git_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_fixture_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_fixture_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "trusted_report_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "trusted_report_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "readonly:/usr/local/bin/node",
+          "blocked": true,
+          "code": "EACCES"
+        },
+        {
+          "name": "readonly:/input/public-test.mjs",
+          "blocked": true,
+          "code": "EROFS"
+        },
+        {
+          "name": "readonly:/boundary/restrict.py",
+          "blocked": true,
+          "code": "EROFS"
+        },
+        {
+          "name": "host_process_signal",
+          "blocked": true,
+          "code": "ESRCH"
+        },
+        {
+          "name": "host_control_socket",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "host_credential_environment",
+          "blocked": true
+        },
+        {
+          "name": "ipv4_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "ipv6_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "vsock_control_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "netlink_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "packet_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "restore_root",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "ptrace_process_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "process_vm_read_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "new_network_namespace",
+          "blocked": true,
+          "code": 1,
+          "stderr": "unshare: unshare failed: Operation not permitted"
+        },
+        {
+          "name": "descendant:ipv4_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:ipv6_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:vsock_control_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:netlink_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:packet_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:restore_root",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:ptrace_process_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:process_vm_read_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:new_network_namespace",
+          "blocked": true,
+          "code": 1,
+          "stderr": "unshare: unshare failed: Operation not permitted"
+        }
+      ],
+      "residualCheck": {
+        "beforeHash": "3164596df4fdd018b2c567ec8c03e79bd76f4e4ca2a3fd020b577300ff9d2aca",
+        "afterHash": "3164596df4fdd018b2c567ec8c03e79bd76f4e4ca2a3fd020b577300ff9d2aca",
+        "stoppedThenDeleted": true,
+        "elapsedMs": 250
+      }
+    },
+    {
+      "mode": "bad-model",
+      "status": "PASS",
+      "execution": {
+        "id": "durio-i12-fdb0b3f1-ac09-421e-9f10-240ede00904f",
+        "status": "failed",
+        "reason": "model_request_denied",
+        "terminated": true
+      },
+      "providerCalls": 0
+    },
+    {
+      "mode": "symlink",
+      "status": "PASS",
+      "execution": {
+        "id": "durio-i12-e6111bef-b6f1-4192-a708-2a0af3d78c2b",
+        "status": "completed",
+        "reason": null,
+        "terminated": true
+      },
+      "providerCalls": 0,
+      "probeFiles": [
+        {
+          "name": "probes.json",
+          "bytes": 5684,
+          "sha256": "6494996bb79c30292896bdc74e37be1d44563b822b9ead47e43ab493dd9f59d5"
+        },
+        {
+          "name": "descendant.json",
+          "bytes": 2438,
+          "sha256": "d5ddcbfc2b625874918b1e3eaa90bbc765dc0e8125f8f86a967f5ce28dd2f947"
+        },
+        {
+          "name": "heartbeat.txt",
+          "bytes": 5,
+          "sha256": "eaf16bc07968e013f3f94ab1342472434a39fc3475f11cf341a6c3965974f8e9"
+        },
+        {
+          "name": "public-test.mjs",
+          "bytes": 20,
+          "sha256": "043d3741b829da7e5bcc3475e828925520dae2d27cd40ceb1b24c83d22829a58"
+        }
+      ],
+      "probes": [
+        {
+          "name": "host_home_credential_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "host_home_credential_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "other_trial_history_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "other_trial_history_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_grader_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_grader_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "hidden_expected_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "hidden_expected_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "shared_git_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "shared_git_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_fixture_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "original_fixture_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "trusted_report_read",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "trusted_report_write",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "readonly:/usr/local/bin/node",
+          "blocked": true,
+          "code": "EACCES"
+        },
+        {
+          "name": "readonly:/input/public-test.mjs",
+          "blocked": true,
+          "code": "EROFS"
+        },
+        {
+          "name": "readonly:/boundary/restrict.py",
+          "blocked": true,
+          "code": "EROFS"
+        },
+        {
+          "name": "host_process_signal",
+          "blocked": true,
+          "code": "ESRCH"
+        },
+        {
+          "name": "host_control_socket",
+          "blocked": true,
+          "code": "ENOENT"
+        },
+        {
+          "name": "host_credential_environment",
+          "blocked": true
+        },
+        {
+          "name": "ipv4_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "ipv6_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "vsock_control_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "netlink_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "packet_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "restore_root",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "ptrace_process_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "process_vm_read_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "new_network_namespace",
+          "blocked": true,
+          "code": 1,
+          "stderr": "unshare: unshare failed: Operation not permitted"
+        },
+        {
+          "name": "descendant:ipv4_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:ipv6_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:vsock_control_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:netlink_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:packet_socket",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:restore_root",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:ptrace_process_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:process_vm_read_channel",
+          "blocked": true,
+          "errno": 1
+        },
+        {
+          "name": "descendant:new_network_namespace",
+          "blocked": true,
+          "code": 1,
+          "stderr": "unshare: unshare failed: Operation not permitted"
+        }
+      ],
+      "residualCheck": {
+        "beforeHash": "eaf16bc07968e013f3f94ab1342472434a39fc3475f11cf341a6c3965974f8e9",
+        "afterHash": "eaf16bc07968e013f3f94ab1342472434a39fc3475f11cf341a6c3965974f8e9",
+        "stoppedThenDeleted": true,
+        "elapsedMs": 250
+      },
+      "exportRejection": "export_not_single_regular_file",
+      "trialValidity": "invalid"
+    }
+  ],
+  "startedAt": "2026-10-09T09:45:57.889Z",
+  "mechanism": "Apple container 1.4.1 + Linux unshare/setpriv + fixed libseccomp socket policy",
+  "providerCalls": 1,
+  "finishedAt": "2026-10-09T09:46:15.476Z"
+}

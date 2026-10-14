@@ -1,0 +1,22 @@
+{
+  "issue": 16,
+  "type": "explicit-user-limited-A5-exception",
+  "status": "AUTHORIZED",
+  "at": "2026-10-09T12:01:44.363602Z",
+  "question": "是否允许为 #16 增加这项限定例外：维护 Pi 1.1.0 的小型字符宽度补丁，并接入按当前 Terminal 实测的自动校准？推荐允许：保留现有 Pi 编辑器，补丁仅涉及两个上游源文件的宽度配置入口；新增宿主校准及失败处理，承担后续升级检查。离线可行性已验证，获准后制作 r5 再做真实 Terminal 验收。它修正光标、换行和选文，不承诺消除 Terminal 原生 emoji 字形间隙。",
+  "answer": "允许这项限定补丁与自动校准（推荐）",
+  "proposal": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/proposal/README.md",
+  "scope": [
+    "Pi 1.1.0 two-upstream-source-file public grapheme-width configuration patch",
+    "Host actual-Terminal dynamic calibration, invalidation and failure preservation",
+    "Existing Pi Editor and TuiAltScreen retained; upgrade maintenance accepted",
+    "New r5 candidate and actual native Terminal verification still required"
+  ],
+  "limits": [
+    "No waiver of #14 stop/exit or menu/focus behavior",
+    "No assumed universal emoji widths or fixture-only hardcode",
+    "No implied #16 acceptance, #32 daily-use acceptance, paid provider authority, main merge, release or issue closure",
+    "Native Terminal glyph spacing is not promised to disappear",
+    "Original confirmed specification and r3/r4 failures remain unchanged"
+  ]
+}

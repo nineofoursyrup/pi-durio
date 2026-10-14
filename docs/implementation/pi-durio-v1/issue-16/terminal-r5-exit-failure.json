@@ -1,0 +1,350 @@
+{
+  "at": "2026-10-09T13:22:20.087062+00:00",
+  "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+  "scenario": "exit",
+  "humanRating": "FAIL",
+  "directUserFeedback": "执行6的时候第一次没有退出全屏，第二次才退出成功",
+  "rawControlInputs": [
+    {
+      "at": "2026-10-09T13:17:20.591Z",
+      "event": "input",
+      "data": "\u0004",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:24.473Z",
+      "event": "input",
+      "data": "\u0004",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:33.664Z",
+      "event": "input",
+      "data": "\u0004",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:46.170Z",
+      "event": "input",
+      "data": "\u0003",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:46.347Z",
+      "event": "input",
+      "data": "\u0003",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:57.689Z",
+      "event": "input",
+      "data": "\u0004",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:57.998Z",
+      "event": "input",
+      "data": "\u0004",
+      "columns": 98,
+      "rows": 26
+    }
+  ],
+  "traceFinding": "First fast pair received Ctrl+C (177ms); second received Ctrl+D (309ms). The first pair stopped the running task. This trace alone does not demonstrate a failed Ctrl+D pair. Preserve human FAIL unchanged.",
+  "firstCtrlDProtocolReplies": [
+    {
+      "at": "2026-10-09T13:17:20.592Z",
+      "event": "input",
+      "data": "\u001b[2;3R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.592Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.595Z",
+      "event": "input",
+      "data": "\u001b[2;5R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.595Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.595Z",
+      "event": "input",
+      "data": "\u001b[2;3R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.595Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.595Z",
+      "event": "input",
+      "data": "\u001b[2;5R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.595Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.595Z",
+      "event": "input",
+      "data": "\u001b[2;3R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.595Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[2;5R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[2;3R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[2;5R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[2;3R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[2;5R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[2;3R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.596Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[2;5R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[2;3R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[2;5R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[2;3R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[2;5R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[2;3R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[2;5R",
+      "columns": 98,
+      "rows": 26
+    },
+    {
+      "at": "2026-10-09T13:17:20.597Z",
+      "event": "input",
+      "data": "\u001b[?1;2c",
+      "columns": 98,
+      "rows": 26
+    }
+  ],
+  "independentCodeFinding": "Implementation agent independently reproduced two RED regressions: calibration CPR/DA1 replies between confirmation presses cancel Ctrl+D or idle Ctrl+C confirmation. Fix in progress; this is distinct from interpretation of the human trace.",
+  "firstRedLog": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-confirmation/first-red.log",
+  "machine": {
+    "rawRestored": true,
+    "sttyRestored": true,
+    "readback": {
+      "status": 0,
+      "sameResult": true
+    },
+    "resultStatus": "aborted",
+    "lifecycleIntent": "stop",
+    "cleanup": "confirmed",
+    "remoteTermination": "unknown"
+  },
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-17-02-966Z/exit/operator-observation.json",
+      "sha256": "bb87fdad0a7d1bc0c8f7484ec10ac13ca01ee501ea64bdeb4d8716c8b060ac17"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-17-02-966Z/exit/machine.json",
+      "sha256": "963b0ab7e533a3792007cb0d405e25d43726e23c6d5d03bfe25c8e360ea58997"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-17-02-966Z/exit/events.jsonl",
+      "sha256": "c3e3315ea2cb20b9661e7d50d723b6a4f27e663062e03cef48dd3eda112a7929"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-17-02-966Z/exit/headless.json",
+      "sha256": "b767d7c9250fb978a7a930152e7478b2bcb89fe0189402630d62664a77beab66"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T13-17-02-966Z/exit/terminal-output.ansi",
+      "sha256": "728c36e09e758b1d5d85af22ed1ed3153cc57c6ba0ec78f8cda29813d2c9a573"
+    }
+  ],
+  "status": "FAIL preserved; independent product defect under repair; native retest not yet requested"
+}

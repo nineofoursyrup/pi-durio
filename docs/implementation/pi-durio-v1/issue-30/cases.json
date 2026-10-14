@@ -1,0 +1,104 @@
+[
+  {
+    "id": "local-fix",
+    "category": "local-fix",
+    "visibility": "public-development",
+    "input": "Fix add in math.ts so signed integer addition works. Preserve README.md. Only math.ts may change; run a Node check.",
+    "files": {
+      "package.json": "{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}",
+      "README.md": "Public Node/TypeScript fixture. No network or package installation required.\n",
+      "math.ts": "export const add = (a: number, b: number) => a - b;\n"
+    },
+    "writable": [
+      "math.ts"
+    ],
+    "dirty": {
+      "README.md": "User draft: preserve this exact note.\n"
+    },
+    "dependencyLock": "{\"lockfileVersion\":3,\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"packages\":{\"\":{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\"}}}",
+    "grader": {
+      "version": "node-check-v1",
+      "program": "import {add} from './project/math.ts'; console.log(JSON.stringify([add(2,3),add(-2,3),add(0,0)]));",
+      "expectedStdout": "[5,1,0]\n",
+      "required": [
+        "signed addition",
+        "preserve dirty note"
+      ]
+    }
+  },
+  {
+    "id": "multi-file",
+    "category": "multi-file",
+    "visibility": "public-development",
+    "input": "Add named greeting(name) in greeting.ts, and use it in main.ts. greeting must return Hello, NAME! and main greet Ada. Only these two files may change.",
+    "files": {
+      "package.json": "{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}",
+      "README.md": "Public Node/TypeScript fixture. No network or package installation required.\n",
+      "greeting.ts": "export const greeting = () => \"Hello!\";\n",
+      "main.ts": "import {greeting} from './greeting.ts'; export const message = greeting();\n"
+    },
+    "writable": [
+      "greeting.ts",
+      "main.ts"
+    ],
+    "dirty": {},
+    "dependencyLock": "{\"lockfileVersion\":3,\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"packages\":{\"\":{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\"}}}",
+    "grader": {
+      "version": "node-check-v1",
+      "program": "import {greeting} from './project/greeting.ts'; import {message} from './project/main.ts';console.log(JSON.stringify([greeting('Sam'),message]));",
+      "expectedStdout": "[\"Hello, Sam!\",\"Hello, Ada!\"]\n",
+      "required": [
+        "named greeting",
+        "caller wiring"
+      ]
+    }
+  },
+  {
+    "id": "regression",
+    "category": "regression",
+    "visibility": "public-development",
+    "input": "Verify the fixed mean.ts: empty input returns null, signed numbers average correctly. Do not change files when checks pass.",
+    "files": {
+      "package.json": "{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}",
+      "README.md": "Public Node/TypeScript fixture. No network or package installation required.\n",
+      "mean.ts": "export const mean = (xs: number[]) => xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : null;\n"
+    },
+    "writable": [],
+    "dirty": {},
+    "dependencyLock": "{\"lockfileVersion\":3,\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"packages\":{\"\":{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\"}}}",
+    "grader": {
+      "version": "node-check-v1",
+      "program": "import {mean} from './project/mean.ts';console.log(JSON.stringify([mean([]),mean([2,4]),mean([-4,2])]));",
+      "expectedStdout": "[null,3,-1]\n",
+      "required": [
+        "empty input stays fixed",
+        "signed input",
+        "no unnecessary edits"
+      ]
+    }
+  },
+  {
+    "id": "no-change",
+    "category": "no-change",
+    "visibility": "public-development",
+    "input": "Analyze math.ts only. Do not modify any file. Return ONLY JSON with operator: subtraction, examples: [3,-5] for subtract(5,2) and subtract(-2,3), and changeNeeded: false.",
+    "files": {
+      "package.json": "{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}",
+      "README.md": "Public Node/TypeScript fixture. No network or package installation required.\n",
+      "math.ts": "export const subtract = (a: number, b: number) => a - b;\n"
+    },
+    "writable": [],
+    "dirty": {},
+    "dependencyLock": "{\"lockfileVersion\":3,\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"packages\":{\"\":{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\"}}}",
+    "grader": {
+      "version": "analysis-check-v2",
+      "program": "import {readFileSync} from 'node:fs';import {subtract} from './project/math.ts';const result=JSON.parse(readFileSync('/input/product-result.json','utf8'));let answer;try{answer=JSON.parse(result.answer);}catch{}if(answer?.operator==='subtraction'&&JSON.stringify(answer.examples)==='[3,-5]'&&answer.changeNeeded===false)console.log(JSON.stringify([subtract(5,2),subtract(-2,3)]));else console.log('necessary analysis answer missing');",
+      "expectedStdout": "[3,-5]\n",
+      "required": [
+        "subtraction correct",
+        "answer identifies operator and signed examples",
+        "analysis must not modify files"
+      ]
+    }
+  }
+]

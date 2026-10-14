@@ -1,0 +1,168 @@
+{
+  "at": "2026-10-10T11:16:52.133056+00:00",
+  "status": "PASS",
+  "scope": "Docs/evidence consistency only; no product workload rerun or independent review claim.",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "rows": 91,
+  "jsonFilesParsed": 18,
+  "uniqueExactFileReferencesVerified": 126,
+  "markdownFileLinksVerified": 24,
+  "copiedFrozenHarnessesEqual": 3,
+  "packageInstallRehashed": false,
+  "productTestsRerun": false,
+  "checks": [
+    "JSON parse; 91 unique ids and full contract text; catalog references and exact file hashes; local Markdown targets; aggregate accounting sums/UNKNOWN; exact frozen harness copies; native candidate/TTY/cold-recovery consistency; explicit pending human daily acceptance"
+  ],
+  "files": [
+    {
+      "name": "NATIVE-REPORT.md",
+      "bytes": 4303,
+      "sha256": "9619c65c7b5aabb521bbe799c94d148dda0607d8d09b586e5162206495e23336"
+    },
+    {
+      "name": "README.md",
+      "bytes": 912,
+      "sha256": "4b0604d3851ec3a4771b33f15e7b7d5eefa3f3acab951db52d53e33b3623e2b1"
+    },
+    {
+      "name": "REPORT.md",
+      "bytes": 8986,
+      "sha256": "2e2178e818bd6cd4d72d63e575ea419fe9685e873b4d7e8cead1b6d96880f601"
+    },
+    {
+      "name": "STARTUP-RECOVERY.md",
+      "bytes": 3868,
+      "sha256": "4e0e3366b61669b1327447b1855fc9e16c98f7aa67574148c803d80e417f7536"
+    },
+    {
+      "name": "accounting-readback.json",
+      "bytes": 16133,
+      "sha256": "76409a7a87ec93435fadf78ef1355cc387828bc9a7e688f94ea2654c4bad2a1c"
+    },
+    {
+      "name": "contract-evidence-index.json",
+      "bytes": 140385,
+      "sha256": "228624816baedb82189d9b5f7539e72bbbe2001f430b29094feab156d6215fa5"
+    },
+    {
+      "name": "contract-evidence-index.md",
+      "bytes": 8297,
+      "sha256": "defc41d43bdec6c99d79abd2bb1adb221a3fe4cb6035a88b02d13a058d2e3a17"
+    },
+    {
+      "name": "freeze-verification.json",
+      "bytes": 2179,
+      "sha256": "d8253fcbd95db366f6dfc7d2b89f636699884c6dd6633d9d48618f6c0a7d262b"
+    },
+    {
+      "name": "harness-derivation.json",
+      "bytes": 4518,
+      "sha256": "ca96f410f94e3abe1702cf21a1c7b00479701751a906b3641abf4dcff992f800"
+    },
+    {
+      "name": "initial-to-r1-runtime-guard.diff",
+      "bytes": 990,
+      "sha256": "73acf0d9c9ce32742d6dd448d8f74b4b0df9de540518863d4e12da3fc5a42f23"
+    },
+    {
+      "name": "measurement-harness-inventory.json",
+      "bytes": 1902,
+      "sha256": "d5ba46857a3cd21b29bcf135d243ac0bb01e50c77e7d010ccd890fd7857f4621"
+    },
+    {
+      "name": "native-batch.diff",
+      "bytes": 3298,
+      "sha256": "9b0a6aea47825c5207e32c778efd19cf5eb91dd920843bf54666f0b23c161738"
+    },
+    {
+      "name": "native-batch.mjs",
+      "bytes": 6102,
+      "sha256": "e0aeb3f6e6344ee7a13c1760b36f16b1a10c0fa85ae9caa1a5ce03fd05b4dc8f"
+    },
+    {
+      "name": "native-config.json",
+      "bytes": 2819,
+      "sha256": "bb6cbc77100405825395a8dc8bbfd6986edb37b2e799a5fea4ebd8a590532385"
+    },
+    {
+      "name": "native-plan.json",
+      "bytes": 3886,
+      "sha256": "b646d276552879755aaa6559cfe8923b4f26dd4de0ee1f2e6e4d43f6e09ada5b"
+    },
+    {
+      "name": "native-readback.json",
+      "bytes": 27198,
+      "sha256": "778dfc2f6eb092664167dafb3411042ab41d6d78c0d6065ceff4c8d96173b5f2"
+    },
+    {
+      "name": "native-recovery-result.json",
+      "bytes": 1143,
+      "sha256": "af8b780fb278e431e23bd4956798d0d5bf6b387ad0b9324656d4b4504f15e55a"
+    },
+    {
+      "name": "native-recovery-scroll.json",
+      "bytes": 153,
+      "sha256": "1efccc8293dbfbd3ca0e21cd64651df2f016e130181c784963a712cb19001ec1"
+    },
+    {
+      "name": "native-recovery.diff",
+      "bytes": 12829,
+      "sha256": "065fab6280aa611d8563c46ea85cf4b13e66dffedfa2c7a74ac1b3b18a9dc881"
+    },
+    {
+      "name": "native-recovery.mjs",
+      "bytes": 12831,
+      "sha256": "86ee066764eabc5fd242e4773023019d82dea82d2cfa288fb231af7ac811d8be"
+    },
+    {
+      "name": "native-result.json",
+      "bytes": 6233,
+      "sha256": "2d0a5f77c1aef6211e6cf9066a280de49111ecb05d8793b34ccb77493751ab3e"
+    },
+    {
+      "name": "native-tool-refusal.json",
+      "bytes": 385,
+      "sha256": "28301f977cb87756f752ac8f72f17ab785c35c80ded593133966a3679374022e"
+    },
+    {
+      "name": "preparation-history.json",
+      "bytes": 4717,
+      "sha256": "8e5979cca0f8d7b401a355ca82cca052f3df50602692ccf479ba29a6a394a0b6"
+    },
+    {
+      "name": "r1-to-r2.diff",
+      "bytes": 1717,
+      "sha256": "378dd3e4202235989d1f42015cfe66b9cb4787cdc2f118da4e33258a396f7149"
+    },
+    {
+      "name": "reconciliation-preparation.json",
+      "bytes": 45425,
+      "sha256": "6f5e56fac683f032d6c5c7352f403c9300add6056b985d3bcae43a3e16c4bb9d"
+    },
+    {
+      "name": "reconciliation-preparation.md",
+      "bytes": 8490,
+      "sha256": "87d03863772db1efcb6ce2ae9cfb522c7af89b8a108a50764954e7beda53a54e"
+    },
+    {
+      "name": "revision.json",
+      "bytes": 1128,
+      "sha256": "9cc7deed64e478bfe859e76118e358ffc75e34c4b3a87f72be45b3ad813d79e0"
+    },
+    {
+      "name": "run-native.command",
+      "bytes": 266,
+      "sha256": "33bfdb2a2fee24a701f9bfd2293c7d9919fe810758fd08007f8d057f2ee749a3"
+    },
+    {
+      "name": "startup-process.json",
+      "bytes": 777,
+      "sha256": "43a387cf486658f4e428ffdf8b965e8a3bbc61f90388c6fc3df1d7a0c14cdcfd"
+    },
+    {
+      "name": "startup-result.json",
+      "bytes": 12787,
+      "sha256": "134f5c54904806ee9972184dad86a3cf0fbed007642b7b6a14c6c1f476aea0dc"
+    }
+  ]
+}

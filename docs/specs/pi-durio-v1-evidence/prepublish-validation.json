@@ -1,0 +1,95 @@
+{
+  "checked_at_utc": "2026-10-09T08:06:43.000338+00:00",
+  "spec": "PI-DURIO-V1-SPEC-r1",
+  "sha256": "a7ffbdbb616310918eb308078c66e6c9577f529dcbb92d2d3903e85659c66ee3",
+  "characters": 23853,
+  "bytes": 52672,
+  "checks": {
+    "template_sections": true,
+    "no_implementation_paths_or_code_blocks": true,
+    "source_issues_unchanged": true,
+    "all_eight_resolutions_linked": true,
+    "original_39_files_unchanged": true,
+    "duplicate_spec_absent": true
+  },
+  "source_snapshots": [
+    {
+      "number": 1,
+      "state": "OPEN",
+      "state_reason": "",
+      "updated_at": "2026-10-09T07:49:14Z",
+      "body_sha256": "70ab6e062b8ba17416d6676602024a65c8a3b6523487e902653316c2d66b9e5d",
+      "resolution_sha256": null
+    },
+    {
+      "number": 2,
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "updated_at": "2026-10-08T18:49:50Z",
+      "body_sha256": "bb5e77fb2c2a7dbd47ab8cfba86b87f0737b234894d4f190d28d89ce1f1d375f",
+      "resolution_sha256": "c2fbe200c509759ef34dec077b315aa282950508a200a5f9d72bbcf96dc5e43a"
+    },
+    {
+      "number": 3,
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "updated_at": "2026-10-08T19:32:24Z",
+      "body_sha256": "934441b6c14341bd2a860f5118d90c00be91526da5e7402317ef344e0918476e",
+      "resolution_sha256": "91c9edeaf01549184189416443399ddc1c272ea261c1adb6f99be8dba5453c22"
+    },
+    {
+      "number": 4,
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "updated_at": "2026-10-09T04:01:46Z",
+      "body_sha256": "818bc9ba22d732a36a280606dff8988fd062a6c09ae622d3b96084945cf86e96",
+      "resolution_sha256": "3ebd0bf63a344cd3276f751ce1c1af32556b25cfaf38ee0917ffaf44e2ba2d6b"
+    },
+    {
+      "number": 5,
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "updated_at": "2026-10-09T05:03:14Z",
+      "body_sha256": "1118dfbc98bd3909f9c7b7cc4ca3f05bdf03c1720f570f34d984e49a6de8ad2b",
+      "resolution_sha256": "81e17c310efbb5d9d7665ab74f29a3bf89b1be71ce23e6ed956297cc4d5967dc"
+    },
+    {
+      "number": 6,
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "updated_at": "2026-10-09T06:17:55Z",
+      "body_sha256": "8ff1141ae3b8b20ebe8ee977b7d9ec8305df61cce8a12f1880abeb044fab4fe5",
+      "resolution_sha256": "472eae54359cb5b2964b834c358e25a15cf3ba96790cf686b2c5139955d78ff8"
+    },
+    {
+      "number": 7,
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "updated_at": "2026-10-09T06:40:11Z",
+      "body_sha256": "d9457d61b512f5877ab632b2ff3869989035dcec70308c5416a56010ee959474",
+      "resolution_sha256": "49e7aa79e139c72457208bbbdccff530a936a09875ffed4306694df747e4bbae"
+    },
+    {
+      "number": 8,
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "updated_at": "2026-10-09T07:00:48Z",
+      "body_sha256": "de3c6c4d3681679de7aa828b9ddf80faddad272c9c607da6db24357ecd442c01",
+      "resolution_sha256": "4b17900785c8e5314a61fb16ad4b02ef4e60194705a9a355aa871222ba6fa701"
+    },
+    {
+      "number": 9,
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "updated_at": "2026-10-09T07:49:00Z",
+      "body_sha256": "48c54db93370e5b597f8ab37d6be9e87e932c039febf39c7b0cc87edd96b22ff",
+      "resolution_sha256": "0f75f9238460f13167fa911529b9be6b330cedd96ab9f222237b663563f7bf39"
+    }
+  ],
+  "review": {
+    "evidence_eval": "PASS after targeted corrections",
+    "improve_metrics": "PASS after targeted corrections",
+    "tui_acceptance": "PASS after targeted corrections"
+  },
+  "validation_scope": "Specification and source consistency only; no product implementation, tests, provider calls or performance validation."
+}

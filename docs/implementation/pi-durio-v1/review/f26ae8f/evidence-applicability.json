@@ -1,0 +1,474 @@
+{
+  "schema": "pi-durio.provider-terminal-repair.evidence-applicability.v1",
+  "at": "2026-10-10T07:16:40.185218+00:00",
+  "reviewedCandidate": {
+    "commit": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "tree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuild": {
+      "path": "/Users/nineofour/Durio/dist/execution/source-build.json",
+      "bytes": 92984,
+      "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+    }
+  },
+  "originalExecutionCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "status": "BOUNDED_REUSE_WITH_EXPLICIT_LIMITS",
+  "method": "Independent read-only source, actual raw/provider facts, native results/profile facts and candidate identity review. Exact compiled parser check resolves the stricter SSE EOF uncertainty; no real execution was repeated.",
+  "identityReadback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/identity-readback.json",
+    "bytes": 21004,
+    "sha256": "500f6800eccfd4504448c5c957a4a82b5ad308c60269aa1051cc434986953b4f"
+  },
+  "rawParserReadback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/readonly-applicability-result.json",
+    "bytes": 301453,
+    "sha256": "1305bbabbb812cd3051c81f238197c6eb58b9f754ef2ea66850b91e87ad34516"
+  },
+  "cases": [
+    {
+      "caseId": "local-fix",
+      "trialId": "v1-live-r1-local-fix",
+      "executionCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+      "historicalOutcome": "completed",
+      "historicalGrade": "PASS",
+      "sourceReport": {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/report.json",
+        "bytes": 10878,
+        "sha256": "dfff9764f280a29eec514a59efc471cb3b1f9ad29707039e070f1f268f9fc733"
+      },
+      "verifiedOriginalFacts": [
+        {
+          "field": "outcome",
+          "source": "e1:684:3452d528da95ff7f4aabe09522fa8bdbcefb3df57b71c8bafabe02094670a180",
+          "kind": "eval.outcome",
+          "body": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/eval-data/objects/3452d528da95ff7f4aabe09522fa8bdbcefb3df57b71c8bafabe02094670a180",
+            "bytes": 202924,
+            "sha256": "3452d528da95ff7f4aabe09522fa8bdbcefb3df57b71c8bafabe02094670a180"
+          },
+          "actualStatus": "completed",
+          "actualJudgment": null
+        },
+        {
+          "field": "grade",
+          "source": "e1:687:d3f92c3c6db88c384d5220ce9c3267c4e48a6a802704f68469a8afabdb27c947",
+          "kind": "eval.grade",
+          "body": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/eval-data/objects/d3f92c3c6db88c384d5220ce9c3267c4e48a6a802704f68469a8afabdb27c947",
+            "bytes": 473,
+            "sha256": "d3f92c3c6db88c384d5220ce9c3267c4e48a6a802704f68469a8afabdb27c947"
+          },
+          "actualStatus": null,
+          "actualJudgment": "PASS"
+        }
+      ],
+      "hostRequests": 7,
+      "knownTokens": 13370,
+      "allRawResponsesHaveCompleteTerminalFrame": true,
+      "allNewParserTokensMatchHistoricalSettlement": true,
+      "applicability": "BOUNDED_REUSE",
+      "reason": "只有 provider-boundary.ts 的 production bytes 改变。eval mediator 原本 await response.text() 到 EOF；全部原始响应逐块经新候选 exact compiled ResponseUsage 验证，完整 terminal frame 与原 known settlement 一致。固定任务、grader、runtime/tool/隔离路径未改，可复用原四类任务行为证据。",
+      "limits": [
+        "仍是旧候选的真实历史 outcome；没有新候选真实 rerun。",
+        "只适用于原固定案例、配置、隔离环境和已观察响应；不证明一般模型稳定性或日常全权限效果。"
+      ]
+    },
+    {
+      "caseId": "multi-file",
+      "trialId": "v1-live-r2-multi-file",
+      "executionCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+      "historicalOutcome": "completed",
+      "historicalGrade": "PASS",
+      "sourceReport": {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/postrun-readback/report.json",
+        "bytes": 144843,
+        "sha256": "ba624384488d5e57c6baf87fc7957a646173d9d57a4df6f3cfbcca124ec15e1d"
+      },
+      "verifiedOriginalFacts": [
+        {
+          "field": "outcome",
+          "source": "e1:621:3b71baafb0f3505fe6180c04312fe5061a72038b6d657829d430f57cd2b495bc",
+          "kind": "eval.outcome",
+          "body": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/eval-data/objects/3b71baafb0f3505fe6180c04312fe5061a72038b6d657829d430f57cd2b495bc",
+            "bytes": 208354,
+            "sha256": "3b71baafb0f3505fe6180c04312fe5061a72038b6d657829d430f57cd2b495bc"
+          },
+          "actualStatus": "completed",
+          "actualJudgment": null
+        },
+        {
+          "field": "grade",
+          "source": "e1:624:d6b14d7a8a12ace470095a19bb64fa07db755e49b9631d476f63023283526f30",
+          "kind": "eval.grade",
+          "body": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/eval-data/objects/d6b14d7a8a12ace470095a19bb64fa07db755e49b9631d476f63023283526f30",
+            "bytes": 474,
+            "sha256": "d6b14d7a8a12ace470095a19bb64fa07db755e49b9631d476f63023283526f30"
+          },
+          "actualStatus": null,
+          "actualJudgment": "PASS"
+        }
+      ],
+      "hostRequests": 8,
+      "knownTokens": 15574,
+      "allRawResponsesHaveCompleteTerminalFrame": true,
+      "allNewParserTokensMatchHistoricalSettlement": true,
+      "applicability": "BOUNDED_REUSE",
+      "reason": "只有 provider-boundary.ts 的 production bytes 改变。eval mediator 原本 await response.text() 到 EOF；全部原始响应逐块经新候选 exact compiled ResponseUsage 验证，完整 terminal frame 与原 known settlement 一致。固定任务、grader、runtime/tool/隔离路径未改，可复用原四类任务行为证据。",
+      "limits": [
+        "仍是旧候选的真实历史 outcome；没有新候选真实 rerun。",
+        "只适用于原固定案例、配置、隔离环境和已观察响应；不证明一般模型稳定性或日常全权限效果。"
+      ]
+    },
+    {
+      "caseId": "regression",
+      "trialId": "v1-live-r2-regression",
+      "executionCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+      "historicalOutcome": "completed",
+      "historicalGrade": "PASS",
+      "sourceReport": {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/postrun-readback/report.json",
+        "bytes": 144843,
+        "sha256": "ba624384488d5e57c6baf87fc7957a646173d9d57a4df6f3cfbcca124ec15e1d"
+      },
+      "verifiedOriginalFacts": [
+        {
+          "field": "outcome",
+          "source": "e1:1228:e7dfaa7ecff2b92ba241e37d5743336c98118b4fb966ab4bcf949d54498e76f6",
+          "kind": "eval.outcome",
+          "body": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/eval-data/objects/e7dfaa7ecff2b92ba241e37d5743336c98118b4fb966ab4bcf949d54498e76f6",
+            "bytes": 243117,
+            "sha256": "e7dfaa7ecff2b92ba241e37d5743336c98118b4fb966ab4bcf949d54498e76f6"
+          },
+          "actualStatus": "completed",
+          "actualJudgment": null
+        },
+        {
+          "field": "grade",
+          "source": "e1:1231:da364c4df9b1462174e3f9b212e8518c7f45ca71815971c9072d3422c4899ae6",
+          "kind": "eval.grade",
+          "body": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/eval-data/objects/da364c4df9b1462174e3f9b212e8518c7f45ca71815971c9072d3422c4899ae6",
+            "bytes": 475,
+            "sha256": "da364c4df9b1462174e3f9b212e8518c7f45ca71815971c9072d3422c4899ae6"
+          },
+          "actualStatus": null,
+          "actualJudgment": "PASS"
+        }
+      ],
+      "hostRequests": 7,
+      "knownTokens": 15142,
+      "allRawResponsesHaveCompleteTerminalFrame": true,
+      "allNewParserTokensMatchHistoricalSettlement": true,
+      "applicability": "BOUNDED_REUSE",
+      "reason": "只有 provider-boundary.ts 的 production bytes 改变。eval mediator 原本 await response.text() 到 EOF；全部原始响应逐块经新候选 exact compiled ResponseUsage 验证，完整 terminal frame 与原 known settlement 一致。固定任务、grader、runtime/tool/隔离路径未改，可复用原四类任务行为证据。",
+      "limits": [
+        "仍是旧候选的真实历史 outcome；没有新候选真实 rerun。",
+        "只适用于原固定案例、配置、隔离环境和已观察响应；不证明一般模型稳定性或日常全权限效果。"
+      ]
+    },
+    {
+      "caseId": "no-change",
+      "trialId": "v1-live-r2-no-change",
+      "executionCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+      "historicalOutcome": "completed",
+      "historicalGrade": "PASS",
+      "sourceReport": {
+        "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/postrun-readback/report.json",
+        "bytes": 144843,
+        "sha256": "ba624384488d5e57c6baf87fc7957a646173d9d57a4df6f3cfbcca124ec15e1d"
+      },
+      "verifiedOriginalFacts": [
+        {
+          "field": "outcome",
+          "source": "e1:1284:891cf3bed8d40a3c9919444b148f22db1e561057f587e7d96331b101464df93e",
+          "kind": "eval.outcome",
+          "body": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/eval-data/objects/891cf3bed8d40a3c9919444b148f22db1e561057f587e7d96331b101464df93e",
+            "bytes": 71186,
+            "sha256": "891cf3bed8d40a3c9919444b148f22db1e561057f587e7d96331b101464df93e"
+          },
+          "actualStatus": "completed",
+          "actualJudgment": null
+        },
+        {
+          "field": "grade",
+          "source": "e1:1287:75361dc18f974fbe5b82bb2b6eee5c638edadccaa0724aa64550702adf444efe",
+          "kind": "eval.grade",
+          "body": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/eval-data/objects/75361dc18f974fbe5b82bb2b6eee5c638edadccaa0724aa64550702adf444efe",
+            "bytes": 478,
+            "sha256": "75361dc18f974fbe5b82bb2b6eee5c638edadccaa0724aa64550702adf444efe"
+          },
+          "actualStatus": null,
+          "actualJudgment": "PASS"
+        }
+      ],
+      "hostRequests": 3,
+      "knownTokens": 3345,
+      "allRawResponsesHaveCompleteTerminalFrame": true,
+      "allNewParserTokensMatchHistoricalSettlement": true,
+      "applicability": "BOUNDED_REUSE",
+      "reason": "只有 provider-boundary.ts 的 production bytes 改变。eval mediator 原本 await response.text() 到 EOF；全部原始响应逐块经新候选 exact compiled ResponseUsage 验证，完整 terminal frame 与原 known settlement 一致。固定任务、grader、runtime/tool/隔离路径未改，可复用原四类任务行为证据。",
+      "limits": [
+        "仍是旧候选的真实历史 outcome；没有新候选真实 rerun。",
+        "只适用于原固定案例、配置、隔离环境和已观察响应；不证明一般模型稳定性或日常全权限效果。"
+      ]
+    }
+  ],
+  "native": {
+    "executionCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+    "oldSourceBuildSha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "environment": {
+      "terminal": "Apple_Terminal",
+      "version": "488.7",
+      "columns": 112,
+      "rows": 35,
+      "profile": "UNKNOWN",
+      "node": "v26.8.2"
+    },
+    "actualSources": [
+      {
+        "name": "idle-1",
+        "result": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/idle-1/result.json",
+          "bytes": 14292,
+          "sha256": "4e0d34510d280252b5790a8c6d7c3191e508a549f3cda43de654ef01c8bf78da"
+        },
+        "plan": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/idle-1/plan.json",
+          "bytes": 1943,
+          "sha256": "f02931fd7f0e99bd9e04954af8143890979ff80d0dc0aa69b1d5f0e667efbff2"
+        },
+        "status": "MEASURED",
+        "profile": {
+          "status": "measured",
+          "entries": 72,
+          "blockedFrames": 2,
+          "retainedInputs": 0,
+          "pendingInputs": 0
+        },
+        "syntheticRequests": null,
+        "realProviderRequests": 0,
+        "rounds": 0,
+        "sourceUnchanged": null
+      },
+      {
+        "name": "idle-2",
+        "result": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/idle-2/result.json",
+          "bytes": 14293,
+          "sha256": "5b15f7c6d26a90913f65f2cfe77fc85c62943098fef0854eea0be7b67e67e7a4"
+        },
+        "plan": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/idle-2/plan.json",
+          "bytes": 1943,
+          "sha256": "b5e3549f23a6913fd988d3ee7a55d6530a73d04fd08082e6d2982d5d6fdf902c"
+        },
+        "status": "MEASURED",
+        "profile": {
+          "status": "measured",
+          "entries": 72,
+          "blockedFrames": 2,
+          "retainedInputs": 0,
+          "pendingInputs": 0
+        },
+        "syntheticRequests": null,
+        "realProviderRequests": 0,
+        "rounds": 0,
+        "sourceUnchanged": null
+      },
+      {
+        "name": "idle-3",
+        "result": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/idle-3/result.json",
+          "bytes": 14294,
+          "sha256": "e9b2d247243fec7aec79453b521597020e1ae16d762b0842037b0f868a97fe7c"
+        },
+        "plan": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/idle-3/plan.json",
+          "bytes": 1943,
+          "sha256": "9ec58bb9f0773559599fcf301804c714d9f784bf1519cfa732687d3369ce420e"
+        },
+        "status": "MEASURED",
+        "profile": {
+          "status": "measured",
+          "entries": 72,
+          "blockedFrames": 2,
+          "retainedInputs": 0,
+          "pendingInputs": 0
+        },
+        "syntheticRequests": null,
+        "realProviderRequests": 0,
+        "rounds": 0,
+        "sourceUnchanged": null
+      },
+      {
+        "name": "long-session",
+        "result": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/result.json",
+          "bytes": 930461,
+          "sha256": "1fb56666475f780092e95270a4992493a8967ac3df726f4123c2a9a49bbdcccf"
+        },
+        "plan": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/plan.json",
+          "bytes": 25509,
+          "sha256": "590b9dd4755da9ce7183e1b142ac5d70dc9ab86ca24513306f46a68d5d72485d"
+        },
+        "status": "MEASURED",
+        "profile": {
+          "status": "measured",
+          "entries": 120,
+          "blockedFrames": 11,
+          "retainedInputs": 0,
+          "pendingInputs": 0
+        },
+        "syntheticRequests": 124,
+        "realProviderRequests": 0,
+        "rounds": 62,
+        "sourceUnchanged": null
+      },
+      {
+        "name": "composition-followup",
+        "result": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/result.json",
+          "bytes": 89966,
+          "sha256": "f8ff08d6ffb52ef1ad19983ff95b9ec47495cd79917dd9da2ef5ef648b4957fb"
+        },
+        "plan": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/plan.json",
+          "bytes": 3344,
+          "sha256": "f6cffce2c0d5458785a67b5ead17400ea2f950165eb5a490f2f15183745da4e3"
+        },
+        "status": "PASS",
+        "profile": {
+          "status": "measured",
+          "entries": 245,
+          "blockedFrames": 25,
+          "retainedInputs": 2,
+          "pendingInputs": 0
+        },
+        "syntheticRequests": 7,
+        "realProviderRequests": 0,
+        "rounds": 0,
+        "sourceUnchanged": null
+      },
+      {
+        "name": "readonly-followup",
+        "result": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/result.json",
+          "bytes": 21873,
+          "sha256": "5783357ebe52b3fe111bba59910d6dd618e9a38459613cb6fcd1d2cd2c18c5c2"
+        },
+        "plan": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/plan.json",
+          "bytes": 2644,
+          "sha256": "25d1ceec8bb0c7d76565df319e6eb8f2dd7c7c6fedc5d073b27e7945b41675a1"
+        },
+        "status": "MEASURED",
+        "profile": null,
+        "syntheticRequests": null,
+        "realProviderRequests": null,
+        "rounds": 0,
+        "sourceUnchanged": true
+      }
+    ],
+    "dispositionSource": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-evidence-disposition-r1.json",
+      "bytes": 5387,
+      "sha256": "87275adc9e96ea57d2266965d3ff4f42a34edf7dda64649f3529d8d5a024c2e3"
+    },
+    "behaviorDecision": "BOUNDED_REUSE_OF_UNCHANGED_NATIVE_PATHS",
+    "basis": [
+      "从旧执行候选至新 HEAD，src/package/lock/scripts/vendor 的 production diff 仅 provider-boundary.ts；独立 hash 核对 runtime、TUI、query、eval、improve caller 的 compiled bytes 与旧安装一致。",
+      "long-session 原始 SQLite 有 62 个 execution.config，providerBoundary 均缺省；0 条 provider.bytes，与 runtime.ts:537-539 的直接 transport 路径相符。62 轮交互/工具/显示/退出路径可复用其原范围证据。",
+      "composition follow-up 的 3 个 execution.config 中仅 improve 有 budgeted boundary；3 次合成原始响应由新解析器读回全部 complete SSE，合计 42 tokens 与原结算一致。其他 4 次合成请求、compaction/UI/选择/fixture 验证及写回路径未改；已有最终 Pi runtime 与自动 compaction 检查补足受影响路径。",
+      "原始 profile 已读取：idle-1 72 entries、long-session 120、composition 245；分别 blockedFrames 2/11/25，pendingInputs 均 0。记录来自旧真实 Apple Terminal 进程，未由合成 headless 代替。"
+    ],
+    "measurementDecision": "HISTORICAL_CANDIDATE_ONLY",
+    "measurementsNotRelabeled": [
+      "firstFrame、RSS、持续任务耗时、采样间隔、load average、存储增长、查询和导出时间",
+      "旧 source LOC、分发包 bytes、安装 bytes、Node/原生/开发依赖库存"
+    ],
+    "measurementReason": "新 parser 和 compiled module 会改变模块导入/执行及文件大小，未重测时不能把旧数值写成新候选测量，也不能由未改 UI 推断资源或时序等价。旧测量可作为历史比较背景；新 source/package/install 库存由主协调者另行生成。",
+    "notEstablished": [
+      "新增中文 IME/复制/鼠标/小窗口人工验收；这两批自动 native workload 本来不提供这些结论",
+      "新候选 resource/timing 实测",
+      "人类 improve 选择或日用接受",
+      "整个 #31 完成"
+    ]
+  },
+  "preservedFailures": [
+    {
+      "scope": "r2 multi-file",
+      "status": "error / unknown",
+      "notRun": "r2 regression/no-change remain not-run",
+      "rule": "r3 三个成功新 trial 不覆盖 r2 原结果"
+    },
+    {
+      "scope": "r3 improve",
+      "finding": "LIVE-USD3-R3-01",
+      "status": "failed / incomplete; original host settlement UNKNOWN",
+      "sdkAndRawTokens": 952,
+      "candidates": 0,
+      "rule": "离线修复与 raw 952 不回填旧 host ledger，不将零候选 incomplete 改记完整成功"
+    },
+    {
+      "scope": "first native composition",
+      "status": "MEASURED_WITH_FAILURES / IMPROVE_REPORT_NOT_FOUND",
+      "originalResult": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/result.json",
+        "bytes": 5351,
+        "sha256": "5062ec149ebc874839d4dc799937e8cff993e4c64580ed14949b9eca082c72d6"
+      },
+      "originalFailure": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/composition/failure.json",
+        "bytes": 5680,
+        "sha256": "cf3c34090a4b138b1676343b05a5fa13fbce2bd2493badceb700263cdc5d2c8a"
+      },
+      "rule": "follow-up composition PASS / readonly MEASURED 是单独证据，首批仍失败"
+    }
+  ],
+  "newRealExecution": {
+    "providerCalls": 0,
+    "vmStarts": 0,
+    "terminalOperations": 0,
+    "newPaidAuthorization": false,
+    "newCandidateRealCodingRerun": false,
+    "newCandidateRealImproveComplete": false
+  },
+  "followupImplication": "本 repair 不要求仅因 source hash 改变重跑旧四类 coding 或未改 native 交互。可把上述有界复用结论作为新 improve-only 提案输入；提案仍须固定新 source/build/install、单独审核新 harness，并取得相应明确付费授权后才能执行。此报告不授予该授权。",
+  "references": [
+    {
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/report.json",
+      "bytes": 10878,
+      "sha256": "dfff9764f280a29eec514a59efc471cb3b1f9ad29707039e070f1f268f9fc733"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/postrun-readback/report.json",
+      "bytes": 144843,
+      "sha256": "ba624384488d5e57c6baf87fc7957a646173d9d57a4df6f3cfbcca124ec15e1d"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/specs/pi-durio-v1-spec.md",
+      "bytes": 52672,
+      "sha256": "a7ffbdbb616310918eb308078c66e6c9577f529dcbb92d2d3903e85659c66ee3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/readonly-applicability.mjs",
+      "bytes": 5162,
+      "sha256": "90d393f8b42a6a81ede1eae2184719673df2988b2c3621cc88bfaec0e3a60d0b"
+    }
+  ],
+  "summary": {
+    "codingStatus": "BOUNDED_REUSE",
+    "codingHistoricalPassCases": 4,
+    "originalRequestsChecked": 25,
+    "allNewParserTokensMatchHistoricalSettlement": true,
+    "nativeBehaviorStatus": "BOUNDED_REUSE_OF_UNCHANGED_NATIVE_PATHS",
+    "nativeMeasurementStatus": "HISTORICAL_CANDIDATE_ONLY",
+    "oldExecutionCandidateRelabeled": false,
+    "newPaidAuthorization": false
+  }
+}

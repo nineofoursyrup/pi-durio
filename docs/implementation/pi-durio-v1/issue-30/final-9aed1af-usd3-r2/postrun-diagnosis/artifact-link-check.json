@@ -1,0 +1,48 @@
+{
+  "status": "DIAGNOSTIC_ASSERTIONS_PASS",
+  "scope": "Independent read-only ESM parse/link check over saved artifacts; no module evaluation, product grader, provider, shell, restricted VM or original-result writes",
+  "rows": [
+    {
+      "caseId": "local-fix",
+      "status": "LINKED",
+      "error": null,
+      "sourceRefs": [
+        {
+          "path": "project/math.ts",
+          "ref": {
+            "sha256": "8d344bcb231aaa7f94df684340b260c5edc259441a6e56f600f23f736b3f2f5e",
+            "bytes": 52
+          }
+        }
+      ],
+      "evaluationPerformed": false,
+      "originalGradeUnchanged": true
+    },
+    {
+      "caseId": "multi-file",
+      "status": "LINK_ERROR",
+      "error": {
+        "name": "SyntaxError",
+        "message": "The requested module './greeting.ts' does not provide an export named 'namedGreeting'"
+      },
+      "sourceRefs": [
+        {
+          "path": "project/greeting.ts",
+          "ref": {
+            "sha256": "087823927c237d65b49ca53dda65ad0bd2eb2b2a24bb3922484cb7734a35c953",
+            "bytes": 61
+          }
+        },
+        {
+          "path": "project/main.ts",
+          "ref": {
+            "sha256": "44e74018b054b9fd0820a3602418018e6574892ef2578207282f0c5f279ebb28",
+            "bytes": 138
+          }
+        }
+      ],
+      "evaluationPerformed": false,
+      "originalGradeUnchanged": true
+    }
+  ]
+}

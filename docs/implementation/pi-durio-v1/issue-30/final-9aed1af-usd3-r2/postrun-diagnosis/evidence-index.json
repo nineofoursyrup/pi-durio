@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "status": "NEW_DIAGNOSTIC_DOCUMENTS_ONLY",
+  "externalRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis",
+  "originalResultWrites": false,
+  "newPaidAuthorization": false,
+  "files": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/REPORT.md",
+      "bytes": 4886,
+      "sha256": "53cda0295f5ee5f5b95c59b54007059bd6d895c7da7f74878fe6f1ba9e91583f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/report.json",
+      "bytes": 10878,
+      "sha256": "dfff9764f280a29eec514a59efc471cb3b1f9ad29707039e070f1f268f9fc733"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/NEXT-BATCH-PLAN.md",
+      "bytes": 4905,
+      "sha256": "8e752a1d983aa8f0768370d9781408c03a8905757e02dfe30dd01c55d42330c0"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/plan.json",
+      "bytes": 7409,
+      "sha256": "f05396132b9c3b42670a91c015a5898cb019f9a17f9122fc1d0257c92be2fa6c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/observed-facts.json",
+      "bytes": 66812,
+      "sha256": "0a1fde9544203d4004a0bed65af2b977024747e22bb04d3345fb085443c35925"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/artifact-link-check.json",
+      "bytes": 1381,
+      "sha256": "36eb40a7d0f10c55d4b7e35bdc42e186dcbd46a5d2f863979b03982d61835289"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/artifact-link-input.json",
+      "bytes": 1219,
+      "sha256": "6f1ef23d2277cf2f1b34df13fc169e20f7525b73fc8b1e26df8aa05fdf44ae96"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/check-artifact-link.mjs",
+      "bytes": 2205,
+      "sha256": "0cb512bbb6d159f1b1cac55df18d75aec49376bd77ed24b4abf72b79f899d214"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/collect.py",
+      "bytes": 10258,
+      "sha256": "e75f623c374bcf04a9d17e8d21d540497ecc5fa9c150c03f703dbc913ec53c63"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/source-verification.json",
+      "bytes": 3573,
+      "sha256": "679a9ad2ec006e4a2043fac39803ec9413649f51c291806b5945a9c07aa22ac9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/preservation-check.json",
+      "bytes": 572,
+      "sha256": "ca267726abea5bc06d5341aa39d26a29b4041674ccb8bd00dfea5a0a47006417"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/collect.stdout",
+      "bytes": 193,
+      "sha256": "24b8574831097bfec04d012693e5c75dfa2c847f668d56ba3beb35e985429264"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/collect.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/artifact-check.stdout",
+      "bytes": 140,
+      "sha256": "be0d3dcc4e27d0c265729566a9d06edd1b79a88748979a0948ef06bae817b13d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/artifact-check.stderr",
+      "bytes": 284,
+      "sha256": "be54af95a76525a994cfc1629afb161467d319c840953febf767b96de76b1146"
+    }
+  ],
+  "externalOnlyReadIndex": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/read-identities.json",
+    "bytes": 883906,
+    "sha256": "62f47da65d26dc9bd04709e8f4428e60e7391774ce382f8a4873631f387f627d"
+  },
+  "originalByteCopyRule": "Tracked files are byte-identical review copies; raw provider streams and full read index remain in external retained evidence."
+}

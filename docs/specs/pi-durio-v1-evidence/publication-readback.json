@@ -1,0 +1,22 @@
+{
+  "spec": "PI-DURIO-V1-SPEC-r1",
+  "issue_number": 10,
+  "url": "https://github.com/nineofoursyrup/pi-durio/issues/10",
+  "checked_at_utc": "2026-10-09T08:07:52.233910+00:00",
+  "user_timezone": "Asia/Shanghai",
+  "body_sha256": "a7ffbdbb616310918eb308078c66e6c9577f529dcbb92d2d3903e85659c66ee3",
+  "state": "OPEN",
+  "labels": [
+    "ready-for-agent"
+  ],
+  "checks": {
+    "rest_body_exact": true,
+    "graphql_body_exact": true,
+    "title_and_ready_for_agent_label": true,
+    "source_2_to_9_closed_completed_and_bodies_comments_preserved": true,
+    "map_1_open_body_comments_preserved": true,
+    "original_39_local_files_preserved": true
+  },
+  "product_validation": "NOT RUN: specification publication only",
+  "review": "Three scope-focused reviews passed after targeted corrections."
+}

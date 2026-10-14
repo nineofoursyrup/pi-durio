@@ -1,0 +1,25 @@
+{
+  "schema": "pi-durio.independent-review-manifest.v1",
+  "candidate": {
+    "commit": "63cae24c0678a7fbf52fa257c290f476da71fe75",
+    "tree": "c57f922c11fda1332b8fb97a6dd009d7575e4ffe",
+    "parent": "f346f77e8a9438aeeabb0a0dad67aaff7aa8bbbc",
+    "worktree": "/Users/nineofour/.codex/worktrees/issue32-daily-trial/Durio",
+    "worktreeCleanAtReview": true
+  },
+  "standardsVerdict": "PASS",
+  "specVerdict": "PASS",
+  "files": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/daily-acceptance-r1/review.md",
+      "bytes": 3124,
+      "sha256": "c9ae7412d58d6a28e10a0e440bf2009634434de1c359b3faa253ef1d9825d9cc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/daily-acceptance-r1/review.json",
+      "bytes": 6543,
+      "sha256": "6803159c10547db650b60c4d978efcd796d768f0672d4541ba78dba7c64cd861"
+    }
+  ],
+  "selfReference": "manifest.json is excluded from its own hash; final handoff reports its byte length and SHA-256."
+}

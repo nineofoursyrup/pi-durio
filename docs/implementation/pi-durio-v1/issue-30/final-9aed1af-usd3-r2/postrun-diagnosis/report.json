@@ -1,0 +1,284 @@
+{
+  "schema": 1,
+  "status": "READ_ONLY_FIRST_FAILURE_DIAGNOSIS_COMPLETE",
+  "at": "2026-10-10T06:07:59.364612+00:00",
+  "productCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "originalBatchId": "pi-durio-v1-live-r1-usd3",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+    "bytes": 8105,
+    "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+  },
+  "batchStatusUnchanged": {
+    "status": "STOPPED",
+    "stage": "eval",
+    "reason": "Error: BATCH_TRIAL_NOT_PASS",
+    "improve": "not-run",
+    "at": "2026-10-10T05:54:47.608Z",
+    "deadline": "2026-10-10T06:53:39.641Z",
+    "remoteTermination": "unknown",
+    "firstFailuresRetained": true,
+    "modelIdentity": "Requested alias is not immutable served model proof; inspect retained raw response",
+    "cost": "Use host stage budget facts; guest coding mirrors eval usage and must not be summed again"
+  },
+  "originalFiles": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+      "bytes": 8105,
+      "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/paid-start.json",
+      "bytes": 774,
+      "sha256": "638b4db20a65f5b1a76a24671a97577868ea3bf2208c3fd9f7aa1f30adde3885"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/batch-result.json",
+      "bytes": 465,
+      "sha256": "44fcd0fcc08784463c157329cb4bbeff00f8981762cf16273dfe42c6b9688c7f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/live-eval-result.json",
+      "bytes": 713898,
+      "sha256": "be42c821efef34d0bd9adc13696057a666432c823385db9ee1246e657cbc6669"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/authorized-plan.json",
+      "bytes": 64833,
+      "sha256": "416c30455a8e9f13b87862f72cb98e213a07611694940c30209235861a30a9c8"
+    }
+  ],
+  "conclusion": {
+    "failureClass": "Model did not complete the required multi-file change within the existing eight-attempt runtime limit",
+    "terminalCause": "REQUEST_LIMIT before ninth model.intent/host dispatch; submission unanswered/faulted; runtime TASK_UNANSWERED",
+    "artifactSymptom": "main.ts imports namedGreeting absent from final greeting.ts; main also retains greeting() without Ada",
+    "scopeCheck": "PASS",
+    "originalDeterministicJudgment": "unknown",
+    "originalGraderReason": "grader cancelled before start; no deterministic judgment",
+    "independentReadOnlyDiagnostic": "ESM link error over exact retained artifact bytes; not a replacement product grade",
+    "productPlumbingDefectProven": false,
+    "runtimeLimitChangeRecommended": false,
+    "providerFailureObserved": false
+  },
+  "failureChain": [
+    {
+      "step": 1,
+      "evidence": "All 15 raw host request payloads matched fixed case user inputs and requested deepseek-flash, max_tokens 4096, stream true; every HTTP status 200 and usage settlement known"
+    },
+    {
+      "step": 2,
+      "evidence": "multi-file response 4 introduced namedGreeting and adaMessage while keeping old greeting()/message; model text treated initial greeting as a user change"
+    },
+    {
+      "step": 3,
+      "evidence": "response 6 attempted a /tmp check and observed read-only filesystem/module-not-found errors; response 7 checked its own alternate API; no captured command is rerun in diagnosis"
+    },
+    {
+      "step": 4,
+      "evidence": "response 8 corrected only greeting.ts to greeting(name); last write acquired SHA matches final saved greeting.ts; main.ts retained earlier imports/calls",
+      "source": {
+        "seq": 1066,
+        "kind": "file.write-result",
+        "ref": {
+          "sha256": "fab7c13882475cb223765d5a3b279526c1b3e9a72fdd994a82704e5d4fa9fd6b",
+          "bytes": 221
+        },
+        "at": "2026-10-10T05:54:37.742Z"
+      }
+    },
+    {
+      "step": 5,
+      "evidence": "guest generation.request count 9; model.intent/dispatch/response count 8, all generation; ninth request has no provider attempt",
+      "ninthGenerationRequest": {
+        "seq": 1069,
+        "kind": "generation.request",
+        "ref": {
+          "sha256": "1c2a5ce3139cf327277d954c2090630b407f3d84193dcb3b4ea76c8874b34c0e",
+          "bytes": 16251
+        },
+        "at": "2026-10-10T05:54:37.761Z"
+      },
+      "submissionSettled": {
+        "source": {
+          "seq": 1070,
+          "kind": "submission.settled",
+          "ref": {
+            "sha256": "7ad8b9bf1a30bb61b87cc5bc40fda0096165e8f7b467cc106e2b8e2d91ce568d",
+            "bytes": 215
+          },
+          "at": "2026-10-10T05:54:37.768Z"
+        },
+        "data": {
+          "conversationId": 1,
+          "requestId": "7c034ee5-b840-44ba-9722-2d5900b7f825",
+          "type": "input",
+          "status": "unanswered",
+          "entry": 7,
+          "id": 8,
+          "reason": "faulted",
+          "detail": "REQUEST_LIMIT: this task reached its provider attempt limit"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "evidence": "Host saved outcome error then external harness aborted on noncompleted outcome at budget snapshot; scope check ran and passed, grader cancelled before start; remaining two cases and improve not run"
+    }
+  ],
+  "originalTrials": [
+    {
+      "caseId": "local-fix",
+      "trialId": "v1-live-r1-local-fix",
+      "outcome": {
+        "status": "completed",
+        "started": true,
+        "valid": true,
+        "reason": null,
+        "source": "e1:684:3452d528da95ff7f4aabe09522fa8bdbcefb3df57b71c8bafabe02094670a180"
+      },
+      "grade": {
+        "judgment": "PASS",
+        "reason": "All fixed necessary requirements verified",
+        "checks": [
+          {
+            "name": "scope",
+            "passed": true
+          },
+          {
+            "name": "task",
+            "passed": true
+          }
+        ],
+        "source": "e1:687:d3f92c3c6db88c384d5220ce9c3267c4e48a6a802704f68469a8afabdb27c947",
+        "execution": {
+          "sha256": "366754f8f1ceab7c546180124ebef4d5dec244ded6659e9e00aba39e590dadb7",
+          "bytes": 25261
+        }
+      },
+      "hostRequests": 7,
+      "hostTokens": 13370
+    },
+    {
+      "caseId": "multi-file",
+      "trialId": "v1-live-r1-multi-file",
+      "outcome": {
+        "status": "error",
+        "started": true,
+        "valid": true,
+        "reason": "execution_error",
+        "source": "e1:1056:cd824aa1cb59cdc8f3ece1a898745b31cf1ba28aa90e4dc3e373d308736e4515"
+      },
+      "grade": {
+        "judgment": "unknown",
+        "reason": "grader cancelled before start; no deterministic judgment",
+        "checks": [
+          {
+            "name": "scope",
+            "passed": true
+          }
+        ],
+        "source": "e1:1058:47e49b00b8d022212b6325ce5bb0234c70fc80ea0840e7f351c7851492839627",
+        "execution": {
+          "sha256": "488090138b362fdeedc8a70968832468a5caecff9aa14bd33312c19675be9824",
+          "bytes": 531
+        }
+      },
+      "hostRequests": 8,
+      "hostTokens": 14129
+    },
+    {
+      "caseId": "regression",
+      "trialId": "v1-live-r1-regression",
+      "outcome": {
+        "status": "not-run",
+        "started": false,
+        "valid": false,
+        "reason": "cancelled",
+        "source": "e1:1060:f7bbbefd9fbf03272d2c8b431d70271406e7e249d623035dba68c6f5fcb1a3f9"
+      },
+      "grade": null,
+      "hostRequests": 0,
+      "hostTokens": 0
+    },
+    {
+      "caseId": "no-change",
+      "trialId": "v1-live-r1-no-change",
+      "outcome": {
+        "status": "not-run",
+        "started": false,
+        "valid": false,
+        "reason": "cancelled",
+        "source": "e1:1061:77be8bef55d3d82fc5675407b7c2171f7af4dcb09378da27c037c5b5dd807838"
+      },
+      "grade": null,
+      "hostRequests": 0,
+      "hostTokens": 0
+    }
+  ],
+  "accounting": {
+    "physicalHostDispatches": 15,
+    "http200": 15,
+    "knownSettlements": 15,
+    "knownTokens": 27499,
+    "unknownSettlements": 0,
+    "conservativeHostEstimateUsd": 0.0329988,
+    "sdkCatalogEstimateUsd": 0.004293852,
+    "accountBilling": "NOT OBSERVED",
+    "combinationRule": "Host estimate and SDK catalog estimate describe the same 27499 tokens; never add them. Guest dispatch mirrors also must not be double-counted.",
+    "priceBasisUsdPerMillionTokens": 1.2,
+    "priceBasis": "Existing frozen official-price observation; no new pricing claim or account bill lookup",
+    "cumulativeKnownTokensBeforeAnySupplement": 27499,
+    "cumulativePhysicalRequestsBeforeAnySupplement": 15
+  },
+  "servedIdentity": {
+    "requestedAlias": "deepseek-flash",
+    "all15RawReturnedModelFields": [
+      "deepseek-flash"
+    ],
+    "all15SystemFingerprints": [
+      "aeb56401ca74e127821c4f9126dcb669"
+    ],
+    "immutableVersionOrWeightsProven": false
+  },
+  "readOnlyChecks": {
+    "journalAndBlobExtraction": {
+      "status": "PASS",
+      "originalObjectsAndFilesRead": 3167,
+      "all15PhysicalRequestsLinkedAndRawUsageMatched": true,
+      "guestGenerationPurposes": {
+        "generation": 8
+      }
+    },
+    "artifactParseAndLink": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/artifact-link-check.json",
+      "bytes": 1381,
+      "sha256": "36eb40a7d0f10c55d4b7e35bdc42e186dcbd46a5d2f863979b03982d61835289"
+    },
+    "sourceMatchesInstalledCandidate": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/source-verification.json",
+      "bytes": 3573,
+      "sha256": "679a9ad2ec006e4a2043fac39803ec9413649f51c291806b5945a9c07aa22ac9"
+    },
+    "originalBytePreservation": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/preservation-check.json",
+      "bytes": 572,
+      "sha256": "ca267726abea5bc06d5341aa39d26a29b4041674ccb8bd00dfea5a0a47006417"
+    }
+  },
+  "actions": {
+    "newCredentialReads": 0,
+    "newProviderRequests": 0,
+    "newRestrictedVmStarts": 0,
+    "productSourceChanges": 0,
+    "productBuilds": 0,
+    "originalResultWrites": 0,
+    "productGraderReexecutions": 0,
+    "modelCodeEvaluations": 0
+  },
+  "limits": {
+    "cleanup": "Recorded managed cleanup confirmed; externalProcesses and batch remoteTermination remain unknown",
+    "cost": "Host conservative and SDK catalog estimates describe the same usage and must not be added; neither is observed account billing",
+    "generalization": "Single real case failure establishes this run result; no broad model reliability conclusion",
+    "authorization": "Consumed original one-start grant cannot be reused; the supplemental plan is unapproved and non-executable"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "status": "DIAGNOSTIC_HELPER_FAILURE_PRESERVED",
+  "error": "KeyError: 'sourceId'",
+  "cause": "First input collector assumed sourceId on every derived record; evidence reads use source.id while source views use sourceId.",
+  "fixedBy": "collect-inputs.py handles actual observed union shape; no product/original evidence writes",
+  "firstRunWasProductFailure": false
+}

@@ -1,0 +1,170 @@
+{
+  "schema": "pi-durio.issue-31.native-followup-preparation.v1",
+  "at": "2026-10-10T05:47:41.980766+00:00",
+  "status": "PREPARED_NOT_RUN",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "docsBase": "14787f0dfaadf69b6c235e5bb650d9f923a5d5a1",
+  "config": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-config.json",
+    "bytes": 3639,
+    "sha256": "e4be939ec2e27357db9e081fe1613f992d55fdeb1083905c38b4d1417d8a9132"
+  },
+  "harnesses": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/native-followup-batch.mjs",
+      "bytes": 7702,
+      "sha256": "b7caf603e75b6e3917479b19f175356d0e3e899ed5c80259fb60096c56458e1b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/native-composition.mjs",
+      "bytes": 13088,
+      "sha256": "e70829545c65daa6bd793d69ef242256afb17bc1d0fafa9422a2299e4eafc3e7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/readonly-data.mjs",
+      "bytes": 6333,
+      "sha256": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/poll-regression.mjs",
+      "bytes": 5169,
+      "sha256": "4dcf7d23115c9985e56f12f2a423ab70e08cc55d120f5368eb651404e4f7f953"
+    }
+  ],
+  "exactCompositionDiff": {
+    "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/composition-polling.patch",
+    "bytes": 3631,
+    "sha256": "910cfeb768345b1b9d46c66627ca3b12b11222cd18f1ec8a45134d153b944757"
+  },
+  "originalFailure": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/composition/failure.json",
+    "bytes": 5680,
+    "sha256": "cf3c34090a4b138b1676343b05a5fa13fbce2bd2493badceb700263cdc5d2c8a"
+  },
+  "originalBatch": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/result.json",
+    "bytes": 5351,
+    "sha256": "5062ec149ebc874839d4dc799937e8cff993e4c64580ed14949b9eca082c72d6"
+  },
+  "originalNativeSummary": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-summary.json",
+    "bytes": 46845,
+    "sha256": "cf9457281285f8d5bdc76fd5f8604136dedb3235e61877e5a4780fcf92ec02dc"
+  },
+  "originalNativeReport": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-report.md",
+    "bytes": 5423,
+    "sha256": "77cfdf8b8ff89b111db7a6bde5da593b29df4b5b9fdbacda2bba1c4dd44fdb34"
+  },
+  "offlineRegression": {
+    "status": "PASS",
+    "plan": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-poll-regression/plan.json",
+      "bytes": 1618,
+      "sha256": "5aaf22993f8019cbfe379220b9f2d949f63ce2c9bd396c8118f3078de9823e1a"
+    },
+    "result": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-poll-regression/result.json",
+      "bytes": 1936,
+      "sha256": "c05f5ce532e32f8beb3846d0bb8122c3b2091f19de099f1e26e1882d753d5ea9"
+    },
+    "originalCallbackFailure": {
+      "name": "Error",
+      "message": "IMPROVE_REPORT_NOT_FOUND"
+    },
+    "readbackStates": [
+      {
+        "atPerformanceMs": 296.400209,
+        "error": "Error: IMPROVE_REPORT_NOT_FOUND"
+      },
+      {
+        "atPerformanceMs": 398.163209,
+        "state": "interrupted-or-running"
+      },
+      {
+        "atPerformanceMs": 501.326334,
+        "state": "interrupted-or-running"
+      },
+      {
+        "atPerformanceMs": 604.144875,
+        "state": "complete"
+      }
+    ],
+    "otherErrors": [
+      {
+        "message": "EVIDENCE_CORRUPT",
+        "rethrownSameObject": true
+      },
+      {
+        "message": "IMPROVE_REPORT_NOT_FOUND: unrelated suffix",
+        "rethrownSameObject": true
+      }
+    ],
+    "scope": "Actual installed public reader, exact harness callback and existing 100 ms async until loop; Evidence writer creates separate minimal fixture records only. No native, VM, build or provider execution."
+  },
+  "steps": [
+    "composition",
+    "readonly-data"
+  ],
+  "sourceLongSession": {
+    "directory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session",
+    "result": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/result.json",
+      "bytes": 930461,
+      "sha256": "1fb56666475f780092e95270a4992493a8967ac3df726f4123c2a9a49bbdcccf"
+    },
+    "plan": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/plan.json",
+      "bytes": 25509,
+      "sha256": "590b9dd4755da9ce7183e1b142ac5d70dc9ab86ca24513306f46a68d5d72485d"
+    },
+    "largeOutput": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/large-output.json",
+      "bytes": 3734,
+      "sha256": "94918e6b978e2194baa642ef6f3a52e2c6d8de587e22f62f8372a13534dac27f"
+    }
+  },
+  "newOutput": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1",
+  "launchCommand": "/opt/homebrew/Cellar/node/26.8.2/bin/node /Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/native-followup-batch.mjs /Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-config.json",
+  "requirements": [
+    "Human launch in actual macOS Terminal; stdin/stdout TTY and TERM_PROGRAM Apple_Terminal required.",
+    "No prior output directory; every record uses create-only writes.",
+    "Reuse exact installed product and preserve its complete inventory verification at launch.",
+    "Bind config and parent source/failure records by bytes/hash before new output creation.",
+    "Fail fast on child nonzero/signal/error, missing MEASURED/PASS result, or TTY drift.",
+    "Run only composition and original-source readonly; do not repeat successful idle/60-round work."
+  ],
+  "remaining": [
+    "Fresh native follow-up has NOT RUN.",
+    "Selection, isolation regression and formal fixture writeback remain NOT RUN for this follow-up.",
+    "30 native-source queries, 5 exports and sourceUnchanged remain NOT RUN until native follow-up produces evidence.",
+    "No human usability, Chinese IME or daily-use acceptance is inferred."
+  ],
+  "preservation": {
+    "originalConfig": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-config.json",
+      "bytes": 1879,
+      "sha256": "d044ef17458909e07af31dd35d0928caf1a875aad88cd8fba65c140423bb77d7"
+    },
+    "originalComposition": {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-composition.mjs",
+      "bytes": 12975,
+      "sha256": "39533830ba1de452a2d3853922febf9fe6b938b608454806919069334c111420"
+    },
+    "originalBatchHarness": {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-batch.mjs",
+      "bytes": 5789,
+      "sha256": "bf33e1667c7844ca4e19de955853a4cc5077bd427f730fc10ed27b77291048e3"
+    },
+    "partialSummary": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/partial-summary.json",
+      "bytes": 24287,
+      "sha256": "1084eaca7169014231e379b6988c854d8c54292a1b355e081c83990ae2ff7bda"
+    },
+    "partialReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/partial-report.md",
+      "bytes": 2198,
+      "sha256": "e342740ff2bbb734aa5b8d05d6a7b674729ad124713429a5774003c1a6a283bf"
+    }
+  }
+}

@@ -1,0 +1,812 @@
+[
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/breakdown.md",
+    "bytes": 9880,
+    "sha256": "f9d9a64c273ac39934c91d9dcbeef5625e420be1defeb68465d1957e5e6e8aa6"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/01-persistent-readonly-task.md",
+    "bytes": 2832,
+    "sha256": "405b77e9866478ded59d323f28c8825d71019b6beaa34a3ce1172b38ffdec25c"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/02-isolated-execution-scoring-probe.md",
+    "bytes": 2594,
+    "sha256": "ac2e2b82d2367f9acf2a345ac680f80f1bdd334f1085150184fb16c7457fe781"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/03-local-coding-and-full-output.md",
+    "bytes": 2553,
+    "sha256": "bafb4cc65863e0c0e139e72b412c5a36a30cf05b5dd42fcc0c818a8fc5f58a35"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/04-stop-and-exit-lifecycle.md",
+    "bytes": 2026,
+    "sha256": "0b292c2a951acb4a2d512fb814ae189419b0fd998f62e9453efec8881b6eb200"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/05-readonly-recovery-check.md",
+    "bytes": 2363,
+    "sha256": "50628ecac2e50489007842e787025ee9febd4a22350c9d816e4bfc966aa04f89"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/06-terminal-task-roundtrip.md",
+    "bytes": 2576,
+    "sha256": "b2de60665f614a9ccbd87fcb1aafe211bd63af51292054c828bff1cfb764e5a3"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/07-queued-input-and-recovery-ui.md",
+    "bytes": 2380,
+    "sha256": "5f6e3f89f90db7e0fdddbbf9e019a58b90ff7833e42dba43b1205e374b629bd6"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/08-evidence-query-and-pin.md",
+    "bytes": 2500,
+    "sha256": "35556761b1b3a115b6c7d6f46ca82994dab7403579a60ad5451a1cf02033c8fa"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/09-context-compaction.md",
+    "bytes": 2423,
+    "sha256": "b80e43286b74e57c221c54fc7633cc0d8320c6b4d003f216de6bda1922d00bb5"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/10-retention-archive-cleanup-migration.md",
+    "bytes": 2404,
+    "sha256": "a152237578fa0a8839d1891ec92dd214cac5b7050707079496e04a2860147f0b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/11-budgeted-eval-trial.md",
+    "bytes": 3027,
+    "sha256": "32e07135920699dda1cad192e0fd9ef9fb7cf2a10b5fd2d29924d5fc3ba654d8"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/12-fresh-comparison-report.md",
+    "bytes": 2639,
+    "sha256": "89ba77421916b18e3a0c2fcbc4fbec27683d2be78bdfdb439ca7aa0d48e9bb6b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/13-improve-evidence-analysis.md",
+    "bytes": 2519,
+    "sha256": "a430c3f2676f6777cc136bee88881da39edb00dbc80983a8d0013fd810384614"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/14-improve-selection-validation-only.md",
+    "bytes": 2720,
+    "sha256": "0f8249045d86ea99108e826b8acf470f926d356ab05e6123049f97bfd5960e4d"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/15-improve-apply-and-rollback.md",
+    "bytes": 2521,
+    "sha256": "6789a73130837d30aa72ec74fcb168ac26c78877f6ef04d57d3beb23ef347d0d"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/16-improve-self-build-and-eval-assets.md",
+    "bytes": 2116,
+    "sha256": "a85f25683d982bee735be91f704d8ca2f8e20392e7412ed83a365912198cf1e3"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/17-acceptance-and-dual-clock-metrics.md",
+    "bytes": 2479,
+    "sha256": "5ab0a9fd91f0c9b8796919e92731c6a61006eba92b0be9c69abbbc7351b47cde"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/18-cost-and-failure-metrics.md",
+    "bytes": 2514,
+    "sha256": "e485e73c09a643801c0788dcae167855b3a2b30200566a47b9270561c684fa56"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/19-intervention-and-rework-metrics.md",
+    "bytes": 2476,
+    "sha256": "9128d0d57c4f6d4ba20d961afe1897c5a4cc870bd62e6670b4ec0cbc4c01c40e"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/20-real-provider-and-improve-acceptance.md",
+    "bytes": 2443,
+    "sha256": "28479bc01cf728c0de053d3635785a7729d8ed9ebcaca442544ba6fb522d5a3f"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/21-technical-acceptance-and-measurements.md",
+    "bytes": 2833,
+    "sha256": "cb3c38c6a91fb6f54f678fb872acce0d49fa93479534ac101df75eb2aaf32e22"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/issues/22-daily-use-acceptance.md",
+    "bytes": 1693,
+    "sha256": "6459ea64ba990774a2270d3de3118051d9c971d04c32e6b44ba09e905a2cdb8a"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/parent-readback-after-drafting.json",
+    "bytes": 53362,
+    "sha256": "da71cd2ee3e80764af2337f18699222aebae011e5d588550ade046d4146c7b77"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T01-create.md",
+    "bytes": 2748,
+    "sha256": "ed5f6303e5619e16a10dec30ad70a396a36e01ae0b8f1540fa0970077722a689"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T01-final.md",
+    "bytes": 2748,
+    "sha256": "ed5f6303e5619e16a10dec30ad70a396a36e01ae0b8f1540fa0970077722a689"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T02-create.md",
+    "bytes": 2510,
+    "sha256": "c930ab6a1876d83d83009fea285f9e84b2f09e1c5fd378890540c2f7930aeaa7"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T02-final.md",
+    "bytes": 2566,
+    "sha256": "cb39506164efddccabfdf87c71c0f21c7caa93dcbff6dfd0dfff097153cffc79"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T03-create.md",
+    "bytes": 2447,
+    "sha256": "bf5a3046f8a6975d8342e5934bba7d286bde81413057ca56c7fd77624ddf5d2b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T03-final.md",
+    "bytes": 2503,
+    "sha256": "6340556e128ad2bc644787efac8c5688ec5ab112683da280b5f9fd367f422894"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T04-create.md",
+    "bytes": 1914,
+    "sha256": "90c61ba11212b45ad36ba32edc1845ce419097c6d39bf88b70f1bf44a3c3bd2f"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T04-final.md",
+    "bytes": 1914,
+    "sha256": "90c61ba11212b45ad36ba32edc1845ce419097c6d39bf88b70f1bf44a3c3bd2f"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T05-create.md",
+    "bytes": 2267,
+    "sha256": "be9ac3fcc8068c5d66f183961479cbfc2cb5f29bb8a08abc89382d02b6e7f7af"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T05-final.md",
+    "bytes": 2323,
+    "sha256": "e49c499c9c0e3d0ca27712adf6a2767bcd1a3d80378e6418a06e206c9ccc9b14"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T06-create.md",
+    "bytes": 2694,
+    "sha256": "20c8ce7920f74345270b7eb471b91bdd387d732731aced7cd66d4a7d0386827e"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T06-final.md",
+    "bytes": 2750,
+    "sha256": "68194b4f38b3513be2e5904b2a7b4a5f115b87422d289b20e63abbb3a0b9752a"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T07-create.md",
+    "bytes": 2238,
+    "sha256": "8061fbd82acac0e621fd0ef19549bc441b5147d6eed661e3017b84bdbfe8753b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T07-final.md",
+    "bytes": 2238,
+    "sha256": "8061fbd82acac0e621fd0ef19549bc441b5147d6eed661e3017b84bdbfe8753b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T08-create.md",
+    "bytes": 2336,
+    "sha256": "875c8f90dc441721b8ec8e655239ceeff82aaaaeb2778d00d6ed09c5e7c94844"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T08-final.md",
+    "bytes": 2336,
+    "sha256": "875c8f90dc441721b8ec8e655239ceeff82aaaaeb2778d00d6ed09c5e7c94844"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T09-create.md",
+    "bytes": 2259,
+    "sha256": "bca91d39c0c7f579a5d00f2da441a27f8b0dd4eae0254ee32207893630bd0c2e"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T09-final.md",
+    "bytes": 2259,
+    "sha256": "bca91d39c0c7f579a5d00f2da441a27f8b0dd4eae0254ee32207893630bd0c2e"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T10-create.md",
+    "bytes": 2255,
+    "sha256": "adc1f559bd763186aef56e0b07053b423a2e00478046d9763469b9641f948b60"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T10-final.md",
+    "bytes": 2255,
+    "sha256": "adc1f559bd763186aef56e0b07053b423a2e00478046d9763469b9641f948b60"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T11-create.md",
+    "bytes": 2948,
+    "sha256": "c97c9dd7dd517ae2554f11f3da264170cecb1e83d2b014195aa589130372b62c"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T11-final.md",
+    "bytes": 3060,
+    "sha256": "2fa853716eb3509dfbe768e369c7659c1c5fda6466ccb314b2782f1bbb0a84e4"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T12-create.md",
+    "bytes": 2528,
+    "sha256": "b92c77aedbe5e1086acbf6cb898b811fbb543d3323c2b81c885be293aa6a6d73"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T12-final.md",
+    "bytes": 2528,
+    "sha256": "b92c77aedbe5e1086acbf6cb898b811fbb543d3323c2b81c885be293aa6a6d73"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T13-create.md",
+    "bytes": 2355,
+    "sha256": "d9ef2a12206592cc9ff80ed4b100b876fc7214f0ff29ae65c7387b4a374a7151"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T13-final.md",
+    "bytes": 2411,
+    "sha256": "72f3c878d3fef6786f280d400b186fcb9455ee30ab53b26a89ee9487bc84ec5c"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T14-create.md",
+    "bytes": 2574,
+    "sha256": "7ba01d48e9ac002a03ff9570d57149556262cb2f686b48fa9b0feab13c118aee"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T14-final.md",
+    "bytes": 2742,
+    "sha256": "de0a7d12e74daf4ebc43b44040ec77edee165ebe4c074eb1fae89d69b8b64440"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T15-create.md",
+    "bytes": 2408,
+    "sha256": "2bc356edf6fe2854d76272c27780808ff833be31a25e0b27edd10d614a843d8b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T15-final.md",
+    "bytes": 2464,
+    "sha256": "d15ff7e3354357ebe4d5e8a21373e8077d63bfa6158f3a6f39d95b3ba9bfe180"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T16-create.md",
+    "bytes": 1996,
+    "sha256": "6354f02e5b7914e2fae5de90e140fcfd35867b8d333d9d66d985789fe78e5db4"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T16-final.md",
+    "bytes": 1996,
+    "sha256": "6354f02e5b7914e2fae5de90e140fcfd35867b8d333d9d66d985789fe78e5db4"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T17-create.md",
+    "bytes": 2315,
+    "sha256": "40cbe1bf02cb4e45c86cd2a8056ff05acd7c64bc846814655a4c76f0335bfc72"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T17-final.md",
+    "bytes": 2315,
+    "sha256": "40cbe1bf02cb4e45c86cd2a8056ff05acd7c64bc846814655a4c76f0335bfc72"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T18-create.md",
+    "bytes": 2462,
+    "sha256": "454e6e2e8358bcf7f0fa8c61849a5ec1d27986e5583d2626f02f4b6eba731cfa"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T18-final.md",
+    "bytes": 2462,
+    "sha256": "454e6e2e8358bcf7f0fa8c61849a5ec1d27986e5583d2626f02f4b6eba731cfa"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T19-create.md",
+    "bytes": 2368,
+    "sha256": "6e7f35054486f2b7208c8de4877d6168eea7450629f1ebfb61f22e8f25231cc8"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T19-final.md",
+    "bytes": 2368,
+    "sha256": "6e7f35054486f2b7208c8de4877d6168eea7450629f1ebfb61f22e8f25231cc8"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T20-create.md",
+    "bytes": 2323,
+    "sha256": "b707e2501163d4aaba737fe606cc5314291bcea917630e69deede77f051fb03a"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T20-final.md",
+    "bytes": 2323,
+    "sha256": "b707e2501163d4aaba737fe606cc5314291bcea917630e69deede77f051fb03a"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T21-create.md",
+    "bytes": 2454,
+    "sha256": "b1ab188a7e8a852c8ddfb7dc894038426525ed343939fc7e88c3e0e32e37a08b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T21-final.md",
+    "bytes": 2510,
+    "sha256": "48e18d0ed4cc9ad5d56364c1df720d171ed176ed81eb33797995f49fbcd5b92b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T22-create.md",
+    "bytes": 1591,
+    "sha256": "50d7764c69a3d445f231643bde4e80c19fdae2c0ddae7a6fb3a2fdfb08accacf"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/bodies/T22-final.md",
+    "bytes": 1591,
+    "sha256": "50d7764c69a3d445f231643bde4e80c19fdae2c0ddae7a6fb3a2fdfb08accacf"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/create-batch-21-22-first-attempt-failure.txt",
+    "bytes": 441,
+    "sha256": "88820b951855baaf7c8363d998993293211324659b2886a9f4ee810128b51e25"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T01.json",
+    "bytes": 3318,
+    "sha256": "639f0b4dd3638d4851a1846b67ce8a7fddc3200da4132f3187ad440b0d22f2d7"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T02.json",
+    "bytes": 3070,
+    "sha256": "ba49b80a077f5906f427fe0d3df01676d754ce18234074e9d202a4ef16905058"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T03.json",
+    "bytes": 3090,
+    "sha256": "c28fc608be6a3911242823fc9dc2c8f7255a332809129497300577263f6bd820"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T04.json",
+    "bytes": 2540,
+    "sha256": "4487ee07c198becb257c846e1335032f73ed1d28cecf82a6e68f124a43a81b42"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T05.json",
+    "bytes": 2888,
+    "sha256": "9053abd491f230b4ca35101f5b45acd957ae67f3feb0307420202411108e97a5"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T06.json",
+    "bytes": 3331,
+    "sha256": "5f8b886bbfacae61213193fd65fbc92bd8da4f80fe1ed80cbdfb8b0ef102e761"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T07.json",
+    "bytes": 2937,
+    "sha256": "bbe9239f1093a1bcfc369d3c16364a6726ac146cc63bf4911ed873048a3a957b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T08.json",
+    "bytes": 3043,
+    "sha256": "900e92daa69756f4f137cc8b146ec0c70001ecde3734f56f1f33493c8ba19350"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T09.json",
+    "bytes": 2946,
+    "sha256": "be5f9634cf5f16694f6470f4bfdb2e8b143ce8a5926e02080c226335a75237ad"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T10.json",
+    "bytes": 2963,
+    "sha256": "2997894a98a26862308e5c59a9b048cd2678d9c97ce5abfa51bae9167993254b"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T11.json",
+    "bytes": 3717,
+    "sha256": "6a10f0e3b88b6ea2ba3f718aeb7cdc0385e66eb2179e50e69aab7ae5ae435b68"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T12.json",
+    "bytes": 3161,
+    "sha256": "18977ea67078243405dc24314fe9f99763f5dbe0e0868201a228c778d511fc42"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T13.json",
+    "bytes": 3047,
+    "sha256": "836ee7c792248918fea79215ecf6828c2e812aa065b50e05a284a1e1b59c1241"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T14.json",
+    "bytes": 3281,
+    "sha256": "a19728668bed19094004acf391ec69b28aaab6ea50a14fa592263c40f7e0465f"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T15.json",
+    "bytes": 3059,
+    "sha256": "c6f84cbc827c63971af902c92a596117b452c241125fca0ec5bdc8e7e8ea8187"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T16.json",
+    "bytes": 2638,
+    "sha256": "95525ed2ecd3a9b2c5b941f726fb1bfbd5f0adde8cae40204168fe3d67c7d518"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T17.json",
+    "bytes": 3017,
+    "sha256": "05b36018b960a95a51093a030643f95ea2a8201670f947426b2b743b6515bb72"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T18.json",
+    "bytes": 3101,
+    "sha256": "f79372709ff3f46b413dbcca0dbb3dee3052266643c07ea1c0354f728f1cf39a"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T19.json",
+    "bytes": 3007,
+    "sha256": "41fd6b139e7c2337849327abf0fb897c90c23ba0355d495b76981b271d34f161"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T20.json",
+    "bytes": 2969,
+    "sha256": "63660e98081557eac629c82a58a1e380aefbe791875866077aa4148fc24610c8"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T21.json",
+    "bytes": 3402,
+    "sha256": "ddb054faf64f54c24519800e01420bf78e79b5ab486832112c105a53c3d57b8f"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/created-T22.json",
+    "bytes": 2216,
+    "sha256": "17d5bfa3f49734708342b5e0943445cc4e87a134000daf729e5736d16ca76efe"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/final-graphql.json",
+    "bytes": 134069,
+    "sha256": "1a62e006c2dc993f5c01edd00a3601748df583ba435d8d8ae3982ade9cf23a1a"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/final-rest.json",
+    "bytes": 128026,
+    "sha256": "1ef828e4dad52d8c7bc854c083714703d5310b71d9901ec0e81762d535479fa4"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/issue-12-finalize-failure-readback.json",
+    "bytes": 5304,
+    "sha256": "b04ca8215bef86efc1a305b837613b69d2943d618849a24c0c971c6b7ac62eb1"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/issue-12-finalize-failure-reconciliation.json",
+    "bytes": 205,
+    "sha256": "d8dad6a379bb2170cb296c043af1276ff3fff21353fc550003205b50be8271b0"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/issues-before.json",
+    "bytes": 82367,
+    "sha256": "69ce5cfd6bd81037b009faec497dc23ac3f804efe5d71aa3fe1bfd14cbc8017a"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/journal.json",
+    "bytes": 26093,
+    "sha256": "82834832a67975e71226251281f7068d783201e75d74ac3928538fba37aa2814"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/parents-before.json",
+    "bytes": 62076,
+    "sha256": "10146c326deb38b36b6d548f91ecd55e60f18b2ea269b4e1aa09e452964df20e"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publication/publication-readback.json",
+    "bytes": 8280,
+    "sha256": "f26ece4acc90e2fc4dd327545751c86da5141774dc4287954751e6f464840891"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/publish-approved.py",
+    "bytes": 18563,
+    "sha256": "ce9d426df508c37b78f0cd7cdf82f473ddfd447bd760e4f339641d0ea0b880d6"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/published-index.md",
+    "bytes": 5487,
+    "sha256": "fa0e9a67414cd8d3d61614e554824d332fa4e513eaf4742dfb601cd920b84e71"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/review-findings.json",
+    "bytes": 879,
+    "sha256": "77e218200e5a3884b630909034c2e5cbb844be041bfe8b77425f0f342a68e022"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/source-issue-10.json",
+    "bytes": 53337,
+    "sha256": "07f3c935eba3fb900cf5d6107df893637e154b8298161d1ad34bf6b85cf6c8a4"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/tickets.json",
+    "bytes": 51870,
+    "sha256": "74f3d9eb6e0de3b6d516d4ac5ca35a2ab05ee45860a9e1572c81a6d8d6be8833"
+  },
+  {
+    "path": ".scratch/pi-durio-v1-tickets-r1/validation.json",
+    "bytes": 6796,
+    "sha256": "a7d59b088c8d23430997adc13cd202186bdfdaf50e18e8f2d81f88183e2f23b2"
+  },
+  {
+    "path": "AGENTS.md",
+    "bytes": 389,
+    "sha256": "7e83738ba1c6c52d79eabf4c24db0d6247fb051bc19b3a6277b94362a39fd545"
+  },
+  {
+    "path": "GLOSSARY.md",
+    "bytes": 5925,
+    "sha256": "43a4d34c092a72794bd19614c6472d61b0899803fd6ea2a05fd2ba7c6a5f4512"
+  },
+  {
+    "path": "docs/adr/0001-local-execution-and-recovery-boundary.md",
+    "bytes": 1284,
+    "sha256": "bcc95c95c3e3140fd325178c47c9a12b3d29414918a1e783b6b05dd6a47feac0"
+  },
+  {
+    "path": "docs/adr/0002-full-original-records-and-user-controlled-reduction.md",
+    "bytes": 1522,
+    "sha256": "455387761601a83c165bf3c3da7a5ffbe7af44c8e437250e25d7ab1446abd76d"
+  },
+  {
+    "path": "docs/adr/0003-eval-isolation-and-evidence-boundary.md",
+    "bytes": 1288,
+    "sha256": "3f1b176b12537cbab079e5e4b7650f0b91345aba2f6e9db6b3b048e8b9eb15eb"
+  },
+  {
+    "path": "docs/agents/domain.md",
+    "bytes": 814,
+    "sha256": "a741edfb8b44f7ee1f69c4ffe9dddc23a76157abd393d97485c6b5a2ae1ff9b8"
+  },
+  {
+    "path": "docs/agents/issue-tracker.md",
+    "bytes": 2431,
+    "sha256": "f417455f1623e5490057159ce2eb64f7dd37744d413687725ed11fdccf2ed73f"
+  },
+  {
+    "path": "docs/agents/triage-labels.md",
+    "bytes": 598,
+    "sha256": "d95bbbeee7295a17d608ccd172e24aac850a9dd9bd11130a1599b14f68687f00"
+  },
+  {
+    "path": "docs/design/eval-and-improvement-readback.json",
+    "bytes": 176885,
+    "sha256": "42c5282a8bdc23e59f009996ab79f0be0f2368cc4ad5b215dd90255cab3f0e6c"
+  },
+  {
+    "path": "docs/design/eval-and-improvement.md",
+    "bytes": 20303,
+    "sha256": "75236d043c4aa58bf146d8ac57621a54d117569044b4aff168e153366a86fd37"
+  },
+  {
+    "path": "docs/design/first-version-acceptance-readback.json",
+    "bytes": 34328,
+    "sha256": "5e07cb9806a90b11200997f2528c95b5f2f943c8c5a0d5993e59eab210826bae"
+  },
+  {
+    "path": "docs/design/first-version-acceptance.md",
+    "bytes": 19665,
+    "sha256": "4edb0e8f8b624e2e8d23d7c3a661252df586e2eaaa0aa9afcc9064704a0230d4"
+  },
+  {
+    "path": "docs/design/first-version-scope-readback.json",
+    "bytes": 997,
+    "sha256": "daaeb5a2a2da428a1d5cabd694c670d3f600955e17e397e14794d1e262e1b06a"
+  },
+  {
+    "path": "docs/design/first-version-scope.md",
+    "bytes": 7636,
+    "sha256": "6b33a042fa1d402cbef421966977c4c89969e212198a7ad8219be6eb34e5c952"
+  },
+  {
+    "path": "docs/design/improve-workflow-readback.json",
+    "bytes": 184638,
+    "sha256": "ad89dbd4fb904df6fea67a3bd52d0407f4644b2e4a7b278737fb23e775f92e3f"
+  },
+  {
+    "path": "docs/design/improve-workflow.md",
+    "bytes": 21299,
+    "sha256": "947f4b85a93b11faad37297933c73c8d85bcb921104db938b588fb4de050fb9d"
+  },
+  {
+    "path": "docs/design/llmops-metrics-and-feedback-readback.json",
+    "bytes": 201518,
+    "sha256": "fca2d7de23740c187b3a6666681643a7d902d2bbdacb61afc178b16443c85bba"
+  },
+  {
+    "path": "docs/design/llmops-metrics-and-feedback.md",
+    "bytes": 31350,
+    "sha256": "59b0869f3fe919a52e4cc659edefaa56c676966df06be93611c30d4b9ff6b158"
+  },
+  {
+    "path": "docs/design/runtime-evidence-and-retention-readback.json",
+    "bytes": 48709,
+    "sha256": "1d290c92460efcc7e3be8875a8ca95c6a1ea37b8d47274126e2f3c2baec78a8a"
+  },
+  {
+    "path": "docs/design/runtime-evidence-and-retention.md",
+    "bytes": 32027,
+    "sha256": "ab3355ed874a6a7fd33d5631de1677784fcc8548aa9e7e2e925351033fa8e0a3"
+  },
+  {
+    "path": "docs/design/tui-minimum-interaction-readback.json",
+    "bytes": 36550,
+    "sha256": "6af7163a6bbea9f7c3cfcf976ea0e16bdf2f796d31d0296b471b8709e66f9ec0"
+  },
+  {
+    "path": "docs/design/tui-minimum-interaction.md",
+    "bytes": 19515,
+    "sha256": "70e9a65fb3658eaa29c6782d3a95ec2df7baec130c029219a58fb90134c1b779"
+  },
+  {
+    "path": "docs/design/upstream-execution-recovery-readback.json",
+    "bytes": 4161,
+    "sha256": "c9f55cafbd4198c2b2b8095949d63b87383a3521a9f398d21ef7ce42483d4e94"
+  },
+  {
+    "path": "docs/design/upstream-execution-recovery.md",
+    "bytes": 18088,
+    "sha256": "faaea060fc3169ccdae531efb27fb21c01a006a1cb4aea9302fc662cbdf8398c"
+  },
+  {
+    "path": "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+    "bytes": 153617,
+    "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+  },
+  {
+    "path": "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+    "bytes": 35573,
+    "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+  },
+  {
+    "path": "docs/prototypes/pi-tui-1.1.0-probe/README.md",
+    "bytes": 3542,
+    "sha256": "746c10daea2fa2fe396b07691dd88f8e3bfc17dc7c97d9ea62d4efca623d9113"
+  },
+  {
+    "path": "docs/prototypes/pi-tui-1.1.0-probe/probe-result.json",
+    "bytes": 1741,
+    "sha256": "43eb91ec03e38cd73e04f4a45bfd08ac00e575818639c401d7a5ac416c236a55"
+  },
+  {
+    "path": "docs/prototypes/pi-tui-1.1.0-probe/probe.mjs.txt",
+    "bytes": 5447,
+    "sha256": "754420aef3472c4a9eaf79a1b260d8b35fae8caa91c6a26b888229ef8160cac2"
+  },
+  {
+    "path": "docs/prototypes/pi-tui-1.1.0-probe/provenance-payload.json",
+    "bytes": 1044,
+    "sha256": "0a876f1f738744241cf93f59c5d0ba7ff505beb7cca9490de4a68cb39dc04c7e"
+  },
+  {
+    "path": "docs/prototypes/pi-tui-1.1.0-probe/registry.json",
+    "bytes": 3423,
+    "sha256": "e5664569d88f7f21c6afbba2dc5abb5e11163088dab6608480959f204e065289"
+  },
+  {
+    "path": "docs/prototypes/pi-tui-1.1.0-probe/source-comparison.json",
+    "bytes": 377,
+    "sha256": "fa15b0d1cae32758d99bc12a2db702011a4108c05574bd19fd3c2896331b730f"
+  },
+  {
+    "path": "docs/prototypes/tui-minimum-interaction-preview.png",
+    "bytes": 166265,
+    "sha256": "4266955a2705f963c10a77eab357558137a6716d11cc408df644ef95d706a2fa"
+  },
+  {
+    "path": "docs/prototypes/tui-minimum-interaction-prototype.html",
+    "bytes": 43175,
+    "sha256": "b4c15bd349166429c25bd457dbf0d3da10bacd336515cc68106ac5f058c3c16e"
+  },
+  {
+    "path": "docs/research/pi-upstream-audit-2026-10-09.md",
+    "bytes": 8097,
+    "sha256": "56b2f86be2a891decfb2da07f1f96251d1af1c8fb803a5f6acc09f95c44c3820"
+  },
+  {
+    "path": "docs/research/tui-improve-audit-2026-10-09.md",
+    "bytes": 6753,
+    "sha256": "afbc06268d2fdf7963b20eec3f11df317717b430174c0bd62612ce18ee8a1903"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/create-stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/create-stdout.txt",
+    "bytes": 53,
+    "sha256": "c6dda8121907fd611d28823ec254e01b19858243d02036c16cc02472a064589d"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/issue-1.json",
+    "bytes": 8028,
+    "sha256": "caec8261b849b366eaa448d71e755934c2be5671008b0a8a64559b9d62c3f328"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/issue-2.json",
+    "bytes": 7280,
+    "sha256": "73665968e2977b038b68ec21a2781df76877fed6e469253c2498d5ccae790618"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/issue-3.json",
+    "bytes": 19944,
+    "sha256": "b8bbd625ebcd651fa762bb17786619fae25f08031da08512c113b8076ccf8b31"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/issue-4.json",
+    "bytes": 10924,
+    "sha256": "1b696db59d8cac71d443f999798e1d8f5a9bd79510dce061366f8e997ea011d4"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/issue-5.json",
+    "bytes": 37616,
+    "sha256": "c979cdb075891595b98b6d8135b65cd44b60d296b43068306b586ae608187597"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/issue-6.json",
+    "bytes": 25343,
+    "sha256": "26326a92568c999aa0fb6cfb932003187bcb152952f37849bd80917fb0e134c5"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/issue-7.json",
+    "bytes": 24235,
+    "sha256": "29345c8fc36546de6755f07c9487f8ddbe9597d37d36a213b3c48d990b9a821e"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/issue-8.json",
+    "bytes": 21179,
+    "sha256": "25334831b9aacae936f97790ecb77dcf52b14909c6f0726fcbec57300ae0debc"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/issue-9.json",
+    "bytes": 39485,
+    "sha256": "002d08aa3d5db52614427402429046785f3a26923df4820989a12c6def09aa2c"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/original-files.json",
+    "bytes": 6184,
+    "sha256": "b8a2c59e0ed7a8f9ff187076f854f7e34815a4ee38c95c791644b1a54668557e"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/prepublish-validation.json",
+    "bytes": 3628,
+    "sha256": "eb6d757a512aa974c3b9ca33f864343c93a38e3df2c6665e1200a835f62e577c"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/publication-journal.json",
+    "bytes": 581,
+    "sha256": "0d66da9d5eab9407dc9001ea37a084c0a7bbe2f5e6b4d9f51086b4c944dc6d0a"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/publication-readback.json",
+    "bytes": 798,
+    "sha256": "9cb627d85906d01d023a7902df060416ab5eb64ffb9008712637cb97889cde66"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/published-issue-graphql.json",
+    "bytes": 243992,
+    "sha256": "08f70fb256037c8b6f9eeeaf4e77691ff70afb8cf6dadee48b2697d33444324a"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-evidence/published-issue-rest.json",
+    "bytes": 56003,
+    "sha256": "d93d2468730c5fee6ff0f2fc4c065fd2ec4499ac2465c45be8e54ef3b1b4b623"
+  },
+  {
+    "path": "docs/specs/pi-durio-v1-spec.md",
+    "bytes": 52672,
+    "sha256": "a7ffbdbb616310918eb308078c66e6c9577f529dcbb92d2d3903e85659c66ee3"
+  },
+  {
+    "path": "docs/wayfinder-proposal.md",
+    "bytes": 7649,
+    "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+  },
+  {
+    "path": "docs/wayfinder-readback-2026-10-09.json",
+    "bytes": 3833,
+    "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+  },
+  {
+    "path": "pi-durable-coding-agent-spec.html",
+    "bytes": 130848,
+    "sha256": "a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6"
+  }
+]

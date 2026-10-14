@@ -1,0 +1,305 @@
+{
+  "schema": "pi-durio.provider-terminal-repair.merge-readback.v1",
+  "status": "MERGED_AND_BUILD_MIGRATED_PENDING_INDEPENDENT_REVIEW",
+  "startedAt": "2026-10-10T07:08:25.846319+00:00",
+  "branch": "codex/pi-durio-v1",
+  "preflight": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/merge-preflight.json",
+    "bytes": 25051,
+    "sha256": "05a8192460ccb2291b1b705b360e7811db15341c9c90d1360ee2c13a17c8d20b"
+  },
+  "before": {
+    "commit": "a3ea6eac3c1b2a8b6d0c870dbe5a9974052a700a",
+    "tree": "6e0d6527db16ab5760a6eaf3c01cd58eb30f9843",
+    "trackedClean": true,
+    "originalUntracked": [
+      {
+        "path": "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+        "bytes": 153617,
+        "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+      },
+      {
+        "path": "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+        "bytes": 35573,
+        "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+      },
+      {
+        "path": "docs/wayfinder-proposal.md",
+        "bytes": 7649,
+        "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+      },
+      {
+        "path": "docs/wayfinder-readback-2026-10-09.json",
+        "bytes": 3833,
+        "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+      }
+    ],
+    "oldDistInventory": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/old-root-dist-inventory.json",
+      "bytes": 74938,
+      "sha256": "d40f3e57eb010278595bb165936cdc36e0eda28399c659bf32ff42904f21661a"
+    },
+    "oldSourceBuildSha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+  },
+  "producer": {
+    "commit": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+    "tree": "ffd2e9216c603bed7891e69512c013c2d80d813c",
+    "parent": "80b912a0d02b1dab7df8afc909fdd9359769ed07",
+    "worktree": "/Users/nineofour/.codex/worktrees/provider-terminal-repair/Durio",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+    "identityVerification": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/producer-and-old-build-identity-verification.json",
+      "bytes": 303168,
+      "sha256": "4fd04b2a912ccfd81201ad2e5041698863d4e08d0ca472658b89395e7d232838"
+    },
+    "completeDistInventory": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/producer-dist-inventory.json",
+      "bytes": 74942,
+      "sha256": "b173096412c0eeea93c6c9289473c7e02361879828f4834e5cf8bd598297226c"
+    },
+    "completeDistSnapshot": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/producer-dist-snapshot",
+    "counts": {
+      "inputs": 169,
+      "compiler": 140,
+      "outputs": 246,
+      "completeDistFiles": 370,
+      "compiledTestFiles": 123
+    }
+  },
+  "expectedDiff": {
+    "paths": [
+      "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/README.md",
+      "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/build-identity.json",
+      "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/final-boundary-checks-r3.log",
+      "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/final-sdk-runtime-checks-r3.log",
+      "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red-identity.json",
+      "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red.log",
+      "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/original-readback-and-sdk-identity.json",
+      "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/original-replay-result-r3.json",
+      "src/provider-boundary.ts",
+      "test/improve.test.ts",
+      "test/provider-boundary.test.ts"
+    ],
+    "sourcePaths": [
+      "src/provider-boundary.ts",
+      "test/improve.test.ts",
+      "test/provider-boundary.test.ts"
+    ],
+    "docs": [
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/README.md",
+        "gitBlob": "377a5d2ce4695df5893b64e77c52b5d91f5199d9",
+        "bytes": 5142,
+        "sha256": "825cb5ec034f9ea9e65f21cd2d8eba0814d21ed896a5d9ba61102a146381556f",
+        "source": "producer-authored Git blob",
+        "externalCopyClaim": false
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/build-identity.json",
+        "gitBlob": "61b3d394debae9d7f51ff692d8f5966885a8443b",
+        "bytes": 2721,
+        "sha256": "ba72d156c4e0e0c147eaa26aacb6379c02fc65e4c03b2252c5db9aae5d44643e",
+        "externalPath": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/build-identity.json",
+        "externalByteIdentical": true
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/final-boundary-checks-r3.log",
+        "gitBlob": "cbfbfeeead53b212a086b1af066b960e736cf79d",
+        "bytes": 1384,
+        "sha256": "32735f2eaeca3fd4239bc6753ad0999f806286a10d86c2b93337e58ec20f7027",
+        "externalPath": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-boundary-checks-r3.log",
+        "externalByteIdentical": true
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/final-sdk-runtime-checks-r3.log",
+        "gitBlob": "3897da6a8a0bf841fe667a147de2be25195ffb1c",
+        "bytes": 366,
+        "sha256": "afe0cbd340169380d327bebb32c594ecc40d2d1e916ff6bd36433108758a228c",
+        "externalPath": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-sdk-runtime-checks-r3.log",
+        "externalByteIdentical": true
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red-identity.json",
+        "gitBlob": "37bb1936f87e352911cf4c5134a52fad1f6663d4",
+        "bytes": 514,
+        "sha256": "9c623bef9e02458d814212c9f0192eee9000b84cc80bd198ce603f6dd49f4379",
+        "externalPath": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/first-red-identity.json",
+        "externalByteIdentical": true
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red.log",
+        "gitBlob": "267bcddc6892044ba3393553274d54584d43a6e9",
+        "bytes": 986,
+        "sha256": "89f31209c448ae84ad8580eb5f1574ccb0ee2dd6eb58eb291d92321e698734ad",
+        "externalPath": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/first-red.log",
+        "externalByteIdentical": true
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/original-readback-and-sdk-identity.json",
+        "gitBlob": "c777404b8868a9c7849467f8d58b5b7b112fc5f9",
+        "bytes": 4239,
+        "sha256": "35206b8c45899ffa1dbb6dc3aa69f479b917e867df6e449f3bb539a9bcec1545",
+        "externalPath": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/original-readback-and-sdk-identity.json",
+        "externalByteIdentical": true
+      },
+      {
+        "path": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/original-replay-result-r3.json",
+        "gitBlob": "72c6bff32e5071c8cf1c5ea6422cd5ad1a2fe45e",
+        "bytes": 975,
+        "sha256": "2325ed75c3bbd56c229d8a2a272b1b21d2f93fdb9779d637c45e0d87023a1020",
+        "externalPath": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/original-replay-result-r3.json",
+        "externalByteIdentical": true
+      }
+    ]
+  },
+  "diffCheck": {
+    "fullExitCode": 2,
+    "fullOutput": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red.log:16: trailing whitespace.\n+  \ndocs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red.log:18: trailing whitespace.\n+  \n",
+    "sourceTestsAndOtherDocs": "PASS",
+    "intentionalRawLogException": "docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red.log",
+    "firstFailure": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/merge-preflight-first-failure.json",
+      "bytes": 1176,
+      "sha256": "41a8075046ae6fcb4f0977bcfb1e0b57cf0c158b2a8e4810f59aee5a2c1c0cd4"
+    },
+    "postMergeFullExitCode": 2,
+    "postMergeSourceTestsAndOtherDocs": "PASS"
+  },
+  "retainedFirstPreflightFailure": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/merge-preflight-first-failure.json",
+    "bytes": 1176,
+    "sha256": "41a8075046ae6fcb4f0977bcfb1e0b57cf0c158b2a8e4810f59aee5a2c1c0cd4"
+  },
+  "historicalPathMigration": {
+    "from": "/Users/nineofour/Durio/dist",
+    "to": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/old-root-dist",
+    "references": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/historical-root-dist-references.json",
+      "bytes": 3278,
+      "sha256": "f2da6bbe19fe2bded546cccd067f6f165c001fd2529847fa8fa265dddcf4671c"
+    },
+    "historicalFilesRewritten": false,
+    "oldSnapshotInventoryVerified": true,
+    "oldReferenceFilesUnchanged": true
+  },
+  "reviewStatus": "PENDING_INDEPENDENT_AFFECTED_SPEC_AND_STANDARDS_REVIEW",
+  "claims": {
+    "localMergeAndBuildIdentityOnly": true,
+    "newBuildExecuted": false,
+    "newTestsExecuted": false,
+    "providerCalls": 0,
+    "vmStarts": 0,
+    "credentialValuesRead": false,
+    "newInstallationCreated": false,
+    "oldCandidateRelabeled": false,
+    "push": false,
+    "statusOrStateJsonChanged": false
+  },
+  "mergeCommand": {
+    "argv": [
+      "git",
+      "merge",
+      "--no-ff",
+      "-m",
+      "Merge provider terminal settlement repair candidate for independent review",
+      "78130b154fe8dad9097c05afb24ff9d1d24d8bce"
+    ],
+    "exitCode": 0,
+    "stdout": "Merge made by the 'ort' strategy.\n .../issue-30/provider-terminal-repair-r1/README.md |  35 +++++++\n .../build-identity.json                            |  84 +++++++++++++++++\n .../final-boundary-checks-r3.log                   |  19 ++++\n .../final-sdk-runtime-checks-r3.log                |  10 ++\n .../first-red-identity.json                        |  10 ++\n .../provider-terminal-repair-r1/first-red.log      |  28 ++++++\n .../original-readback-and-sdk-identity.json        |  90 ++++++++++++++++++\n .../original-replay-result-r3.json                 |  46 +++++++++\n src/provider-boundary.ts                           |  60 +++++++++++-\n test/improve.test.ts                               |  12 ++-\n test/provider-boundary.test.ts                     | 105 ++++++++++++++++++++-\n 11 files changed, 491 insertions(+), 8 deletions(-)\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/README.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/build-identity.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/final-boundary-checks-r3.log\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/final-sdk-runtime-checks-r3.log\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red-identity.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/first-red.log\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/original-readback-and-sdk-identity.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/provider-terminal-repair-r1/original-replay-result-r3.json\n",
+    "stderr": ""
+  },
+  "after": {
+    "commit": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "parents": [
+      "a3ea6eac3c1b2a8b6d0c870dbe5a9974052a700a",
+      "78130b154fe8dad9097c05afb24ff9d1d24d8bce"
+    ],
+    "tree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "producerChangedBlobsMatch": true,
+    "preexistingIntegrationBlobsPreserved": true,
+    "preexistingIntegrationPathCount": 18,
+    "trackedClean": true,
+    "statusPorcelain": "?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png\n?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json"
+  },
+  "completedAt": "2026-10-10T07:08:30.436385+00:00",
+  "newBuild": {
+    "sourceBuild": {
+      "path": "/Users/nineofour/Durio/dist/execution/source-build.json",
+      "bytes": 92984,
+      "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+    },
+    "frozenSourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/producer-dist-snapshot/execution/source-build.json",
+      "bytes": 92984,
+      "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+    },
+    "completeDistInventory": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/producer-dist-inventory.json",
+      "bytes": 74942,
+      "sha256": "b173096412c0eeea93c6c9289473c7e02361879828f4834e5cf8bd598297226c"
+    },
+    "rootIdentityVerification": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/root-after-build-identity-verification.json",
+      "bytes": 104914,
+      "sha256": "ce4a7fd6d5a8b01f6d2869de9cc1fdf0d9b60b8245166c44bb35dfda5c6657b5"
+    },
+    "counts": {
+      "inputs": 169,
+      "compiler": 140,
+      "outputs": 246,
+      "completeDistFiles": 370,
+      "compiledTestFiles": 123
+    }
+  },
+  "oldBuild": {
+    "snapshot": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/old-root-dist",
+    "sourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/old-root-dist/execution/source-build.json",
+      "bytes": 92981,
+      "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+    },
+    "completeDistInventory": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/old-root-dist-inventory.json",
+      "bytes": 74938,
+      "sha256": "d40f3e57eb010278595bb165936cdc36e0eda28399c659bf32ff42904f21661a"
+    }
+  },
+  "distMigration": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/dist-migration.json",
+    "bytes": 1894,
+    "sha256": "9b5806ebdc615735434d2613b0469aefe0ca724b870e033470414d88a9b7ab0a"
+  },
+  "stillOriginalUntracked": {
+    "identicalPaths": true,
+    "identicalBytesAndSha256": true,
+    "files": [
+      {
+        "path": "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+        "bytes": 153617,
+        "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+      },
+      {
+        "path": "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+        "bytes": 35573,
+        "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+      },
+      {
+        "path": "docs/wayfinder-proposal.md",
+        "bytes": 7649,
+        "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+      },
+      {
+        "path": "docs/wayfinder-readback-2026-10-09.json",
+        "bytes": 3833,
+        "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+      }
+    ]
+  },
+  "credentialIgnore": {
+    "rule": ".gitignore:15:/api.env\tapi.env",
+    "blob": "79ec4055b24c9be8703d5dc07fe8a9feb573991c",
+    "unchanged": true,
+    "valueRead": false
+  },
+  "rootWriteLock": "Released to parent coordinator after final readback."
+}

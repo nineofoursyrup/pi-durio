@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-09T22:51:24.535100+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 5.056759083992802,
+  "log": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/build.log",
+    "bytes": 59,
+    "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281"
+  }
+}

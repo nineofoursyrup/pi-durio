@@ -1,0 +1,20 @@
+{
+  "sourceCommit": "66c7fcafb34e722eafd738140f9305e5a235db80",
+  "sourceTree": "32ab413c76296d9579eb373b86e945129a10fa87",
+  "packageRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/install/node_modules/pi-durio",
+  "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/manifest.json",
+  "manifestSha256": "38742960c17164ed1c66970c67e5ff60ce73cccd7556828fae28e092b15d7474",
+  "runner": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/control-terminal-validation.mjs",
+  "runnerSha256": "86752fdb5433dc3baa883cb0548d6ea66e2e2f51962128fbc64d1eb33e33ebec",
+  "archive": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/pi-durio-0.1.0.tgz",
+  "archiveSha256": "d87e09ca58f041331f1a6bd3b7addbcfa159e0f5bcdeba70f4c0b5015a94b5b4",
+  "files": 12725,
+  "status": "OFFLINE_READY_NATIVE_PENDING",
+  "sourceBinding": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/source-binding.json",
+  "sourceBindingSha256": "34252d18fe6417e13fbf2aba616cc88c363ed6a19d50661960cbc173202a756e",
+  "integratedPrerequisite": "1558066370085ca63ab7b6eede8e2cd8713d1e5d",
+  "nativeCommand": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/control-terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/manifest.json'",
+  "nativeAcceptance": "NOT RUN",
+  "paidProvider": "NOT RUN",
+  "manualCard": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-17/docs/implementation/pi-durio-v1/issue-17/operator-card.md"
+}

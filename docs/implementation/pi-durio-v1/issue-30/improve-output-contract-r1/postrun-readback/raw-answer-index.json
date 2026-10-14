@@ -1,0 +1,34 @@
+{
+  "status": "SINGLE_JSON_FORMAL_REPORT_COMPLETE_NOT_SELECTED_OR_EXECUTED",
+  "answer": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/raw-analysis-answer.txt",
+    "bytes": 9764,
+    "sha256": "13ea1c557af31625295535a896ab7ddd6105daf61f34d568b0a6dd671f37422c"
+  },
+  "objectKeys": [
+    "summary",
+    "candidates",
+    "gaps"
+  ],
+  "rawProposedDraftCount": 1,
+  "rawSummaryText": "The explicitly registered project clamps a number to inclusive bounds. Static inspection of clamp.ts (e1:49:a680a9179462aab085f0352e77a9e1c25a3d53ac56cf41015e1d20f913cf8ca7) shows `Math.min(upper, Math.min(lower, value))`, which for a value below `lower` returns `lower` but for a value above `upper` returns `upper`; however when `value` is below `lower` the inner `Math.min(lower, value)` equals `value`, and the outer min of `upper` and that result clamps high values correctly — the actual defect is that a below-lower value is returned as `value` only if `value <= upper`... Static tracing: inner = min(lower, value); result = min(upper, inner). For value < lower, inner = value, result = min(upper, value) = value (since value < lower <= upper), so the result is the unclamped low value — a genuine low-bound violation. check.mjs (e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2) expects clamp(-4,0,10)=0 and clamp(-9,-5,-1)=-5, so the low-bound behavior fails. Observed execution evidence: the retained run invoked `node check.mjs`, the managed command completed with exitCode 1 (e1:25:35696d254652b487ec6bab04fddf29f7ca231e63adf5d1c69e777eb23954193c) and a tool.error recorded 'Command exited with code 1' (e1:26:3f8896d0da5cc0426f7d92f9eed80708b8b289446b865d3eb47025d703e25edb). The raw failure stdout/stderr body is withheld (e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503 is [WITHHELD]), so the specific failing assertion output is not an acquired fact. One minimal repair candidate is supported in clamp.ts only; README.md, check.mjs and package.json remain protected. No performance improvement is claimed and no success counterexample was acquired. Report and candidate are analysis-only; no execution, validation, writeback or activation occurs here.",
+  "rawGapsText": [
+    "The retained failure body is withheld (e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503 is [WITHHELD]); no acquired evidence states the exact failing assertion or the observed incorrect return value.",
+    "No successful/exit-0 run of check.mjs was acquired, so no success counterexample exists for either the current or the proposed code.",
+    "The self-source target is unregistered and incomplete; no self-source material was read and none is cited.",
+    "package.json declares no test script, so the acceptance path is the direct node check.mjs invocation observed in the retained run, not a project-scripted test.",
+    "No failure body, stack trace, or stdout/stderr of the check run was acquired; all defect reasoning beyond exitCode 1 is static analysis of registered source text.",
+    "No previous reports or decisions exist for this project, so no suppression or prior-key continuity applies; no problemKey was inherited.",
+    "The available evidence run is an offline fixture (mode offline, deepseek-flash-offline-fixture), so the run environment is not a real production execution."
+  ],
+  "formalReportState": "complete",
+  "formalCandidateCount": 1,
+  "selectedCandidateCount": 0,
+  "formalReason": null,
+  "canonicalCandidate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/canonical-candidate-copy.json",
+    "bytes": 8837,
+    "sha256": "6ef254121b198beb905a70396f4909131c90912773f720ed50030291104b889f"
+  },
+  "warning": "A structurally complete report does not verify model claims or authorize selection, validation, writeback, activation or execution. Candidate source and revisions are unchanged."
+}

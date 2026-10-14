@@ -1,0 +1,206 @@
+{
+  "kind": "repair-27-owner-standalone-handoff",
+  "baseline": "ca14cf5a5f2ef00017c972a40cb8c8d5b11488d9",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-27-owner",
+  "branch": "codex/pi-durio-v1-repair-27-owner",
+  "commit": "ff588fed3db6fe62f3c0a8ce84db462b62a828f9",
+  "tree": "8a264a556c3bd3114608ce3b7273c87aa4b62cf9",
+  "sourceBuild": {
+    "path": "source-build.json",
+    "sha256": "1daa604888618d96843da4e8811d2dd37b9cee0a35221f704bc8ced0b4846443",
+    "verifiedCurrentInputsCompilerOutputs": true
+  },
+  "environment": {
+    "node": "v26.8.2",
+    "platform": "darwin/arm64",
+    "properLockfile": "4.1.2",
+    "dependencies": "offline filesystem copy of /Users/nineofour/Durio/node_modules; package-lock.json unchanged"
+  },
+  "changes": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-27/README.md",
+      "sha256": "b10728af2f80993917c8f13c05caae1815d333fc308593f450eadcc4e96153e1"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-27/owner-repair.md",
+      "sha256": "3f47a2765993dbe49dc48efc51fc43a54c0a801c1e5ba9fc8d657d51cbaac46e"
+    },
+    {
+      "path": "src/metrics/acceptance.ts",
+      "sha256": "0e70a9c405ad752ca3a076e799dfb18bc54e63a0c2c7af30962b5c3cea2614ce"
+    },
+    {
+      "path": "src/metrics/costs.ts",
+      "sha256": "405f8b33d272c95d9e5193b38dfb68cea7766d594e01105254d3ae94a01bd6fc"
+    },
+    {
+      "path": "src/metrics/feedback.ts",
+      "sha256": "5d4038f2c371a9de43ae2450dc8b0129208c8bbe09afdcd28789c64f48cc0c19"
+    },
+    {
+      "path": "src/ownership.ts",
+      "sha256": "7079a570e16721a58a9e30778c8ca9eb488f77e8a54358c2b3d6d1d3a24c3f25"
+    },
+    {
+      "path": "test/metrics-ownership.test.ts",
+      "sha256": "fe7a803d015465133937ffdcbba33846d5e59f1d380700d9f507b3d564cf05e4"
+    },
+    {
+      "path": "test/metrics-runtime.test.ts",
+      "sha256": "b25f581896806c241578bcfdb3c1fd6a9468ce68633004304b2bde49c84bd289"
+    }
+  ],
+  "testBuilds": [
+    {
+      "path": "dist/test/metrics-clock.test.js",
+      "sha256": "ba82e9cd734581068e67eb9d200e912856610d9c20db845cf20664a5d38320f8"
+    },
+    {
+      "path": "dist/test/metrics-feedback-runtime.test.js",
+      "sha256": "6538bef4bb49e2417edc9b08ec2017edb9bcf879fa112bb457f17af705e7b4a3"
+    },
+    {
+      "path": "dist/test/metrics-feedback.test.js",
+      "sha256": "70519920c48bca7a8e6b73d4a0be5c305df7fce5ddea4806db26da4656d8ecc1"
+    },
+    {
+      "path": "dist/test/metrics-operations-runtime.test.js",
+      "sha256": "b390f2ba6c5dc86811a9335b7161f59b114da0e04861b552353876cdc91c4c31"
+    },
+    {
+      "path": "dist/test/metrics-operations.test.js",
+      "sha256": "2cd7b4dbf190d99c3396db94e79529062b88802d17bc1603ad0c7edbfcfe6464"
+    },
+    {
+      "path": "dist/test/metrics-ownership.test.js",
+      "sha256": "b4c13c5dd7f98d2116afd83b98cd6ff36b508572124c0d7c3252c08549a9a5e7"
+    },
+    {
+      "path": "dist/test/metrics-runtime.test.js",
+      "sha256": "eae10ea85071ea9acab6bc6b98287e699b00fc1f19e90d6c4bef420de0e1de64"
+    },
+    {
+      "path": "dist/test/metrics.test.js",
+      "sha256": "005aa2286d32c188264565f66d83035687171ef4f28859c47264df1ae241ef39"
+    },
+    {
+      "path": "dist/test/recovery.test.js",
+      "sha256": "48438200a528fa7573e8b29d6dd85688944622abd053cc53661748e4ed0d91d4"
+    },
+    {
+      "path": "dist/test/runtime.test.js",
+      "sha256": "02b0ebba928634e5491fe19c659c733be4cbafaafa97a2f0d5d55b80cb0bc30a"
+    },
+    {
+      "path": "dist/test/storage.test.js",
+      "sha256": "ea2385af52e138978b2f509c944d0b54cdf2b589c86531bddc1a629d726db46e"
+    }
+  ],
+  "checks": [
+    {
+      "log": "02-red-owner.log",
+      "result": "FAIL_EXPECTED",
+      "tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "meaning": "Original source ca14cf5 before repair; original regression version reproduced all 12 competing API/CLI/root/alias combinations bypassing owner. This is not evidence of actual data corruption."
+    },
+    {
+      "log": "04-green-owner.log",
+      "result": "PASS",
+      "tests": 1,
+      "meaning": "Initial repaired regression, original inventory unchanged"
+    },
+    {
+      "log": "06-lifecycle-metrics.log",
+      "result": "PASS",
+      "tests": 8,
+      "meaning": "Lifecycle plus runtime observation sync boundary, earlier test-file version"
+    },
+    {
+      "log": "08-targeted-tests.log",
+      "command": "node --test dist/test/metrics*.test.js dist/test/storage.test.js dist/test/preflight.test.js dist/test/recovery.test.js",
+      "result": "PASS",
+      "tests": 61,
+      "note": "There is no standalone preflight.test.js; actual collected inputs are metrics*, storage, recovery. Preflight behavior is covered by runtime/storage."
+    },
+    {
+      "log": "09-runtime-tests.log",
+      "command": "node --test dist/test/runtime.test.js",
+      "result": "PASS",
+      "tests": 12
+    },
+    {
+      "log": "07-targeted-build.log",
+      "command": "npm run build",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --cached --check",
+      "result": "PASS"
+    }
+  ],
+  "notRun": [
+    "full npm check (coordinated combined candidate gate)",
+    "VM isolation/eval execution",
+    "native Terminal",
+    "paid/live provider",
+    "independent post-repair review"
+  ],
+  "interface": "recordAcceptance/root/input, recordFeedback/root/input, recordCostEstimate/root/input stay synchronous and unchanged; acquireOwner remains async with existing public lease methods; no runtime/preflight/#26 implementation source changed",
+  "model": {
+    "requested": "gpt-6-astra/xhigh",
+    "actualBackend": "not independently verifiable"
+  },
+  "limitations": [
+    "Only cooperative protocol participants are excluded; external filesystem tampering is outside locking guarantees.",
+    "Evidence applies to this standalone commit/build. Parent stage1/stage2/#26 combination still needs integrated gate."
+  ],
+  "artifacts": [
+    {
+      "path": "01-red-build.log",
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+      "bytes": 59
+    },
+    {
+      "path": "02-red-owner.log",
+      "sha256": "2a7ca81066c29ddcaa3f2df233f6d54987f251c667a657b21ba5e9b42797bc4a",
+      "bytes": 5327
+    },
+    {
+      "path": "03-green-build.log",
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+      "bytes": 59
+    },
+    {
+      "path": "04-green-owner.log",
+      "sha256": "26587011c29d39e32ca05c2f212f232b5387119b54f52db4fe4e59057e5d897a",
+      "bytes": 251
+    },
+    {
+      "path": "05-lifecycle-build.log",
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+      "bytes": 59
+    },
+    {
+      "path": "06-lifecycle-metrics.log",
+      "sha256": "5ba237be49246642c8bc284a969ef9c7112686d6e8daa858deb760713e43321e",
+      "bytes": 1100
+    },
+    {
+      "path": "07-targeted-build.log",
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+      "bytes": 59
+    },
+    {
+      "path": "08-targeted-tests.log",
+      "sha256": "d022d1f968da354332622b34f9a18bf90d5ebda01222a6e3c2e92111cc1890be",
+      "bytes": 8161
+    },
+    {
+      "path": "09-runtime-tests.log",
+      "sha256": "0b80e8063c85eaad68c9292fb7b0de96c380238fc3fac3900c2668602405ff0f",
+      "bytes": 1398
+    }
+  ]
+}

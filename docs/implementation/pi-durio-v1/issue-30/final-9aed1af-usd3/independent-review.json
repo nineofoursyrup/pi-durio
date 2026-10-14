@@ -1,0 +1,406 @@
+{
+  "reviewedAt": "2026-10-10T05:48:39.191872+00:00",
+  "reviewer": "/root/review_usd3",
+  "independence": "Single independent focused reviewer; Standards and Spec assessed separately; not implementation self-review",
+  "scope": "Frozen USD3 external proposal/harness/wrapper only; no product/sourceBuild change, rebuild, real credential read, provider or VM",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/frozen-manifest.json",
+    "bytes": 7837,
+    "sha256": "f0ccad818a62f66d00e274f4efba03c52d4e5570f465476500dbe6fd1642aecc"
+  },
+  "productCommit": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "integrationDocsHeadObserved": "14787f0dfaadf69b6c235e5bb650d9f923a5d5a1",
+  "standards": {
+    "verdict": "PASS",
+    "hardDefects": [],
+    "optionalSmells": [],
+    "summary": "No documented-standard breach found. Full Fowler baseline considered. Generator/verifier duplication and copied original runtime body are intentional identity and independent-equivalence boundaries; no optional refactor recommended."
+  },
+  "spec": {
+    "verdict": "BLOCKED",
+    "hardDefects": [
+      {
+        "id": "USD3-SPEC-01",
+        "severity": "P2",
+        "kind": "demonstrable-defect",
+        "hardBlock": true,
+        "file": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/run.mjs",
+        "lines": {
+          "start": 16,
+          "end": 19
+        },
+        "title": "在实际启动边界重新检查原授权有效期",
+        "requirement": "One start within 24 hours of grant; immutable deadline start+60 minutes, including both stages. No resume or replacement batch after interruption or expiry.",
+        "requirementSource": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/proposed-batch-reviewed.json#/window/definition",
+        "description": "preflight.mjs:60-61 只检查调用时刻。run.mjs 随后验证安装目录、await installed、检查运行时与 fixture，然后才创建 startedAt 与 paid-start。若授权在这些准备步骤期间过期，仍会开始付费流程；paid-start 的 startedAt 明确落在 24h 授权窗口之外。",
+        "reproduction": {
+          "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+          "preflightAt": "2026-10-11T05:34:25.009Z",
+          "grantExpiresAt": "2026-10-11T05:34:25.010Z",
+          "paidStartedAt": "2026-10-11T05:34:25.011Z",
+          "effects": [
+            "synthetic credential lookup",
+            "prepareEval",
+            "runEval"
+          ],
+          "realProviderRequests": 0
+        },
+        "recommendation": "在产生实际 startedAt / 原子 wx paid-start 的相邻边界，用同一个原 grantedAt 再次拒绝过期或未来授权；不要更新 grantedAt。将修复限制在外部 harness，新 manifest 重新冻结。增加一条在 preflight 后跨越到期时间的离线回归。",
+        "origin": "Inherited body, exposed in the reviewed USD3 external entry; product changes or rebuild are unnecessary."
+      }
+    ],
+    "optionalSuggestions": [],
+    "summary": "Budget, derivative identity, frozen entrypoints and credential parser checks otherwise conform; actual start can occur after the original 24h grant expires."
+  },
+  "executableBeforeRepair": false,
+  "hardBlockCount": 1,
+  "evidence": {
+    "frozenEntriesMatched": 16,
+    "oldProposalLeafDeltaCount": 15,
+    "originalPreservedFilesMatched": 18,
+    "commonByteIdentical": true,
+    "runnerSuffixFromConstIdentityByteIdentical": true,
+    "reusedPreflightCases": 24,
+    "reusedCredentialCases": 12,
+    "reusedChecksRerun": false,
+    "additionalProbe": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+    "probeResult": "CONFIRMED_DEFECT",
+    "observedActualPaidGrantExists": false,
+    "observedActualPaidStartExists": false,
+    "realCredentialRead": false,
+    "providerRequests": 0
+  },
+  "positiveFindings": [
+    "Grant/manifest/stage caps bind exactly to 40 requests, 2.4M tokens, USD 3; eval and improve retain 32/8 requests and 1.2M tokens each.",
+    "Maximum per-request reservations 1052672/1056768 and output caps 4096/8192 are unchanged; fixed observed flash tariff 1.2 USD/M yields conservative 2.88 estimate.",
+    "Exact USD3 derivative prevents scope, model, trial, window, price, credential-source and stage redistribution changes; old USD5 grant rejected.",
+    "Runner/common/preflight/wrapper paths and bytes belong to frozen harness; wrapper clears inherited key and Node injection options, preflights before load_key, accepts only fixed owner 0600 regular non-symlink api.env, parses without shell, redacts errors, then execs runner.",
+    "Existing cancellation/authentication/failure/cleanup stop body retained; future candidate selection remains a separate human decision."
+  ],
+  "limitations": [
+    "No live provider, authenticated availability, billing, isolation, runtime installation check or product acceptance performed. Tariff is a frozen official-document observation, not an account hard cap or immutable served-model proof.",
+    "Native technical harness first failure and daily-use acceptance are outside this review.",
+    "No executable grant was created by this reviewer. Credential readiness is a separate source record and does not renew original grant time.",
+    "Any changed frozen content requires a new pinned review. Existing original first failures and old manifest remain retained."
+  ],
+  "reviewedFiles": [
+    {
+      "role": "pinned-manifest",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/frozen-manifest.json",
+      "bytes": 7837,
+      "sha256": "f0ccad818a62f66d00e274f4efba03c52d4e5570f465476500dbe6fd1642aecc"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/proposed-batch-reviewed.json",
+      "bytes": 68896,
+      "sha256": "9312057d264c70e65df4dd1217bc82909c96ad27b6c832292220287c978656f9"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/artifact.json",
+      "bytes": 1905,
+      "sha256": "a1c8fb0660266c7758335a31a8773396294e3fc86d550a479be53ea2b344647b"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/check-credential.py",
+      "bytes": 3015,
+      "sha256": "aadd6a3763f85155a2bb4c94157ba5286e99f36c16f9b77587946cd63386cd3b"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/check-preflight.mjs",
+      "bytes": 10637,
+      "sha256": "8092ed2ffa2d898ba0821c9eb8d41e926e00237d5de4a2dbd71536515441b60c"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/derive.py",
+      "bytes": 8041,
+      "sha256": "7359b9e498eb4e2cfcb9cf0282d86a71810efd715953f7c9a9e499175721af66"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/launch.py",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/preflight.mjs",
+      "bytes": 7899,
+      "sha256": "bffdfd6e5addf0e268e4cd53065d2ea1feea3b76fe4a8412fa6a19869c779891"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/run.mjs",
+      "bytes": 6897,
+      "sha256": "347e6fcbfdb336adf6cb47d35537c7367a2b546a897e1817edbc968fc0e710f1"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/cases.json",
+      "bytes": 5131,
+      "sha256": "666962275c6b5a7a6176a4733d614061d23d57fa20727a782c7ff112434fe84c"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/provider-observation.json",
+      "bytes": 1560,
+      "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/user-budget-20261010.json",
+      "bytes": 1294,
+      "sha256": "8761b7ac09591484979324959210608e88ff958ed809b82c8110e6a75fe0bc89"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/frozen-manifest.json",
+      "bytes": 5355,
+      "sha256": "d5272b244660c2a54a2fc70d1f5c50785ed20edf92a3dfb78a7e24ef7dfb3a22"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/retrieval.json",
+      "bytes": 715,
+      "sha256": "facf0c8d8c857ad49b2df669ebab2c72e79388f1c4ccdd9fef8f575eaab96b13"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/pricing.html",
+      "bytes": 23982,
+      "sha256": "210f102275ccf1a6542f08a3bc9e4b4c7c83278cb74b35217bffa112df6363b2"
+    },
+    {
+      "role": "frozen-content-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/models.html",
+      "bytes": 39323,
+      "sha256": "41551c3c498a93b6e6459eaeee89829940ca8acf999b24436a38a2231c7e091b"
+    },
+    {
+      "role": "baseline-proposal",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/proposed-batch-reviewed.json",
+      "bytes": 68789,
+      "sha256": "6af625fa56de175368f5e0063b43ee13bdef095a59a3cc4c9736684001afa877"
+    },
+    {
+      "role": "baseline-runner",
+      "path": "/Users/nineofour/Durio/scripts/live-batch/run.mjs",
+      "bytes": 8506,
+      "sha256": "aa0cb70081fedfb584d0f8ff156ad6af8647bd353203d6c383a89c1de6a9f041"
+    },
+    {
+      "role": "baseline-common",
+      "path": "/Users/nineofour/Durio/scripts/live-batch/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "role": "derivation-and-original-preservation",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/derivation.json",
+      "bytes": 7605,
+      "sha256": "29618072b46714676df17c9589f479d4c25a5637638561b4bee1c7a738260010"
+    },
+    {
+      "role": "nonexecutable-grant-template",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/grant-template-NOT-EXECUTABLE.json",
+      "bytes": 921,
+      "sha256": "0aa4fb58579f769f18d019db18dec06b5e88d4bc1383b842115b0a81a49d1c0e"
+    },
+    {
+      "role": "reused-offline-checks",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/summary.json",
+      "bytes": 7025,
+      "sha256": "a6f50c614fffdc6f1faa1ae71148d1c7b013bd5cf651f354416c0970c0b665b4"
+    },
+    {
+      "role": "reused-credential-checks",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/credential-check-r1.json",
+      "bytes": 985,
+      "sha256": "49913057315ce07cead2580230dae43c81e8b66f7578b64cdae390ffc3043fd1"
+    },
+    {
+      "role": "separate-readiness-record",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/credential-readiness-20261010.json",
+      "bytes": 333,
+      "sha256": "55d99cda5e8ea9d7968d740febacbd763c6a0ce7adf79a3e69a15e1d3f6b322a"
+    },
+    {
+      "role": "project-instructions",
+      "path": "/Users/nineofour/Durio/AGENTS.md",
+      "bytes": 389,
+      "sha256": "7e83738ba1c6c52d79eabf4c24db0d6247fb051bc19b3a6277b94362a39fd545"
+    },
+    {
+      "role": "review-skill-full-fowler-baseline",
+      "path": "/Users/nineofour/.agents/skills/code-review/SKILL.md",
+      "bytes": 8358,
+      "sha256": "230670c66b6445bd4764b95a001dbe09d4929bdfc6c804f3cbe6b369b192055b"
+    },
+    {
+      "role": "review-probe-source",
+      "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe.mjs",
+      "bytes": 4919,
+      "sha256": "c8072341885d8e52e48430b0df6f159c46215bf65c906d040fbc1e93a92df187"
+    },
+    {
+      "role": "review-probe-result",
+      "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+      "bytes": 907,
+      "sha256": "341b2233193117b0c05ccda0042a9ac8ab3d5c8ef34b48f45583b3612f36da07"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/grant-false-4pFw0J/result.json",
+      "bytes": 970,
+      "sha256": "9dd6b7064a1f5613113dcccc4b863c595c545843b3845ea609940616e0421ced"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/old-usd5-grant-kLtPiz/result.json",
+      "bytes": 1455,
+      "sha256": "bc5673aef49ecbf0c57b1c9c3e28df69cc4ff8ca21b6e858bc29f6ac0fe41076"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/eval-stage-expanded-2VRKiF/result.json",
+      "bytes": 41462,
+      "sha256": "33b0d282a75c80dcba6cd4de2cf3c18bdac7a580f62267b45c38ce60c8b79396"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/improve-stage-expanded-5EVcFS/result.json",
+      "bytes": 41918,
+      "sha256": "bbebf96a6caea912da01631d6245ffccdd27a8c341e604eb6a0d61b36c2980f4"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/stage-redistributed-lCtlVW/result.json",
+      "bytes": 42130,
+      "sha256": "0fe7c3e4f480594391ed904569066773328c4ae1f9bb8e75d4012b5072a537cc"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/aggregate-expanded-GqIis2/result.json",
+      "bytes": 41374,
+      "sha256": "82007ce9b554496b5979806d22d5cb7edf9c40ff509d38452251f69c93b6c7b3"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/request-expanded-H0eWAf/result.json",
+      "bytes": 41461,
+      "sha256": "5cd5ea78d5500305f025355b256b9830aa82afb15181cd1af5c1018336d9da2f"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/window-active-expanded-mbx2QJ/result.json",
+      "bytes": 41563,
+      "sha256": "480252717143c73e5923f21f711e9c7c1642803f9871baa31a3bea151543b65c"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/window-start-expanded-qrOy8s/result.json",
+      "bytes": 41523,
+      "sha256": "4fa67c5d832bba2c972acc69d5db65cfa5be229c48eb8570121f743f9bbdd772"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/extra-starts-IgCPAx/result.json",
+      "bytes": 41254,
+      "sha256": "de7e0faab5140e8dcd903a01662971eb3bdbd73b4ec7c9b63279c0324fc5cbdd"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/price-lowered-aTXjx3/result.json",
+      "bytes": 41470,
+      "sha256": "f419fa1ece19250300730d4cc2b754636dc4d1f8a684d883010c3e73cfa88080"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/price-increased-KYtKGr/result.json",
+      "bytes": 41486,
+      "sha256": "4d3916a15c4788985fc8b0dbef092c89ff4e2622382f7536a87a961aac445423"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/reservation-lowered-HXYFgo/result.json",
+      "bytes": 41503,
+      "sha256": "537136334581b26ad803baf6ab600e6fb81d3d326026fcbb6dddb1cfdc6df0dc"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/credential-path-changed-SpBsl1/result.json",
+      "bytes": 1106,
+      "sha256": "b0adbfc7dfad4b6bf1af029cb5d3174e38255214d08ffd42789f173c8c355cc2"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/authorization-source-removed-O4PdVB/result.json",
+      "bytes": 1427,
+      "sha256": "74e53a6bc372d49c7b0739cda0450c170327ae5bb783f9d263042cc164330d02"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/grant-time-renewed-hrSKew/result.json",
+      "bytes": 1118,
+      "sha256": "665df7cb5395a17b98aa90c106caf769040353a18a743dd192b5b4c82dec34cf"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/repeat-start-gk6nM5/result.json",
+      "bytes": 967,
+      "sha256": "e2e0b4997e25028f8f0d3533925e64a49094d85506392e326f40232c54578bce"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/existing-authorized-plan-ufPfWl/result.json",
+      "bytes": 991,
+      "sha256": "56d02622d638627166e2f090fc87131e3311af537cec4041fdac3b2f5ea4112e"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/grant-expired-jtIZvv/result.json",
+      "bytes": 941,
+      "sha256": "d659538e7644ac43accdd748468ea60226ddd05291e4d80bfe551f506ffce150"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/grant-in-future-jcD7kx/result.json",
+      "bytes": 945,
+      "sha256": "9d35f1dff8b9a24c53e5b3a1fff7e42b8e09c85f21ddd9a5649b6316bba69ff2"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/valid-materialization-GC8N1g/result.json",
+      "bytes": 687,
+      "sha256": "c419849461f44d6651348d172d753ed424c8494f1c45b451ca3b36e758cad4fc"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/wrapper-missing-A2dP5z/result.json",
+      "bytes": 202,
+      "sha256": "1877ad197ae237bda6d8bd9889920e902b5e34442624ee858083e8db41598ef3"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/wrapper-false-fULfWz/result.json",
+      "bytes": 220,
+      "sha256": "79a749e1f4f71069b2bda1d60856a595a700abb5bc60835412d222e832f9ddf7"
+    },
+    {
+      "role": "existing-check-result-status-read",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/wrapper-positive-HzUNYu/result.json",
+      "bytes": 315,
+      "sha256": "b1095a75650e8442ef076671b47ec7fbb19efb1b546fb4ffcc964cc647bf57f9"
+    }
+  ]
+}

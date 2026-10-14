@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "cases": 8,
+  "rows": [
+    {
+      "name": "eval-new-stage-admits-original-reservation",
+      "status": "PASS",
+      "maxTokens": 1172501,
+      "firstReservation": 1052672,
+      "secondUnsettledReservationDenied": true
+    },
+    {
+      "name": "eval-known-small-usage-can-reach-24-request-ceiling",
+      "status": "PASS",
+      "requests": 24,
+      "scope": "Artificial small-usage arithmetic only; not a claim that real tasks will complete"
+    },
+    {
+      "name": "eval-exact-reservation-headroom-boundary",
+      "status": "PASS",
+      "chargedUpperTokens": 1172501
+    },
+    {
+      "name": "eval-one-token-over-headroom-stops",
+      "status": "PASS",
+      "newReservationDenied": true
+    },
+    {
+      "name": "eval-unknown-settlement-remains-reserved",
+      "status": "PASS",
+      "unknown": 1,
+      "reservedTokens": 1052672
+    },
+    {
+      "name": "improve-full-eight-request-allowance-preserved",
+      "status": "PASS",
+      "requests": 8,
+      "maxTokens": 1200000
+    },
+    {
+      "name": "improve-unknown-usage-stops",
+      "status": "PASS",
+      "reservedTokens": 1056768
+    },
+    {
+      "name": "cumulative-ledger-and-stage-allocation",
+      "status": "PASS",
+      "priorTokens": 27499,
+      "newTokens": 2372501,
+      "cumulativeTokens": 2400000,
+      "cumulativeMaxRequests": 47,
+      "cumulativeConservativeUsd": 2.88
+    }
+  ],
+  "source": {
+    "path": "dist/src/provider-boundary.js",
+    "sha256": "6094e3a6f2bcc72402da8a7e44a6fa895282f0fc7f3e4ba4fd0d94fe148c86e5",
+    "bytes": 8185
+  },
+  "scope": "Exact accepted PersistentBudget compiled class with in-memory Evidence adapter; no runtime/Harness, provider, credentials, restricted VM or persistent budget writes",
+  "networkCalls": 0,
+  "productCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e"
+}

@@ -1,0 +1,296 @@
+{
+  "ticket": 25,
+  "at": "2026-10-09T20:22:07.862590+00:00",
+  "status": "integrated-accepted",
+  "integrationMerge": "ac14c395823fe9c81e1b551288d4d3a487df3da8",
+  "integrationTree": "24070b3964addfec5770465dd091ad6d9bbddaf1",
+  "candidate": "29f00ced7c033816d1413cd53cf39870e475e191",
+  "productCommit": "52f8dd25fed19f84c5712d2c916de3878a1de945",
+  "verifiedDirectFiles": {
+    "/Users/nineofour/pi-durio-v1-run/worktrees/issue-25/docs/implementation/pi-durio-v1/issue-25/acceptance.json": "1239993cba82b2276546fc632d7a69e0397665708dd7442a0337fe9afe03a404",
+    "/Users/nineofour/pi-durio-v1-run/worktrees/issue-25/docs/implementation/pi-durio-v1/issue-25/README.md": "e6988f66a2d7a08e1ae470798d00c16aff49e7181d268ff91698450f99690d66",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/candidate-identity.json": "5f988e2528d5d9578e58ca6ef524139b49b4c4d02a2165103be9389b795ac7da",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/report.json": "fd9f71d54aaac0bb6db3f465aea403a733a2235c67d1e303452617ea2510a215",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/reuse-map.json": "baf3bba0199fdd4975c42eb70476ac9f83e1e4d15b7883b88cf61c8e1715692c",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/benefit-focused.log": "68166a0b5a24cf021aeebef0d94ac0449ce1ba49d2f7e939891d9085c669dee7",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/benefit-red.log": "c37b9a659d9dff883ee1c1135b69375f6ecdd25b56cca8d77543918ff8fffaab",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/full-check-01.log": "9a223e57615fa0df104f4eb9c57789460d7da1e0f15a32073c2115d40abfc3fa",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/retention-guest-focused.log": "651648e58545f5dd32e821ab2b1193da1f17db7ecf744bb495a7dcbfdf631455",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/effective-basis-focused.log": "d6c75dd055095960b55e40f4e19fe92df4a7e7cfebbb94f219bae8e07248ee3d",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/combined-help.log": "96481c7a2208441f4099f2ff34edd3973b5df48adeb346ce611bcaeb7a2ab1e5",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/report.json": "51ec34fae27a7d518b3d98370b8bd5e9677108ea172eb07d8cd92d87eafe30bd",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/live-guest/report.json": "b4f24dda82eac30fa79fae64549c7c08ec57bb75fc9fe1f207b2b0578e674de9",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/source.tar.gz": "536e4cd04e1ae2e5a220543077d874b0efa3fbcb134d3272030a238596a56098",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/pack/pi-durio-0.1.0.tgz": "0ba48a30a1f298f057bfc4a3f38d313a5aba8dc07fe94b8469851f87afc7cec0",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/install/node_modules/pi-durio/dist/execution/source-build.json": "362f40bf19e749bf98678cd1ea0a3b97ec256b5bdb07f0282b48ed3400273227",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/pack.json": "48eb9fac0751cbb0ebd6bc37e27b65259ca49ad3921c977b9c373b05e9b652fd",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/install.log": "2f58f62fd5738b94b7d6113ef02c12f2eceea053191e6958da7dffcdc763e94d",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/linux-prepare.log": "259454ba7335aed468aa95188b1867cde79b68f6bb1c72b47a36c26f399bbce0",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/linux-runtime/preparation-reuse.json": "259454ba7335aed468aa95188b1867cde79b68f6bb1c72b47a36c26f399bbce0",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/skill-first-request.json": "64d7fd648961147b365c81e27f5f51ac455a785d64c20cd217e317fc6a6e16b4",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/skill-analysis-payloads.json": "5e3e62943cc8df24f4b3c5e09bfadc57220cec3e27c8816e1b4ae713d92edf1a",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/first-skill-no-behavior-rejected.json": "ba16b7f95391f81c7c3881724c7fbe1062f0588344be963755f637b0774c3bf2",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/skill-first-activation.json": "6e93fa108646ac0dc86fe608bfc5553b1d7de1ccd406c8b28357bb72057eb8de",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/skill-fresh-actual-profiles.json": "a98035ca7e953c92835485b10c3b280e463b8f625f0d7e90bf8f77ce439686e3",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/skill-first-observed.json": "d3976b163a55176d5756ff806504a1f938e0afb313907fe7cd1d2b6630d0c18e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/cleanup-active-protected.json": "e112ea24ac07d013dfd23272bf81bb4b2f25d923c48968055fcc0bda63f509ae",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/skill-revert.json": "70be215502dc9881693d4be538c6858f8c42b1f1a3dfbe509c855a8b3305562a",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/installed-demo/readonly-inventory.json": "2616ac20d8a48a175f4dbcf26a0ca86071f58d4b449bb8340286c337a428d4e1",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/candidate-identity.json": "7e5d7410693c5d182ec857e067d9b93db6eb5cbd32b726e4daae7eea9c3dc50f",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/installed-demo/report.json": "27a5441e51c27b9252a515cdc645668347eedea83ca301101a0716a9e8ea981f",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-formal-01.log": "0df0b47159493627a4c66bb148bee97d8fee08e83602897231ca55e1d448d836",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-build-02.log": "74664580e113ca6a127ffb00c3bec2fd558d9bbea8586f794c1ec52c7f41470f",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-profile-fence-03.log": "ccfe8c784399e174e3c0567b6715004dc707393e0053cbdd839637c1b96acb5c",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/green-profile-fence-02.log": "4274ce176681849c8fbd97f29887a0bcd6e3caca11b743866ff56cdbabd354e1",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-retention.log": "f9166814cf92252d77ac88fa928a3f93b1e9872239d235cef222a832a548713a",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-live-guest/report.json": "8b6d2673d407d9d3b83d42872ba9e7a1b30fb91e1bb73ca2bcb96c65be6ee54d",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/red-effective-basis.log": "757f02ac1f3268e50a7b5572b78bf1de704b0563bf35944dd6cc2914a53b3f1a",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r3/prior-acceptance.json": "32e5f56a4dad30164e99b197eb5700b9139d9ad5778c31e0a1ebece78a70ae07",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/source.tar.gz": "a3dacb6277ae7038e7aa7805b84f9683d8bc2f81add80639b4616132ddc19d45",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/pack/pi-durio-0.1.0.tgz": "1cbafca341ff763684e696cba5e718e0bf82fb2d3abe72eb0088b7cae50f3db0",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/candidate-identity.json": "48a28d5dfbc7603019f9ba5f043ed084395fc4851558f3eaa9ee4c3965b408e8",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/install/node_modules/pi-durio/dist/execution/source-build.json": "e64e3194d781725b5ba01ac94ffa2ab9950a7ccf2fa06ce810ff3fd590482d0c",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/pack.json": "aef0a746a805daa7a526008b0a54e81da37110562e012ba8a6456702165d3c16",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/install.log": "2f58f62fd5738b94b7d6113ef02c12f2eceea053191e6958da7dffcdc763e94d",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/whole-profile-first-failure.json": "c0744025703c98ccabaf040dc86b64acb58213fbc70de62b13e294bc991545e0",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/file-only-config-rejected.json": "15c2c1345a0b856e0286fa9309562a3530e92d39c489cfacb2d93c8978689339",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/first-skill-no-behavior-rejected.json": "2039515779691326497d663eafb2c6959e10e9b7ca94acacbce3eabee09a94ad",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/config-observed.json": "26b18b652a615019bed1ab01912d422aabc124fd4a209933dd6736f9d8252439",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-first-activation.json": "1ee11013ae3782b56a6680559e3cfaa53dd54bb3d8503eca94e274ad28d167ac",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-fresh-actual-profiles.json": "a5a97fee37df4afa1d37901b5c0fee56d1fba8587da9423e6c8e739976d85faf",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-first-observed.json": "dcfaff92edf86eae4bc2a2e91129a4a9a8a661fcd23216dc52140dd98c58f976",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-observed.json": "3b94e6553d7fd4e044b9877bc8c71d20523e586dd10c55c941c1274597e37cdc",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/cleanup-active-protected.json": "a9b8f56227887a9256359d63a43d31374944239c68c0d85dff33d9d177982da8",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-cleanup-revert.json": "79d39dd66336261662eab518348f3e3ca1566fe563be6f1504e8bec84e352c0e",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-revert.json": "cbeccbd9f953a3049b916fc7dbbdc3c700645b6c3014bd0aed1759a77cbc0c5a",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/config-revert.json": "6c46a90eb4401828a87fd548103cba9b254ffb0ece871fc0569f05663e35d0c1",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/readonly-inventory.json": "23d8383eeee2845495251739e1472da5ce63e4ca9a81b8ce2bedb699521719bf",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/installed-demo/profile-only-validation.json": "ad916ff5866d032126c331cec6937cd97eb079f32020b0b3d2df0c52f9773e06",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/installed-demo/profile-no-gain.json": "145741c2dc5d6817f7ae2caa7a7399afbd844c10402a89cda0c38b535355c1ea",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/merge-integration-readback.json": "a33c9bac53ac8222950f1af2e686d84b303ce26ab666bc6e56644e0bc07f73a1",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/handoff.json": "a9fb5ac1763ebad571ffcf0fc59986c7560e54a59f454d4aa912aacbdbd329cc",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/coordinator-premerge.json": "c5d334cf9ee25e7aac66e9127617baeecdb5181dabf6649ffe6b470b0804c3d8",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-25-verifier.py": "aed750317e39952e5d905038cc9ef6d3fa7376214ed9b9956aad1fcb62261756",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-preflight.json": "4806aa2f0188e3a063461254b57848dec4a814f4c9e52c7c6f7ba7f9db0dc56b",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-postflight.json": "479f229e39aa3c0627c9a2d12d568d36b2714e59f79ebf69f148dedfab298e68",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-verification-first-failure-1791577159-930432.json": "a9004add90b51f6eab181ddb84aad1bcb67e0d1e247cb4be445955ca0fa97bfa",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-verification-first-failure-1791577193-590558.json": "be82ea6969384c568ea898d9185e85a9535f929f1eaa6770b315bace5d83a9bc",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/merge-integration-readback.json": "6f5ee804a577175a2ff17ad544e77d35275494b6251fa69939e97907b748dcc4"
+  },
+  "identity": {
+    "source": 321,
+    "compiled": 313,
+    "build": {
+      "inputs": 144,
+      "compiler": 132,
+      "outputs": 219
+    },
+    "packaged": 12890,
+    "installed": 12894,
+    "linuxDependencies": 12631,
+    "runtimeEntries": 12824,
+    "runtimeCompiled": 191
+  },
+  "checks": {
+    "finalAffected": {
+      "pass": 30,
+      "fail": 0,
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/benefit-focused.log",
+        "bytes": 3877,
+        "sha256": "68166a0b5a24cf021aeebef0d94ac0449ce1ba49d2f7e939891d9085c669dee7"
+      }
+    },
+    "scope": "Earlier 196/196 full check has no independently preserved exact dirty source/build identity; no final whole-suite claim. Later 24/24 retention/provider boundary, 26/26 profile-basis and current 30/30 affected checks retained. Final package/install/compiled/source binding passed.",
+    "notClaimed": "Earlier 196/196 full test lacks preserved exact dirty source/build identity and is not claimed as final candidate whole-suite evidence.",
+    "rerun": "No build, tests, provider, runtime, grader or VM re-executed. Existing affected and installed actual checks apply to identical merged source/package inputs."
+  },
+  "actual": {
+    "data": {
+      "parent": {
+        "records": 156,
+        "objects": 165,
+        "dispatches": 8
+      },
+      "child": {
+        "records": 333,
+        "objects": 12336,
+        "dispatches": 8
+      }
+    },
+    "artifacts": [
+      {
+        "run": "1f15a1b0-196f-4120-9fd5-338118eb7bb3",
+        "id": "d1db60a4a81ed99445bde824b11e5edabde51c6bf39bff42077046b7c5086222",
+        "ownFiles": 219,
+        "dependencyFiles": 12631
+      },
+      {
+        "run": "dffdc2c0-5101-491f-968c-c0c92e127e6f",
+        "id": "d1db60a4a81ed99445bde824b11e5edabde51c6bf39bff42077046b7c5086222",
+        "ownFiles": 219,
+        "dependencyFiles": 12631
+      },
+      {
+        "run": "a449e6d0-4f34-480e-bfde-66653dd20c69",
+        "id": "d1db60a4a81ed99445bde824b11e5edabde51c6bf39bff42077046b7c5086222",
+        "ownFiles": 219,
+        "dependencyFiles": 12631
+      }
+    ],
+    "vms": [
+      {
+        "id": "durio-i12-d7c9bc3d-aee1-414a-b6ff-38036de50431",
+        "trialId": "improve-bf1d3b1e3cf81b8ab296c149-pair-1-baseline",
+        "started": true,
+        "terminated": true,
+        "requests": 4
+      },
+      {
+        "id": "durio-i12-93373a74-e0c8-443f-94df-5496d2a90716",
+        "trialId": "improve-bf1d3b1e3cf81b8ab296c149-pair-1-candidate",
+        "started": true,
+        "terminated": true,
+        "requests": 4
+      },
+      {
+        "id": "durio-i12-e45dc6f4-8022-4079-99fa-18b0532cdce2",
+        "grader": "improve-bf1d3b1e3cf81b8ab296c149-pair-1-baseline",
+        "started": true,
+        "terminated": true
+      },
+      {
+        "id": "durio-i12-006623fd-c475-4e61-9500-580707a30c8e",
+        "grader": "improve-bf1d3b1e3cf81b8ab296c149-pair-1-candidate",
+        "started": true,
+        "terminated": true
+      }
+    ],
+    "contract": {
+      "effect": "无明显差异",
+      "allChecksPassed": true,
+      "allDeclaredBenefitsMet": false,
+      "requiredBenefitCount": 0,
+      "diagnosticBenefitCount": 1,
+      "allRequiredBenefitsMet": true,
+      "rule": "Every declared check/protection remains necessary for every objective. All required benefits must meet their own thresholds; omitted benefit role means required. Explicit diagnostic effects remain observations and never satisfy a required benefit. Performance requires at least one required comparison. Mixed or missing conclusions are retained, never replaced by the last result."
+    },
+    "childRequests": 8,
+    "childTokens": 112,
+    "activation": "new-default",
+    "subsequentTaskObserved": "a449e6d0-4f34-480e-bfde-66653dd20c69",
+    "cleanupBlocked": true,
+    "rollback": "completed; exact default and file restored",
+    "readonlyFiles": 388
+  },
+  "scopedReuse": {
+    "comparisons": 2,
+    "reused": [
+      {
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/installed-demo/report.json",
+          "sha256": "27a5441e51c27b9252a515cdc645668347eedea83ca301101a0716a9e8ea981f",
+          "bytes": 1218
+        },
+        "scope": "Only exact file write/readback, partial/unknown receipts, cross-root fence, user-edit-preserving rollback, TUI explicit selection and cleanup mechanics. Formal write body and these modules remain unchanged; final 30 public-boundary checks retest the changed formal gate. No whole-report PASS reuse."
+      },
+      {
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/live-guest/report.json",
+          "sha256": "b4f24dda82eac30fa79fae64549c7c08ec57bb75fc9fe1f207b2b0578e674de9",
+          "bytes": 4597
+        },
+        "scope": "Live guest to controlled offline mediator diagnostic only; guest/runtime/provider dispatch compiled bytes identical."
+      },
+      {
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/installed-demo/profile-only-validation.json",
+          "sha256": "ad916ff5866d032126c331cec6937cd97eb079f32020b0b3d2df0c52f9773e06",
+          "bytes": 346540
+        },
+        "scope": "Original actual profile loading and validate-only preserving formal/defaults. Final role omission means required, no scope/loader changes. Current r3 re-exercises actual fresh profile loading."
+      },
+      {
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r1/installed-demo/profile-no-gain.json",
+          "sha256": "145741c2dc5d6817f7ae2caa7a7399afbd844c10402a89cda0c38b535355c1ea",
+          "bytes": 347698
+        },
+        "scope": "Performance no-gain historical outcome remains applicable: omitted role is required, final stricter formal gate preserves refusal; final tests cover current gate."
+      },
+      {
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/config-observed.json",
+          "sha256": "26b18b652a615019bed1ab01912d422aabc124fd4a209933dd6736f9d8252439",
+          "bytes": 53123
+        },
+        "scope": "Complete deterministic config profile correction and actual new-task observation. All relevant loader/profile/decisions compiled bytes identical; no comparison benefits in this plan; current direct regression checks pass stricter gate."
+      },
+      {
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/whole-profile-first-failure.json",
+          "sha256": "c0744025703c98ccabaf040dc86b64acb58213fbc70de62b13e294bc991545e0",
+          "bytes": 43359
+        },
+        "scope": "Complete expected profile mismatch remains original failed direct check before formal work."
+      },
+      {
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-25/r2/installed-demo/skill-observed.json",
+          "sha256": "3b94e6553d7fd4e044b9877bc8c71d20523e586dd10c55c941c1274597e37cdc",
+          "bytes": 52531
+        },
+        "scope": "Only declared equivalent loaded-skill trim, actual unchanged settings and rollback mechanics. Its ancestor first activation is contract-inconsistent and not reused as eligibility evidence."
+      }
+    ],
+    "notReused": [
+      "r1 file-only no-behavior first instruction loading and file-only deterministic config activation classifications.",
+      "r2 first skill activation eligibility: required benefit was unsatisfied under the original human-readable contract. Actual trial, profile and write receipts remain facts; original files and report are immutable.",
+      "Original 196-test full check has no separately archived exact dirty source/build identity and is not claimed to cover this final candidate."
+    ],
+    "rule": "Every reuse is conditioned on actual unchanged code/input or the narrow audited change and current affected regressions. R1/r2 original FAIL, UNKNOWN, effects and contract deficiencies are not rewritten."
+  },
+  "invalidatedOriginalClaims": [
+    "r1 file-only no-behavior first skill and file-only deterministic config classifications",
+    "r2 first skill eligibility under its unsatisfied original required-benefit activation contract"
+  ],
+  "preservation": {
+    "originalsUnchanged": 162,
+    "untrackedFiles": [
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+      "docs/wayfinder-proposal.md",
+      "docs/wayfinder-readback-2026-10-09.json"
+    ],
+    "protectedUnchanged": 688,
+    "coldReadonlyFilesUnchanged": 388,
+    "firstFailuresPreserved": true,
+    "priorFrozenEvidenceAnchor": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/merge-integration-readback.json",
+      "sha256": "a33c9bac53ac8222950f1af2e686d84b303ce26ab666bc6e56644e0bc07f73a1"
+    },
+    "historicalScan": "No full old-evidence inventory rescan; reused prior merger anchor and explicit r1/r2 references only.",
+    "rootIgnoredDist": "Older ignored compiled output byte-preserved; current verified package/compiled evidence belongs to r3 installation and issue-25 worktree."
+  },
+  "firstFailures": "Original implementation/profile/benefit failures and two manifest-verifier assumption failures retained; see exact handoff and merge readback.",
+  "acceptance": {
+    "writeback": "Exact validated file content plus baseline/inode and full effective-profile verification. Partial/unknown outcomes fence admission until explicit reconciliation.",
+    "activation": "Declared actual before/after task profile, explicit future defaults and observed subsequent task; old pending work is not hot-migrated. Every required benefit and all protections pass.",
+    "rollback": "Explicit exact-byte/default rollback protects later edits and retains original unknown facts.",
+    "composition": "Exact candidate tree after local no-ff merge; no product changes during integration. Applicable checks reused."
+  },
+  "limits": [
+    "Early 196/196 result has an exact dirty-source preservation gap and is not final-candidate whole-suite evidence.",
+    "Synthetic provider and actor conditions are not live provider quality, real user acceptance or performance improvement.",
+    "Diagnostic no difference remains no difference; it supplies no required benefit.",
+    "Running processes, external effects, Git and old pending authorization are not implicitly changed by file rollback/default selection."
+  ],
+  "notRun": [
+    "#26 registered self-source/new-build and independent eval-asset execution",
+    "#30 real authorized DeepSeek batch and actual generated candidate selection",
+    "#31 final native composition/lightweight measurement/technical acceptance",
+    "#32 human daily-use acceptance"
+  ],
+  "independentFinalReview": "NOT RUN; final implementation candidate review remains required",
+  "publication": "Pending metadata commit/push and readback; main and all issues unchanged"
+}

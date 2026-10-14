@@ -1,0 +1,651 @@
+{
+  "ticket": 22,
+  "state": "ready-for-root-acceptance-and-serial-integration",
+  "at": "2026-10-09T17:10:28.413646+00:00",
+  "sourceCommit": "f7191308674d8b92d2e4d717c57386b77046867a",
+  "sourceTree": "23ec269e71b21630c3c55ec8a6ccf9863f7c2422",
+  "integrationBase": "6b6b5f64f817a724d15f0bae554f4c008d5bc0eb",
+  "branch": "codex/pi-durio-v1-issue-22",
+  "authority": "Authorized local code, tests, necessary dependency preparation and local commits; no paid calls, credentials inspection, push, remote edits, root/main merge, release or issue closure.",
+  "sourceIdentity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/candidate-identity-01.json",
+    "bytes": 43717,
+    "sha256": "5eb663f969d152d5e9c169d636183d199bb1acdb58db68d0f5a7c32d43c9fbcd"
+  },
+  "sourceArchive": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/source-f719130.tar.gz",
+    "bytes": 2165727,
+    "sha256": "5f3509d4b7c37b5efd305a399e68a43a749cfe581706b7423efe05597de4133e"
+  },
+  "package": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/pack-01/pi-durio-0.1.0.tgz",
+    "sha256": "c94e11b3f7e567cf36be0bf7496bb23f112970f9cabee80bc7080727b8d8cfc8",
+    "bytes": 23277539
+  },
+  "independentInstallation": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/install-01/node_modules/pi-durio",
+  "linuxRuntime": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/linux-runtime-01",
+  "binding": {
+    "sourceFiles": 103,
+    "compiledFiles": 141,
+    "exactCompiledSets": true,
+    "installedCompiledEqual": true,
+    "linuxCompiledEqual": true,
+    "shippedSourcesAndReadmeEqual": true
+  },
+  "environment": {
+    "node": "v26.8.2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "osRelease": "27.2.0",
+    "at": "2026-10-09T17:00:20.018Z",
+    "productCommit": "f7191308674d8b92d2e4d717c57386b77046867a",
+    "integratedBase": "6b6b5f64f817a724d15f0bae554f4c008d5bc0eb",
+    "providerBoundarySha256": "be73fdaabf9d1a5485a72d33cf2952f7c1ee48f64c4ec512960b646054e0c55f"
+  },
+  "linuxDependencyReuse": {
+    "verifiedDependencyManifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/demo-03/objects/419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+      "sha256": "419258fcafff39fba6e0bb7986f8cb446a59979ec27601922a9bb4aae246fbdd",
+      "sourcePlan": "final-matrix-03",
+      "files": 12631,
+      "beforeCopy": true,
+      "afterCopy": true
+    },
+    "source": "/Users/nineofour/pi-durio-v1-run/evidence/issue-21/linux-runtime-05",
+    "installed": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/install-01/node_modules/pi-durio",
+    "destination": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/linux-runtime-01",
+    "preparation": "Reuse exact previously validated Linux dependencies under the identical lock; replace all product dist/package/vendor bytes from current independent installation. No previous runtime/outcome reused.",
+    "lockSha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67",
+    "environment": {
+      "node": "v24.8.0",
+      "platform": "linux",
+      "arch": "arm64",
+      "image": "pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c",
+      "preparation": "npm ci --omit=dev; explicit preparation network only"
+    }
+  },
+  "actual": {
+    "kind": "Actual fresh restricted installed product execution with fixed deterministic provider; no model inference, paid requests or model-effect claim.",
+    "planSource": "e1:260:5f27c5f26b6c278c8b236411f23cc01c2de7405424d86c0586e593114da3d270",
+    "planFixedSource": "e1:261:010f36e75f515a36913c32b4aa1ab00b74ffbee1171dd386adaef66558dab14e",
+    "plan": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/fresh-vm-01/displayed-plan.json",
+      "bytes": 41764,
+      "sha256": "fa3ada454704e9c89909898a4ec19fa65b8a8893aca9f1c5257501b2b53f4643"
+    },
+    "report": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/fresh-vm-01/report.json",
+      "bytes": 615329,
+      "sha256": "a7b6bf850f357c5abe6a1af5a3d528b4c7ef63ee827b44e90e5af72007061f7f"
+    },
+    "textReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/fresh-vm-01/report.txt",
+      "bytes": 4089,
+      "sha256": "25836330856fd687a2c29d0df5788929582547c7a975ef8a22cf9c3708f6868a"
+    },
+    "verification": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/fresh-vm-01/verification.json",
+      "bytes": 4471,
+      "sha256": "e8027b93e8aa716f35ebe4c8f35be11868d9ed16de19eb40235d5ff0299fb4c5"
+    },
+    "cases": [
+      "local-fix",
+      "regression"
+    ],
+    "runtimeSides": {
+      "baseline": {
+        "runtime": {
+          "id": "7b6fa03a8f70fda55591c9415b5ebd17efed28c33196f9b2fe8e61a147646cc9",
+          "manifest": {
+            "sha256": "7b6fa03a8f70fda55591c9415b5ebd17efed28c33196f9b2fe8e61a147646cc9",
+            "bytes": 2322559
+          },
+          "bytes": 97518475
+        },
+        "instructions": ""
+      },
+      "candidate": {
+        "runtime": {
+          "id": "7b6fa03a8f70fda55591c9415b5ebd17efed28c33196f9b2fe8e61a147646cc9",
+          "manifest": {
+            "sha256": "7b6fa03a8f70fda55591c9415b5ebd17efed28c33196f9b2fe8e61a147646cc9",
+            "bytes": 2322559
+          },
+          "bytes": 97518475
+        },
+        "instructions": "Keep your final response concise while meeting every task requirement."
+      }
+    },
+    "budget": {
+      "maxRequests": 48,
+      "maxTokens": 49152,
+      "maxRequestTokens": 1024,
+      "deadline": "2026-10-09T17:26:11.520Z",
+      "unknownUpperBound": null
+    },
+    "trialBudget": {
+      "maxRequests": 6,
+      "maxTokens": 6144
+    },
+    "image": "pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c",
+    "counts": {
+      "planned": 8,
+      "started": 8,
+      "completed": 8,
+      "gradable": 8,
+      "passed": 8,
+      "passRate": 1,
+      "completionRate": 1,
+      "coverageRate": 1
+    },
+    "validPairs": 4,
+    "conclusion": "无明显差异",
+    "regression": {
+      "planned": 12,
+      "valid": 12,
+      "regressed": 0,
+      "regressionRate": 0,
+      "coverageRate": 1
+    },
+    "cost": {
+      "kind": "estimate",
+      "price": {
+        "version": "offline-zero-v1",
+        "source": "deterministic local transport; no model inference or paid network",
+        "currency": "USD",
+        "perMillionTokens": 0
+      },
+      "boundsExceeded": 0,
+      "requests": 28,
+      "dispatches": 28,
+      "knownTokens": 392,
+      "knownValue": 0,
+      "totalValue": 0,
+      "missing": 0,
+      "priceMissing": false,
+      "completeness": "known",
+      "bySide": {
+        "baseline": {
+          "boundsExceeded": 0,
+          "requests": 14,
+          "dispatches": 14,
+          "knownTokens": 196,
+          "knownValue": 0,
+          "totalValue": 0,
+          "missing": 0,
+          "priceMissing": false,
+          "completeness": "known"
+        },
+        "candidate": {
+          "boundsExceeded": 0,
+          "requests": 14,
+          "dispatches": 14,
+          "knownTokens": 196,
+          "knownValue": 0,
+          "totalValue": 0,
+          "missing": 0,
+          "priceMissing": false,
+          "completeness": "known"
+        }
+      },
+      "unattributed": {
+        "boundsExceeded": 0,
+        "requests": 0,
+        "dispatches": 0,
+        "knownTokens": 0,
+        "knownValue": 0,
+        "totalValue": 0,
+        "missing": 0,
+        "priceMissing": false,
+        "completeness": "known"
+      },
+      "failed": {
+        "boundsExceeded": 0,
+        "requests": 0,
+        "dispatches": 0,
+        "knownTokens": 0,
+        "knownValue": 0,
+        "totalValue": 0,
+        "missing": 0,
+        "priceMissing": false,
+        "completeness": "known"
+      },
+      "scope": "all plan sides, failed/cancelled requests, SDK retries and automatic compaction; deterministic grading makes no provider requests"
+    },
+    "timing": {
+      "preparationMs": 3908.0884150000347,
+      "knownTaskMs": 60150.46325,
+      "taskMs": 60150.46325,
+      "gradingMs": 12374.248625000007,
+      "missing": 0,
+      "clock": "host monotonic elapsed per stage; task includes VM/runtime overhead, not isolated model-active time; absolute deadline never extends",
+      "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+    },
+    "freshness": {
+      "runIds": [
+        "cba3dbb1-34ea-417a-97ac-13d1cca48547",
+        "13d52055-cecb-4a59-913b-b92b4c7fd515",
+        "c703b814-1420-44bc-8613-2130b66a2da1",
+        "14ebbc71-dd8e-4f57-9911-4ab2496f7cea",
+        "cddf0931-5c53-432c-a2e9-a38113a947da",
+        "b4bc6c4c-54f5-4ec6-b9a4-beb2a9fa46c1",
+        "4002809d-41e6-4980-b3fc-55e7cb9a321e",
+        "27c73bae-b617-4fed-9e08-f4d369228bee"
+      ],
+      "sessionIds": [
+        "df3a8553-fb79-4ae3-9090-658d6f3fe930",
+        "7c96f1b1-9e01-4280-8286-7c612acea589",
+        "bdc50a0e-a14e-470c-9ba4-7e804384a30a",
+        "e28e406f-2353-483e-88de-ff5da0f441ee",
+        "5f8439c1-e59e-41cc-9a75-3d8579f6cdb8",
+        "f6787104-771d-4c73-8db9-2f4ee8eb6cbb",
+        "ab6ad8da-65fb-4188-b7ff-2148e7b387f3",
+        "73d7527f-8387-4735-a0cf-98a72f79e729"
+      ],
+      "vmIds": [
+        "durio-i12-01179057-a94e-4747-b414-3a04af255753",
+        "durio-i12-3381d2e7-7fa0-4d54-88a8-f613acd27a1b",
+        "durio-i12-d0c7d4a1-7c86-455b-90e9-f9012533881b",
+        "durio-i12-827a18a7-c3fd-46c5-ae1f-8ee9a2749a2c",
+        "durio-i12-5f6666ef-36eb-41c9-9ece-b61cfce2e541",
+        "durio-i12-715e6778-b6ca-4bc8-861b-0227ee219ee6",
+        "durio-i12-9ff0fd0d-f077-44b0-8156-58a2d0a94dfb",
+        "durio-i12-6d078c43-012f-4713-af36-7e6a53e1dc10"
+      ],
+      "allTerminated": true,
+      "initialStates": [
+        {
+          "trialId": "fresh-paired-01-pair-1-baseline",
+          "initialSha256": "84009ca39f17bff08e2e8e5727de6b097e1acbbaa6dc4da3a3b74e50b485651e"
+        },
+        {
+          "trialId": "fresh-paired-01-pair-1-candidate",
+          "initialSha256": "84009ca39f17bff08e2e8e5727de6b097e1acbbaa6dc4da3a3b74e50b485651e"
+        },
+        {
+          "trialId": "fresh-paired-01-pair-2-candidate",
+          "initialSha256": "84009ca39f17bff08e2e8e5727de6b097e1acbbaa6dc4da3a3b74e50b485651e"
+        },
+        {
+          "trialId": "fresh-paired-01-pair-2-baseline",
+          "initialSha256": "84009ca39f17bff08e2e8e5727de6b097e1acbbaa6dc4da3a3b74e50b485651e"
+        },
+        {
+          "trialId": "fresh-paired-01-pair-3-baseline",
+          "initialSha256": "290fb7c1908503073bc9077e838cf62ed97e408e70c532320e7ad24b914e2c93"
+        },
+        {
+          "trialId": "fresh-paired-01-pair-3-candidate",
+          "initialSha256": "290fb7c1908503073bc9077e838cf62ed97e408e70c532320e7ad24b914e2c93"
+        },
+        {
+          "trialId": "fresh-paired-01-pair-4-candidate",
+          "initialSha256": "290fb7c1908503073bc9077e838cf62ed97e408e70c532320e7ad24b914e2c93"
+        },
+        {
+          "trialId": "fresh-paired-01-pair-4-baseline",
+          "initialSha256": "290fb7c1908503073bc9077e838cf62ed97e408e70c532320e7ad24b914e2c93"
+        }
+      ],
+      "actualOrder": [
+        "fresh-paired-01-pair-1-baseline",
+        "fresh-paired-01-pair-1-candidate",
+        "fresh-paired-01-pair-2-candidate",
+        "fresh-paired-01-pair-2-baseline",
+        "fresh-paired-01-pair-3-baseline",
+        "fresh-paired-01-pair-3-candidate",
+        "fresh-paired-01-pair-4-candidate",
+        "fresh-paired-01-pair-4-baseline"
+      ]
+    },
+    "vmTeardown": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/fresh-vm-01/vm-teardown.json",
+      "bytes": 10775,
+      "sha256": "c54ba981a8896456c5eb58f5273258324031f1196cc4ef8d28c681d3378b2f43"
+    },
+    "modelIdentityScope": "Host records the controlled returned model alias. Alias consistency is not immutable model-weight attestation.",
+    "regrade": {
+      "explanation": "Deliberately wrong known oracle applied to both local-fix sides using a new grader version. Four local-fix grades FAIL, fixed original outcomes unchanged; this is scoring-wiring evidence, not product regression.",
+      "report": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/fresh-vm-01/regraded-report.json",
+        "bytes": 655408,
+        "sha256": "bf7c4c62e96a21d48672c886faec62b1a14b5172f7b5bae0ddfa74594e7314c0"
+      },
+      "preservedReport": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/fresh-vm-01/original-preserved-report.json",
+        "bytes": 615329,
+        "sha256": "a7b6bf850f357c5abe6a1af5a3d528b4c7ef63ee827b44e90e5af72007061f7f"
+      },
+      "originalConclusion": "无明显差异",
+      "newConclusion": "证据不足",
+      "details": {
+        "conclusion": "证据不足",
+        "outcomesUnchanged": true,
+        "providerRequestsUnchanged": true,
+        "oldConclusion": "无明显差异",
+        "affectedRules": [
+          {
+            "caseId": "local-fix",
+            "version": "paired-add-deliberate-oracle-failure-v2",
+            "requirements": [
+              "signed addition",
+              "preserve dirty note"
+            ],
+            "observations": [
+              "positive-add",
+              "signed-add"
+            ],
+            "previousConclusion": "无明显差异"
+          }
+        ]
+      },
+      "timing": {
+        "preparationMs": 3908.0884150000347,
+        "knownTaskMs": 60150.46325,
+        "taskMs": 60150.46325,
+        "gradingMs": 18783.597665999987,
+        "missing": 0,
+        "clock": "host monotonic elapsed per stage; task includes VM/runtime overhead, not isolated model-active time; absolute deadline never extends",
+        "externalSetup": "explicit image/Linux dependency preparation is separately logged and excluded from eval execution time"
+      }
+    },
+    "readonly": {
+      "sqliteSha256": "d3b9284145a786c8d1df9b79663bac4be175867486bf1020dd38075034e897d5",
+      "reopen": true,
+      "tui": true,
+      "installedCli": true,
+      "oldSnapshot": true
+    },
+    "automaticRerun": "denied"
+  },
+  "synthetic": {
+    "kind": "Pure known-result arithmetic. No runtime, VM, model or provider execution; separate from actual fresh evidence.",
+    "passed": 13,
+    "index": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/known-results-02/index.json",
+      "bytes": 3590,
+      "sha256": "84302350158c1ccb6c64f9645433b13aaaf416ee9c752e72d78e1edcfa66009c"
+    },
+    "harness": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/known-results.mjs",
+      "bytes": 4510,
+      "sha256": "3eb0e8c1862e1f4de733f0b9a1d427d0ecd48500591d9bcc68f04996a0e55393"
+    },
+    "scenarios": [
+      {
+        "id": "improvement",
+        "expected": "改善",
+        "actual": "改善",
+        "counts": {
+          "planned": 4,
+          "valid": 4,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 1
+        }
+      },
+      {
+        "id": "soft-degradation",
+        "expected": "退化",
+        "actual": "退化",
+        "counts": {
+          "planned": 4,
+          "valid": 4,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 1
+        }
+      },
+      {
+        "id": "no-obvious-difference",
+        "expected": "无明显差异",
+        "actual": "无明显差异",
+        "counts": {
+          "planned": 4,
+          "valid": 4,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 1
+        }
+      },
+      {
+        "id": "missing-pair",
+        "expected": "证据不足",
+        "actual": "证据不足",
+        "counts": {
+          "planned": 4,
+          "valid": 3,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 0.75
+        }
+      },
+      {
+        "id": "failed-but-cheaper",
+        "expected": "证据不足",
+        "actual": "证据不足",
+        "counts": {
+          "planned": 4,
+          "valid": 4,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 1
+        }
+      },
+      {
+        "id": "partial-hard-regression",
+        "expected": "退化",
+        "actual": "退化",
+        "counts": {
+          "planned": 4,
+          "valid": 4,
+          "regressed": 1,
+          "regressionRate": 0.25,
+          "coverageRate": 1
+        }
+      },
+      {
+        "id": "contradictory-repeats",
+        "expected": "证据不足",
+        "actual": "证据不足",
+        "counts": {
+          "planned": 4,
+          "valid": 4,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 1
+        }
+      },
+      {
+        "id": "grader-fault",
+        "expected": "证据不足",
+        "actual": "证据不足",
+        "counts": {
+          "planned": 4,
+          "valid": 4,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 1
+        }
+      },
+      {
+        "id": "requirement-granularity-4-3-1",
+        "expected": "退化",
+        "actual": "退化",
+        "counts": {
+          "planned": 4,
+          "valid": 3,
+          "regressed": 1,
+          "regressionRate": 0.3333333333333333,
+          "coverageRate": 0.75
+        }
+      },
+      {
+        "id": "missing-price",
+        "expected": "证据不足",
+        "actual": "证据不足",
+        "counts": {
+          "planned": 4,
+          "valid": 4,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 1
+        }
+      },
+      {
+        "id": "contamination",
+        "expected": "证据不足",
+        "actual": "证据不足",
+        "counts": {
+          "planned": 4,
+          "valid": 3,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 0.75
+        }
+      },
+      {
+        "id": "single-stochastic-success",
+        "expected": "证据不足",
+        "actual": "证据不足",
+        "counts": {
+          "planned": 2,
+          "valid": 2,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 1
+        }
+      },
+      {
+        "id": "missing-threshold",
+        "expected": "证据不足",
+        "actual": "证据不足",
+        "counts": {
+          "planned": 4,
+          "valid": 4,
+          "regressed": 0,
+          "regressionRate": 0,
+          "coverageRate": 1
+        }
+      }
+    ]
+  },
+  "checks": [
+    {
+      "command": "npm run check",
+      "result": "143/143 PASS; 0 skipped, cancelled or failures",
+      "productCommit": "f7191308674d8b92d2e4d717c57386b77046867a",
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/final-check-01.log",
+        "bytes": 17532,
+        "sha256": "e48d3de1247c143c747395105a179fc3c75700f64e207ee1673976b30994b9ef"
+      }
+    },
+    {
+      "command": "npm pack; offline independent npm install --ignore-scripts --omit=dev",
+      "result": "PASS",
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/pack-01.log",
+        "bytes": 142,
+        "sha256": "aaf5411a7b334deea2839643118c94278760e1ba6b6d92af6baf34ce54f9df9a"
+      },
+      "installationLog": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/install-product-01.log",
+        "bytes": 89,
+        "sha256": "74042dedea6ef2f75dcc741fe70408f2a34d29f67a8d31c7e92a1a8ea802eb89"
+      }
+    },
+    {
+      "command": "Installed scripts/eval/compare-demo.mjs",
+      "result": "PASS",
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/fresh-vm-01.log",
+        "bytes": 4472,
+        "sha256": "f46d537e3e0b91640675a3efde02b951c48705774be1bdcfedb4a045d554f421"
+      }
+    },
+    {
+      "command": "known-results.mjs on final installed comparison module",
+      "result": "13/13 PASS",
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/known-results-02.log",
+        "bytes": 3055,
+        "sha256": "1f90302ac74d8b4f7d2459ef9e7289c64998028c6ca897a6e98374570a2b729b"
+      }
+    }
+  ],
+  "unchangedBoundaryApplicability": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/unchanged-boundary-applicability-01.json",
+    "bytes": 5774,
+    "sha256": "5d7eedb5548b5f9780c3c7016f90e5b4b95ef977ab9e53d55d4e90b739967727"
+  },
+  "firstFailures": {
+    "retained": true,
+    "logs": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/red-comparison-01.log",
+        "bytes": 93,
+        "sha256": "de1db37ecf3a85f79ab07f1e904350c119c9a93e8f25da26e2e94e729125db69"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/red-comparison-02.log",
+        "bytes": 203,
+        "sha256": "065603ccdfcd93dd1295d7ae2bbd6a6698c79b875613e97ef58271501df9ec0e"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/red-complete-cost-01.log",
+        "bytes": 1920,
+        "sha256": "1e2b85b6ee57315ac0d8f9683b45a2802b4b04a39ce968a446cc6b401f75d13c"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/red-rules-01.log",
+        "bytes": 147,
+        "sha256": "fa1e0bef09d4d1c2026d68bee11c364896159c12735c7c4d3f168fcb8da65010"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/red-rules-02.log",
+        "bytes": 3659,
+        "sha256": "11766843bc46788e28ddc0a3ba9a2bb7723fa7a4150f4b51741b19734f568c78"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/red-time-gap-01.log",
+        "bytes": 273,
+        "sha256": "1d8d7aeb633e53b24587c06d9b5913d54ed21ec408efd3450cd995322eb2b8cd"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/red-time-gap-02.log",
+        "bytes": 2827,
+        "sha256": "184d952267dabf10521cb7d464c9311f56e95351e431eff00794e4c0a8aeec3e"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/red-trial-budget-01.log",
+        "bytes": 143,
+        "sha256": "3bd20e80d564a0e7c50cc876950f492fc16c7796f4aeaf9856ec44b264118865"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-22/green-comparison-01.log",
+        "bytes": 147,
+        "sha256": "fa1e0bef09d4d1c2026d68bee11c364896159c12735c7c4d3f168fcb8da65010"
+      }
+    ],
+    "interpretation": "Initial missing dependency/module and compile failures are setup/type failures. Meaningful assertion RED evidence is red-rules-02, red-complete-cost-01 and red-time-gap-02. All originals remain; final checks do not rewrite them."
+  },
+  "remaining": [
+    {
+      "ticket": 30,
+      "scope": "Paid real DeepSeek capability, served model identity and stochastic model benefits",
+      "status": "NOT RUN; no paid authorization in this implementation scope"
+    },
+    {
+      "ticket": 31,
+      "scope": "Full native macOS Terminal acceptance of combined product including eval panel",
+      "status": "NOT RUN; installed CLI and readonly TUI component verified here"
+    },
+    {
+      "ticket": 32,
+      "scope": "Real user daily acceptance",
+      "status": "NOT RUN"
+    }
+  ],
+  "integrationScope": "Latest accepted issue19 included; issue23 owns subsequent improve/runtime composition and is not part of this frozen product. Root performs acceptance and merger integration; GitHub issue remains OPEN."
+}

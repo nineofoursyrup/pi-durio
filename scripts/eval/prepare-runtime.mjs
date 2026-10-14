@@ -1,0 +1,11 @@
+import {cp,mkdir,writeFile,readFile} from 'node:fs/promises';
+import {resolve,join} from 'node:path';
+import {spawn} from 'node:child_process';
+import {randomUUID,createHash} from 'node:crypto';
+const [destination,image]=process.argv.slice(2);
+if(!destination||!image||!/^\S+@sha256:[a-f0-9]{64}$/.test(image))throw Error('Usage: node scripts/eval/prepare-runtime.mjs NEW_DIRECTORY IMMUTABLE_IMAGE');
+const root=resolve(destination);if(/[,\n\r]/.test(root))throw Error('unsupported_mount_path');await mkdir(root,{recursive:false});
+for(const name of ['package.json','package-lock.json','vendor','dist'])await cp(name,join(root,name),{recursive:true});
+const args=['run','--rm','--name',`durio-eval-prepare-${randomUUID()}`,'--platform','linux/arm64','--cpus','1','--memory','1G','--mount',`type=bind,source=${root},target=/prepare`,'--entrypoint','/bin/sh',image,'-c',`cd /prepare && npm ci --omit=dev && node --input-type=module -e 'import {writeFileSync} from "node:fs";writeFileSync("eval-environment.json",JSON.stringify({node:process.version,platform:process.platform,arch:process.arch,image:"${image}",preparation:"npm ci --omit=dev; explicit preparation network only"}))'`];
+await writeFile(join(root,'preparation-plan.json'),JSON.stringify({image,args,lockSha256:createHash('sha256').update(await readFile('package-lock.json')).digest('hex')}));
+const child=spawn('/opt/homebrew/bin/container',args,{env:{PATH:'/usr/bin:/bin:/opt/homebrew/bin',HOME:process.env.HOME},stdio:['ignore','pipe','pipe']});let stdout='',stderr='';child.stdout.on('data',chunk=>{stdout+=chunk;process.stdout.write(chunk);});child.stderr.on('data',chunk=>{stderr+=chunk;process.stderr.write(chunk);});const code=await new Promise((resolve,reject)=>{child.on('error',reject);child.on('close',resolve);});await writeFile(join(root,'preparation-result.json'),JSON.stringify({code,stdout,stderr}));if(code!==0)throw Error(`runtime preparation failed: ${code}`);console.log(root);

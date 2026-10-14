@@ -1,0 +1,20 @@
+{
+  "paidApproved": false,
+  "manifestSha256": "9a948eb693a20f5ca4d17443152fff0639465160628432d8d1f2eaa6b8cb1f8e",
+  "batchId": "pi-durio-v1-live-r3-improve-repair",
+  "humanAuthorization": null,
+  "authorizationSource": null,
+  "credentialSource": "/Users/nineofour/Durio/api.env",
+  "grantedAt": null,
+  "limits": {
+    "maxRequests": 8,
+    "maxTokens": 1200000,
+    "cumulativeMaxRequests": 42,
+    "cumulativeMaxTokens": 2318328,
+    "usdCeiling": 3,
+    "grantToStartMs": 86400000,
+    "activeMs": 3600000,
+    "starts": 1
+  },
+  "note": "No authorization received. Fill only after new frozen manifest, independent review and explicit fresh human one-start approval."
+}

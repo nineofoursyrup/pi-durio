@@ -1,0 +1,22 @@
+{
+  "paidApproved": false,
+  "manifestSha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486",
+  "batchId": "pi-durio-v1-live-r1-usd3",
+  "humanAuthorization": "额度不超过3 usd",
+  "authorizationSource": {
+    "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/user-budget-20261010.json",
+    "bytes": 1294,
+    "sha256": "8761b7ac09591484979324959210608e88ff958ed809b82c8110e6a75fe0bc89"
+  },
+  "credentialSource": "/Users/nineofour/Durio/api.env",
+  "grantedAt": "2026-10-10T05:34:25.010886Z",
+  "limits": {
+    "maxRequests": 40,
+    "maxTokens": 2400000,
+    "usdCeiling": 3,
+    "grantToStartMs": 86400000,
+    "activeMs": 3600000,
+    "starts": 1
+  },
+  "note": "Template only. Coordinator must review, confirm credential readiness and workload isolation, then create explicit-human-grant.json without changing the original grant time. This task creates no executable grant."
+}

@@ -1,0 +1,6 @@
+{
+  "status": "CHECKER_FAILURE",
+  "error": "AssertionError: ('A', 'docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r3/README.md')",
+  "cause": "Reviewer checker incorrectly expected /r3/ as a complete path segment. Actual directory is final-9aed1af-usd3-r3; no repository or harness source was changed.",
+  "resolution": "Correct exact prefix in r2 checker; retain this first failure"
+}

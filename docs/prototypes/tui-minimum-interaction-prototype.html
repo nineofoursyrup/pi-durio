@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>pi-durio · TUI 最小交互合同原型</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f5f7;color:#192231;font:15px/1.6 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:24px}h1{font-size:24px;margin:0}h2{font-size:17px;margin:0 0 10px}p{margin:7px 0}button,select,textarea{font:inherit}button,select{border:1px solid #b9c4d0;border-radius:5px;padding:6px 10px;background:white;color:#192231;cursor:pointer}button:hover{border-color:#2b6bb6}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #75aefa;outline-offset:2px}button:disabled{opacity:.4;cursor:default}button.active,button.primary{background:#255b94;color:#fff;border-color:#255b94}.intro{background:#fff;border-left:4px solid #255b94;padding:14px 18px;margin:14px 0}.muted{color:#526174;font-size:13px}.state{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card,.guide,.free{border:1px solid #d3dbe3;border-radius:6px;background:#fff;padding:12px}.card strong{display:block;font-size:13px;color:#526174}.card span{display:block;overflow-wrap:anywhere}#changed{min-height:26px;color:#255b94;margin:10px 0}.tabs,.actions,.steps{display:flex;gap:7px;flex-wrap:wrap}.tabs{margin:16px 0 10px}.tabs button{flex:1;white-space:nowrap}.guide{margin-bottom:10px}.steps button{font-size:13px;text-align:left}.steps button.done{background:#edf4fa;color:#345a7c}.steps button.next{border:2px solid #255b94}.free{margin-bottom:16px}.free summary{cursor:pointer;font-weight:600}.actions{padding-top:10px}.terminal{background:#111923;color:#dfe6ee;border:1px solid #445061;border-radius:7px;overflow:hidden;font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;max-width:100%;margin:auto}.terminal.narrow{max-width:560px}.bar{padding:9px 14px;background:#1c2735;color:#a9c6e6;border-bottom:1px solid #344354}.transcript{height:330px;overflow:auto;padding:14px;scroll-behavior:auto}.line{margin:0 0 13px;white-space:pre-wrap;overflow-wrap:anywhere}.line b{color:#84b9f2}.line.notice{color:#b5c7dc}.line.warning{border-left:3px solid #dba64a;padding-left:10px;color:#edca8e}.line details{white-space:normal}.line pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0;font:inherit}.line summary{cursor:pointer;color:#a2c7f1}.composer{padding:12px;background:#182330;border-top:1px solid #344354}.composer textarea{display:block;width:100%;min-height:64px;resize:vertical;background:#111923;border:1px solid #586a7f;color:#e6edf6;padding:10px;border-radius:4px}.composer button{background:#253b52;color:#e0ebf6;border-color:#546b83}.composer .muted{color:#aec0d4}.composer .actions{justify-content:space-between}.statusline{margin-top:9px;color:#a8bed6;font-size:12px}.queue{padding:8px 14px;border-top:1px solid #344354;color:#b3c9df;max-height:130px;overflow:auto;font-size:12px}.queue p{margin:2px 0;overflow-wrap:anywhere}.report{margin-top:16px;background:#fff;border:1px solid #d3dbe3;border-radius:6px;padding:16px}.report article{padding:12px 0;border-top:1px solid #d3dbe3}.report h3{font-size:16px;margin:0}.report dl{display:grid;grid-template-columns:48px 1fr;gap:3px 10px;margin:7px 0;font-size:13px}.report dt{color:#526174}.report dd{margin:0}table{border-collapse:collapse;width:100%;font-size:13px;margin-top:12px}th,td{text-align:left;border-bottom:1px solid #d3dbe3;padding:7px;vertical-align:top}.overlay{position:fixed;inset:0;background:#101b2e80;display:grid;place-items:center;padding:24px}.dialog{background:#fff;color:#192231;width:min(650px,100%);padding:22px;border-radius:7px;max-height:90vh;overflow:auto}.hidden{display:none!important}.risk{background:#fff5e3;border-left:3px solid #bd7d14;padding:10px}.kbd{font-family:ui-monospace,monospace;font-size:12px}footer{font-size:13px;color:#526174;margin-top:16px}@media(max-width:700px){main{padding:12px}.state{grid-template-columns:1fr 1fr}.tabs button{flex-basis:40%}.transcript{height:290px}table{font-size:11px}}
+</style>
+<main>
+<h1>pi-durio · TUI 最小交互合同</h1>
+<div class="intro"><strong>要验证的问题：</strong>使用者能否分清“输入已排队 / 已接入”“请求中止 / 已中止”“打开记录 / 恢复执行”，以及 improve 的选择、执行与效果？
+<p>这是可丢弃的 <strong>模拟交互原型</strong>，所有任务、证据、结果均为展示夹具。无模型、真实命令、SQLite、网络或持久化；刷新即重置。此网页<strong>不验证 macOS Terminal 的实际行为</strong>，也不是另一套 runtime。</p>
+<p class="muted">已确认：全屏单列、底部固定输入与状态、忙时 Enter 提交 steer、显式 follow-up、首版验收终端为 macOS Terminal。Q4 快捷键参考 Claude Code；Q5 improve 逐项选择、一次提交。下方映射待真实 Terminal 验收，中止与恢复继续沿用本项目边界。</p></div>
+<section class="state" aria-label="当前模拟状态">
+<div class="card"><strong>当前执行</strong><span id="execution"></span></div>
+<div class="card"><strong>消息 / 草稿</strong><span id="messages"></span></div>
+<div class="card"><strong>副作用 / 恢复条件</strong><span id="recovery"></span></div>
+<div class="card"><strong>候选 / 执行 / 效果</strong><span id="improvement"></span></div>
+</section>
+<p id="changed" role="status" aria-live="polite"></p>
+<nav class="tabs" aria-label="模拟场景" id="tabs"></nav>
+<section class="guide"><h2 id="scenario-title"></h2><p id="scenario-desc"></p><div class="steps" id="steps"></div></section>
+<details class="free" open><summary>自由操作 · 可随时尝试；不适用的动作会说明原因</summary><div class="actions" id="free-actions"></div></details>
+<details class="free"><summary>快捷键独立走查 · 先载入空闲样例，再逐项操作</summary><p class="muted">“中文🥭A”可将光标放在 🥭 前体验 Ctrl+D 按完整可见字符删除。空输入先提示，再用标注的模拟按钮演示 800ms 窗口，无须手速点击。载入样例会重置当前模拟任务。内置浏览器走查中 Ctrl+C / Ctrl+X 未触发页面动作；可用下方 Ctrl+C 模拟按钮与“排到下一任务”体验状态语义，真实按键仍待 Terminal 验收。</p><div class="actions" id="keyboard-actions"></div></details>
+<section class="terminal" id="terminal" aria-label="模拟终端">
+<div class="bar">pi-durio / 当前会话 CUR-01 <span id="terminal-state"></span><span style="float:right">单列 · 中文 / emoji 🥭</span></div>
+<div class="transcript" id="transcript" tabindex="0" aria-label="会话内容，支持滚动和选文"></div>
+<div class="queue" id="queue"></div>
+<div class="composer">
+<label for="draft" id="input-label">输入</label><textarea id="draft" placeholder="输入草稿，例如：先修测试。草稿不会因 Esc 消失。"></textarea>
+<div class="actions"><div><button id="send">发送</button> <button id="follow">排到下一任务</button> <button id="newline">插入换行</button> <button id="restore-draft">恢复暂存草稿</button></div><button id="bottom">回到底部</button></div>
+<div class="statusline" id="statusline"></div>
+<div class="muted kbd">Enter 发送 / steer · Ctrl+X 后 Enter 排为 follow-up · Shift+Enter、Ctrl+J、末尾反斜杠 + Enter 换行。Option+Enter 需用户自行配置 Meta，本原型不改 Terminal 设置。</div>
+<div class="muted kbd">Esc 先关弹层，无弹层且运行中则请求中止。Ctrl+C 运行中请求中止；空闲首次暂存并清空输入，再次且未编辑才退出。Ctrl+D 在输入中向前删除；空输入在 800ms 内再按才退出。/exit 显式退出。Ctrl+O 展开详情，Ctrl+L 重绘。以上待真实 Terminal 验收。</div>
+</div>
+</section>
+<section class="report hidden" id="report"></section>
+<footer>可双击此 HTML 打开。切换场景重置该模拟；顶部字段与消息记录随每次动作更新。退出仅模拟关闭会话，不会关闭浏览器。滚动与折叠可用鼠标，也可 Tab 聚焦后使用键盘。</footer>
+</main>
+<div class="overlay hidden" id="overlay"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div id="dialog-content"></div><button id="close-dialog">关闭面板（Esc）</button></section></div>
+<script>
+// Pure display-fixture reducer. This simulates observations; it is not a runtime implementation.
+const reportItems=[
+ {id:'R1',title:'减少重复读取日志',target:'日志读取入口',scope:'仅调整本次声明的读取批次；不改写历史记录',evidence:'模拟记录 E12：同一输入被读取 3 次',validation:'重放同一模拟输入，检查输出相同且读取次数减少',activation:'仅验证不启用；选择执行时，必要验证通过后对新任务启用，不热改当前工作；效果仍需后续观察'},
+ {id:'R2',title:'改善长路径的展示',target:'工具输出展示',scope:'仅调整路径换行与展开；不截断原始记录',evidence:'模拟记录 E18：80 列下路径超出可视区域',validation:'中文、emoji 与长路径模拟样本保持可读',activation:'仅验证不启用；选择执行时，必要验证通过后对新任务启用，不热改当前工作；效果仍需后续观察'}
+];
+const names={running:'运行中',idle:'空闲',stopping:'中止中 · 等待确认',stopped:'已中止',failed:'失败 · 待处置',exiting:'退出中 · 等待保存/关闭确认',closed:'会话已关闭',viewing:'仅查看 · 尚未恢复',ended:'旧任务已结束'};
+function initial(scene=0){return {scene,status:scene===2?'viewing':scene===3||scene===4?'idle':'running',resumable:true,draft:'',savedDrafts:[],cArmed:false,dArmedAt:null,chord:false,queue:[],log:[{text:'用户：检查当前任务中的失败测试。'},{text:scene===2?'已打开中断记录；仅查看，不自动继续。':'助手：这是模拟会话。工具输出与状态可通过下方动作推进。'}],overlay:null,unknown:scene===2?'unresolved':'none',compatible:true,recoveryDecision:'尚无处置',reportRev:1,baseline:1,choices:{},results:[],submitted:false,expanded:false,narrow:false,followBottom:true,notice:'请选择引导演练步骤，或直接输入并自由操作。'};}
+function reduce(before,action){
+ let s=structuredClone(before); const p=action.value; const note=t=>{s.notice=t;s.log.push({text:t,kind:'notice'});};
+ const frozen=()=>s.queue.some(q=>q.state==='冻结待处置');
+ const freeze=()=>s.queue.forEach(q=>{if(q.state==='已排队')q.state='冻结待处置';});
+ const gate=()=>{if(!s.compatible)return '执行版本不兼容：只可查看，不能继续旧任务。';if(s.unknown==='unresolved')return '副作用仍未知：必须完成恢复核对，关闭面板不构成处置。';if(frozen())return '未消费消息已冻结：先明确保留为草稿或丢弃，再继续。';return '';};
+ switch(action.type){
+ case 'draft':s.draft=p;s.cArmed=false;s.dArmedAt=null;s.chord=false;break;
+ case 'restoreDraft':if(!s.savedDrafts.length){s.notice='没有暂存草稿。';break;}s.draft=[s.draft,s.savedDrafts.pop()].filter(Boolean).join('\n');s.cArmed=false;s.dArmedAt=null;note('已恢复最近暂存草稿；尚未提交。');break;
+ case 'escape':if(s.overlay)return reduce(s,{type:'close'});if(s.status==='running')return reduce(s,{type:'abort'});s.notice='Esc：当前无弹层或运行中任务；草稿与恢复限制保留。';break;
+ case 'ctrlC':
+  if(['sessions','record'].includes(s.overlay))return reduce(s,{type:'historyAction'});
+  s.dArmedAt=null;s.chord=false;
+  if(s.status==='running'){s.cArmed=false;return reduce(s,{type:'abort'});}
+  if(['stopping','exiting','closed'].includes(s.status)){note('正在中止 / 退出或已关闭，不发出新的退出请求。');break;}
+  if(s.cArmed){s.cArmed=false;return reduce(s,{type:'exit'});}
+  if(s.draft)s.savedDrafts.push(s.draft);s.draft='';s.cArmed=true;note('Ctrl+C：输入已清空并保留在可恢复暂存中。未编辑时再次按 Ctrl+C 才请求退出；中止动作不计作本次按键。');break;
+ case 'ctrlD':{
+  if(s.overlay){s.cArmed=false;s.dArmedAt=null;note('Ctrl+D：当前弹层内不穿透操作输入或退出；请先关闭弹层。');break;}
+  s.cArmed=false;s.chord=false;
+  if(!p.promptFocused){s.dArmedAt=null;note('Ctrl+D：请先聚焦输入区；不会删除其他位置，也不会退出。');break;}
+  if(s.draft){
+   let start=Math.min(p.start,s.draft.length),end=Math.min(p.end,s.draft.length);
+   if(start===end){const segment=[...new Intl.Segmenter('zh',{granularity:'grapheme'}).segment(s.draft)].find(x=>x.index+x.segment.length>start);if(segment){start=segment.index;end=start+segment.segment.length;}}
+   s.draft=s.draft.slice(0,start)+s.draft.slice(end);s.caret=start;s.dArmedAt=null;s.notice='Ctrl+D：向前删除一个可见字符或选中范围；没有请求退出。';break;
+  }
+  if(['stopping','exiting','closed'].includes(s.status)){s.dArmedAt=null;note('正在中止 / 退出或已关闭，不发出新的退出请求。');break;}
+  if(s.dArmedAt!==null&&p.at-s.dArmedAt>=0&&p.at-s.dArmedAt<=800){s.dArmedAt=null;return reduce(s,{type:'exit'});}
+  s.dArmedAt=p.at;note('Ctrl+D：输入为空；请在 800ms 内再按一次才请求退出。');break;
+ }
+ case 'followChord':s.chord=true;s.cArmed=false;s.dArmedAt=null;s.notice='已按 Ctrl+X；接着按 Enter 将草稿排为 follow-up，其他输入取消此组合。';break;
+ case 'cancelKeys':s.cArmed=false;s.dArmedAt=null;s.chord=false;break;
+ case 'hint':s.notice=p;break;
+ case 'redraw':s.notice='Ctrl+L：已重绘模拟视图，记录、草稿与执行状态保持。';break;
+ case 'keyboardIdle':s={...initial(s.scene),status:'idle',draft:'中文🥭A'};note('已载入空闲快捷键样例：可检查 Ctrl+C 暂存 / 恢复，或聚焦输入后 Ctrl+D 删除。');break;
+ case 'send':case 'follow':{
+  s.chord=false;
+  if(['sessions','record'].includes(s.overlay)){note('历史预览只读：先关闭预览，返回当前活动会话才可提交。');break;}
+  if(action.type==='send'&&s.draft.trim()==='/exit'){s.draft='';s.cArmed=false;s.dArmedAt=null;return reduce(s,{type:'exit'});}
+  if(!s.draft.trim()){s.notice='请先输入内容。';break;}
+  const blocked=gate();if(blocked){note(blocked);break;}
+  if(!['idle','running'].includes(s.status)){note('当前只可编辑草稿；先明确恢复工作后才可发送。');break;}
+  const kind=action.type==='follow'?'follow-up':s.status==='running'?'steer':'任务';
+  if(kind==='follow-up'&&s.status!=='running'){note('空闲时请使用“发送”，follow-up 用于排在当前任务之后。');break;}
+  s.queue.push({text:s.draft,kind,state:kind==='任务'?'已接入':'已排队'});s.draft='';s.status='running';s.cArmed=false;s.dArmedAt=null;s.chord=false;
+  note(kind==='任务'?'新任务已接入。':`${kind} 已排队；${kind==='steer'?'当前工具轮次结束后接入，不立即停止命令。':'当前任务完成后才接入。'}`);break;}
+ case 'toolEnd':
+  if(s.status!=='running'){note('没有运行中的工具轮次可结束。');break;}
+  s.queue.forEach(q=>{if(q.kind==='steer'&&q.state==='已排队')q.state='已接入';});note('模拟：当前工具轮次已结束，排队的 steer 已接入；follow-up 继续等待。');break;
+ case 'finish':{
+  if(s.status!=='running'){note('当前没有可完成的运行中任务。');break;}
+  if(s.queue.some(q=>q.kind==='steer'&&q.state==='已排队')){note('仍有未接入的 steer：先模拟工具轮次结束。');break;}
+  const next=s.queue.find(q=>q.kind==='follow-up'&&q.state==='已排队');s.status=next?'running':'idle';if(next)next.state='已接入';note(next?'模拟：当前任务完成；下一条 follow-up 已接入并开始。':'模拟：当前任务完成，回到空闲。');break;}
+ case 'abort':if(s.status!=='running'){note('当前会话 CUR-01 无运行中任务可中止；保留草稿。');break;}s.status='stopping';s.resumable=false;s.cArmed=false;s.dArmedAt=null;freeze();note('已请求中止当前会话 CUR-01；正在等待执行层确认，不等于已中止。未消费消息已冻结，不会自动重新发送。');break;
+ case 'abortAck':if(s.status!=='stopping'){note('先请求中止，再模拟确认。');break;}s.status='stopped';note('模拟执行层确认：已中止。草稿保留，冻结消息须明确处置。');break;
+ case 'fail':if(s.status!=='running'){note('当前没有运行中任务可模拟失败。');break;}s.status='failed';s.resumable=false;freeze();note('模拟任务失败；未消费消息已冻结，下一次输入不会自动带入旧队列。');break;
+ case 'exit':case 'confirmExit':if(['closed','exiting','stopping'].includes(s.status)){note('会话正在中止 / 关闭或已经关闭，不发出新的退出请求。');break;}if(action.type==='exit'&&s.draft){s.overlay='exitChoice';s.notice='存在未发送草稿：请选择退出并保留，或 Esc 返回编辑。';break;}s.overlay=null;s.status='exiting';s.cArmed=false;s.dArmedAt=null;freeze();note('已请求退出并保留草稿、暂存草稿与未完成工作；等待保存与关闭确认，不代表当前副作用已撤销。');break;
+ case 'exitAck':if(s.status!=='exiting'){note('先请求退出，再模拟确认。');break;}s.status='closed';note('模拟确认：会话已关闭，未完成工作保留。');break;
+ case 'open':if(s.status!=='closed'){note('此入口演示打开已关闭会话；当前会话尚未关闭。');break;}s.status='viewing';note('打开记录：仅查看，不自动恢复执行。');break;
+ case 'keep':case 'discard':{
+  const q=s.queue.filter(q=>q.state==='冻结待处置');if(!q.length){note('当前没有待处置的冻结消息。');break;}
+  if(action.type==='keep'){s.draft=[s.draft,...q.map(x=>x.text)].filter(Boolean).join('\n');s.cArmed=false;s.dArmedAt=null;}q.forEach(x=>x.state=action.type==='keep'?'已保留草稿（未重新接入）':'用户已丢弃（历史保留）');note(action.type==='keep'?'冻结消息仅保存为草稿；没有重新接入。须明确开始新任务并重新提交旧文本。':'用户明确丢弃未消费消息；历史仍保留该决定。');break;}
+ case 'resume':{const blocked=gate();if(blocked){note(blocked);break;}if(!s.resumable){note('已中止或失败的旧 pending 不重启。可明确开始新任务，再自行提交保留的文本。');break;}if(s.status!=='viewing'){note('仅在查看可恢复的中断记录时明确继续。');break;}s.status='running';note('用户明确选择继续，模拟恢复执行；草稿仍需另行发送。');break;}
+ case 'newTask':{const blocked=gate();if(blocked){note(blocked);break;}if(!['stopped','failed','ended'].includes(s.status)&&!(s.status==='viewing'&&!s.resumable)){note('此入口仅演示结束旧任务后另开新任务。');break;}s.status='idle';s.resumable=true;note('明确开始新任务；旧 pending 不重启，保留的草稿仍未提交。');break;}
+ case 'known':s={...initial(s.scene),status:'viewing',unknown:'none',draft:s.draft};note('载入已知中断：打开仅查看，需明确选择继续。');break;
+ case 'unknown':s={...initial(s.scene),status:'viewing',unknown:'unresolved',draft:s.draft};note('载入未知副作用：外部写入可能已发生，结果未知；执行锁定，恢复核对只读。');break;
+ case 'incompatible':s={...initial(s.scene),status:'viewing',compatible:false,draft:s.draft};note('载入旧执行版本：与当前执行版本不兼容，只可查看；不得由新版本接管旧工作。');break;
+ case 'recovery':s.overlay='recovery';s.notice='打开恢复核对面板。关闭面板不构成同意。';break;
+ case 'evidence':s.overlay='evidence';s.notice='只读查看模拟证据；尚未改变副作用事实。';break;
+ case 'completed':if(s.unknown!=='unresolved'){note('当前没有待核对的未知副作用。');break;}s.unknown='confirmed';s.recoveryDecision='可靠证据确认已完成；不重做';s.overlay=null;note('模拟可靠证据已确认该动作完成；后续明确继续时跳过该动作，不重做。');break;
+ case 'retry':if(s.unknown!=='unresolved'){note('当前没有待核对的未知副作用。');break;}s.unknown='accepted';s.recoveryDecision='证据不足；用户明确承担重复风险并选择重试';s.overlay=null;note('用户明确选择允许重试：旧动作是否已发生仍未知，重复副作用风险保留。尚未自动开始执行。');break;
+ case 'endOld':if(s.unknown!=='unresolved'){note('当前没有未知旧任务可结束。');break;}s.unknown='retained';s.status='ended';s.resumable=false;s.recoveryDecision='用户结束旧任务；未知副作用历史保留';s.overlay=null;freeze();note('旧任务已结束；未知副作用保留在历史中，不转写为成功或失败。');break;
+ case 'menu':s.overlay='menu';s.notice='打开会话菜单；Esc 只关闭它。';break;
+ case 'sessions':s.overlay='sessions';s.notice='按需浏览模拟会话列表；不会切换或恢复当前执行。';break;
+ case 'inspectSession':s.overlay='record';s.viewedSession=p;s.notice='只读查看另一条模拟会话；当前执行、草稿与队列均不改变。';break;
+ case 'historyAction':s.notice='历史预览只读，无可中止或退出的执行目标。关闭预览，返回当前会话 CUR-01 后再操作。';break;
+ case 'close':s.overlay=null;s.notice='当前弹层已关闭（若无弹层则不操作）；草稿与执行限制均保留。';break;
+ case 'choose':if(s.submitted){note('该报告版本已提交；可更新模拟报告后重新审阅。');break;}s.choices[p.id]=p.mode;s.notice=`${p.id} 选择已更新；尚未提交。`;break;
+ case 'submit':{
+  const picked=Object.entries(s.choices).filter(([,mode])=>mode);if(!picked.length){note('没有选择任何项，不提交。');break;}
+  if(s.submitted){note('此报告版本已提交，不重复执行。');break;}
+  s.results=picked.map(([id,mode])=>({id,mode,execution:mode==='暂缓'?'未执行':mode==='仅验证'?'验证完成（模拟），未修改目标':'声明范围执行完成（模拟）',effect:'效果未验证',report:`IMP-04 / rev ${s.reportRev} / 基线 B${s.baseline}`}));s.submitted=true;note('已一次性提交所选项及模式；模拟结果列明用户决定、执行结果和效果。');break;}
+ case 'reportUpdate':s.reportRev++;s.choices={};s.submitted=false;note('模拟报告更新：旧选择已清除，必须重新审阅；既有结果仍按原版本保留。');break;
+ case 'baseline':s.baseline++;s.choices={};s.submitted=false;note('模拟基线变化：旧选择已清除，必须重新审阅；既有结果不迁移到新基线。');break;
+ case 'output':s.log.push({kind:'output',text:'工具输出 · 展示摘要（前 3 / 80 行）；模拟完整记录为 80 行',complete:true});note('新增长输出。若已离开底部，当前位置保持。');break;
+ case 'incomplete':s.log.push({kind:'warning',text:'记录不完整：模拟传输中断，后续内容未收到。这不是展示截断；展开也不能补回缺失记录。'});note('新增记录缺失标记；不会声称内容完整。');break;
+ case 'expand':s.expanded=!s.expanded;s.notice=s.expanded?'已展开 80 行模拟记录。':'已收起为摘要；完整模拟记录仍可查看。';break;
+ case 'narrow':s.narrow=!s.narrow;s.notice=s.narrow?'模拟缩小可视列宽；这不是实际 Terminal resize 测试。':'恢复较宽的展示区。';break;
+ case 'scrollAway':s.followBottom=false;s.notice='已模拟滚动离开底部；新输出不抢回。';break;
+ case 'bottom':s.followBottom=true;s.notice='回到底部；继续跟随新输出。';break;
+ case 'scroll':s.followBottom=p;break;
+ }
+ return s;
+}
+const act=(label,type,value)=>({label,type,value});
+const scenes=[
+ {title:'1 · 输入、steer 与 follow-up',desc:'从运行中开始：先编辑、排队，然后分别观察“当前工具轮次结束”和“当前任务完成”两个接入时点。',steps:[act('填入“先修测试”','draft','先修测试'),act('Enter：提交 steer','send'),act('填入“随后更新说明”','draft','随后更新说明'),act('排到下一任务','follow'),act('模拟工具轮次结束','toolEnd'),act('模拟当前任务完成','finish')],free:['toolEnd','finish','menu']},
+ {title:'2 · 中止、退出与草稿',desc:'Esc 无弹层时请求中止，有弹层时先返回。中止 / 退出冻结未消费消息；旧 pending 不重启，旧文本须新任务重新提交。用显式 /exit 入口演示退出；Ctrl+D 的输入删除与双按见快捷键独立走查。',steps:[act('编辑运行中消息','draft','先保存分析，再继续'),act('提交 steer','send'),act('Esc：请求中止','escape'),act('模拟确认已中止','abortAck'),act('尝试继续（仍冻结）','resume'),act('冻结消息仅保留为草稿','keep'),act('明确开始新任务','newTask'),act('明确重新提交保留文本','send'),act('再编辑一份草稿','draft','尚未提交的草稿'),act('/exit：显式退出入口','exit'),act('选择退出并保留草稿','confirmExit'),act('模拟关闭确认','exitAck'),act('重新打开（仅查看）','open')],free:['escape','ctrlC','abortAck','fail','exit','exitAck','open','keep','discard','resume','newTask','menu']},
+ {title:'3 · 恢复核对与版本',desc:'打开未知中断记录。先尝试绕过核对，再看证据；自由操作可分别体验三种处置与版本不兼容分支。每次载入分支会重置模拟任务。',steps:[act('打开恢复核对','recovery'),act('Esc：关闭面板','close'),act('尝试继续（仍阻止）','resume'),act('只读查看模拟证据','evidence'),act('证据确认完成，不重做','completed'),act('明确继续','resume'),act('载入版本不兼容','incompatible'),act('尝试继续（只可查看）','resume')],free:['known','unknown','incompatible','recovery','evidence','completed','retry','endOld','resume']},
+ {title:'4 · improve 选择与结果',desc:'报告默认不选。每条建议可选“仅验证 / 执行已声明范围 / 暂缓”，一次按钮提交。更新报告或基线使旧选择失效；执行完成不等于效果已验证。',steps:[act('R1：仅验证','choose',{id:'R1',mode:'仅验证'}),act('R2：执行声明范围','choose',{id:'R2',mode:'执行已声明范围'}),act('模拟报告更新（清空）','reportUpdate'),act('尝试提交（没有选择）','submit'),act('重选 R1：仅验证','choose',{id:'R1',mode:'仅验证'}),act('重选 R2：暂缓','choose',{id:'R2',mode:'暂缓'}),act('一次提交，查看三轴结果','submit')],free:['reportUpdate','baseline','submit','menu']},
+ {title:'5 · 输出、滚动与列宽',desc:'中文、emoji、无空格长路径都来自模拟记录。展示摘要可展开；记录缺失单独标记。离开底部后新输出不会自动拉回。',steps:[act('加入长输出','output'),act('展开完整模拟记录','expand'),act('模拟缩小列宽','narrow'),act('滚动离开底部','scrollAway'),act('再来一段输出（不抢回）','output'),act('标记记录不完整','incomplete'),act('回到底部','bottom')],free:['output','incomplete','expand','narrow','scrollAway','bottom','menu']}
+];
+const labels={toolEnd:'模拟：工具轮次结束',finish:'模拟：当前任务完成',menu:'打开会话菜单',sessions:'按需查看会话列表',abort:'请求中止当前会话',escape:'Esc · 返回 / 中止',ctrlC:'Ctrl+C · 中止 / 清输入 / 再次退出',abortAck:'模拟：确认已中止',fail:'模拟：任务失败',exit:'/exit · 显式退出入口',confirmExit:'退出并保留草稿及未完成工作',exitAck:'模拟：确认关闭',open:'重新打开记录',keep:'冻结消息仅保留为草稿',discard:'丢弃冻结消息',resume:'明确继续执行',newTask:'明确开始新任务（草稿未提交）',known:'载入：已知中断',unknown:'载入：未知副作用',incompatible:'载入：版本不兼容',recovery:'打开恢复核对',evidence:'只读查看证据',completed:'证据确认完成，不重做',retry:'证据不足：明确承担重复风险重试',endOld:'结束旧任务，保留未知历史',reportUpdate:'模拟报告更新',baseline:'模拟基线变化',submit:'提交当前选择',output:'加入长输出',incomplete:'模拟记录不完整',expand:'展开 / 收起模拟记录',narrow:'切换可视列宽',scrollAway:'模拟滚动离开底部',bottom:'回到底部'};
+let state=initial(),step=0,lastFocus=null,rendering=false;
+const $=id=>document.getElementById(id),esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const simulatedLine=i=>`[${String(i+1).padStart(2,'0')}] 中文检查 🥭 ✅ 文件 ${i+1} /workspace/中文目录/`+'verylongpathwithoutanyspaces'.repeat(5)+`/结果-${i+1}.ts`;
+function button(label,action){const b=document.createElement('button');b.textContent=label;b.onclick=()=>dispatch(action);return b;}
+function dispatch(action){const next=scenes[state.scene].steps[step];const equivalent=action.type==='escape'&&next?.type==='close'&&state.overlay;if(next&&(action.type===next.type||equivalent)&&JSON.stringify(action.value)===JSON.stringify(next.value))step++;if(action.type==='keyboardIdle')step=0;const wasOverlay=state.overlay;state=reduce(state,action);if(!wasOverlay&&state.overlay)lastFocus=document.activeElement;render();if(action.type==='ctrlD'&&action.value.promptFocused){$('draft').focus();$('draft').selectionStart=$('draft').selectionEnd=state.caret??action.value.start;}if(action.type==='scrollAway')$('transcript').scrollTop=0;if(action.type==='bottom')$('transcript').scrollTop=$('transcript').scrollHeight;if(!wasOverlay&&state.overlay)$('close-dialog').focus();if(wasOverlay&&!state.overlay&&lastFocus?.isConnected)lastFocus.focus();}
+function loadScene(index){state=initial(index);step=0;render();}
+function render(){
+ rendering=true;const sc=scenes[state.scene],log=$('transcript'),oldScroll=log.scrollTop;
+ $('execution').textContent=names[state.status];
+ const queued=state.queue.filter(q=>q.state==='已排队').length,admitted=state.queue.filter(q=>q.state==='已接入').length,frozen=state.queue.filter(q=>q.state==='冻结待处置').length;
+ $('messages').textContent=`排队 ${queued} · 已接入 ${admitted} · 冻结 ${frozen} · 草稿 ${state.draft.length} 字符 · 暂存 ${state.savedDrafts.length} 份`;
+ const unknownLabels={none:'无未知副作用',unresolved:'副作用未知 · 执行锁定',confirmed:'证据确认完成 · 不重做',accepted:'旧事实仍未知 · 已明确允许重试',retained:'未知历史保留 · 旧任务结束'};
+ $('recovery').textContent=`${unknownLabels[state.unknown]}；${state.compatible?'执行版本兼容':'执行版本不兼容，仅查看'}`;
+ $('improvement').textContent=`选择 ${Object.values(state.choices).filter(Boolean).length}/2；已提交结果 ${state.results.length} 项；效果未验证`;
+ $('changed').textContent=state.notice;
+ $('tabs').replaceChildren(...scenes.map((s,i)=>{const b=button(s.title.split(' · ')[0]+' · '+['输入','中止 / 退出','恢复','improve','输出'][i],{});b.onclick=()=>loadScene(i);b.className=i===state.scene?'active':'';b.setAttribute('aria-current',i===state.scene?'step':'false');return b;}));
+ $('scenario-title').textContent=sc.title;$('scenario-desc').textContent=sc.desc;
+ $('steps').replaceChildren(...sc.steps.map((a,i)=>{const b=button(`${i<step?'✓ ':''}${i+1}. ${a.label}`,a);b.disabled=i>step;b.className=i<step?'done':i===step?'next':'';b.onclick=()=>dispatch(a);return b;}),(()=>{const b=button('重置本场景',{});b.onclick=()=>loadScene(state.scene);return b;})());
+ $('free-actions').replaceChildren(...[...sc.free,'sessions'].map(type=>button(labels[type],{type})));
+ const dButton=button('聚焦输入并按 Ctrl+D',{});dButton.onmousedown=e=>e.preventDefault();dButton.onclick=()=>pressD(true);
+ const secondD=button('模拟空输入双按 Ctrl+D（间隔 100ms）',{});secondD.onmousedown=e=>e.preventDefault();secondD.onclick=()=>pressD(true,true);secondD.disabled=!!state.draft;
+ $('keyboard-actions').replaceChildren(button('载入空闲样例（重置模拟任务）',{type:'keyboardIdle'}),button('Ctrl+C：清空 / 再按退出',{type:'ctrlC'}),button('恢复暂存草稿',{type:'restoreDraft'}),dButton,secondD,button('输入 /exit',{type:'draft',value:'/exit'}),button('Enter 提交',{type:'send'}));
+ $('terminal').classList.toggle('narrow',state.narrow);$('terminal-state').textContent='· '+names[state.status];
+ log.innerHTML=state.log.map(x=>x.kind==='output'?`<div class="line"><b>${esc(x.text)}</b><p class="muted" style="color:#aec0d4">这是展示摘要；完整模拟记录保留。${state.expanded?'现展示 80 行':'现展示 3 行'}</p><pre>${esc(Array.from({length:state.expanded?80:3},(_,i)=>simulatedLine(i)).join('\n'))}</pre><button data-expand>${state.expanded?'收起摘要':'按需查看完整模拟记录（80 行）'}</button></div>`:`<div class="line ${x.kind||''}">${esc(x.text)}</div>`).join('');
+ log.querySelectorAll('[data-expand]').forEach(b=>b.onclick=()=>dispatch({type:'expand'}));
+ $('queue').innerHTML=state.queue.length?state.queue.map((q,i)=>`<p>#${i+1} [${esc(q.kind)}] <strong>${esc(q.state)}</strong> · ${esc(q.text)}</p>`).join(''):'消息：尚无排队或接入记录';
+ if($('draft').value!==state.draft)$('draft').value=state.draft;
+ $('draft').disabled=['sessions','record'].includes(state.overlay);
+ $('restore-draft').disabled=!state.savedDrafts.length||!!state.overlay;
+ const busy=state.status==='running';$('input-label').textContent=busy?'运行中输入 · Enter 提交 steer，等待当前工具轮次结束':state.status==='idle'?'空闲输入 · Enter 发送新任务':'草稿保留 · 当前不可发送，先处置 / 明确恢复';
+ $('send').textContent=busy?'Enter · 补充当前任务（steer）':'Enter · 发送';$('send').disabled=!['running','idle'].includes(state.status);$('follow').disabled=!busy;
+ $('statusline').textContent=`${names[state.status]} | ${state.followBottom?'跟随新输出':'已离开底部 · 新输出不抢回'} | ${state.narrow?'约窄列模拟':'宽列模拟'} | ${state.recoveryDecision}`;
+ renderReport();renderOverlay();
+ log.scrollTop=state.followBottom?log.scrollHeight:oldScroll;
+ rendering=false;
+}
+function renderReport(){
+ const el=$('report');el.classList.toggle('hidden',state.scene!==3);if(state.scene!==3)return;
+ const chosen=Object.entries(state.choices).filter(([,m])=>m);
+ el.innerHTML=`<h2>improve · IMP-04 / rev ${state.reportRev} / 基线 B${state.baseline}</h2><p class="muted">候选编号稳定；每次报告或基线变化，旧选择失效。未选项不会执行。报告与证据均为模拟。</p>`+
+ reportItems.map(r=>`<article><h3>${r.id} · ${r.title}</h3><dl>${[['目标',r.target],['范围',r.scope],['证据',r.evidence],['验证',r.validation],['生效',r.activation]].map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl><label for="choice-${r.id}">用户决定：</label><select id="choice-${r.id}" data-id="${r.id}" ${state.submitted?'disabled':''}>${['','仅验证','执行已声明范围','暂缓'].map(m=>`<option value="${m}" ${state.choices[r.id]===m?'selected':''}>${m||'未选择（默认）'}</option>`).join('')}</select></article>`).join('')+
+ `<p><strong>将提交：</strong>${chosen.length?chosen.map(([id,m])=>esc(`${id} → ${m}`)).join('；'):'无'}</p><button id="submit-report" class="primary" ${!chosen.length||state.submitted?'disabled':''}>${state.submitted?'本报告版本已提交':'一次提交所选项与模式'}</button>`+
+ (state.results.length?`<table><caption>按原报告版本保留的模拟结果</caption><thead><tr><th>候选 / 版本</th><th>用户决定</th><th>执行结果</th><th>效果</th></tr></thead><tbody>${state.results.map(r=>`<tr><td>${r.id}<br>${esc(r.report)}</td><td>${r.mode}</td><td>${r.execution}</td><td>${r.effect}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">尚未提交；没有执行结果。效果未验证。</p>');
+ el.querySelectorAll('select').forEach(x=>x.onchange=()=>dispatch({type:'choose',value:{id:x.dataset.id,mode:x.value}}));$('submit-report').onclick=()=>dispatch({type:'submit'});
+}
+function renderOverlay(){
+ $('overlay').classList.toggle('hidden',!state.overlay);if(!state.overlay)return;
+ if(['exitChoice','sessions','record'].includes(state.overlay)){
+  const el=$('dialog-content');
+  if(state.overlay==='exitChoice'){el.innerHTML=`<h2 id="dialog-title">保留草稿并退出？</h2><p>当前有 ${state.draft.length} 字符未发送草稿。退出会保留草稿与未完成工作；尚未消费的消息冻结，重新打开后不会自动执行。</p><p class="risk">按 Esc 返回编辑；不会丢弃草稿，也不会发出退出请求。</p>`;el.append(button(labels.confirmExit,{type:'confirmExit'}));}
+  if(state.overlay==='sessions'){el.innerHTML='<h2 id="dialog-title">会话列表 · 只读浏览</h2><p>选择仅展示模拟记录，不自动恢复，也不改变当前会话。</p>';el.append(button('A · 修复测试 · 已知中断',{type:'inspectSession',value:'A'}),document.createTextNode(' '),button('B · 更新配置 · 副作用未知',{type:'inspectSession',value:'B'}));}
+  if(state.overlay==='record'){el.innerHTML=`<h2 id="dialog-title">模拟会话 ${state.viewedSession} · 仅查看</h2><p>${state.viewedSession==='A'?'任务：修复测试。状态：已知中断，可在明确打开并继续后恢复。':'任务：更新配置。状态：副作用未知，需恢复核对后另行决定。'}</p><p>此只读预览不会加载为当前执行会话。</p>`;el.append(button('返回会话列表',{type:'sessions'}));}
+  return;
+ }
+ const body=state.overlay==='menu'?'<h2 id="dialog-title">会话菜单</h2><p>这里只演示弹层：按 Esc 关闭，保留草稿，不触发中止、恢复或任何同意。</p>':state.overlay==='evidence'?'<h2 id="dialog-title">恢复核对 · 只读模拟证据</h2><p>E-21：请求已发出；在中断点未记录最终响应。</p><p>E-22（可靠证据分支）：目标端包含该次唯一动作标识，内容与目标一致，可确认已完成。</p><p>E-23（证据不足分支）：只看到时间邻近记录，无法归因到该次动作；结果仍未知。</p><p class="risk">这些是互斥的模拟证据分支。选择“可靠证据”演示不重做；选择“证据不足”演示用户明确承担重复风险。关闭面板不会解除执行限制。</p>':'<h2 id="dialog-title">恢复核对</h2><p>当前动作可能已产生外部副作用，但结果未知。核对阶段仅查看证据，不产生新副作用。</p><p class="risk">证据不足时重试，可能重复执行已经发生的动作。用户决定只改变后续处置，不改写未知历史。</p>';
+ $('dialog-content').innerHTML=body;
+ if(state.overlay!=='menu'){const box=document.createElement('div');box.className='actions';box.append(...['evidence','completed','retry','endOld'].map(type=>button(labels[type],{type})));$('dialog-content').append(box);}
+}
+$('draft').addEventListener('input',e=>{state=reduce(state,{type:'draft',value:e.target.value});$('messages').textContent=`排队 ${state.queue.filter(q=>q.state==='已排队').length} · 已接入 ${state.queue.filter(q=>q.state==='已接入').length} · 冻结 ${state.queue.filter(q=>q.state==='冻结待处置').length} · 草稿 ${state.draft.length} 字符 · 暂存 ${state.savedDrafts.length} 份`;});
+$('draft').addEventListener('blur',()=>{state=reduce(state,{type:'cancelKeys'});});
+$('draft').addEventListener('keydown',e=>{
+ if(e.isComposing)return;
+ if(e.key==='Enter'){
+  e.preventDefault();
+  if(e.ctrlKey){dispatch({type:'hint',value:'不使用 Ctrl+Enter 立即发送；请用 Enter 提交 steer，或 Ctrl+X 后 Enter 排为 follow-up。真实 Terminal 编码是否可区分仍待验收。'});return;}
+  if(e.altKey||e.metaKey){dispatch({type:'hint',value:'Option+Enter 依赖用户自己的 Terminal Meta 配置；网页请用 Shift+Enter 或 Ctrl+J 换行。'});return;}
+  if(e.shiftKey){insertNewline();return;}
+  if(state.chord){dispatch({type:'follow'});return;}
+  if(state.draft.endsWith('\\')&&e.target.selectionStart===state.draft.length&&e.target.selectionEnd===state.draft.length){insertNewline(true);return;}
+  dispatch({type:'send'});
+ }
+ if(e.ctrlKey&&e.key.toLowerCase()==='j'){e.preventDefault();insertNewline();}
+});
+function insertNewline(removeEscape=false){const el=$('draft'),start=el.selectionStart-(removeEscape?1:0),end=el.selectionEnd;dispatch({type:'draft',value:state.draft.slice(0,start)+'\n'+state.draft.slice(end)});el.focus();el.selectionStart=el.selectionEnd=start+1;}
+function pressD(focusPrompt=false,simulateDouble=false){const el=$('draft');if(focusPrompt)el.focus();const value={promptFocused:document.activeElement===el,start:el.selectionStart,end:el.selectionEnd,at:Date.now()};if(simulateDouble){state=reduce(state,{type:'cancelKeys'});dispatch({type:'ctrlD',value});dispatch({type:'ctrlD',value:{...value,at:value.at+100}});return;}dispatch({type:'ctrlD',value});const armedAt=state.dArmedAt;if(armedAt!==null)setTimeout(()=>{if(state.dArmedAt===armedAt&&Date.now()-armedAt>=800){state=reduce(state,{type:'cancelKeys'});dispatch({type:'hint',value:'Ctrl+D 的 800ms 确认窗口已过期；再次按键将重新提示。'});}},805);}
+$('send').onclick=()=>dispatch({type:'send'});$('follow').onclick=()=>dispatch({type:'follow'});$('newline').onclick=()=>insertNewline();$('restore-draft').onclick=()=>dispatch({type:'restoreDraft'});$('bottom').onclick=()=>dispatch({type:'bottom'});$('close-dialog').onclick=()=>dispatch({type:'close'});
+$('transcript').addEventListener('scroll',e=>{if(rendering)return;const el=e.target;state=reduce(state,{type:'scroll',value:el.scrollHeight-el.clientHeight-el.scrollTop<15});$('statusline').textContent=`${names[state.status]} | ${state.followBottom?'跟随新输出':'已离开底部 · 新输出不抢回'} | ${state.narrow?'约窄列模拟':'宽列模拟'} | ${state.recoveryDecision}`;});
+document.addEventListener('keydown',e=>{
+ if(e.isComposing)return;
+ const key=e.key.toLowerCase();if(['control','shift','alt','meta'].includes(key))return;
+ const isD=e.ctrlKey&&key==='d',isC=e.ctrlKey&&key==='c';
+ if(!isD&&!isC&&!(e.ctrlKey&&key==='x'))state=reduce(state,{type:'cancelKeys'});
+ if(e.key==='Escape'){e.preventDefault();dispatch({type:'escape'});}
+ if(e.ctrlKey&&key==='c'){e.preventDefault();dispatch({type:'ctrlC'});}
+ if(isD){e.preventDefault();pressD();}
+ if(e.ctrlKey&&key==='x'&&document.activeElement===$('draft')&&!state.overlay){e.preventDefault();dispatch({type:'followChord'});}
+ if(e.ctrlKey&&key==='o'){e.preventDefault();dispatch({type:'expand'});}
+ if(e.ctrlKey&&key==='l'){e.preventDefault();dispatch({type:'redraw'});}
+ if(e.key==='Tab'&&state.overlay){const items=[...$('overlay').querySelectorAll('button')],first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+});
+render();
+</script>
+</html>

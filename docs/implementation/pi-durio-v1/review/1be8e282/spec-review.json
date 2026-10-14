@@ -1,0 +1,253 @@
+{
+  "review": "Spec",
+  "status": "CHANGES_REQUESTED",
+  "identity": {
+    "baseline": "25d311616136766b37c0274f3f490ec1105f9592",
+    "candidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+    "candidate_tree": "e5ad9f25f84ded025fe7b2dff49fc08936a89eb3",
+    "checkout": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-26",
+    "checkout_head": "ccc8e53257cb4274889b1a0bc3fd982fe6de3597",
+    "checkout_tree": "e5ad9f25f84ded025fe7b2dff49fc08936a89eb3",
+    "checkout_status": "",
+    "diff_sha256": "de1a6e6a0875cbb75aecf9cc2b663463fb04030c5756e28f11f37bba28a5a288",
+    "diff_stat": "342 files changed, 43099 insertions(+)"
+  },
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "xhigh",
+  "actual_backend_attestation": "unavailable; do not claim independently proven",
+  "completed_at": "2026-10-09T21:43:51.731079+00:00",
+  "finding_count": 2,
+  "highest_priority": 1,
+  "findings": [
+    {
+      "id": "SPEC-01",
+      "priority": 1,
+      "title": "普通任务预检一次性解码全部历史原文，违反内存有界合同",
+      "path": "src/preflight.ts",
+      "lines": {
+        "start": 116,
+        "end": 116
+      },
+      "spec": [
+        {
+          "path": "docs/specs/pi-durio-v1-spec.md",
+          "lines": [
+            69,
+            69
+          ],
+          "quote": "内存、显示及送模有界，长输出分块持久化、背压和引用分页。"
+        },
+        {
+          "path": "docs/design/runtime-evidence-and-retention.md",
+          "lines": [
+            41,
+            41
+          ],
+          "quote": "内存、显示窗口和送模上下文仍须有界；它们与磁盘原文保留是不同维度。"
+        }
+      ],
+      "trigger": "已有任意规模的历史 tool.output 等 host facts 后，启动下一次普通任务；runtime.ts:417 无条件调用 preflight。",
+      "behavior": "SELECT 所有 records 后 .all().map 读取并 JSON.parse 每个 body，使所有 acquired.bytes/base64 原文同时驻留到预检结束，即使这些记录不是授权或恢复判断所需。显示分页、生产时分块写盘均不能限制此路径的历史总内存。",
+      "impact": "正常保留历史会线性抬高后续启动峰值，足够历史可在接受下一任务前使进程 OOM。硬约束是内存不随完整历史无界增长；本报告未发明生产 RSS/heap 数值门槛。",
+      "evidence": {
+        "source_chain": [
+          "src/coding-environment.ts:97-104 实际 16 KiB 分块以 acquired.bytes/base64 写入 host fact",
+          "src/preflight.ts:116 所有 body 同时解码",
+          "src/runtime.ts:417 所有非 recovery 任务进入此路径"
+        ],
+        "producer": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory/identity.json",
+        "reproduction": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory/repro.mjs",
+        "first_results": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory/results.json",
+        "low_heap_first_result": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory/low-heap-24-first.json",
+        "measurements": {
+          "raw_output_bytes": 25165824,
+          "records": 1536,
+          "heap48_preflight": {
+            "exit": 0,
+            "before_heap_used": 5787768,
+            "after_heap_used": 43843160,
+            "before_rss": 51396608,
+            "after_rss": 146194432
+          },
+          "heap48_stream_control": {
+            "exit": 0,
+            "after_heap_used": 6578432,
+            "after_rss": 63062016
+          },
+          "heap24_preflight": {
+            "exit": null,
+            "signal": "SIGABRT",
+            "error": "JavaScript heap out of memory"
+          },
+          "heap24_stream_control": {
+            "exit": 0,
+            "after_heap_used": 6768640,
+            "after_rss": 62734336
+          }
+        },
+        "limitations": "纯 Evidence seam；保留真实 tool.output acquired/base64 结构，但无 durable sessions、模型、完整长会话。证明全 body 驻留的失效机制，不声称产品日用性能接受。48 MiB heap 首次通过保留；24 MiB heap 是后续独立受限失效检查。"
+      },
+      "suggested_fix": "预检只流式读取恢复/授权所需事实并按 run/session 保留有界摘要，避免 materialize 历史输出。对 inspectSession 同样检查 tasks/submissions/entries 的累计和 runtime.ts:477 的再序列化，保留全 Harness 核对及只读语义；后两条为同一路径修复范围提示，未单独计为已复现发现。"
+    },
+    {
+      "id": "SPEC-02",
+      "priority": 1,
+      "title": "真实批次入口未将可捕获退出信号接入受控取消",
+      "path": "scripts/live-batch/run.mjs",
+      "lines": {
+        "start": 33,
+        "end": 34
+      },
+      "spec": [
+        {
+          "path": "docs/specs/pi-durio-v1-spec.md",
+          "lines": [
+            51,
+            51
+          ],
+          "quote": "退出停止接收新工作，请求取消并等待受管执行清理、存储关闭后再释放所有权，保留可恢复工作；"
+        },
+        {
+          "path": "docs/design/eval-and-improvement.md",
+          "lines": [
+            79,
+            79
+          ],
+          "quote": "超时/取消停止放行并终止受管执行。"
+        },
+        {
+          "path": "docs/implementation/pi-durio-v1/issue-30/README.md",
+          "lines": [
+            55,
+            55
+          ],
+          "quote": "node scripts/live-batch/run.mjs FROZEN_MANIFEST EXPLICIT_HUMAN_GRANT"
+        }
+      ],
+      "trigger": "将来用户明确授权并按已交付命令运行真实批次时，在 eval 或 improve 等待中按 Ctrl+C，或向该 host 发送 SIGTERM。",
+      "behavior": "入口只创建 deadline AbortController，未注册 SIGINT/SIGTERM。默认 Node 信号处理直接终止 host；signal 不会 abort，runEval/analyzeImprove 的受管取消和 finally 不会被 await，batch-result.json 也不会落盘。普通 src/eval/cli.ts:21-22 已有信号适配，但该入口直接调用 API，绕过该适配。",
+      "impact": "可捕获退出被降为硬中断；停止 provider 传输和受管 VM/进程、记录取消或 cleanup unknown 的路径没有机会完成。隔离清理的 stop/inspect/delete 位于 scripts/isolation/boundary.mjs:184-199 的 finally；停止 host 不构成 VM/外部副作用已停止的证明。",
+      "evidence": {
+        "source_chain": [
+          "scripts/live-batch/run.mjs:33-34 只有 deadline timer，无 signal listeners",
+          "scripts/live-batch/run.mjs:50,56 直接传递 controller.signal",
+          "src/eval/runner.ts:63,92 依赖传入 signal",
+          "scripts/isolation/boundary.mjs:129-132,184-199 取消及清理依赖 host 继续执行",
+          "src/eval/cli.ts:21-22 既有正确适配对照"
+        ],
+        "reproduction": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/live-batch-signal/repro.mjs",
+        "results": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/live-batch-signal/results.json",
+        "observed": {
+          "SIGINT": {
+            "listeners": 0,
+            "abort_observed": false,
+            "batch_result_saved": false,
+            "exit_signal": "SIGINT"
+          },
+          "SIGTERM": {
+            "listeners": 0,
+            "abort_observed": false,
+            "batch_result_saved": false,
+            "exit_signal": "SIGTERM"
+          }
+        },
+        "limitations": "保留原入口控制流，仅把 common.mjs import 替换为完全离线 mock，绕过授权/工件验证以到达等待阶段；纯合成 grant/key 字符串，不构成真实付费授权，provider requests=0、VM starts=0。没有运行真实批次，也没有证明实际 VM 残留；这不是对尚未取得的 #30 实际执行验收判 FAIL。"
+      },
+      "suggested_fix": "为该入口接入 SIGINT/SIGTERM（及项目适用的 SIGHUP）到同一 AbortController，停止后续阶段，await 在途受管清理，并在 finally 保留结果/unknown 与移除监听；重复信号不得绕过清理或扩权。"
+    }
+  ],
+  "known_unaccepted_gates": [
+    {
+      "issue": 30,
+      "state": "PREPARATION_ONLY",
+      "details": "固定真实批次准备已实现；明确付费批准/凭据来源未到，实际 provider 请求为 0；真实四类任务与 improve 完整链未执行。SPEC-02 只审查已交付入口实现。"
+    },
+    {
+      "issue": 31,
+      "state": "INCOMPLETE_AT_REVIEW_DISPATCH",
+      "details": "最终固定安装的本地测量与新增原生 Terminal 组合验收由 root 协调；不读取或认可浮动 root 修改，亦不把该已声明 gate 当隐藏完成。"
+    },
+    {
+      "issue": 32,
+      "state": "PENDING_USER_DAILY_USE_ACCEPTANCE",
+      "details": "用户本机日用接受未取得，不能由合成、静态或技术检查替代。"
+    }
+  ],
+  "recognized_authorized_exceptions": [
+    "issue-16 width-exception-authorization.json: Pi 1.1.0 两源文件字宽配置补丁与真实 Terminal 动态校准，不是未授权 fork",
+    "issue-26 build-resource-profile-decision.json: 可信 TypeScript build VM 1 GiB/heap768 MiB，普通任务 512 MiB 不变"
+  ],
+  "coverage": {
+    "contracts": [
+      "AGENTS.md",
+      "docs/agents/domain.md",
+      "docs/agents/issue-tracker.md",
+      "GLOSSARY.md",
+      "docs/adr/0001-0003",
+      "docs/specs/pi-durio-v1-spec.md",
+      "docs/design/*.md"
+    ],
+    "implementation_areas": [
+      "platform/CLI/runtime/provider capability & ownership",
+      "recovery preflight/readonly check/continuation & retained execution identity",
+      "coding file write protection/raw output & source original retention",
+      "TUI input/queue/reading/explicit selection seams (native behavior not re-executed)",
+      "storage/retention/archive/fixed evidence & compaction",
+      "eval plan/runner/mediator/isolation export/scoring/comparison/report",
+      "improve analysis/source scope/decision/exact verification/formal writeback/build activation/rollback",
+      "metrics accepted-task denominators/clocks/cost allocation/feedback/operations",
+      "issue-30 preparation/grant/deadline/auth-stop/signal stop adapter"
+    ],
+    "method": "Fixed-tree source and applicable evidence review; risky boundaries received deeper reads and two narrowly scoped offline reproductions. This is not line-by-line proof of every changed line or new native/paid acceptance."
+  },
+  "checks": [
+    {
+      "name": "pinned source identity and clean checkout",
+      "result": "PASS",
+      "details": {
+        "baseline": "25d311616136766b37c0274f3f490ec1105f9592",
+        "candidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+        "candidate_tree": "e5ad9f25f84ded025fe7b2dff49fc08936a89eb3",
+        "checkout": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-26",
+        "checkout_head": "ccc8e53257cb4274889b1a0bc3fd982fe6de3597",
+        "checkout_tree": "e5ad9f25f84ded025fe7b2dff49fc08936a89eb3",
+        "checkout_status": "",
+        "diff_sha256": "de1a6e6a0875cbb75aecf9cc2b663463fb04030c5756e28f11f37bba28a5a288",
+        "diff_stat": "342 files changed, 43099 insertions(+)"
+      }
+    },
+    {
+      "name": "existing source-build input/output identity",
+      "result": "PASS",
+      "count": 387,
+      "source": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory/identity.json"
+    },
+    {
+      "name": "historical output preflight memory vs streaming control",
+      "result": "FAIL_CURRENT_IMPLEMENTATION",
+      "source": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory/results.json"
+    },
+    {
+      "name": "lower-heap first failure and streaming control",
+      "result": "FAIL_CURRENT_IMPLEMENTATION_CONTROL_PASS",
+      "source": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/preflight-memory/low-heap-24-first.json"
+    },
+    {
+      "name": "entry signal propagation with offline dependencies",
+      "result": "FAIL_CURRENT_IMPLEMENTATION",
+      "source": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/live-batch-signal/results.json"
+    },
+    {
+      "name": "product full suite/build/VM/paid provider/native Terminal",
+      "result": "NOT_RUN_IN_THIS_REVIEW",
+      "reason": "Reuse existing applicable evidence; root owns measurements/native coordination. No blanket retest."
+    }
+  ],
+  "evidence_limits": [
+    "#29 exact 198/198 full evidence and #26 r5 affected63/63, r6 TUI1/1, boundary3/3/build/new-process/old-pending/rollback supplied evidence were used as navigation, not treated as proof against identified source defects.",
+    "#25 early196/196 lacks complete dirty-source identity and was not represented as final full-suite evidence.",
+    "No product/test edits, commits, pushes, paid calls, VM starts, builds or Terminal automation by this reviewer. External synthetic fixtures, including the OOM owner marker and original failures, remain preserved.",
+    "Later root/repaired candidates are outside this pinned review.",
+    "No unrequested behavior/scope-creep finding was established; approved exceptions were honored."
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "at": "2026-10-09T21:56:40.996935+00:00",
+  "status": "LOCAL_REVIEW_REPAIR_INTEGRATED_NOT_ACCEPTED",
+  "ticket": 30,
+  "finding": "SPEC-02",
+  "branch": "codex/pi-durio-v1",
+  "base": "8b1d9b0fa08ed9da49c649f4e51e2d58bdc5d723",
+  "originalRepairCandidate": {
+    "commit": "6fc87ea168a3129699dea88c75c63ca47f920ab1",
+    "tree": "966457f539b641a0167dfcf3afd15cc8500a7569"
+  },
+  "combinedCandidate": {
+    "commit": "8d7f5f7d02ad2dfe1826408156329123b3ad972a",
+    "tree": "35328ab3af1e93134ffcbe3d7fc4e97aa38adbb5",
+    "parents": [
+      "6fc87ea168a3129699dea88c75c63ca47f920ab1",
+      "8b1d9b0fa08ed9da49c649f4e51e2d58bdc5d723"
+    ]
+  },
+  "rootMerge": {
+    "commit": "bd975d6cbe776b694143ed805b6a0ff473029c4e",
+    "tree": "35328ab3af1e93134ffcbe3d7fc4e97aa38adbb5",
+    "parents": [
+      "8b1d9b0fa08ed9da49c649f4e51e2d58bdc5d723",
+      "8d7f5f7d02ad2dfe1826408156329123b3ad972a"
+    ],
+    "equalsCombinedCandidateTree": true,
+    "conflicts": [],
+    "trackedClean": true
+  },
+  "changedFiles": [
+    "docs/implementation/pi-durio-v1/issue-30/README.md",
+    "scripts/live-batch/run.mjs",
+    "test/live-batch.test.ts"
+  ],
+  "docsSyncedBeforeRootMerge": [
+    "README.md",
+    "docs/implementation/pi-durio-v1/issue-31/evidence-index.json",
+    "docs/implementation/pi-durio-v1/issue-31/local-r1-report.md",
+    "docs/implementation/pi-durio-v1/issue-31/local-r1-summary.json",
+    "docs/implementation/pi-durio-v1/review/1be8e282/spec-review.json",
+    "docs/implementation/pi-durio-v1/review/1be8e282/spec-review.md",
+    "docs/implementation/pi-durio-v1/status.json",
+    "docs/implementation/pi-durio-v1/status.md"
+  ],
+  "identity": {
+    "sourceBuildManifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/source-build.json",
+      "bytes": 88569,
+      "sha256": "7b06b8920626dd38bf7e082120c2397f340a02446be3cfa674ea00ae3daf6cf0"
+    },
+    "counts": {
+      "inputs": 157,
+      "compiler": 140,
+      "outputs": 231
+    },
+    "all157InputsMatchMergedRoot": true,
+    "all140CompilerFilesMatchFrozenWorktree": true,
+    "all231ProductOutputsMatchFrozenWorktreeAndPreexistingRoot": true,
+    "compiledTest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel/dist/test/live-batch.test.js",
+      "bytes": 12419,
+      "sha256": "c781753d653300479f90702cf2b1b3d871acef725734107ef3ebe58e9bc7fa82"
+    },
+    "evidenceFilesVerified": 490,
+    "processScenariosVerified": [
+      {
+        "name": "eval-SIGINT-YvPU7o",
+        "outcome": {
+          "code": 130,
+          "signal": null
+        },
+        "events": [
+          "prepare",
+          "eval",
+          "active",
+          "abort",
+          "closed"
+        ]
+      },
+      {
+        "name": "eval-SIGTERM-3puL12",
+        "outcome": {
+          "code": 143,
+          "signal": null
+        },
+        "events": [
+          "prepare",
+          "eval",
+          "active",
+          "abort",
+          "closed"
+        ]
+      },
+      {
+        "name": "eval-failed-cleanup-R1219F",
+        "outcome": {
+          "code": 143,
+          "signal": null
+        },
+        "events": [
+          "prepare",
+          "eval",
+          "active",
+          "abort",
+          "closed"
+        ]
+      },
+      {
+        "name": "improve-Ktwugr",
+        "outcome": {
+          "code": 130,
+          "signal": null
+        },
+        "events": [
+          "prepare",
+          "eval",
+          "improve",
+          "active",
+          "abort",
+          "closed"
+        ]
+      },
+      {
+        "name": "prepare-8TxJ9e",
+        "outcome": {
+          "code": 130,
+          "signal": null
+        },
+        "events": [
+          "prepare",
+          "active",
+          "closed"
+        ]
+      },
+      {
+        "name": "tampered-runner-73uRrT",
+        "outcome": {
+          "code": 1,
+          "signal": null
+        },
+        "events": []
+      },
+      {
+        "name": "unfrozen-common-gaQXda",
+        "outcome": {
+          "code": 1,
+          "signal": null
+        },
+        "events": []
+      },
+      {
+        "name": "unfrozen-runner-GEtUBZ",
+        "outcome": {
+          "code": 1,
+          "signal": null
+        },
+        "events": []
+      }
+    ]
+  },
+  "validationReuse": {
+    "basis": "Latest root contributes only eight README/docs files, none in the frozen build input set. Merge changes no repair source, compiler or output bytes. Final successful build-r2 and compiled-r2 remain applicable.",
+    "reusedBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/build-r2.log",
+      "bytes": 59,
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281"
+    },
+    "reusedCompiledTests": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/compiled-r2.log",
+      "bytes": 684,
+      "sha256": "39aacfa0d2cb41693720c431486a3de274c8dc59c2063ad3de7ff0bc8137b0fe"
+    },
+    "testsPassed": 6,
+    "scenarios": 8,
+    "scope": "Real OS SIGINT/SIGTERM and entrypoint behavior with deterministic installed API fixtures; three unfrozen/tampered entry/helper rejection scenarios. No actual provider or VM coverage claimed.",
+    "newBuilds": 0,
+    "newBehaviorTestRuns": 0,
+    "newVmStarts": 0,
+    "newProviderRequests": 0,
+    "newNativeRuns": 0,
+    "preflight": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/merge-preflight.json",
+      "bytes": 163616,
+      "sha256": "2f11a47ff4144a941ce05b4c409c76031eadbea9ff2c0caf838139c046a828b7"
+    },
+    "postflight": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/merge-postflight.json",
+      "bytes": 724,
+      "sha256": "8bbe82a8bea49d4b918f066efcbf0a99a632ffe5d35b23745526918b0e46b966"
+    },
+    "verifier": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/merge-verifier.py",
+      "bytes": 6244,
+      "sha256": "45859ff30de124463a371ad13e058ceb41aeecd885fd825f25d8f7ab52d65a65"
+    }
+  },
+  "preservation": {
+    "protectedFilesUnchanged": 1016,
+    "originalsUnchanged": 162,
+    "untrackedUnchanged": [
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+      "docs/wayfinder-proposal.md",
+      "docs/wayfinder-readback-2026-10-09.json"
+    ],
+    "originalFailures": "Original red signal/improve/runner-gate logs and failed first TypeScript build retained in the 490-file evidence manifest. Early compiled 6/6 emitted by failed tsc remains excluded as final identity evidence.",
+    "oldFrozenManifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/prepared-r1/frozen-manifest-r2.json",
+      "bytes": 5614,
+      "sha256": "fd9b8b5741e8ec9f7ef1dff965e6abcbedda33a668ea4cdd7b318881e9d90892"
+    },
+    "oldFrozenReferencesUnchanged": true,
+    "oldEvidenceReuseAnchor": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/merge-integration-readback.json",
+      "bytes": 22213,
+      "sha256": "2637f04207d8339fd527dee27deeeb3135ccafc39ba8b31efdc319ce92405c2e"
+    },
+    "historicalWholeInventoryRescanned": false,
+    "rootDist": {
+      "bytePreserved": true,
+      "manifestSha256": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+      "currentRepairManifestSha256": "7b06b8920626dd38bf7e082120c2397f340a02446be3cfa674ea00ae3daf6cf0",
+      "productOutputsEqual": true,
+      "sourceMetadata": "Existing root manifest retains its old input identity and is not relabeled. Final composition build belongs to coordinator follow-up."
+    }
+  },
+  "mergerFirstFailure": {
+    "evidence": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/merge-verification-first-failure-1791582966-160321.json",
+      "bytes": 1601,
+      "sha256": "e3b1f7602b2306973b4633a2fd06c1840c37deb925c5db5655c9f78f5653afb2"
+    },
+    "cause": "First postflight command ran from evidence directory, but originals.json uses paths relative to the repository root. It failed with FileNotFoundError before making any mutation.",
+    "correction": "Reran the same verifier from /Users/nineofour/Durio; postflight PASS. No product/source/test changes made to satisfy verifier."
+  },
+  "boundaries": {
+    "independentReview": "PENDING; SPEC-02 not closed by this merge",
+    "issue30": "INCOMPLETE",
+    "paid": "NOT GRANTED / NOT RUN",
+    "oldManifestAppliesToCurrentRunner": false,
+    "futureLiveStart": "Requires a new concrete current harness/manifest and explicit human grant; no old authorization inherited.",
+    "actualRemoteTermination": "UNKNOWN in cancellation fixtures; not promoted to terminated",
+    "actualCandidate": "Not generated or selected",
+    "stateJsonModified": false,
+    "acceptanceWritten": false,
+    "push": false,
+    "githubChanges": false,
+    "mainChanged": false,
+    "release": false
+  },
+  "requestedModel": "gpt-6-astra",
+  "requestedEffort": "xhigh",
+  "actualBackendAttestation": "NOT_ATTESTED",
+  "ownership": "Root write ownership returned to coordinator immediately after this readback is finalized."
+}

@@ -1,0 +1,34 @@
+{
+  "kind": "public official documentation observation; no account or authentication access",
+  "observedAt": "2026-10-09T20:32:08Z",
+  "method": "Official-domain web search returned pricing and Chat Completions documentation. Direct opens of pricing, Chat Completions and List Models timed out; those retrieval failures remain in the session and this record. Search reported its indexed pages as crawled two weeks earlier, so this is an observation time, not a provider tariff effective date.",
+  "pricing": {
+    "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "model": "deepseek-flash",
+    "documentedVersion": "DeepSeek-V4.1-Flash",
+    "currency": "USD",
+    "perMillionTokens": {"inputCacheHit": {"offPeak": 0.003, "peak": 0.006}, "inputCacheMiss": {"offPeak": 0.15, "peak": 0.3}, "output": {"offPeak": 0.6, "peak": 1.2}},
+    "maximumListedRateAnyClass": 1.2,
+    "fourMillionTokensConservativeEstimate": 4.8,
+    "limitations": "Price can change. This is a conservative token-price estimate, not an observed account invoice or account hard spending cap. Do not assume discounts, credits or a configured account cap. Stop before dispatch if a known tariff change would exceed the grant."
+  },
+  "api": {
+    "source": "https://api-docs.deepseek.com/api/create-chat-completion/",
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "model": "deepseek-flash",
+    "stream": "SSE chunks; tool_calls and optional reasoning_content; final usage may be omitted on interruption",
+    "identity": "Preserve returned model and system_fingerprint where acquired. An API alias does not prove immutable served weights."
+  },
+  "providerBound": {
+    "source": "https://api-docs.deepseek.com/api/list-models/",
+    "priorObservation": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/deepseek-docs-observation-20261009T1830Z.json",
+    "priorObservedAt": "2026-10-09T18:31:01.736208+00:00",
+    "documentedContextTokens": 1048576,
+    "evalReservation": 1052672,
+    "improveReservation": 1056768,
+    "calculation": "Existing product reserves documented total context plus the fixed output ceiling, conservatively. It does not substitute expected small fixture usage for the bound."
+  },
+  "liveAuthentication": "NOT RUN",
+  "credentialRead": "NOT RUN",
+  "paidRequests": 0
+}

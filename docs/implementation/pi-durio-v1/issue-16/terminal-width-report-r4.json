@@ -1,0 +1,112 @@
+{
+  "candidate": "42ff424757f83c8578949d2a31f31eafca8ad486",
+  "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r4/manifest.json",
+  "manifestSha256": "21334d9cfada9de155dfa24c81cba3662199fafe9a5ce21a7d6b49ed0163dde2",
+  "scriptSha256": "61a6d2a825592e75ce1b735a8c8d2e276ed8ef9c9d0e730d3c4af408a409a8e1",
+  "at": "2026-10-09T11:36:26.103Z",
+  "environment": {
+    "node": "v26.8.2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "TERM_PROGRAM": "Apple_Terminal",
+    "TERM_PROGRAM_VERSION": "488.7",
+    "TERM": "xterm-256color",
+    "LANG": "zh_CN.UTF-8",
+    "columns": 100,
+    "rows": 30,
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2\nBuildVersion:\t\t26B5101f\n"
+  },
+  "before": {
+    "raw": false,
+    "stty": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600"
+  },
+  "samples": [
+    {
+      "sample": "AB",
+      "status": "WIDTH_AGREES",
+      "terminalWidth": 2,
+      "libraryWidth": 2,
+      "response": "\u001b[2;3R"
+    },
+    {
+      "sample": "中",
+      "status": "WIDTH_AGREES",
+      "terminalWidth": 2,
+      "libraryWidth": 2,
+      "response": "\u001b[3;3R"
+    },
+    {
+      "sample": "é",
+      "status": "WIDTH_AGREES",
+      "terminalWidth": 1,
+      "libraryWidth": 1,
+      "response": "\u001b[4;2R"
+    },
+    {
+      "sample": "👩",
+      "status": "WIDTH_AGREES",
+      "terminalWidth": 2,
+      "libraryWidth": 2,
+      "response": "\u001b[5;3R"
+    },
+    {
+      "sample": "💻",
+      "status": "WIDTH_AGREES",
+      "terminalWidth": 2,
+      "libraryWidth": 2,
+      "response": "\u001b[6;3R"
+    },
+    {
+      "sample": "👩‍💻",
+      "status": "WIDTH_MISMATCH",
+      "terminalWidth": 5,
+      "libraryWidth": 2,
+      "response": "\u001b[7;6R"
+    },
+    {
+      "sample": "A👩‍💻é中B",
+      "status": "WIDTH_MISMATCH",
+      "terminalWidth": 10,
+      "libraryWidth": 7,
+      "response": "\u001b[8;11R"
+    },
+    {
+      "sample": "A👩‍💻é中B。",
+      "status": "WIDTH_MISMATCH",
+      "terminalWidth": 12,
+      "libraryWidth": 9,
+      "response": "\u001b[9;13R"
+    }
+  ],
+  "status": "CARET_MISMATCH_REPRODUCED",
+  "paidProvider": "NOT RUN",
+  "replay": {
+    "source": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/manual/2026-10-09T11-19-18-936Z/cursor",
+    "frameSha256": "436d12f52d64759229adb790aeb5f0dd3f139bfc94e8c6786a5d175598ec7f1d",
+    "ansiSha256": "dbcbf74ff96b0558b56a777b21800556945e8f5fbcf847d9b236b6c9a2b7927d",
+    "offset": 2514,
+    "bytes": 192,
+    "recordedCursor": {
+      "row": 26,
+      "column": 8
+    },
+    "natural": {
+      "row": 10,
+      "column": 11,
+      "response": "\u001b[10;11R"
+    },
+    "positioned": {
+      "row": 10,
+      "column": 8,
+      "response": "\u001b[10;8R"
+    },
+    "status": "CARET_MISMATCH_REPRODUCED"
+  },
+  "after": {
+    "raw": false,
+    "stty": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600"
+  },
+  "rawRestored": true,
+  "sttyRestored": true,
+  "observation": "yes"
+}

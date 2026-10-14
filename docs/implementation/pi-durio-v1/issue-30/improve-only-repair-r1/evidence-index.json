@@ -1,0 +1,405 @@
+{
+  "status": "FROZEN_PENDING_HARNESS_REVIEW_AND_NEW_GRANT",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/frozen-manifest.json",
+    "bytes": 74214,
+    "sha256": "9a948eb693a20f5ca4d17443152fff0639465160628432d8d1f2eaa6b8cb1f8e"
+  },
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "copiedFiles": [
+    {
+      "relative": "README.md",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/README.md",
+      "bytes": 6260,
+      "sha256": "0e4f5a7a43fd3b53575a232a39b00d14e330e68958e4a291013477537722488c"
+    },
+    {
+      "relative": "frozen-manifest.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/frozen-manifest.json",
+      "bytes": 74214,
+      "sha256": "9a948eb693a20f5ca4d17443152fff0639465160628432d8d1f2eaa6b8cb1f8e"
+    },
+    {
+      "relative": "proposed-batch-reviewed.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/proposed-batch-reviewed.json",
+      "bytes": 7669,
+      "sha256": "6f450286691dc7e2c1feba54031572ec2bfa7225c24c19cd769268d1e4bcc335"
+    },
+    {
+      "relative": "checks.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/checks.json",
+      "bytes": 2787,
+      "sha256": "6177a9c2a1e0328c9955c00fefdfd30baf8090f883b4845c300963eed7965cc3"
+    },
+    {
+      "relative": "candidate-binding-check.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/candidate-binding-check.json",
+      "bytes": 1626,
+      "sha256": "4e3cf4ec766f4ba1b6edc4a8d0d437e000ad5c4ff1b2467723abf469543c9741"
+    },
+    {
+      "relative": "artifact-binding-precheck.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/artifact-binding-precheck.json",
+      "bytes": 1095,
+      "sha256": "5f13db4f80d8718e5c2af47516c82d4736add9e5783b893d43b00f02a43fa5d8"
+    },
+    {
+      "relative": "retained-prior-code.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/retained-prior-code.json",
+      "bytes": 4356,
+      "sha256": "666a5429aaa62680425ed041283404dd01fb224162facbbf4a11d2a5b1a6df44"
+    },
+    {
+      "relative": "first-failure-tracking.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/first-failure-tracking.json",
+      "bytes": 4161,
+      "sha256": "8c6364eda4fc9a3bbe1e1ce43ba8d1cd16d87895e7e166d4efe800354743259a"
+    },
+    {
+      "relative": "grant-template-FROZEN-NOT-EXECUTABLE.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/grant-template-FROZEN-NOT-EXECUTABLE.json",
+      "bytes": 676,
+      "sha256": "a8185de429a6f6d9a399c17bd6faa80176736c083430bd254d57b08672ccbbe5"
+    },
+    {
+      "relative": "authorization-source-template-FROZEN-NOT-EXECUTABLE.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/authorization-source-template-FROZEN-NOT-EXECUTABLE.json",
+      "bytes": 720,
+      "sha256": "a6557f6e3440db72856bba8642669d3561bfd617f394413e050077977ee6638e"
+    },
+    {
+      "relative": "provider-observation.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/provider-observation.json",
+      "bytes": 1560,
+      "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c"
+    },
+    {
+      "relative": "check-repair.mjs",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-repair.mjs",
+      "bytes": 17378,
+      "sha256": "fc777642c6c3610a76844c399c086bee845bf74d0241684b4fc98163b36ec7c0"
+    },
+    {
+      "relative": "check-wrapper.py",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-wrapper.py",
+      "bytes": 2274,
+      "sha256": "4a4ce4ad10730c685939ccf8109dc5f5d83546c2493bcf4e253d293e80083d70"
+    },
+    {
+      "relative": "check-final-preflight.mjs",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-final-preflight.mjs",
+      "bytes": 4945,
+      "sha256": "008d63faee4ac605d03fae7f4b95c3fd7a923a93d171827cfa9ee9179b6bc8fb"
+    },
+    {
+      "relative": "check-final-denials.py",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-final-denials.py",
+      "bytes": 1836,
+      "sha256": "65f8f9ecf1ede6d567208fe35a558a9e3a7062ef0008b6a26a91ac6b51e7353d"
+    },
+    {
+      "relative": "check-r5.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r5.json",
+      "bytes": 99079,
+      "sha256": "d35f10a2d9a3c5f28b1bf06c16b92419e55292f415b246e6f9f11a2d1e4f8975"
+    },
+    {
+      "relative": "wrapper-check-r3.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r3.json",
+      "bytes": 648,
+      "sha256": "347265fcbb619ab2673810f9e85a81bee47e5dbc11990108f2c2b06359660bb9"
+    },
+    {
+      "relative": "final-preflight-check-r1.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-preflight-check-r1.json",
+      "bytes": 1398,
+      "sha256": "6d4d6a0029833ada479f0a593b7f94692729f9a2b0fbf7d220433b216ff224c9"
+    },
+    {
+      "relative": "final-denials-r1.json",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-denials-r1.json",
+      "bytes": 814,
+      "sha256": "41ce179b97692469ff670e509e4f5f20de33aaf8ce029f8d0647eecf0093b230"
+    },
+    {
+      "relative": "check-r1.stderr",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r1.stderr",
+      "bytes": 600,
+      "sha256": "6b7616eb3136e9c28dc78226cb924406f3dbc678024e384defe27a6fd3a62c24"
+    },
+    {
+      "relative": "check-r2.stderr",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2.stderr",
+      "bytes": 898,
+      "sha256": "634143659db83bd43bbadffef73116aa3f055d26de433d06f44bc2d524789917"
+    },
+    {
+      "relative": "freeze-r1.stdout",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/freeze-r1.stdout",
+      "bytes": 369,
+      "sha256": "9056b79cb0e010d7027a51b7c33a089c26052029f16c81891dfb0489420271f1"
+    },
+    {
+      "relative": "harness/common.mjs",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "relative": "harness/freeze.mjs",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/freeze.mjs",
+      "bytes": 4155,
+      "sha256": "1bd42f9aa15b2d4f4d90b1396527b9a8856f39ad04de08c9d190d8b0ddf9b0e6"
+    },
+    {
+      "relative": "harness/launch.py",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/launch.py",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+    },
+    {
+      "relative": "harness/ledger.mjs",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/ledger.mjs",
+      "bytes": 3187,
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+    },
+    {
+      "relative": "harness/preflight.mjs",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/preflight.mjs",
+      "bytes": 12402,
+      "sha256": "ec752343e4bed892a06ad684aae697ae350716f78f4af61a7e33058cc7c51230"
+    },
+    {
+      "relative": "harness/prepare-repair.py",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/prepare-repair.py",
+      "bytes": 7952,
+      "sha256": "90d44f27886bb9c85c7f8d099ed5eac2f2699e3271eb2b7d350c0b7161af515c"
+    },
+    {
+      "relative": "harness/run.mjs",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/run.mjs",
+      "bytes": 6091,
+      "sha256": "45dcdd649a6f71bd680f1540d054a3a38bcc6bc858eb3ad194f040e902bf102d"
+    }
+  ],
+  "externalOnly": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/authorization-source-template-NOT-EXECUTABLE.json",
+      "bytes": 658,
+      "sha256": "25680bc430cbd76633654d003284fba7261f5c316591fd38fdee2408be37afa5"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/candidate-gate-template-NOT-FROZEN.json",
+      "bytes": 1790,
+      "sha256": "c1b87210d402d74272e9ee451b8cbd20cfa48f8fd3945be806392a96cb2ff16f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r1-source.mjs",
+      "bytes": 16854,
+      "sha256": "055ed24e2368c28d49bdf021b2c545930c3e8a00c13907745ae983389b7f7cde"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r1.json",
+      "bytes": 4260,
+      "sha256": "86bb7cae6385c68ba99221178ba78c38155917a72b38eb4ef143dd83f4dbfebe"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2-preflight-source.mjs",
+      "bytes": 12194,
+      "sha256": "18dbd6f5689a3d748a6310d2f2e2598f85f3ac4e5209bb2a0076e5017400e0e8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2-source.mjs",
+      "bytes": 16870,
+      "sha256": "36c998deb82e260b9c4b1446ee641cf427af83cc4898efd4dc347ba70e5958ad"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2.json",
+      "bytes": 75560,
+      "sha256": "36ec4661e8dfaf30acbbf418a8cd0d081590942045a64ce36c7b9eae7892b7d3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r3.json",
+      "bytes": 98368,
+      "sha256": "1aae189fed6db623fc9992a31010e27c7529f103347a12d9e51442dade092598"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r3.stderr",
+      "bytes": 172,
+      "sha256": "ac0f944a97bc5d75f3e1cba05a9384ef6454730eb1afa51aa4428d8ff0ac3c26"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r3.stdout",
+      "bytes": 29,
+      "sha256": "2871f7f939af2977f961b3a145ef75b19bc520a7a3a3cf34d08ead1548cb4b56"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r4-source.mjs",
+      "bytes": 17151,
+      "sha256": "28940280f95f8ef816e9be646f684ee0f3eb2157722addc41547f5f3398a1f4f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r4.json",
+      "bytes": 98664,
+      "sha256": "ce8d815a87e79d081bc12d5df7be0b0c2ad822a0442a02b888d8673b7aae5411"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r4.stderr",
+      "bytes": 172,
+      "sha256": "ba9aa2b4737f2b0b40d05026c6ec9dc19cca0ddb20fe74f70a1edc8efdc9afdc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r4.stdout",
+      "bytes": 29,
+      "sha256": "3927659d2f59f31bec9a6f5111670e01a17dcc0928a3de98b7b0ef9ba3bef3aa"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r5.stderr",
+      "bytes": 172,
+      "sha256": "6ce9757ec752aaf5e7fd1ae34141baf3eb6d98e599e8dded58786f3f647fdb4e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r5.stdout",
+      "bytes": 29,
+      "sha256": "e828bc6f39b5424b6418d57a1279b2a994b38127e10527ff8f45dce673446595"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/checked-manifest.json",
+      "bytes": 74214,
+      "sha256": "9a948eb693a20f5ca4d17443152fff0639465160628432d8d1f2eaa6b8cb1f8e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-denials-r1.stderr",
+      "bytes": 51,
+      "sha256": "f20db1b0e5c71b209292a4e46deca85fb3d0333576fd94db52c5600b611e1f53"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-denials-r1.stdout",
+      "bytes": 149,
+      "sha256": "85020be7b28c89b2cd4fc00508d300ab42470cd7c602feaed5ca95637143d70a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-preflight-check-r1.stderr",
+      "bytes": 172,
+      "sha256": "6ea40c949ae2134c2b06a51a7f39b9251ec68e072dd83a3aa7f570a6cd292110"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-preflight-check-r1.stdout",
+      "bytes": 186,
+      "sha256": "622f33b16899681d96c2e10594747ba80ea82bc70613b923cfdbe743a6c5ae05"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/freeze-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/grant-template-NOT-EXECUTABLE.json",
+      "bytes": 614,
+      "sha256": "2eecb55a2d02c63326c58a083edebddbd4ccd85bccd87cea2fa348cb23511a60"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/preparation-r1-original.json",
+      "bytes": 69391,
+      "sha256": "d1c8d54949edb910c060baa6379260987819bce24d235efcb81c6fe9c1b23758"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/preparation.json",
+      "bytes": 69640,
+      "sha256": "b49905667723ea7b9be508edd15556a94dd8c98fc2154dcad14f7ca05701d0b6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/prepare-r1-source.py",
+      "bytes": 6006,
+      "sha256": "b6baf82496ff46ebf98d0f4958cea2525c8b06fbed0d1ee20172c0bcab9352a7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/prepare-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/prepare-r1.stdout",
+      "bytes": 142,
+      "sha256": "4bf2cdd082c53d9487a978d58158e547ff0988742a2689dfe9c1966eb4ef781c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/prior-source-9aed1af/improve.ts",
+      "bytes": 25404,
+      "sha256": "85ecc8bd1cf206911bf83911fc5ea4cea84f2e836f6983bedb4dee4ae604a7fa"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/prior-source-9aed1af/provider-boundary.ts",
+      "bytes": 7167,
+      "sha256": "ddd688163aa6dd431609b9857fdd5c24d37a06741b9bff05083e7656da0974c5"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/prior-source-9aed1af/runtime.ts",
+      "bytes": 79700,
+      "sha256": "42001c5350161fb152ee8ec501b1f03e01475043effb972920be086593b06476"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/protected-prior-originals.json",
+      "bytes": 2100488,
+      "sha256": "c1fa1c8df933209dcf7767ec086b7b6521e140752aebbc7c83f33126d43a45e3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r1.json",
+      "bytes": 648,
+      "sha256": "43a08883342b60d0a9ce720de1c294fd46a7ab8ff27b71fd4d7803b54dcc65cb"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r1.stderr",
+      "bytes": 51,
+      "sha256": "f20db1b0e5c71b209292a4e46deca85fb3d0333576fd94db52c5600b611e1f53"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r1.stdout",
+      "bytes": 57,
+      "sha256": "5b2310fb895437e89527de5f34be6fdb143694f39250b6da7606bfdae17da00e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r2.json",
+      "bytes": 648,
+      "sha256": "de6bc0ccf1a3dfef77793d76edb5831674e4be5ab4d92daaed736fa1ee27769b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r2.stderr",
+      "bytes": 51,
+      "sha256": "f20db1b0e5c71b209292a4e46deca85fb3d0333576fd94db52c5600b611e1f53"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r2.stdout",
+      "bytes": 57,
+      "sha256": "5b2310fb895437e89527de5f34be6fdb143694f39250b6da7606bfdae17da00e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r3.stderr",
+      "bytes": 51,
+      "sha256": "f20db1b0e5c71b209292a4e46deca85fb3d0333576fd94db52c5600b611e1f53"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r3.stdout",
+      "bytes": 57,
+      "sha256": "5b2310fb895437e89527de5f34be6fdb143694f39250b6da7606bfdae17da00e"
+    }
+  ],
+  "candidateGate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
+    "bytes": 4084,
+    "sha256": "21271432e2d61a85048c5be7d9679328b49286bf96ae86e299eb6801f945a47d"
+  },
+  "authorization": "No actual grant, paid-start or authorized-plan; only false templates",
+  "priorOriginals": "7264 closed-batch inputs + 9 immutable old-product bindings + 3 old Git source snapshots + 4 fixture hashes; original postrun7280 observation preserved",
+  "independentHarnessReview": "PENDING"
+}

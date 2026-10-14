@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/collect.py", line 126, in <module>
+    assert IMPROVE['improve'] == REOPENED['report'] and REOPENED['result'] == IMPROVE
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

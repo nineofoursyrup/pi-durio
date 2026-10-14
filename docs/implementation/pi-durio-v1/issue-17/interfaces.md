@@ -1,0 +1,21 @@
+# #17 accepted-task / queue seam proposal (base 943e8a7b)
+
+No dependency or package changes. Public Pi 1.1.0 exposes Conversation.submit({type:'input',content,requestId,whenBusy:'steer'}), Submission.status/abort, and subscription to committed submissions. A steer is placed by Pi at postTools/final boundary. We retain independent follow-up/management admissions at the host until eligible; no raw Harness handle escapes.
+
+## Readonly public host seam (src/evidence.ts)
+
+- `readAcceptedTasks(root, {after?:number, limit?:number, through?:number})`: `{tasks: AcceptedTaskFact[], next:number|null, through:number}`. Stable acceptance sequence cursor and through snapshot. One member per independent task. Existing `task.accepted` is included. Pending follow-up has a stable taskId at acceptance and `runId:null`; steer never adds a task. Later run linkage updates the projection without changing acceptedAt/acceptedSeq/taskId.
+- `readQueue(root, {after?:number, limit?:number, through?:number, targetRunId?:string})`: same paginated pattern, `items: QueueItemFact[]`. No writes or ordinary Harness open. All statuses come from persisted host receipts and upstream placement facts.
+- `AcceptedTaskFact`: taskId, requestId, kind (`task`|`follow-up`), input, workspace, sessionId (original target session for queued work), runId (nullable), acceptedAt, acceptedSeq, updatedAt, status, reason, executionVersion (artifact id/config reference), authorization (recorded capability scope), receipt `{seq,kind,at}`. Missing older facts remain null/unknown.
+- `QueueItemFact`: requestId, kind (`steer`|`follow-up`|`compact`|`improve`), taskId (same current task for steer; allocated at admission for independent follow-up; null for management), runId (null until follow-up starts), target `{workspace,sessionId,taskId,runId}`, input, acceptedAt/acceptedSeq, updatedAt/status/reason, executionVersion, authorization, receipt, upstream `{submissionId,status}` nullable.
+- Queue status: `pending` (accepted, not placed), `dispatching` (durable intent exists; unresolved cross-store interval), `applied` (committed upstream placement / started new run), `withdrawn`, `frozen`; original receipts remain append-only. A missing placement receipt cannot be inferred as applied. Frozen reason points to stop/exit/failure/recovery or compatibility failure.
+
+Storage: reuse host.sqlite `records` + immutable `objects`. `control.accepted`, `control.receipt`, `control.decision` facts are attached to their actual original target runId (not an invented run). Follow-up own runId stays null in the fact until explicit linkage to a real started run. No second usage or trace ledger. Initial task identity remains existing `task.accepted`.
+
+#17 owns these evidence.ts APIs/types and runtime/control writers. #18 consumes these read APIs, may request additions but does not write admission facts. Readonly projections must include pending/frozen/withdrawn members, never count steer as another task or invent results. Queue management and recovery share #15 checked host entry points; old pending never flows through a later ordinary submission.
+
+## Confirmed compatibility amendments
+
+Implemented exported types use immutable `target` and separate nullable `execution:{runId,sessionId}`, plus nullable `runId` convenience field. No overloaded sessionId. `through` is the maximum host record sequence for all admission, receipt, linkage and closing facts, preserved across pages. Later `task.accepted` for a queued task includes `queueRequestId` and is not another member; initial acceptance identity/time remain the original control.accepted. Missing original execution identity stays null. Read functions return only committed evidence, never open or resume Harness.
+
+Follow-up context binding: use an immutable `conversation.context()` message snapshot from the completed preceding run. Import that context through public passive `Conversation.commit` entries into the new explicitly linked execution session before its own input submission. This keeps source workspace/session/task/run immutable while giving the follow-up its own run/session/usage. The snapshot records exact source and as-of boundary; no model-generated summary or new loop. Auto dispatch is allowed only after normal completed/confirmed closure; frozen items require source-bound checked decisions.

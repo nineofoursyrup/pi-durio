@@ -1,0 +1,69 @@
+{
+  "schema": "pi-durio.issue-31.contract-delta.v1",
+  "at": "2026-10-10T10:24:20.236965+00:00",
+  "status": "PARTIAL_TECHNICAL_ACCEPTANCE_NOT_COMPLETE",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "priorDelta": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/improve-only-repair-r2/contract-delta.json",
+    "bytes": 4252,
+    "sha256": "c8029d3c8f5607db477802bc54c6a8ce807908c4e24d11e3e8e0a83d461cdd2f"
+  },
+  "method": "Additive observations only; no automatic PASS promotion, no replacement of original reports or earlier failures.",
+  "observations": [
+    {
+      "ids": [
+        "I1",
+        "I2",
+        "I3"
+      ],
+      "observation": "One explicitly approved real analysis completed with 4 known requests and a complete, stored/reopened identical report containing one canonical project candidate, stable report/candidate revisions and empty selection. Only the registered project sources and scoped evidence tools were used.",
+      "remaining": "The model summary contains contradictory reasoning and hypotheses[1] is statically false. This is disclosed without changing the original report. Schema completion is not factual correctness or proven effect. The exact patch remains unexecuted and unvalidated."
+    },
+    {
+      "ids": [
+        "S2",
+        "S4",
+        "E1",
+        "E2",
+        "E6",
+        "V6",
+        "V7",
+        "M2",
+        "M7",
+        "A2"
+      ],
+      "observation": "All4 physical HTTP200 requests have complete terminal raw usage and one DONE, total24585 tokens, confirmed local cleanup/closed storage. Cumulative45 requests/130611known+1056768retained UNKNOWN=1187379charged upper tokens, conservative fixed-price USD1.4248548.",
+      "remaining": "Remote termination remains unknown; no account invoice, immutable model weights, new resource/timing or broader lightweight conclusion. Original raw952 does not replace unknown; SDK mirrors not double counted."
+    },
+    {
+      "ids": [
+        "I5",
+        "I8",
+        "I9",
+        "I10",
+        "A3"
+      ],
+      "observation": "Candidate is unselected/not-started/unverified. Exact one-file correction and protection requirements can be prepared for human consideration; no candidate API, validation, formal write or activation has occurred.",
+      "remaining": "Explicit human choice of the actual report/revision/baseline and plan, protected validation, formal writeback/effect/reopen, full technical acceptance and user Mac daily-use acceptance remain required. No fresh model call is implied or authorized."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/report.json",
+      "bytes": 17439,
+      "sha256": "cf2e811046179892f3b699d3d238dd7a3c36e2c8467128082c4b9f9250cd508f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/cumulative-budget.json",
+      "bytes": 2806,
+      "sha256": "ea3f2100966346170682aa19184bc9765503f18f06cb11ccd53505d2b84da2eb"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/static-analysis.json",
+      "bytes": 3819,
+      "sha256": "f1eca720d5005ba5c90908ba87b7876bd96fe486cabf3dda9c55ba46e86dcf77"
+    }
+  ],
+  "paidAuthorization": "OUTPUT_R1_ONE_START_CONSUMED_NO_FURTHER_START",
+  "candidateAuthorization": "NONE_AWAITING_EXPLICIT_ACTUAL_CANDIDATE_CHOICE"
+}

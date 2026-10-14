@@ -1,0 +1,28 @@
+{
+  "checked_at": "2026-10-09T02:50:30.224230+08:00",
+  "decision": {
+    "title": "首版范围与轻量目标",
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/2",
+    "state": "closed",
+    "state_reason": "completed",
+    "resolution_url": "https://github.com/nineofoursyrup/pi-durio/issues/2#issuecomment-6066794453",
+    "resolution_body_readback": "matched prepared file"
+  },
+  "map": {
+    "title": "pi-durio 首版决策地图",
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/1",
+    "state": "open",
+    "decision_index_matches": true
+  },
+  "child_count": 7,
+  "closed_children": 1,
+  "next_frontier": {
+    "title": "上游复用与执行恢复边界",
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/3",
+    "state": "open",
+    "assignees": [],
+    "blockers_all_closed": true
+  },
+  "source_html_sha256": "a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6",
+  "scope": "design decision; no product or provider execution"
+}

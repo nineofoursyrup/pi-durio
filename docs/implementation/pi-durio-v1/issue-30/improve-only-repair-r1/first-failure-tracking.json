@@ -1,0 +1,96 @@
+{
+  "status": "FIRST_FAILURES_RETAINED",
+  "failures": [
+    {
+      "evidence": "check-r1.json",
+      "source": "check-r1-source.mjs",
+      "cause": "Offline fixture preloaded paid-start to test restart denial, then incorrectly required it absent. Fixed fixture comparison to retain the pre-existing receipt; no production gate failure."
+    },
+    {
+      "evidence": "check-r2.json",
+      "source": "check-r2-preflight-source.mjs",
+      "cause": "New preflight compared binary floating multiplication 2.7819936000000003 with literal 2.7819936. Corrected price arithmetic to integer-tenths tariff: tokens*12/10000000. Declared cap and authorization unchanged."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r1.json",
+      "bytes": 4260,
+      "sha256": "86bb7cae6385c68ba99221178ba78c38155917a72b38eb4ef143dd83f4dbfebe"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r1-source.mjs",
+      "bytes": 16854,
+      "sha256": "055ed24e2368c28d49bdf021b2c545930c3e8a00c13907745ae983389b7f7cde"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r1.stderr",
+      "bytes": 600,
+      "sha256": "6b7616eb3136e9c28dc78226cb924406f3dbc678024e384defe27a6fd3a62c24"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2.json",
+      "bytes": 75560,
+      "sha256": "36ec4661e8dfaf30acbbf418a8cd0d081590942045a64ce36c7b9eae7892b7d3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2-source.mjs",
+      "bytes": 16870,
+      "sha256": "36c998deb82e260b9c4b1446ee641cf427af83cc4898efd4dc347ba70e5958ad"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2-preflight-source.mjs",
+      "bytes": 12194,
+      "sha256": "18dbd6f5689a3d748a6310d2f2e2598f85f3ac4e5209bb2a0076e5017400e0e8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r2.stderr",
+      "bytes": 898,
+      "sha256": "634143659db83bd43bbadffef73116aa3f055d26de433d06f44bc2d524789917"
+    }
+  ],
+  "supersededPasses": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r3.json",
+      "bytes": 98368,
+      "sha256": "1aae189fed6db623fc9992a31010e27c7529f103347a12d9e51442dade092598"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r4.json",
+      "bytes": 98664,
+      "sha256": "ce8d815a87e79d081bc12d5df7be0b0c2ad822a0442a02b888d8673b7aae5411"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r1.json",
+      "bytes": 648,
+      "sha256": "43a08883342b60d0a9ce720de1c294fd46a7ab8ff27b71fd4d7803b54dcc65cb"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r2.json",
+      "bytes": 648,
+      "sha256": "de6bc0ccf1a3dfef77793d76edb5831674e4be5ab4d92daaed736fa1ee27769b"
+    }
+  ],
+  "finalPasses": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/check-r5.json",
+      "bytes": 99079,
+      "sha256": "d35f10a2d9a3c5f28b1bf06c16b92419e55292f415b246e6f9f11a2d1e4f8975"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/wrapper-check-r3.json",
+      "bytes": 648,
+      "sha256": "347265fcbb619ab2673810f9e85a81bee47e5dbc11990108f2c2b06359660bb9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-preflight-check-r1.json",
+      "bytes": 1398,
+      "sha256": "6d4d6a0029833ada479f0a593b7f94692729f9a2b0fbf7d220433b216ff224c9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/final-denials-r1.json",
+      "bytes": 814,
+      "sha256": "41ce179b97692469ff670e509e4f5f20de33aaf8ce029f8d0647eecf0093b230"
+    }
+  ]
+}

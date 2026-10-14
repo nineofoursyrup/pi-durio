@@ -1,0 +1,50 @@
+{
+  "issue": 24,
+  "acceptedAt": "2026-10-09T19:05:55.086594+00:00",
+  "status": "integrated-accepted",
+  "scope": "T14 explicit structured improve selection, temporary only validation and non-execution decisions; formal writeback/activation remains #25/#26",
+  "productSource": "6c150099a0cd8634b9f18462d62c3f4685f89476",
+  "ticketTip": "ab5d8179c153fc54acd294aa6b806dfeb7023731",
+  "integrationMerge": "6e0c39132daf1beb9883fe0110ed7d5d0b20889b",
+  "mergeTree": "7ef47c2c21da6a3b82da762dc9b5dbee4775a923",
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/merge-integration-readback.json",
+    "sha256": "877227de74704e03c2ac8f7b015036354c3466de43422db1a6082cdc5d05ffed"
+  },
+  "criteria": {
+    "selection": "PASS: default empty, exact report/revision/target/baseline/mode/steps/combined content/checks/basis/budget bound, persisted before effects; duplicate/mismatch and drift fail safely",
+    "validation": "PASS: actual direct/regression and fresh VM paths; all four formal targets unchanged, combined first failure and explicit independent continuation retained",
+    "benefit": "Fresh2/2 PASS,8 controlled requests,112 known tokens; no obvious difference/allDeclaredBenefitsMet=false; no activation",
+    "history": "PASS: defer relevant-change explanation, stable do-not-suggest scope, explicit restore, read-only reopen and snapshot retention",
+    "provenance": "PASS: parent scoped link/opaque retained report and child fixed plan/outcome independent; 12 actual VM lifecycles and all acquired refs/objects bound",
+    "ui": "PASS: actual command path and narrow selected-item visibility; native final composition remains #31"
+  },
+  "checks": {
+    "firstFull": "177 PASS /1 FAIL of178; original retained",
+    "repairedAffected": "13/13 final decisions/basis/viewport plus1/1 actual TUI path; earlier18/18 reused",
+    "integration": "Same frozen tree; no source/dependency changes, no repeated runtime/VM/provider tests"
+  },
+  "identity": {
+    "sourceFiles": 126,
+    "buildInputs": 125,
+    "compilerFiles": 132,
+    "outputs": 186,
+    "installedEntries": 12855,
+    "protectedFilesUnchanged": 220
+  },
+  "remaining": [
+    "#25 formal writeback/activation",
+    "#26 actual new runtime build and eval-asset path",
+    "#28 final cost/fault integration and #29 feedback metrics",
+    "#30 live DeepSeek batch NOT AUTHORIZED/NOT RUN",
+    "#31 final native composition, measurements and technical acceptance",
+    "#32 human daily-use acceptance",
+    "Final candidate independent review"
+  ],
+  "limitations": {
+    "provider": "Explicit controlled offline transport; actual local Pi/VM execution; no model quality or performance benefit claim",
+    "nativeTerminal": "New whole-product composition NOT RUN; synthetic component checks do not replace #31/#32",
+    "actualModel": "gpt-6-astra/xhigh requested; backend not independently attestable"
+  },
+  "rootDist": "Old ignored root dist preserved; actual candidate is issue-24/r1/install"
+}

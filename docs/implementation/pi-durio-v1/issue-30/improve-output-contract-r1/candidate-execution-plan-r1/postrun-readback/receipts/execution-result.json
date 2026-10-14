@@ -1,0 +1,22 @@
+{
+  "status": "COMPLETED_EXACT_PROJECT_WRITEBACK",
+  "stage": "readonly-reopen",
+  "decisionId": "v1-live-r4-clamp-execute-r1",
+  "dataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/decision-data",
+  "scope": [
+    "clamp.ts"
+  ],
+  "checkCount": 1,
+  "newProviderRequests": 0,
+  "newTokens": 0,
+  "priorCumulativeRequests": 45,
+  "cumulativeChargedUpperUsd": 1.4248548,
+  "activation": "not-enabled",
+  "effect": "direct-checks-passed; no model quality or performance claim",
+  "originalAnalysisTreeUnchanged": true,
+  "originalReasoningErrorPreserved": true,
+  "at": "2026-10-10T10:45:29.192Z",
+  "deadline": "2026-10-10T10:50:25.690Z",
+  "firstFailuresRetained": true,
+  "rollbackAuthorized": false
+}

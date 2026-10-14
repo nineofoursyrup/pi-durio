@@ -1,0 +1,25 @@
+{
+  "status": "ALL_FOUR_MATCH_FROZEN_BASELINE",
+  "files": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project/package.json",
+      "bytes": 87,
+      "sha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project/clamp.ts",
+      "bytes": 111,
+      "sha256": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project/README.md",
+      "bytes": 129,
+      "sha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project/check.mjs",
+      "bytes": 357,
+      "sha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "README.md": false,
+  "src/index.ts": false,
+  "src/tui.ts": false,
+  "src/tui-alt-screen.ts": false,
+  "src/terminal.ts": true,
+  "src/native-platform.ts": true,
+  "src/native-modifiers.ts": true,
+  "src/keybindings.ts": true,
+  "src/components/editor.ts": false,
+  "src/components/scroll-view.ts": true,
+  "src/components/mouse-region.ts": true,
+  "src/utils.ts": false
+}

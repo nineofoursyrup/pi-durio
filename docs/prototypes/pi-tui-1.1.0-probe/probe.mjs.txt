@@ -1,0 +1,72 @@
+import fs from 'node:fs';
+import { Container, Editor, MouseRegion, ScrollView, Text, TuiAltScreen, VStack, visibleWidth, stripTerminalSequences, wrapTextWithAnsi } from './package/dist/index.js';
+
+// Disposable, model-free capability probe using only the public Terminal contract.
+class ProbeTerminal {
+  columns = 48; rows = 14; kittyProtocolActive = false; writes = []; stopped = false;
+  start(onInput, onResize) { this.input = onInput; this.resize = onResize; this.stopped = false; }
+  stop() { this.stopped = true; }
+  async drainInput() {}
+  write(value) { this.writes.push(value); }
+  moveBy() {} hideCursor() {} showCursor() {} clearLine() {} clearFromCursor() {} clearScreen() {} setTitle() {} setProgress() {} setProgramStatus() {}
+}
+const identity = text => text;
+const theme = { borderColor: identity, selectList: {selectedPrefix: identity, selectedText: identity, description: identity, scrollInfo: identity, noMatch: identity}};
+const terminal = new ProbeTerminal();
+let copied;
+let clicked = 0;
+const tui = new TuiAltScreen(terminal, true, undefined, { copyOnSelect: false, copySelection: async text => { copied = text; return true; } });
+const transcript = new Container();
+transcript.addChild(new MouseRegion(new Text('tool details toggle', 0, 0), event => {
+  if (event.type === 'click') { clicked++; return {handled: true}; }
+}));
+for (let n = 0; n < 50; n++) transcript.addChild(new Text(`line-${String(n).padStart(2, '0')} 中文 👩‍💻 é`, 0, 0));
+const scroll = new ScrollView(transcript, {follow: 'end', primary: true});
+const editor = new Editor(tui, theme);
+let submitted;
+editor.onSubmit = text => { submitted = text; };
+tui.setLayoutRoot(new VStack([{component: scroll, basis: 0, grow: 1, minSize: 1}, {component: editor, basis: 'auto', shrink: 1, minSize: 1, maxSize: 5}, {component: new Text('STATUS fixed footer', 0, 0), basis: 1}]));
+tui.setFocus(editor);
+tui.start(); tui.renderNow();
+const checks = {};
+const screen = () => tui.getScreenLines().map(stripTerminalSequences);
+checks.fixedFooter = screen().at(-1).startsWith('STATUS fixed footer');
+checks.initialFollowEnd = tui.isFollowingOutput && screen().some(row => row.includes('line-49'));
+terminal.input('\x1b[5~'); tui.renderNow();
+checks.pageUpScrollsWithEditorFocused = !tui.isFollowingOutput && !screen().some(row => row.includes('line-49'));
+checks.footerAfterScroll = screen().at(-1).startsWith('STATUS fixed footer');
+tui.scrollToTop(); tui.renderNow();
+terminal.input('\x1b[<0;2;1M'); terminal.input('\x1b[<0;2;1m'); tui.renderNow();
+checks.mouseClickDispatched = clicked === 1;
+terminal.input('\x1b[<0;1;2M'); terminal.input('\x1b[<32;6;2M'); terminal.input('\x1b[<0;6;2m'); tui.renderNow();
+checks.dragSelectionAndInjectedCopy = tui.hasActiveSelection() && await tui.copyActiveSelectionToClipboard() && copied === 'line-0';
+tui.resetTextSelection();
+terminal.input('中文'); terminal.input('\n'); terminal.input('第二行');
+checks.ctrlJInsertsNewline = editor.getText() === '中文\n第二行' && submitted === undefined;
+terminal.input('\r');
+checks.enterSubmits = submitted === '中文\n第二行';
+editor.setText('abc'); terminal.input('\x01'); terminal.input('\x04');
+checks.ctrlDDeletesForward = editor.getText() === 'bc' && !terminal.stopped;
+terminal.input('\x03');
+checks.ctrlCDoesNotExitWithoutHostHandler = !terminal.stopped && editor.getText() === 'bc';
+terminal.input('\x1b');
+checks.escapeDoesNotStopWithoutHostHandler = !terminal.stopped;
+editor.setText(''); terminal.input('\x1b[200~第一行\n第二行\x1b[201~');
+checks.bracketedPastePreservesNewlineWithoutSubmit = editor.getExpandedText() === '第一行\n第二行' && submitted === '中文\n第二行';
+checks.wideGraphemes = visibleWidth('中文') === 4 && visibleWidth('👩‍💻') === 2 && visibleWidth('é') === 1;
+checks.wideWrapFits = wrapTextWithAnsi('中文测试👩‍💻é中文', 6).every(line => visibleWidth(line) <= 6);
+terminal.columns = 32; terminal.rows = 10; terminal.resize(); tui.renderNow();
+checks.resizeKeepsFooter = screen().length === 10 && screen().at(-1).startsWith('STATUS fixed footer');
+const screenBeforeStop = screen();
+const beforeStop = terminal.writes.length;
+tui.stop({preserveScreen: true});
+const stopOutput = terminal.writes.slice(beforeStop).join('');
+checks.preserveScreenExitsAltWithoutHistory = stopOutput.includes('\x1b[?1049l') && !stopOutput.includes('line-00') && !stopOutput.includes('line-49');
+checks.preserveScreenRestoresMouseAndAutowrap = stopOutput.includes('\x1b[?1006l') && stopOutput.includes('\x1b[?7h');
+const terminal2 = new ProbeTerminal(); const tui2 = new TuiAltScreen(terminal2);
+tui2.addChild(new Text(Array.from({length: 60}, (_, n) => `HISTORY-${n}`).join('\n'), 0, 0));
+tui2.start(); tui2.renderNow(); const prior = terminal2.writes.length; tui2.stop();
+checks.defaultStopPrintsFullDocument = terminal2.writes.slice(prior).join('').includes('HISTORY-0') && terminal2.writes.slice(prior).join('').includes('HISTORY-59');
+const result = {node: process.version, platform: process.platform, arch: process.arch, checks, allPassed: Object.values(checks).every(Boolean), screenBeforeStop, copied, stopOutput, note: 'Synthetic Terminal interface probe; not macOS Terminal.app, real IME, system clipboard, PTY signal cleanup, or performance validation.'};
+fs.writeFileSync(new URL('./probe-result.json', import.meta.url), JSON.stringify(result, null, 2));
+console.log(JSON.stringify(result, null, 2));

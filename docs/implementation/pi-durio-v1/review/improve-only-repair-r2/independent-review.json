@@ -1,0 +1,276 @@
+{
+  "status": "PASS_SCOPED_AFFECTED_INDEPENDENT_REVIEW",
+  "reviewedAt": "2026-10-10T07:35:14.277072+00:00",
+  "reviewer": {
+    "agent": "/root/review_improve_only",
+    "independentOfImplementer": true,
+    "soleActiveReviewer": true,
+    "axes": "Separate Standards and Spec conclusions in one affected-change pass",
+    "context": "Continuation of the independent r1 review, without producer implementation edits",
+    "requestedModel": "gpt-6-astra",
+    "requestedReasoningEffort": "xhigh",
+    "actualBackendAttestation": "NOT_ATTESTED"
+  },
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/frozen-manifest.json",
+    "bytes": 76288,
+    "sha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a"
+  },
+  "batchId": "pi-durio-v1-live-r3-improve-repair",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "producer": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+  "artifact": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/artifact.json",
+    "bytes": 2792,
+    "sha256": "6608f6149f3e45051fc73eadcdb1dac8b77aa0d070070ef642ed3e26cd276661"
+  },
+  "candidateGate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
+    "bytes": 4084,
+    "sha256": "21271432e2d61a85048c5be7d9679328b49286bf96ae86e299eb6801f945a47d"
+  },
+  "reviewedHarness": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/freeze.mjs",
+      "bytes": 4410,
+      "sha256": "75d152dd8801dee65ddeada359b50789237ebac38ca7f780dd9a43db4866df08"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/launch.py",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/ledger.mjs",
+      "bytes": 3187,
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/preflight.mjs",
+      "bytes": 12746,
+      "sha256": "4926e7978cf23eb642dc2ac78f61f68fe6d2c77f6f674a3571be3e0992a69bdc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/prepare-repair.py",
+      "bytes": 8036,
+      "sha256": "15ec67c3695f336a074196d40455c824a2a92c1803cf2480c75611cf3182e642"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/run.mjs",
+      "bytes": 6224,
+      "sha256": "c2eb991f269fc3ccd6939da0f92135035f0956de3cfd013ec9d32bd3ef976a2c"
+    }
+  ],
+  "priorReview": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/independent-review.json",
+    "bytes": 18464,
+    "sha256": "873680e102700a4321210235bf3960343ac4a4c1f28a219e09cea84bc0d2b5a9"
+  },
+  "priorReviewMarkdown": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/independent-review.md",
+    "bytes": 6460,
+    "sha256": "af863c12ad4df734e6d737bc378682c21874fde5235b8b6c34f7388aa4304f46"
+  },
+  "priorManifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/frozen-manifest.json",
+    "bytes": 74214,
+    "sha256": "9a948eb693a20f5ca4d17443152fff0639465160628432d8d1f2eaa6b8cb1f8e"
+  },
+  "scope": {
+    "included": [
+      "r1 two P2 finding fixes in frozen r2 and affected tests",
+      "freeze support/reference changes, inactive authorization templates and exact new manifest",
+      "Concrete approval request wording with successor hash and unchanged limits"
+    ],
+    "reused": [
+      "r1 unaffected harness review",
+      "unchanged common.mjs, ledger.mjs, launch.py",
+      "independently bound source/install/applicability gate and retained original evidence identities"
+    ],
+    "excluded": [
+      "Product repair re-review or new product scope",
+      "Coordinator current repository documentation/commit work",
+      "Real credential/provider/VM/Terminal/product execution",
+      "Grant creation, paid start, product/Git/state/root modification"
+    ]
+  },
+  "standards": {
+    "status": "PASS",
+    "findingCount": 0,
+    "hardFindings": [],
+    "optionalSmellCount": 0,
+    "optionalSmells": [],
+    "conclusion": "局部修复沿用既有状态、错误与 gate 结构；没有新增权限系统或第二账本。完整 Fowler smell baseline 已沿用审阅，未发现新增文档标准硬违规或需报告的可选 smell。",
+    "standardsSources": "Same applicable AGENTS/domain/code-review skill sources as the preserved r1 report."
+  },
+  "spec": {
+    "status": "PASS",
+    "findingCount": 0,
+    "findings": [],
+    "resolvedPriorFindings": [
+      {
+        "id": "IMPROVE-R1-SPEC-01",
+        "originalPriority": 2,
+        "originalVerdict": "FAIL",
+        "disposition": "RESOLVED_ON_FROZEN_R2",
+        "file": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/run.mjs",
+        "lines": [
+          39,
+          40,
+          42,
+          43
+        ],
+        "change": "Final ledger construction/save/readback catch now explicitly sets STOPPED_BUDGET_RECEIPT_FAILURE, budgetCompleteness unknown, and no-repeat/no-candidate-execution remaining disposition; existing exit selection yields 1. Completed analysis, report, candidate count, original error and paid-start remain retained.",
+        "validation": "Two exact-source memory cases assert result status and exit1 after write/readback failure, retained analysis/reopened report/receipt, no extra analyzeImprove call; readback-failure keeps the already saved budget, write-failure does not invent one.",
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/review-repair-check-r1.json",
+          "bytes": 4973,
+          "sha256": "80d548a7e9344119ca981d2918972fbfbe9f10eac942e142b294874193dac732"
+        },
+        "originalFailure": {
+          "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/reviewer-ledger-failure-probe.json",
+          "bytes": 4181,
+          "sha256": "1fdd8f28e039e61cf07c963886a6997d06c4828b2e48a94152f19ccc05ada26a"
+        }
+      },
+      {
+        "id": "IMPROVE-R1-SPEC-02",
+        "originalPriority": 2,
+        "originalVerdict": "FAIL",
+        "disposition": "RESOLVED_ON_FROZEN_R2",
+        "file": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/preflight.mjs",
+        "lines": [
+          87,
+          88,
+          89
+        ],
+        "change": "Requires author human-user, source.kind codex-user-reply and nonempty source.requestToolCallId. New metadata remains inside the existing authorizationSource file-hash binding; exact manifest/reply/time/limits/prior links are unchanged. Prepared templates contain no actual reply/time/call id and paidApproved remains false.",
+        "validation": "Six exact-source memory cases reject missing/wrong author/source and missing/blank call id before installation/product/credential effects. Valid new provenance is used in the current 30-case suite and final exact-input preflight.",
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/review-repair-check-r1.json",
+          "bytes": 4973,
+          "sha256": "80d548a7e9344119ca981d2918972fbfbe9f10eac942e142b294874193dac732"
+        },
+        "trustBoundary": "Audit provenance only. Main must populate real author/source/reply/time from this direct human response. No adversarial same-user identity-authentication or cryptographic attestation is claimed."
+      }
+    ],
+    "conclusion": "两项 r1 P2 在该冻结 r2 上均已修复。最终 ledger 回执失败严格停止且保留事实；最小直接人类回复 provenance 被要求并受文件 hash 绑定。预算、fixture/seed、candidate/install gate、历史 UNKNOWN、one-start 与无候选动作范围不变。",
+    "requirementsSource": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/review-request.md"
+  },
+  "checksExecuted": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2/reviewer-identity-check.json",
+      "bytes": 13356,
+      "sha256": "9bebbd334407d1b58bf594f8dfc4326ad5103ae824c11a41265a3b8320fd81ac"
+    }
+  ],
+  "checksReused": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/admission-check-r1.json",
+      "bytes": 99079,
+      "sha256": "8288ca5aa1a17ce637db5d82a8b2cbe6eb50e972bb975ee6415bf2b115adf697"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/review-repair-check-r1.json",
+      "bytes": 4973,
+      "sha256": "80d548a7e9344119ca981d2918972fbfbe9f10eac942e142b294874193dac732"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-preflight-check-r1.json",
+      "bytes": 1398,
+      "sha256": "1bdd1a891d5a74f04418fcfd2d161c5a37c511b757c88b5713e45c92250bffe6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-denials-r1.json",
+      "bytes": 814,
+      "sha256": "3d93555d4fd46b792c49f47efe373b6c881e7ccc51cbdc3a5bbf2c6b41a14967"
+    }
+  ],
+  "validation": {
+    "independentReadOnlyBindingCount": 38,
+    "currentExactSourceAdmissionCases": 30,
+    "currentExactSourceRepairCases": 8,
+    "finalActualAdmissionDenials": 3,
+    "finalPreflightActualReferences": 7320,
+    "preflightAuthorization": "Artificial memory-only fixture; not actual approval",
+    "reviewerReranBehavioralChecks": false,
+    "reason": "Current source hashes match the supplied 30+8 checks, targeted behavior and assertions were inspected, and final manifest hash matches complete preflight/denial records. No new unresolved behavioral uncertainty justified duplicate execution.",
+    "unchangedByteIdentical": [
+      "common.mjs",
+      "ledger.mjs",
+      "launch.py"
+    ],
+    "initialSeedTreeUnchanged": true,
+    "proposalChanges": "Revision-local evidence/dataRoot paths and exact retained-code index identity only; all budgets and operational content unchanged."
+  },
+  "frozenIntegrity": "Producer confirmed no pending writes to any frozen references; received full manifest and final check hashes, then independently verified exact bytes. r1 manifest/review/first reproduction are hash-linked and preserved; r1 remains FAIL historically, r2 PASS does not overwrite it.",
+  "approvalRequestReview": {
+    "status": "CONCRETE_AND_REVIEWABLE_FOR_NEW_HUMAN_DECISION",
+    "request": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2/authorization-request.md",
+      "bytes": 1984,
+      "sha256": "aa856f086c73e7658c1670acc02df98b81ea32fc92177efe29190408a1a8859a"
+    },
+    "boundManifestSha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a",
+    "isAuthorization": false,
+    "reviewedFacts": [
+      "Prior r3 start consumed",
+      "Exactly one improve-only analysis on f26ae8f and new r2 dataRoot",
+      "New8 requests/1200000 charged tokens; per-request1056768/output8192",
+      "Prior34/1118328 charged tokens includes1056768 UNKNOWN reservation",
+      "Cumulative42/2318328 with public-fixed-tariff estimate USD2.7819936 within original USD3 cap",
+      "Fresh24h start and actual-start+60m activity windows; analysis max5m",
+      "Fixed credential source; new failures/unknown/record loss stop without repeat",
+      "No eval or candidate choice/execution/validation/activation/writeback; future report/revision-bound choice separate"
+    ],
+    "alternativeDraft": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2/approval-request-reviewed.txt",
+      "bytes": 1287,
+      "sha256": "42f988b7f786adfa4532a93fd1fd91ffc8430388fdcf8b49a53a347aa6401ae9"
+    },
+    "coordinatorTextVerdict": "PASS: exact candidate/batch/r2 manifest, one improve-only scope, all stage/cumulative budgets, old UNKNOWN and first failures, start/active windows, fixed credential source, stop/no-repeat and later candidate decision are accurate. Explicitly states prior r3 one-start was consumed; suggested affirmative reply is scoped by this actual request. Request file is not a grant.",
+    "coordinatorSourceUnmodified": true
+  },
+  "authorization": {
+    "newPaidStartAuthorized": false,
+    "actualGrantPresent": false,
+    "paidStartPresent": false,
+    "authorizedPlanPresent": false,
+    "templatesPaidApproved": false,
+    "sourceTemplateActualReplyTimeCallId": null,
+    "nextAction": "Main may present the reviewed concrete request to the human; only a new direct affirmative reply bound to this manifest may be captured as the one-start grant."
+  },
+  "remainingExternalGates": [
+    "New explicit human one-start approval with actual call id/reply/receivedAt, captured by trusted main",
+    "At real launch: unchanged frozen identities, inactive unused batch, current valid time and private permitted credential source",
+    "Actual new provider response/model identity, usage, cleanup and retained report remain unobserved",
+    "Any actual candidate requires later report/revision-bound user selection; no #30/#31/#32, full technical, daily acceptance or release completion inferred"
+  ],
+  "limits": {
+    "credentialReads": 0,
+    "providerCalls": 0,
+    "productImportsOrExecutions": 0,
+    "vmStarts": 0,
+    "terminalAcceptanceRuns": 0,
+    "actualGrantFilesCreated": 0,
+    "actualPaidStartFilesCreated": 0,
+    "rootOrStateWrites": 0,
+    "productEdits": 0,
+    "gitWrites": 0,
+    "githubWrites": 0,
+    "reviewerBehavioralTestRuns": 0,
+    "writes": "review/improve-only-repair-r2 only"
+  },
+  "summary": "Standards PASS: 0 new findings. Spec PASS: 0 open findings on frozen r2; both prior P2 findings resolved on this revision. Concrete approval request reviewed; no new paid start granted.",
+  "report": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2/independent-review.md",
+    "bytes": 4856,
+    "sha256": "a004d0a97253f68ec2b687eb560360a5bd0c4dbba31dec0a69b28de96c86983e"
+  }
+}

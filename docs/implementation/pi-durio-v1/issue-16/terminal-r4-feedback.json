@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-09T11:25:33.938576+00:00",
+  "source": "direct user chat r4 cursor revalidation reply",
+  "candidate": "42ff424757f83c8578949d2a31f31eafca8ad486",
+  "observation": "emoji后有莫名空格，光标也不在B的后面而是在B的前面",
+  "status": "FAIL",
+  "remaining": "Terminal native glyph widths and caret column need direct diagnostic evidence; previous ANSI pass is not visual acceptance"
+}

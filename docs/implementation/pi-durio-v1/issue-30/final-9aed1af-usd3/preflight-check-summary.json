@@ -1,0 +1,164 @@
+{
+  "status": "PASS",
+  "cases": 24,
+  "rows": [
+    {
+      "name": "grant-false",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/grant-false-4pFw0J/result.json"
+    },
+    {
+      "name": "old-usd5-grant",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/old-usd5-grant-kLtPiz/result.json"
+    },
+    {
+      "name": "eval-stage-expanded",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/eval-stage-expanded-2VRKiF/result.json"
+    },
+    {
+      "name": "improve-stage-expanded",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/improve-stage-expanded-5EVcFS/result.json"
+    },
+    {
+      "name": "stage-redistributed",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/stage-redistributed-lCtlVW/result.json"
+    },
+    {
+      "name": "aggregate-expanded",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/aggregate-expanded-GqIis2/result.json"
+    },
+    {
+      "name": "request-expanded",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/request-expanded-H0eWAf/result.json"
+    },
+    {
+      "name": "window-active-expanded",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/window-active-expanded-mbx2QJ/result.json"
+    },
+    {
+      "name": "window-start-expanded",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/window-start-expanded-qrOy8s/result.json"
+    },
+    {
+      "name": "extra-starts",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/extra-starts-IgCPAx/result.json"
+    },
+    {
+      "name": "price-lowered",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/price-lowered-aTXjx3/result.json"
+    },
+    {
+      "name": "price-increased",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/price-increased-KYtKGr/result.json"
+    },
+    {
+      "name": "reservation-lowered",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/reservation-lowered-HXYFgo/result.json"
+    },
+    {
+      "name": "credential-path-changed",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/credential-path-changed-SpBsl1/result.json"
+    },
+    {
+      "name": "authorization-source-removed",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/authorization-source-removed-O4PdVB/result.json"
+    },
+    {
+      "name": "grant-time-renewed",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/grant-time-renewed-hrSKew/result.json"
+    },
+    {
+      "name": "repeat-start",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/repeat-start-gk6nM5/result.json"
+    },
+    {
+      "name": "existing-authorized-plan",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/existing-authorized-plan-ufPfWl/result.json"
+    },
+    {
+      "name": "grant-expired",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/grant-expired-jtIZvv/result.json"
+    },
+    {
+      "name": "grant-in-future",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/grant-in-future-jcD7kx/result.json"
+    },
+    {
+      "name": "valid-materialization-and-repeat",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/valid-materialization-GC8N1g/result.json"
+    },
+    {
+      "name": "wrapper-missing",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/wrapper-missing-A2dP5z/result.json"
+    },
+    {
+      "name": "wrapper-false",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/wrapper-false-fULfWz/result.json"
+    },
+    {
+      "name": "wrapper-positive",
+      "status": "PASS",
+      "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/wrapper-positive-HzUNYu/result.json"
+    }
+  ],
+  "scope": "Offline subprocess gate and wrapper tests only; original run body and common authenticationStop preserved; installed API synthetic; no real key/provider/VM; positive uses literal fixture key",
+  "scripts": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/check-credential.py",
+      "bytes": 3015,
+      "sha256": "aadd6a3763f85155a2bb4c94157ba5286e99f36c16f9b77587946cd63386cd3b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/check-preflight.mjs",
+      "bytes": 10637,
+      "sha256": "8092ed2ffa2d898ba0821c9eb8d41e926e00237d5de4a2dbd71536515441b60c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/derive.py",
+      "bytes": 8041,
+      "sha256": "7359b9e498eb4e2cfcb9cf0282d86a71810efd715953f7c9a9e499175721af66"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/launch.py",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/preflight.mjs",
+      "bytes": 7899,
+      "sha256": "bffdfd6e5addf0e268e4cd53065d2ea1feea3b76fe4a8412fa6a19869c779891"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/run.mjs",
+      "bytes": 6897,
+      "sha256": "347e6fcbfdb336adf6cb47d35537c7367a2b546a897e1817edbc968fc0e710f1"
+    }
+  ]
+}

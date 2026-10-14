@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "issue": 15,
+  "findings": [
+    "SPEC-01",
+    "STD-01"
+  ],
+  "status": "READY_FOR_COORDINATOR_LOCAL_INTEGRATION_AND_FIXED_CANDIDATE_REVIEW",
+  "commit": "52cec0cdeb62600e7cf3aba8c8d4401bd4eb86c4",
+  "tree": "47c393a316f3ee56d54def413fc71a5c283fe5e8",
+  "base": "5bb1b1176fc4316e407e4ebc211a47c592792aee",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-15-target-session",
+  "branch": "codex/pi-durio-v1-repair-15-target-session",
+  "candidateManifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/candidate-manifest.json",
+    "sha256": "4d4f688e56c8883e86053d91ee8aef338385d2e3d500abdbf7ebb3668db5f2c9",
+    "bytes": 5492
+  },
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/source-build-final.json",
+    "sha256": "95fa0768cb040f4c0668d78aa2a18bcea31c1ded599e38ad75d12ddfd3ced037",
+    "bytes": 91832
+  },
+  "checks": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/checks.json",
+    "sha256": "f7bea438493044c65ccf07d6b600131c2541604ee99f388a12f1089afe252502",
+    "bytes": 4623
+  },
+  "fixtures": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/fixture-identities.json",
+    "sha256": "da896195e0b40ba2e6759ff9f54551a2b6fe51a9e651656b267a9276b02bbe77",
+    "bytes": 447964
+  },
+  "verification": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/verification.json",
+    "sha256": "9385b0969c0c26ce0873adfefd717234f4e1c249522c36c607f4dd70fc9a829f",
+    "bytes": 199
+  },
+  "buildDeltas": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/build-deltas.json",
+    "sha256": "25f56bce03da5da3f3fe6cc1194b1029d5f2d5920fba78934a03605901b46841",
+    "bytes": 836
+  },
+  "baseline": {
+    "sourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/baseline-source-build.json",
+      "sha256": "14af3948555bb393f358dab588d97b3333f09b975e828e9ec3508adf7b18b932",
+      "bytes": 89533
+    },
+    "executionArtifact": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/baseline-execution-artifact.json",
+      "sha256": "23c00768b464e2fe59c2f507fc9a17b135ec1844627248dd41fc3dc12da37801",
+      "bytes": 38920
+    },
+    "scope": "Immutable actual baseline artifact captured from original offline fixture, not retagged after repair."
+  },
+  "changes": [
+    "Removed full inspectSession; public fenced read callbacks and purpose-specific state, usage, compaction and recovery projections.",
+    "Complete task/submission/foreign ownership and unknown outcome decision coverage with disk-backed minimal joins; bounded display pages and exact snapshot IDs.",
+    "CLI/API original Entry/Task detail pages and TUI n/p navigation, full unresolved counts independent of visible page.",
+    "Closed-session usage documents spooled and appended separately with full source identities, preserving first-document runtime usage and per-conversation query overwrite attribution.",
+    "Storage/retention/archive scan and validate all originals without retaining entry history; explicit management limits and bounded archive display summaries."
+  ],
+  "observedResults": {
+    "longTarget": {
+      "baseline": "SIGABRT at 48 MiB heap for genuine completed session + 64 MiB public retained originals",
+      "repaired": "completed; 1768-byte report, original durable hash unchanged, 48 MiB heap"
+    },
+    "ordinaryClose": {
+      "baseline": "unknown / cleanup confirmed / EVIDENCE_RECORD_LIMIT, 1.1 MB acquired answer and 20 input tokens preserved",
+      "repaired": "completed / cleanup confirmed; 2204830 retained entry bytes; close receipts 1010 and 741 bytes; same answer hash and 20 input tokens"
+    },
+    "sourceBuildCounts": {
+      "status": "PASS",
+      "inputs": 165,
+      "compilerFiles": 140,
+      "outputs": 243,
+      "mismatches": [],
+      "worktreeClean": true,
+      "node": "v26.8.2",
+      "checkedAt": "2026-10-09T22:43:22.780510+00:00"
+    }
+  },
+  "limitations": [
+    "Checks are offline deterministic transport and public Storage fixtures, including explicitly synthetic crash checkpoints; no provider, VM, native Terminal acceptance or full npm check in this subtask.",
+    "First OOM proves bounded-heap failure, not RSS/timing performance; other repair processes were active, so no comparative throughput claim.",
+    "Public Storage returns each requested record/document as one value: memory is bounded by page and individual value size, not a hard arbitrary-record byte limit. Original detail API returns <=4096 UTF-16 code units, but upstream by-ID JSON decoding still requires the individual record.",
+    "Historical recovery-r1 10/10 log is supplemental and lacks a separately frozen r2 source-build manifest; final integration gate must not infer exact-candidate coverage from it.",
+    "Final build differs from r6 only in args reference callId display bound and Entry/Task hint; final navigation tests cover it. Reused earlier deterministic checks are identified in checks.json."
+  ],
+  "remainingResponsibilities": [
+    "Coordinator/merger integrates this commit into current integration; reconcile runtime/CLI/TUI overlap against later repairs as needed.",
+    "Coordinator builds and runs the one final combined npm check on the fixed integration candidate.",
+    "Independent affected SPEC-01/STD-01 review and acceptance writeback remain open; this handoff does not mark #15 reaccepted.",
+    "Push, PR, main/release and issue closure are coordinator responsibilities and were not performed."
+  ],
+  "modelRequest": {
+    "model": "gpt-6-astra",
+    "effort": "xhigh",
+    "backendIdentity": "UNKNOWN: not independently exposed by child execution"
+  },
+  "preservedFailures": [
+    "first-close.json and close-1200k.json are passing controls, not product failures.",
+    "first-close-crossing.json is the first observed ordinary-close product failure.",
+    "first-long-target.json/.stderr and r2 are setup import/command failures; first-long-target-r3.json is the actual product OOM.",
+    "build-r1.log and build-r3.log preserve initial compile failures; all original logs retained."
+  ],
+  "authorizationBoundary": "Only own isolated branch/worktree, directly affected offline checks and local commit; root worktree and state.json unchanged; no push."
+}

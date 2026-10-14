@@ -1,0 +1,66 @@
+{
+  "issue": 17,
+  "acceptedAt": "2026-10-09T16:01:57.590085+00:00",
+  "status": "integrated-accepted",
+  "scope": "T07 applicable implementation and real macOS Terminal acceptance; not full v1 daily acceptance",
+  "productSource": "f67a2edd377d37e3f13bbc0da273028103695d6f",
+  "originalProduct": "66c7fcafb34e722eafd738140f9305e5a235db80",
+  "ticketTip": "3909c094e0827b803441e8501715ecbcdf2cfdea",
+  "integrationMerge": "cc8fd2d6aaee811382fe48cf35519f559ee4f842",
+  "mergeTree": "8a589da73578a71f0ac74dc29ee5223b6839803f",
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/reopen-repair/merge-integration-readback.json",
+    "sha256": "37f839e56d765cc73ab24142016d6d27791f07d9d440e0275095bb28980a3e3e"
+  },
+  "criteria": {
+    "control": "PASS: immutable admission target, persistent steer/follow-up management ordering, withdraw/delivery receipts and separate accepted tasks",
+    "stopExit": "PASS: real bash/local effect, Ctrl+X then Ctrl+C paths, distinct idle exit pair, frozen follow-up and compact, raw/stty restoration",
+    "recovery": "PASS: readonly stopped source restriction, explicit end, preserved original aborted result, independent new task and old queue frozen",
+    "coldReopenRepair": "PASS: real native cold start without Ctrl+L or WIDTH_CPR_TIMEOUT; installed-byte verification serialized with timed terminal probes; timeout protections unchanged"
+  },
+  "native": {
+    "r1QueueStop": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/native-r1-attempt2-phase1-pass.json",
+    "r1RecoveryObserved": "Readonly restriction, explicit end and frozen queue only; startup FAIL and actual new-task gap remain unchanged",
+    "r2Supplement": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/reopen-repair/native-r2-pass.json",
+    "r2SupplementSha256": "fa14692f2467ea46f7c65d5279ae60e5c3d567e16522646e0635189319c07a8c",
+    "r2Facts": {
+      "recoveryReportSaved": true,
+      "noWidthTimeout": true,
+      "noRetryNeeded": true,
+      "measured": true,
+      "sourceExplicitlyEnded": true,
+      "sourceOriginalPreserved": true,
+      "newTaskCompleted": true,
+      "newTaskOnly": true,
+      "oldQueueFrozen": true,
+      "rawRestored": true,
+      "sttyRestored": true
+    },
+    "human": "P and chat reply 补测完成"
+  },
+  "checks": {
+    "r1": "Applicable original full79, final affected6, merged18 and installed public readbacks reused",
+    "r2": "30/30 affected, 29/29 combined UI +1/1 storage panel,2/2 runner and actual independent installed smoke PASS",
+    "binding": "12746 exact install entries;99 compiled;12631 dependency files; product paths match merge",
+    "reuse": "No merge product delta; root metadata differences only; original checks and failures preserved"
+  },
+  "preserved": [
+    "r1 attempt1 sequence incomplete",
+    "r1 attempt2 startup WIDTH_CPR_TIMEOUT FAIL",
+    "r1 original operator UNKNOWN (F directly followed by Chinese)",
+    "r1 new-task human claim without execution: NOT VERIFIED",
+    "repair first RED before corrected GREEN"
+  ],
+  "unlocks": [
+    19,
+    23,
+    27
+  ],
+  "remaining": [
+    "#19 real compaction behavior and correct accounting",
+    "#21 full eval, subsequent improve and metrics",
+    "#31 full integrated technical/native measurement",
+    "#30 paid DeepSeek batch and #32 human daily acceptance",
+    "Final independent code review; no main/release/issue closure"
+  ]
+}

@@ -1,0 +1,408 @@
+{
+  "at": "2026-10-09T22:09:45.481579+00:00",
+  "status": "LOCAL_STAGE_1_REVIEW_REPAIR_INTEGRATED_WITH_REMAINING_E2_SCOPE",
+  "issue": 15,
+  "findings": [
+    "SPEC-01",
+    "STD-01"
+  ],
+  "base": "ca14cf5a5f2ef00017c972a40cb8c8d5b11488d9",
+  "originalCandidate": {
+    "commit": "5ab40019d56eaf4e36c64d30cb3ebc84d20be072",
+    "tree": "df6b26c81c18697fb0e1233cd5b4e7ea59125955",
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/candidate-manifest.json",
+      "bytes": 6118,
+      "sha256": "f858ca393a4973afc2938dbda57356be214e2213ce38eba5911dac590409e9da"
+    }
+  },
+  "combinedCandidate": {
+    "commit": "f653aa032983ffb0395c727448a676858c8f327f",
+    "tree": "d73d046bb03069fb6cdbea4834705a02bcb6dc9b",
+    "parents": [
+      "5ab40019d56eaf4e36c64d30cb3ebc84d20be072",
+      "ca14cf5a5f2ef00017c972a40cb8c8d5b11488d9"
+    ]
+  },
+  "rootMerge": {
+    "commit": "e43f902df4321dc0b87c8fc7b194f6942b94fc7c",
+    "tree": "d73d046bb03069fb6cdbea4834705a02bcb6dc9b",
+    "parents": [
+      "ca14cf5a5f2ef00017c972a40cb8c8d5b11488d9",
+      "f653aa032983ffb0395c727448a676858c8f327f"
+    ],
+    "treeEqualsCombinedCandidate": true,
+    "conflicts": [],
+    "trackedClean": true
+  },
+  "changedFiles": [
+    "docs/implementation/pi-durio-v1/issue-15/README.md",
+    "docs/implementation/pi-durio-v1/issue-15/preflight-memory-repair.md",
+    "src/preflight.ts",
+    "src/recovery-facts.ts",
+    "src/recovery.ts",
+    "src/runtime.ts",
+    "src/storage-disposition.ts",
+    "test/preflight.test.ts",
+    "test/recovery-facts.test.ts",
+    "test/storage.test.ts"
+  ],
+  "rootFilesSynced": [
+    "README.md",
+    "docs/implementation/pi-durio-v1/issue-30/README.md",
+    "docs/implementation/pi-durio-v1/issue-30/review-repair/handoff.json",
+    "docs/implementation/pi-durio-v1/issue-30/review-repair/merge-integration-readback.json",
+    "docs/implementation/pi-durio-v1/issue-31/evidence-index.json",
+    "docs/implementation/pi-durio-v1/issue-31/local-r1-report.md",
+    "docs/implementation/pi-durio-v1/issue-31/local-r1-summary.json",
+    "docs/implementation/pi-durio-v1/review/1be8e282/coordinator-disposition.json",
+    "docs/implementation/pi-durio-v1/review/1be8e282/spec-review.json",
+    "docs/implementation/pi-durio-v1/review/1be8e282/spec-review.md",
+    "docs/implementation/pi-durio-v1/review/1be8e282/standards-evidence/appendix.md",
+    "docs/implementation/pi-durio-v1/review/1be8e282/standards-review.json",
+    "docs/implementation/pi-durio-v1/review/1be8e282/standards-review.md",
+    "docs/implementation/pi-durio-v1/status.json",
+    "docs/implementation/pi-durio-v1/status.md",
+    "scripts/live-batch/run.mjs",
+    "test/live-batch.test.ts"
+  ],
+  "verifiedOriginalCandidate": {
+    "sourceBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/source-build.json",
+      "bytes": 89374,
+      "sha256": "10f2da5c693ff27c2a4983697a845d5dae6efb5c0344ccc409953932756cdeca"
+    },
+    "counts": {
+      "inputs": 159,
+      "compiler": 140,
+      "outputs": 234
+    },
+    "sourceArchive": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/source-5ab4001.tar.gz",
+      "sha256": "5001ea5fe4ede755888fe1153091f3e0d9ed4927170a7f48f33d743e8a5a6a76",
+      "bytes": 2431911
+    },
+    "sourceArchiveFilesAgainstGit": 347,
+    "compiledArchive": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/compiled-5ab4001.tar.gz",
+      "sha256": "5081556b5b0790d1c8be7c9ae83f519021ea8124e58961864dfc21e4efb24f1e",
+      "bytes": 692354
+    },
+    "compiledFilesAgainstWorktree": 340,
+    "appleDoubleArchiveMetadataEntries": 348,
+    "appleDoubleHandling": "Archive SHA binds metadata; 340 non-AppleDouble files exactly match the complete dist file set and bytes.",
+    "dependenciesVerified": 12778,
+    "dependencyProvenance": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/dependency-provenance.json",
+      "bytes": 796,
+      "sha256": "51a4885274cefc9d642502806f9a84e404cdbd20a069c51008e127fa87b0ef70"
+    },
+    "evidenceIndex": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/evidence-index.json",
+      "bytes": 1068570,
+      "sha256": "44f60d3b4b8d48e4ada026b3199ef34ca05a2d43b8f21459f13d56b6e01ddf54"
+    },
+    "evidenceFilesVerified": 3629
+  },
+  "combinedIdentityDelta": {
+    "inputCount": 160,
+    "originalInputCount": 159,
+    "added": [
+      "test/live-batch.test.ts"
+    ],
+    "modified": [
+      "scripts/live-batch/run.mjs"
+    ],
+    "removed": [],
+    "allRootAndTicketInputBytesEqual": true,
+    "sourceBuildManifestRewritten": false,
+    "originalProductSourceAndCompiledOutputsUnchanged": true,
+    "explanation": "Latest root adds #30 live-batch test and changes its runner; all #15 product source, compiler, frozen compiled outputs and focused test source remain unchanged. The original source-build manifest continues to identify only its original 159-input candidate. Combined 160-input build identity is pending coordinator final composition build.",
+    "rootDist": {
+      "bytePreserved": true,
+      "manifestSha256": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+      "currentMergedProductBuild": false,
+      "note": "Root dist is the prior #26 producer and is stale for these merged #15 source changes. It was not rebuilt or relabeled."
+    }
+  },
+  "verificationReuse": {
+    "checks": [
+      {
+        "command": "npm run build",
+        "status": "PASS",
+        "log": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/build-green-07.log",
+          "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+          "bytes": 59
+        }
+      },
+      {
+        "command": "node --test dist/test/preflight.test.js dist/test/recovery-facts.test.js dist/test/recovery.test.js dist/test/runtime.test.js dist/test/storage.test.js dist/test/control.test.js dist/test/compaction.test.js",
+        "status": "PASS",
+        "tests": 60,
+        "passed": 60,
+        "failed": 0,
+        "log": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/affected-07.log",
+          "sha256": "29ba24bcb195d70cfd6905bdd2f5c008daee37dee0ec0fe8f6166ba87ca8efd0",
+          "bytes": 7365
+        }
+      },
+      {
+        "command": "node benchmark.mjs",
+        "status": "PASS",
+        "cases": 6,
+        "results": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-results.json",
+          "sha256": "a959406f8f5857251cdcf5e37be82d0f8f99e09c02f64f98235932403d91b7c7",
+          "bytes": 3551
+        },
+        "identity": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-identity.json",
+          "sha256": "9d8de53ba6d723667640703989aba4ee3f45d74a337d6a635b5875a9efad963d",
+          "bytes": 479
+        }
+      },
+      {
+        "command": "node benchmark-gc.mjs",
+        "status": "PASS",
+        "cases": 6,
+        "results": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-gc-results.json",
+          "sha256": "449b8cedb77864111f1fe380762dcaf3ba6d36fd58e338456fd42b24d1ba6791",
+          "bytes": 4306
+        },
+        "identity": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-gc-identity.json",
+          "sha256": "9d8de53ba6d723667640703989aba4ee3f45d74a337d6a635b5875a9efad963d",
+          "bytes": 479
+        }
+      },
+      {
+        "command": "post-commit source-build and compiler content verification",
+        "status": "PASS",
+        "inputs": 159,
+        "outputs": 234,
+        "compilerFiles": 140
+      },
+      {
+        "command": "git diff --check; git status --porcelain",
+        "status": "PASS",
+        "clean": true
+      }
+    ],
+    "benchmarkCasesReadBack": [
+      {
+        "group": "benchmark",
+        "rawOutputBytes": 0,
+        "strategy": "admission",
+        "exitCode": 0,
+        "retainedAfterGc": null
+      },
+      {
+        "group": "benchmark",
+        "rawOutputBytes": 0,
+        "strategy": "recovery-snapshot",
+        "exitCode": 0,
+        "retainedAfterGc": null
+      },
+      {
+        "group": "benchmark",
+        "rawOutputBytes": 4194304,
+        "strategy": "admission",
+        "exitCode": 0,
+        "retainedAfterGc": null
+      },
+      {
+        "group": "benchmark",
+        "rawOutputBytes": 4194304,
+        "strategy": "recovery-snapshot",
+        "exitCode": 0,
+        "retainedAfterGc": null
+      },
+      {
+        "group": "benchmark",
+        "rawOutputBytes": 25165824,
+        "strategy": "admission",
+        "exitCode": 0,
+        "retainedAfterGc": null
+      },
+      {
+        "group": "benchmark",
+        "rawOutputBytes": 25165824,
+        "strategy": "recovery-snapshot",
+        "exitCode": 0,
+        "retainedAfterGc": null
+      },
+      {
+        "group": "benchmark-gc",
+        "rawOutputBytes": 0,
+        "strategy": "admission",
+        "exitCode": 0,
+        "retainedAfterGc": {
+          "rss": 54411264,
+          "heapTotal": 9846784,
+          "heapUsed": 6095888,
+          "external": 2627715,
+          "arrayBuffers": 143737
+        }
+      },
+      {
+        "group": "benchmark-gc",
+        "rawOutputBytes": 0,
+        "strategy": "recovery-snapshot",
+        "exitCode": 0,
+        "retainedAfterGc": {
+          "rss": 54362112,
+          "heapTotal": 9846784,
+          "heapUsed": 6064000,
+          "external": 2623587,
+          "arrayBuffers": 143737
+        }
+      },
+      {
+        "group": "benchmark-gc",
+        "rawOutputBytes": 4194304,
+        "strategy": "admission",
+        "exitCode": 0,
+        "retainedAfterGc": {
+          "rss": 54951936,
+          "heapTotal": 9846784,
+          "heapUsed": 6096296,
+          "external": 2627715,
+          "arrayBuffers": 143737
+        }
+      },
+      {
+        "group": "benchmark-gc",
+        "rawOutputBytes": 4194304,
+        "strategy": "recovery-snapshot",
+        "exitCode": 0,
+        "retainedAfterGc": {
+          "rss": 72368128,
+          "heapTotal": 19021824,
+          "heapUsed": 6133192,
+          "external": 5378745,
+          "arrayBuffers": 143737
+        }
+      },
+      {
+        "group": "benchmark-gc",
+        "rawOutputBytes": 25165824,
+        "strategy": "admission",
+        "exitCode": 0,
+        "retainedAfterGc": {
+          "rss": 54919168,
+          "heapTotal": 9846784,
+          "heapUsed": 6096232,
+          "external": 2627715,
+          "arrayBuffers": 143737
+        }
+      },
+      {
+        "group": "benchmark-gc",
+        "rawOutputBytes": 25165824,
+        "strategy": "recovery-snapshot",
+        "exitCode": 0,
+        "retainedAfterGc": {
+          "rss": 104890368,
+          "heapTotal": 40779776,
+          "heapUsed": 6226816,
+          "external": 3410735,
+          "arrayBuffers": 143737
+        }
+      }
+    ],
+    "basis": "Source/build/archive/compiled/140 compiler correspondence and actual saved process results verified. #30 changes do not overlap the seven #15 focused test sources or changed product files. Existing 60/60 and 6+6 checks remain original candidate evidence; no claim of complete combined-candidate verification.",
+    "combinedWholeProjectCheck": "NOT RUN here; coordinator explicitly scheduled one final composition check after pending repairs.",
+    "newBuilds": 0,
+    "newBehaviorTestRuns": 0,
+    "newVmStarts": 0,
+    "newProviderRequests": 0,
+    "newNativeRuns": 0,
+    "preflight": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/merge-preflight.json",
+      "bytes": 1010899,
+      "sha256": "35290d9e64f096bb53f186de12480f05aad74b6b5c0c679e21fcac86287b0fe6"
+    },
+    "postflight": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/merge-postflight.json",
+      "bytes": 949,
+      "sha256": "26c29650e803bd7c21cc4b63f5e9d16a7e31aaff2d522cda15d0559d9682a17c"
+    },
+    "verifier": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/merge-verifier.py",
+      "bytes": 8414,
+      "sha256": "d0fb717343535482354694c21ad00604a160860a793655ec6ee6cca9e74bc21d"
+    },
+    "mergerFailures": []
+  },
+  "preservation": {
+    "protectedFilesUnchanged": 4627,
+    "originalsUnchanged": 162,
+    "untrackedUnchanged": [
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+      "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+      "docs/wayfinder-proposal.md",
+      "docs/wayfinder-readback-2026-10-09.json"
+    ],
+    "originalFirstFailures": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/first-red-01.log",
+        "sha256": "b208ddf61942fe8064f6561d68ebf3d92d720681dcf9a6105fd2f227b8c6e5c1",
+        "bytes": 5696
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/coordinator-recovery-scope/first-result.json",
+        "sha256": "0fbfc20965189d3d9bd9213daae100a3959adf602cd5ea8baef3af6f7ca33cc0",
+        "bytes": 3719
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/coordinator-recovery-scope/first.stderr",
+        "sha256": "0486c82edc8ae0d4088f312557e7fde68eeec62d63675e08bce4a7ba2007941b",
+        "bytes": 8207
+      }
+    ],
+    "firstFailuresRewritten": false,
+    "frozenCandidateRewritten": false,
+    "oldEvidenceAnchor": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/merge-integration-readback.json",
+      "bytes": 9159,
+      "sha256": "431bc0b6517ff226913748f3be3408c21aeb9bdb19deb097b361214cadda57f8"
+    },
+    "historicalFullInventoryRescanned": false
+  },
+  "remainingRequiredWork": [
+    {
+      "path": "src/recovery.ts:93 -> inspectSession; src/preflight.ts:61",
+      "defect": "Target session inspection retains all transcript entries, tasks, submissions, conversations and documents; report.tools also grows with committed history.",
+      "proposal": "Public scanTasks/scanSubmissions page and validate all ownership; public entry(assistantId/outcome.entryId) on demand; target conversation pi.agent/pi.live only; disk-backed minimal joins where needed. Provide completed-history summary/page without truncating unresolved tools or decision/snapshot coverage. Freeze a separate candidate and add real target-session regression before claiming full E2."
+    },
+    {
+      "path": "src/retention.ts:104; src/storage-archive.ts:36; src/runtime.ts:257,765",
+      "defect": "Remaining full-inspection consumers have separate exact needs: storage needs counts/conversation identity/pending, withdrawal needs one compaction task and summary, close needs pending and usage.",
+      "proposal": "Use purpose-specific public projections under the same stable source fence; preserve storage protected dependencies and usage semantics."
+    }
+  ],
+  "limits": [
+    "Stage 1 covers ordinary admission, lazy host recovery facts, streaming snapshot hash and non-target session admission summaries. It does not complete all E2.",
+    "Target-session full inspector/recovery reports, ordinary runtime close, withdrawal and storage consumers still need the separately planned follow-up.",
+    "24 MiB old-space tests are a regression seam, not production RSS or latency acceptance.",
+    "Independent review and all finding dispositions remain coordinator responsibilities. SPEC-01/STD-01 are not closed and issue 15 is not re-accepted by this merge."
+  ],
+  "boundaries": {
+    "accepted": false,
+    "findingsClosed": false,
+    "stateJsonModified": false,
+    "githubChanges": false,
+    "pushed": false,
+    "mainChanged": false,
+    "release": false,
+    "paid": "NOT RUN",
+    "heavyWindow": "Untouched; VM work remains with repair26_output"
+  },
+  "requestedModel": "gpt-6-astra",
+  "requestedEffort": "xhigh",
+  "actualBackendAttestation": "NOT_ATTESTED",
+  "ownership": "Root write ownership returned to coordinator immediately after this record was finalized."
+}

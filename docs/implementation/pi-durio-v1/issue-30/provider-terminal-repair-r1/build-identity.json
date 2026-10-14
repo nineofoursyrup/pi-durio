@@ -1,0 +1,84 @@
+{
+  "finding": "LIVE-USD3-R3-01",
+  "base": "80b912a0d02b1dab7df8afc909fdd9359769ed07",
+  "branch": "codex/pi-durio-v1-provider-terminal-repair",
+  "worktree": "/Users/nineofour/.codex/worktrees/provider-terminal-repair/Durio",
+  "sourceBuild": {
+    "path": "/Users/nineofour/.codex/worktrees/provider-terminal-repair/Durio/dist/execution/source-build.json",
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+    "bytes": 92984
+  },
+  "verifiedBuildEntries": {
+    "inputs": 169,
+    "compiler": 140,
+    "outputs": 246
+  },
+  "files": [
+    {
+      "path": "src/provider-boundary.ts",
+      "sha256": "7da79d9ea8f8d1b5e6b094410c9c5b3447fb210fff1fe75911fcc6434032ddd0",
+      "bytes": 9800
+    },
+    {
+      "path": "test/provider-boundary.test.ts",
+      "sha256": "8b21e610c0151ee60321fff1525a26ed8aaa63cd114180ed011677e01a2944a6",
+      "bytes": 13998
+    },
+    {
+      "path": "test/improve.test.ts",
+      "sha256": "c25339693dc819f9772210c3ecd1ee092522b36e0bd3d7adee1211791b63482f",
+      "bytes": 18927
+    },
+    {
+      "path": "package.json",
+      "sha256": "1e3c7dee4f53a86aecc7732ece59e5d8b9298487e2d5d807c5aabb769e012c15",
+      "bytes": 2432
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67",
+      "bytes": 64781
+    },
+    {
+      "path": "dist/src/provider-boundary.js",
+      "sha256": "4da8307caa26bf57837bf8ddb58c554153d60278c266c607a24d88d4d548ffed",
+      "bytes": 11734
+    },
+    {
+      "path": "dist/src/provider-boundary.js.map",
+      "sha256": "9f7adff389a8982e32dc57c3db6591a8f7f25c1ee1bcf58f28471e11ffb8053e",
+      "bytes": 12073
+    },
+    {
+      "path": "dist/src/provider-boundary.d.ts",
+      "sha256": "d12a80958394d5fee1da769ba240e33c678701be52311ce429cd707b5e2621dd",
+      "bytes": 2172
+    },
+    {
+      "path": "dist/test/provider-boundary.test.js",
+      "sha256": "331708308bda03b15ebc3541e54f431f11d71de37ac5d1e4dc937ae2bb30338d",
+      "bytes": 15881
+    },
+    {
+      "path": "dist/test/improve.test.js",
+      "sha256": "785c83c77138b2d3a973ba1f058db1c34fd93d621eaf4b574f7c6e4d9332ed78",
+      "bytes": 21065
+    },
+    {
+      "path": "dist/execution/source-build.json",
+      "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+      "bytes": 92984
+    }
+  ],
+  "environment": {
+    "node": "v26.8.2",
+    "npm": "11.19.1"
+  },
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoning": "xhigh",
+  "actualBackendIdentity": "unavailable: tool did not expose verifiable backend identity",
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "newProductCandidateRequired": true,
+  "oldRealEvidence": "Retained on 9aed1af; not relabeled"
+}

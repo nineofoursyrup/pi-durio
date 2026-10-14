@@ -1,0 +1,102 @@
+{
+  "status": "PASS_AFFECTED_OFFLINE_PENDING_INDEPENDENT_REVIEW",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/frozen-manifest.json",
+    "bytes": 10012,
+    "sha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e"
+  },
+  "newCases": 35,
+  "checks": [
+    {
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/supplement-check-r2.json",
+        "bytes": 45449,
+        "sha256": "d9b01fa7bebbf035aeae2590ba773724d913191b98efc47314e674e7e7ddc69c"
+      },
+      "cases": 25,
+      "scope": "Exact frozen runner/preflight/supplement in memory-only API/clock/authorization/receipt fixture; post-install expiry, three exact PASS identities, first failure, unknown usage, old authorization and repeat denial, auth401, repeated cancellation, zero candidate and unavailable ledger"
+    },
+    {
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/budget-check-r1.json",
+        "bytes": 1841,
+        "sha256": "76428bdfb41ce5a3393b06d7f72034a08c6c738fac84e0097590483dec929486"
+      },
+      "cases": 8,
+      "scope": "Exact installed PersistentBudget class in memory-only Evidence store; new eval reservation/headroom/unknown/request ceiling and unchanged full improve allowance; no runtime/Harness/provider"
+    },
+    {
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/wrapper-check-r1.json",
+        "bytes": 706,
+        "sha256": "9a99edda9edfa343e589d17171dccc12688690915c7b717161eac20a3a97158b"
+      },
+      "cases": 2,
+      "scope": "Actual unchanged wrapper with new actual preflight; missing/false grant and prohibited credential reader; clean child environment"
+    }
+  ],
+  "firstCheckFailure": {
+    "record": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/supplement-check-r1.json",
+      "bytes": 8042,
+      "sha256": "d72bde048b04f308f44e035baead4741cdb8be87925ac811dac3fac72e2f6fde"
+    },
+    "script": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/check-supplement-r1-source.mjs",
+      "bytes": 15869,
+      "sha256": "4b352787c701d6eb470765207076cc5f0b77994a807876945b46b38cb44fa2e0"
+    },
+    "reason": "Offline fixture saved receipts in memory but file() did not read those saved bytes. Positive path therefore reported a synthetic cumulative-budget read error. No runtime harness change; fixed only offline fixture read adapter.",
+    "resolution": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/supplement-check-r2.json",
+      "bytes": 45449,
+      "sha256": "d9b01fa7bebbf035aeae2590ba773724d913191b98efc47314e674e7e7ddc69c"
+    },
+    "frozenHarnessChangedBetweenChecks": false
+  },
+  "reused": [
+    {
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/credential-check-r1.json",
+        "bytes": 985,
+        "sha256": "49913057315ce07cead2580230dae43c81e8b66f7578b64cdae390ffc3043fd1"
+      },
+      "cases": 12,
+      "basis": "launch.py is byte-identical; parser/owner/mode/no-symlink/secret-redaction policy unchanged. New gate ordering retested above; no real key used."
+    },
+    {
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/compiled-r2.log",
+        "bytes": 684,
+        "sha256": "39aacfa0d2cb41693720c431486a3de274c8dc59c2063ad3de7ff0bc8137b0fe"
+      },
+      "basis": "Original established product/cancellation implementation unchanged. Added ledger finalization and exact three-case gate are covered by new exact-source cancellation/auth fixtures; this old log is not a new paid run."
+    }
+  ],
+  "earlierReviewFailurePreserved": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+    "bytes": 907,
+    "sha256": "341b2233193117b0c05ccda0042a9ac8ab3d5c8ef34b48f45583b3612f36da07"
+  },
+  "originalBytePreservation": {
+    "filesVerified": 3167,
+    "mismatches": 0,
+    "index": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/read-identities.json",
+      "bytes": 883906,
+      "sha256": "62f47da65d26dc9bd04709e8f4428e60e7391774ce382f8a4873631f387f627d"
+    }
+  },
+  "syntax": "All four harness .mjs node --check; both .py ast.parse; executed check scripts parsed and passed",
+  "actualCredentialReads": 0,
+  "actualProviderRequests": 0,
+  "restrictedVmStarts": 0,
+  "productBuilds": 0,
+  "actualGrantsOrStartsCreated": false,
+  "limitations": [
+    "Checks use synthetic memory-only API/authorization/clock data; they do not establish true provider availability or task success.",
+    "Frozen public tariff remains an observation, not an invoice/account hard cap or immutable served model proof.",
+    "Product installation/runtime and initial data-root verification remain live runner pre-materialization gates.",
+    "Independent scoped review is pending; coordinator alone may request and record a new human one-start grant."
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "at": "2026-10-10T11:14:35.743Z",
+  "status": "MEASURED",
+  "exception": null,
+  "steps": [
+    {
+      "id": "idle-1",
+      "script": "native-idle.mjs",
+      "elapsedMs": 31365.723917,
+      "loadBefore": [
+        3.50927734375,
+        3.4140625,
+        3.63330078125
+      ],
+      "loadAfter": [
+        3.140625,
+        3.32666015625,
+        3.59228515625
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "measurementStatus": "MEASURED",
+      "ttyBefore": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyAfter": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyUnchanged": true
+    },
+    {
+      "id": "idle-2",
+      "script": "native-idle.mjs",
+      "elapsedMs": 30376.116874999996,
+      "loadBefore": [
+        3.140625,
+        3.32666015625,
+        3.59228515625
+      ],
+      "loadAfter": [
+        3.55224609375,
+        3.41845703125,
+        3.61572265625
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "measurementStatus": "MEASURED",
+      "ttyBefore": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyAfter": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyUnchanged": true
+    },
+    {
+      "id": "idle-3",
+      "script": "native-idle.mjs",
+      "elapsedMs": 31371.774499999992,
+      "loadBefore": [
+        3.55224609375,
+        3.41845703125,
+        3.61572265625
+      ],
+      "loadAfter": [
+        3.5322265625,
+        3.4248046875,
+        3.60986328125
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "measurementStatus": "MEASURED",
+      "ttyBefore": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyAfter": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyUnchanged": true
+    },
+    {
+      "id": "long-session",
+      "script": "native-session.mjs",
+      "elapsedMs": 318689.814833,
+      "loadBefore": [
+        3.5322265625,
+        3.4248046875,
+        3.60986328125
+      ],
+      "loadAfter": [
+        4.61865234375,
+        4.41162109375,
+        4.0625
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "measurementStatus": "MEASURED",
+      "ttyBefore": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyAfter": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyUnchanged": true
+    },
+    {
+      "id": "readonly-data",
+      "script": "readonly-data.mjs",
+      "elapsedMs": 502.49545899999794,
+      "loadBefore": [
+        4.61865234375,
+        4.41162109375,
+        4.0625
+      ],
+      "loadAfter": [
+        4.61865234375,
+        4.41162109375,
+        4.0625
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "measurementStatus": "MEASURED",
+      "ttyBefore": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyAfter": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyUnchanged": true
+    },
+    {
+      "id": "cold-recovery",
+      "script": "native-recovery.mjs",
+      "elapsedMs": 11334.747334000014,
+      "loadBefore": [
+        4.61865234375,
+        4.41162109375,
+        4.0625
+      ],
+      "loadAfter": [
+        4.75048828125,
+        4.447265625,
+        4.0791015625
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "measurementStatus": "PASS",
+      "ttyBefore": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyAfter": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+      "ttyUnchanged": true
+    }
+  ],
+  "notRun": [],
+  "ttyAtEndBeforeRepair": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+  "ttyOriginal": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+  "ttyRepairNeeded": false,
+  "providerPolicy": "Only declared synthetic transport; credentials not inherited",
+  "humanAcceptance": "NOT CLAIMED"
+}

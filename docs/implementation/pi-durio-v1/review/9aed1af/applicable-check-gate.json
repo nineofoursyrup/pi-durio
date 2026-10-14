@@ -1,0 +1,3587 @@
+{
+  "at": "2026-10-09T23:29:59.544871+00:00",
+  "status": "PASS_WITH_APPLICABLE_REUSE",
+  "scope": "Local post-repair check gate only; not full technical, provider, native Terminal or daily-use acceptance. No new full-suite run is claimed.",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+  "producerCommit": "304d255dd856316fe52a1863a12856c0468c72aa",
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-repaired-r1/source-build.json",
+    "bytes": 92981,
+    "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+  },
+  "identityVerified": true,
+  "unresolvedRequiredChecks": [],
+  "sourceBuildCounts": {
+    "inputs": 169,
+    "compiler": 140,
+    "outputs": 246
+  },
+  "identityReadback": [
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/artifact.ts",
+      "bytes": 5364,
+      "sha256": "3f68b98904baf644230538f3a2faa333c51b55f064e808897b3daaa2df3ae66a"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/cli.ts",
+      "bytes": 19258,
+      "sha256": "bb6796c073004eb6cf6a6a329f1a374fdf5a1b023dd3cb11d984a6f5736d5fcc"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/coding-environment.ts",
+      "bytes": 8107,
+      "sha256": "95798cb345160b4af86fa06e548743425cfcadd3763eb59d06e97ccb37759444"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/compaction.ts",
+      "bytes": 7847,
+      "sha256": "db5e9237e61095a52bade0cee008bdbbb6c1a10248a8d3e0bb81e2e634c270c1"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/control.ts",
+      "bytes": 11543,
+      "sha256": "a008ab15a77c7fe323f5be01f14a4af3e842d752a3d47bf976b6b5073f474803"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/derived-evidence.ts",
+      "bytes": 3491,
+      "sha256": "a0c73f6451c7517b5dcb2cdcf888da5ae075f601b645cd1d2fb7d88ad2bdfa13"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/detail-page.ts",
+      "bytes": 961,
+      "sha256": "ae0145e7b7fded15adafddf9b75ee53998ea4de5884b92b6a01e2e2411e7e206"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/eval/cli.ts",
+      "bytes": 2730,
+      "sha256": "c04e6341b61cee11a96a535c52212d654ec6bf9c99d841fb2349c26a102d08e7"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/eval/comparison.ts",
+      "bytes": 12200,
+      "sha256": "66ea03e27e9e1c76da8f4f385dfe64a4c3dd27e26f8cd067a21d806941ef21e9"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/eval/fixtures.ts",
+      "bytes": 4895,
+      "sha256": "176d99f46a5e9b93d9367a18412d0d0decc31208920e7b916a917adf3558a77a"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/eval/guest.ts",
+      "bytes": 3766,
+      "sha256": "7db4aa89a4baebaa228324b443f4d4a668fbc80960c376c9785ac081f5b5e8a8"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/eval/mediator.ts",
+      "bytes": 5212,
+      "sha256": "b43f0384d75346a362d4b9a33c76e196ced7707d522767dad66e4fdd8c76d301"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/eval/plan.ts",
+      "bytes": 11188,
+      "sha256": "42f086f9ca000acd09fd717ca9606547c6eb0341158f9fbb6e910ee14ce04e95"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/eval/probes.ts",
+      "bytes": 2645,
+      "sha256": "0ba96ad04ef017c4dd16d1c9679e199566ef309fbced9ebfac329051987c357a"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/eval/runner.ts",
+      "bytes": 36323,
+      "sha256": "33bbf2a839d341be2c4c3c710534a411cc6db7adfd5292ba5b8edbd32f7339b9"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/eval/store.ts",
+      "bytes": 3004,
+      "sha256": "de3fccee741f910e70aed31818a03726e348f9fb9e67facef488b2aba34f12ea"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/evidence.ts",
+      "bytes": 12568,
+      "sha256": "d6e0bc877bffee474a29f925a7621a6a27cfc92ae90ef3ba86eaa321700d73f5"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/execution-config.ts",
+      "bytes": 2905,
+      "sha256": "18e83270ddbfb6a8469c073f3daa49ec5e1d122865628d992c88646458ffa0da"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/execution-output.ts",
+      "bytes": 2169,
+      "sha256": "99a96d44e61edbc9a15c20a64a99f957d89c617b23bc20e4b9724d410606f843"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/fact-clock.ts",
+      "bytes": 1216,
+      "sha256": "432664eb241b611737774378fe636b07be90e67d4c8daf7bcd022a69bd01aa48"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/file-inventory.ts",
+      "bytes": 679,
+      "sha256": "70248aaf8ade6571716fd76a1a2c9f7e5525f8ab24ae3da9ce0f1e7aa40d32e6"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/fixed-evidence.ts",
+      "bytes": 11463,
+      "sha256": "60a66348b183f9d02c1ecba513c1cc5c8cbbd7ebb103960d962b631752ba4f14"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/headless-lifecycle.ts",
+      "bytes": 850,
+      "sha256": "e0abbe64a7e8764bc899e6e4021f91633a69da6cf5550d078fbfaca33e08efb7"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/history-cli.ts",
+      "bytes": 2942,
+      "sha256": "e7de1c9b645b3664ad9fb5bfce130ff6eaefd9debbaafcf9ba9aee569c1ccba7"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/history.ts",
+      "bytes": 13866,
+      "sha256": "51d52a96249cce90f6b27d527afecde86a821b0dba9163fbc868b982680ce4ef"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-build.ts",
+      "bytes": 13133,
+      "sha256": "b580fac9a362774eac343baba65a49452e5cbb9556a7d305d1d1fd989719f98c"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-cli.ts",
+      "bytes": 5387,
+      "sha256": "57fa8c986537f070508cc2c74a601554cc309080d4bc7010b3b4086cb773449e"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-decisions.ts",
+      "bytes": 21819,
+      "sha256": "8109df0a81e5c5358dcfb5e63d27050608c8ce48b77b77a520d4c2bcfe1d8069"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-defaults.ts",
+      "bytes": 4257,
+      "sha256": "8abe194fa0b553d120c8b8e96e081a1c079abde57a8365f9d790695e011c0a66"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-eval-assets.ts",
+      "bytes": 5503,
+      "sha256": "489ff0851c8ee403b427a214257077b16b1dac20d7ce3bc3158a5bf3d3755e86"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-formal.ts",
+      "bytes": 9225,
+      "sha256": "818ed5a144291595a9846fd0017df7e8ffa5126e462e692c35fdefed244e8ef7"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-history.ts",
+      "bytes": 11552,
+      "sha256": "5984451f966cd0f7f6393f861632731d1cedf550f4f116cbbfde1dd152573217"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-process.ts",
+      "bytes": 11686,
+      "sha256": "a69273530257aa683043485000b5f4bbc727d38b677868b1890979aee5232602"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-profile-validation.ts",
+      "bytes": 3427,
+      "sha256": "1cc64916f0ab4bc3b9d4bda8777323bb6176d3c9e18da3312b1fa7d31518a5dd"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-rollback.ts",
+      "bytes": 7062,
+      "sha256": "5b99b11c409eb8a47cd444262a9f58d0552725df84d12138367fa3390c9f3667"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-source.ts",
+      "bytes": 8651,
+      "sha256": "06ac08ce2678f41b80be049740b86d15d05269279b54b73438a6c50526e5cf1f"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve-validation.ts",
+      "bytes": 22824,
+      "sha256": "0d7a297f17428e0cd56e14683cc2a77b0195f8b958594d950d93313725221ef3"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/improve.ts",
+      "bytes": 25404,
+      "sha256": "85ecc8bd1cf206911bf83911fc5ea4cea84f2e836f6983bedb4dee4ae604a7fa"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/acceptance.ts",
+      "bytes": 19967,
+      "sha256": "0e70a9c405ad752ca3a076e799dfb18bc54e63a0c2c7af30962b5c3cea2614ce"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/cli.ts",
+      "bytes": 1883,
+      "sha256": "c796cc47f002898dfe5ecc1391ec3d3d044099c9b092d6853696c3f84154a63c"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/clocks.ts",
+      "bytes": 7248,
+      "sha256": "4c2dc471801e094df79c67d1ad9cb2b80cfcce8665acf396463f52f0599dda00"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/costs.ts",
+      "bytes": 17266,
+      "sha256": "405f8b33d272c95d9e5193b38dfb68cea7766d594e01105254d3ae94a01bd6fc"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/faults.ts",
+      "bytes": 14849,
+      "sha256": "26c5d49d25392f02ab30ce3128e704e6b7bed67df5d2f7bccb3fda04287301e2"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/feedback-report.ts",
+      "bytes": 12513,
+      "sha256": "ee3eb5dc5c95243683c1bebe416e84156e7be7bcffc10773306e3b010e2f8d94"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/feedback.ts",
+      "bytes": 7249,
+      "sha256": "5d4038f2c371a9de43ae2450dc8b0129208c8bbe09afdcd28789c64f48cc0c19"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/index.ts",
+      "bytes": 904,
+      "sha256": "75b5c1901aee226ade25e05b6a153f1075d1e7aaf5955adf4229b8603b5a15f1"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/operations.ts",
+      "bytes": 8394,
+      "sha256": "9f329a1d8e11eb2025ae9e0fa553e071073092bbddb923471459fe0e5e703c2a"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/metrics/report.ts",
+      "bytes": 13488,
+      "sha256": "301895a307a5170d652b24231edba05901fe0ebeabd1191cb9acbb9bebeb6ed5"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/offline.ts",
+      "bytes": 3196,
+      "sha256": "2275f68361cfbc0d9766f1971e37c42b24388b3e89ab0529773a1c70abd90bf3"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/ownership.ts",
+      "bytes": 5935,
+      "sha256": "7079a570e16721a58a9e30778c8ca9eb488f77e8a54358c2b3d6d1d3a24c3f25"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/preflight.ts",
+      "bytes": 10862,
+      "sha256": "6caa4570098241bcac97f0c2fad9a8ea98b9aa653d9181aab0e8b2b7bd59c51b"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/provider-boundary.ts",
+      "bytes": 7167,
+      "sha256": "ddd688163aa6dd431609b9857fdd5c24d37a06741b9bff05083e7656da0974c5"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/query.ts",
+      "bytes": 4423,
+      "sha256": "faacfd68c44af99e6cdc3ef3d0b9874aff0499bfd53eaf437f2540d2b17e4b18"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/read-environment.ts",
+      "bytes": 2510,
+      "sha256": "7fbcf4ae2e94e16d5b4dcdbdd5f02f3c19d071a3d4020462d6a9be5c427e5b28"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/recovery-facts.ts",
+      "bytes": 3478,
+      "sha256": "f44aa79b4745a36cad6804830476a5929cddd5d6c002783b8ff3230aa2c08ccb"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/recovery-projection.ts",
+      "bytes": 14110,
+      "sha256": "30f06d861c97a6a770a0c144c380edd2e889654e85c98684ddfe83d29b93fe54"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/recovery.ts",
+      "bytes": 28648,
+      "sha256": "700dffc819dabe8cfbce62edd30abed1bbef6b8844782ed891f2042baa212a0a"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/retention.ts",
+      "bytes": 15176,
+      "sha256": "e6146534ae65945fddaa46af4344a8b212fbd9c00c25dab5d54fb86ab31fff80"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/runtime.ts",
+      "bytes": 79700,
+      "sha256": "42001c5350161fb152ee8ec501b1f03e01475043effb972920be086593b06476"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/storage-archive.ts",
+      "bytes": 11706,
+      "sha256": "e3274a6e536140283d1d668083309917c0d47af5cb728f4ee63804fa9813fbd1"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/storage-cli.ts",
+      "bytes": 2264,
+      "sha256": "a442983acfdb6a25535391f22346730759e1f5bda9086a6a025cad9ad8f9fe6e"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/storage-disposition.ts",
+      "bytes": 3956,
+      "sha256": "5ae759c7fffb3ffc693d2d3095fdf5e53184deb4daf7435eeea09c48acf4dbda"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/storage-files.ts",
+      "bytes": 4837,
+      "sha256": "6d87923b978e2c6de30e7f49ed2b56e61e263b601092d71e7f3f6cc542170ba6"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/storage-projection.ts",
+      "bytes": 7422,
+      "sha256": "555b8b34fc6c7b9e611a22425d166e00a393f6b1344f560653ef75dee7ad4b2c"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/storage.ts",
+      "bytes": 11730,
+      "sha256": "9636422e8281c1ab1e8b0b224f643a6567700ecc1bf99f5e6f1a569c414a2109"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/task-profile.ts",
+      "bytes": 3562,
+      "sha256": "ff099365ac26e6f3cab5b9c3aee6082704c91e0ca221fdc3978accca43c47593"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/app.ts",
+      "bytes": 65900,
+      "sha256": "d377dc3903da9249ec59a564827bb8f2e83b5d99f25be8324abb11df0b4374a2"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/cursor.ts",
+      "bytes": 1259,
+      "sha256": "f2d491ec0ddd4e5bc6c505b0c3104aa171ade2ebbf579f0a1e70704ed3aefb15"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/drafts.ts",
+      "bytes": 2528,
+      "sha256": "295e40cbf3f5a14624346ce55a600b0deed1584a67afda3785795d13e0059e95"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/eval.ts",
+      "bytes": 4826,
+      "sha256": "d4ba8f114cf4b691105c3771633685c881bdece2ffa74c9b4ca327e001ee21b0"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/history.ts",
+      "bytes": 7294,
+      "sha256": "b9bd69a8833c45f129a5eca0b962fcca510d6a9958c3ce2a8e5488c69a38d6ea"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/improve-selection.ts",
+      "bytes": 5410,
+      "sha256": "e543d962b4ee846fc38c7550206ebb75c5cb01ccb5c8e08432402ee7237cc49b"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/improve.ts",
+      "bytes": 2647,
+      "sha256": "f796a8bfd7d554d9d21b6ce69fdcdce369381dec4d9cd06d2582ceedab609ba4"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/metrics.ts",
+      "bytes": 6497,
+      "sha256": "48ae30d13acf6d1af940aab18e8265c56613c27f1a7e59c519ee33587f513c9d"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/storage.ts",
+      "bytes": 4577,
+      "sha256": "6599082819f690c4bac329b18c7f068490af99883952e3dfe5bf546eadb2ef84"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/width-gate.ts",
+      "bytes": 8510,
+      "sha256": "a21cd0385dfc883a7ead407245af5d6a58782b42867b241c2689e286a9fadd1e"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/tui/width-probe.ts",
+      "bytes": 4718,
+      "sha256": "8fe24930bf555ce44e2076beac619541989b01726928c22e8cfe50ccee192ec8"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/usage-query.ts",
+      "bytes": 10902,
+      "sha256": "bfdf35a26dcbf30e565017a5110daf24993b7594efd81a0bdbb6d949575a8001"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/workspace-fence.ts",
+      "bytes": 2399,
+      "sha256": "4af72665ea840f1ccd7f39dfee782170598a0470f4954def9ccf14d93e283b93"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/src/workspace-ownership.ts",
+      "bytes": 3807,
+      "sha256": "d73f0011f6c6af003bc08635d41d8ff854b15a890c1f547eb625db9aa4ef7a41"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/coding.test.ts",
+      "bytes": 21040,
+      "sha256": "ae32b69bda5c2d4a035b374b8bafa19f91d65b092d43d8238153fe99f134ff8e"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/compaction.test.ts",
+      "bytes": 30535,
+      "sha256": "1a2980f410097b45bdfb62ca1784f44501c4c7a03fa094c643509fe880633daa"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/control-facts.test.ts",
+      "bytes": 4170,
+      "sha256": "ada6d56ee86c8757ad29eea20f66e60c7743a06e5d7fe755af954a2e449eceff"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/control.test.ts",
+      "bytes": 13963,
+      "sha256": "55580ceb6617a8dfd9e6e8c66c31a1484e11facb446cc3308f46c3f4b176f31e"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/eval-comparison.test.ts",
+      "bytes": 13579,
+      "sha256": "008b5dbaa0a60d82dd8ca99d2330f67f23576c659b296d74fed64a906fced2a7"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/eval.test.ts",
+      "bytes": 10834,
+      "sha256": "a032e98f4562bbb1ed739036db187b98a5d099f7f77bed56f664401ea39f8055"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/execution-output.test.ts",
+      "bytes": 5298,
+      "sha256": "3bb9c6e29603408d9022abadb6c888fd731c9d3e6744badc76d9f9a8e48a1730"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/fact-clock.test.ts",
+      "bytes": 1465,
+      "sha256": "09d07195d6b13d436420d11a41814459714d134c23b3389c61fd00b0ca56c455"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/fixtures/project/README.md",
+      "bytes": 81,
+      "sha256": "03b38e56583c0045020e794e949a28c9a5fb33be4feb88bae65f2bac759219ed"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/fixtures/recovery-projection.ts",
+      "bytes": 4607,
+      "sha256": "892f225767628307d10116e608e7084526d4a0f97dfa9bfbd41d332d790de1d4"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/history-view.test.ts",
+      "bytes": 1373,
+      "sha256": "bbfd2852b06f30d4bb6e83c7b7009732ab113e93a98dd8e2e8cf291abcf0c16f"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/history.test.ts",
+      "bytes": 16894,
+      "sha256": "a648e38e03c7204b9e9387b30d767aad3c0f32257471c2e28eecdd31bdb9d33c"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/improve-build.test.ts",
+      "bytes": 10224,
+      "sha256": "d98ebce034cac4bdb777a9399108c91b6eff4cae946b1a28c1dd4b6c803d57d6"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/improve-deadline.test.ts",
+      "bytes": 12202,
+      "sha256": "2ddbedc59f89864f3f3c38c1443d54dc3cd5103d334258f922b0fe3a8cdc3693"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/improve-decisions.test.ts",
+      "bytes": 24086,
+      "sha256": "b10d1331cfdf59c8bdcbc25b624d2eb630f79de38e612f88b4d668e8dc216ad9"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/improve-eval-assets.test.ts",
+      "bytes": 10733,
+      "sha256": "b60bc3aa2428fbeaad95a8425b96dd5dd98a165949aabcbaa60a1feb992a0b81"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/improve-execution.test.ts",
+      "bytes": 22771,
+      "sha256": "13c2caa9086328ef5ded8d82e4beab19eb044b3b6eb70aaaa82b9407006efca3"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/improve-retention.test.ts",
+      "bytes": 2508,
+      "sha256": "3df116aae4820e39d2edab90940f7129cf79e9c81521e3470b2232548cf55453"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/improve.test.ts",
+      "bytes": 18222,
+      "sha256": "b03c7c18f274cd6d1796b540aee5108b8b009ff7f2c865795be8efe4d3872ae8"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/lifecycle.test.ts",
+      "bytes": 16426,
+      "sha256": "b4b4c4f92e7e466e1dc6b106125f318d3cd3c1e19c966069534e1d2c4f4701e3"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/live-batch.test.ts",
+      "bytes": 11139,
+      "sha256": "ed11d951bd4b37ff5680c8559d2665349953f8bc51573ebab63eb8d49bcdfbf0"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/metrics-clock.test.ts",
+      "bytes": 9413,
+      "sha256": "10071c26ace0e06293b4f1d255467384ebc1d78ab9725606487321331e667bcf"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/metrics-feedback-runtime.test.ts",
+      "bytes": 7260,
+      "sha256": "22a69101fcb4be3e46a704764a89b627935f89ff33cc0eb1b566cf0a8fa1ec76"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/metrics-feedback.test.ts",
+      "bytes": 14728,
+      "sha256": "ab8e35c464043667223ac3dfa58816abc8d1f2c1580610779bd181ac38bc0fea"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/metrics-operations-runtime.test.ts",
+      "bytes": 6105,
+      "sha256": "32da348f54b1462a2f8c6fa2305a2ba0a0da71de9fac1a98e293ceb551560828"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/metrics-operations.test.ts",
+      "bytes": 15337,
+      "sha256": "d54de187d886b2f297e33e4820a5755fef0340a9cfe0f6356861a2ea967daa16"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/metrics-ownership.test.ts",
+      "bytes": 10850,
+      "sha256": "fe7a803d015465133937ffdcbba33846d5e59f1d380700d9f507b3d564cf05e4"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/metrics-runtime.test.ts",
+      "bytes": 9096,
+      "sha256": "b25f581896806c241578bcfdb3c1fd6a9468ce68633004304b2bde49c84bd289"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/metrics.test.ts",
+      "bytes": 11443,
+      "sha256": "48a624fa128681277c3a9f11acafb060007eaf5b7f7fe1e1c9be34f57fc830e4"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/preflight.test.ts",
+      "bytes": 7175,
+      "sha256": "b9d417886213c2b00c067c20de7c3781508ee0d088a5f63a4ab8d5398a163444"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/provider-boundary.test.ts",
+      "bytes": 5047,
+      "sha256": "97ce5dcb676effa4f40925840edcc47ef319eb37a75d5b5d66c0c6ffdd636882"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/query.test.ts",
+      "bytes": 4081,
+      "sha256": "b350c63c0f02292958802efbc90a34017fdcd2ed7bd42f940546ba84563b4c6a"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/recovery-facts.test.ts",
+      "bytes": 3543,
+      "sha256": "54a1d78bf5eb632682110d01a6dc391a9ed6d65d28f3fa1ae935ad15e5e85481"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/recovery-projection.test.ts",
+      "bytes": 13801,
+      "sha256": "4ef217540dbab5a725b651a8e38bfca1f5f28052414e127219e138985b53245c"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/recovery.test.ts",
+      "bytes": 21679,
+      "sha256": "77a847ac7d768bcb36399817528cd04893be49135f50d066bb2093bf3c902eb6"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/runtime-provider.test.ts",
+      "bytes": 3559,
+      "sha256": "bd0ba1098bf4cabdee49ab41e2ee57566e96f4612a3be050b0ed21d799ab8c17"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/runtime.test.ts",
+      "bytes": 15454,
+      "sha256": "4161d423e3ff4538d98c31dc1d75e0d96ffe6a79446b1565ae994e0ea10ebc5e"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/storage.test.ts",
+      "bytes": 17925,
+      "sha256": "0c72aa8017f32a6217ccacde961760e663f6cd5e8ecfa9696a613e3b0b490602"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/terminal-candidate.test.ts",
+      "bytes": 1897,
+      "sha256": "a9d48d6d49481e908b6c2695d447698012a2735e1debec3b6c84628681ca485b"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/tui-recovery-start.test.ts",
+      "bytes": 6125,
+      "sha256": "2a03884c8845fbd80e23f81d5705b964205d3207c374eee7456d7f0273a07cd6"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/tui.test.ts",
+      "bytes": 25939,
+      "sha256": "b9367a7863fcebd57c49c0ba335449432a846b78a2add66bac617a4089d61e6e"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/test/width.test.ts",
+      "bytes": 13951,
+      "sha256": "b1525ce430a5e282c6b4089ac3d947a65cea639ec7f1d781e3a47b9905893727"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/build-artifact.mjs",
+      "bytes": 2581,
+      "sha256": "790e77787d6e159df739f782b065ab67a7cdd43b6fc26f0895ae1500ea14d3c7"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/build-pi-tui-width.mjs",
+      "bytes": 3883,
+      "sha256": "257b74eafb80cf0f326503ce5a4f5a30e67f169a96400345a202bd6f7597d166"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/control-terminal-validation.mjs",
+      "bytes": 13164,
+      "sha256": "86752fdb5433dc3baa883cb0548d6ea66e2e2f51962128fbc64d1eb33e33ebec"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-coding.mjs",
+      "bytes": 8963,
+      "sha256": "3e4e96fddd80399589b30690b51ddf37d6ae43ca46eb376765ef3726a9305953"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-compaction.mjs",
+      "bytes": 6147,
+      "sha256": "9f2eea671272ecb1d1d6615975af28ec8ad3c57a054b032948ecd29ba1fb4410"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-control.mjs",
+      "bytes": 3050,
+      "sha256": "2b240f955dd59a5c29b857e3af009a9c89c3aef138aa1480e90a07ed62f56b5a"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-improve-decisions.mjs",
+      "bytes": 21867,
+      "sha256": "1d3e65f0e6f4d01dcd9d17b8108e57c9a87d4970fef2a1ce8219405d79115835"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-improve-execution.mjs",
+      "bytes": 30086,
+      "sha256": "69c19ce75423b6fcee2b7bc7d1bc7433eb428ba904074d5613604a2e3131478a"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-improve.mjs",
+      "bytes": 14222,
+      "sha256": "b0f6f2a0ff9e5ef14d00f37dd1f389b44f0541974ca91e135c4a9000505dc541"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-lifecycle.mjs",
+      "bytes": 16827,
+      "sha256": "44d603a76617e306ae8cf027ec6ffafe3ef09a25d72205685eacd474649f5d9c"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-live-guest.mjs",
+      "bytes": 4849,
+      "sha256": "7c065e9015e6fefa9999bb90941df00af814d843ec337df85ccb01e378c8a1e6"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-recovery.mjs",
+      "bytes": 7777,
+      "sha256": "2f88b5ebf348d982b0033044ecd61da6a2666e91340678dd56823f0950298f41"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/demo-storage.mjs",
+      "bytes": 7896,
+      "sha256": "2784eb34d8a17a478763e91d038aa20b5b97eac96ebcf3721e5eff2a53c049a7"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/eval/Containerfile",
+      "bytes": 286,
+      "sha256": "6c27f8d035c6760f98cfafee7f6f2ad417a0c9a46a63ca7514eaf8b0b1178ddd"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/eval/compare-demo.mjs",
+      "bytes": 8536,
+      "sha256": "f9003bd097e4b8b25fee7f7700d1d32887d7e9dd0b9c55115aa9adad122f0fcc"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/eval/fixtures/runtime-probe.mjs",
+      "bytes": 2273,
+      "sha256": "6ec291d174c78fb66371c521c6b54f2dd70a6b98e925471b77ea01feb720ddfc"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/eval/prepare-runtime.mjs",
+      "bytes": 1959,
+      "sha256": "381c45397183016f06e3e019fa819b514ca58ac82d0eb5a32b41fe07ab42f89c"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/Containerfile",
+      "bytes": 244,
+      "sha256": "644af6e828f3b149b92977ea215f1f0ca6d54eace8714be375ca6c3b4047a93b"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/README.md",
+      "bytes": 8674,
+      "sha256": "f2b65aa2df0f182f879046de6dd9394e948413868ee7e2e9945c1373a125beba"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/boundary.mjs",
+      "bytes": 16697,
+      "sha256": "47e4f311f8436a784981ee652e615b320327919b9ab9965b48a5c45783aa8054"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/export.mjs",
+      "bytes": 2858,
+      "sha256": "40be732ecb0c569dca61eac981cb7769f5136b0ab5d2ad09af5633148b3080ba"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/fixtures/native-probe.py",
+      "bytes": 2246,
+      "sha256": "ee4ebc2f3dcee3f32261cdfb7bd1bece64a72e3aa6db81b06d2eaba43456031b"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/fixtures/probe.mjs",
+      "bytes": 4564,
+      "sha256": "6b167e916f776dc31633b16029715019ee5609dddb37e2733d3a896268b9f603"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/probe.mjs",
+      "bytes": 11518,
+      "sha256": "8f5cb4311ee007013a45ed5e6028fa4e0bbe528d61a55da22fc8adc03c6bae6f"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/restrict.py",
+      "bytes": 2291,
+      "sha256": "acf442988bd1386fdc688c737b656eb9b6f315d9775fd6f9faa1091485f6fff7"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/test/boundary.test.mjs",
+      "bytes": 14571,
+      "sha256": "e8632f7c1895c3858376b4a2827f99eeb15e93be9080507d7ed1fbf25fb9ee42"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/isolation/test/export.test.mjs",
+      "bytes": 1287,
+      "sha256": "73b09eedae422cbb775d22edfa39d7c905a583e2b055e414034a82222b444c47"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/live-batch/check-auth-stop.mjs",
+      "bytes": 3075,
+      "sha256": "4f02fea9474c9e124d7601848540377e69c5860dc1e28797fc0b4237758a3160"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/live-batch/check-installation.mjs",
+      "bytes": 1931,
+      "sha256": "59d156efb161f6e1dc72c7faef4775e89cc1250a66cd188152af477b57162eaf"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/live-batch/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/live-batch/freeze.mjs",
+      "bytes": 1404,
+      "sha256": "8a451b3eb73aa73fbc4a587321da67fd98a515f9fc2be08b0be9ab81cac9a40f"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/live-batch/prepare.mjs",
+      "bytes": 7333,
+      "sha256": "e5005275e73c1da7372d9ccee7f43586ba0b3393095dd21c6adb89a19877ee8d"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/live-batch/run.mjs",
+      "bytes": 8506,
+      "sha256": "aa0cb70081fedfb584d0f8ff156ad6af8647bd353203d6c383a89c1de6a9f041"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/prepare-pack.mjs",
+      "bytes": 817,
+      "sha256": "ca6e47d469876e867d3972f16111464467619fe7ddbdb35e8458c1dfc3327201"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/recovery-start-terminal-validation.mjs",
+      "bytes": 10588,
+      "sha256": "a5b280f8f4244c4b50498cff69db734f442d4742d161e3c33a879458d943cb10"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/terminal-candidate-manifest.mjs",
+      "bytes": 1597,
+      "sha256": "cc9f627764b18135dde55d18ef1fb9bdcfa0ace5ef96cfa5700ec797cb41dfd7"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/terminal-validation.mjs",
+      "bytes": 17388,
+      "sha256": "f6241325c635eb0518625c0d7f3292da35d073d1ca0643176c62566e925e37d9"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/terminal-width-diagnostic.mjs",
+      "bytes": 8484,
+      "sha256": "61a6d2a825592e75ce1b735a8c8d2e276ed8ef9c9d0e730d3c4af408a409a8e1"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/scripts/validate-storage-resume.mjs",
+      "bytes": 3312,
+      "sha256": "5961214801ff00958f3297cf2eeb897c427a45cf56e48b4f7d8368f545057a17"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/vendor/pi-tui/README.md",
+      "bytes": 1892,
+      "sha256": "d84dc6618f61a4848ee85b4e00983ebf3a895cb0d4311ea436a6581a8ad0e67b"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/vendor/pi-tui/manifest.json",
+      "bytes": 994,
+      "sha256": "7e8670f2b3e416b37b616e92284f578dac11818043e8297f8cf2609af322eaa4"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/vendor/pi-tui/pi-tui-1.1.0-durio-width.1.tgz",
+      "bytes": 516829,
+      "sha256": "90a1f855d1e5f30d9b97c8733ca0a1c3a05ce07d5e95af4e2fed6f553e34f62a"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/vendor/pi-tui/upstream/earendil-works-pi-tui-1.1.0.tgz",
+      "bytes": 519750,
+      "sha256": "5d0f9dfb31c06f27d1fb2b05d166fc0d33430f53ece0a3ff3f69d55950f1430b"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/vendor/pi-tui/width-overrides.patch",
+      "bytes": 2054,
+      "sha256": "4af10fd879dd0ec955f711d7b2605df567cd9d89c34270ce56d596f009bcbc1e"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/package.json",
+      "bytes": 2432,
+      "sha256": "1e3c7dee4f53a86aecc7732ece59e5d8b9298487e2d5d807c5aabb769e012c15"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/package-lock.json",
+      "bytes": 64781,
+      "sha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67"
+    },
+    {
+      "kind": "inputs",
+      "path": "/Users/nineofour/Durio/tsconfig.json",
+      "bytes": 274,
+      "sha256": "e4b18ea6bc4b6853ecd2c17be6fa272e12e7e48fe4cadd27bbf96c456b63675b"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/@types/proper-lockfile/LICENSE",
+      "bytes": 1141,
+      "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/@types/proper-lockfile/README.md",
+      "bytes": 2168,
+      "sha256": "612135ededd12d3b9b8418362eaf2b6b8635d527952ead0da836e6b62abfd767"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/@types/proper-lockfile/index.d.ts",
+      "bytes": 1394,
+      "sha256": "a3e12bcf2d196656ccd5b5d5344182967a2bdde0f63c9b955c36169ed02c3555"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/@types/proper-lockfile/package.json",
+      "bytes": 1137,
+      "sha256": "892bde4e440d1536c07410155f8f7c4776d6d825c931fa34d5d04b8f0a9c02f5"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/@types/retry/LICENSE",
+      "bytes": 1141,
+      "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/@types/retry/README.md",
+      "bytes": 516,
+      "sha256": "c641edb74df7897c6a95cd9de021c9b2c3d621f63d9e4719115a5964284a4099"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/@types/retry/index.d.ts",
+      "bytes": 4981,
+      "sha256": "868c78a84ad3530fc1b6e03da4611405da111bbfb0f1480abe45e801cde0b995"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/@types/retry/package.json",
+      "bytes": 935,
+      "sha256": "03d7348d63dd71d2acd89448c5c61b087fafb537c5caef1db745655a738912cd"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/LICENSE.txt",
+      "bytes": 9197,
+      "sha256": "a7d00bfd54525bc694b6e32f64c7ebcf5e6b7ae3657be5cc12767bce74654a47"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/README.md",
+      "bytes": 2842,
+      "sha256": "73147458477d90cd6236627cdd9b0871df12e6e8a21d2d0fda6d1ad2826bdc0e"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/SECURITY.md",
+      "bytes": 2656,
+      "sha256": "7b6976eec43edfa68b79a459dd089c56b7a395916dbf1a01bd11e6d86e12128f"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/ThirdPartyNoticeText.txt",
+      "bytes": 37824,
+      "sha256": "1af3c68039c57e539422da82a4faada506ce6d0ea6f90e0b699d02dbcdb7a90c"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/bin/tsc",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/bin/tsserver",
+      "bytes": 50,
+      "sha256": "a088f0c3419bcb2f7b860ad42e4c9f25ead067eda70af6a10d0a7d453954aada"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/_tsc.js",
+      "bytes": 6213092,
+      "sha256": "e8f349eabd48486bdb2bf9dc1a00c89d58297270c54b745838879e2859194419"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/_tsserver.js",
+      "bytes": 27888,
+      "sha256": "0efcc88cdf0593cc1dcc8b6afd605c7bed9eca6f648c70c8f0df8695114bf6d7"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/_typingsInstaller.js",
+      "bytes": 10363,
+      "sha256": "62a69c574365f1c81633b86b3214f9df860aad08843028dd5244b00aa7f1e190"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/cs/diagnosticMessages.generated.json",
+      "bytes": 320453,
+      "sha256": "5b30e58d35f877521e14c16551c86320b2ed19ddb70fe5f41841b561d27f18c2"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/de/diagnosticMessages.generated.json",
+      "bytes": 344426,
+      "sha256": "a4031a8028febc35f92ba317104878d93f02c1750e6ee16351c2270ab4dff517"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/es/diagnosticMessages.generated.json",
+      "bytes": 340054,
+      "sha256": "3c7844125e1f2a3a2227e16dd1fed75218a3454919706b34cd8a5da9d43cda22"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/fr/diagnosticMessages.generated.json",
+      "bytes": 346016,
+      "sha256": "9fc1836d7575840a8b7a63dacdedd99e90e4144c0bbe29a4b7fa78a86e0e8bf5"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/it/diagnosticMessages.generated.json",
+      "bytes": 339409,
+      "sha256": "a740fe2b2338d72a8d165fb8c7c22ac1393a18b6aa7f1ed6d45b79887867f98a"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/ja/diagnosticMessages.generated.json",
+      "bytes": 381398,
+      "sha256": "ae1a2d439bfb60b9fa32408bde0e9ec39840a33d621014fcb5b2fb4e69a606de"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/ko/diagnosticMessages.generated.json",
+      "bytes": 346139,
+      "sha256": "31b27d2d556fc037eeac1672f771bf940ec70afba342e977faa75a2fa292a8be"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.d.ts",
+      "bytes": 992,
+      "sha256": "a7297ff837fcdf174a9524925966429eb8e5feecc2cc55cc06574e6b092c1eaa"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.decorators.d.ts",
+      "bytes": 13192,
+      "sha256": "8e7f8264d0fb4c5339605a15daadb037bf238c10b654bb3eee14208f860a32ea"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.decorators.legacy.d.ts",
+      "bytes": 1326,
+      "sha256": "782dec38049b92d4e85c1585fbea5474a219c6984a35b004963b00beb1aab538"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.dom.asynciterable.d.ts",
+      "bytes": 1887,
+      "sha256": "d7a3c8b952931daebdfc7a2897c53c0a1c73624593fa070e46bd537e64dcd20a"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.dom.d.ts",
+      "bytes": 1874901,
+      "sha256": "080941d9f9ff9307f7e27a83bcd888b7c8270716c39af943532438932ec1d0b9"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.dom.iterable.d.ts",
+      "bytes": 29802,
+      "sha256": "2e80ee7a49e8ac312cc11b77f1475804bee36b3b2bc896bead8b6e1266befb43"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.collection.d.ts",
+      "bytes": 5229,
+      "sha256": "dc2df20b1bcdc8c2d34af4926e2c3ab15ffe1160a63e58b7e09833f616efff44"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.core.d.ts",
+      "bytes": 22866,
+      "sha256": "c57796738e7f83dbc4b8e65132f11a377649c00dd3eee333f672b8f0a6bea671"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.d.ts",
+      "bytes": 1241,
+      "sha256": "45b7ab580deca34ae9729e97c13cfd999df04416a79116c3bfb483804f85ded4"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.generator.d.ts",
+      "bytes": 2557,
+      "sha256": "515d0b7b9bea2e31ea4ec968e9edd2c39d3eebf4a2d5cbd04e88639819ae3b71"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.iterable.d.ts",
+      "bytes": 18200,
+      "sha256": "0559b1f683ac7505ae451f9a96ce4c3c92bdc71411651ca6ddb0e88baaaad6a3"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.promise.d.ts",
+      "bytes": 3200,
+      "sha256": "0dc1e7ceda9b8b9b455c3a2d67b0412feab00bd2f66656cd8850e8831b08b537"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.proxy.d.ts",
+      "bytes": 5251,
+      "sha256": "ce691fb9e5c64efb9547083e4a34091bcbe5bdb41027e310ebba8f7d96a98671"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.reflect.d.ts",
+      "bytes": 6493,
+      "sha256": "8d697a2a929a5fcb38b7a65594020fcef05ec1630804a33748829c5ff53640d0"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.symbol.d.ts",
+      "bytes": 1649,
+      "sha256": "4ff2a353abf8a80ee399af572debb8faab2d33ad38c4b4474cff7f26e7653b8d"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+      "bytes": 11010,
+      "sha256": "fb0f136d372979348d59b3f5020b4cdb81b5504192b1cacff5d1fbba29378aa1"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2016.array.include.d.ts",
+      "bytes": 5204,
+      "sha256": "d15bea3d62cbbdb9797079416b8ac375ae99162a7fba5de2c6c505446486ac0a"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2016.d.ts",
+      "bytes": 965,
+      "sha256": "3facaf05f0c5fc569c5649dd359892c98a85557e3e0c847964caeb67076f4d75"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2016.full.d.ts",
+      "bytes": 1032,
+      "sha256": "807e0e0bdc67605dd28efe18f20ab5fcd75d944ef95936120702335f9379094b"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2016.intl.d.ts",
+      "bytes": 1484,
+      "sha256": "68d18b664c9d32a7336a70235958b8997ebc1c3b8505f4f1ae2b7e7753b87618"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2017.arraybuffer.d.ts",
+      "bytes": 915,
+      "sha256": "eb3d66c8327153d8fa7dd03f9c58d351107fe824c79e9b56b462935176cdf12a"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2017.d.ts",
+      "bytes": 1162,
+      "sha256": "e44bb8bbac7f10ecc786703fe0a6a4b952189f908707980ba8f3c8975a760962"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2017.date.d.ts",
+      "bytes": 1916,
+      "sha256": "38f0219c9e23c915ef9790ab1d680440d95419ad264816fa15009a8851e79119"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2017.full.d.ts",
+      "bytes": 1032,
+      "sha256": "1d242d5c24cf285c88bc4fb93c5ff903de8319064e282986edeb6247ba028d5e"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2017.intl.d.ts",
+      "bytes": 1449,
+      "sha256": "4de680d5bb41c17f7f68e0419412ca23c98d5749dcaaea1896172f06435891fc"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2017.object.d.ts",
+      "bytes": 2473,
+      "sha256": "69ab18c3b76cd9b1be3d188eaf8bba06112ebbe2f47f6c322b5105a6fbc45a2e"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts",
+      "bytes": 7209,
+      "sha256": "a680117f487a4d2f30ea46f1b4b7f58bef1480456e18ba53ee85c2746eeca012"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2017.string.d.ts",
+      "bytes": 2378,
+      "sha256": "2f11ff796926e0832f9ae148008138ad583bd181899ab7dd768a2666700b1893"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts",
+      "bytes": 1542,
+      "sha256": "954296b30da6d508a104a3a0b5d96b76495c709785c1d11610908e63481ee667"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2018.asyncgenerator.d.ts",
+      "bytes": 2692,
+      "sha256": "ac9538681b19688c8eae65811b329d3744af679e0bdfa5d842d0e32524c73e1c"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2018.asynciterable.d.ts",
+      "bytes": 2257,
+      "sha256": "0a969edff4bd52585473d24995c5ef223f6652d6ef46193309b3921d65dd4376"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2018.d.ts",
+      "bytes": 1088,
+      "sha256": "5e1c4c362065a6b95ff952c0eab010f04dcd2c3494e813b493ecfd4fcb9fc0d8"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2018.full.d.ts",
+      "bytes": 1074,
+      "sha256": "95f1023b824c2c511c48f1201e2d1188bcb0ca1138a309a870b956d2e92e44ab"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2018.intl.d.ts",
+      "bytes": 3021,
+      "sha256": "9e9fbd7030c440b33d021da145d3232984c8bb7916f277e8ffd3dc2e3eae2bdb"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2018.promise.d.ts",
+      "bytes": 1353,
+      "sha256": "811ec78f7fefcabbda4bfa93b3eb67d9ae166ef95f9bff989d964061cbf81a0c"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2018.regexp.d.ts",
+      "bytes": 1232,
+      "sha256": "717937616a17072082152a2ef351cb51f98802fb4b2fdabd32399843875974ca"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2019.array.d.ts",
+      "bytes": 3163,
+      "sha256": "d7e7d9b7b50e5f22c915b525acc5a49a7a6584cf8f62d0569e557c5cfc4b2ac2"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2019.d.ts",
+      "bytes": 1071,
+      "sha256": "68d73b4a11549f9c0b7d352d10e91e5dca8faa3322bfb77b661839c42b1ddec7"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2019.full.d.ts",
+      "bytes": 1074,
+      "sha256": "08f6861df84fba9719c14d5adc3ba40be9f0c687639e6c4df3c05b9301b8ff94"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2019.intl.d.ts",
+      "bytes": 958,
+      "sha256": "74f7fa2d027d5b33eb0471c8e82a6c87216223181ec31247c357a3e8e2fddc5b"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2019.object.d.ts",
+      "bytes": 1473,
+      "sha256": "71c37f4c9543f31dfced6c7840e068c5a5aacb7b89111a4364b1d5276b852557"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2019.string.d.ts",
+      "bytes": 1528,
+      "sha256": "576711e016cf4f1804676043e6a0a5414252560eb57de9faceee34d79798c850"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2019.symbol.d.ts",
+      "bytes": 1006,
+      "sha256": "89c1b1281ba7b8a96efc676b11b264de7a8374c5ea1e6617f11880a13fc56dc6"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.bigint.d.ts",
+      "bytes": 38185,
+      "sha256": "d6d7ae4d1f1f3772e2a3cde568ed08991a8ae34a080ff1151af28b7f798e22ca"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.d.ts",
+      "bytes": 1201,
+      "sha256": "5efce4fc3c29ea84e8928f97adec086e3dc876365e0982cc8479a07954a3efd4"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.date.d.ts",
+      "bytes": 2956,
+      "sha256": "063600664504610fe3e99b717a1223f8b1900087fab0b4cad1496a114744f8df"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.full.d.ts",
+      "bytes": 1074,
+      "sha256": "1305d1e76ca44e30fb8b2b8075fa522b83f60c0bcf5d4326a9d2cf79b53724f8"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.intl.d.ts",
+      "bytes": 22438,
+      "sha256": "639e512c0dfc3fad96a84caad71b8834d66329a1f28dc95e3946c9b58176c73a"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.number.d.ts",
+      "bytes": 1587,
+      "sha256": "368af93f74c9c932edd84c58883e736c9e3d53cec1fe24c0b0ff451f529ceab1"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.promise.d.ts",
+      "bytes": 1803,
+      "sha256": "934019d7e3c81950f9a8426d093458b65d5aff2c7c1511233c0fd5b941e608ab"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.sharedmemory.d.ts",
+      "bytes": 5128,
+      "sha256": "52ada8e0b6e0482b728070b7639ee42e83a9b1c22d205992756fe020fd9f4a47"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.string.d.ts",
+      "bytes": 2556,
+      "sha256": "3bdefe1bfd4d6dee0e26f928f93ccc128f1b64d5d501ff4a8cf3c6371200e5e6"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2020.symbol.wellknown.d.ts",
+      "bytes": 1606,
+      "sha256": "59fb2c069260b4ba00b5643b907ef5d5341b167e7d1dbf58dfd895658bda2867"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2021.d.ts",
+      "bytes": 1036,
+      "sha256": "feecb1be483ed332fad555aff858affd90a48ab19ba7272ee084704eb7167569"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2021.full.d.ts",
+      "bytes": 1074,
+      "sha256": "4a66df3ab5de5cfcda11538cffddd67ff6a174e003788e270914c1e0248483cf"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2021.intl.d.ts",
+      "bytes": 8245,
+      "sha256": "965f36eae237dd74e6cca203a43e9ca801ce38824ead814728a2807b1910117d"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2021.promise.d.ts",
+      "bytes": 2262,
+      "sha256": "af3dd424cf267428f30ccfc376f47a2c0114546b55c44d8c0f1d57d841e28d74"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2021.string.d.ts",
+      "bytes": 1592,
+      "sha256": "995c005ab91a498455ea8dfb63aa9f83fa2ea793c3d8aa344be4a1678d06d399"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2021.weakref.d.ts",
+      "bytes": 3171,
+      "sha256": "959d36cddf5e7d572a65045b876f2956c973a586da58e5d26cde519184fd9b8a"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2022.array.d.ts",
+      "bytes": 4676,
+      "sha256": "3925a6c820dcb1a06506c90b1577db1fdbf7705d65b62b99dce4be75c637e26b"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2022.d.ts",
+      "bytes": 1108,
+      "sha256": "ee7bad0c15b58988daa84371e0b89d313b762ab83cb5b31b8a2d1162e8eb41c2"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2022.error.d.ts",
+      "bytes": 2379,
+      "sha256": "0a3d63ef2b853447ec4f749d3f368ce642264246e02911fcb1590d8c161b8005"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2022.full.d.ts",
+      "bytes": 1074,
+      "sha256": "3cbad9a1ba4453443026ed38e4b8be018abb26565fa7c944376463ad9df07c41"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2022.intl.d.ts",
+      "bytes": 7692,
+      "sha256": "8cdf8847677ac7d20486e54dd3fcf09eda95812ac8ace44b4418da1bbbab6eb8"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2022.object.d.ts",
+      "bytes": 1085,
+      "sha256": "8444af78980e3b20b49324f4a16ba35024fef3ee069a0eb67616ea6ca821c47a"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2022.regexp.d.ts",
+      "bytes": 1331,
+      "sha256": "b4b67b1a91182421f5df999988c690f14d813b9850b40acd06ed44691f6727ad"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2022.string.d.ts",
+      "bytes": 1155,
+      "sha256": "3287d9d085fbd618c3971944b65b4be57859f5415f495b33a6adc994edd2f004"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2023.array.d.ts",
+      "bytes": 40236,
+      "sha256": "df83c2a6c73228b625b0beb6669c7ee2a09c914637e2d35170723ad49c0f5cd4"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2023.collection.d.ts",
+      "bytes": 900,
+      "sha256": "436aaf437562f276ec2ddbee2f2cdedac7664c1e4c1d2c36839ddd582eeb3d0a"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2023.d.ts",
+      "bytes": 999,
+      "sha256": "27bdc30a0e32783366a5abeda841bc22757c1797de8681bbe81fbc735eeb1c10"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2023.full.d.ts",
+      "bytes": 1074,
+      "sha256": "785921608325fa246b450f05b238f4b3ed659f1099af278ce9ebbc9416a13f1d"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2023.intl.d.ts",
+      "bytes": 2645,
+      "sha256": "8e3c06ea092138bf9fa5e874a1fdbc9d54805d074bee1de31b99a11e2fec239d"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2024.arraybuffer.d.ts",
+      "bytes": 2637,
+      "sha256": "87dc0f382502f5bbce5129bdc0aea21e19a3abbc19259e0b43ae038a9fc4e326"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2024.collection.d.ts",
+      "bytes": 1224,
+      "sha256": "b1cb28af0c891c8c96b2d6b7be76bd394fddcfdb4709a20ba05a7c1605eea0f9"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2024.d.ts",
+      "bytes": 1166,
+      "sha256": "8fd575e12870e9944c7e1d62e1f5a73fcf23dd8d3a321f2a2c74c20d022283fe"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2024.full.d.ts",
+      "bytes": 1074,
+      "sha256": "b3e9cef4eed59f8a2249ed834ba4aabe9d0d4e9037d4679487fa17dad99004a3"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2024.object.d.ts",
+      "bytes": 1259,
+      "sha256": "2fef54945a13095fdb9b84f705f2b5994597640c46afeb2ce78352fab4cb3279"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2024.promise.d.ts",
+      "bytes": 1389,
+      "sha256": "ac77cb3e8c6d3565793eb90a8373ee8033146315a3dbead3bde8db5eaf5e5ec6"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2024.regexp.d.ts",
+      "bytes": 1073,
+      "sha256": "56e4ed5aab5f5920980066a9409bfaf53e6d21d3f8d020c17e4de584d29600ad"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2024.sharedmemory.d.ts",
+      "bytes": 3077,
+      "sha256": "4ece9f17b3866cc077099c73f4983bddbcb1dc7ddb943227f1ec070f529dedd1"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es2024.string.d.ts",
+      "bytes": 1194,
+      "sha256": "0a6282c8827e4b9a95f4bf4f5c205673ada31b982f50572d27103df8ceb8013c"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es5.d.ts",
+      "bytes": 218439,
+      "sha256": "c430d44666289dae81f30fa7b2edebf186ecc91a2d4c71266ea6ae76388792e1"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.es6.d.ts",
+      "bytes": 1032,
+      "sha256": "df039a67536fe2acc3affdcbfb645892f842db36fe599e8e652e2f0c640a90d1"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.array.d.ts",
+      "bytes": 1791,
+      "sha256": "1c9319a09485199c1f7b0498f2988d6d2249793ef67edda49d1e584746be9032"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.collection.d.ts",
+      "bytes": 3878,
+      "sha256": "e3a2a0cee0f03ffdde24d89660eba2685bfbdeae955a6c67e8c4c9fd28928eeb"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.d.ts",
+      "bytes": 1282,
+      "sha256": "2ab096661c711e4a81cc464fa1e6feb929a54f5340b46b0a07ac6bbf857471f0"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.decorators.d.ts",
+      "bytes": 1070,
+      "sha256": "d4b1d2c51d058fc21ec2629fff7a76249dec2e36e12960ea056e3ef89174080f"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.disposable.d.ts",
+      "bytes": 6806,
+      "sha256": "51ad4c928303041605b4d7ae32e0c1ee387d43a24cd6f1ebf4a2699e1076d4fa"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.error.d.ts",
+      "bytes": 1029,
+      "sha256": "73f78680d4c08509933daf80947902f6ff41b6230f94dd002ae372620adb0f60"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.float16.d.ts",
+      "bytes": 20528,
+      "sha256": "196cb558a13d4533a5163286f30b0509ce0210e4b316c56c38d4c0fd2fb38405"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.full.d.ts",
+      "bytes": 1074,
+      "sha256": "bde31fd423cd93b0eff97197a3f66df7c93e8c0c335cbeb113b7ff1ac35c23f4"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.intl.d.ts",
+      "bytes": 893,
+      "sha256": "811c71eee4aa0ac5f7adf713323a5c41b0cf6c4e17367a34fbce379e12bbf0a4"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.iterator.d.ts",
+      "bytes": 8676,
+      "sha256": "22adec94ef7047a6c9d1af3cb96be87a335908bf9ef386ae9fd50eeb37f44c47"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.promise.d.ts",
+      "bytes": 1658,
+      "sha256": "60037901da1a425516449b9a20073aa03386cce92f7a1fd902d7602be3a7c2e9"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.esnext.sharedmemory.d.ts",
+      "bytes": 1067,
+      "sha256": "c5239f5c01bcfa9cd32f37c496cf19c61d69d37e48be9de612b541aac915805b"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.scripthost.d.ts",
+      "bytes": 9451,
+      "sha256": "cd034f499c6cdca722b60c04b5b1b78e058487a7085a8e0d6fb50809947ee573"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.webworker.asynciterable.d.ts",
+      "bytes": 1887,
+      "sha256": "ca417afee74054e99d5a8252b35bef26ca6e2942d67d343fce6b42fc9f432993"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.webworker.d.ts",
+      "bytes": 609557,
+      "sha256": "6d08cde2bfb6ff909efbf7cb7d6d55be412cf4b9f48fd0430185986973fa91f5"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
+      "bytes": 1041,
+      "sha256": "80e18897e5884b6723488d4f5652167e7bb5024f946743134ecc4aa4ee731f89"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/lib.webworker.iterable.d.ts",
+      "bytes": 22768,
+      "sha256": "d6c6331ce67c41b2ad5bfb0c8c022403980b479a377a44da8f16b61120418f66"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/pl/diagnosticMessages.generated.json",
+      "bytes": 342111,
+      "sha256": "0645575abe920de1ee4cf3f2f70c7abc7f6691daa01cf1e9ad6b1ce53917c9ff"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/pt-br/diagnosticMessages.generated.json",
+      "bytes": 330482,
+      "sha256": "34a649eb937cd70fe7b15663c2e5479e753d42df0e5c2933636789b60c2c939d"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/ru/diagnosticMessages.generated.json",
+      "bytes": 443587,
+      "sha256": "29bb8ea9d44f55bb7acdedfac0a57865ea40552f004d0d6e3b96746ac76666cc"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/tr/diagnosticMessages.generated.json",
+      "bytes": 330684,
+      "sha256": "9466915f3e0cdb2625495bbe9c02c8b7ef9e3543fffae957ba034655563abf65"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/tsc.js",
+      "bytes": 267,
+      "sha256": "2cffde0b8c6760dfb0b5b0382bbb7e00ba6a8b2d981b9205b256a700a481d983"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/tsserver.js",
+      "bytes": 272,
+      "sha256": "e3ccfeec65ec5c470b8ffc5611878a31182650c7e8a062c38a719f83b523edcb"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/tsserverlibrary.d.ts",
+      "bytes": 865,
+      "sha256": "73b15a0b7cf5c6df9076b9408c5ce682f11813453bf54c54cb284f075b5224cf"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/tsserverlibrary.js",
+      "bytes": 1012,
+      "sha256": "7ca9b464de80a5382d9ccfed2b224323bc0274c8de61bf0464e89ee824677c76"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/typesMap.json",
+      "bytes": 16788,
+      "sha256": "4143fb8b1c5d4421dfa19a4b80ddf2da375fc0835a349c3b18519fda5955e1d9"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/typescript.d.ts",
+      "bytes": 588085,
+      "sha256": "e134052a6b1ded61693b4037f615dc72f14e2881e79c1ddbff6c514c8a516b05"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/typescript.js",
+      "bytes": 9112572,
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/typingsInstaller.js",
+      "bytes": 280,
+      "sha256": "2d48a038523ea7c626fa2796a30fa5fdc07612ea5fab83544423009d7683a213"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/watchGuard.js",
+      "bytes": 2313,
+      "sha256": "471200d4bc555ef8d8429358bdca2a68ea7c9bfff6c853b5b048d2512fe4092a"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/zh-cn/diagnosticMessages.generated.json",
+      "bytes": 295909,
+      "sha256": "6bd4ae6aea0991f6b73c46ec79ebb643b280a07e4808be363b07d01d2f6d399d"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/lib/zh-tw/diagnosticMessages.generated.json",
+      "bytes": 292532,
+      "sha256": "c35cf732ff01539090a3622b7a07f7bb4cadb28f6f13048b366012c458329be1"
+    },
+    {
+      "kind": "compiler",
+      "path": "/Users/nineofour/Durio/node_modules/typescript/package.json",
+      "bytes": 3620,
+      "sha256": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/artifact.d.ts",
+      "bytes": 621,
+      "sha256": "094b8dfe77867926796bf1953e2ef3e3b5d5c4276187bdda88cf198e00432f30"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/artifact.js",
+      "bytes": 5539,
+      "sha256": "87c8661b5880b588a0ffb2fae0e75fada29d796fdd14a2ad8afcd9f16524d792"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/artifact.js.map",
+      "bytes": 5651,
+      "sha256": "220c0bc431e17e5f1412f1bf8d5ef30135565ae45e1d8f41186d5d86bc14ee69"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/cli.d.ts",
+      "bytes": 31,
+      "sha256": "43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/cli.js",
+      "bytes": 21189,
+      "sha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/cli.js.map",
+      "bytes": 17137,
+      "sha256": "d9830ff900e0f9bb8d1ccb68644c95ef5aa46630b5676cd8873e372a289af625"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/coding-environment.d.ts",
+      "bytes": 745,
+      "sha256": "a3972c489f61971c9b65f26d3a5ce89a865772b50cb2d42be8c4afac69f24eff"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/coding-environment.js",
+      "bytes": 9200,
+      "sha256": "4c5fe4557c77e6336baa1bdea289e7426421fdd9d5488692a583925d9c357cf0"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/coding-environment.js.map",
+      "bytes": 8448,
+      "sha256": "25cf70f64f07bfeeef2b66c2a033a9e6fff4786d897b47fa1ed22c1127d3c510"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/compaction.d.ts",
+      "bytes": 1929,
+      "sha256": "2d941e86d6d0107fefbdea6cd5b4779d9b278b5443660d33717292a1af599b44"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/compaction.js",
+      "bytes": 8934,
+      "sha256": "4928eb67ea4180cf2e242be143cac9b8d00c4e511881fc88a1fbe1dd9843eeea"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/compaction.js.map",
+      "bytes": 9532,
+      "sha256": "d33c9820f0c0a9a6825fe322211fb7858ba8792f3e061f330f266ac6680b32c2"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/control.d.ts",
+      "bytes": 2979,
+      "sha256": "e28497b779b4b1d3ee868bfe74ef49e3a44cf0313d1c67bdd143d0e5f7d35523"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/control.js",
+      "bytes": 12087,
+      "sha256": "c698b0bbd6c6f38a804b9cc34505da65c8b6973768532a1288bb692263c542f3"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/control.js.map",
+      "bytes": 12450,
+      "sha256": "91027fd6c84e9af3b51ffa4e8f4b7329c21b9586b64a8f65f6acc0daebc6a434"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/derived-evidence.d.ts",
+      "bytes": 1082,
+      "sha256": "48f2479c88655640525b418d2f48eed07ab8d977e0f7631117dde644d04cb0d6"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/derived-evidence.js",
+      "bytes": 4036,
+      "sha256": "99908a511572911f23677c2c4d166a11d8d8bb2d57f5107347fb13bb561e4735"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/derived-evidence.js.map",
+      "bytes": 3432,
+      "sha256": "7a523e2f671cef7265927cf6616ca06711a0a1726438220c85e8847dbaf64177"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/detail-page.d.ts",
+      "bytes": 485,
+      "sha256": "fa42a0c18ba7272356a7aba86e4454c43e5851dd9b0bac999e1f245978a30b11"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/detail-page.js",
+      "bytes": 870,
+      "sha256": "29a1da3bc3cd7c8202a3cff25148ce5795831bba375cb8c61b9cfc0caebb1062"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/detail-page.js.map",
+      "bytes": 1186,
+      "sha256": "75f916f7c796207fe3613027905bba69768b06a75e4aac2ba132c81c807f5619"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/cli.d.ts",
+      "bytes": 148,
+      "sha256": "5292213b15835c3427c7f65b3ba531cfa7c4c8f9c2467e94bd97dcacca597908"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/cli.js",
+      "bytes": 3320,
+      "sha256": "e8f6c28f01d33af078879c38f5c142da9fd5cfea66417f2133ca37a5c44c7027"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/cli.js.map",
+      "bytes": 3650,
+      "sha256": "534208650be9c93be188edbd67da9ff277cbcca3990aa04cb803811a42e0f434"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/comparison.d.ts",
+      "bytes": 4106,
+      "sha256": "2372a4f2ad9f7ca79659ea0fd4fc3ff7a7b8dab3ce0397ffd5cc2feceb1cf12d"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/comparison.js",
+      "bytes": 11963,
+      "sha256": "4fd1f7fbeef65d68821c6adeac776660777da9449d2189c16f954b9a3554c6d6"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/comparison.js.map",
+      "bytes": 15638,
+      "sha256": "f4a07839564000aa0f27c693ebcdab1120be66f3bc5859b918d5797bc3df44bc"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/fixtures.d.ts",
+      "bytes": 807,
+      "sha256": "b5df9003a4b17a18aac40f7ec2ad29c9dc2a35e620645743f7d2ad2b9f7575c6"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/fixtures.js",
+      "bytes": 4821,
+      "sha256": "04bb1cdfee37c0fa1274732c24638695775a4e0c74bda6f23b90a18894a1b974"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/fixtures.js.map",
+      "bytes": 3009,
+      "sha256": "0211aa9dd29e85404031a06aa4beeff15fbb1eeafb5e25a5daaef4640cefaba9"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/guest.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/guest.js",
+      "bytes": 4076,
+      "sha256": "9e42585ecdd76e7c473079f0a128d6f6784ef601b069c0ad3d5877cabd4a269c"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/guest.js.map",
+      "bytes": 4880,
+      "sha256": "212b81de6b5487c2369daac9c19a889ae9a9d0e127f03e96e13b70aba026bb53"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/mediator.d.ts",
+      "bytes": 618,
+      "sha256": "a1aa531ce022e93b92f2a6584e6d109df207ec965aa4dbe0927bc362a44da39e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/mediator.js",
+      "bytes": 6019,
+      "sha256": "7593a459b739c292d1d4d54de8b09354d031da66ca45bc2f10ec9c67044ae3fa"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/mediator.js.map",
+      "bytes": 6005,
+      "sha256": "4b210591acc15db09a204536471b10be99c77609f07b30282d53d553ee9c60ce"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/plan.d.ts",
+      "bytes": 3139,
+      "sha256": "cc2832840cd389461c939bde49012d45bd9fcb0541138e30ffaff2e13ae5468c"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/plan.js",
+      "bytes": 10425,
+      "sha256": "a52be1a32073877a7918a58da6a87862efcc03d1ef5cf888889a983e56862c3d"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/plan.js.map",
+      "bytes": 11810,
+      "sha256": "d6411617fd4214e4671994be9de723385550c01475681419a85b719c9f574b2a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/probes.d.ts",
+      "bytes": 777,
+      "sha256": "c23a722d82ce5321e12c614842fbd4ca3ab64a1152f268df1464371c058f7302"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/probes.js",
+      "bytes": 2960,
+      "sha256": "33e7d4818121ff0e9adea23774fc50945c18308bd4b1844edef6d006b1a30e54"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/probes.js.map",
+      "bytes": 3583,
+      "sha256": "cb27f9ee0931b14c547e3c9c465ce63e5fa06997605ec609f4da5db706c0d13f"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/runner.d.ts",
+      "bytes": 21159,
+      "sha256": "e05c584d3ec474efc6b9173b8b26ae3e441a86fc2309c254ff64dcd25707426a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/runner.js",
+      "bytes": 41058,
+      "sha256": "2dc784688063af42a2cd30e193e19e4622d1ecc38e66f57f79058728b2d35be4"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/runner.js.map",
+      "bytes": 46021,
+      "sha256": "7a57571462ff60f4c490817f37a306dfa26c0a2bc61795738bd6bc1c571741a5"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/store.d.ts",
+      "bytes": 920,
+      "sha256": "15d92d7812ee78297621f936eebb1fe83b32dd5691dcce4070b1fe09d34aff1c"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/store.js",
+      "bytes": 3130,
+      "sha256": "873c706d9a4cda7d0bc9bba7ebc3998a3282677985776e4c8d57a4f26da80ed3"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/eval/store.js.map",
+      "bytes": 4009,
+      "sha256": "fce7b3ad7fc84904912a5b7b2db2aeaca4114ee83d805a4ab192a667af714b38"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/evidence.d.ts",
+      "bytes": 4063,
+      "sha256": "cbbf4acd4b500e16721cb68c6cdc2ed58688612ef64eb08c682e7b7195e60982"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/evidence.js",
+      "bytes": 11600,
+      "sha256": "4f2aa5f772d3c6adecc45f2296bd3cd2a15805726ea6c78291e165b8b06a78cb"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/evidence.js.map",
+      "bytes": 12049,
+      "sha256": "5b64b79267d43815474aede536b6e9f3d274cfa69df4bcf9764ae94c726841d8"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/execution-config.d.ts",
+      "bytes": 2598,
+      "sha256": "eaafb1245277c26ec0a04fff60dc25ab2572ea2b66dcb2e4538d7e51b826d0b6"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/execution-config.js",
+      "bytes": 2887,
+      "sha256": "35fa668b7e61fbbb984365eba49acc0c8d1d6b6ca6aa012399d1a2a2396d0a0a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/execution-config.js.map",
+      "bytes": 2465,
+      "sha256": "7c090be97ce1a77e6c3c8239a0bda64010a0bb18aefc0294a118dda37ae02f83"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/execution-output.d.ts",
+      "bytes": 616,
+      "sha256": "d06f4d6b2dbd3ed093687f295e279dbbe0ed8923019878378038ca01bff8ce57"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/execution-output.js",
+      "bytes": 2442,
+      "sha256": "edc9e9c413e72e547e6ed51e9d04b2a4a83e6ab6328a61c5099bccc46f206985"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/execution-output.js.map",
+      "bytes": 2204,
+      "sha256": "6a884bf142d000233985dce90b7f54d3fff9399685c0eb63a394fdf9961f181b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/fact-clock.d.ts",
+      "bytes": 581,
+      "sha256": "0e3831ca9ecc56f519961dbbecc7a47c0b34bbec0a90da79422ca65707f19047"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/fact-clock.js",
+      "bytes": 995,
+      "sha256": "98795dbc0df0b70e4e03987476e103eb3b6ada004a115231815051370cdfd887"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/fact-clock.js.map",
+      "bytes": 930,
+      "sha256": "af5079702cf6789c08bea4841156a232c93c47e0d3d00f65d21b98bcf9431ee7"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/file-inventory.d.ts",
+      "bytes": 101,
+      "sha256": "f8ca28b40f30660d435359673f289fd82f2a40d6bc0b847f61ed0f1b991769d4"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/file-inventory.js",
+      "bytes": 853,
+      "sha256": "b175b1b3e390eddb108473ca50f2a939450c7b3335e0bdb50b0ca39a4f292345"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/file-inventory.js.map",
+      "bytes": 1112,
+      "sha256": "18f33adf93856dcd81c72fbcc35376462d8f65a066b8bf5e8e117586294f245e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/fixed-evidence.d.ts",
+      "bytes": 1909,
+      "sha256": "bb91a19401a327eebd8e6e7e6e1a73a66f066291af218f97a6daa37bc88b9f3b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/fixed-evidence.js",
+      "bytes": 13287,
+      "sha256": "896b0b9b94efe6dc40ee99166a707aaaa1d7b95a727789814133478ff424ad4a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/fixed-evidence.js.map",
+      "bytes": 14085,
+      "sha256": "9ddfa55ff5f1f8cc46acc5e7e3b0028861f4ad961071bc0d7be2114d9be855e9"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/headless-lifecycle.d.ts",
+      "bytes": 364,
+      "sha256": "daf2217adc908462b51efe6fb3e677115fa3c0699828e37334e9b9c770a1cff4"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/headless-lifecycle.js",
+      "bytes": 846,
+      "sha256": "45a9215f617351fc0fad0a85f11d1b3c1b04b0eddb219e8d3d1cb093407005f9"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/headless-lifecycle.js.map",
+      "bytes": 791,
+      "sha256": "ed3aec974f6c6777a3e75d6ecab95c152d170e31c072c7d3bd8888e1a1eabe1f"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/history-cli.d.ts",
+      "bytes": 134,
+      "sha256": "0bafbbcddf7e89441dad37145b64b1603dfc7db7974804224b12923ec959e8c3"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/history-cli.js",
+      "bytes": 3321,
+      "sha256": "cb13cbc15f4c92460ce8e99c54968f0e624f583607114870a61fc1692c3b96fd"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/history-cli.js.map",
+      "bytes": 4081,
+      "sha256": "0920cd5989bba314d71ec49aa18f1e8d64fdd0ca94990bacbcdace9be1d77a82"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/history.d.ts",
+      "bytes": 4734,
+      "sha256": "164854695b232632c1c53e0a98fd98cd1f8515fc4c5ff688e02b70d0c31ba07c"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/history.js",
+      "bytes": 15284,
+      "sha256": "5464e3aa15661d843914102002ac4ed481284adc6ca34812cf5f00e3d1a9b625"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/history.js.map",
+      "bytes": 16892,
+      "sha256": "869d7b513fdfe190134b72049120cf2286f2ead98bb56000ddd573e23b0f61f9"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-build.d.ts",
+      "bytes": 1978,
+      "sha256": "116d84e8f51eae9feef898c3534aff9d6b01cdeb3b5605d9ecafad6ce4e8a003"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-build.js",
+      "bytes": 13540,
+      "sha256": "9e1050b1cd55a6bdc02f7a0d8d93e4d55034b2aa189538e43b365dde811ab908"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-build.js.map",
+      "bytes": 15031,
+      "sha256": "7c0cdc854332ac345cbae3cd6dbfc8b05e0e582fa1aad10a1a8615ccc118b721"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-cli.d.ts",
+      "bytes": 155,
+      "sha256": "0f8f4f4af24fb3589c55a4728a92f4a38c4143ba15a7546901be9c7bcdecd920"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-cli.js",
+      "bytes": 6445,
+      "sha256": "47c75df5006ea52e2eed487b5305f8902b386919408284ad342ea38a2def68af"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-cli.js.map",
+      "bytes": 6930,
+      "sha256": "5929bbfacc0cf7261f53b3c61f7e55a707eca7aaefcd2e27151f632bcf5633a3"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-decisions.d.ts",
+      "bytes": 4556,
+      "sha256": "530bf2448dadf5eb73eeb826f8573c3d9700d13e9a51eeb11d253fb04e0b09d0"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-decisions.js",
+      "bytes": 24053,
+      "sha256": "0454a2f19be20cc04eb71a9fa95bd82830a22a36203f0816269e1a44ac64033e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-decisions.js.map",
+      "bytes": 27319,
+      "sha256": "3396ff4bbd48cef0c1c28030617dea17e85ea45747917cd9ff4990c2ced8eacb"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-defaults.d.ts",
+      "bytes": 1512,
+      "sha256": "d9485dbe4d83bdf5c202b061fa8ffcf91daf151c1786018e5d2cfbdfb788bb51"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-defaults.js",
+      "bytes": 3866,
+      "sha256": "f0f8add557bcf3f42c9a2d20149056a4f366c061c4deeec68c7b6227f046e87a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-defaults.js.map",
+      "bytes": 5082,
+      "sha256": "3297c23747f1568439215f248b99b71f4646362b0bb5352d4f86733410df30f7"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-eval-assets.d.ts",
+      "bytes": 7875,
+      "sha256": "7f2b4ff63f9a8e3054d9cd73ddf2ef7f04facfc0a015e7e7786b8ad15b29add8"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-eval-assets.js",
+      "bytes": 5374,
+      "sha256": "618caf42d27ab2a7aae9dc3b87c55361eef1677089e8ccf584154a9a03154a28"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-eval-assets.js.map",
+      "bytes": 6204,
+      "sha256": "addfc602915e017a101a6b71b46a8e3b93c6471f1b894ed994c1f818c7d507b0"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-formal.d.ts",
+      "bytes": 1949,
+      "sha256": "60ad11da45ce9a017b7573d26c2c0a5c442ebb410393b11bc5b7f31464812bc8"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-formal.js",
+      "bytes": 9596,
+      "sha256": "7485e0ab086e8516387f30bd4a53f096aaf4e1359e5dd85ea7810d101fb0598a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-formal.js.map",
+      "bytes": 10442,
+      "sha256": "185f45c4559530a83e72218a55522742a5d819b2c7da996e5442d78a81465151"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-history.d.ts",
+      "bytes": 2009,
+      "sha256": "56e3ced4abcb6ae6d715ad6a0dbd461696a058973612f9c37d421c77de4fdf35"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-history.js",
+      "bytes": 12517,
+      "sha256": "64d4e0f48dc55cc0a7638e1a208de38ab4dd7ec20b349dbbd902820419d03104"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-history.js.map",
+      "bytes": 14915,
+      "sha256": "6e564905960b14df4b1bf5c8b75e316f7017c2ac93dcb7899cabcf9193740dbb"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-process.d.ts",
+      "bytes": 2018,
+      "sha256": "2ac1623750ae9188f1785c725a8a81105b5c493225f033c34f9891dcb111c77e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-process.js",
+      "bytes": 12167,
+      "sha256": "f6192cdb05ddbe158fce491ebb1c6a514bdff8812d60c1664de8bec6c0ddbd73"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-process.js.map",
+      "bytes": 13609,
+      "sha256": "8ed14ed68a7b38c3a706ccf869b6f392200746022beee75c3c86dfb609e94a97"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-profile-validation.d.ts",
+      "bytes": 1124,
+      "sha256": "eeea3bddd15bd1b2b75434478a1b7389a1220e0d752943e66c27cce97ca91e83"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-profile-validation.js",
+      "bytes": 3328,
+      "sha256": "e11f6235998e7fd345725495881eeb07e0c3441cd3c072ed62bae27d9f331db4"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-profile-validation.js.map",
+      "bytes": 3212,
+      "sha256": "03a9084b19380ba0fcb5c3c86757800cb931c9d249c0f5f4b248e74a50685ec4"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-rollback.d.ts",
+      "bytes": 943,
+      "sha256": "e02a8e84375637bb288e59231c61a571ae50384209e04853de8d225694604c8a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-rollback.js",
+      "bytes": 8511,
+      "sha256": "2db6ccac7d1cbdd9a7cf307f5cf6ebe1b2f6b2358c9290db6d124e9c1c4f2144"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-rollback.js.map",
+      "bytes": 8863,
+      "sha256": "86af16c872be81dc7208e1ebea6fe92d86427f21db98e59411322494fecd2e68"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-source.d.ts",
+      "bytes": 1558,
+      "sha256": "9e835846d4419afcc4e23beff1b82f5f92a5ef6e0329e0679b0d7265826d5a2d"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-source.js",
+      "bytes": 9563,
+      "sha256": "e1b01150d7d2133748c5ab348745b3b5c61ed4c8819a304d9e93109063382a31"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-source.js.map",
+      "bytes": 10225,
+      "sha256": "da02bc7146925a68ce55bf77fd2450ad65f5e44fec41bc9e4a04a205cf6927a6"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-validation.d.ts",
+      "bytes": 4363,
+      "sha256": "1298c48bf7294f61c51bc36faada4a751517e0ff3e1e0e2c59c49f4cab776f45"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-validation.js",
+      "bytes": 24978,
+      "sha256": "83da3de532a0388caf825266937155f55927afdc65dc379af0dc5fb85fb99558"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve-validation.js.map",
+      "bytes": 27011,
+      "sha256": "fc2e3e4a341891d0d59d88744bae2e6a47b081e963c0e5abafb806b205dbaae6"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve.d.ts",
+      "bytes": 7400,
+      "sha256": "6405c625de60248091a318648d4130df0cc4b35053f61543d6b4a1bf5b49a8fb"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve.js",
+      "bytes": 26798,
+      "sha256": "dfa8cf65a8969cb96880dc52f1568f41f9740fe8f5c59c53fe2b5b84b636f108"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/improve.js.map",
+      "bytes": 26614,
+      "sha256": "38f25ec18d0d39b9fc9338a451a63d9fe28e505d7ad6f5176904c240fc3f7a72"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/acceptance.d.ts",
+      "bytes": 4148,
+      "sha256": "cf5d08b5a2f73a030af1205884996b49c9ac5bb018996514dafed585b8eca3ff"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/acceptance.js",
+      "bytes": 20523,
+      "sha256": "20c932c9468819ab09644d1095eb535c14bb9a5ea6ba88a47730eb185bc81305"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/acceptance.js.map",
+      "bytes": 23435,
+      "sha256": "87eb1745c6d0b7411b8ab6f024dea31afac121c874e7536ba538e2e5f7e0afe6"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/cli.d.ts",
+      "bytes": 125,
+      "sha256": "9327b72e5ed48122f49269b7b2991e74ef70bc849494f3e5db504f8c44c44dd1"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/cli.js",
+      "bytes": 2130,
+      "sha256": "424b97e04a6a71ea95ba4eda9832161383aa18781700bd8a84d6ddd31c4ed7de"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/cli.js.map",
+      "bytes": 2324,
+      "sha256": "c675dde6ea1dfd6f9cd1d38c55651adee36f3de3f4d68cd9768ab25efd051985"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/clocks.d.ts",
+      "bytes": 1942,
+      "sha256": "3df4c9a81d79f4fa0231fd525f631a48da42a73f3baa4556281b13a45749bea7"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/clocks.js",
+      "bytes": 7514,
+      "sha256": "4f83a18ca653e24437a210e577be8ca3c0f8282f9f5299e00b9a50cc9b1034bd"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/clocks.js.map",
+      "bytes": 9641,
+      "sha256": "72789a31629b93a2f1119be25fe496fe5321db9a149512a317440810e7330f70"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/costs.d.ts",
+      "bytes": 3966,
+      "sha256": "4d75f3e4f17b518a0556b527fcdb18d6fc4a2f5391f8a45b058b6dc9bc48a861"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/costs.js",
+      "bytes": 19402,
+      "sha256": "0f0c3cd7a1b9af5be4664e48ef9fc88fb22624ab81d05d9f19521f7d4eb8ce4e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/costs.js.map",
+      "bytes": 23190,
+      "sha256": "736c788e16018161d9581e36df61e87b3a16c21be90453a0c3bef9365034747e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/faults.d.ts",
+      "bytes": 5714,
+      "sha256": "fa2f964379b334b48eadff51800ea392c732dae7fbe51e9f906b95d4d5130649"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/faults.js",
+      "bytes": 18302,
+      "sha256": "4467e30f995cd1a17183ff62b881f87327aba3db344ff73e8796ef358f744b91"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/faults.js.map",
+      "bytes": 20652,
+      "sha256": "a31be34266e24f8709918b9e88ba19b224870c574c5a41b71f207699852c770d"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/feedback-report.d.ts",
+      "bytes": 17148,
+      "sha256": "1513bae9f0acff8f1b8f7e25f6f4790b8b9469bc62403eea02705198215c6219"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/feedback-report.js",
+      "bytes": 13765,
+      "sha256": "bef50e26ce58b30a80fa1fda210dfcbe4aa17a6d744c2bce468200e6cca45c9b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/feedback-report.js.map",
+      "bytes": 17553,
+      "sha256": "13228647d51063ffb0f278880e8f66ef0a4808b3768530c5f5ce2235046d6791"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/feedback.d.ts",
+      "bytes": 1787,
+      "sha256": "c7d552a6cee83b20037906cde28a3e3da3e3326413639a205ff55477e79fa32a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/feedback.js",
+      "bytes": 7339,
+      "sha256": "3ef9c6fa2a2cd053d772d49bcded9eedeec97345eb3cd531de6dd41f7687f949"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/feedback.js.map",
+      "bytes": 8574,
+      "sha256": "f143d41c0f7e45898b61dfececdfbfbb1b951827b99beebbdad99f4ef6314a68"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/index.d.ts",
+      "bytes": 944,
+      "sha256": "c8ca4488671c3856b6b11facc0d7356d62a7ecda3e36fca92d13645626c4e140"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/index.js",
+      "bytes": 507,
+      "sha256": "c1b385d96f69fa771030a919d5b2f97b47c1a87e95f7ac91121f919f03f6f12f"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/index.js.map",
+      "bytes": 485,
+      "sha256": "e70ad57043cb2a990cc7cfc3bbaa1029f72bda4340bc2b636ea1a9fa87863563"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/operations.d.ts",
+      "bytes": 16381,
+      "sha256": "b699690efb3919aafd01b8639ee8215e5ca513d7104caaea5513488f1696bddd"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/operations.js",
+      "bytes": 9487,
+      "sha256": "ff8905efd4e8081eb0a7ab2be7593f8bb3a19d8d5f3b13994f0a718b9ea3a9f0"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/operations.js.map",
+      "bytes": 10403,
+      "sha256": "bc5054a9095da102b7643214e04e58f4bf10767ae2a11e886c939bfd79b61d1e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/report.d.ts",
+      "bytes": 6672,
+      "sha256": "3447c1d3351fa7fe0112610cb05a5c7fc6b050b817b78da720cfe74c8dcfac5b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/report.js",
+      "bytes": 14320,
+      "sha256": "abebdbb75bf592b6e380b950e3b5674047aca9368531ed307958cf5fd72e2ba4"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/metrics/report.js.map",
+      "bytes": 17304,
+      "sha256": "69cfd81acb77e809a850d67dfe10afb7f9fda7bf82d31887d84564095e93175f"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/offline.d.ts",
+      "bytes": 520,
+      "sha256": "b5251ee16423cc5496b5dabbdc7d050889aecbc08ca314c114d03ccea674d31b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/offline.js",
+      "bytes": 3027,
+      "sha256": "7c41fe9c344e119b09b4ba91d62508fa038cdea9939f63d01bbf8d4588632d06"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/offline.js.map",
+      "bytes": 3731,
+      "sha256": "14996cec7025196946471e4ecbae9b28b7c03a518fae641b5eb8e36b6f2fd424"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/ownership.d.ts",
+      "bytes": 723,
+      "sha256": "c71e0fd3695cdd843605578f6899a32cd261c113d2b9c6d59c79a92e583d740e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/ownership.js",
+      "bytes": 6321,
+      "sha256": "4aa219211efc65b363c8537c62e5abb297f61d2d2f9130a8add29a0965684404"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/ownership.js.map",
+      "bytes": 6418,
+      "sha256": "3136e711808aba752b1565da5d0cf0d35d5ff235a7d4a013fd7041a7a57521aa"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/preflight.d.ts",
+      "bytes": 1496,
+      "sha256": "4e4ea2351fe7c0dcca4a264407402f694fb76686cfeef0cad7715adb166fa850"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/preflight.js",
+      "bytes": 11968,
+      "sha256": "a34c8b4856a23e4e94e34eb218acb73c08703f702bfbcf7f59b31ddf88b537d4"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/preflight.js.map",
+      "bytes": 10225,
+      "sha256": "5abc010d73c93f8123d3138d8240ecdd494cfd3480a9137f3b702ef8e7997e8b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/provider-boundary.d.ts",
+      "bytes": 2172,
+      "sha256": "d12a80958394d5fee1da769ba240e33c678701be52311ce429cd707b5e2621dd"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/provider-boundary.js",
+      "bytes": 8185,
+      "sha256": "6094e3a6f2bcc72402da8a7e44a6fa895282f0fc7f3e4ba4fd0d94fe148c86e5"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/provider-boundary.js.map",
+      "bytes": 8510,
+      "sha256": "f8390794c02711d2e0bed78bca04884dea950845db54c519465d4d21978bfcae"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/query.d.ts",
+      "bytes": 1441,
+      "sha256": "592c1631ecfeae42512da4aadf759f22152e29f1cef6a326508abacd8688e94a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/query.js",
+      "bytes": 4576,
+      "sha256": "f061762ac9b30837ec14331baf3c5441da876476aa1f6f80132ee7739a707813"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/query.js.map",
+      "bytes": 5541,
+      "sha256": "f85b74fdaa51474b17201d2bfe6f7ed9ba0e6fb69964b24fc4dafe49e78de826"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/read-environment.d.ts",
+      "bytes": 208,
+      "sha256": "58c54501ba6a8fe721e9c5b1820aa42d21668a634592f9ad7d0ffce588247faa"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/read-environment.js",
+      "bytes": 2978,
+      "sha256": "c768aedd08eb7e2bc32bd0cc52b285e28b0a8f0883818df9279eefb82bb8f082"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/read-environment.js.map",
+      "bytes": 2708,
+      "sha256": "befadcc011441efd8a13496e6c50f98395f9ea6d39ba328e7ce71c594050ce17"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/recovery-facts.d.ts",
+      "bytes": 1469,
+      "sha256": "eb1d242ae30a0977cbc2af41125d85962b4bd344f31d8c7da5e0e2a841b753ce"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/recovery-facts.js",
+      "bytes": 3414,
+      "sha256": "317a71b5bb4cf195aa6e507eb346b23f2b46dddee55572724986aa82de8e83c2"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/recovery-facts.js.map",
+      "bytes": 3314,
+      "sha256": "08caa8c306b003a1820a111c00d5b66d7624538af9a21a0b1ec11d273de42d15"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/recovery-projection.d.ts",
+      "bytes": 3543,
+      "sha256": "f9747bb53cc53715745fc928359519a72225ad20e11680d2c8aa2a9bffc2bd41"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/recovery-projection.js",
+      "bytes": 14513,
+      "sha256": "b70257d17676f1ccd419323b0212dc12002c8583c7793acf552e8ad019bc4d5a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/recovery-projection.js.map",
+      "bytes": 13781,
+      "sha256": "09c0286c8ef3297f4596279f723336aa8764f2eb038e169c66fc7f145d801ba8"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/recovery.d.ts",
+      "bytes": 10540,
+      "sha256": "ab32fae78e1928272566f2b93d5d51160dfc7398a20c2a51e343c51323d3842b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/recovery.js",
+      "bytes": 28013,
+      "sha256": "eea33333e604ef2df1b3eec4758aabad978cb229c7c1b8332ae60c7e7de18124"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/recovery.js.map",
+      "bytes": 26945,
+      "sha256": "07af6f992118a59f51e4d6390f8393796c801eacb65ede1f132851637ff4f736"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/retention.d.ts",
+      "bytes": 1914,
+      "sha256": "87f237eb3e04a68de3a9f7a5959fd7aeada15884945505794a101fae12ce9899"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/retention.js",
+      "bytes": 16677,
+      "sha256": "ddf7f001ef64018830d85432b561666bdab95f3527331ffeac36f9087c8c7bb3"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/retention.js.map",
+      "bytes": 17995,
+      "sha256": "fa14f55ce789f5bf1ba5feaf570b334822d8f2cee75f7f79fec0aa233fc0cfd2"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/runtime.d.ts",
+      "bytes": 6265,
+      "sha256": "b2ae362ac09c94eebba48d8948df81882dd65f7fdd915c2c9ef6af9a5c145b2b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/runtime.js",
+      "bytes": 86759,
+      "sha256": "36e1439f09a08043627a47c656cc92e201a9b228d2bcca698eda530426220378"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/runtime.js.map",
+      "bytes": 79605,
+      "sha256": "d844ecda4d2a225a49464834ae47c3f92727cf08cf67528a00af2cfafc1b50f8"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-archive.d.ts",
+      "bytes": 3957,
+      "sha256": "bff7b559bdeab22f2532f289c4760a65749b100524dd9bf78d134db7ef598c3a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-archive.js",
+      "bytes": 12728,
+      "sha256": "34d48035ad78da97c0087b8e37be09d0ab07b25f1d184abccc357b87871c0550"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-archive.js.map",
+      "bytes": 12847,
+      "sha256": "003daf4063a2f4fe2ecff8ddd3ac296e3dbf6fb00f5ff670c0024c972ed35ae7"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-cli.d.ts",
+      "bytes": 162,
+      "sha256": "616b9de44daf2bde1d8dad7cc4475a871363da57ed6daedd2f131253d3a29b9e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-cli.js",
+      "bytes": 2773,
+      "sha256": "780dce6b50f50fa1f4cd7e6ca25b497a68b7f42742dabeb01eab7263cd9113b8"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-cli.js.map",
+      "bytes": 2950,
+      "sha256": "5ba21224dc660e77dfef47f6c62a67d0e1e982fc18d97562a0527cba3ffae537"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-disposition.d.ts",
+      "bytes": 387,
+      "sha256": "a08089a995500734e98bb8f7c2c48ff5b0735ed6ffc580e646ec4a7e22ab0c76"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-disposition.js",
+      "bytes": 4231,
+      "sha256": "119469f563ca3805112c07964fefb310d5400655be628ae5fa4fe04d42aec72a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-disposition.js.map",
+      "bytes": 4520,
+      "sha256": "2b31252627c34c4c3cf385180d9737021ce5b5599e8441f72dd7e49a15776a85"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-files.d.ts",
+      "bytes": 1255,
+      "sha256": "2ae7c18a3445f90eebaf06e533de4f8e085b8372e6ffbbf83c26e3e8f40aa8e8"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-files.js",
+      "bytes": 5384,
+      "sha256": "32115ee7c15a924e383a20c216b3c0c7c57a2fce76613fe732b86b5ce5c38864"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-files.js.map",
+      "bytes": 6484,
+      "sha256": "ef0c22bc8038f548c1c90a4ac50e9b64947a48539b893d143ddbb795a55d6802"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-projection.d.ts",
+      "bytes": 3675,
+      "sha256": "5277b9457bb137280d429482534c59c9fd717884f662dafcfd6c156c4c274b41"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-projection.js",
+      "bytes": 7094,
+      "sha256": "fccde55b8259d44dffaffd8366aa3b5088ff2601f370bb8811da5b6ec16dad27"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage-projection.js.map",
+      "bytes": 6976,
+      "sha256": "658416c564d6d0027d05aa278f845aa221ab54d9654879a726243590bd0da13a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage.d.ts",
+      "bytes": 1668,
+      "sha256": "0a2412cac21132a717b34fa59d82a1165e46a18a5643abb9acd125dc86281227"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage.js",
+      "bytes": 13202,
+      "sha256": "13915a4403913359cad83b1147baeddce5eacae0a89bebbc0484655d842f57b1"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/storage.js.map",
+      "bytes": 15094,
+      "sha256": "ed788d1fa715c037a880d5bc3258110f33599c93f0c8b501db7193665b0246b2"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/task-profile.d.ts",
+      "bytes": 1048,
+      "sha256": "64cfa67ce8fb8fb2250b0d2d48f51c8669b34761b7dd2290d84457244a9b00d1"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/task-profile.js",
+      "bytes": 3519,
+      "sha256": "74b4d361bbe53209565a56d4b6b9c5f3aad00bdaf3157da121b9c2844394a110"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/task-profile.js.map",
+      "bytes": 4084,
+      "sha256": "ba6ad222225eb5d6f20e58fee5d4fa08753649f6be9814b29346ed2ddd0ea31b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/app.d.ts",
+      "bytes": 3678,
+      "sha256": "f8a841e851c8c394cd6be8e5e0aed93a63826a0f1ae403f880b04b3cafa3df97"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/app.js",
+      "bytes": 80260,
+      "sha256": "459612fbb00b0f8563de718227ea2f66a4913cbecc8266fb56c9485ab0d9b4bb"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/app.js.map",
+      "bytes": 79653,
+      "sha256": "d0dd973b0766cafa0f9d870e30f3a60304320f773a2fe88329d0461d3de5e6cb"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/cursor.d.ts",
+      "bytes": 400,
+      "sha256": "51b70078b9de5bf62741e16b3b308576e788061c5a0166f6e0c023ef0704c1b4"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/cursor.js",
+      "bytes": 1370,
+      "sha256": "d3c89482423b87ef76889591906ed69878844df6c96b6e88e73a2da1168a98d7"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/cursor.js.map",
+      "bytes": 1077,
+      "sha256": "b8f1423e8d95b03c02a1a0c7a6b5524513eb20cbf4da146547949dba06a57ad0"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/drafts.d.ts",
+      "bytes": 550,
+      "sha256": "8054ca8f59da2071efbe2fc87383b419aa103d98c073bfd282cefaf194d17620"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/drafts.js",
+      "bytes": 3008,
+      "sha256": "a73709d7cf63090ed00babefc19a251cabeb973c53f8f4caaae48cf75338402d"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/drafts.js.map",
+      "bytes": 3336,
+      "sha256": "946fac4150b36b9c742d233e69616c3e279ef889ed5efcfa404adc387eeb21e1"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/eval.d.ts",
+      "bytes": 674,
+      "sha256": "0d7a3a0317814686a90bed7be3079882c4cfdc05760f4970ebb10f47b339a086"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/eval.js",
+      "bytes": 6407,
+      "sha256": "9e68b44546ce16b7de9058b0623aaae18ad3a4078e51196af799fc4aa9e25ba8"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/eval.js.map",
+      "bytes": 7748,
+      "sha256": "69a069d3c2dbb0d6c6f830c00e148a5b938655bc27da108a22eb0b60d4abf322"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/history.d.ts",
+      "bytes": 823,
+      "sha256": "0d72a3e208b262f8d8c3e0fd35dc0907b0f047225706e7ace09e43354b16f3a5"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/history.js",
+      "bytes": 9453,
+      "sha256": "1b9f05753a995f02af64918308f15f15cd4cd16afd01859f853a2c88808c8abd"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/history.js.map",
+      "bytes": 11081,
+      "sha256": "b053b7ea426b2f0392b05eb467a6d788af440ef3b7f0137fded21a97d33c27f5"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/improve-selection.d.ts",
+      "bytes": 946,
+      "sha256": "bda726a3260d79b54542604d877460b624603a50c4f5c2860c60330629b7a34a"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/improve-selection.js",
+      "bytes": 6802,
+      "sha256": "938158b705dace005a914c733c065f1f9d5af1d7e3747d4190c968b7d247dae4"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/improve-selection.js.map",
+      "bytes": 7773,
+      "sha256": "130235bfe60f5a1c76fd4667aeaa5ac99461d3d94e247a50b73fce7bfa36c720"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/improve.d.ts",
+      "bytes": 444,
+      "sha256": "cf5d92a5c87ab329382c4dbeb817aa587e2412693c2dad77ece58d3e59b96e8b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/improve.js",
+      "bytes": 3364,
+      "sha256": "b7d62744eb02a18d256c958077591b22bf714858be59cf002b974bfc7801061e"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/improve.js.map",
+      "bytes": 3933,
+      "sha256": "65712e8aa7bcfff0c27d5ec43afe11764f1d5087da4bad3f8b84a46d2c876f78"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/metrics.d.ts",
+      "bytes": 43740,
+      "sha256": "ff1915e9dbcb2ea1ddc5da571fe8c7e0d1c91736a10ba597f0239f1c6ea3e896"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/metrics.js",
+      "bytes": 8198,
+      "sha256": "4b787bbb7501bc8e65223ecb6749128bd3e743bf20c3c26c44406f6492e4e5b1"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/metrics.js.map",
+      "bytes": 10416,
+      "sha256": "f102cf885afb78a37e89af672d1d2b93bd45018900827ba231dd2bb2c20941c1"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/storage.d.ts",
+      "bytes": 651,
+      "sha256": "78897bf6e5440a7accc134b2fe817a9503b7a40bd17ccd7f0490659780553862"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/storage.js",
+      "bytes": 5831,
+      "sha256": "845378fcd144c3c36c0f3c020b688dd209fa9b569262990e74109d42ef1ca4cb"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/storage.js.map",
+      "bytes": 6497,
+      "sha256": "379e4023c9705a94255a52c8edd016331debde35a290dd05539126a0a0337dbb"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/width-gate.d.ts",
+      "bytes": 2191,
+      "sha256": "232d8b60374c41b5111a42db0baaf3d760e43bc540082b9e866425f1d4ecbf1d"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/width-gate.js",
+      "bytes": 9732,
+      "sha256": "f46bb05ed314929ef2603d03523caa749ca77b8d1018b14a954b71e149951375"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/width-gate.js.map",
+      "bytes": 9675,
+      "sha256": "508ccd817ddf2b79bf49d4a8a2a5042a8d9541738f0ff5dbdde0c7219126cb70"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/width-probe.d.ts",
+      "bytes": 994,
+      "sha256": "653c6cdc3a7a23ce47cc6d0a949ea9dceb8654c1c796578b953e9d84aaefa1ee"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/width-probe.js",
+      "bytes": 5304,
+      "sha256": "c8a902801a33ef6397d2f3cda975bc592525b177517dcfa23a383a64865383e2"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/tui/width-probe.js.map",
+      "bytes": 5063,
+      "sha256": "13e92557de851c8e5a56de5e804c115a85b30e8b2f26cd70851cefb5ee3798c7"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/usage-query.d.ts",
+      "bytes": 2115,
+      "sha256": "b854f66370831f5f855f18dee5e242fafa48de27de565da7dd2015d55ba1b035"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/usage-query.js",
+      "bytes": 12455,
+      "sha256": "d49cfafefcb6f8c274ee5927e3e1a051b1701999b940e65bd1b1afe4e390f198"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/usage-query.js.map",
+      "bytes": 12276,
+      "sha256": "2b7c71fca2ef0ed2053fece9e8b08eb1a555593a110cf2d1c31a248de4b45133"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/workspace-fence.d.ts",
+      "bytes": 616,
+      "sha256": "c77119490ae5a831b01169347ed6f79f147df34684875d896e0ffb805ac16e2b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/workspace-fence.js",
+      "bytes": 2596,
+      "sha256": "65ba8684ffd957710dc61e8a1212f0c3f7067662710f3e086679c04ab62e990f"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/workspace-fence.js.map",
+      "bytes": 2671,
+      "sha256": "353bf42e7fde0dacfba2df21bf39d57aec28d367582caf45d9d8dbcb963553e9"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/workspace-ownership.d.ts",
+      "bytes": 580,
+      "sha256": "5722075ed2be9df8545d16dd4536e59d4f52302b5688f4884b61f443b5a9486d"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/workspace-ownership.js",
+      "bytes": 4106,
+      "sha256": "16e68393ccdce8237f0d167a5169835167a8a27cc6679973b863f3b9dffccbbc"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/src/workspace-ownership.js.map",
+      "bytes": 3979,
+      "sha256": "7c9a325bb695eed41deb0ad20ce725d55aa4f84ec07f743b28c5793cc286d269"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/execution/package-lock.json",
+      "bytes": 64781,
+      "sha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/execution/isolation/boundary.mjs",
+      "bytes": 16697,
+      "sha256": "47e4f311f8436a784981ee652e615b320327919b9ab9965b48a5c45783aa8054"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/execution/isolation/export.mjs",
+      "bytes": 2858,
+      "sha256": "40be732ecb0c569dca61eac981cb7769f5136b0ab5d2ad09af5633148b3080ba"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/execution/isolation/native-probe.py",
+      "bytes": 2246,
+      "sha256": "ee4ebc2f3dcee3f32261cdfb7bd1bece64a72e3aa6db81b06d2eaba43456031b"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/execution/isolation/restrict.py",
+      "bytes": 2291,
+      "sha256": "acf442988bd1386fdc688c737b656eb9b6f315d9775fd6f9faa1091485f6fff7"
+    },
+    {
+      "kind": "outputs",
+      "path": "/Users/nineofour/Durio/dist/execution/isolation/runtime-probe.mjs",
+      "bytes": 2273,
+      "sha256": "6ec291d174c78fb66371c521c6b54f2dd70a6b98e925471b77ea01feb720ddfc"
+    }
+  ],
+  "deltaFromOriginalCombined": {
+    "inputs": {
+      "added": [
+        "test/improve-deadline.test.ts"
+      ],
+      "removed": [],
+      "modified": [
+        "scripts/isolation/boundary.mjs",
+        "scripts/isolation/test/boundary.test.mjs",
+        "src/eval/runner.ts",
+        "src/improve-build.ts",
+        "src/improve-validation.ts",
+        "test/improve-build.test.ts"
+      ]
+    },
+    "compiler": {
+      "added": [],
+      "removed": [],
+      "modified": []
+    },
+    "outputs": {
+      "added": [],
+      "removed": [],
+      "modified": [
+        "dist/execution/isolation/boundary.mjs",
+        "dist/src/eval/runner.js",
+        "dist/src/eval/runner.js.map",
+        "dist/src/improve-build.d.ts",
+        "dist/src/improve-build.js",
+        "dist/src/improve-build.js.map",
+        "dist/src/improve-validation.js",
+        "dist/src/improve-validation.js.map"
+      ]
+    },
+    "compiledTests": {
+      "added": [
+        "dist/test/improve-deadline.test.d.ts",
+        "dist/test/improve-deadline.test.js",
+        "dist/test/improve-deadline.test.js.map"
+      ],
+      "removed": [],
+      "modified": [
+        "dist/test/improve-build.test.js",
+        "dist/test/improve-build.test.js.map"
+      ],
+      "unchanged": 118
+    }
+  },
+  "originalCombination": {
+    "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+    "exitCode": 1,
+    "tests": 251,
+    "pass": 250,
+    "fail": 1,
+    "skipped": 0,
+    "record": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/test-result.json",
+      "bytes": 917,
+      "sha256": "01f79bfe66d82c1e790b90698c57912be95c9ef325a20becb0abf734141033d6"
+    },
+    "firstFailurePreserved": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/first-failure-diagnosis.json",
+      "bytes": 8009,
+      "sha256": "a360bdc0e127d3fdff5e6352d3502c15113d8d2b482b753744f6c7f1ac810fbe"
+    }
+  },
+  "affectedChecks": {
+    "boundaryNegative": {
+      "red": 7,
+      "green": 7,
+      "logs": [
+        "boundary-red.tap",
+        "boundary-green-r1.tap"
+      ]
+    },
+    "actualCallChainControllerRegression": {
+      "pass": 10,
+      "log": "improve-eval-green-r4.tap",
+      "scope": "Actual submit/validation/eval/boundary control flow; fake controller, no VM-isolation claim"
+    },
+    "realBoundarySmoke": {
+      "pass": 2,
+      "vms": 4,
+      "log": "vm-boundary.tap"
+    },
+    "sourceHappyPath": {
+      "pass": 1,
+      "vms": 3,
+      "durationMs": 246140.769791,
+      "predeclaredFixtureDeadlineMs": 600000,
+      "originalFixtureDeadlineMs": 300000,
+      "log": "source-happy-path.tap"
+    },
+    "realOutputRetention": {
+      "pass": 1,
+      "vms": 2,
+      "log": "real-output-retention.tap"
+    },
+    "realEval": {
+      "trials": 1,
+      "passed": 1,
+      "graders": 1,
+      "vms": 2,
+      "controlledRequests": 4,
+      "knownTokens": 56,
+      "paidCalls": 0,
+      "report": "real-eval-verification.json"
+    }
+  },
+  "cleanup": {
+    "actualVms": 11,
+    "allTerminated": true,
+    "beforeInventory": "containers-before-heavy.json",
+    "afterInventory": "containers-after-heavy.json",
+    "remainingIds": [
+      "buildkit"
+    ],
+    "details": "vm-outcomes.json"
+  },
+  "reuse": {
+    "basis": "Original 250 passing results remain scoped evidence for untouched behavior. Four production execution/cutoff callers and their failure attribution are covered by the named affected controller regressions and real restricted-environment paths. Source happy-path replaces the original failed case using an explicitly declared 600000ms fixture budget; original 300000ms failure stays unchanged.",
+    "unchanged": "Compiler, dependency lock, all other source inputs and unaffected compiled test files are byte-checked. Plan/report/budget logic, selection/writeback/rollback and unrelated runtime/ownership/recovery/metrics behavior did not change.",
+    "coverageMap": {
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-26/deadline-repair-r1.md",
+      "bytes": 6230,
+      "sha256": "1be47601b8962a6d36f9a7f154a3f83bf634ebe3cb4299906de784f2bf414175"
+    },
+    "countPolicy": "Groups overlap; do not sum them into a new whole-suite total. The 10 controller child cases plus harness are reported as 10 behavior cases, not 11 independent requirements.",
+    "excluded": [
+      {
+        "log": "improve-green-r1.tap",
+        "status": "INVALID_EVIDENCE",
+        "reason": "Inherited NODE_TEST_CONTEXT skipped nested tests; nominal wrapper PASS excluded"
+      },
+      {
+        "log": "improve-green-r2.tap",
+        "status": "FIXTURE_FAILURE",
+        "reason": "Cancellation can stop before emitted stdout reaches acquisition; final test compares retained bytes to actual acquired bytes"
+      }
+    ]
+  },
+  "compiledMigration": {
+    "oldBuild": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/compiled-retained/execution/source-build.json",
+      "bytes": 92815,
+      "sha256": "ccd9ac5775ebe6e5f75a74e10cc7f41873ac804662d4e3975b9b4bdc07ac3850"
+    },
+    "oldDistFiles": 367,
+    "newDistFiles": 370,
+    "oldDistBytePreserved": true,
+    "newBuildReusedWithoutRecompile": true
+  },
+  "promotionHarnessFirstFailure": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-repaired-r1/promotion-first-failure.json",
+    "bytes": 911,
+    "sha256": "f988c40f7e848dcc2dc181c82e484e9997ce9446dcf730fec17bc1437c52c8e8"
+  },
+  "review": "PENDING independent affected Spec and Standards reviews",
+  "externalGates": {
+    "paidDeepSeek": "NOT_RUN_NOT_AUTHORIZED",
+    "nativeFinalCandidate": "NOT_RUN",
+    "dailyAcceptance": "NOT_RUN"
+  },
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/handoff.json",
+      "bytes": 4597,
+      "sha256": "82408c894b4829149e796eef93cfdfd80c977d714a4d42831fa0c88723f9580d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-integration-readback.json",
+      "bytes": 19397,
+      "sha256": "939b1f36258578123ce2c0b45d05376c2af489d6b20c3f833bbccbf9ad39ed95"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-postflight.json",
+      "bytes": 76767,
+      "sha256": "c785110638674e127d1a70fbc21737010a4e615aabb2b869aa874884560393f8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/heavy-after-identity.json",
+      "bytes": 129664,
+      "sha256": "324a69a835d3e7fd1ed2f3706ec70a75d9cd0e273d5f70d2c7c3088819e9f177"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/boundary-green-r1.tap",
+      "bytes": 786,
+      "sha256": "c8aba1e3f13fb2d3c9c93b9ff3fde60f65b15683eb855c92b0f7b922ed7b0b29"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/improve-eval-green-r4.tap",
+      "bytes": 2974,
+      "sha256": "fd2593715802c91d4c560fdfc6408dd40e16c1cee56591d3c4271a13593fbd63"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/vm-boundary.tap",
+      "bytes": 580,
+      "sha256": "f723e04d5b4f9721117639a88cf4978f79be6f185988e879f4ba19c130e4e107"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/source-happy-path.tap",
+      "bytes": 390,
+      "sha256": "606a110d8a10fbf92b07472253536199fd0e02980a156f464e941af8ad4e1ff7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/real-output-retention.tap",
+      "bytes": 652,
+      "sha256": "d9f6cf286b0da6eef92e03a266da73308666789b1ab22d9bbeac8f338c2b19a6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/real-eval-verification.json",
+      "bytes": 722,
+      "sha256": "fdc4eed3f4d387f5d020fadd75f2f4b8736ead22a839ed9337e91bad41447f44"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/vm-outcomes.json",
+      "bytes": 9597,
+      "sha256": "35c20c5cc8fd1b8c87f96408bbefba1f34b06d43bd7530bb18414f032fd71dd8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/original-first-failure-readback.json",
+      "bytes": 3756,
+      "sha256": "de8438689d2094acc82efcf3b98debc59e28aa00912995f88a8b9a5778001c67"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/test-result.json",
+      "bytes": 917,
+      "sha256": "01f79bfe66d82c1e790b90698c57912be95c9ef325a20becb0abf734141033d6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tests.tap",
+      "bytes": 72079,
+      "sha256": "c16faf0ca5218e555ff82bdbd216c4cf3a0dba87ad4592e28f6ecbbae7dd9d6f"
+    }
+  ]
+}

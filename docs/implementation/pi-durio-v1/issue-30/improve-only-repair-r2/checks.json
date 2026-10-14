@@ -1,0 +1,81 @@
+{
+  "status": "PASS_OFFLINE_FIXED_R2_PENDING_INDEPENDENT_REVIEW_AND_GRANT",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/frozen-manifest.json",
+    "bytes": 76288,
+    "sha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a"
+  },
+  "newChecks": {
+    "exactSourceAdmission": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/admission-check-r1.json",
+      "bytes": 99079,
+      "sha256": "8288ca5aa1a17ce637db5d82a8b2cbe6eb50e972bb975ee6415bf2b115adf697"
+    },
+    "admissionCases": 30,
+    "independentFailureModeCoverage": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/review-repair-check-r1.json",
+      "bytes": 4973,
+      "sha256": "80d548a7e9344119ca981d2918972fbfbe9f10eac942e142b294874193dac732"
+    },
+    "focusedCases": 8,
+    "completeActualInputsWithMemoryGrant": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-preflight-check-r1.json",
+      "bytes": 1398,
+      "sha256": "1bdd1a891d5a74f04418fcfd2d161c5a37c511b757c88b5713e45c92250bffe6"
+    },
+    "fullPreflightCases": 1,
+    "actualFalseMissingGrantEntryPoints": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-denials-r1.json",
+      "bytes": 814,
+      "sha256": "3d93555d4fd46b792c49f47efe373b6c881e7ccc51cbdc3a5bbf2c6b41a14967"
+    },
+    "denialCases": 3
+  },
+  "reuse": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/check-reuse.json",
+    "bytes": 5339,
+    "sha256": "a46f020d647358990486e30ee93e3dfa4f3eeea123fe6cadbe51ca85ffe58293"
+  },
+  "scope": "42 current offline cases: 30 admission + 8 new repair modes + 1 complete preflight + 3 real denied paths. Artificial author/source/API/candidate fixtures live only in memory; no actual authorization.",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "candidateGate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
+    "bytes": 4084,
+    "sha256": "21271432e2d61a85048c5be7d9679328b49286bf96ae86e299eb6801f945a47d"
+  },
+  "priorReview": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/independent-review.json",
+      "bytes": 18464,
+      "sha256": "873680e102700a4321210235bf3960343ac4a4c1f28a219e09cea84bc0d2b5a9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/independent-review.md",
+      "bytes": 6460,
+      "sha256": "af863c12ad4df734e6d737bc378682c21874fde5235b8b6c34f7388aa4304f46"
+    }
+  ],
+  "r1Preserved": {
+    "files": 368,
+    "index": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/retained-r1-identities.json",
+      "bytes": 103621,
+      "sha256": "2b0edb5323cb9fe6cb38a953c261115223faf10292be6169657a61dcf5c49cbf"
+    },
+    "status": "UNCHANGED_AFTER_FREEZE_CHECKS"
+  },
+  "staticChecks": {
+    "json": "PASS",
+    "pythonAst": "PASS",
+    "nodeSyntax": "PASS",
+    "allFrozenFileReferences": "PASS"
+  },
+  "newIndependentHarnessReview": "PENDING",
+  "newHumanOneStartGrant": "ABSENT",
+  "realCredentialReads": 0,
+  "newProviderRequests": 0,
+  "productImportsOrExecutions": 0,
+  "newRestrictedVmStarts": 0,
+  "actualGrantFilesCreated": 0,
+  "actualPaidStartFilesCreated": 0
+}

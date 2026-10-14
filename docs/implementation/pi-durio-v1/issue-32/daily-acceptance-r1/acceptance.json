@@ -1,0 +1,214 @@
+{
+  "schema": "pi-durio.user-daily-acceptance.v1",
+  "recordedAt": "2026-10-11T11:19:17.705778+00:00",
+  "status": "DAILY_USE_ACCEPTED_FIRST_VERSION_COMPLETE",
+  "issue": {
+    "number": 32,
+    "url": "https://github.com/nineofoursyrup/pi-durio/issues/32",
+    "slice": "PI-DURIO-V1-TICKETS-r1:T22",
+    "deliveryStatus": "COMPLETE",
+    "remoteStateAtReadback": "OPEN",
+    "remoteStateChangedByThisRecord": false
+  },
+  "supersedesCurrentConclusionOf": {
+    "reference": {
+      "path": "docs/implementation/pi-durio-v1/issue-32/pending-acceptance.json",
+      "bytes": 8196,
+      "sha256": "d03ca2a1679ca03fdd9eaeb0e46621c803ee58342f27353334fc2428ec3452ec"
+    },
+    "rule": "Append-only subsequent acceptance conclusion. Original pending record and trial guide remain byte-identical historical preparation evidence."
+  },
+  "candidate": {
+    "sourceCommit": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "sourceTree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+    "cliSha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b",
+    "documentationBase": "f346f77e8a9438aeeabb0a0dad67aaff7aa8bbbc",
+    "installation": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install",
+    "binding": "Direct user reference to 当前版本 binds to fixed supplied candidate; both retained trial artifacts match supplied source-build and CLI bytes."
+  },
+  "technicalAcceptance": {
+    "status": "COMPLETE_AND_APPLICABLE",
+    "acceptedTickets": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "record": {
+      "path": "docs/implementation/pi-durio-v1/issue-31/technical-acceptance.json",
+      "bytes": 2210,
+      "sha256": "a5dcd3f6796cb82270385e5c4e806a10e009a283ae4476a7092dd157e34d0c12"
+    },
+    "applicabilityReadback": {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/applicable-readback.json",
+      "bytes": 30412,
+      "sha256": "1f284f598ca8daa7728222837ddc17f99f9eef0b677c13b6d052497c9b7f0c36"
+    },
+    "newWholeSuitePassClaimed": false
+  },
+  "actualTrial": {
+    "status": "ACTUAL_USE_ATTESTED_BY_USER_WITH_MATCHING_OFFLINE_RECORDS",
+    "source": "user-response.json plus applicable-readback.json selected run metadata",
+    "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+    "dataRoot": "/Users/nineofour/Library/Application Support/pi-durio-f26-user-trial-demo",
+    "workspace": "/Users/nineofour/Durio/test/fixtures/project",
+    "scope": "Observed saved records: two offline fixture runs, both completed with cleanup confirmed. The direct user message attests actual use; no real model task or minimum duration is inferred.",
+    "runIds": [
+      "86be33b0-b74a-48ac-b3b7-94f00aeedca6",
+      "6141c3c6-84f1-4010-ad28-cdff115e3fc2"
+    ],
+    "environment": {
+      "recordedPlatform": "darwin",
+      "recordedArchitecture": "arm64",
+      "recordedNodeVersion": "v26.8.2",
+      "sourceSequences": [
+        4,
+        51
+      ],
+      "preparationMachineFacts": {
+        "observedAt": "2026-10-10T11:32:17.523496+00:00",
+        "method": "Read-only host commands and installed Terminal Info.plist; no Terminal session or product started.",
+        "facts": {
+          "macOSVersion": "27.2",
+          "macOSBuild": "26B5101f",
+          "architecture": "arm64",
+          "machine": "MacBookPro18,1",
+          "memoryBytes": 34359738368,
+          "nodeVersion": "v26.8.2",
+          "installedTerminalVersion": "2.15",
+          "installedTerminalBuild": "488.7",
+          "trialTerminalProfile": "PENDING",
+          "trialTerminalFont": "PENDING",
+          "trialTerminalDimensions": "PENDING"
+        }
+      },
+      "preparationFactsAreExactTrialMeasurement": false,
+      "actualTerminalApplication": "UNKNOWN_NOT_INDEPENDENTLY_CAPTURED",
+      "terminalProfile": "UNKNOWN",
+      "terminalFont": "UNKNOWN",
+      "terminalDimensions": "UNKNOWN"
+    },
+    "executionTimestamps": [
+      {
+        "runId": "86be33b0-b74a-48ac-b3b7-94f00aeedca6",
+        "acceptedAt": "2026-10-10T11:51:16.832Z",
+        "startedAt": "2026-10-10T11:51:22.099Z",
+        "closedAt": "2026-10-10T11:51:22.579Z"
+      },
+      {
+        "runId": "6141c3c6-84f1-4010-ad28-cdff115e3fc2",
+        "acceptedAt": "2026-10-10T11:52:51.930Z",
+        "startedAt": "2026-10-10T11:52:52.480Z",
+        "closedAt": "2026-10-10T11:52:52.715Z"
+      }
+    ],
+    "humanTrialStartedAt": "UNKNOWN",
+    "humanTrialEndedAt": "UNKNOWN",
+    "humanTrialDuration": "UNKNOWN"
+  },
+  "userDecision": {
+    "status": "EXPLICIT_DAILY_USE_ACCEPTED",
+    "decision": "日用接受",
+    "originalResponse": "已试用当前版本，日用接受，收尾",
+    "actualUseAttestedByUser": true,
+    "source": {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/user-response.json",
+      "bytes": 1168,
+      "sha256": "29c3447c9906774c867fc17a82d09fdbb3e50369f538fcd482e00c937accad0c"
+    },
+    "sourceType": "direct-user-message",
+    "sourceConversation": "current pi-durio implementation conversation",
+    "sourceTime": "NOT_EXPOSED",
+    "coordinatorRecordedAt": "2026-10-11T11:14:32.716104+00:00",
+    "timeNote": "recordedAt is the coordinator recording time, not an invented exact message-sent or trial time",
+    "correctionsInThisResponse": []
+  },
+  "completion": {
+    "dailyUseAccepted": true,
+    "firstVersionComplete": true,
+    "acceptedTickets": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32
+    ],
+    "pendingTickets": [],
+    "basis": "All necessary technical evidence remains applicable and the user explicitly confirms actual use and daily-use acceptance. Unknown profile/font/precise trial timing are disclosed limits, not new acceptance gates.",
+    "productReleasePerformed": false
+  },
+  "preservedLimitations": [
+    "Original technical FAIL, UNKNOWN and NOT RUN remain in referenced evidence; bounded reuse is unchanged.",
+    "Offline trial records contain no real model inference evidence and do not broaden historical real-provider or improve conclusions.",
+    "npm 11.19.1 bundled file: dependency npm ls invalid and consuming offline npm ci FAIL remain known installation-path limits.",
+    "Historical native IME/emoji/copy/small-window evidence retains original scenario and unchanged-input bounds; no fresh Terminal test occurred.",
+    "Exact user-message sent time, total human trial duration, and actual Terminal profile/font/dimensions remain unknown.",
+    "Actual agent backend is NOT_ATTESTED."
+  ],
+  "authority": {
+    "localDocumentationAndCommit": true,
+    "coordinatorOwnsIntegrationAndRemoteCloseout": true,
+    "newPaidBatch": false,
+    "automaticIssueClose": false,
+    "mainProductMerge": false,
+    "release": false,
+    "parentSpecOrMapModified": false,
+    "extraPaidTrialMandatory": false,
+    "minimumTrialDuration": null,
+    "feedbackQuestionnaire": false
+  },
+  "effects": {
+    "productCommands": 0,
+    "productImports": 0,
+    "productTests": 0,
+    "TUIStarts": 0,
+    "TerminalOperations": 0,
+    "providerRequestsAdded": 0,
+    "VMStarts": 0,
+    "credentialsRead": false,
+    "originalEvidenceWrites": 0,
+    "sharedStatusWrites": 0,
+    "GitHubWrites": 0
+  },
+  "model": {
+    "requested": "gpt-6-astra",
+    "reasoningRequested": "xhigh",
+    "actualBackend": "NOT_ATTESTED"
+  }
+}

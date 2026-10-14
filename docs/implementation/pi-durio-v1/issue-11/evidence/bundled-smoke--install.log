@@ -1,0 +1,70 @@
+npm error code 1
+npm error path /Users/nineofour/pi-durio-v1-run/evidence/issue-11/bundled-smoke/node_modules/pi-durio/node_modules/esbuild
+npm error command failed
+npm error command sh -c node install.js
+npm error node:internal/errors:999
+npm error   const err = new Error(message);
+npm error               ^
+npm error
+npm error Error: Command failed: /opt/homebrew/Cellar/node/26.8.2/bin/node /Users/nineofour/pi-durio-v1-run/evidence/issue-11/bundled-smoke/node_modules/pi-durio/node_modules/esbuild/bin/esbuild --version
+npm error node:internal/modules/cjs/loader:1573
+npm error   throw err;
+npm error   ^
+npm error
+npm error Error: Cannot find module '/Users/nineofour/pi-durio-v1-run/evidence/issue-11/bundled-smoke/node_modules/pi-durio/node_modules/esbuild/bin/esbuild'
+npm error     at Module._resolveFilename (node:internal/modules/cjs/loader:1569:15)
+npm error     at wrapResolveFilename (node:internal/modules/cjs/loader:1123:27)
+npm error     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1147:10)
+npm error     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1174:12)
+npm error     at Module._load (node:internal/modules/cjs/loader:1346:5)
+npm error     at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+npm error     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+npm error     at node:internal/main/run_main_module:33:47 {
+npm error   code: 'MODULE_NOT_FOUND',
+npm error   requireStack: []
+npm error }
+npm error
+npm error Node.js v26.8.2
+npm error
+npm error     at genericNodeError (node:internal/errors:999:15)
+npm error     at wrappedFn (node:internal/errors:544:14)
+npm error     at checkExecSyncError (node:child_process:942:11)
+npm error     at Object.execFileSync (node:child_process:978:15)
+npm error     at validateBinaryVersion (/Users/nineofour/pi-durio-v1-run/evidence/issue-11/bundled-smoke/node_modules/pi-durio/node_modules/esbuild/install.js:103:28)
+npm error     at /Users/nineofour/pi-durio-v1-run/evidence/issue-11/bundled-smoke/node_modules/pi-durio/node_modules/esbuild/install.js:296:5 {
+npm error   status: 1,
+npm error   signal: null,
+npm error   output: [
+npm error     null,
+npm error     Buffer(0) [Uint8Array] [],
+npm error     Buffer(833) [Uint8Array] [
+npm error       110, 111, 100, 101,  58, 105, 110, 116, 101, 114, 110,  97,
+npm error       108,  47, 109, 111, 100, 117, 108, 101, 115,  47,  99, 106,
+npm error       115,  47, 108, 111,  97, 100, 101, 114,  58,  49,  53,  55,
+npm error        51,  10,  32,  32, 116, 104, 114, 111, 119,  32, 101, 114,
+npm error       114,  59,  10,  32,  32,  94,  10,  10,  69, 114, 114, 111,
+npm error       114,  58,  32,  67,  97, 110, 110, 111, 116,  32, 102, 105,
+npm error       110, 100,  32, 109, 111, 100, 117, 108, 101,  32,  39,  47,
+npm error        85, 115, 101, 114, 115,  47, 110, 105, 110, 101, 111, 102,
+npm error       111, 117, 114,  47,
+npm error       ... 733 more items
+npm error     ]
+npm error   ],
+npm error   pid: 42252,
+npm error   stdout: Buffer(0) [Uint8Array] [],
+npm error   stderr: Buffer(833) [Uint8Array] [
+npm error     110, 111, 100, 101,  58, 105, 110, 116, 101, 114, 110,  97,
+npm error     108,  47, 109, 111, 100, 117, 108, 101, 115,  47,  99, 106,
+npm error     115,  47, 108, 111,  97, 100, 101, 114,  58,  49,  53,  55,
+npm error      51,  10,  32,  32, 116, 104, 114, 111, 119,  32, 101, 114,
+npm error     114,  59,  10,  32,  32,  94,  10,  10,  69, 114, 114, 111,
+npm error     114,  58,  32,  67,  97, 110, 110, 111, 116,  32, 102, 105,
+npm error     110, 100,  32, 109, 111, 100, 117, 108, 101,  32,  39,  47,
+npm error      85, 115, 101, 114, 115,  47, 110, 105, 110, 101, 111, 102,
+npm error     111, 117, 114,  47,
+npm error     ... 733 more items
+npm error   ]
+npm error }
+npm error
+npm error Node.js v26.8.2
+npm error A complete log of this run can be found in: /Users/nineofour/.npm/_logs/2026-10-09T09_47_45_330Z-debug-0.log

@@ -1,0 +1,274 @@
+{
+  "at": "2026-10-09T23:43:29.830233+00:00",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "rows": [
+    {
+      "worktree": "/Users/nineofour/Durio",
+      "HEAD": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+      "branch": "refs/heads/codex/pi-durio-v1",
+      "ownedByThisRun": false
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-11",
+      "HEAD": "2f21e346116483a691c9f219f0c669106da5f7bf",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-11",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-12",
+      "HEAD": "9fb7ca7e5ad51d2abb83646dfabf417f3f5eeba6",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-12",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-13",
+      "HEAD": "5dc01db6a135923a77794a8499c3cd999bcd85f2",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-13",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-14",
+      "HEAD": "74f79969bdb87fd24c8ca8943ee227d789ee2194",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-14",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-15",
+      "HEAD": "3a2113488748d2f4abbe9b96904422d580e426b6",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-15",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16",
+      "HEAD": "e5f7431af5797ec9518563902909215a6c56c668",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-16",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-cursor",
+      "HEAD": "42ff424757f83c8578949d2a31f31eafca8ad486",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-16-cursor",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-width",
+      "HEAD": "b256a70ee18337bddca09ae5adb079eee1adbb78",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-16-width",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-17",
+      "HEAD": "8eeb3b35e831fad276ce3dd884e17a23799c5981",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-17",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-17-reopen",
+      "HEAD": "3909c094e0827b803441e8501715ecbcdf2cfdea",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-17-reopen",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-18",
+      "HEAD": "b965e0c4839c783e2923cc41178e69eb9f986165",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-18",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-19",
+      "HEAD": "0dbeb473767d4aa5c5250ae3694b4d4b97c7e75d",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-19",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-20",
+      "HEAD": "30f25fac6c8c94546355bf03b94622f994b22714",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-20",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-21",
+      "HEAD": "87eb35e40f62db0285c88399c58be112f27f72a9",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-21",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-22",
+      "HEAD": "fa6aa2a798cf4629749cb6c07e72a7ca7422e60f",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-22",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-23",
+      "HEAD": "ea0c1ed70a28240214a740a4c543e91a6d00291f",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-23",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-24",
+      "HEAD": "ab5d8179c153fc54acd294aa6b806dfeb7023731",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-24",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-25",
+      "HEAD": "29f00ced7c033816d1413cd53cf39870e475e191",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-25",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-26",
+      "HEAD": "ccc8e53257cb4274889b1a0bc3fd982fe6de3597",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-26",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-27",
+      "HEAD": "0d292488cef06eedf917cf032d7c8417a9db3584",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-27",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-28",
+      "HEAD": "960db7658f6a8afc1c544bd20a4fed2e74184ecf",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-28",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-29",
+      "HEAD": "210a9c005c89c9deaaf4cfd2be8e2a2c8eb1b589",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-29",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-30",
+      "HEAD": "cf6a45f0f6c2c74621fdedc8be846b599b429a97",
+      "branch": "refs/heads/codex/pi-durio-v1-issue-30",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-15-preflight",
+      "HEAD": "f653aa032983ffb0395c727448a676858c8f327f",
+      "branch": "refs/heads/codex/pi-durio-v1-repair-15-preflight",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-15-target-session",
+      "HEAD": "c35eab8dd614e7e5ec102609c294755dd8613be4",
+      "branch": "refs/heads/codex/pi-durio-v1-repair-15-target-session",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-26-deadline",
+      "HEAD": "e1e7ec3d02b8f3b770fee886b075d984d7cf8369",
+      "branch": "refs/heads/codex/pi-durio-v1-repair-26-deadline",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-26-output",
+      "HEAD": "843ed79708e46ea5ad24bdb2e9b39ef22cbd6a63",
+      "branch": "refs/heads/codex/pi-durio-v1-repair-26-output",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-27-owner",
+      "HEAD": "c7d8421bbeb0a68aba7d28c1bafe58043a1ad5fa",
+      "branch": "refs/heads/codex/pi-durio-v1-repair-27-owner",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    },
+    {
+      "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-30-cancel",
+      "HEAD": "8d7f5f7d02ad2dfe1826408156329123b3ad972a",
+      "branch": "refs/heads/codex/pi-durio-v1-repair-30-cancel",
+      "ownedByThisRun": true,
+      "status": [],
+      "fullyMerged": true,
+      "disposition": "RETAIN_PENDING_EVIDENCE_PATH_AUDIT: producer compiled files, runtime/install and preservation paths may still be referenced by immutable handoffs; no deletion during current controlled resource workload."
+    }
+  ],
+  "deleted": []
+}

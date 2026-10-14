@@ -1,0 +1,120 @@
+{
+  "status": "PASS",
+  "at": "2026-10-10T06:24:18.676829+00:00",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/frozen-manifest.json",
+    "bytes": 10012,
+    "sha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e"
+  },
+  "checks": [
+    {
+      "name": "all-manifest-direct-bindings",
+      "status": "PASS",
+      "entries": 23
+    },
+    {
+      "name": "original-r2-preservation",
+      "status": "PASS",
+      "files": 3167
+    },
+    {
+      "name": "source-build-inputs",
+      "status": "PASS",
+      "files": 169
+    },
+    {
+      "name": "compiled-outputs",
+      "status": "PASS",
+      "files": 246
+    },
+    {
+      "name": "installed-complete-content-and-set",
+      "status": "PASS",
+      "entries": 12925
+    },
+    {
+      "name": "linux-runtime-fixed-files-and-mode",
+      "status": "PASS",
+      "entries": 12851,
+      "identity": "5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a"
+    },
+    {
+      "name": "closed-seed-readonly-kinds",
+      "status": "PASS",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/eval-data/host.sqlite",
+      "kinds": {
+        "eval.content": 133,
+        "eval.plan": 1,
+        "evidence.fixed": 1
+      }
+    },
+    {
+      "name": "closed-seed-readonly-kinds",
+      "status": "PASS",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/improve-data/host.sqlite",
+      "kinds": {
+        "context.snapshot": 1,
+        "durable.closed-snapshot": 2,
+        "execution.artifact": 1,
+        "execution.config": 1,
+        "generation.request": 2,
+        "lifecycle.close-started": 1,
+        "lifecycle.storage-closed": 1,
+        "lifecycle.storage-closing": 1,
+        "model.dispatch": 2,
+        "model.fetch-intent": 2,
+        "model.http": 2,
+        "model.intent": 2,
+        "model.payload": 2,
+        "model.provider-event": 6,
+        "model.response": 2,
+        "ownership.acquired": 1,
+        "ownership.session": 1,
+        "preflight": 1,
+        "run.closed": 1,
+        "run.started": 1,
+        "shell.completed": 1,
+        "shell.started": 1,
+        "submission.accepted": 1,
+        "submission.intent": 1,
+        "submission.settled": 1,
+        "task.accepted": 1,
+        "tool.dispatch": 1,
+        "tool.error": 1,
+        "tool.intent": 1,
+        "tool.output": 1,
+        "tool.summary": 1,
+        "usage.projection": 1,
+        "workspace.owner": 1
+      }
+    },
+    {
+      "name": "reused-improve-fixture-target-new-analysis-identity",
+      "status": "PASS",
+      "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project",
+      "targetRunId": "1ff5b41c-5fde-460f-9dcf-8a3ebe090d03",
+      "syntheticSeed": true
+    },
+    {
+      "name": "exact-original-case-input-fixture-dirty-scope-grader-and-runtime",
+      "status": "PASS",
+      "cases": 3
+    },
+    {
+      "name": "unstarted-false-templates-only",
+      "status": "PASS"
+    },
+    {
+      "name": "offline-results-and-retained-first-failures-current-bytes",
+      "status": "PASS"
+    }
+  ],
+  "distinctFilesRead": 29146,
+  "realCredentialReads": 0,
+  "providerCalls": 0,
+  "productRuntimeOrHarnessOpen": 0,
+  "vmStarts": 0,
+  "builds": 0,
+  "rawWrites": 0,
+  "readIdentities": "read-identities.json"
+}

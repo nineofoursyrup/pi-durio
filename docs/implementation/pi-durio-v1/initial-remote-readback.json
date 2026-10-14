@@ -1,0 +1,304 @@
+{
+  "checked_at": "2026-10-09T09:15:59.946809+00:00",
+  "tickets": [
+    {
+      "number": 11,
+      "title": "首个 headless 只读任务与持久记录",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 12,
+      "title": "受限执行与可信评分探查",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 13,
+      "title": "可写 coding、工作区所有权与完整输出",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        11
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 14,
+      "title": "中止与退出的可解释收尾",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        13
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 15,
+      "title": "只读重开与恢复核对",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        14
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 16,
+      "title": "真实 Terminal 请求往返与可靠输入",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        11
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 17,
+      "title": "忙时队列、停止与恢复决策交互",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        16,
+        15
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 18,
+      "title": "历史原文、trace、用量追查与固定证据",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        13,
+        16
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 19,
+      "title": "自动与主动上下文压缩",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        18,
+        17
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 20,
+      "title": "保留保护下的归档、清理与一致性迁移",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        15,
+        18
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 21,
+      "title": "固定计划下的受预算 eval 与独立评分",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        18,
+        12,
+        15
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 22,
+      "title": "fresh 对照与限定范围改善报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        21
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 23,
+      "title": "improve 受限取证与候选报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        17,
+        18
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 24,
+      "title": "improve 结构化选择、仅验证与建议抑制",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        22,
+        23
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 25,
+      "title": "项目与配置候选的验证后写回、启用和回退",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        24
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 26,
+      "title": "自身源码新构建与独立 eval 资产改进",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        25
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 27,
+      "title": "任务验收三率与执行、验收双时钟",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        17,
+        18
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 28,
+      "title": "全样本成本与任务、尝试故障报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        27
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 29,
+      "title": "低打扰人工介入与交付后返工报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        27
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 30,
+      "title": "真实 DeepSeek 代表任务与 improve 执行闭环",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        25
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 31,
+      "title": "首版技术验收与轻量实测报告",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        19,
+        28,
+        29,
+        26,
+        20,
+        30
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    },
+    {
+      "number": 32,
+      "title": "本机试用与明确日用接受",
+      "state": "open",
+      "assignees": [],
+      "comments": 0,
+      "blocked_by": [
+        31
+      ],
+      "body_matches": true,
+      "dependencies_match": true
+    }
+  ],
+  "edges": 34,
+  "children": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32
+  ]
+}

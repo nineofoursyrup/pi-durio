@@ -1,0 +1,727 @@
+{
+  "schema": "pi-durio-v1-partial-local-measurement-summary-v2",
+  "at": "2026-10-09T23:47:29.014113+00:00",
+  "status": "PARTIAL_TECHNICAL_ACCEPTANCE_NOT_COMPLETE",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+  "machine": {
+    "os": "27.2",
+    "architecture": "arm64",
+    "model": "MacBookPro18,1",
+    "memoryBytes": 34359738368,
+    "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+    "nodeVersion": "v26.8.2",
+    "terminalVersion": "2.15"
+  },
+  "sourceCategories": {
+    "root-config-and-other": {
+      "regularFiles": 9,
+      "symlinks": 0,
+      "logicalBytes": 211548,
+      "allocatedBytesByPath": 233472,
+      "allocatedBytesUniqueInode": 233472,
+      "physicalTextLines": 4522
+    },
+    "documentation": {
+      "regularFiles": 223,
+      "symlinks": 0,
+      "logicalBytes": 3234615,
+      "allocatedBytesByPath": 3702784,
+      "allocatedBytesUniqueInode": 3702784,
+      "physicalTextLines": 38073
+    },
+    "scripts": {
+      "regularFiles": 39,
+      "symlinks": 0,
+      "logicalBytes": 286749,
+      "allocatedBytesByPath": 376832,
+      "allocatedBytesUniqueInode": 376832,
+      "physicalTextLines": 2557
+    },
+    "product": {
+      "regularFiles": 80,
+      "symlinks": 0,
+      "logicalBytes": 792839,
+      "allocatedBytesByPath": 946176,
+      "allocatedBytesUniqueInode": 946176,
+      "physicalTextLines": 7481
+    },
+    "tests": {
+      "regularFiles": 42,
+      "symlinks": 0,
+      "logicalBytes": 476558,
+      "allocatedBytesByPath": 565248,
+      "allocatedBytesUniqueInode": 565248,
+      "physicalTextLines": 4529
+    },
+    "vendor": {
+      "regularFiles": 5,
+      "symlinks": 0,
+      "logicalBytes": 1041519,
+      "allocatedBytesByPath": 1052672,
+      "allocatedBytesUniqueInode": 1052672,
+      "physicalTextLines": 108
+    }
+  },
+  "externalMeasurementHarnesses": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/inventory.py",
+      "bytes": 8673,
+      "sha256": "5b78c63a6121fa672ac8213be72402830ecd37afdf997817e4cca0427ddd0db7",
+      "physicalTextLines": 151,
+      "scope": "External acceptance/measurement harness, separate from maintained product source and tracked scripts at the fixed candidate"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/process-startup.mjs",
+      "bytes": 4643,
+      "sha256": "2d30ebf7332345157f947dcf53cac24d1063b91f1b3a3e9262dfd0523799e4f3",
+      "physicalTextLines": 57,
+      "scope": "External acceptance/measurement harness, separate from maintained product source and tracked scripts at the fixed candidate"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/headless-session.mjs",
+      "bytes": 10386,
+      "sha256": "7e7c843c8ad3d8469b0f7241d93df33bffb24929a2e9cc46f6cac367694d0dda",
+      "physicalTextLines": 71,
+      "scope": "External acceptance/measurement harness, separate from maintained product source and tracked scripts at the fixed candidate"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/readonly-data.mjs",
+      "bytes": 6333,
+      "sha256": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655",
+      "physicalTextLines": 50,
+      "scope": "External acceptance/measurement harness, separate from maintained product source and tracked scripts at the fixed candidate"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-batch.mjs",
+      "bytes": 5789,
+      "sha256": "bf33e1667c7844ca4e19de955853a4cc5077bd427f730fc10ed27b77291048e3",
+      "physicalTextLines": 50,
+      "scope": "External acceptance/measurement harness, separate from maintained product source and tracked scripts at the fixed candidate"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-idle.mjs",
+      "bytes": 5198,
+      "sha256": "e40078530911a41e6d0dc562ee77ac6eef28bd9e6fc247043f33efab403936de",
+      "physicalTextLines": 59,
+      "scope": "External acceptance/measurement harness, separate from maintained product source and tracked scripts at the fixed candidate"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-session.mjs",
+      "bytes": 11937,
+      "sha256": "9759643db32363fbae68fb85b1582149b619983b24357f1bf7c9ce22ebd0b2ca",
+      "physicalTextLines": 93,
+      "scope": "External acceptance/measurement harness, separate from maintained product source and tracked scripts at the fixed candidate"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-composition.mjs",
+      "bytes": 12975,
+      "sha256": "39533830ba1de452a2d3853922febf9fe6b938b608454806919069334c111420",
+      "physicalTextLines": 68,
+      "scope": "External acceptance/measurement harness, separate from maintained product source and tracked scripts at the fixed candidate"
+    }
+  ],
+  "distribution": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/pack/pi-durio-0.1.0.tgz",
+    "compressedBytes": 19221238,
+    "sha256": "3628f9fd3e6c66cf7cd123dd9ea3dc6260c3be07ffb556d0972197e221d66d9a",
+    "unpackedRegularFiles": 12921,
+    "unpackedLogicalFileBytes": 90083823
+  },
+  "installation": {
+    "root": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install",
+    "regularFiles": 12924,
+    "symlinks": 5,
+    "logicalBytes": 90150168,
+    "allocatedBytesByPath": 128765952,
+    "allocatedBytesUniqueInode": 128765952,
+    "physicalTextLines": 1293438
+  },
+  "installationBreakdown": {
+    "installation-root-files": {
+      "regularFiles": 2,
+      "symlinks": 0,
+      "logicalBytes": 33271,
+      "allocatedBytesByPath": 40960,
+      "allocatedBytesUniqueInode": 40960,
+      "physicalTextLines": 1207
+    },
+    "other-installed-modules-and-links": {
+      "regularFiles": 1,
+      "symlinks": 1,
+      "logicalBytes": 33074,
+      "allocatedBytesByPath": 36864,
+      "allocatedBytesUniqueInode": 36864,
+      "physicalTextLines": 1201
+    },
+    "package-own-files": {
+      "regularFiles": 285,
+      "symlinks": 0,
+      "logicalBytes": 2482501,
+      "allocatedBytesByPath": 3121152,
+      "allocatedBytesUniqueInode": 3121152,
+      "physicalTextLines": 29094
+    },
+    "bundled-production-dependencies": {
+      "regularFiles": 12631,
+      "symlinks": 4,
+      "logicalBytes": 86559803,
+      "allocatedBytesByPath": 124514304,
+      "allocatedBytesUniqueInode": 124514304,
+      "physicalTextLines": 1261828
+    },
+    "package-vendor-archives": {
+      "regularFiles": 5,
+      "symlinks": 0,
+      "logicalBytes": 1041519,
+      "allocatedBytesByPath": 1052672,
+      "allocatedBytesUniqueInode": 1052672,
+      "physicalTextLines": 108
+    }
+  },
+  "nativeModulePaths": [
+    "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/darwin/prebuilds/darwin-arm64/darwin-platform.node",
+    "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/darwin/prebuilds/darwin-x64/darwin-platform.node",
+    "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/linux/prebuilds/linux-arm64/linux-platform-x11.node",
+    "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/linux/prebuilds/linux-x64/linux-platform-x11.node",
+    "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/win32/prebuilds/win32-arm64/win32-platform.node",
+    "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/win32/prebuilds/win32-x64/win32-platform.node"
+  ],
+  "startup": [
+    {
+      "workload": "help",
+      "repetitions": 7,
+      "failures": 0,
+      "minMs": 206.769875,
+      "medianMs": 211.399709,
+      "maxMs": 280.449583,
+      "firstObservedMs": 280.449583,
+      "allObservedMs": [
+        280.449583,
+        214.084166,
+        211.346125,
+        211.399709,
+        208.690458,
+        213.376042,
+        206.769875
+      ]
+    },
+    {
+      "workload": "missing-store-history",
+      "repetitions": 7,
+      "failures": 0,
+      "minMs": 204.765958,
+      "medianMs": 206.307958,
+      "maxMs": 210.002917,
+      "firstObservedMs": 210.002917,
+      "allObservedMs": [
+        210.002917,
+        206.307958,
+        204.765958,
+        207.627958,
+        205.410125,
+        206.103,
+        206.847334
+      ]
+    }
+  ],
+  "headless": {
+    "workload": "HEADLESS_PUBLIC_RUNTIME_SYNTHETIC_TRANSPORT",
+    "rounds": 62,
+    "sixtyRoundsDurationMs": 301857.593333,
+    "totalAfterIdleMs": 306619.59316700004,
+    "syntheticRequests": 124,
+    "realProviderRequests": 0,
+    "idleSampledRssBytes": {
+      "count": 30,
+      "min": 81395712,
+      "median": 81477632.0,
+      "max": 81477632
+    },
+    "longSessionSampledRssBytes": {
+      "count": 241,
+      "min": 153550848,
+      "median": 274890752,
+      "max": 287588352
+    },
+    "first30LongSamplesRssBytes": {
+      "count": 30,
+      "min": 153550848,
+      "median": 246382592.0,
+      "max": 251887616
+    },
+    "last30LongSamplesRssBytes": {
+      "count": 30,
+      "min": 285458432,
+      "median": 285999104.0,
+      "max": 287277056
+    },
+    "wholeObservedPeakRssBytes": 289144832,
+    "sampling": "Host Node RSS sampled approximately once per second; does not include Terminal, child processes or unsampled transient peaks.",
+    "loadAverage1Minute": {
+      "count": 274,
+      "min": 12.31591796875,
+      "median": 17.99365234375,
+      "max": 21.33984375
+    },
+    "phaseSamples": {
+      "idle": {
+        "count": 30,
+        "min": 81395712,
+        "median": 81477632.0,
+        "max": 81477632
+      },
+      "large-output": {
+        "count": 2,
+        "min": 286785536,
+        "median": 286818304.0,
+        "max": 286851072
+      },
+      "long-session": {
+        "count": 241,
+        "min": 153550848,
+        "median": 274890752,
+        "max": 287588352
+      },
+      "post-output-context": {
+        "count": 1,
+        "min": 289144832,
+        "median": 289144832,
+        "max": 289144832
+      }
+    }
+  },
+  "largeOutput": {
+    "round": 61,
+    "kind": "large-output",
+    "prompt": "Headless measure fixed 1 MiB output and retain all acquired bytes.",
+    "steps": [
+      {
+        "name": "bash",
+        "args": {
+          "command": "'/opt/homebrew/Cellar/node/26.8.2/bin/node' large.cjs"
+        }
+      }
+    ],
+    "runId": "8107f2d3-6736-479a-9977-2c2fc9c442e0",
+    "sessionId": "83c33adb-8e08-46fc-abfa-e30bbbd1b090",
+    "elapsedMs": 2735.939916000003,
+    "requests": 2,
+    "payloadBytes": [
+      37927,
+      38439
+    ],
+    "result": {
+      "runId": "8107f2d3-6736-479a-9977-2c2fc9c442e0",
+      "taskId": "a5b34228-f6ce-45b5-a0e5-a2c1860a4075",
+      "sessionId": "83c33adb-8e08-46fc-abfa-e30bbbd1b090",
+      "mode": "offline",
+      "status": "completed",
+      "answer": "Controlled response: inspect actual tool evidence for acceptance.",
+      "observation": "ok",
+      "cleanup": "confirmed",
+      "lifecycle": {
+        "intent": null,
+        "disposition": "completed",
+        "cleanupTimeoutMs": 10000,
+        "storage": "closed",
+        "owner": "release-after-host-close",
+        "remoteTermination": "unknown"
+      },
+      "executionCleanup": {
+        "managedCommands": "settled",
+        "started": 1,
+        "settled": 1,
+        "externalProcesses": "unknown"
+      },
+      "usage": {
+        "source": "pi.usage",
+        "scope": "session:83c33adb-8e08-46fc-abfa-e30bbbd1b090",
+        "completeness": "known",
+        "value": {
+          "models": {
+            "deepseek/deepseek-flash": {
+              "input": 20,
+              "output": 8,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "reasoning": 0,
+              "totalTokens": 28,
+              "cost": {
+                "input": 6e-06,
+                "output": 9.6e-06,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 1.56e-05
+              }
+            }
+          },
+          "tools": {}
+        },
+        "cost": {
+          "kind": "estimate",
+          "currency": "USD",
+          "source": "@earendil-works/pi-ai@1.1.0 model price catalog",
+          "observedAt": "2026-10-09T23:47:11.706Z"
+        }
+      }
+    },
+    "toolResults": [
+      {
+        "seq": 2928,
+        "kind": "shell.completed",
+        "at": "2026-10-09T23:47:11.435Z",
+        "ref": {
+          "sha256": "84e18e6a21054d7d28d087476b0e464dd2f083809b59de181b96cda838843731",
+          "bytes": 349
+        }
+      },
+      {
+        "seq": 2930,
+        "kind": "tool.result",
+        "at": "2026-10-09T23:47:11.461Z",
+        "ref": {
+          "sha256": "c409658ccc40783a008c50001ac0dfcb264e7724fc6b2b56f8f98c8207e2f0fe",
+          "bytes": 210
+        }
+      }
+    ],
+    "actual": {
+      "bytes": 1048576,
+      "chunks": 64,
+      "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502"
+    },
+    "expected": {
+      "bytes": 1048576,
+      "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502"
+    }
+  },
+  "storageCheckpoints": [
+    {
+      "checkpoint": "storage-empty.json",
+      "logicalBytes": 0,
+      "allocatedByPathBytes": 0,
+      "groups": {},
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/storage-empty.json",
+        "bytes": 67,
+        "sha256": "e2e039cb67122d29f3ebfc12a083cc6b919a010452772fcc1332ffdb33e41bb2"
+      }
+    },
+    {
+      "checkpoint": "storage-round-1.json",
+      "logicalBytes": 4514440,
+      "allocatedByPathBytes": 5214208,
+      "groups": {
+        "host-database": {
+          "files": 1,
+          "logicalBytes": 24576,
+          "allocatedByPathBytes": 24576
+        },
+        "object-payloads": {
+          "files": 295,
+          "logicalBytes": 4362888,
+          "allocatedByPathBytes": 5062656
+        },
+        "durable-sessions": {
+          "files": 1,
+          "logicalBytes": 126976,
+          "allocatedByPathBytes": 126976
+        }
+      },
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/storage-round-1.json",
+        "bytes": 75529,
+        "sha256": "dfa39360a4781ae239ff9fca0ea840d813fb29c297c3ab338766b8575e84861a"
+      }
+    },
+    {
+      "checkpoint": "storage-round-10.json",
+      "logicalBytes": 6823986,
+      "allocatedByPathBytes": 8806400,
+      "groups": {
+        "host-database": {
+          "files": 1,
+          "logicalBytes": 122880,
+          "allocatedByPathBytes": 131072
+        },
+        "object-payloads": {
+          "files": 677,
+          "logicalBytes": 5390386,
+          "allocatedByPathBytes": 7364608
+        },
+        "durable-sessions": {
+          "files": 10,
+          "logicalBytes": 1310720,
+          "allocatedByPathBytes": 1310720
+        }
+      },
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/storage-round-10.json",
+        "bytes": 174564,
+        "sha256": "89d023cc192878e12c7441ba5fd48ebabf9609399af4a81bdc4051754c4f8217"
+      }
+    },
+    {
+      "checkpoint": "storage-round-20.json",
+      "logicalBytes": 10647134,
+      "allocatedByPathBytes": 14020608,
+      "groups": {
+        "host-database": {
+          "files": 1,
+          "logicalBytes": 241664,
+          "allocatedByPathBytes": 262144
+        },
+        "object-payloads": {
+          "files": 1100,
+          "logicalBytes": 7624286,
+          "allocatedByPathBytes": 10977280
+        },
+        "durable-sessions": {
+          "files": 20,
+          "logicalBytes": 2781184,
+          "allocatedByPathBytes": 2781184
+        }
+      },
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/storage-round-20.json",
+        "bytes": 284365,
+        "sha256": "e76534a1f6fbde9f9c806e1eb26b589363fd17f1768fa0b41392e39d31e85410"
+      }
+    },
+    {
+      "checkpoint": "storage-round-30.json",
+      "logicalBytes": 15760300,
+      "allocatedByPathBytes": 20533248,
+      "groups": {
+        "host-database": {
+          "files": 1,
+          "logicalBytes": 352256,
+          "allocatedByPathBytes": 393216
+        },
+        "object-payloads": {
+          "files": 1523,
+          "logicalBytes": 11008940,
+          "allocatedByPathBytes": 15740928
+        },
+        "durable-sessions": {
+          "files": 30,
+          "logicalBytes": 4399104,
+          "allocatedByPathBytes": 4399104
+        }
+      },
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/storage-round-30.json",
+        "bytes": 394168,
+        "sha256": "4f62912d27a874bdc422acf6e73e05fc12efada002395f60019fdc65675eb32c"
+      }
+    },
+    {
+      "checkpoint": "storage-round-40.json",
+      "logicalBytes": 22172363,
+      "allocatedByPathBytes": 28364800,
+      "groups": {
+        "host-database": {
+          "files": 1,
+          "logicalBytes": 466944,
+          "allocatedByPathBytes": 524288
+        },
+        "object-payloads": {
+          "files": 1947,
+          "logicalBytes": 15545035,
+          "allocatedByPathBytes": 21680128
+        },
+        "durable-sessions": {
+          "files": 40,
+          "logicalBytes": 6160384,
+          "allocatedByPathBytes": 6160384
+        }
+      },
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/storage-round-40.json",
+        "bytes": 504223,
+        "sha256": "5cea132e07656dd73c348c6e8bfc35d7b26c42e80fcf3199f9e6972f60a5b182"
+      }
+    },
+    {
+      "checkpoint": "storage-round-50.json",
+      "logicalBytes": 29896815,
+      "allocatedByPathBytes": 37408768,
+      "groups": {
+        "host-database": {
+          "files": 1,
+          "logicalBytes": 577536,
+          "allocatedByPathBytes": 589824
+        },
+        "object-payloads": {
+          "files": 2370,
+          "logicalBytes": 21233775,
+          "allocatedByPathBytes": 28733440
+        },
+        "durable-sessions": {
+          "files": 50,
+          "logicalBytes": 8085504,
+          "allocatedByPathBytes": 8085504
+        }
+      },
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/storage-round-50.json",
+        "bytes": 614025,
+        "sha256": "fdc2ea27d2af433bef428d1dd1d8c214d76facf5a416c1f75adae7241aead3fa"
+      }
+    },
+    {
+      "checkpoint": "storage-round-60.json",
+      "logicalBytes": 38938228,
+      "allocatedByPathBytes": 47878144,
+      "groups": {
+        "host-database": {
+          "files": 1,
+          "logicalBytes": 692224,
+          "allocatedByPathBytes": 720896
+        },
+        "object-payloads": {
+          "files": 2793,
+          "logicalBytes": 28075636,
+          "allocatedByPathBytes": 36986880
+        },
+        "durable-sessions": {
+          "files": 60,
+          "logicalBytes": 10170368,
+          "allocatedByPathBytes": 10170368
+        }
+      },
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/storage-round-60.json",
+        "bytes": 723828,
+        "sha256": "41810fadde45101c7a8ce794637dc31771a6e34a47ba71a3636c1e1f4c03b7c4"
+      }
+    },
+    {
+      "checkpoint": "storage-large-output.json",
+      "logicalBytes": 41383251,
+      "allocatedByPathBytes": 50593792,
+      "groups": {
+        "host-database": {
+          "files": 1,
+          "logicalBytes": 716800,
+          "allocatedByPathBytes": 720896
+        },
+        "object-payloads": {
+          "files": 2899,
+          "logicalBytes": 30233939,
+          "allocatedByPathBytes": 39440384
+        },
+        "durable-sessions": {
+          "files": 61,
+          "logicalBytes": 10432512,
+          "allocatedByPathBytes": 10432512
+        }
+      },
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/storage-large-output.json",
+        "bytes": 751116,
+        "sha256": "0563615d0771a059cf19915dbab7aea4fc785b5d81ecc6704d03b14f8358b6dc"
+      }
+    }
+  ],
+  "readonly": {
+    "queries": 30,
+    "exports": 5,
+    "sourceUnchanged": true,
+    "queryLatencyMs": {
+      "queryEvidence": {
+        "count": 10,
+        "min": 0.42879100000004655,
+        "median": 0.4511244999999917,
+        "max": 0.5822089999999776
+      },
+      "queryHistory": {
+        "count": 10,
+        "min": 11.413667000000032,
+        "median": 12.203770999999989,
+        "max": 14.416541999999993
+      },
+      "readEvidence": {
+        "count": 10,
+        "min": 0.6262500000000273,
+        "median": 0.7031044999999949,
+        "max": 0.9005419999999731
+      }
+    },
+    "exportLatencyMs": {
+      "count": 5,
+      "min": 8.316583999999978,
+      "median": 8.555499999999995,
+      "max": 9.790708999999993
+    },
+    "exportBytes": [
+      1048576,
+      1048576,
+      1048576,
+      1048576,
+      1048576
+    ],
+    "exportHashes": [
+      "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+      "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+      "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+      "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+      "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502"
+    ]
+  },
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/freeze.json",
+      "bytes": 3036,
+      "sha256": "afe310bfd8e7a9fdc9a7f856b5e0fd446b6255cfc36cbd514d9bb3ad57d5ae0b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/inventory.json",
+      "bytes": 11690063,
+      "sha256": "1a366ddcc52a6f5fddd19c5557f1e77803c65633a05994ca24c309a9b3c139c5"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/startup/result.json",
+      "bytes": 12931,
+      "sha256": "adce4d0aae9e17e8fa5f32c087dfcf825e2d0936fa8c889df7ed4ff4cf2e9f77"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/headless-session/result.json",
+      "bytes": 1034864,
+      "sha256": "a56ae26629dfe9c2a9dbc998ab0dfe65e8b7647e44b92099678c36c7dfdcabca"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/readonly-headless/result.json",
+      "bytes": 21643,
+      "sha256": "b51d13582416db1065cd88173b62420b96ab4cc9f7fd0b6ca2e83c083ebacaf9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-config.json",
+      "bytes": 1879,
+      "sha256": "d044ef17458909e07af31dd35d0928caf1a875aad88cd8fba65c140423bb77d7"
+    }
+  ],
+  "packagingDisposition": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/dependency-report-disposition.json",
+    "bytes": 3230,
+    "sha256": "1b93c4965e57e2d01af0c9a9fe0d6a4aa00ef4f7fe3f36f6db3c0741adc9cd46"
+  },
+  "limits": [
+    "No approved numeric threshold or weighted lightweight score. Values are observations, not a performance winner or whole-v1 PASS.",
+    "OS cache was not purged; startup is process-cold, not machine-cold.",
+    "The controlled worker/VM window was exclusive; unrelated host activity was not controlled and load averages are retained.",
+    "Five minutes and 60 task contexts do not establish hours of stability or a leak diagnosis.",
+    "Physical UTF-8 line counts include comments and blanks; external measurement helpers are listed separately so they are not hidden from maintenance accounting.",
+    "Logical bytes and st_blocks allocation are different; APFS shared extents and snapshots are not unique physical-space measurements. Node executable is excluded.",
+    "Synthetic transport does not measure provider quality, cost, actual inference latency or human effort.",
+    "Native Terminal startup/session/composition, paid DeepSeek and actual user daily-use acceptance remain pending.",
+    "Original installation npm ls and consumer ci failures remain FAIL with a separate documented disposition."
+  ],
+  "gates": {
+    "paidDeepSeek": "NOT_RUN_NOT_AUTHORIZED",
+    "finalNativeTerminal": "NOT_RUN_USER_LAUNCH_REQUIRED",
+    "technicalAcceptance": "PARTIAL",
+    "dailyUseAcceptance": "NOT_RUN"
+  }
+}

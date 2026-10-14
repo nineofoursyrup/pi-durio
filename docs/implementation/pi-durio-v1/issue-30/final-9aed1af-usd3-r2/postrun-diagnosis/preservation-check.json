@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "at": "2026-10-10T06:05:13.448185+00:00",
+  "readIndex": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/read-identities.json",
+    "bytes": 883906,
+    "sha256": "62f47da65d26dc9bd04709e8f4428e60e7391774ce382f8a4873631f387f627d"
+  },
+  "originalFilesReverified": 3167,
+  "mismatches": 0,
+  "scope": "Exact bytes read by collect.py remained identical after readonly extraction and parse/link diagnostic. No original file writes. This does not claim unrelated external processes stopped."
+}

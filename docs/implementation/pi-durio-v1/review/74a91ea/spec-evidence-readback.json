@@ -1,0 +1,80 @@
+{
+  "at": "2026-10-09T22:56:22.730338+00:00",
+  "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+  "tree": "e3089debbbbc34a3a4ba48980087cf9bbd12589d",
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/source-build.json",
+    "sha256": "ccd9ac5775ebe6e5f75a74e10cc7f41873ac804662d4e3975b9b4bdc07ac3850",
+    "counts": {
+      "inputs": 168,
+      "compiler": 140,
+      "outputs": 246
+    },
+    "mismatches": []
+  },
+  "compiledTestsAndFixtures": {
+    "count": 120,
+    "mismatches": []
+  },
+  "evidenceFiles": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-gc-results.json",
+      "bytes": 4306,
+      "sha256": "449b8cedb77864111f1fe380762dcaf3ba6d36fd58e338456fd42b24d1ba6791"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/checks.json",
+      "bytes": 4623,
+      "sha256": "f7bea438493044c65ccf07d6b600131c2541604ee99f388a12f1089afe252502"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/affected-r2.log",
+      "bytes": 4804,
+      "sha256": "a95f8f5d157fa7f538a74dfc1465a478bd331cfad902b3dada03841be74bf95b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/navigation-final.log",
+      "bytes": 381,
+      "sha256": "2f032889e8ecba82134f45df87630047e35490365c44a3bc2a44c7b784c0a8b9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/checks.json",
+      "bytes": 1879,
+      "sha256": "eaafb0b125f561e5453cfc4c002690488d667397b7865edd790ead7493f07dd7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/compiled-r2.log",
+      "bytes": 684,
+      "sha256": "39aacfa0d2cb41693720c431486a3de274c8dc59c2063ad3de7ff0bc8137b0fe"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-output/validation.json",
+      "bytes": 2637,
+      "sha256": "fa7f89e53b580af5967f1286b96d3aac4aade7978a092369f4db3ecde893d24c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-27-owner/handoff-manifest.json",
+      "bytes": 7260,
+      "sha256": "5192612d5f52a227e10a49fb9697deabaeea1e986098d7c2258bdf7ae30d7762"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/build-result.json",
+      "bytes": 302,
+      "sha256": "3af08f9a483ca1354955d567c4bf4bd0fecddc471f60010486d3b7df40650635"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/test-start.json",
+      "bytes": 25016,
+      "sha256": "30efbb71ca200554f8d12b2ee0ad0026368decebeabbd2f515573ebfca87cf96"
+    }
+  ],
+  "worktreeStatus": "?? docs/prototypes/archive/\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json",
+  "trackedWorktreeDiff": "",
+  "trackedIndexDiff": "",
+  "repairDiffSha256": "7af3e6126869fbd68e103af6d94c4efbdbcd0e7ea9c238dddd2b133b05f9ffe1",
+  "combinedTestResultExists": false,
+  "newBehaviorProbesRun": 0,
+  "productWrites": 0,
+  "vmStarts": 0,
+  "providerRequests": 0
+}

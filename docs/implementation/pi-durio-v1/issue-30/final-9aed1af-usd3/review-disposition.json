@@ -1,0 +1,21 @@
+{
+  "status": "BLOCKED_SUPERSEDED_BY_R2_PENDING_REVIEW",
+  "review": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/review.json",
+    "bytes": 20710,
+    "sha256": "4bf7bed922f5bab737842b6b75aa4aad1616c50df32ab0218a6f12a490a82c9f"
+  },
+  "finding": "USD3-SPEC-01",
+  "firstFailure": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+    "bytes": 907,
+    "sha256": "341b2233193117b0c05ccda0042a9ac8ab3d5c8ef34b48f45583b3612f36da07"
+  },
+  "successor": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+    "bytes": 8105,
+    "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+  },
+  "originalFrozenBytesUnmodified": true,
+  "executableGrantOrStartCreated": false
+}

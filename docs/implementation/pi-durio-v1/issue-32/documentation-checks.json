@@ -1,0 +1,125 @@
+{
+  "schema": "pi-durio.trial-documentation-check.v1",
+  "at": "2026-10-10T11:32:17.523496+00:00",
+  "status": "PASS_DOCUMENTATION_AND_READONLY_IDENTITY_ONLY",
+  "baseCommit": "af559570433282249f32154f3c547246225f2dc9",
+  "scope": "Only issue-32 trial guide and pending record; existing product verification reused. No trial or acceptance claim.",
+  "installation": {
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install-complete-tree.json",
+      "bytes": 3555012,
+      "sha256": "8800e7bfd67290ac39f7269799fc185998df46877b4a48062b5d4a1549591eb8"
+    },
+    "entriesChecked": 14230,
+    "fileModeContentAndMembershipMatch": true,
+    "sourceBuildMatch": true,
+    "nodeMatch": true,
+    "packageMatch": true,
+    "unchangedProductPaths": [
+      "src",
+      "test",
+      "scripts",
+      "vendor",
+      "package.json",
+      "package-lock.json",
+      "tsconfig.json"
+    ]
+  },
+  "environment": {
+    "macOSVersion": "27.2",
+    "macOSBuild": "26B5101f",
+    "architecture": "arm64",
+    "machine": "MacBookPro18,1",
+    "memoryBytes": 34359738368,
+    "nodeVersion": "v26.8.2",
+    "installedTerminalVersion": "2.15",
+    "installedTerminalBuild": "488.7",
+    "trialTerminalProfile": "PENDING",
+    "trialTerminalFont": "PENDING",
+    "trialTerminalDimensions": "PENDING"
+  },
+  "documents": [
+    {
+      "path": "/Users/nineofour/.codex/worktrees/issue32-daily-trial/Durio/docs/implementation/pi-durio-v1/issue-32/TRIAL.md",
+      "bytes": 6661,
+      "sha256": "ce8ad1e3682eac601f7fe0398cae9fb1d5e81cd26dc857c324c57b95932bd197"
+    },
+    {
+      "path": "/Users/nineofour/.codex/worktrees/issue32-daily-trial/Durio/docs/implementation/pi-durio-v1/issue-32/pending-acceptance.json",
+      "bytes": 8196,
+      "sha256": "d03ca2a1679ca03fdd9eaeb0e46621c803ee58342f27353334fc2428ec3452ec"
+    }
+  ],
+  "effects": {
+    "productImports": 0,
+    "productCommands": 0,
+    "productTests": 0,
+    "TUIStarts": 0,
+    "TerminalOperations": 0,
+    "providerRequests": 0,
+    "VMStarts": 0,
+    "credentialsRead": false,
+    "originalEvidenceWrites": 0,
+    "sharedStatusWrites": 0,
+    "GitHubWrites": 0
+  },
+  "checks": {
+    "jsonParse": "PASS",
+    "markdownLocalLinks": {
+      "status": "PASS",
+      "count": 10,
+      "targets": [
+        "../issue-31/TECHNICAL-ACCEPTANCE.md",
+        "../review/final-technical-f26ae8f/review.md",
+        "../issue-31/final-f26ae8f/REPORT.md",
+        "../issue-31/final-f26ae8f/contract-evidence-index.md",
+        "../issue-31/final-f26ae8f/STARTUP-RECOVERY.md",
+        "../issue-31/final-f26ae8f/NATIVE-REPORT.md",
+        "../delivery-9aed1af/npm-diagnosis-REPORT.md",
+        "../issue-31/final-f26ae8f/reconciliation-preparation.md",
+        "../issue-31/final-f26ae8f/REPORT.md",
+        "pending-acceptance.json"
+      ]
+    },
+    "recordReferences": {
+      "status": "PASS",
+      "count": 9,
+      "sizeAndSha256Recorded": true
+    },
+    "shellSyntax": {
+      "status": "PASS",
+      "shell": "/bin/zsh -n",
+      "blocks": 2,
+      "executed": false
+    },
+    "flagsAndCommands": {
+      "status": "PASS",
+      "source": [
+        "src/cli.ts",
+        "src/history-cli.ts",
+        "src/tui/app.ts",
+        "src/offline.ts"
+      ],
+      "installedCLI": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/src/cli.js",
+      "flags": [
+        "--workspace",
+        "--data-root",
+        "--offline-demo",
+        "--coding"
+      ],
+      "tuiCommands": [
+        "/history",
+        "/exit",
+        "/help"
+      ],
+      "fixture": "README.md exists"
+    },
+    "gitDiffCheck": "PASS",
+    "pendingFields": "Actual trial candidate/environment/source/time and direct user response remain PENDING/null."
+  },
+  "model": {
+    "requested": "gpt-6-astra",
+    "reasoningRequested": "xhigh",
+    "actualBackend": "NOT_ATTESTED"
+  }
+}

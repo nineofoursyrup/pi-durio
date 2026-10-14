@@ -1,0 +1,102 @@
+{
+  "status": "FROZEN_UNAUTHORIZED_PENDING_INDEPENDENT_REVIEW",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/frozen-plan-manifest.json",
+    "bytes": 8942,
+    "sha256": "686b5c023020444104cd711b809dfd01442b0568a79fa36e42484716c8f1f3fe"
+  },
+  "checks": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/preparation-checks.json",
+    "bytes": 4095,
+    "sha256": "a5e375e2f51a82fd8b9f5aecd8f4678a7d9b74498857eb047d452092e238d4c1"
+  },
+  "allFiles": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/README.md",
+      "bytes": 5791,
+      "sha256": "30ca6a6e0644af7867a36fd8edf379d47fc6bbfd5675c8600bcd1eba5f016094"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/authorization-template-NOT-EXECUTABLE.json",
+      "bytes": 462,
+      "sha256": "cebc3d1350fedb8617707862f0a73a13887eb98ddf6d00bc318216a54271185c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/closed-seed-tree.json",
+      "bytes": 708195,
+      "sha256": "f433294284116b793be9a58879d54d8aec8a47d685e852eac9ed26c6a1d2548b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/decision-draft-NOT-EXECUTABLE.json",
+      "bytes": 6713,
+      "sha256": "b74b711b278d8cc18775e28ed05ecb2ee7393cf78e9bdb4d01d9fea0c5f4dee3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/execute-selected.mjs",
+      "bytes": 9291,
+      "sha256": "7df4c4c1a78f85269adea596e6963964dce7d5126aaf3f5a571fa963db0ab8ef"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/frozen-plan-manifest.json",
+      "bytes": 8942,
+      "sha256": "686b5c023020444104cd711b809dfd01442b0568a79fa36e42484716c8f1f3fe"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/preparation-checks.json",
+      "bytes": 4095,
+      "sha256": "a5e375e2f51a82fd8b9f5aecd8f4678a7d9b74498857eb047d452092e238d4c1"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/proposed-clamp.txt",
+      "bytes": 111,
+      "sha256": "45e016afe980df19159fc0679a6e44d88838a7a5afc398820309b576884f003c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/proposed-plan.json",
+      "bytes": 8875,
+      "sha256": "d2b24e14e3bf4c2b1b1af3cef6255bd5f9e3f97d58693b30854ae37c8bfb4391"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/protected-regression.mjs",
+      "bytes": 2014,
+      "sha256": "0bc2e4faaf81e83991be687531f01b9d68db78addf1a06ae12cc556c65608205"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/public-interface-binding.json",
+      "bytes": 4038,
+      "sha256": "e8ecc86b246fe73a423154910aae97e1b306b908eb7b8e54601c51bbeb36c70d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/verify-plan.py",
+      "bytes": 8097,
+      "sha256": "c181862d383dbb8320f6f087d278490c7894506896f2c23a039f84eee07679ce"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/verify-plan.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/verify-plan.stdout",
+      "bytes": 151,
+      "sha256": "73f1def973fac258d842ece3affa6613c1faf4c3c8a01cb79f7b7b6f63c3acd8"
+    }
+  ],
+  "externalOnly": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/closed-seed-tree.json",
+      "bytes": 708195,
+      "sha256": "f433294284116b793be9a58879d54d8aec8a47d685e852eac9ed26c6a1d2548b"
+    }
+  ],
+  "actualCandidateChoice": null,
+  "productApiCalls": 0,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "formalWrites": 0
+}

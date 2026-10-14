@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "issue": 20,
+  "state": "READY_FOR_COORDINATOR_ACCEPTANCE",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-20",
+  "branch": "codex/pi-durio-v1-issue-20",
+  "product": {
+    "commit": "68fb251623326b1a6357e7efb8b2602ecbc74f3e",
+    "tree": "ef9cc416e8944f293bf8be4194fd6e49472db676",
+    "integratedProductBase": "0557d08c8a6dda6d96a08c0ef77948a7e91bbc5b"
+  },
+  "artifacts": {
+    "evidenceRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20",
+    "candidateManifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/candidate-r2/manifest.json",
+    "package": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/candidate-r2/pi-durio-0.1.0.tgz",
+    "sourceArchive": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/candidate-r2/source.tar.gz",
+    "installedPackage": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/install-r2/node_modules/pi-durio",
+    "dependencyComparison": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/candidate-r2/installed-comparison.json",
+    "actualScenarioResults": [
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/demo-r1/result.json",
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/resume-r2/result.json"
+    ],
+    "fixtureManifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/evidence-fixtures-r2.json",
+    "nativeFixtureArchive": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/demo-r1/archive"
+  },
+  "publicApi": [
+    "archiveStorage",
+    "commitCleanup",
+    "migrateStorage",
+    "previewCleanup",
+    "readCleanup",
+    "restoreArchive",
+    "storageUsage",
+    "unfixEvidence",
+    "verifyArchive"
+  ],
+  "boundaries": [
+    "All host record bodies, decisions and manifests remain retained; independent referenced attachments and complete closed sessions may be explicitly cleaned.",
+    "Archive scope is explicit whole-root (all projects) or attachments; no misleading single-session root closure.",
+    "Clean up only preview-eligible units after exact identity confirmation and current-owner revalidation. Fixed/unfinished/recovery/frozen/pending work protects relevant content.",
+    "Missing cleaned sessions admit only new work after complete immutable disposition proof; no recovery authorization.",
+    "Migrate supports verified same-format fresh-root copies; executionAuthorized=false. No generic migration platform, overwrite or automatic source deletion.",
+    "R1 original failures/evidence and failed .partial archives are preserved.",
+    "No main merge, push, release, remote closure, paid provider or native Terminal acceptance."
+  ],
+  "integrationNotes": [
+    "Changes to app.ts are only StorageView import, /storage menu and panel union/dispatch; preserve #17 stop/exit/input execution changes.",
+    "preflight.ts only uses the complete managed-session-removal proof to accept an intentionally absent closed session.",
+    "fixed-evidence.ts adds explicit release and retained dependency provenance; package.json only exposes ./storage, with no new dependency.",
+    "Root 9005b86 adds #17 incomplete native documentation only; merger can combine those docs without repeating runtime checks."
+  ],
+  "reproduce": {
+    "install": "Create a NEW install directory and npm install --ignore-scripts --no-audit --no-fund the exact candidate-r2 package.",
+    "affectedDemo": "node candidate-r2/validate-storage-resume.mjs NEW_OUTPUT NEW_INSTALL/node_modules/pi-durio",
+    "fullDemo": "node candidate-r1/demo-storage.mjs NEW_OUTPUT NEW_INSTALL/node_modules/pi-durio",
+    "scope": "Use only NEW owned fixture directories. Do not rerun mutation on recorded demo-r1/resume-r2, user data, or another issue data root."
+  },
+  "operatorCard": "operator-card.md",
+  "validation": "validation.json",
+  "firstFailures": "first-failures.md"
+}

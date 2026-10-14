@@ -1,0 +1,97 @@
+{
+  "copiedUnchanged": [
+    {
+      "source": {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/process-startup.mjs",
+        "bytes": 4643,
+        "sha256": "2d30ebf7332345157f947dcf53cac24d1063b91f1b3a3e9262dfd0523799e4f3"
+      },
+      "copy": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/process-startup.mjs",
+        "bytes": 4643,
+        "sha256": "2d30ebf7332345157f947dcf53cac24d1063b91f1b3a3e9262dfd0523799e4f3"
+      }
+    },
+    {
+      "source": {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-idle.mjs",
+        "bytes": 5198,
+        "sha256": "e40078530911a41e6d0dc562ee77ac6eef28bd9e6fc247043f33efab403936de"
+      },
+      "copy": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-idle.mjs",
+        "bytes": 5198,
+        "sha256": "e40078530911a41e6d0dc562ee77ac6eef28bd9e6fc247043f33efab403936de"
+      }
+    },
+    {
+      "source": {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-session.mjs",
+        "bytes": 11937,
+        "sha256": "9759643db32363fbae68fb85b1582149b619983b24357f1bf7c9ce22ebd0b2ca"
+      },
+      "copy": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-session.mjs",
+        "bytes": 11937,
+        "sha256": "9759643db32363fbae68fb85b1582149b619983b24357f1bf7c9ce22ebd0b2ca"
+      }
+    },
+    {
+      "source": {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/readonly-data.mjs",
+        "bytes": 6333,
+        "sha256": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+      },
+      "copy": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/readonly-data.mjs",
+        "bytes": 6333,
+        "sha256": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+      }
+    }
+  ],
+  "adapted": [
+    {
+      "source": {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-batch.mjs",
+        "bytes": 5789,
+        "sha256": "bf33e1667c7844ca4e19de955853a4cc5077bd427f730fc10ed27b77291048e3"
+      },
+      "new": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-batch.mjs",
+        "bytes": 6102,
+        "sha256": "e0aeb3f6e6344ee7a13c1760b36f16b1a10c0fa85ae9caa1a5ce03fd05b4dc8f"
+      },
+      "diff": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-batch.diff",
+        "bytes": 3298,
+        "sha256": "9b0a6aea47825c5207e32c778efd19cf5eb91dd920843bf54666f0b23c161738"
+      },
+      "reason": "Remove already-passing composition, append cold recovery, pin manifest and usable measurement viewport."
+    },
+    {
+      "source": {
+        "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/scripts/recovery-start-terminal-validation.mjs",
+        "bytes": 10588,
+        "sha256": "a5b280f8f4244c4b50498cff69db734f442d4742d161e3c33a879458d943cb10"
+      },
+      "new": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-recovery.mjs",
+        "bytes": 12831,
+        "sha256": "86ee066764eabc5fd242e4773023019d82dea82d2cfa288fb231af7ac811d8be"
+      },
+      "diff": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-recovery.diff",
+        "bytes": 12829,
+        "sha256": "065fab6280aa611d8563c46ea85cf4b13e66dffedfa2c7a74ac1b3b18a9dc881"
+      },
+      "reason": "Automate existing e/newTask/queue/exit operator sequence via normal native callback; preserve machine assertions; no fabricated human P."
+    }
+  ],
+  "preExecutionRevision": "Before any native workload, require captured runtime error absent and final task cleanup confirmed in addition to inherited checks. Initial prepared bytes preserved as .initial.",
+  "r2Reason": "Static coordinator review found recovery action can fall below first page at80x24. First observe normal recovery panel, then at most64 normal Down keys with frames and visible-action assertion before e. No product failure or prior runtime attempt is claimed.",
+  "priorConfig": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/native-config.json",
+    "bytes": 2526,
+    "sha256": "61a0c12ef0c9737f7fd54e72ba5b302844bfa423f13899112d897c87d1626c92"
+  }
+}

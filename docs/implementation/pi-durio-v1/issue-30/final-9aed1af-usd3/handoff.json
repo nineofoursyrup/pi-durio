@@ -1,0 +1,52 @@
+{
+  "status": "READY_FOR_COORDINATOR_AND_INDEPENDENT_SCOPED_REVIEW; PAID_NOT_RUN",
+  "ticket": 30,
+  "worktree": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio",
+  "branch": "codex/pi-durio-v1-issue-30-usd3",
+  "base": "14787f0dfaadf69b6c235e5bb650d9f923a5d5a1",
+  "productCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/frozen-manifest.json",
+    "bytes": 7837,
+    "sha256": "f0ccad818a62f66d00e274f4efba03c52d4e5570f465476500dbe6fd1642aecc"
+  },
+  "proposal": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/proposed-batch-reviewed.json",
+    "bytes": 68896,
+    "sha256": "9312057d264c70e65df4dd1217bc82909c96ad27b6c832292220287c978656f9"
+  },
+  "checks": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/checks.json",
+    "bytes": 3880,
+    "sha256": "19f43a43c5d279eb5682bdd46a4828d9d12f568c5f63b610595f513946a86043"
+  },
+  "derivation": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/derivation.json",
+    "bytes": 7605,
+    "sha256": "29618072b46714676df17c9589f479d4c25a5637638561b4bee1c7a738260010"
+  },
+  "diffScope": "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3",
+  "commit": null,
+  "push": false,
+  "githubChanges": false,
+  "mainCheckoutWrites": false,
+  "grantCreated": false,
+  "actualPaidRequests": 0,
+  "actualCredentialReads": 0,
+  "vmStarts": 0,
+  "commandForCoordinatorOnly": "/usr/bin/python3 /Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/launch.py",
+  "grantPath": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/explicit-human-grant.json",
+  "grantTemplate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/grant-template-NOT-EXECUTABLE.json",
+    "bytes": 921,
+    "sha256": "0aa4fb58579f769f18d019db18dec06b5e88d4bc1383b842115b0a81a49d1c0e"
+  },
+  "requiredCoordinatorSteps": [
+    "Finish scoped independent review against this manifest; preserve any repair as a new reviewed freeze with prior bytes retained",
+    "Verify native Terminal/resource workload is finished before provider/VM execution",
+    "Use separate saved credential-readiness human confirmation; do not rewrite authorization source or refresh original 2026-10-10T05:34:25.010886Z grant time",
+    "Create the explicit grant binding this exact manifest only after review; wrapper performs frozen preflight before the fixed credential file is read",
+    "Launch once; retain every failure/unknown and remaining not-run; no automatic replacement or restart",
+    "Present actual improve candidate/revision/baseline/check/writeback scope for separate human selection; no candidate is selected by the paid grant"
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "status": "PASS_SCOPED_OFFLINE",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/frozen-manifest.json",
+    "bytes": 7837,
+    "sha256": "f0ccad818a62f66d00e274f4efba03c52d4e5570f465476500dbe6fd1642aecc"
+  },
+  "gate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/summary.json",
+    "bytes": 7025,
+    "sha256": "a6f50c614fffdc6f1faa1ae71148d1c7b013bd5cf651f354416c0970c0b665b4"
+  },
+  "credentialParser": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/credential-check-r1.json",
+    "bytes": 985,
+    "sha256": "49913057315ce07cead2580230dae43c81e8b66f7578b64cdae390ffc3043fd1"
+  },
+  "commands": [
+    {
+      "command": "node --check for four .mjs scripts; Python ast.parse for three .py scripts",
+      "exit": 0
+    },
+    {
+      "command": "/opt/homebrew/Cellar/node/26.8.2/bin/node /Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/check-preflight.mjs",
+      "exit": 0,
+      "cases": 24,
+      "stdout": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/preflight-check-r1.stdout",
+        "bytes": 127,
+        "sha256": "ce9edde0cfb1f49a6b34bacb0b0fcd6e55119de2717366a28b180d378fcb0ccd"
+      },
+      "stderr": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/preflight-check-r1.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "/usr/bin/python3 /Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/check-credential.py /Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/credential-check-r1.json",
+      "exit": 0,
+      "cases": 12,
+      "stdout": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/credential-check-r1.stdout",
+        "bytes": 32,
+        "sha256": "1b0b27a1874c06ae8e07a8bcd5ec4f1e73db60da6fd7e7c1b98b911626bad87f"
+      },
+      "stderr": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/credential-check-r1.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "reuse": {
+    "commonByteIdentical": true,
+    "runnerFromIdentityOnwardByteIdentical": true,
+    "originalPrepareUnchanged": {
+      "path": "/Users/nineofour/Durio/scripts/live-batch/prepare.mjs",
+      "bytes": 7333,
+      "sha256": "e5005275e73c1da7372d9ccee7f43586ba0b3393095dd21c6adb89a19877ee8d"
+    },
+    "productSourceBuildStillMatches": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/execution/source-build.json",
+      "bytes": 92981,
+      "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+    },
+    "cancelAndCleanup": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/compiled-r2.log",
+      "bytes": 684,
+      "sha256": "39aacfa0d2cb41693720c431486a3de274c8dc59c2063ad3de7ff0bc8137b0fe"
+    },
+    "authenticationStop": "Unchanged common.mjs body; existing issue-30 auth-stop-r2 evidence retained at original scope"
+  },
+  "preservedOriginalFiles": 18,
+  "limits": [
+    "No real api.env read, provider request, VM, build, stress or resource measurement",
+    "Installed API replaced only in subprocess fixtures; no product acceptance or actual cancellation claimed",
+    "No full installation rescan this turn; original accepted identity is reused and actual paid runner still verifies complete installation/runtime before credential lookup",
+    "No executable grant or real paid start generated; temporary positive fixtures contain explicit synthetic grants/starts only"
+  ]
+}

@@ -1,0 +1,666 @@
+{
+  "at": "2026-10-09T22:51:24.606216+00:00",
+  "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/source-build.json",
+    "bytes": 92815,
+    "sha256": "ccd9ac5775ebe6e5f75a74e10cc7f41873ac804662d4e3975b9b4bdc07ac3850"
+  },
+  "identity": {
+    "checked": 554,
+    "mismatches": []
+  },
+  "testCommand": [
+    "/opt/homebrew/bin/node",
+    "--test",
+    "--test-concurrency=2",
+    "--test-reporter=tap",
+    "dist/test/coding.test.js",
+    "dist/test/compaction.test.js",
+    "dist/test/control-facts.test.js",
+    "dist/test/control.test.js",
+    "dist/test/eval-comparison.test.js",
+    "dist/test/eval.test.js",
+    "dist/test/execution-output.test.js",
+    "dist/test/fact-clock.test.js",
+    "dist/test/history-view.test.js",
+    "dist/test/history.test.js",
+    "dist/test/improve-build.test.js",
+    "dist/test/improve-decisions.test.js",
+    "dist/test/improve-eval-assets.test.js",
+    "dist/test/improve-execution.test.js",
+    "dist/test/improve-retention.test.js",
+    "dist/test/improve.test.js",
+    "dist/test/lifecycle.test.js",
+    "dist/test/live-batch.test.js",
+    "dist/test/metrics-clock.test.js",
+    "dist/test/metrics-feedback-runtime.test.js",
+    "dist/test/metrics-feedback.test.js",
+    "dist/test/metrics-operations-runtime.test.js",
+    "dist/test/metrics-operations.test.js",
+    "dist/test/metrics-ownership.test.js",
+    "dist/test/metrics-runtime.test.js",
+    "dist/test/metrics.test.js",
+    "dist/test/preflight.test.js",
+    "dist/test/provider-boundary.test.js",
+    "dist/test/query.test.js",
+    "dist/test/recovery-facts.test.js",
+    "dist/test/recovery-projection.test.js",
+    "dist/test/recovery.test.js",
+    "dist/test/runtime-provider.test.js",
+    "dist/test/runtime.test.js",
+    "dist/test/storage.test.js",
+    "dist/test/terminal-candidate.test.js",
+    "dist/test/tui-recovery-start.test.js",
+    "dist/test/tui.test.js",
+    "dist/test/width.test.js"
+  ],
+  "testFiles": 39,
+  "compiledTestsAndFixtures": [
+    {
+      "path": "/Users/nineofour/Durio/dist/test/coding.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/coding.test.js",
+      "bytes": 22131,
+      "sha256": "b7f7a68457aebab39f1b81f48b105dfb4629a1271ac80e3ed697e9980ebb291e"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/coding.test.js.map",
+      "bytes": 24387,
+      "sha256": "0414abee61793eeaebfb9becc3b8ca56441a67441cece8a872a1148db8772206"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/compaction.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/compaction.test.js",
+      "bytes": 33743,
+      "sha256": "33a4652303da5847a416f8af148e65bc18ad757577680d0ef7f752cc5a72abf8"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/compaction.test.js.map",
+      "bytes": 39717,
+      "sha256": "cf9cbcc3375cd76038b2d05c02014df70c0138bdd0a19e3c4aab7fb3ac7f3fc4"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/control-facts.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/control-facts.test.js",
+      "bytes": 4600,
+      "sha256": "bba5e3d0ca15f06ae9e23e61be9171b69f49fcb6a2a3d9a6e3f4ea0774e5b244"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/control-facts.test.js.map",
+      "bytes": 5550,
+      "sha256": "e08ba14ea4e4ac841db87977919f24ea2206fa509e0e7a5f91860d8a10c000f9"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/control.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/control.test.js",
+      "bytes": 15359,
+      "sha256": "2c2d857fa9d1d759dc9a9e9d3c71d512c123503bbcf5cddede185f791fe25aa0"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/control.test.js.map",
+      "bytes": 17506,
+      "sha256": "68a38cd7d11f4c368ad568011561b2da16d0b72d4122bc5999412ec07d204f71"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/eval-comparison.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/eval-comparison.test.js",
+      "bytes": 15453,
+      "sha256": "8de2428e5f101feab74efaf7104f10f61d659d08dd0018c5026460b6959def6f"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/eval-comparison.test.js.map",
+      "bytes": 18660,
+      "sha256": "5e3d320be61f3bd9d56a15266d3c9b5297d1d49da651ded1c6c2c3b2bbe99ba6"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/eval.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/eval.test.js",
+      "bytes": 12183,
+      "sha256": "cc2bff7af3b56a826ad5754c5fd7c97d7d57bf66029b9560edb81ec3beb122ae"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/eval.test.js.map",
+      "bytes": 14382,
+      "sha256": "afb60c9083fbf0b10a62596ee542942811a0aef43479d5b1cfebea1c1a4d384f"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/execution-output.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/execution-output.test.js",
+      "bytes": 5961,
+      "sha256": "ad52b27574d283e522da3573d53b4e8b315379a2be049a0a2bbd289bd8f692e6"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/execution-output.test.js.map",
+      "bytes": 6851,
+      "sha256": "c05f9dc6a53be7e5a2ffd1f3c674b2ce6ec64881f7718657d231acba213c9f21"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/fact-clock.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/fact-clock.test.js",
+      "bytes": 1651,
+      "sha256": "7cb5ad7ae72594c5b72a955c034845c80eddff70c19743ad828acd7deb647945"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/fact-clock.test.js.map",
+      "bytes": 2012,
+      "sha256": "2566bf3fa02f1f10415dc8af7d0f185222db0744953981d56adfe66861b3bf78"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/fixtures/recovery-projection.d.ts",
+      "bytes": 838,
+      "sha256": "d4a399b749b82b9e65d325e0d772f05af4dca6c8ae4c29dfb7995d0184d2ed7a"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/fixtures/recovery-projection.js",
+      "bytes": 4604,
+      "sha256": "f64cf88c1f9fe035ef8ae6e7199a84bc44f49b0d504704a8f00768c987b2e206"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/fixtures/recovery-projection.js.map",
+      "bytes": 5465,
+      "sha256": "b87dfd7f0f2e2b0c886e80faed361a2ee66eeab1194fc2aa0ed8822ec95082dd"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/history-view.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/history-view.test.js",
+      "bytes": 1613,
+      "sha256": "1142c89b0a3a408f8456ab4cfc15f193f4f8473dd9f61c6d84d26c6001ea6224"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/history-view.test.js.map",
+      "bytes": 2110,
+      "sha256": "b7a16861812036500a9894eabee9a520b0fdc9895a49ec22845b85ea49a3304d"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/history.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/history.test.js",
+      "bytes": 19208,
+      "sha256": "ca0e0d27b7787d041e01f766a352000db5437a0feb4558b5ac7f39d6be846306"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/history.test.js.map",
+      "bytes": 24870,
+      "sha256": "536ca88cf538de4fa7e17d97bc0daea1a519621736c367d8c4c25ab8eb7297ff"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-build.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-build.test.js",
+      "bytes": 10840,
+      "sha256": "b6838c80ce4340aa450546e05a2ff41f2460f8dea74c02bbf22f36071ae6e74f"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-build.test.js.map",
+      "bytes": 12164,
+      "sha256": "cd5e0128948c2bc1e6fac675c3c94d0cf29e11ce3c897daca0e997fe9e66493e"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-decisions.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-decisions.test.js",
+      "bytes": 26466,
+      "sha256": "f9502eff1442ed641719ec42a2a2accdeb639d32a0e5bbe962bbc3989cc6dd95"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-decisions.test.js.map",
+      "bytes": 30475,
+      "sha256": "fca8d4d5e9a5fc00ebf43aba5cfa18dd9aa5ef70d4433e0434525378441ba29f"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-eval-assets.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-eval-assets.test.js",
+      "bytes": 11888,
+      "sha256": "5cc31c0c3b04ebd79057644efef9879904561dc639f95931b77c35319f378316"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-eval-assets.test.js.map",
+      "bytes": 13840,
+      "sha256": "ca8714dc044ca276b7732a909c0c6b91bbc9088a1e3fccc8ad2c79ba9487515d"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-execution.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-execution.test.js",
+      "bytes": 24855,
+      "sha256": "611e3c3348d012b2d3009fecfc0934706d6e178993abfbe4e3bc0f1d3a3f6826"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-execution.test.js.map",
+      "bytes": 25461,
+      "sha256": "22db5c32d5d635f2d29cf026b0b92f544a7d122a07cb03e397e82a405342bf01"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-retention.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-retention.test.js",
+      "bytes": 2794,
+      "sha256": "9c98b52ae35d7b66be8df2724082875187796b11151e0986aff3f6704eb8d03e"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve-retention.test.js.map",
+      "bytes": 3398,
+      "sha256": "76c239910848e5bfc00ac6f81143a43adac831fe3601d1230bf014533d946d2c"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve.test.js",
+      "bytes": 20305,
+      "sha256": "6c45f2fa0c823397078081b1f4ee7ce53b3c51e8038390045d8864b0cedd4fc9"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/improve.test.js.map",
+      "bytes": 23730,
+      "sha256": "27d4c7f50f38d700f4c6c782c9fb3b70f3ab2903e844de2fcd5db795e1430e6f"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/lifecycle.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/lifecycle.test.js",
+      "bytes": 17275,
+      "sha256": "2504892aa11f51741107bc33dda6361ee696261c29d335c454875579ed2c91bb"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/lifecycle.test.js.map",
+      "bytes": 18782,
+      "sha256": "4a8aff66de4fd96a871683d6aa46a6267515a346805162026f47fddc828de577"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/live-batch.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/live-batch.test.js",
+      "bytes": 12419,
+      "sha256": "c781753d653300479f90702cf2b1b3d871acef725734107ef3ebe58e9bc7fa82"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/live-batch.test.js.map",
+      "bytes": 10947,
+      "sha256": "694fb05274e2dec8981003bc8ceb78f66d8326afccbf26a8b83b31537ff290df"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-clock.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-clock.test.js",
+      "bytes": 10816,
+      "sha256": "ba82e9cd734581068e67eb9d200e912856610d9c20db845cf20664a5d38320f8"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-clock.test.js.map",
+      "bytes": 13365,
+      "sha256": "e56114f56ea4b41ebae4e75bd02bbc74d45dc3612f2d03f86b47a8ad40a15a62"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-feedback-runtime.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-feedback-runtime.test.js",
+      "bytes": 8061,
+      "sha256": "6538bef4bb49e2417edc9b08ec2017edb9bcf879fa112bb457f17af705e7b4a3"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-feedback-runtime.test.js.map",
+      "bytes": 9803,
+      "sha256": "13d43b8b4a190e654f1c65529ee4324cdeeaa29783e7860b14ef362d71bac833"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-feedback.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-feedback.test.js",
+      "bytes": 16018,
+      "sha256": "70519920c48bca7a8e6b73d4a0be5c305df7fce5ddea4806db26da4656d8ecc1"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-feedback.test.js.map",
+      "bytes": 22318,
+      "sha256": "e85b940024ae102b8b0b2030f3231cad5f652023461016473ebd8383abe25c05"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-operations-runtime.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-operations-runtime.test.js",
+      "bytes": 6807,
+      "sha256": "b390f2ba6c5dc86811a9335b7161f59b114da0e04861b552353876cdc91c4c31"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-operations-runtime.test.js.map",
+      "bytes": 8259,
+      "sha256": "cfa24c008916bcdb6cb8de9a450085617011e34429d79fbbee7a5799cb9d69cf"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-operations.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-operations.test.js",
+      "bytes": 17772,
+      "sha256": "2cd7b4dbf190d99c3396db94e79529062b88802d17bc1603ad0c7edbfcfe6464"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-operations.test.js.map",
+      "bytes": 22922,
+      "sha256": "3c9c95a8c26ff7a8d63182afee4d75ffc9d599d957e6de260d513ce67d9468a3"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-ownership.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-ownership.test.js",
+      "bytes": 12477,
+      "sha256": "b4c13c5dd7f98d2116afd83b98cd6ff36b508572124c0d7c3252c08549a9a5e7"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-ownership.test.js.map",
+      "bytes": 14063,
+      "sha256": "bcddff33432b669d5da7d85ee708f6159ea1da68711c5c2d5134ff6f3c5ef730"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-runtime.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-runtime.test.js",
+      "bytes": 10283,
+      "sha256": "eae10ea85071ea9acab6bc6b98287e699b00fc1f19e90d6c4bef420de0e1de64"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics-runtime.test.js.map",
+      "bytes": 12506,
+      "sha256": "4e22c9a5554f46b472e766bc93e37495b866280aff56959c9b1ac22439901d27"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics.test.js",
+      "bytes": 12844,
+      "sha256": "005aa2286d32c188264565f66d83035687171ef4f28859c47264df1ae241ef39"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/metrics.test.js.map",
+      "bytes": 15976,
+      "sha256": "0a290d8176148b37e1bdee2d6b7f564baf5c3f693632d932eb0c26a2419f2eb1"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/preflight.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/preflight.test.js",
+      "bytes": 7475,
+      "sha256": "1c261db69c7bc40fd356bf9808b82a8ad7836d312bf17f789232533aa7644a95"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/preflight.test.js.map",
+      "bytes": 7428,
+      "sha256": "6e962385148afd650230804b18cadf7a2712f2357f39b551f95e2082357ed42e"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/provider-boundary.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/provider-boundary.test.js",
+      "bytes": 5719,
+      "sha256": "7f7a4a104ec36c47b6de04f03e3ab4280226f9a06566ab495d06f0f55fab5d2f"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/provider-boundary.test.js.map",
+      "bytes": 6495,
+      "sha256": "33fd91845717d0b90fbace8bc6665e8989a401d7ef6bfd4cd0437f6a75e2c1ae"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/query.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/query.test.js",
+      "bytes": 4343,
+      "sha256": "ff5528311aed4f7aa1ee2607efe8a03f4424e89e5ef2e87a6f0193929b392517"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/query.test.js.map",
+      "bytes": 5524,
+      "sha256": "63ab4b48e4ed8b868d5ba043addd874c91a5fb4c69e3af01f1701bf5d241fecd"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/recovery-facts.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/recovery-facts.test.js",
+      "bytes": 3771,
+      "sha256": "ebb27c604c5de5b3aac702ae634c45e65f42bc1cdd10aaed45015f2b29d9eee5"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/recovery-facts.test.js.map",
+      "bytes": 4340,
+      "sha256": "70c1544789fae2ae57936cd4975af06885d057cb9d60aa6bfd2f6b831a99d32c"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/recovery-projection.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/recovery-projection.test.js",
+      "bytes": 14470,
+      "sha256": "75b04d4b870a83b9365aa93d68a696682ab89b1ded01bbb6b43094bfe9c3b76f"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/recovery-projection.test.js.map",
+      "bytes": 17461,
+      "sha256": "e661a8699f32c76c0fd9dbf2e6f7ea2f663be14e239ef77fbc2c885dde5d6a60"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/recovery.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/recovery.test.js",
+      "bytes": 23338,
+      "sha256": "48438200a528fa7573e8b29d6dd85688944622abd053cc53661748e4ed0d91d4"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/recovery.test.js.map",
+      "bytes": 25642,
+      "sha256": "bc550a6eaf055de400bb105d983eb0ca2907aed10e6f1b79e066b492a51e63c4"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/runtime-provider.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/runtime-provider.test.js",
+      "bytes": 3893,
+      "sha256": "b977cb602cdd441762cf7276606fe650140de85104004ddb3a42bc5fa13827cc"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/runtime-provider.test.js.map",
+      "bytes": 4790,
+      "sha256": "8e5784dd9df6253c7a1c6c4e2070436153c543021cd9193aa76950e9aa62c4c6"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/runtime.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/runtime.test.js",
+      "bytes": 16135,
+      "sha256": "5edc78f0ea267fa83bf89bc1ea8e2a01db6158b219941c401cccd98dc273204b"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/runtime.test.js.map",
+      "bytes": 17558,
+      "sha256": "18198e0cb28e81be63d4224e9f080c92ff5a2ddc820521e0c83c48b5cac9dd93"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/storage.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/storage.test.js",
+      "bytes": 19582,
+      "sha256": "4e7d33e98520df7c2d0edec63a6ad5b5982de280f7f71bb3b496ce57ae0f5ab7"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/storage.test.js.map",
+      "bytes": 24527,
+      "sha256": "4c28e0f49bda600915fa4a9e5469719436d051858ee91a7412f08997ac634a2d"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/terminal-candidate.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/terminal-candidate.test.js",
+      "bytes": 2163,
+      "sha256": "46b67b7ed00ec5aa3d6e336d730aca9401b8fa7aebde8a36efa65d00ba173003"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/terminal-candidate.test.js.map",
+      "bytes": 2285,
+      "sha256": "c73ce2a4968616838cf4f4bd67f2f29c8afe197737a8eb3b7aa7ae92a6e72dc3"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/tui-recovery-start.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/tui-recovery-start.test.js",
+      "bytes": 7063,
+      "sha256": "e38d65ff074c85f986e3925470e8c38a264ad9d2660b2a7705f462c5f848d06b"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/tui-recovery-start.test.js.map",
+      "bytes": 7251,
+      "sha256": "7ed0105e8f533019b7f54f03b9f96b8cf241f5d75afea4e4ffd84e19469ed7e0"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/tui.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/tui.test.js",
+      "bytes": 30100,
+      "sha256": "b93189181fc31932b22e787c11c94d2039b0863669fa3e63143f157f9e6c698a"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/tui.test.js.map",
+      "bytes": 36000,
+      "sha256": "33f14442f9e2faad09074121eba7fe391349e6c58b806285d2c020908b8cde9a"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/width.test.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/width.test.js",
+      "bytes": 16113,
+      "sha256": "66ccc4a2f1c446d6ed9d52f7bb8e34d1a81da038c7a4b32d2cfbf9c72f55fa39"
+    },
+    {
+      "path": "/Users/nineofour/Durio/dist/test/width.test.js.map",
+      "bytes": 19109,
+      "sha256": "de6cdc56e7e53a71e7607a048350edef8b9a57bcfebbc35298d78497811f6b71"
+    }
+  ],
+  "load": [
+    17.95654296875,
+    21.78955078125,
+    26.6298828125
+  ]
+}

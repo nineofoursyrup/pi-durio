@@ -1,0 +1,20 @@
+{
+  "paidApproved": false,
+  "manifestSha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e",
+  "batchId": "pi-durio-v1-live-r2-usd3-supplement",
+  "humanAuthorization": null,
+  "authorizationSource": null,
+  "credentialSource": "/Users/nineofour/Durio/api.env",
+  "grantedAt": null,
+  "limits": {
+    "maxRequests": 32,
+    "maxTokens": 2372501,
+    "cumulativeMaxRequests": 47,
+    "cumulativeMaxTokens": 2400000,
+    "usdCeiling": 3,
+    "grantToStartMs": 86400000,
+    "activeMs": 3600000,
+    "starts": 1
+  },
+  "note": "Not executable. After independent review the coordinator must obtain a NEW explicit one-start human grant bound to this exact manifest and cumulative ledger. Original authorization is consumed. No actual credential reads or starts during preparation."
+}

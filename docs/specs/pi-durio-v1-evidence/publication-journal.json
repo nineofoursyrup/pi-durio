@@ -1,0 +1,15 @@
+{
+  "spec": "PI-DURIO-V1-SPEC-r1",
+  "body_sha256": "a7ffbdbb616310918eb308078c66e6c9577f529dcbb92d2d3903e85659c66ee3",
+  "title": "pi-durio 首版实现规格（#2–#9 汇总）",
+  "label": "ready-for-agent",
+  "created_label": true,
+  "started_at_utc": "2026-10-09T08:07:13.788823+00:00",
+  "status": "published_and_verified",
+  "returncode": 0,
+  "stdout": "https://github.com/nineofoursyrup/pi-durio/issues/10\n",
+  "stderr": "",
+  "verified_at_utc": "2026-10-09T08:07:52.233910+00:00",
+  "issue_number": 10,
+  "url": "https://github.com/nineofoursyrup/pi-durio/issues/10"
+}

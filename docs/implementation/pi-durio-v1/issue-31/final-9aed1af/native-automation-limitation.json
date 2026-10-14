@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-09T21:14:23.037966+00:00",
+  "event": "native-measurement-automation-blocked",
+  "tool": "mcp__cua_repl.js",
+  "requested": "cua.getApp(\"Terminal\")",
+  "result": "Computer Use is not allowed to use the app com.apple.Terminal for safety reasons.",
+  "action": "No alternative desktop-control route used. User-launched native batch prepared outside repository; fixed configuration still pending issue26 acceptance/integration.",
+  "status": "PREPARATION_ONLY_NOT_RUN",
+  "artifacts": [
+    "preparation/issue-31/native-batch.mjs",
+    "preparation/issue-31/harness-preparation-r7.json",
+    "preparation/issue-31/contract-applicability-preparation-r2.json"
+  ],
+  "realProviderCalls": 0
+}

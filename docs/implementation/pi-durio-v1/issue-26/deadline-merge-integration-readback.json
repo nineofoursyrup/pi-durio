@@ -1,0 +1,400 @@
+{
+  "at": "2026-10-09T23:27:46.906417+00:00",
+  "status": "LOCAL_SERIAL_INTEGRATION_COMPLETE",
+  "authority": "dispatch/merge-26-deadline.md; one bounded local merge, no acceptance or delivery authority implied",
+  "root": {
+    "branch": "codex/pi-durio-v1",
+    "head": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+    "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+    "status": "?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png\n?? docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json",
+    "parents": [
+      "f32896da26699e7cc7e55bea23bd8a518a370c21",
+      "e1e7ec3d02b8f3b770fee886b075d984d7cf8369"
+    ]
+  },
+  "producer": {
+    "commit": "304d255dd856316fe52a1863a12856c0468c72aa",
+    "tree": "0376fc17c75c9fc3114e577aa6fe1729b9cd60b3",
+    "inputCount": 169,
+    "exactPathsAndBytes": true
+  },
+  "combined": {
+    "commit": "e1e7ec3d02b8f3b770fee886b075d984d7cf8369",
+    "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+    "inputCount": 169,
+    "exactPathsAndBytes": true
+  },
+  "rootMerge": {
+    "commit": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+    "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+    "inputCount": 169,
+    "exactPathsAndBytes": true
+  },
+  "rootMergeTreeEqualsCombinedTree": true,
+  "conflicts": [],
+  "changedFiles": [
+    "docs/implementation/pi-durio-v1/issue-26/deadline-repair-r1.md",
+    "scripts/isolation/boundary.mjs",
+    "scripts/isolation/test/boundary.test.mjs",
+    "src/eval/runner.ts",
+    "src/improve-build.ts",
+    "src/improve-validation.ts",
+    "test/improve-build.test.ts",
+    "test/improve-deadline.test.ts"
+  ],
+  "diffStat": " .../pi-durio-v1/issue-26/deadline-repair-r1.md     | 34 +++++++++\n scripts/isolation/boundary.mjs                     | 23 +++++-\n scripts/isolation/test/boundary.test.mjs           | 36 +++++++++\n src/eval/runner.ts                                 | 14 ++--\n src/improve-build.ts                               | 14 ++--\n src/improve-validation.ts                          | 29 +++++---\n test/improve-build.test.ts                         |  5 +-\n test/improve-deadline.test.ts                      | 87 ++++++++++++++++++++++\n 8 files changed, 212 insertions(+), 30 deletions(-)\n",
+  "contentCorrespondence": {
+    "sourceBuildSha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "inputs": 169,
+    "compiler": 140,
+    "outputs": 246,
+    "compiledTests": 123,
+    "exactInputOutputCompilerTestSetsAndBytes": true,
+    "producer": {
+      "commit": "304d255dd856316fe52a1863a12856c0468c72aa",
+      "tree": "0376fc17c75c9fc3114e577aa6fe1729b9cd60b3",
+      "inputCount": 169,
+      "exactPathsAndBytes": true
+    },
+    "ticket": {
+      "commit": "e1e7ec3d02b8f3b770fee886b075d984d7cf8369",
+      "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+      "inputCount": 169,
+      "exactPathsAndBytes": true
+    },
+    "beforeAfterBindings": true,
+    "root": {
+      "commit": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+      "tree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+      "inputCount": 169,
+      "exactPathsAndBytes": true
+    }
+  },
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/source-build.json",
+    "bytes": 92981,
+    "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+  },
+  "evidenceManifest": {
+    "sha256": "65b0c81819764a6a47b9f6d56d884220810abfcf2a95abb8344d510f0f9077b5",
+    "declaredEntries": 172513,
+    "declaredRegularBytes": 1489509789,
+    "entriesActuallyVerified": 115,
+    "pathsActuallyVerified": [
+      "boundary-green-r1.tap",
+      "boundary-red.tap",
+      "build-r1.log",
+      "build-r2.log",
+      "build-r3.log",
+      "build-r4.log",
+      "build-r5.log",
+      "build-r6.log",
+      "candidate-before-heavy.patch",
+      "candidate-stat.txt",
+      "candidate.patch",
+      "commands.json",
+      "containers-after-heavy.json",
+      "containers-before-heavy.json",
+      "first-failure-diagnosis.json",
+      "handoff.json",
+      "heavy-after-identity.json",
+      "heavy-before-identity.json",
+      "heavy-plan.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/execution/absence.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/execution/configuration.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/execution/delete.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/execution/outcome.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/execution/plan.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/execution/stop.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/execution/stopped.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/startup/absence.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/startup/configuration.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/startup/delete.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/startup/outcome.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/startup/plan.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/startup/stop.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/build/startup/stopped.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/check-0/execution/absence.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/check-0/execution/configuration.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/check-0/execution/delete.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/check-0/execution/outcome.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/check-0/execution/plan.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/check-0/execution/stop.json",
+      "heavy-tmp/durio-build-execution-w0YTtr/temporary/build/check-0/execution/stopped.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/default/absence.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/default/configuration.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/default/delete.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/default/outcome.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/default/plan.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/default/stop.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/default/stopped.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/typescript-build/absence.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/typescript-build/configuration.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/typescript-build/delete.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/typescript-build/outcome.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/typescript-build/plan.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/typescript-build/stop.json",
+      "heavy-tmp/durio-build-profile-5zq4tj/typescript-build/stopped.json",
+      "heavy-tmp/durio-decisions-FPNWsx/output-validation/math/check-0/execution/absence.json",
+      "heavy-tmp/durio-decisions-FPNWsx/output-validation/math/check-0/execution/configuration.json",
+      "heavy-tmp/durio-decisions-FPNWsx/output-validation/math/check-0/execution/delete.json",
+      "heavy-tmp/durio-decisions-FPNWsx/output-validation/math/check-0/execution/outcome.json",
+      "heavy-tmp/durio-decisions-FPNWsx/output-validation/math/check-0/execution/plan.json",
+      "heavy-tmp/durio-decisions-FPNWsx/output-validation/math/check-0/execution/stop.json",
+      "heavy-tmp/durio-decisions-FPNWsx/output-validation/math/check-0/execution/stopped.json",
+      "heavy-tmp/durio-decisions-j4nQiV/output-validation/math/check-0/execution/absence.json",
+      "heavy-tmp/durio-decisions-j4nQiV/output-validation/math/check-0/execution/configuration.json",
+      "heavy-tmp/durio-decisions-j4nQiV/output-validation/math/check-0/execution/delete.json",
+      "heavy-tmp/durio-decisions-j4nQiV/output-validation/math/check-0/execution/outcome.json",
+      "heavy-tmp/durio-decisions-j4nQiV/output-validation/math/check-0/execution/plan.json",
+      "heavy-tmp/durio-decisions-j4nQiV/output-validation/math/check-0/execution/stop.json",
+      "heavy-tmp/durio-decisions-j4nQiV/output-validation/math/check-0/execution/stopped.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/pending/absence.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/pending/configuration.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/pending/delete.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/pending/outcome.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/pending/plan.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/pending/stop.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/pending/stopped.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/quota/absence.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/quota/configuration.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/quota/delete.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/quota/outcome.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/quota/plan.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/quota/stop.json",
+      "heavy-tmp/durio-model-budget-mgD9d0/quota/stopped.json",
+      "improve-eval-green-r4.tap",
+      "improve-green-r1.tap",
+      "improve-green-r2.tap",
+      "improve-green-r3.tap",
+      "light-fixtures-index.json",
+      "linux-runtime-provenance.json",
+      "original-first-failure-readback.json",
+      "real-eval-plan.json",
+      "real-eval-report.json",
+      "real-eval-smoke.mjs",
+      "real-eval-verification.json",
+      "real-eval.log",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-execution/absence.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-execution/configuration.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-execution/delete.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-execution/outcome.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-execution/plan.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-execution/stop.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-execution/stopped.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-grading-0c2e8179-4301-4f50-bb52-3a686c5fc4b0/absence.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-grading-0c2e8179-4301-4f50-bb52-3a686c5fc4b0/configuration.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-grading-0c2e8179-4301-4f50-bb52-3a686c5fc4b0/delete.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-grading-0c2e8179-4301-4f50-bb52-3a686c5fc4b0/outcome.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-grading-0c2e8179-4301-4f50-bb52-3a686c5fc4b0/plan.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-grading-0c2e8179-4301-4f50-bb52-3a686c5fc4b0/stop.json",
+      "real-eval/execution/19bf35ed-d8b6-4aae-9472-e29de44ab9f1-grading-0c2e8179-4301-4f50-bb52-3a686c5fc4b0/stopped.json",
+      "real-output-retention.tap",
+      "red-boundary-identity.json",
+      "red-boundary-source.mjs",
+      "source-build.json",
+      "source-happy-path.tap",
+      "vm-boundary.tap",
+      "vm-outcomes.json"
+    ],
+    "fullManifestFilesScanned": false,
+    "scope": "All top-level immutable logs/reports and each VM outcome/plan/configuration/stop/stopped/delete/absence; nested fixture tree not fully scanned. Separately verified source/compiler/output/test files, Linux dependency source/copy and original 12 references."
+  },
+  "vmCleanup": {
+    "verifiedCount": 11,
+    "recordedBeforeAfterInventory": [
+      [
+        "buildkit"
+      ],
+      [
+        "buildkit"
+      ]
+    ],
+    "readback": "merge-preflight.json"
+  },
+  "firstFailure": {
+    "preservedReferences": 12,
+    "reason": "timeout",
+    "readback": "merge-preflight.json"
+  },
+  "reuse": {
+    "affectedEvidence": {
+      "boundary-red.tap": {
+        "tests": 7,
+        "pass": 0,
+        "fail": 7,
+        "cancelled": 0,
+        "skipped": 0,
+        "sha256": "085a46b537d34d934790e306fc382d85ebe7003f55060bb241348eee1a379796",
+        "scope": "one separately recorded group"
+      },
+      "boundary-green-r1.tap": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "sha256": "c8aba1e3f13fb2d3c9c93b9ff3fde60f65b15683eb855c92b0f7b922ed7b0b29",
+        "scope": "one separately recorded group"
+      },
+      "improve-eval-green-r4.tap": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "sha256": "fd2593715802c91d4c560fdfc6408dd40e16c1cee56591d3c4271a13593fbd63",
+        "scope": "controller inner tests; outer wrapper excluded"
+      },
+      "vm-boundary.tap": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "sha256": "f723e04d5b4f9721117639a88cf4978f79be6f185988e879f4ba19c130e4e107",
+        "scope": "one separately recorded group"
+      },
+      "source-happy-path.tap": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "sha256": "606a110d8a10fbf92b07472253536199fd0e02980a156f464e941af8ad4e1ff7",
+        "scope": "one separately recorded group"
+      },
+      "real-output-retention.tap": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "sha256": "d9f6cf286b0da6eef92e03a266da73308666789b1ab22d9bbeac8f338c2b19a6",
+        "scope": "one separately recorded group"
+      }
+    },
+    "offlineEval": {
+      "counts": {
+        "planned": 1,
+        "started": 1,
+        "completed": 1,
+        "gradable": 1,
+        "passed": 1,
+        "passRate": 1,
+        "completionRate": 1,
+        "coverageRate": 1
+      },
+      "requests": 4,
+      "knownTokens": 56,
+      "paidCallsRecorded": 0,
+      "mode": "offline",
+      "scope": "Controlled transport tests fixed product execution and comparison machinery; no model inference, quality or stochastic stability claim"
+    },
+    "prior250Pass": "Applicable unchanged behavior only; original combined failure remains retained; this integration does not convert the old full suite into a full PASS.",
+    "basis": "All 169 product/build inputs match producer, combined commit and root merge; 140 compiler entries, 246 outputs and 123 compiled tests remain identical. Integration into ticket added only 18 existing root documentation files; no changed executable input or dependency/environment.",
+    "newBuilds": 0,
+    "newTests": 0,
+    "newVMs": 0,
+    "newProviderCalls": 0,
+    "newTerminalOperations": 0
+  },
+  "excludedEvidence": [
+    {
+      "log": "improve-green-r1.tap",
+      "status": "INVALID_EVIDENCE",
+      "reason": "Inherited NODE_TEST_CONTEXT skipped nested tests; nominal wrapper PASS excluded"
+    },
+    {
+      "log": "improve-green-r2.tap",
+      "status": "FIXTURE_FAILURE",
+      "reason": "Cancellation can stop before emitted stdout reaches acquisition; final test compares retained bytes to actual acquired bytes"
+    }
+  ],
+  "linuxRuntime": {
+    "runtime": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/linux-runtime",
+    "declaredRuntimeIdentity": "5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a",
+    "dependencyCount": 12636,
+    "dependencyContentIdentity": "05389876e7e6d1cadb3e6425a223a13ffecf962a85e6d336647734b883335f17",
+    "dependencySourceAndCopyExact": true,
+    "productOutputsMatched": 246,
+    "sourceBuildSha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "runtimeIdentityRecomputed": false
+  },
+  "oldRootDist": {
+    "sourceBuildSha256": "ccd9ac5775ebe6e5f75a74e10cc7f41873ac804662d4e3975b9b4bdc07ac3850",
+    "files": 367,
+    "exactPrePostSetBytesLinksModes": true,
+    "preservedInPlace": true,
+    "rebuiltOrReplaced": false,
+    "backupOrMigrationPerformed": false,
+    "nextOwner": "Coordinator separately preserves old dist and migrates verified producer build."
+  },
+  "originalPlanningFiles": [
+    {
+      "path": "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png",
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822",
+      "mode": 420
+    },
+    {
+      "path": "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html",
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77",
+      "mode": 420
+    },
+    {
+      "path": "docs/wayfinder-proposal.md",
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006",
+      "mode": 420
+    },
+    {
+      "path": "docs/wayfinder-readback-2026-10-09.json",
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9",
+      "mode": 420
+    }
+  ],
+  "preservedDocuments": "README/status and existing review/first-failure documents from f32896da preserved byte-for-byte; no run/state.json or original report rewrite.",
+  "verification": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-verifier.py",
+      "bytes": 17864,
+      "sha256": "653134802606d035e26b45698c768d29e3acff13df93017a0557a0f5479d4e8a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-preflight.json",
+      "bytes": 95265,
+      "sha256": "cba5d21aa518e21d5c49624dd96ab279061f814515498301a48aa0991ea8d782"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-ticket-command.json",
+      "bytes": 3280,
+      "sha256": "198b00a1c62c164830e0f074b75dec30cecbd384b1c4221ae38b80228c009f67"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-combined.json",
+      "bytes": 76445,
+      "sha256": "614a2fc38f0caad0f084e67645c60ec7ca825b73e10f154b4264e125861931dc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-root-command.json",
+      "bytes": 1388,
+      "sha256": "426453d59da5d210554de9ab30356caa84576d26f17abc6e61f588c05b88dacc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline/merge-postflight.json",
+      "bytes": 76767,
+      "sha256": "c785110638674e127d1a70fbc21737010a4e615aabb2b869aa874884560393f8"
+    }
+  ],
+  "remaining": [
+    "Independent STD-04 review has not been performed by this merger and is not claimed passed.",
+    "No complete issue technical acceptance or dependency-unblocking claim.",
+    "Native macOS Terminal acceptance obligations remain separate.",
+    "Paid provider authorization/execution and actual provider identity remain separate.",
+    "User day-use acceptance, main merge, issue closure and first release remain separate."
+  ],
+  "rootWriteOwnership": "Returned immediately to coordinator after this completed integration/readback; merger performs no further root writes."
+}

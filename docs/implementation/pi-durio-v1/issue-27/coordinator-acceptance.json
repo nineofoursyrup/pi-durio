@@ -1,0 +1,50 @@
+{
+  "issue": 27,
+  "acceptedAt": "2026-10-09T18:13:40.864837+00:00",
+  "status": "integrated-accepted",
+  "scope": "T17 applicable daily task acceptance rates and dual-clock local implementation/acceptance; synthetic and ordinary populations separated",
+  "productSource": "0d292488cef06eedf917cf032d7c8417a9db3584",
+  "ticketTip": "0d292488cef06eedf917cf032d7c8417a9db3584",
+  "integrationMerge": "716aab74832e781c4652246671893430699808ea",
+  "mergeTree": "2988eeeb65fc3f311dc36eca27159a2608c53684",
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-27/merge-integration-readback.json",
+    "sha256": "a4ba14583504b9b43927c375f9103928f5c13f9ec1dabb1a73afa2739af05dc5"
+  },
+  "criteria": {
+    "sample": "PASS: accepted N includes unstarted/frozen/withdrawn independent tasks, B/C/G/S and source classes/types/actual version retained; no retry/steer duplication",
+    "acceptance": "PASS: explicit requirements/result/judgment and retained host assessment with original basis; reliable necessary FAIL, incomplete/conflict/dispute/revision/withdrawal and missing evidence handled",
+    "clock": "PASS: admission through confirmed termination and first still-valid judgment separated; comparable monotonic spans, cross-process/missing/rollback unknowns and interval union retained",
+    "actualRuntime": "PASS: installed actual coding2/2/1/2/1; shell0/7 supportsPASS/FAIL; actual improve2requests excluded; explicitwithdraw gives2/2/1/1/0; total7controlledrequests",
+    "readonly": "PASS: cold CLI JSON/text/export, TUI and reopening share current/old immutable snapshots with zero extra requests and unchanged query-phase database",
+    "identity": "PASS: Git archive282;119inputs132compiler174outputs;12837package+4links12841installed;162actualrecords37sources336objects;3artifactsoneidentity174files12631deps"
+  },
+  "checks": {
+    "firstFull": "155 PASS /1 FAIL of156, original readRun resultClock compatibility failure retained",
+    "fixedAffected": "37/37 aftercompatibility;60/60 aftermerge;15/15 finalboundary;1/1 sourcecorrespondence",
+    "integration": "Same delivered product tree; no source/dependency changes or conflicts, applicable checks reused"
+  },
+  "knownExamples": "10/8/6/5/4 and12-minute/24-hour scenarios are separate synthetic known facts, not the installed actual runtime outcome",
+  "preserved": [
+    "11 first failures, original failed runtime and invalid/missing judgments",
+    "r1demo correctly rejected missing evidence_summary; onlydemo fixed forr2",
+    "162 originals+4untracked+204compactprotectedfiles unchanged"
+  ],
+  "remaining": [
+    "#24-26 improve decisions/validation/writeback/activation",
+    "#28 costs/faults and#29 intervention/rework",
+    "#30 paid realDeepSeek andimprove loop NOTAUTHORIZED/NOTRUN",
+    "#31 fullnativecomposition andmeasurements",
+    "#32 explicit daily-use acceptance",
+    "Finalfixedcandidate independentreview"
+  ],
+  "limitations": {
+    "actualModel": "unknown; requested gpt-6-astra/xhigh accepted but backend not independently attestable",
+    "provider": "Only explicit offline controlled transport, actual local runtime/tools and acquired evidence. No paid/live request.",
+    "nativeTerminal": "NOT RUN; TUI tests and installed acceptance use component Terminal. #31/#32 own native/full-user acceptance.",
+    "formalEvalVM": "NOT RUN by #27; merged accepted #23 guest-file fix retained and installed guest list checked.",
+    "downstream": "#28/#29 metrics and #24+ improve selection/verification/writeback are not implemented by this ticket.",
+    "clock": "Cross-process/incomparable/reported time remains unverified; no complete precise aggregate invented. Explicit user-wait facts optional; missing stages remain unknown."
+  },
+  "rootDist": "Old ignored root dist preserved; validated product is issue-27/install-r2"
+}

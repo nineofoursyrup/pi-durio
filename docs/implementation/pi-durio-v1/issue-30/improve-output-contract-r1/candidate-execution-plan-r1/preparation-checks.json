@@ -1,0 +1,63 @@
+{
+  "status": "PASS_STATIC_AND_UNAUTHORIZED_ENTRY_ONLY",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/frozen-plan-manifest.json",
+    "bytes": 8942,
+    "sha256": "686b5c023020444104cd711b809dfd01442b0568a79fa36e42484716c8f1f3fe"
+  },
+  "staticChecks": [
+    "all frozen input identities match",
+    "all actual authorization fields false/null; public deadline null; no executable public decision file",
+    "exact original candidate/report/target/steps/revisions bound without canonical edits",
+    "one fixed scope/content/regression with unchanged protected check; zero provider budget",
+    "new non-overlapping paths remain absent; approval-relative one-start timing fixed",
+    "four original target files and immutable rollback before bytes match baseline",
+    "closed clone seed and global cutoff fixed; inherited four requests excluded from new accounting",
+    "all 15558 postrun original identities unchanged",
+    "source order denies before effects; no analysis/provider setup; final receipt failure exits nonzero",
+    "three JavaScript files parse; candidate and regression were not executed"
+  ],
+  "syntax": [
+    {
+      "file": "common.mjs",
+      "exitCode": 0,
+      "execution": "syntax-only"
+    },
+    {
+      "file": "execute-selected.mjs",
+      "exitCode": 0,
+      "execution": "syntax-only"
+    },
+    {
+      "file": "protected-regression.mjs",
+      "exitCode": 0,
+      "execution": "syntax-only"
+    }
+  ],
+  "actualEntryDenials": [
+    {
+      "name": "false-template",
+      "exitCode": 1,
+      "expectedError": "EXPLICIT_CANDIDATE_CHOICE_REQUIRED",
+      "status": "DENIED_BEFORE_PRODUCT_IMPORT_OR_WRITES",
+      "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: EXPLICIT_CANDIDATE_CHOICE_REQUIRED\n\nfalse !== true\n\n    at file:///Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/execute-selected.mjs:14:8\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "name": "missing-actual-selection",
+      "exitCode": 1,
+      "expectedError": "ENOENT",
+      "status": "DENIED_BEFORE_PRODUCT_IMPORT_OR_WRITES",
+      "stderr": "node:fs:621\n    return binding.readFileUtf8(path, stringToFlags(options.flag));\n                   ^\n\nError: ENOENT: no such file or directory, open '/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/actual-selection.json'\n    at readFileSync (node:fs:621:20)\n    at json (file:///Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/common.mjs:9:36)\n    at file:///Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/execute-selected.mjs:13:21\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'open',\n  path: '/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/actual-selection.json'\n}\n\nNode.js v26.8.2\n"
+    }
+  ],
+  "postrunOriginalsUnchangedBeforeAfter": 15558,
+  "seedFiles": 3427,
+  "publicPreviewCalled": false,
+  "candidateValidated": false,
+  "productApiCalls": 0,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "formalWrites": 0,
+  "decisionDataClones": 0,
+  "testsReused": "Existing #24/#25 behavior checks remain applicable to unchanged installed product; no product tests rerun. This is plan preparation, not a product execution PASS."
+}

@@ -1,0 +1,110 @@
+{
+  "at": "2026-10-09T13:39:42.191818+00:00",
+  "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+  "scenario": "exit-first-pair",
+  "humanRatings": [
+    {
+      "id": "EXIT_FIRST_PAIR",
+      "label": "运行中、空输入的首次 Ctrl+D 双按（800ms 内）即退出，完成清理并恢复终端",
+      "status": "PASS",
+      "answer": "P"
+    }
+  ],
+  "machine": {
+    "calls": 1,
+    "cancelled": true,
+    "rawRestored": true,
+    "sttyRestored": true,
+    "readback": {
+      "status": 0,
+      "sameResult": true
+    },
+    "firstPair": {
+      "expectedControl": "0x04",
+      "controls": [
+        {
+          "at": "2026-10-09T13:38:29.247Z",
+          "code": "0x04"
+        },
+        {
+          "at": "2026-10-09T13:38:29.763Z",
+          "code": "0x04"
+        }
+      ],
+      "firstTwoMatch": true,
+      "intervalMs": 516,
+      "lifecycleIntent": "exit",
+      "runtimeMatched": true,
+      "note": "Key/timing and runtime facts only; operator feedback and the full input/resize log establish first-pair behavior. A stop intent does not satisfy EXIT_FIRST_PAIR."
+    }
+  },
+  "runtimeResult": {
+    "runId": "3cfef0a2-edd2-45ac-9c03-7a2fe5c29c6d",
+    "taskId": "e56a525a-ec6c-403e-b6b7-ae4de17492b3",
+    "sessionId": "5405a9f4-6dde-4532-bbd1-647ff29af1d2",
+    "mode": "offline",
+    "status": "unknown",
+    "reason": "Application exit preserved unfinished work; explicit recovery required; remote termination unknown",
+    "observation": "ok",
+    "cleanup": "confirmed",
+    "lifecycle": {
+      "intent": "exit",
+      "disposition": "resumable",
+      "cleanupTimeoutMs": 10000,
+      "storage": "closed",
+      "owner": "release-after-host-close",
+      "remoteTermination": "unknown"
+    },
+    "usage": {
+      "source": "pi.usage",
+      "scope": "session:5405a9f4-6dde-4532-bbd1-647ff29af1d2",
+      "completeness": "unknown",
+      "value": null,
+      "cost": {
+        "kind": "estimate",
+        "currency": "USD",
+        "source": "@earendil-works/pi-ai@1.1.0 model price catalog",
+        "observedAt": "2026-10-09T13:38:29.854Z"
+      }
+    }
+  },
+  "interveningNonProtocolInputs": [],
+  "lifecycleEvents": [
+    {
+      "at": "2026-10-09T13:38:15.121Z",
+      "event": "provider-request",
+      "ordinal": 1
+    },
+    {
+      "at": "2026-10-09T13:38:29.790Z",
+      "event": "provider-cancellation-received"
+    },
+    {
+      "at": "2026-10-09T13:38:30.137Z",
+      "event": "scenario-finished"
+    }
+  ],
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-38-00-204Z/exit-first-pair/operator-observation.json",
+      "sha256": "3129a333ca6f99710fbcd9160d9c5b753b7c10037166d6ec0f2560dea479da68"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-38-00-204Z/exit-first-pair/machine.json",
+      "sha256": "36fc69954d049b5a0e8b160b212587b16ee1b35e3daabb9075320701b74d28a3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-38-00-204Z/exit-first-pair/events.jsonl",
+      "sha256": "81f5de1619b682cec562158dfcd4e9bef19d637910f28a437a1efb7deb3cc7f7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-38-00-204Z/exit-first-pair/headless.json",
+      "sha256": "1d502b1d1468c45c73572eb3f665da273ae2e4989a32d649a6c34378b9b414d8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-38-00-204Z/exit-first-pair/terminal-output.ansi",
+      "sha256": "1ab4895c35879cb01767cd4e1f96e734368e184f743646151f878941a5793251"
+    }
+  ],
+  "acceptance": "PASS only EXIT_FIRST_PAIR; earlier idle-only run and r5 EXIT FAIL retained"
+}

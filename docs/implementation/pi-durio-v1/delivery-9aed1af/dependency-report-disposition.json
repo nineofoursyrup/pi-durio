@@ -1,0 +1,68 @@
+{
+  "at": "2026-10-09T23:42:33.256827+00:00",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "status": "INSTALL_CONTENT_AND_RUNTIME_VERIFIED_WITH_NPM_COMPATIBILITY_LIMITATIONS",
+  "diagnosis": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/package-dependency-diagnosis/REPORT.md",
+      "bytes": 10646,
+      "sha256": "08d5f92945847b0a67f7a7beee1777b3addf657615befa52a84f4281f6a6a161"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/package-dependency-diagnosis/result.json",
+      "bytes": 1038,
+      "sha256": "0e9a568068b7d90852a120557b876f7ec698d356414c13b7614e779a0dc42412"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/package-dependency-diagnosis/content-check.json",
+      "bytes": 107238,
+      "sha256": "46197f749d585fa12cb5fd76d6ca4408c89d395e417da0251a908c004b48795c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/package-dependency-diagnosis/original-input-unchanged.json",
+      "bytes": 873,
+      "sha256": "5106c452c615c3f1bd4541b427e1653a32d40648490012cbbb7374638eea3f16"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/package-dependency-diagnosis/ci-probe.json",
+      "bytes": 25646,
+      "sha256": "37018178887fafa79ab96962a37372d18160b7b098e72591dcea97b6d07c9a65"
+    }
+  ],
+  "originalFinalInstallResult": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/result.json",
+    "bytes": 946,
+    "sha256": "4ff1c206e271873a02cae2e6d74fc6ce4c82a4a82caa9a1b8f77e37abfc0a124"
+  },
+  "originalFirstFailure": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install-first-failure.json",
+    "bytes": 1077,
+    "sha256": "7808c0f66dfe7a7987c2f0829a54e4d0f1d7455bf93bd35e990e2dec137601f2"
+  },
+  "preservedFailures": [
+    {
+      "command": "npm ls --omit=dev --all --json",
+      "status": "FAIL",
+      "reason": "npm 11.19.1 bundled file source metadata validation; exact installed derivative files independently match."
+    },
+    {
+      "command": "consumer npm ci --omit=dev --ignore-scripts --no-audit --no-fund --offline",
+      "status": "FAIL",
+      "reason": "npm generated consumer lock lacks 25 foreign-platform optional bundle entries required by ci. This tarball consumer rebuild path is not supported in the observed offline/tool-version scope."
+    }
+  ],
+  "acceptedScope": [
+    "Exact source/build/archive/package/install bytes are linked",
+    "Cold-cache consumer npm install and repeated npm install succeeded",
+    "CLI help and all 12 public imports passed before and after failed ci",
+    "Original authorized pi-tui derivative remains 202 exact files with no replacement"
+  ],
+  "sourceRepoCi": "Prior applicable source-repository complete-lock ci evidence is retained, not rerun or inferred from consumer ci",
+  "decision": "No product content change required for scoped macOS arm64 archive installation and runtime. Continue current candidate with explicit npm compatibility limitations; no blanket packaging PASS or whole-v1 acceptance.",
+  "notDone": [
+    "Consumer ci packaging redesign",
+    "Other npm versions",
+    "Online consumer ci",
+    "Whole technical/daily-use acceptance"
+  ]
+}

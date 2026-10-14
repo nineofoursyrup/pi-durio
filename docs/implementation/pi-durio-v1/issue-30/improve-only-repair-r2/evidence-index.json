@@ -1,0 +1,289 @@
+{
+  "status": "FROZEN_R2_PENDING_INDEPENDENT_REVIEW_AND_GRANT",
+  "externalRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/frozen-manifest.json",
+    "bytes": 76288,
+    "sha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a"
+  },
+  "copiedFiles": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/README.md",
+      "bytes": 4390,
+      "sha256": "1efadbfbc079ca8ccef098bb3e9277fb601c6afc6030e46a69b9a0d474d22b51"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/frozen-manifest.json",
+      "bytes": 76288,
+      "sha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/proposed-batch-reviewed.json",
+      "bytes": 7669,
+      "sha256": "265261daf9d50792c32683cca2ecec308b2df670ec4f9902b5816e99801e5462"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/checks.json",
+      "bytes": 3430,
+      "sha256": "df77dda3419e091975f19f10af7a9c00d46c2642c728e688bef87eef6d4d2197"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/revision-delta.json",
+      "bytes": 3154,
+      "sha256": "a791fd1957c3447618269916d51e09e9c5391481ef9f4d3ee795c183dfca3f7f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/check-reuse.json",
+      "bytes": 5339,
+      "sha256": "a46f020d647358990486e30ee93e3dfa4f3eeea123fe6cadbe51ca85ffe58293"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/artifact-binding-precheck.json",
+      "bytes": 1095,
+      "sha256": "5f13db4f80d8718e5c2af47516c82d4736add9e5783b893d43b00f02a43fa5d8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/candidate-binding-check.json",
+      "bytes": 1626,
+      "sha256": "0ef0a4bb6b74eb74bed57851f9e00d1b716cd420783931c47101805e889c9d3e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/provider-observation.json",
+      "bytes": 1560,
+      "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/retained-prior-code.json",
+      "bytes": 4356,
+      "sha256": "f4d9feaa608b04016a3d30c444d62063ed65b4df4df17d44255fb12a8009de2d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/authorization-source-template-FROZEN-NOT-EXECUTABLE.json",
+      "bytes": 982,
+      "sha256": "648bc0dc0a48c2553a53d0ac4aa96087131897f3d6aa75acb1dd4d6fd0fe7c8f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/grant-template-FROZEN-NOT-EXECUTABLE.json",
+      "bytes": 676,
+      "sha256": "09c7b7080f2dbbc226ecd334a39d95f6f91c980bc2d0587bc7e2d7c52ffb486d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/check-repair.mjs",
+      "bytes": 17487,
+      "sha256": "0bf6627c4c30b273d6973341949c2698e32882cbe5f5ba92970f81f706ca38f2"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/check-review-repairs.mjs",
+      "bytes": 14324,
+      "sha256": "ddb085d0fa367c06053fb947870743249a1144bb0d2b540f2ab17d9d84f7f428"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/check-final-preflight.mjs",
+      "bytes": 5054,
+      "sha256": "978644133d9b6303d029a2f69273f0befc70f4d1488fcb1a02ebc400d7bef7cb"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/check-final-denials.py",
+      "bytes": 1836,
+      "sha256": "65f8f9ecf1ede6d567208fe35a558a9e3a7062ef0008b6a26a91ac6b51e7353d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/admission-check-r1.json",
+      "bytes": 99079,
+      "sha256": "8288ca5aa1a17ce637db5d82a8b2cbe6eb50e972bb975ee6415bf2b115adf697"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/review-repair-check-r1.json",
+      "bytes": 4973,
+      "sha256": "80d548a7e9344119ca981d2918972fbfbe9f10eac942e142b294874193dac732"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-preflight-check-r1.json",
+      "bytes": 1398,
+      "sha256": "1bdd1a891d5a74f04418fcfd2d161c5a37c511b757c88b5713e45c92250bffe6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-denials-r1.json",
+      "bytes": 814,
+      "sha256": "3d93555d4fd46b792c49f47efe373b6c881e7ccc51cbdc3a5bbf2c6b41a14967"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/freeze-r1.stdout",
+      "bytes": 369,
+      "sha256": "7551c2f964664d4f53aedd0c5aadd65b7a5c251c5bdb9801fc9e7f805d028c86"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/freeze.mjs",
+      "bytes": 4410,
+      "sha256": "75d152dd8801dee65ddeada359b50789237ebac38ca7f780dd9a43db4866df08"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/launch.py",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/ledger.mjs",
+      "bytes": 3187,
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/preflight.mjs",
+      "bytes": 12746,
+      "sha256": "4926e7978cf23eb642dc2ac78f61f68fe6d2c77f6f674a3571be3e0992a69bdc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/prepare-repair.py",
+      "bytes": 8036,
+      "sha256": "15ec67c3695f336a074196d40455c824a2a92c1803cf2480c75611cf3182e642"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/run.mjs",
+      "bytes": 6224,
+      "sha256": "c2eb991f269fc3ccd6939da0f92135035f0956de3cfd013ec9d32bd3ef976a2c"
+    }
+  ],
+  "externalOnly": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/admission-check-r1.stderr",
+      "bytes": 172,
+      "sha256": "de4b48dadcb498ed1fa38cb2f86aaeb0738b98e0f8a3f8e6c49ca45427f6af3b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/admission-check-r1.stdout",
+      "bytes": 29,
+      "sha256": "e828bc6f39b5424b6418d57a1279b2a994b38127e10527ff8f45dce673446595"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/authorization-source-template-NOT-EXECUTABLE.json",
+      "bytes": 920,
+      "sha256": "a0e5d16f6072217a200420dd1644747b4300b3b05c4b4de6e3bd2002bbb46480"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/candidate-gate-template-NOT-FROZEN.json",
+      "bytes": 1790,
+      "sha256": "c1b87210d402d74272e9ee451b8cbd20cfa48f8fd3945be806392a96cb2ff16f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/check-wrapper.py",
+      "bytes": 2274,
+      "sha256": "4a4ce4ad10730c685939ccf8109dc5f5d83546c2493bcf4e253d293e80083d70"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/checked-manifest.json",
+      "bytes": 76288,
+      "sha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-denials-r1.stderr",
+      "bytes": 51,
+      "sha256": "f20db1b0e5c71b209292a4e46deca85fb3d0333576fd94db52c5600b611e1f53"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-denials-r1.stdout",
+      "bytes": 149,
+      "sha256": "5399432778f358cb3a43d78ac06bd320364887ce7336c31915f3286933ef01a6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-preflight-check-r1.stderr",
+      "bytes": 172,
+      "sha256": "34331b826a19dd5b550da4bf869cfd3e5fa61b1edeb3596fb75019bb26067e5d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/final-preflight-check-r1.stdout",
+      "bytes": 186,
+      "sha256": "9a8804c23d1d86b8b3ca8b1103a69d67fce82257223c0a35c863cb0d18394403"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/freeze-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/grant-template-NOT-EXECUTABLE.json",
+      "bytes": 614,
+      "sha256": "2eecb55a2d02c63326c58a083edebddbd4ccd85bccd87cea2fa348cb23511a60"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/preparation.json",
+      "bytes": 69640,
+      "sha256": "0b29ec6bb627ccab18b7d7c4ecbd55375dee4e185cc87ec1128a238b7d941932"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/protected-prior-originals.json",
+      "bytes": 2100488,
+      "sha256": "c1fa1c8df933209dcf7767ec086b7b6521e140752aebbc7c83f33126d43a45e3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/retained-r1-identities.json",
+      "bytes": 103621,
+      "sha256": "2b0edb5323cb9fe6cb38a953c261115223faf10292be6169657a61dcf5c49cbf"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/review-repair-check-r1.stderr",
+      "bytes": 172,
+      "sha256": "6c0471242943fe561e3014b4b7e34dda14d0b7b95595952939665d4bad2ffed1"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/review-repair-check-r1.stdout",
+      "bytes": 28,
+      "sha256": "be58970717716c618560e5b5aa2eedfcdeaebca6dd40cc68d7896dd19a90b5f0"
+    }
+  ],
+  "priorIndependentReview": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/independent-review.json",
+      "bytes": 18464,
+      "sha256": "873680e102700a4321210235bf3960343ac4a4c1f28a219e09cea84bc0d2b5a9"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1/independent-review.md",
+      "bytes": 6460,
+      "sha256": "af863c12ad4df734e6d737bc378682c21874fde5235b8b6c34f7388aa4304f46"
+    }
+  ],
+  "fixture": {
+    "status": "PREPARATION ONLY; no live plan or provider authorization",
+    "preparedAt": "2026-10-09T19:16:35.926596+00:00",
+    "purpose": "One actual improve analysis over a small known deterministic project defect; no performance winner required.",
+    "files": {
+      "package.json": "{\"name\":\"durio-live-improve-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}\n",
+      "clamp.ts": "export const clamp = (value: number, lower: number, upper: number) => Math.min(upper, Math.min(lower, value));\n",
+      "README.md": "User draft: preserve this exact note.\nClamp a number to the inclusive lower and upper bounds; lower is never greater than upper.\n",
+      "check.mjs": "import assert from 'node:assert/strict';\nimport {clamp} from './clamp.ts';\nconst cases = [[-4,0,10,0],[0,0,10,0],[6,0,10,6],[14,0,10,10],[-3,-5,-1,-3],[-9,-5,-1,-5]];\nfor (const [value,lower,upper,expected] of cases) assert.equal(clamp(value,lower,upper), expected, JSON.stringify({value,lower,upper}));\nconsole.log('All declared clamp requirements pass');\n"
+    },
+    "allowedWriteback": [
+      "clamp.ts"
+    ],
+    "protected": [
+      "README.md",
+      "package.json",
+      "check.mjs"
+    ],
+    "baselineExpectation": "Declared check is expected to fail for in-range and upper-bound cases; actual first failure is captured before real analysis, not asserted executed here.",
+    "analysisScope": "Register project source clamp.ts, check.mjs and README.md; actual model must inspect registered source and provide its own structured candidate. No prefilled candidate.",
+    "selection": "After actual report, present exact candidate revision, target baseline, content proposal, deterministic check and writeback scope for human structured selection. Paid-batch grant alone does not select a future candidate.",
+    "validation": "Run fixed project check against prepared candidate; verify protected bytes and real output. No fresh model behavior claim or paid validation required for this directly testable local function bug.",
+    "openConditions": [
+      "Freeze actual installed product after #25; bind source/build/install identities.",
+      "Capture actual seed task facts with explicitly controlled provenance; synthetic seed is not live evidence.",
+      "Fix exact request/trial identities and user-paid authorization before any real provider request.",
+      "Keep zero-candidate/invalid reports and first failures; no implicit extra calls.",
+      "Reopen actual decision/writeback records and verify final protected contents; do not imply performance improvement."
+    ],
+    "fileHashes": {
+      "package.json": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+      "clamp.ts": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+      "README.md": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+      "check.mjs": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d"
+    }
+  },
+  "initialSeedFiles": 296,
+  "seedProvenance": "Independent APFS copy of original synthetic seed. No paid failed run copied; original seed identity remains explicit.",
+  "scope": "Repository copies are evidence only; execute only the external hash-bound harness after independent review and new explicit one-start grant. No current authorization exists."
+}

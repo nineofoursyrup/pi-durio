@@ -1,0 +1,46 @@
+{
+  "finding": "LIVE-USD3-R3-01",
+  "kind": "offline original-byte replay, no provider inference and no tool execution",
+  "originalFrameCount": 7,
+  "originalRun": "f05d3379-5950-4bfa-aebd-72dd671c4fc3",
+  "usage": [
+    952,
+    7
+  ],
+  "cancellations": [
+    {
+      "reason": "undefined",
+      "aborted": false
+    },
+    {
+      "reason": "undefined",
+      "aborted": false
+    }
+  ],
+  "snapshot": {
+    "requests": 2,
+    "knownTokens": 959,
+    "reservedTokens": 0,
+    "unknown": 0,
+    "violation": false,
+    "completeness": "known",
+    "deadline": "2026-10-10T06:56:36.941Z"
+  },
+  "settlements": [
+    {
+      "budgetId": "offline-replay",
+      "id": "51b0e9db-e310-46ee-af1d-6aefc8c57bdb",
+      "tokens": 952,
+      "status": "returned"
+    },
+    {
+      "budgetId": "offline-replay",
+      "id": "042a00bf-b44e-4927-95a7-cfc1fbd1b32c",
+      "tokens": 7,
+      "status": "returned"
+    }
+  ],
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "status": "PASS"
+}

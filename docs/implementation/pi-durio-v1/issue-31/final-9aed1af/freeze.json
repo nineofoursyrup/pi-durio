@@ -1,0 +1,70 @@
+{
+  "at": "2026-10-09T23:41:01.768351+00:00",
+  "status": "FROZEN_FOR_LOCAL_HEADLESS_MEASUREMENT",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "identity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/candidate-identity.json",
+    "bytes": 5219556,
+    "sha256": "f56d137950dbe52af7854df4d360699fe8612fa45aeb4208e2def0d6a5d0de03"
+  },
+  "installInventory": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install-complete-tree.json",
+    "bytes": 3555010,
+    "sha256": "13e3237a9a36ab342c8fc25a18522dcb574547002a9fa5f68d742d30c771aa35"
+  },
+  "installationReadback": {
+    "entries": 14230,
+    "mismatches": 0
+  },
+  "gate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-repaired-r1/gate.json",
+    "bytes": 128895,
+    "sha256": "5041c312711237efe7af675525f5dc32b673c9dab8c9f010452e269db9e61832"
+  },
+  "reviews": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/9aed1af/spec-review.json",
+      "bytes": 9668,
+      "sha256": "3d29e6ca7b2f234ff2255b20595f1e1e26bd7e1bfd9021c01690af242f0dcf6e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/9aed1af/standards-review.json",
+      "bytes": 11186,
+      "sha256": "ac468315e1d4c2ebbe26e443764b9cf77f2c0cf4395d1929395b9204a08e0bf5"
+    }
+  ],
+  "harnesses": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/inventory.py",
+      "bytes": 8673,
+      "sha256": "5b78c63a6121fa672ac8213be72402830ecd37afdf997817e4cca0427ddd0db7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/process-startup.mjs",
+      "bytes": 4643,
+      "sha256": "2d30ebf7332345157f947dcf53cac24d1063b91f1b3a3e9262dfd0523799e4f3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/headless-session.mjs",
+      "bytes": 10386,
+      "sha256": "7e7c843c8ad3d8469b0f7241d93df33bffb24929a2e9cc46f6cac367694d0dda"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/readonly-data.mjs",
+      "bytes": 6333,
+      "sha256": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+    }
+  ],
+  "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+  "nodeVersion": "v26.8.2",
+  "output": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af",
+  "heavyWindow": "Coordinator only; implementation and VM execution idle. Package diagnosis released resource window. Read-only source review complete. Other machine load is observed, not controlled.",
+  "packageLimits": [
+    "npm ls first failure preserved; bundled file-dependency metadata diagnosed separately",
+    "Consumer npm ci failed optional foreign-platform lock validation; not relabelled PASS",
+    "Measurements use the actual byte-verified independently installed product, whose offline install and runtime imports passed"
+  ],
+  "plan": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/local-measurement-plan.md",
+  "realProviderRequests": 0,
+  "nativeTerminal": "NOT RUN"
+}

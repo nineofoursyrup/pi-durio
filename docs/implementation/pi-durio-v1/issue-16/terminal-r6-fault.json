@@ -1,0 +1,77 @@
+{
+  "at": "2026-10-09T13:46:00.558314+00:00",
+  "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+  "scenario": "fault",
+  "humanRatings": [
+    {
+      "id": "FAULT",
+      "label": "提交一个请求；约 1.2 秒后 fixture 触发可捕获故障，观察恢复到原终端缓冲区、可见光标、可正常输入。",
+      "status": "PASS",
+      "answer": "P"
+    }
+  ],
+  "machine": {
+    "calls": 1,
+    "cancelled": true,
+    "rawRestored": true,
+    "sttyRestored": true,
+    "readback": {
+      "status": 0,
+      "sameResult": true
+    }
+  },
+  "expectedFault": "Error: TERMINAL_VALIDATION_CAPTURED_FAULT",
+  "runtimeResult": {
+    "runId": "eab43c8a-c360-412b-8341-6782639c56b0",
+    "taskId": "c0470cc6-fd77-4815-aa48-7312b0147ed5",
+    "sessionId": "a2f19e48-b0ec-4b4c-8a7e-2f11dee21647",
+    "mode": "offline",
+    "status": "unknown",
+    "reason": "Application exit preserved unfinished work; explicit recovery required; remote termination unknown",
+    "observation": "ok",
+    "cleanup": "confirmed",
+    "lifecycle": {
+      "intent": "exit",
+      "disposition": "resumable",
+      "cleanupTimeoutMs": 10000,
+      "storage": "closed",
+      "owner": "release-after-host-close",
+      "remoteTermination": "unknown"
+    },
+    "usage": {
+      "source": "pi.usage",
+      "scope": "session:a2f19e48-b0ec-4b4c-8a7e-2f11dee21647",
+      "completeness": "unknown",
+      "value": null,
+      "cost": {
+        "kind": "estimate",
+        "currency": "USD",
+        "source": "@earendil-works/pi-ai@1.1.0 model price catalog",
+        "observedAt": "2026-10-09T13:44:58.472Z"
+      }
+    }
+  },
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-44-47-492Z/fault/operator-observation.json",
+      "sha256": "303a1eb0b4372a2e06c94903eb756b9d6f1879099393a0c81855e9f12914d115"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-44-47-492Z/fault/machine.json",
+      "sha256": "c8afc789a97ed178fc79b495b1fe555b8c22719052c40159e0f66f876aba8991"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-44-47-492Z/fault/events.jsonl",
+      "sha256": "d8544312b260b5f9bd2572af64c0979a682cc62fa7188fb45cf5d56a5d9a0623"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-44-47-492Z/fault/headless.json",
+      "sha256": "db15dd1bce06da59ebe4a4212f6cec8318a7e3f0cbfb6e0be5486a029f58dd55"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-44-47-492Z/fault/terminal-output.ansi",
+      "sha256": "5eab1418c93c637b22519b4a8eef885e7ba072cd9fa653b701ac58986f5df2bc"
+    }
+  ],
+  "acceptance": "PASS fault restoration; unfinished result remains unknown/resumable and remote termination unknown"
+}

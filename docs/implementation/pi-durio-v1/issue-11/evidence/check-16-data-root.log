@@ -1,0 +1,32 @@
+
+> pi-durio@0.1.0 check
+> npm run build && npm test
+
+
+> pi-durio@0.1.0 build
+> tsc && node scripts/build-artifact.mjs
+
+
+> pi-durio@0.1.0 test
+> node --test dist/test/*.test.js
+
+✔ rejecting an in-project data root does not mutate the read-only project through direct or symlink paths (6.007542ms)
+✔ real Harness reads the fixture, commits usage, and reopens without executing (785.759417ms)
+✔ original persistence failure cancels the active provider and blocks all later work (517.66775ms)
+✔ stop and exit await the in-flight provider while preserving acquired partial content and unknown usage (1058.697792ms)
+✔ derived observation failure leaves the authoritative runtime result intact (755.180875ms)
+✔ missing auth fails before acceptance and invalid auth is explicit without fallback or leaked key (567.964458ms)
+✔ a failed Harness initialization closes allocated storage before releasing ownership (438.589459ms)
+✔ second process using an alias is rejected before any writable storage opens (694.697708ms)
+✔ read-only snapshot inspection never changes original DB and separate runs never repeat earlier usage (1145.310458ms)
+✔ model tool requests cannot acquire write capabilities (647.682667ms)
+✔ show and preflight do not create or change source files, including SQLite sidecars (808.151916ms)
+✔ cancellation after a committed tool round retains known usage without inventing the unfinished request usage (642.382166ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8261.20575

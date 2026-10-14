@@ -1,0 +1,125 @@
+{
+  "target": {
+    "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project",
+    "runId": "1ff5b41c-5fde-460f-9dcf-8a3ebe090d03",
+    "sessionId": "38d552d3-1163-4edd-b315-f22711c5978a",
+    "taskId": "be316732-d859-42d5-b2b3-0b906b77f98d"
+  },
+  "cutoff": 47,
+  "queryBounds": {
+    "maxRuns": 1,
+    "maxRecords": 50,
+    "maxEvidenceBytes": 32768,
+    "maxSourceBytes": 32768
+  },
+  "summaries": [
+    {
+      "runId": "1ff5b41c-5fde-460f-9dcf-8a3ebe090d03",
+      "status": "completed",
+      "completeness": "complete",
+      "attempts": 2,
+      "responses": 2,
+      "version": "c3a26d10711de3ae1afdd08698e4dd43a92f48d1bc591653e8778218aa373ffd",
+      "evidence": [
+        {
+          "id": "e1:20:d2a3b2bfd0115e74d33d8bca508339e1e25547a25a17ad40fc652542cc31e8f3",
+          "kind": "model.response",
+          "seq": 20
+        },
+        {
+          "id": "e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503",
+          "kind": "tool.output",
+          "seq": 24
+        },
+        {
+          "id": "e1:25:35696d254652b487ec6bab04fddf29f7ca231e63adf5d1c69e777eb23954193c",
+          "kind": "shell.completed",
+          "seq": 25
+        },
+        {
+          "id": "e1:26:3f8896d0da5cc0426f7d92f9eed80708b8b289446b865d3eb47025d703e25edb",
+          "kind": "tool.error",
+          "seq": 26
+        },
+        {
+          "id": "e1:37:1ac9fd12494f96a71673c8eab48a112e99955df63098ff523f89ce77c77b96a0",
+          "kind": "model.response",
+          "seq": 37
+        },
+        {
+          "id": "e1:46:58cfd7f733809326c38cc1ebed548ce80c49ac7bebbc08ffa3e97d5808db0627",
+          "kind": "run.closed",
+          "seq": 46
+        }
+      ],
+      "omitted": false
+    }
+  ],
+  "targets": [
+    {
+      "id": "clamp-project",
+      "kind": "project",
+      "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project",
+      "files": [
+        {
+          "path": "clamp.ts",
+          "sha256": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+          "bytes": 111,
+          "sourceId": "e1:49:a680a9179462aab085f0352e77a9e1c25a3d53ac56cf41015e1d20f913cf8ca7",
+          "state": "available",
+          "reason": []
+        },
+        {
+          "path": "check.mjs",
+          "sha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d",
+          "bytes": 357,
+          "sourceId": "e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2",
+          "state": "available",
+          "reason": []
+        },
+        {
+          "path": "README.md",
+          "sha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+          "bytes": 129,
+          "sourceId": "e1:51:ccf3e336d85ab9b57c2361610ef0777fc8288d1d2cedec9ee0eef5133438c927",
+          "state": "available",
+          "reason": []
+        },
+        {
+          "path": "package.json",
+          "sha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+          "bytes": 87,
+          "sourceId": "e1:52:8cc84f042f96e2325ad9daf05845f9fa1bcd0183132f01a0329b99a45bfa60b4",
+          "state": "available",
+          "reason": []
+        }
+      ],
+      "baseline": "46864e756634ac28260fe43119d15103008ce1a2fbc9b37b548c2b2027ab257f",
+      "applicableVersion": "c3a26d10711de3ae1afdd08698e4dd43a92f48d1bc591653e8778218aa373ffd",
+      "state": "verified",
+      "gaps": []
+    },
+    {
+      "id": "self-source-unregistered",
+      "kind": "self-source",
+      "workspace": null,
+      "files": [],
+      "baseline": "unavailable",
+      "applicableVersion": null,
+      "state": "incomplete",
+      "gaps": [
+        "Self source is not explicitly registered; no directory search or installation edits permitted"
+      ]
+    }
+  ],
+  "previousReports": [],
+  "previousDecisions": [],
+  "applicableSuppressions": [],
+  "suppressionCoverage": {
+    "total": 0,
+    "shown": 0,
+    "rawAccess": "Only same-project decision references are readable; shared configuration suppression exposes scoped summary only."
+  },
+  "coverage": "Only declared session and explicitly bounded same-project/type comparison summaries; historical reports limited to ten, previous decisions to twenty. Empty or missing evidence never proves absence. Candidate claims remain model-derived, not host-verified judgments.",
+  "decisions": "Each candidate should declare problemKey: a stable explicit identifier for the concrete problem/mechanism in its target/file scope (for example math.add.operator), preserving earlier keys for the same problem. Titles, report IDs, wording, ordinary upgrades and same-kind new observations do not make a new problem. Inspect previousDecisions and applicableSuppressions. Do not repeat active suppressed advice. A changed key in overlapping scope is unresolved identity, not proof of a new problem. A deferred candidate requires both relevant changed file content and reconsideration:{sourceId:original decision evidence ID,reason:explanation of the substantive change,evidence:[new acquired source IDs]}. Byte changes alone do not prove a meaningful condition change. No decision or report text authorizes execution."
+}

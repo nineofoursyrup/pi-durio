@@ -1,0 +1,133 @@
+{
+  "productCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "artifact": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/artifact.json",
+    "bytes": 1905,
+    "sha256": "a1c8fb0660266c7758335a31a8773396294e3fc86d550a479be53ea2b344647b"
+  },
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/execution/source-build.json",
+    "bytes": 92981,
+    "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+  },
+  "sources": [
+    {
+      "relativePath": "src/runtime.ts",
+      "referenceLines": [
+        [
+          481,
+          482
+        ],
+        [
+          506,
+          516
+        ],
+        [
+          707,
+          714
+        ]
+      ],
+      "installedBuildInput": {
+        "path": "src/runtime.ts",
+        "sha256": "42001c5350161fb152ee8ec501b1f03e01475043effb972920be086593b06476",
+        "bytes": 79700
+      },
+      "currentWorktree": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/runtime.ts",
+        "bytes": 79700,
+        "sha256": "42001c5350161fb152ee8ec501b1f03e01475043effb972920be086593b06476"
+      },
+      "matched": true
+    },
+    {
+      "relativePath": "src/eval/guest.ts",
+      "referenceLines": [
+        [
+          9,
+          12
+        ],
+        [
+          17,
+          24
+        ]
+      ],
+      "installedBuildInput": {
+        "path": "src/eval/guest.ts",
+        "sha256": "7db4aa89a4baebaa228324b443f4d4a668fbc80960c376c9785ac081f5b5e8a8",
+        "bytes": 3766
+      },
+      "currentWorktree": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/eval/guest.ts",
+        "bytes": 3766,
+        "sha256": "7db4aa89a4baebaa228324b443f4d4a668fbc80960c376c9785ac081f5b5e8a8"
+      },
+      "matched": true
+    },
+    {
+      "relativePath": "src/eval/runner.ts",
+      "referenceLines": [
+        [
+          112,
+          116
+        ],
+        [
+          125,
+          143
+        ]
+      ],
+      "installedBuildInput": {
+        "path": "src/eval/runner.ts",
+        "sha256": "33bbf2a839d341be2c4c3c710534a411cc6db7adfd5292ba5b8edbd32f7339b9",
+        "bytes": 36323
+      },
+      "currentWorktree": {
+        "path": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/eval/runner.ts",
+        "bytes": 36323,
+        "sha256": "33bbf2a839d341be2c4c3c710534a411cc6db7adfd5292ba5b8edbd32f7339b9"
+      },
+      "matched": true
+    }
+  ],
+  "harnessStopLogic": {
+    "file": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/run.mjs",
+      "bytes": 7255,
+      "sha256": "aa88a4132158cd7b04412f271e44ec3eead133e035b17d7b3cb33a3a9b67cfdd"
+    },
+    "lines": [
+      [
+        45,
+        55
+      ],
+      [
+        65,
+        70
+      ]
+    ]
+  },
+  "multiFileExecutionConfiguration": {
+    "seq": 6,
+    "ref": {
+      "sha256": "b14673d047d050a215181e5c991b672aa677ef4f28614517d5bf0e8f5cac0cc3",
+      "bytes": 1952
+    },
+    "settings": {
+      "retry": {
+        "enabled": false,
+        "maxRetries": 0
+      },
+      "compaction": {
+        "enabled": true,
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "stream": {
+        "maxRetries": 0,
+        "timeoutMs": 120000
+      },
+      "contextRetentionMs": 0,
+      "toolExecution": "sequential"
+    },
+    "claims": "All eight dispatched attempts were generation; ninth was refused before model.intent. This configuration is evidence, not permission."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "authorized": true,
+  "choice": "execute-declared-scope",
+  "manifestSha256": "686b5c023020444104cd711b809dfd01442b0568a79fa36e42484716c8f1f3fe",
+  "author": "human-user",
+  "source": {
+    "kind": "codex-user-reply",
+    "requestToolCallId": "call_591912f6d1fc4caa82875122834a1df1",
+    "userMessageId": "msg_01a12569-fe3f-76e1-8f7e-264073feae32",
+    "questionItemId": "[\"request_user_input_async\",\"call_591912f6d1fc4caa82875122834a1df1\",0]"
+  },
+  "exactHumanReply": "选择 R1，验证通过后仅写回 clamp.ts",
+  "grantedAt": "2026-10-10T10:44:25.791Z",
+  "acknowledgesOriginalReasoningError": true,
+  "starts": 1,
+  "note": "Actual direct human candidate choice. One fixed protected regression then exact conditional clamp.ts writeback; zero new provider; no retry, activation, compensation or automatic rollback."
+}

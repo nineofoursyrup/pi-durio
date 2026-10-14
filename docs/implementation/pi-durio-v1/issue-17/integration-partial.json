@@ -1,0 +1,31 @@
+{
+  "issue": 17,
+  "recordedAt": "2026-10-09T15:06:47.167355+00:00",
+  "status": "integrated-native-pending",
+  "accepted": false,
+  "dependencySatisfaction": false,
+  "integrationMerge": "fc01fc4fc21f92a65fa11f9677f9686008ba9fc7",
+  "productSource": "66c7fcafb34e722eafd738140f9305e5a235db80",
+  "ticketTip": "8eeb3b35e831fad276ce3dd884e17a23799c5981",
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/merge-integration-readback.json",
+    "sha256": "53dd052124d0fbef6e7d401c53fbf0b87a3f5f3f5758ed21f4d92e8258c9af91"
+  },
+  "offline": "Applicable combined build, 18/18 affected checks, installed control and five readonly queries passed; earlier unaffected checks reused after exact bindings.",
+  "candidate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/manifest.json",
+    "sha256": "38742960c17164ed1c66970c67e5ff60ce73cccd7556828fae28e092b15d7474"
+  },
+  "native": {
+    "status": "NOT RUN",
+    "operatorCard": "operator-card.md",
+    "request": "First phase requested; second phase after evidence readback"
+  },
+  "preservation": "162 original files and 131635 existing evidence files unchanged at merge; first failures retained.",
+  "remaining": [
+    "Native two-phase #17 acceptance",
+    "No #19/#23/#27 dependency unlock until applicable acceptance",
+    "Final technical/native acceptance #31 and daily acceptance #32 remain separate",
+    "No paid model calls, main product merge, release or ticket closure"
+  ]
+}

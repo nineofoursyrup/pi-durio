@@ -1,0 +1,75 @@
+{
+  "schema": "pi-durio.daily-acceptance-documentation-check.v1",
+  "at": "2026-10-11T11:21:08.294249+00:00",
+  "status": "PASS_DOCUMENTATION_AND_READONLY_APPLICABILITY_ONLY",
+  "baseCommit": "f346f77e8a9438aeeabb0a0dad67aaff7aa8bbbc",
+  "checks": {
+    "jsonParse": "PASS",
+    "exactUserResponseCopy": "PASS",
+    "candidateBuildAndSourceBinding": "PASS",
+    "explicitAcceptanceAndCompletionRule": "PASS",
+    "unexposedTimesAndTrialUnknownsPreserved": "PASS",
+    "originalsUnchanged": "PASS",
+    "originalsChecked": 16,
+    "databaseBytesUnchanged": "PASS",
+    "walAndShmStillAbsent": "PASS",
+    "fileReferenceSizeAndSha256": "PASS",
+    "referenceEntriesChecked": 68,
+    "markdownLocalLinks": {
+      "status": "PASS",
+      "count": 7,
+      "targets": [
+        "user-response.json",
+        "acceptance.json",
+        "../TRIAL.md",
+        "../pending-acceptance.json",
+        "../documentation-checks.json",
+        "../../issue-31/TECHNICAL-ACCEPTANCE.md",
+        "applicable-readback.json"
+      ]
+    },
+    "appendOnlyOwnedScope": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "documents": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/DAILY-ACCEPTANCE.md",
+      "bytes": 4762,
+      "sha256": "c1a631e826c9f1270fc7214469850000dcf0b6be03e41432f11fe0e958ff57cb"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/acceptance.json",
+      "bytes": 7794,
+      "sha256": "a7bf7959f78069225a64c6cdc9937ebf7d8653633aeda9b1eb9f331363fdbfee"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/applicable-readback.json",
+      "bytes": 30412,
+      "sha256": "1f284f598ca8daa7728222837ddc17f99f9eef0b677c13b6d052497c9b7f0c36"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/user-response.json",
+      "bytes": 1168,
+      "sha256": "29c3447c9906774c867fc17a82d09fdbb3e50369f538fcd482e00c937accad0c"
+    }
+  ],
+  "reusedVerification": "Original candidate-bound product checks and accepted technical evidence; no new whole-suite, installation inventory, TUI, provider or VM run. This check validates only the appended documentation, selected read-only trial metadata and input applicability.",
+  "effects": {
+    "productCommands": 0,
+    "productImports": 0,
+    "productTests": 0,
+    "TUIStarts": 0,
+    "TerminalOperations": 0,
+    "providerRequestsAdded": 0,
+    "VMStarts": 0,
+    "credentialsRead": false,
+    "originalEvidenceWrites": 0,
+    "sharedStatusWrites": 0,
+    "GitHubWrites": 0
+  },
+  "model": {
+    "requested": "gpt-6-astra",
+    "reasoningRequested": "xhigh",
+    "actualBackend": "NOT_ATTESTED"
+  }
+}

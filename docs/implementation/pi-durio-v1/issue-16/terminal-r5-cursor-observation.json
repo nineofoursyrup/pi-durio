@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-09T12:31:43.299Z",
+  "scenario": "cursor",
+  "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+  "reportedBy": "human-terminal-operator",
+  "ratings": [
+    {
+      "id": "C1",
+      "label": "原始 A👩‍💻é中B 的 caret 位于 B 后、只有一个光标",
+      "status": "PASS",
+      "answer": "P"
+    },
+    {
+      "id": "C2",
+      "label": "首见 🇨🇳 👍🏽 ✈️ Ω 测量后插入点正确，没有误提交",
+      "status": "PASS",
+      "answer": "P"
+    },
+    {
+      "id": "C3",
+      "label": "40×12 附近缩放再恢复后 caret 正确，退出恢复正常",
+      "status": "PASS",
+      "answer": "P"
+    }
+  ]
+}

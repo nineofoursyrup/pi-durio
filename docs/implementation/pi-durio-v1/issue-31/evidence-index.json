@@ -1,0 +1,94 @@
+{
+  "status": "PARTIAL_LOCAL_MEASUREMENTS_NOT_TECHNICAL_ACCEPTANCE",
+  "candidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/partial-summary.json",
+      "bytes": 8676,
+      "sha256": "d8adf1b033cd715e6be44acfa47a48b239383b7ab0b9412849b00392110b4a95"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/inventory.json",
+      "bytes": 11658169,
+      "sha256": "9d521f9e4bf82db7b10f2f2ba035e07e6ea6ed2d179f59720bb0415db901c4fa"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/environment-before.json",
+      "bytes": 103215,
+      "sha256": "ca7badafe579bd3510369f409648fefad77bba6bca1f6cb0ea409be0ac9cf3b1"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/native-config.json",
+      "bytes": 2078,
+      "sha256": "3dc5cec2ce8d949d2d1af4042a5852278450c02506914a2f72ebf4b3d97c210f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/native-freeze.json",
+      "bytes": 1640,
+      "sha256": "07747e02216afd482038ac449d8f354d0be793b14c9364a6689a6f1f9d849da7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/run-native.sh",
+      "bytes": 712,
+      "sha256": "f88efa030b31eb50fa93c73e22814fb2569cb977feba9cc6ccd710c47704c1db"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/process-startup/plan.json",
+      "bytes": 2173,
+      "sha256": "b090fb4ac86f8deaee81a5d72bc9e58f54c5923f5f66e68002d590487d1f24e6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/process-startup/result.json",
+      "bytes": 12798,
+      "sha256": "d3e8d9c31280e090b6a1e27dbc07fb58db08b095fd49646dd2ec5546cdae0270"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/harness/inventory.py",
+      "bytes": 8673,
+      "sha256": "5b78c63a6121fa672ac8213be72402830ecd37afdf997817e4cca0427ddd0db7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/harness/local-measurement-plan.md",
+      "bytes": 9615,
+      "sha256": "906ae9aac3377ccd484e67274680f524612ad86994e83501f9a579ec6ca206ce"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/harness/native-batch.mjs",
+      "bytes": 5789,
+      "sha256": "bf33e1667c7844ca4e19de955853a4cc5077bd427f730fc10ed27b77291048e3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/harness/native-composition.mjs",
+      "bytes": 12975,
+      "sha256": "39533830ba1de452a2d3853922febf9fe6b938b608454806919069334c111420"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/harness/native-idle.mjs",
+      "bytes": 5198,
+      "sha256": "e40078530911a41e6d0dc562ee77ac6eef28bd9e6fc247043f33efab403936de"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/harness/native-instructions.md",
+      "bytes": 1349,
+      "sha256": "2a03e47f278eec58d1d5b9a553bc3158f49e126358c9e0e868656e3d69d5d655"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/harness/native-session.mjs",
+      "bytes": 11937,
+      "sha256": "9759643db32363fbae68fb85b1582149b619983b24357f1bf7c9ce22ebd0b2ca"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/harness/process-startup.mjs",
+      "bytes": 4643,
+      "sha256": "2d30ebf7332345157f947dcf53cac24d1063b91f1b3a3e9262dfd0523799e4f3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/harness/readonly-data.mjs",
+      "bytes": 6333,
+      "sha256": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+    }
+  ],
+  "rawStartupFiles": "process-startup/ retains all 14 per-process JSON, stdout and stderr files",
+  "native": "FROZEN_NOT_RUN",
+  "provider": "NOT_GRANTED_NOT_RUN"
+}

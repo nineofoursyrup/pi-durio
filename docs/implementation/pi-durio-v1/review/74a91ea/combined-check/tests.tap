@@ -1,0 +1,1540 @@
+TAP version 13
+# Subtest: public runtime repairs a real project with read/edit/write/bash and preserves existing user changes
+ok 1 - public runtime repairs a real project with read/edit/write/bash and preserves existing user changes
+  ---
+  duration_ms: 7299.246875
+  type: 'test'
+  ...
+# Subtest: original output failure and cancellation stop a real in-flight producer without rerunning side effects
+ok 2 - original output failure and cancellation stop a real in-flight producer without rerunning side effects
+  ---
+  duration_ms: 14349.388708
+  type: 'test'
+  ...
+# Subtest: a failed shell check retains complete large output and an explicit error summary
+ok 3 - a failed shell check retains complete large output and an explicit error summary
+  ---
+  duration_ms: 4405.598625
+  type: 'test'
+  ...
+# Subtest: shell receives an explicit immutable environment while file tools refuse undeclared targets
+ok 4 - shell receives an explicit immutable environment while file tools refuse undeclared targets
+  ---
+  duration_ms: 4174.873792
+  type: 'test'
+  ...
+# Subtest: derived tool summaries degrade independently and read-only callers retain the same result semantics
+ok 5 - derived tool summaries degrade independently and read-only callers retain the same result semantics
+  ---
+  duration_ms: 5075.080417
+  type: 'test'
+  ...
+# Subtest: large output survives temporary spill removal and read-only pagination without growing model input
+ok 6 - large output survives temporary spill removal and read-only pagination without growing model input
+  ---
+  duration_ms: 9402.269333
+  type: 'test'
+  ...
+# Subtest: workspace ownership rejects aliases and overlapping roots across sessions and data roots before acceptance
+ok 7 - workspace ownership rejects aliases and overlapping roots across sessions and data roots before acceptance
+  ---
+  duration_ms: 9036.883542
+  type: 'test'
+  ...
+# Subtest: uncertain Git workspace identity blocks coding before any acceptance or model call
+ok 8 - uncertain Git workspace identity blocks coding before any acceptance or model call
+  ---
+  duration_ms: 17.108958
+  type: 'test'
+  ...
+# Subtest: coding from a Git subdirectory still keeps its data root outside the whole project
+ok 9 - coding from a Git subdirectory still keeps its data root outside the whole project
+  ---
+  duration_ms: 75.742291
+  type: 'test'
+  ...
+# Subtest: writing an existing file requires a current observation and refuses intervening user edits
+ok 10 - writing an existing file requires a current observation and refuses intervening user edits
+  ---
+  duration_ms: 5464.863375
+  type: 'test'
+  ...
+# Subtest: coding tool calls in one model round execute sequentially even through file aliases
+ok 11 - coding tool calls in one model round execute sequentially even through file aliases
+  ---
+  duration_ms: 5301.959375
+  type: 'test'
+  ...
+# Subtest: busy compact is deduplicated, steer reaches its tool boundary and maintenance creates no coding sample
+ok 12 - busy compact is deduplicated, steer reaches its tool boundary and maintenance creates no coding sample
+  ---
+  duration_ms: 8078.484542
+  type: 'test'
+  ...
+# Subtest: idle manual compaction uses the public summary submission, retains originals and deduplicates a repeated request
+ok 13 - idle manual compaction uses the public summary submission, retains originals and deduplicates a repeated request
+  ---
+  duration_ms: 7131.753167
+  type: 'test'
+  ...
+# Subtest: manual summary is the verified context of a later independent task; wrong workspace never silently starts fresh
+ok 14 - manual summary is the verified context of a later independent task; wrong workspace never silently starts fresh
+  ---
+  duration_ms: 8325.603375
+  type: 'test'
+  ...
+# Subtest: follow-up then compact then follow-up uses committed context lineage and preserves original admission target
+ok 15 - follow-up then compact then follow-up uses committed context lineage and preserves original admission target
+  ---
+  duration_ms: 9635.292084
+  type: 'test'
+  ...
+# Subtest: cancelling only the running manual task preserves the completed source and records the interrupted attempt
+ok 16 - cancelling only the running manual task preserves the completed source and records the interrupted attempt
+  ---
+  duration_ms: 5707.75525
+  type: 'test'
+  ...
+# Subtest: manual interruption is frozen across reopen and ending its source never wakes the old task
+ok 17 - manual interruption is frozen across reopen and ending its source never wakes the old task
+  ---
+  duration_ms: 8340.080333
+  type: 'test'
+  ...
+# Subtest: actual automatic background summary becomes stale after newer overflow compaction and is never applied twice
+ok 18 - actual automatic background summary becomes stale after newer overflow compaction and is never applied twice
+  ---
+  duration_ms: 5533.852667
+  type: 'test'
+  ...
+# Subtest: incomplete summaries retain attempts and usage but never update the context
+ok 19 - incomplete summaries retain attempts and usage but never update the context
+  ---
+  duration_ms: 7506.895667
+  type: 'test'
+  ...
+# Subtest: manual usage is maintenance while authoritative session totals are projected once
+ok 20 - manual usage is maintenance while authoritative session totals are projected once
+  ---
+  duration_ms: 6149.228417
+  type: 'test'
+  ...
+# Subtest: automatic generated-but-unplaced summary is frozen across whole-Harness recovery and ordinary submission
+ok 21 - automatic generated-but-unplaced summary is frozen across whole-Harness recovery and ordinary submission
+  ---
+  duration_ms: 5668.465458
+  type: 'test'
+  ...
+# Subtest: cancelling an active queued compaction resolves only that item and later follow-up still runs
+ok 22 - cancelling an active queued compaction resolves only that item and later follow-up still runs
+  ---
+  duration_ms: 8379.752875
+  type: 'test'
+  ...
+# Subtest: a late cancellation loses to committed summary placement and never claims rollback
+ok 23 - a late cancellation loses to committed summary placement and never claims rollback
+  ---
+  duration_ms: 6002.928167
+  type: 'test'
+  ...
+# Subtest: frozen unexecuted compact reattaches to the proven completed follow-up context
+ok 24 - frozen unexecuted compact reattaches to the proven completed follow-up context
+  ---
+  duration_ms: 8698.125
+  type: 'test'
+  ...
+# Subtest: frozen compact cannot jump over a failed dispatched follow-up to reuse an older completed context
+ok 25 - frozen compact cannot jump over a failed dispatched follow-up to reuse an older completed context
+  ---
+  duration_ms: 6957.031917
+  type: 'test'
+  ...
+# Subtest: manual maintenance keeps the original dispatch capability and exhausted persistent budget
+ok 26 - manual maintenance keeps the original dispatch capability and exhausted persistent budget
+  ---
+  duration_ms: 5450.147583
+  type: 'test'
+  ...
+# Subtest: duplicates admitted during manual summary generation retain their stable alias and input identity
+ok 27 - duplicates admitted during manual summary generation retain their stable alias and input identity
+  ---
+  duration_ms: 5598.791708
+  type: 'test'
+  ...
+# Subtest: readonly task membership includes queued, frozen and withdrawn follow-ups once and keeps an as-of snapshot across pages
+ok 28 - readonly task membership includes queued, frozen and withdrawn follow-ups once and keeps an as-of snapshot across pages
+  ---
+  duration_ms: 137.3155
+  type: 'test'
+  ...
+# Subtest: an accepted task can fail before run.started without acquiring a run; queued follow-up never inherits its source outcome
+ok 29 - an accepted task can fail before run.started without acquiring a run; queued follow-up never inherits its source outcome
+  ---
+  duration_ms: 59.896875
+  type: 'test'
+  ...
+# Subtest: busy steer uses its original task, follow-up is accepted once before its own run, and withdrawal wins before Pi placement
+ok 30 - busy steer uses its original task, follow-up is accepted once before its own run, and withdrawal wins before Pi placement
+  ---
+  duration_ms: 7567.923166
+  type: 'test'
+  ...
+# Subtest: stop freezes steer, follow-up and management; later ordinary work cannot revive them and stopped-source reattachment is refused
+ok 31 - stop freezes steer, follow-up and management; later ordinary work cannot revive them and stopped-source reattachment is refused
+  ---
+  duration_ms: 6058.694459
+  type: 'test'
+  ...
+# Subtest: failure leaves accepted independent work frozen; actual placement defeats a late withdrawal
+ok 32 - failure leaves accepted independent work frozen; actual placement defeats a late withdrawal
+  ---
+  duration_ms: 5175.245833
+  type: 'test'
+  ...
+# Subtest: completed-source follow-up requires an explicit compatible decision after reopening, and repeated decisions never repeat dispatch
+ok 33 - completed-source follow-up requires an explicit compatible decision after reopening, and repeated decisions never repeat dispatch
+  ---
+  duration_ms: 8146.052666
+  type: 'test'
+  ...
+# Subtest: recovery recognizes committed steer inputs as the same run and never releases its frozen independent queue
+ok 34 - recovery recognizes committed steer inputs as the same run and never releases its frozen independent queue
+  ---
+  duration_ms: 6626.459292
+  type: 'test'
+  ...
+# Subtest: stopping a running follow-up preserves the first stop intent and freezes earlier-source siblings
+ok 35 - stopping a running follow-up preserves the first stop intent and freezes earlier-source siblings
+  ---
+  duration_ms: 6498.745542
+  type: 'test'
+  ...
+# Subtest: fixed objective pairs improve only when every objective reaches delta and protection-only cases pass
+ok 36 - fixed objective pairs improve only when every objective reaches delta and protection-only cases pass
+  ---
+  duration_ms: 1.593583
+  type: 'test'
+  ...
+# Subtest: hard protection regression survives baseline task failure, incomplete pairs, cheap candidate and unrelated grader failure
+ok 37 - hard protection regression survives baseline task failure, incomplete pairs, cheap candidate and unrelated grader failure
+  ---
+  duration_ms: 0.32625
+  type: 'test'
+  ...
+# Subtest: four conclusions retain mixed repeats, missing usage, single stochastic trial, failed-but-cheaper and missing thresholds
+ok 38 - four conclusions retain mixed repeats, missing usage, single stochastic trial, failed-but-cheaper and missing thresholds
+  ---
+  duration_ms: 0.435
+  type: 'test'
+  ...
+# Subtest: a soft protection needs consistent degradation within each case; a mean cannot hide a mixed repeat
+ok 39 - a soft protection needs consistent degradation within each case; a mean cannot hide a mixed repeat
+  ---
+  duration_ms: 0.268833
+  type: 'test'
+  ...
+# Subtest: a fixed plan rejects unequal pair order and a global budget that starves the later side
+ok 40 - a fixed plan rejects unequal pair order and a global budget that starves the later side
+  ---
+  duration_ms: 0.555334
+  type: 'test'
+  ...
+# Subtest: known request or latency gains cannot upgrade a batch with missing price or usage; hard regressions still lead
+ok 41 - known request or latency gains cannot upgrade a batch with missing price or usage; hard regressions still lead
+  ---
+  duration_ms: 0.434375
+  type: 'test'
+  ...
+# Subtest: machine/text/TUI use host costs, keep both sides and reopen without writes; partial regrading cannot mix rules
+ok 42 - machine/text/TUI use host costs, keep both sides and reopen without writes; partial regrading cannot mix rules
+  ---
+  duration_ms: 1047.262417
+  type: 'test'
+  ...
+# Subtest: the shared report retains missing prices, unknown usage and unassigned costs instead of assigning zeros or a winning side
+ok 43 - the shared report retains missing prices, unknown usage and unassigned costs instead of assigning zeros or a winning side
+  ---
+  duration_ms: 3341.392583
+  type: 'test'
+  ...
+# Subtest: fixed eval runtime carries execution source identity but excludes host graders when materialized
+ok 44 - fixed eval runtime carries execution source identity but excludes host graders when materialized
+  ---
+  duration_ms: 135.036791
+  type: 'test'
+  ...
+# Subtest: a started trial without final host duration is unknown time rather than a zero-duration total
+ok 45 - a started trial without final host duration is unknown time rather than a zero-duration total
+  ---
+  duration_ms: 111.87225
+  type: 'test'
+  ...
+# Subtest: report preserves all planned identities, grader errors and first failure; missing actual evidence removes eligibility
+ok 46 - report preserves all planned identities, grader errors and first failure; missing actual evidence removes eligibility
+  ---
+  duration_ms: 333.821875
+  type: 'test'
+  ...
+# Subtest: mediator denies guest endpoint/model/structure changes before any provider dispatch and unknown usage blocks new trial requests
+ok 47 - mediator denies guest endpoint/model/structure changes before any provider dispatch and unknown usage blocks new trial requests
+  ---
+  duration_ms: 190.020625
+  type: 'test'
+  ...
+# Subtest: paid plan needs a fixed provider upper bound before dispatch, not only an after-the-fact exceeded marker
+ok 48 - paid plan needs a fixed provider upper bound before dispatch, not only an after-the-fact exceeded marker
+  ---
+  duration_ms: 33.234917
+  type: 'test'
+  ...
+# Subtest: owner loss and oversized guest payload are rejected before dispatch; HTTP failure stays a service failure with missing cost
+ok 49 - owner loss and oversized guest payload are rejected before dispatch; HTTP failure stays a service failure with missing cost
+  ---
+  duration_ms: 205.020083
+  type: 'test'
+  ...
+# Subtest: same per-trial limit blocks a noisy side without consuming the next side allowance or resetting global facts
+ok 50 - same per-trial limit blocks a noisy side without consuming the next side allowance or resetting global facts
+  ---
+  duration_ms: 356.261625
+  type: 'test'
+  ...
+# Subtest: wrapped eval plan selection remains visible in a narrow viewport
+ok 51 - wrapped eval plan selection remains visible in a narrow viewport
+  ---
+  duration_ms: 219.223792
+  type: 'test'
+  ...
+# Subtest: selected process keeps all acquired output bytes and fixed evidence protects every block
+ok 52 - selected process keeps all acquired output bytes and fixed evidence protects every block
+  ---
+  duration_ms: 467.807
+  type: 'test'
+  ...
+# Subtest: cancellation and failed start journaling retain acquired bytes while stopping the child
+ok 53 - cancellation and failed start journaling retain acquired bytes while stopping the child
+  ---
+  duration_ms: 201.639459
+  type: 'test'
+  ...
+# Subtest: output receipt failure keeps original blocks and does not publish retained completeness
+ok 54 - output receipt failure keeps original blocks and does not publish retained completeness
+  ---
+  duration_ms: 56.774667
+  type: 'test'
+  ...
+# Subtest: timeout still escalates to SIGKILL after a child ignores SIGTERM
+ok 55 - timeout still escalates to SIGKILL after a child ignores SIGTERM
+  ---
+  duration_ms: 5256.61775
+  type: 'test'
+  ...
+# Subtest: host admission and external termination clocks preserve monotonic process identity and cannot inherit supplied clocks
+ok 56 - host admission and external termination clocks preserve monotonic process identity and cannot inherit supplied clocks
+  ---
+  duration_ms: 82.984709
+  type: 'test'
+  ...
+# Subtest: history selection remains visible at 40x12 and pending acceptance can be inspected without a run
+ok 57 - history selection remains visible at 40x12 and pending acceptance can be inspected without a run
+  ---
+  duration_ms: 102.590208
+  type: 'test'
+  ...
+# Subtest: all declared filters use acquired facts, pending tasks retain null run, and stable pages exclude later receipt changes
+ok 58 - all declared filters use acquired facts, pending tasks retain null run, and stable pages exclude later receipt changes
+  ---
+  duration_ms: 137.2465
+  type: 'test'
+  ...
+# Subtest: pre-start failure remains an accepted task with no execution link and keeps its own evidence gap
+ok 59 - pre-start failure remains an accepted task with no execution link and keeps its own evidence gap
+  ---
+  duration_ms: 30.448459
+  type: 'test'
+  ...
+# Subtest: stable evidence pages preserve bytes and distinguish source gaps, display limits, corruption and explicit cleanup
+ok 60 - stable evidence pages preserve bytes and distinguish source gaps, display limits, corruption and explicit cleanup
+  ---
+  duration_ms: 138.235291
+  type: 'test'
+  ...
+# Subtest: trace counts dispatch boundaries, preserves failed retry identity and does not end a live stream at HTTP headers
+ok 61 - trace counts dispatch boundaries, preserves failed retry identity and does not end a live stream at HTTP headers
+  ---
+  duration_ms: 119.41575
+  type: 'test'
+  ...
+# Subtest: committed cumulative usage deduplicates across runs and reopen, reasoning is not added, and re-estimates append
+ok 62 - committed cumulative usage deduplicates across runs and reopen, reasoning is not added, and re-estimates append
+  ---
+  duration_ms: 228.892875
+  type: 'test'
+  ...
+# Subtest: fixation verifies source and dependency closure under owner and never succeeds from missing links
+ok 63 - fixation verifies source and dependency closure under owner and never succeeds from missing links
+  ---
+  duration_ms: 105.683542
+  type: 'test'
+  ...
+# Subtest: derived scopes redact decoded credentials and instructions across page edges without changing originals or access
+ok 64 - derived scopes redact decoded credentials and instructions across page edges without changing originals or access
+  ---
+  duration_ms: 101.934625
+  type: 'test'
+  ...
+# Subtest: real offline failed task: large output, unknown usage, slow consumer, fixation, CLI repeat reads and exports never call provider again
+ok 65 - real offline failed task: large output, unknown usage, slow consumer, fixation, CLI repeat reads and exports never call provider again
+  ---
+  duration_ms: 189515.633292
+  type: 'test'
+  ...
+# Subtest: registered source execution declares a future process separately from project profile activation
+ok 66 - registered source execution declares a future process separately from project profile activation
+  ---
+  duration_ms: 1.919583
+  type: 'test'
+  ...
+# Subtest: registration rejects a newly added build input even when all previously listed files still match
+ok 67 - registration rejects a newly added build input even when all previously listed files still match
+  ---
+  duration_ms: 27703.268416
+  type: 'test'
+  ...
+# Subtest: selected source produces a content-bound executable and only an explicit new process observes it
+not ok 68 - selected source produces a content-bound executable and only an explicit new process observes it
+  ---
+  duration_ms: 350166.185542
+  type: 'test'
+  location: '/Users/nineofour/Durio/dist/test/improve-build.test.js:61:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"state":"frozen","reason":"A started group has no certain recorded outcome.","groups":[{"state":"unknown","reason":"Error: ENOENT: no such file or directory, scandir '/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-build-execution-GfFjf7/temporary/build/check-0/execution/work/targets'","formal":null}]}
+    + actual - expected
+    
+    + 'frozen'
+    - 'completed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'completed'
+  actual: 'frozen'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/nineofour/Durio/dist/test/improve-build.test.js:63:12)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: explicit non-executing decision persists exact identities and duplicate returns state without writes
+ok 69 - explicit non-executing decision persists exact identities and duplicate returns state without writes
+  ---
+  duration_ms: 175.968417
+  type: 'test'
+  ...
+# Subtest: validate-only constructs and checks real restricted content while preserving the formal non-Git target
+ok 70 - validate-only constructs and checks real restricted content while preserving the formal non-Git target
+  ---
+  duration_ms: 3110.089292
+  type: 'test'
+  ...
+# Subtest: over-limit restricted check output reopens from retained byte blocks without overflowing the check journal
+ok 71 - over-limit restricted check output reopens from retained byte blocks without overflowing the check journal
+  ---
+  duration_ms: 7460.074833
+  type: 'test'
+  ...
+# Output retention evidence: /Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-hGb18J
+# Output retention evidence: /Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-decisions-C6MnUM
+# Subtest: scope/problem suppression survives rewording, new IDs and versions; ambiguous overlapping keys are withheld until explicit restore
+ok 72 - scope/problem suppression survives rewording, new IDs and versions; ambiguous overlapping keys are withheld until explicit restore
+  ---
+  duration_ms: 197.325625
+  type: 'test'
+  ...
+# Subtest: deferral needs relevant content change; revision, baseline, dependencies, conflicts and missing budgets reject before work
+ok 73 - deferral needs relevant content change; revision, baseline, dependencies, conflicts and missing budgets reject before work
+  ---
+  duration_ms: 150.240583
+  type: 'test'
+  ...
+# Subtest: decision record failure prevents candidate construction
+ok 74 - decision record failure prevents candidate construction
+  ---
+  duration_ms: 100.398458
+  type: 'test'
+  ...
+# Subtest: TUI starts unselected, shows each mode and aggregate, and only submits after rendered summary plus explicit Enter
+ok 75 - TUI starts unselected, shows each mode and aggregate, and only submits after rendered summary plus explicit Enter
+  ---
+  duration_ms: 152.287333
+  type: 'test'
+  ...
+# Subtest: a necessary failure freezes independent remaining work; explicit continuation preserves failure and spends only remaining original authorization
+ok 76 - a necessary failure freezes independent remaining work; explicit continuation preserves failure and spends only remaining original authorization
+  ---
+  duration_ms: 4962.368541
+  type: 'test'
+  ...
+# Subtest: cancelled batch and record failure never dispatch the remainder or replay an uncertain started group
+ok 77 - cancelled batch and record failure never dispatch the remainder or replay an uncertain started group
+  ---
+  duration_ms: 3240.605458
+  type: 'test'
+  ...
+# Subtest: unselected dependencies, explicit conflicts, shared-target split and insufficient total limits cannot start work
+ok 78 - unselected dependencies, explicit conflicts, shared-target split and insufficient total limits cannot start work
+  ---
+  duration_ms: 207.209541
+  type: 'test'
+  ...
+# Subtest: combination projection keeps every necessary protection and benefit, rather than taking the last check
+ok 79 - combination projection keeps every necessary protection and benefit, rather than taking the last check
+  ---
+  duration_ms: 0.2575
+  type: 'test'
+  ...
+# Subtest: child source identity is root-qualified without parent-local evidence or blob syntax
+ok 80 - child source identity is root-qualified without parent-local evidence or blob syntax
+  ---
+  duration_ms: 0.155208
+  type: 'test'
+  ...
+# Subtest: explicit exact validation basis permits config formatting equivalence, catches a semantic change and never infers safety from Markdown or model labels
+ok 81 - explicit exact validation basis permits config formatting equivalence, catches a semantic change and never infers safety from Markdown or model labels
+  ---
+  duration_ms: 7064.150334
+  type: 'test'
+  ...
+# Subtest: narrow selection viewport keeps the current candidate title and mode visible while navigating wrapped choices
+ok 82 - narrow selection viewport keeps the current candidate title and mode visible while navigating wrapped choices
+  ---
+  duration_ms: 125.507417
+  type: 'test'
+  ...
+# Subtest: diagnostic effects remain visible beside required results and cannot hide missing necessary evidence
+ok 83 - diagnostic effects remain visible beside required results and cannot hide missing necessary evidence
+  ---
+  duration_ms: 0.170375
+  type: 'test'
+  ...
+# Subtest: formal eval revisions require a new independent version; cases retain explicit identities
+ok 84 - formal eval revisions require a new independent version; cases retain explicit identities
+  ---
+  duration_ms: 99.244417
+  type: 'test'
+  ...
+# Subtest: a formal grader change cannot accompany the evaluated project candidate in another group
+ok 85 - a formal grader change cannot accompany the evaluated project candidate in another group
+  ---
+  duration_ms: 165.81325
+  type: 'test'
+  ...
+# Subtest: independent grader write and explicit regrade keep original judgments and rescore both saved sides
+ok 86 - independent grader write and explicit regrade keep original judgments and rescore both saved sides
+  ---
+  duration_ms: 19418.181667
+  type: 'test'
+  ...
+# Subtest: exact explicit formal decision validates then writes real project bytes; replay and reopen are read-only
+ok 87 - exact explicit formal decision validates then writes real project bytes; replay and reopen are read-only
+  ---
+  duration_ms: 2621.985167
+  type: 'test'
+  ...
+# Subtest: postvalidation external edits block formal bytes and remain visible without replay
+ok 88 - postvalidation external edits block formal bytes and remain visible without replay
+  ---
+  duration_ms: 2558.105292
+  type: 'test'
+  ...
+# Subtest: partial multi-file application retains known and unknown facts and fences a new task even in another data root
+ok 89 - partial multi-file application retains known and unknown facts and fences a new task even in another data root
+  ---
+  duration_ms: 11333.130042
+  type: 'test'
+  ...
+# Subtest: rollback preserves later user edits and can restore the exact selected bytes on an explicit later decision
+ok 90 - rollback preserves later user edits and can restore the exact selected bytes on an explicit later decision
+  ---
+  duration_ms: 3267.871666
+  type: 'test'
+  ...
+# Subtest: functional pass with a predeclared performance no-gain comparison cannot write or enable
+ok 91 - functional pass with a predeclared performance no-gain comparison cannot write or enable
+  ---
+  duration_ms: 4634.356375
+  type: 'test'
+  ...
+# Subtest: maintenance cannot bypass a required no-gain comparison even when functional checks pass
+ok 92 - maintenance cannot bypass a required no-gain comparison even when functional checks pass
+  ---
+  duration_ms: 2507.587417
+  type: 'test'
+  ...
+# Subtest: explicit diagnostic no-gain permits maintenance only when every necessary protection passes
+ok 93 - explicit diagnostic no-gain permits maintenance only when every necessary protection passes
+  ---
+  duration_ms: 4989.911458
+  type: 'test'
+  ...
+# Subtest: performance cannot relabel its only benefit as diagnostic
+ok 94 - performance cannot relabel its only benefit as diagnostic
+  ---
+  duration_ms: 124.626125
+  type: 'test'
+  ...
+# Subtest: config loader refuses credentials, authority, output limits and conflicting merged settings
+ok 95 - config loader refuses credentials, authority, output limits and conflicting merged settings
+  ---
+  duration_ms: 0.578458
+  type: 'test'
+  ...
+# Subtest: file-only whitespace basis cannot classify first activation of unused instructions as no behavior change
+ok 96 - file-only whitespace basis cannot classify first activation of unused instructions as no behavior change
+  ---
+  duration_ms: 104.359458
+  type: 'test'
+  ...
+# Subtest: file-only deterministic config regression cannot omit the whole actual activation profile from its expectations
+ok 97 - file-only deterministic config regression cannot omit the whole actual activation profile from its expectations
+  ---
+  duration_ms: 101.352167
+  type: 'test'
+  ...
+# Subtest: a whole effective-profile expectation failure blocks a passing file regression and preserves original defaults
+ok 98 - a whole effective-profile expectation failure blocks a passing file regression and preserves original defaults
+  ---
+  duration_ms: 2457.73825
+  type: 'test'
+  ...
+# Subtest: lost write-result evidence stays unknown on reopen; explicit exact-byte rollback records reconciliation without erasing it
+ok 99 - lost write-result evidence stays unknown on reopen; explicit exact-byte rollback records reconciliation without erasing it
+  ---
+  duration_ms: 3322.608833
+  type: 'test'
+  ...
+# Subtest: a first config mapping with identical actual settings leaves an older pending task on its original profile through rollback
+ok 100 - a first config mapping with identical actual settings leaves an older pending task on its original profile through rollback
+  ---
+  duration_ms: 11087.064584
+  type: 'test'
+  ...
+# Subtest: explicit config activation fixes new-task effective profile while file writeback and actual observation stay distinct
+ok 101 - explicit config activation fixes new-task effective profile while file writeback and actual observation stay distinct
+  ---
+  duration_ms: 5729.11325
+  type: 'test'
+  ...
+# Subtest: cleanup retains unresolved and still-rollbackable formal bytes plus the current default; completed rollback releases only the former scope
+ok 102 - cleanup retains unresolved and still-rollbackable formal bytes plus the current default; completed rollback releases only the former scope
+  ---
+  duration_ms: 206.032542
+  type: 'test'
+  ...
+# Subtest: explicit improve uses the public restricted runtime and zero candidates reopen without dispatch or mutation
+ok 103 - explicit improve uses the public restricted runtime and zero candidates reopen without dispatch or mutation
+  ---
+  duration_ms: 5533.982417
+  type: 'test'
+  ...
+# Subtest: registered source plus acquired evidence produces an unselected candidate; shell/write/cross-scope and instruction-like evidence cannot grant capabilities
+ok 104 - registered source plus acquired evidence produces an unselected candidate; shell/write/cross-scope and instruction-like evidence cannot grant capabilities
+  ---
+  duration_ms: 8267.649542
+  type: 'test'
+  ...
+# Subtest: busy improve retains original target and begins after coding, while stop freezes it across ordinary new input
+ok 105 - busy improve retains original target and begins after coding, while stop freezes it across ordinary new input
+  ---
+  duration_ms: 12720.235833
+  type: 'test'
+  ...
+# Subtest: effective request/token/time limits stop the actual provider gate and retain incomplete reports without reset
+ok 106 - effective request/token/time limits stop the actual provider gate and retain incomplete reports without reset
+  ---
+  duration_ms: 27511.01775
+  type: 'test'
+  ...
+# Subtest: source views freeze content and reject links; explicit self source requires matching source, compiler and installed build
+ok 107 - source views freeze content and reject links; explicit self source requires matching source, compiler and installed build
+  ---
+  duration_ms: 8689.07125
+  type: 'test'
+  ...
+# Subtest: missing limits and unsupported output never authorize execution; cleaned evidence is reported without rewriting old judgments
+ok 108 - missing limits and unsupported output never authorize execution; cleaned evidence is reported without rewriting old judgments
+  ---
+  duration_ms: 6191.53525
+  type: 'test'
+  ...
+# Subtest: headless list/report and TUI viewer reopen the same persisted identity without writes or provider calls
+ok 109 - headless list/report and TUI viewer reopen the same persisted identity without writes or provider calls
+  ---
+  duration_ms: 5939.825875
+  type: 'test'
+  ...
+# Subtest: first cancellation intent remains stop despite a later exit request during cleanup
+ok 110 - first cancellation intent remains stop despite a later exit request during cleanup
+  ---
+  duration_ms: 5290.407417
+  type: 'test'
+  ...
+# Subtest: cleanup deadline keeps unknown and ownership while a late transport response remains writable
+ok 111 - cleanup deadline keeps unknown and ownership while a late transport response remains writable
+  ---
+  duration_ms: 3786.255167
+  type: 'test'
+  ...
+# Subtest: cancelling only a caller wait leaves the task running and does not create another attempt
+ok 112 - cancelling only a caller wait leaves the task running and does not create another attempt
+  ---
+  duration_ms: 3381.747042
+  type: 'test'
+  ...
+# Subtest: a request cancelled before acceptance never opens a run or dispatches
+ok 113 - a request cancelled before acceptance never opens a run or dispatches
+  ---
+  duration_ms: 0.439208
+  type: 'test'
+  ...
+# Subtest: owner evidence fences an unconfirmed process exit even when the lock library removed its lock directory
+ok 114 - owner evidence fences an unconfirmed process exit even when the lock library removed its lock directory
+  ---
+  duration_ms: 70.842917
+  type: 'test'
+  ...
+# Subtest: initialization and acceptance races freeze the first intent and stop all new dispatch
+ok 115 - initialization and acceptance races freeze the first intent and stop all new dispatch
+  ---
+  duration_ms: 3418.664709
+  type: 'test'
+  ...
+# Subtest: stop failure and storage close failure preserve unknown, original failure and ownership
+ok 116 - stop failure and storage close failure preserve unknown, original failure and ownership
+  ---
+  duration_ms: 10163.008208
+  type: 'test'
+  ...
+# Subtest: real long command and child finish or cancel before storage closes, retaining actual target effects
+ok 117 - real long command and child finish or cancel before storage closes, retaining actual target effects
+  ---
+  duration_ms: 24354.300167
+  type: 'test'
+  ...
+# Subtest: a cancellation at the final model or shell dispatch boundary cannot launch that operation
+ok 118 - a cancellation at the final model or shell dispatch boundary cannot launch that operation
+  ---
+  duration_ms: 9224.47225
+  type: 'test'
+  ...
+# Subtest: headless SIGINT and SIGTERM show processing and persist distinct first intent
+ok 119 - headless SIGINT and SIGTERM show processing and persist distinct first intent
+  ---
+  duration_ms: 10237.704083
+  type: 'test'
+  ...
+# Subtest: lost owner heartbeat stops dispatch and retains unknown without releasing unconfirmed ownership
+ok 120 - lost owner heartbeat stops dispatch and retains unknown without releasing unconfirmed ownership
+  ---
+  duration_ms: 6153.786042
+  type: 'test'
+  ...
+# Subtest: live batch SIGINT waits for cleanup and retains cancelled/NOT RUN outcomes
+ok 121 - live batch SIGINT waits for cleanup and retains cancelled/NOT RUN outcomes
+  ---
+  duration_ms: 159.011292
+  type: 'test'
+  ...
+# Subtest: live batch SIGTERM waits for cleanup and retains cancelled/NOT RUN outcomes
+ok 122 - live batch SIGTERM waits for cleanup and retains cancelled/NOT RUN outcomes
+  ---
+  duration_ms: 145.032209
+  type: 'test'
+  ...
+# Subtest: live batch cancellation during preparation never starts eval
+ok 123 - live batch cancellation during preparation never starts eval
+  ---
+  duration_ms: 139.640959
+  type: 'test'
+  ...
+# Subtest: live batch cancellation retains a cleanup failure and does not start improve
+ok 124 - live batch cancellation retains a cleanup failure and does not start improve
+  ---
+  duration_ms: 146.706209
+  type: 'test'
+  ...
+# Subtest: live batch improve cancellation retains unknown cleanup and never selects a returned candidate
+ok 125 - live batch improve cancellation retains unknown cleanup and never selects a returned candidate
+  ---
+  duration_ms: 145.671
+  type: 'test'
+  ...
+# Subtest: live batch current runner and common helper must match the frozen harness
+ok 126 - live batch current runner and common helper must match the frozen harness
+  ---
+  duration_ms: 203.035625
+  type: 'test'
+  ...
+# Subtest: literal 12-minute execution and 24-hour acceptance preserve queue/user/active portions without counting child overlaps twice
+ok 127 - literal 12-minute execution and 24-hour acceptance preserve queue/user/active portions without counting child overlaps twice
+  ---
+  duration_ms: 345.8035
+  type: 'test'
+  ...
+# Subtest: same-task recovery spans no new admission; unfinished, cross-process and missing endpoints stay out of exact means
+ok 128 - same-task recovery spans no new admission; unfinished, cross-process and missing endpoints stay out of exact means
+  ---
+  duration_ms: 197.237916
+  type: 'test'
+  ...
+# Subtest: clock rollback cannot fabricate cross-process elapsed time, and incompatible overlapping phases become unknown
+ok 129 - clock rollback cannot fabricate cross-process elapsed time, and incompatible overlapping phases become unknown
+  ---
+  duration_ms: 122.481417
+  type: 'test'
+  ...
+# Subtest: unstarted withdrawn follow-up remains in N and has an execution endpoint; expected version does not become actual
+ok 130 - unstarted withdrawn follow-up remains in N and has an execution endpoint; expected version does not become actual
+  ---
+  duration_ms: 77.276583
+  type: 'test'
+  ...
+# Subtest: first host judgment survives wall rollback, while incomparable reported occurrences keep acceptance time unknown
+ok 131 - first host judgment survives wall rollback, while incomparable reported occurrences keep acceptance time unknown
+  ---
+  duration_ms: 169.881792
+  type: 'test'
+  ...
+# Subtest: real public delivery, explicit correction and independent repair retain identities; CLI/TUI/export only read the same report
+ok 132 - real public delivery, explicit correction and independent repair retain identities; CLI/TUI/export only read the same report
+  ---
+  duration_ms: 10834.457125
+  type: 'test'
+  ...
+# Subtest: confirmed example 4 retains 2/8 interventions, 3 events, 3 full-stage negatives and 3 unknowns
+ok 133 - confirmed example 4 retains 2/8 interventions, 3 events, 3 full-stage negatives and 3 unknowns
+  ---
+  duration_ms: 918.195792
+  type: 'test'
+  ...
+# Subtest: confirmed example 5 uses first delivery independent of admission and acceptance; late evidence revises without changing old snapshots
+ok 134 - confirmed example 5 uses first delivery independent of admission and acceptance; late evidence revises without changing old snapshots
+  ---
+  duration_ms: 622.405125
+  type: 'test'
+  ...
+# Subtest: seven-day window is half-open, maturity is inclusive, unknown times and pre-delivery/new scope remain visible
+ok 135 - seven-day window is half-open, maturity is inclusive, unknown times and pre-delivery/new scope remain visible
+  ---
+  duration_ms: 915.159666
+  type: 'test'
+  ...
+# Subtest: normal consent, partial absence, PASS-like ambiguity and completed logs do not erase unknown; open positives remain separate
+ok 136 - normal consent, partial absence, PASS-like ambiguity and completed logs do not erase unknown; open positives remain separate
+  ---
+  duration_ms: 652.250084
+  type: 'test'
+  ...
+# Subtest: failed diagnostics and intermediate claims are not delivery; recovery can supply the first normal unaccepted conclusion
+ok 137 - failed diagnostics and intermediate claims are not delivery; recovery can supply the first normal unaccepted conclusion
+  ---
+  duration_ms: 83.645709
+  type: 'test'
+  ...
+# Subtest: explicit revisions/withdrawals retain originals, idempotent feedback and unknown conflicts without reviving stale classifications
+ok 138 - explicit revisions/withdrawals retain originals, idempotent feedback and unknown conflicts without reviving stale classifications
+  ---
+  duration_ms: 134.296792
+  type: 'test'
+  ...
+# Subtest: a whole-window absence cannot hide unknown-time corrective evidence; known out-of-window corrections do not defeat it
+ok 139 - a whole-window absence cannot hide unknown-time corrective evidence; known out-of-window corrections do not defeat it
+  ---
+  duration_ms: 166.780375
+  type: 'test'
+  ...
+# Subtest: unknown scope, duplicate receipt of the same original feedback and unavailable revision originals do not produce certain counts
+ok 140 - unknown scope, duplicate receipt of the same original feedback and unavailable revision originals do not produce certain counts
+  ---
+  duration_ms: 117.992292
+  type: 'test'
+  ...
+# Subtest: delivery and admission exactly at asOf are visible when the selection includes that instant
+ok 141 - delivery and admission exactly at asOf are visible when the selection includes that instant
+  ---
+  duration_ms: 86.297917
+  type: 'test'
+  ...
+# Subtest: legal recovery reopens the intervention phase after failed close and includes rescue before first delivery
+ok 142 - legal recovery reopens the intervention phase after failed close and includes rescue before first delivery
+  ---
+  duration_ms: 163.432042
+  type: 'test'
+  ...
+# Subtest: actual public runtime success/failure/cancel/manual maintenance share immutable CLI/TUI/export reports and retain no-usage gaps
+ok 143 - actual public runtime success/failure/cancel/manual maintenance share immutable CLI/TUI/export reports and retain no-usage gaps
+  ---
+  duration_ms: 11154.460833
+  type: 'test'
+  ...
+# Subtest: complete full-sample CNY 80 / current S4 = 20 includes failure/retry/cancel/auto-compaction, and total 118 deduplicates views
+ok 144 - complete full-sample CNY 80 / current S4 = 20 includes failure/retry/cancel/auto-compaction, and total 118 deduplicates views
+  ---
+  duration_ms: 2669.045334
+  type: 'test'
+  ...
+# Subtest: fault example retains recovered errors, 2/8 task faults, 1/8 terminations, and separate physical model/tool attempt coverage
+ok 145 - fault example retains recovered errors, 2/8 task faults, 1/8 terminations, and separate physical model/tool attempt coverage
+  ---
+  duration_ms: 2176.015458
+  type: 'test'
+  ...
+# Subtest: unknown ownership, usage and price keep known-part/S partial; S0 stays N/A; historical and conflicting re-estimates remain inspectable
+ok 146 - unknown ownership, usage and price keep known-part/S partial; S0 stays N/A; historical and conflicting re-estimates remain inspectable
+  ---
+  duration_ms: 1353.36575
+  type: 'test'
+  ...
+# Subtest: normal managed cancellation is covered, errors before cancellation survive, and unrelated later success does not prove recovery or fault termination
+ok 147 - normal managed cancellation is covered, errors before cancellation survive, and unrelated later success does not prove recovery or fault termination
+  ---
+  duration_ms: 593.813459
+  type: 'test'
+  ...
+# Subtest: period occurrence and admission accumulation use distinct windows and currencies; manual compaction never inherits coding ownership
+ok 148 - period occurrence and admission accumulation use distinct windows and currencies; manual compaction never inherits coding ownership
+  ---
+  duration_ms: 662.854333
+  type: 'test'
+  ...
+# Subtest: owned child eval follows a scoped fixed plan and parent snapshot, counts trusted requests once, and never widens to later child work
+ok 149 - owned child eval follows a scoped fixed plan and parent snapshot, counts trusted requests once, and never widens to later child work
+  ---
+  duration_ms: 311.563958
+  type: 'test'
+  ...
+# Subtest: a second API or CLI process cannot write any metrics fact through the root or its alias while the data owner is held
+ok 150 - a second API or CLI process cannot write any metrics fact through the root or its alias while the data owner is held
+  ---
+  duration_ms: 1651.352458
+  type: 'test'
+  ...
+# Subtest: idle host writes remain synchronous, idempotent and release ownership after success or invalid input
+ok 151 - idle host writes remain synchronous, idempotent and release ownership after success or invalid input
+  ---
+  duration_ms: 863.841875
+  type: 'test'
+  ...
+# Subtest: only a live registered owner for the same canonical root is borrowed, and release immediately excludes reuse
+ok 152 - only a live registered owner for the same canonical root is borrowed, and release immediately excludes reuse
+  ---
+  duration_ms: 253.180291
+  type: 'test'
+  ...
+# Subtest: a missing claim or replaced lock cannot authorize writes or delete another owner on release
+ok 153 - a missing claim or replaced lock cannot authorize writes or delete another owner on release
+  ---
+  duration_ms: 179.115042
+  type: 'test'
+  ...
+# Subtest: stale markers are never stolen and cleanup failures remain visible and block reuse
+ok 154 - stale markers are never stolen and cleanup failures remain visible and block reuse
+  ---
+  duration_ms: 170.370417
+  type: 'test'
+  ...
+# Subtest: readonly metrics CLI reports do not acquire ownership or change originals while a writer holds the root
+ok 155 - readonly metrics CLI reports do not acquire ownership or change originals while a writer holds the root
+  ---
+  duration_ms: 704.076875
+  type: 'test'
+  ...
+# Subtest: competing identical receipts stay atomic and a rejected writer can retry without a duplicate original
+ok 156 - competing identical receipts stay atomic and a rejected writer can retry without a duplicate original
+  ---
+  duration_ms: 518.379625
+  type: 'test'
+  ...
+# Subtest: a short write exposes both operation and release failures and retains its ownership marker
+ok 157 - a short write exposes both operation and release failures and retains its ownership marker
+  ---
+  duration_ms: 62.848166
+  type: 'test'
+  ...
+# Subtest: public runtime actual check supports PASS; headless/TUI/reopen/export share a read-only report and retain exact facts
+ok 158 - public runtime actual check supports PASS; headless/TUI/reopen/export share a read-only report and retain exact facts
+  ---
+  duration_ms: 8090.473042
+  type: 'test'
+  ...
+# Subtest: public failed run can be gradable FAIL from an actual fixed check; missing evidence later becomes unknown
+ok 159 - public failed run can be gradable FAIL from an actual fixed check; missing evidence later becomes unknown
+  ---
+  duration_ms: 6070.957
+  type: 'test'
+  ...
+# Subtest: accepted 10/8/6/5/4 example counts unstarted tasks and keeps error-but-gradable separate from completion
+ok 160 - accepted 10/8/6/5/4 example counts unstarted tasks and keeps error-but-gradable separate from completion
+  ---
+  duration_ms: 675.853167
+  type: 'test'
+  ...
+# Subtest: judgment revisions preserve first failure, disputes, withdrawals, changed requirements and old snapshots
+ok 161 - judgment revisions preserve first failure, disputes, withdrawals, changed requirements and old snapshots
+  ---
+  duration_ms: 298.577541
+  type: 'test'
+  ...
+# Subtest: incomplete, contaminated, faulty and unverified feedback remain unknown; a reliable necessary failure is enough
+ok 162 - incomplete, contaminated, faulty and unverified feedback remain unknown; a reliable necessary failure is enough
+  ---
+  duration_ms: 374.26525
+  type: 'test'
+  ...
+# Subtest: withdrawing a superseding judgment or result never resurrects the invalid prior judgment
+ok 163 - withdrawing a superseding judgment or result never resurrects the invalid prior judgment
+  ---
+  duration_ms: 299.707459
+  type: 'test'
+  ...
+# Subtest: populations, missing identity and duplicate admissions remain explicit; filters never use expected queued version
+ok 164 - populations, missing identity and duplicate admissions remain explicit; filters never use expected queued version
+  ---
+  duration_ms: 299.825458
+  type: 'test'
+  ...
+# Subtest: a later reliable failure changes the aggregate outcome but does not move an unwithdrawn first determinate judgment clock
+ok 165 - a later reliable failure changes the aggregate outcome but does not move an unwithdrawn first determinate judgment clock
+  ---
+  duration_ms: 229.989625
+  type: 'test'
+  ...
+# Subtest: missing or corrupt acceptance originals affect their admission run conservatively without hiding other tasks
+ok 166 - missing or corrupt acceptance originals affect their admission run conservatively without hiding other tasks
+  ---
+  duration_ms: 803.923958
+  type: 'test'
+  ...
+# Subtest: admission does not materialize unrelated historical output under a constrained heap
+ok 167 - admission does not materialize unrelated historical output under a constrained heap
+  ---
+  duration_ms: 33238.196167
+  type: 'test'
+  ...
+# Subtest: admission discards long transcripts across sessions and rejects a late pending submission or foreign task
+ok 168 - admission discards long transcripts across sessions and rejects a late pending submission or foreign task
+  ---
+  duration_ms: 1666.250959
+  type: 'test'
+  ...
+# Subtest: missing or corrupt admission authority and close facts never become a successful admission
+ok 169 - missing or corrupt admission authority and close facts never become a successful admission
+  ---
+  duration_ms: 243.592041
+  type: 'test'
+  ...
+# Subtest: one persisted budget admits generation, compaction, retry and grading; reopening never resets reservations
+ok 170 - one persisted budget admits generation, compaction, retry and grading; reopening never resets reservations
+  ---
+  duration_ms: 548.592375
+  type: 'test'
+  ...
+# Subtest: unknown and cancelled requests retain admission across restart and block new work without a proven bound
+ok 171 - unknown and cancelled requests retain admission across restart and block new work without a proven bound
+  ---
+  duration_ms: 378.32
+  type: 'test'
+  ...
+# Subtest: budget rejects expired plans and never sends when acquired original cannot be retained
+ok 172 - budget rejects expired plans and never sends when acquired original cannot be retained
+  ---
+  duration_ms: 150.990667
+  type: 'test'
+  ...
+# Subtest: response limit preserves the acquired offending bytes and never refunds its dispatch
+ok 173 - response limit preserves the acquired offending bytes and never refunds its dispatch
+  ---
+  duration_ms: 194.334125
+  type: 'test'
+  ...
+# Subtest: a concurrent readonly viewer does not lose the next host evidence append
+ok 174 - a concurrent readonly viewer does not lose the next host evidence append
+  ---
+  duration_ms: 266.717167
+  type: 'test'
+  ...
+# Subtest: metadata windows and bounded originals preserve readonly identity, ordering and corruption errors
+ok 175 - metadata windows and bounded originals preserve readonly identity, ordering and corruption errors
+  ---
+  duration_ms: 266.137209
+  type: 'test'
+  ...
+# Subtest: streamed recovery and owner snapshot IDs equal the original array JSON digest, with a fixed watermark
+ok 176 - streamed recovery and owner snapshot IDs equal the original array JSON digest, with a fixed watermark
+  ---
+  duration_ms: 118.997666
+  type: 'test'
+  ...
+# Subtest: recovery snapshot validation rejects missing or tampered original bodies, including hash-excluded recovery reports
+ok 177 - recovery snapshot validation rejects missing or tampered original bodies, including hash-excluded recovery reports
+  ---
+  duration_ms: 193.389167
+  type: 'test'
+  ...
+# Subtest: a genuine completed target session with 64 MiB originals is inspected under a 48 MiB heap without loading transcript history
+ok 178 - a genuine completed target session with 64 MiB originals is inspected under a 48 MiB heap without loading transcript history
+  ---
+  duration_ms: 8216.684
+  type: 'test'
+  ...
+# {"fixture":{"dataRoot":"/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-target-projection-4xspIw/data","runId":"9342ba22-e8cf-4796-adeb-ff6897940aa0","sessionId":"25194077-fa95-4416-84e2-c80d863eb3aa","sourceSha256":"abaa3bd66b8719107e26d0440bd8f362531e94b9c197bb452cc49aa2349ffab2","retainedOriginalBytes":67108864},"heapMiB":48,"reportBytes":1775}
+# Subtest: ordinary confirmed close keeps a bounded receipt beyond the old 2 MiB snapshot seam without changing acquired output or usage
+ok 179 - ordinary confirmed close keeps a bounded receipt beyond the old 2 MiB snapshot seam without changing acquired output or usage
+  ---
+  duration_ms: 6475.671833
+  type: 'test'
+  ...
+# {"fixture":{"dataRoot":"/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/tmp/durio-close-projection-8wN3cc/data","runId":"dda8226c-a0f5-44a9-b114-7634ce9aecc7","sessionId":"c014c844-c771-4cfe-b66f-1368a136d8b5","originalEntryBytes":2204832,"answerSha256":"d60507919f666bf0e171cf3bf60b1da57574e93a6c39f2ea346cf0cd664d7c64"},"receiptBytes":[1024,755],"inputTokens":20}
+# Subtest: all public usage documents survive a projected close, retaining the first document and query attribution without duplicate totals
+ok 180 - all public usage documents survive a projected close, retaining the first document and query attribution without duplicate totals
+  ---
+  duration_ms: 8008.10225
+  type: 'test'
+  ...
+# Subtest: paged unknown tools retain complete decision coverage, original navigation and stale snapshot rejection
+ok 181 - paged unknown tools retain complete decision coverage, original navigation and stale snapshot rejection
+  ---
+  duration_ms: 12570.953625
+  type: 'test'
+  ...
+# Subtest: late-page foreign submissions/tasks and missing assistant or outcome block both continuation and ending
+ok 182 - late-page foreign submissions/tasks and missing assistant or outcome block both continuation and ending
+  ---
+  duration_ms: 7773.546
+  type: 'test'
+  ...
+# Subtest: reopening committed results scans all durable receipts without rewriting sources, replay or usage
+ok 183 - reopening committed results scans all durable receipts without rewriting sources, replay or usage
+  ---
+  duration_ms: 4293.438625
+  type: 'test'
+  ...
+# Subtest: permission/configuration/content drift stays read-only; explicit end quarantines the exact old store and permits a new task
+ok 184 - permission/configuration/content drift stays read-only; explicit end quarantines the exact old store and permits a new task
+  ---
+  duration_ms: 12139.99475
+  type: 'test'
+  ...
+# Subtest: the whole Harness is checked: managing one run never schedules another conversation or queued submission
+ok 185 - the whole Harness is checked: managing one run never schedules another conversation or queued submission
+  ---
+  duration_ms: 7396.894042
+  type: 'test'
+  ...
+# Subtest: a stale decision cannot consume new facts; model retries retain unknown usage and their eight-attempt budget
+ok 186 - a stale decision cannot consume new facts; model retries retain unknown usage and their eight-attempt budget
+  ---
+  duration_ms: 8641.034417
+  type: 'test'
+  ...
+# Subtest: a retained owner needs observed managed cleanup as well as explicit disposition; raw crash and active owner remain fenced
+ok 187 - a retained owner needs observed managed cleanup as well as explicit disposition; raw crash and active owner remain fenced
+  ---
+  duration_ms: 20986.417584
+  type: 'test'
+  ...
+# Subtest: headless recovery saves a machine-readable input request and true readonly inspect changes no source
+ok 188 - headless recovery saves a machine-readable input request and true readonly inspect changes no source
+  ---
+  duration_ms: 9485.285875
+  type: 'test'
+  ...
+# Subtest: cross-store admission gaps use the committed request identity and never blindly submit it again
+ok 189 - cross-store admission gaps use the committed request identity and never blindly submit it again
+  ---
+  duration_ms: 13229.609125
+  type: 'test'
+  ...
+# Subtest: explicit continuation after a pre-dispatch exit preserves the original unknown and performs the authorized effect once
+ok 190 - explicit continuation after a pre-dispatch exit preserves the original unknown and performs the authorized effect once
+  ---
+  duration_ms: 8379.045791
+  type: 'test'
+  ...
+# Subtest: a completed effect without its durable commit continues with read-only capabilities even for equivalent new calls
+ok 191 - a completed effect without its durable commit continues with read-only capabilities even for equivalent new calls
+  ---
+  duration_ms: 7931.228875
+  type: 'test'
+  ...
+# Subtest: unknown post-effect outcome needs durable headless input; an explicit retry keeps original failure and its duplicate risk
+ok 192 - unknown post-effect outcome needs durable headless input; an explicit retry keeps original failure and its duplicate risk
+  ---
+  duration_ms: 7605.292709
+  type: 'test'
+  ...
+# Subtest: actual upstream automatic compaction uses the same budget and result-only completion is recorded once
+ok 193 - actual upstream automatic compaction uses the same budget and result-only completion is recorded once
+  ---
+  duration_ms: 6628.511916
+  type: 'test'
+  ...
+# Subtest: budgeted run identity cannot be resumed through an unbudgeted recovery entry
+ok 194 - budgeted run identity cannot be resumed through an unbudgeted recovery entry
+  ---
+  duration_ms: 4373.332708
+  type: 'test'
+  ...
+# Subtest: rejecting an in-project data root does not mutate the read-only project through direct or symlink paths
+ok 195 - rejecting an in-project data root does not mutate the read-only project through direct or symlink paths
+  ---
+  duration_ms: 6.58025
+  type: 'test'
+  ...
+# Subtest: real Harness reads the fixture, commits usage, and reopens without executing
+ok 196 - real Harness reads the fixture, commits usage, and reopens without executing
+  ---
+  duration_ms: 5858.059792
+  type: 'test'
+  ...
+# Subtest: original persistence failure cancels the active provider and blocks all later work
+ok 197 - original persistence failure cancels the active provider and blocks all later work
+  ---
+  duration_ms: 5662.23075
+  type: 'test'
+  ...
+# Subtest: stop and exit await the in-flight provider while preserving acquired partial content and unknown usage
+ok 198 - stop and exit await the in-flight provider while preserving acquired partial content and unknown usage
+  ---
+  duration_ms: 11886.590583
+  type: 'test'
+  ...
+# Subtest: derived observation failure leaves the authoritative runtime result intact
+ok 199 - derived observation failure leaves the authoritative runtime result intact
+  ---
+  duration_ms: 6413.560417
+  type: 'test'
+  ...
+# Subtest: missing auth fails before acceptance and invalid auth is explicit without fallback or leaked key
+ok 200 - missing auth fails before acceptance and invalid auth is explicit without fallback or leaked key
+  ---
+  duration_ms: 5090.354916
+  type: 'test'
+  ...
+# Subtest: a failed Harness initialization closes allocated storage before releasing ownership
+ok 201 - a failed Harness initialization closes allocated storage before releasing ownership
+  ---
+  duration_ms: 4557.619292
+  type: 'test'
+  ...
+# Subtest: second process using an alias is rejected before any writable storage opens
+ok 202 - second process using an alias is rejected before any writable storage opens
+  ---
+  duration_ms: 5075.138834
+  type: 'test'
+  ...
+# Subtest: read-only snapshot inspection never changes original DB and separate runs never repeat earlier usage
+ok 203 - read-only snapshot inspection never changes original DB and separate runs never repeat earlier usage
+  ---
+  duration_ms: 7501.55625
+  type: 'test'
+  ...
+# Subtest: model tool requests cannot acquire write capabilities
+ok 204 - model tool requests cannot acquire write capabilities
+  ---
+  duration_ms: 5510.904167
+  type: 'test'
+  ...
+# Subtest: show and preflight do not create or change source files, including SQLite sidecars
+ok 205 - show and preflight do not create or change source files, including SQLite sidecars
+  ---
+  duration_ms: 5944.61675
+  type: 'test'
+  ...
+# Subtest: cancellation after a committed tool round retains known usage without inventing the unfinished request usage
+ok 206 - cancellation after a committed tool round retains known usage without inventing the unfinished request usage
+  ---
+  duration_ms: 4806.565
+  type: 'test'
+  ...
+# Subtest: fixed dependency closure blocks cleanup; explicit release is idempotent and other fixation still protects shared objects
+ok 207 - fixed dependency closure blocks cleanup; explicit release is idempotent and other fixation still protects shared objects
+  ---
+  duration_ms: 1170.857333
+  type: 'test'
+  ...
+# Subtest: preview is immutable and explicit commit cannot expand scope or ignore later fixed protection
+ok 208 - preview is immutable and explicit commit cannot expand scope or ignore later fixed protection
+  ---
+  duration_ms: 446.588125
+  type: 'test'
+  ...
+# Subtest: whole-session removal preserves facts and permits a later new task only with complete matching removal evidence
+ok 209 - whole-session removal preserves facts and permits a later new task only with complete matching removal evidence
+  ---
+  duration_ms: 655.947834
+  type: 'test'
+  ...
+# Subtest: frozen host request and pending summary in another conversation each protect the whole shared session and its attachments
+ok 210 - frozen host request and pending summary in another conversation each protect the whole shared session and its attachments
+  ---
+  duration_ms: 251.8525
+  type: 'test'
+  ...
+# Subtest: partial cleanup preserves every part and resumes same operation after delete-before-receipt and disk faults
+ok 211 - partial cleanup preserves every part and resumes same operation after delete-before-receipt and disk faults
+  ---
+  duration_ms: 764.743209
+  type: 'test'
+  ...
+# Subtest: completed attachment parts do not invalidate the same operation remaining session preview after a later part fails
+ok 212 - completed attachment parts do not invalidate the same operation remaining session preview after a later part fails
+  ---
+  duration_ms: 361.214791
+  type: 'test'
+  ...
+# Subtest: lossless whole-root and attachment archives verify actual restore and preserve source identities
+ok 213 - lossless whole-root and attachment archives verify actual restore and preserve source identities
+  ---
+  duration_ms: 453.305209
+  type: 'test'
+  ...
+# Subtest: migration includes a nonempty committed WAL and unknown format or disk failure retains the source
+ok 214 - migration includes a nonempty committed WAL and unknown format or disk failure retains the source
+  ---
+  duration_ms: 742.34825
+  type: 'test'
+  ...
+# Subtest: broken fixed manifest, unknown host format, active ownership and alias never become empty protection
+ok 215 - broken fixed manifest, unknown host format, active ownership and alias never become empty protection
+  ---
+  duration_ms: 306.753541
+  type: 'test'
+  ...
+# Subtest: released installation bytes retain manifest provenance and are eligible only after all fixed scopes release
+ok 216 - released installation bytes retain manifest provenance and are eligible only after all fixed scopes release
+  ---
+  duration_ms: 426.863459
+  type: 'test'
+  ...
+# Subtest: TUI management requires a rendered preview and CLI readback uses the same durable operation
+ok 217 - TUI management requires a rendered preview and CLI readback uses the same durable operation
+  ---
+  duration_ms: 974.672917
+  type: 'test'
+  ...
+# Subtest: terminal-validation.mjs candidate verification rejects added and missing files as well as changed bytes
+ok 218 - terminal-validation.mjs candidate verification rejects added and missing files as well as changed bytes
+  ---
+  duration_ms: 201.016542
+  type: 'test'
+  ...
+# Subtest: recovery-start-terminal-validation.mjs candidate verification rejects added and missing files as well as changed bytes
+ok 219 - recovery-start-terminal-validation.mjs candidate verification rejects added and missing files as well as changed bytes
+  ---
+  duration_ms: 198.719667
+  type: 'test'
+  ...
+# Subtest: recovery startup waits for slow execution-material checks before starting timed width queries
+ok 220 - recovery startup waits for slow execution-material checks before starting timed width queries
+  ---
+  duration_ms: 9717.0085
+  type: 'test'
+  ...
+# {"checks":1,"delayMs":1410.0699590000004,"queriesDuringCheck":0,"unverified":[]}
+# Subtest: recovery command waits for slow execution-material checks before starting timed width queries
+ok 221 - recovery command waits for slow execution-material checks before starting timed width queries
+  ---
+  duration_ms: 9760.107959
+  type: 'test'
+  ...
+# {"checks":1,"delayMs":1410.0349999999999,"queriesDuringCheck":0,"unverified":[]}
+# Subtest: non-terminal CLI rejection does not emit terminal modes into a pipeline
+ok 222 - non-terminal CLI rejection does not emit terminal modes into a pipeline
+  ---
+  duration_ms: 507.162708
+  type: 'test'
+  ...
+# Subtest: coding UI delivers busy Enter and Ctrl+X Enter to authoritative queue facts, supports withdrawal and keeps history readonly
+ok 223 - coding UI delivers busy Enter and Ctrl+X Enter to authoritative queue facts, supports withdrawal and keeps history readonly
+  ---
+  duration_ms: 11730.954292
+  type: 'test'
+  ...
+# Subtest: closing the recovery panel cannot unlock execution; explicit end preserves original unknown before a new task
+ok 224 - closing the recovery panel cannot unlock execution; explicit end preserves original unknown before a new task
+  ---
+  duration_ms: 7017.75325
+  type: 'test'
+  ...
+# Subtest: editor keeps graphemes, multiline and recoverable drafts; overlays consume exits and double-key confirmation expires
+ok 225 - editor keeps graphemes, multiline and recoverable drafts; overlays consume exits and double-key confirmation expires
+  ---
+  duration_ms: 945.926625
+  type: 'test'
+  ...
+# Subtest: viewport/focus changes invalidate confirmations, and explicit menu exit preserves the live draft
+ok 226 - viewport/focus changes invalidate confirmations, and explicit menu exit preserves the live draft
+  ---
+  duration_ms: 15.5425
+  type: 'test'
+  ...
+# Subtest: in-flight stop waits for actual stream cancellation; repeated keys and modal Esc do not grant exit
+ok 227 - in-flight stop waits for actual stream cancellation; repeated keys and modal Esc do not grant exit
+  ---
+  duration_ms: 5497.892333
+  type: 'test'
+  ...
+# Subtest: controlled exit of a running task preserves unknown result and restores the terminal after closure
+ok 228 - controlled exit of a running task preserves unknown result and restores the terminal after closure
+  ---
+  duration_ms: 5211.977917
+  type: 'test'
+  ...
+# Subtest: real runtime facts stream into bounded read-only UI without changing drafts, usage or executing busy text
+ok 229 - real runtime facts stream into bounded read-only UI without changing drafts, usage or executing busy text
+  ---
+  duration_ms: 6015.965333
+  type: 'test'
+  ...
+# Subtest: streaming preserves a paused viewport, fixed draft and bounded windows across resize and detail navigation
+ok 230 - streaming preserves a paused viewport, fixed draft and bounded windows across resize and detail navigation
+  ---
+  duration_ms: 5204.800625
+  type: 'test'
+  ...
+# Subtest: real read tools show source truncation and failure while folded without exposing raw record plumbing
+ok 231 - real read tools show source truncation and failure while folded without exposing raw record plumbing
+  ---
+  duration_ms: 7194.304667
+  type: 'test'
+  ...
+# Subtest: focused editor uses one hardware caret without a competing painted caret
+ok 232 - focused editor uses one hardware caret without a competing painted caret
+  ---
+  duration_ms: 16.699875
+  type: 'test'
+  ...
+# Subtest: caret adaptation preserves independent reverse-video component styles
+ok 233 - caret adaptation preserves independent reverse-video component styles
+  ---
+  duration_ms: 0.349667
+  type: 'test'
+  ...
+# Subtest: real bracketed paste preserves combining text and keeps caret visible through multiline resize
+ok 234 - real bracketed paste preserves combining text and keeps caret visible through multiline resize
+  ---
+  duration_ms: 21.324541
+  type: 'test'
+  ...
+# Subtest: repainting hides the hardware caret before moving it through display rows
+ok 235 - repainting hides the hardware caret before moving it through display rows
+  ---
+  duration_ms: 10.979875
+  type: 'test'
+  ...
+# Subtest: history overlay is reachable and consumes command-like text without changing the active execution target
+ok 236 - history overlay is reachable and consumes command-like text without changing the active execution target
+  ---
+  duration_ms: 3549.314042
+  type: 'test'
+  ...
+# Subtest: compact has a visible menu, idle summary reaches next input, and readonly history cannot compress
+ok 237 - compact has a visible menu, idle summary reaches next input, and readonly history cannot compress
+  ---
+  duration_ms: 5963.084167
+  type: 'test'
+  ...
+# Subtest: a failed TUI task never implicitly supplies context to the next independent request
+ok 238 - a failed TUI task never implicitly supplies context to the next independent request
+  ---
+  duration_ms: 4152.8935
+  type: 'test'
+  ...
+# Subtest: improve is reachable with explicit limits; report navigation and ordinary text never select a candidate
+ok 239 - improve is reachable with explicit limits; report navigation and ordinary text never select a candidate
+  ---
+  duration_ms: 4823.433333
+  type: 'test'
+  ...
+# Subtest: recovery pages expose all unknown counts and navigate with one snapshot; a partial visible page cannot enable continue
+ok 240 - recovery pages expose all unknown counts and navigate with one snapshot; a partial visible page cannot enable continue
+  ---
+  duration_ms: 5694.0465
+  type: 'test'
+  ...
+# Subtest: native width query survives split/batched replies and preserves ordinary input and pasted CPR text
+ok 241 - native width query survives split/batched replies and preserves ordinary input and pasted CPR text
+  ---
+  duration_ms: 1.52625
+  type: 'test'
+  ...
+# Subtest: timed-out CPR cannot be reassigned before its trailing DA1, and contextual mismatch stays unknown
+ok 242 - timed-out CPR cannot be reassigned before its trailing DA1, and contextual mismatch stays unknown
+  ---
+  duration_ms: 12.136458
+  type: 'test'
+  ...
+# Subtest: calibration replies between the first two Ctrl+D presses do not cancel exit confirmation
+ok 243 - calibration replies between the first two Ctrl+D presses do not cancel exit confirmation
+  ---
+  duration_ms: 62.928541
+  type: 'test'
+  ...
+# Subtest: calibration replies between the first two Ctrl+C presses do not cancel exit confirmation
+ok 244 - calibration replies between the first two Ctrl+C presses do not cancel exit confirmation
+  ---
+  duration_ms: 80.575375
+  type: 'test'
+  ...
+# Subtest: real input, focus and resize revoke confirmation on arrival even while width replies are held
+ok 245 - real input, focus and resize revoke confirmation on arrival even while width replies are held
+  ---
+  duration_ms: 354.015583
+  type: 'test'
+  ...
+# Subtest: late inactive CPR and fragmented DA1 stay protocol events, while the 800ms expiry remains intact
+ok 246 - late inactive CPR and fragmented DA1 stay protocol events, while the 800ms expiry remains intact
+  ---
+  duration_ms: 882.144625
+  type: 'test'
+  ...
+# Subtest: product first paste is measured before paint, keeps later keys ordered and discovers combined graphemes
+ok 247 - product first paste is measured before paint, keeps later keys ordered and discovers combined graphemes
+  ---
+  duration_ms: 6068.001875
+  type: 'test'
+  ...
+# Subtest: pending calibration preserves modal priority and Ctrl+C exit saves unapplied input without replay
+ok 248 - pending calibration preserves modal priority and Ctrl+C exit saves unapplied input without replay
+  ---
+  duration_ms: 123.233125
+  type: 'test'
+  ...
+# Subtest: SIGTERM during a pending measurement saves the draft and receipts, then restores display modes
+ok 249 - SIGTERM during a pending measurement saves the draft and receipts, then restores display modes
+  ---
+  duration_ms: 56.553959
+  type: 'test'
+  ...
+# Subtest: Enter arriving while a run is busy cannot become a new task after that run finishes during calibration
+ok 250 - Enter arriving while a run is busy cannot become a new task after that run finishes during calibration
+  ---
+  duration_ms: 6243.097042
+  type: 'test'
+  ...
+# Subtest: stop remains responsive while new output widths are waiting, without leaking Esc through a modal
+ok 251 - stop remains responsive while new output widths are waiting, without leaking Esc through a modal
+  ---
+  duration_ms: 5697.421875
+  type: 'test'
+  ...
+1..251
+# tests 251
+# suites 0
+# pass 250
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 764164.730459

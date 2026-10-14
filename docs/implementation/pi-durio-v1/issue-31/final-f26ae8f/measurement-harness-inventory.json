@@ -1,0 +1,44 @@
+{
+  "scope": "Actual external acceptance/measurement JavaScript helpers used by M1-M4/N1; separate from fixed product source and tracked project scripts. Report generators and readback Python are delivery tooling, not measured product.",
+  "files": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/process-startup.mjs",
+      "bytes": 4643,
+      "physicalTextLines": 57,
+      "sha256": "2d30ebf7332345157f947dcf53cac24d1063b91f1b3a3e9262dfd0523799e4f3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-batch.mjs",
+      "bytes": 6102,
+      "physicalTextLines": 52,
+      "sha256": "e0aeb3f6e6344ee7a13c1760b36f16b1a10c0fa85ae9caa1a5ce03fd05b4dc8f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-idle.mjs",
+      "bytes": 5198,
+      "physicalTextLines": 59,
+      "sha256": "e40078530911a41e6d0dc562ee77ac6eef28bd9e6fc247043f33efab403936de"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-session.mjs",
+      "bytes": 11937,
+      "physicalTextLines": 93,
+      "sha256": "9759643db32363fbae68fb85b1582149b619983b24357f1bf7c9ce22ebd0b2ca"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/readonly-data.mjs",
+      "bytes": 6333,
+      "physicalTextLines": 50,
+      "sha256": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-recovery.mjs",
+      "bytes": 12831,
+      "physicalTextLines": 92,
+      "sha256": "86ee066764eabc5fd242e4773023019d82dea82d2cfa288fb231af7ac811d8be"
+    }
+  ],
+  "fileCount": 6,
+  "bytes": 47044,
+  "physicalTextLines": 403
+}

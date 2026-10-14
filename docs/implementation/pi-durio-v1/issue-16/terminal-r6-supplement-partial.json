@@ -1,0 +1,192 @@
+{
+  "at": "2026-10-09T13:54:14.649272+00:00",
+  "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+  "humanObservation": {
+    "at": "2026-10-09T13:52:53.271Z",
+    "reportedBy": "human-terminal-operator",
+    "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+    "ratings": [
+      {
+        "id": "S1",
+        "label": "亲眼看到已完成及 Fruit count: 7",
+        "status": "PASS",
+        "answer": "P"
+      },
+      {
+        "id": "S2",
+        "label": "在实际最小尺寸，xyz 可输入可见、F2 菜单及 Esc 可用",
+        "status": "UNKNOWN",
+        "answer": "u 忘了看xyz了"
+      },
+      {
+        "id": "S3",
+        "label": "略小窗口有提示且单次 Ctrl+C 有效，恢复后可操作并正常退出",
+        "status": "PASS",
+        "answer": "P"
+      }
+    ],
+    "minimumGrid": {
+      "answer": "U",
+      "status": "UNKNOWN",
+      "matchedRecordedDimensions": false,
+      "meaning": "smallest usable grid explicitly tested and reported by this operator; no inferred minimum"
+    }
+  },
+  "machine": {
+    "calls": 2,
+    "rawRestored": true,
+    "sttyRestored": true,
+    "readback": {
+      "status": 0,
+      "sameResult": true
+    },
+    "completed": true,
+    "cleanupConfirmed": true,
+    "answerContainsFixture": true
+  },
+  "result": {
+    "runId": "98f3d56f-3d32-4f6b-a6e1-f4bad85b4718",
+    "taskId": "acc551a1-9c9c-4afd-acc9-5396692cf552",
+    "sessionId": "9f9874c3-d300-4d69-804e-6f3997c6e57f",
+    "mode": "offline",
+    "status": "completed",
+    "answer": "Offline fixture readback (no model inference):\n# Short completion fixture\nFruit count: 7.\n",
+    "observation": "ok",
+    "cleanup": "confirmed",
+    "lifecycle": {
+      "intent": null,
+      "disposition": "completed",
+      "cleanupTimeoutMs": 10000,
+      "storage": "closed",
+      "owner": "release-after-host-close",
+      "remoteTermination": "unknown"
+    },
+    "usage": {
+      "source": "pi.usage",
+      "scope": "session:9f9874c3-d300-4d69-804e-6f3997c6e57f",
+      "completeness": "known",
+      "value": {
+        "models": {
+          "deepseek/deepseek-flash": {
+            "input": 20,
+            "output": 8,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 28,
+            "cost": {
+              "input": 6e-06,
+              "output": 9.6e-06,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 1.56e-05
+            }
+          }
+        },
+        "tools": {}
+      },
+      "cost": {
+        "kind": "estimate",
+        "currency": "USD",
+        "source": "@earendil-works/pi-ai@1.1.0 model price catalog",
+        "observedAt": "2026-10-09T13:49:32.128Z"
+      }
+    }
+  },
+  "widthSummary": {
+    "status": "measured",
+    "error": null,
+    "blockedFrames": 9,
+    "retainedInputs": 0,
+    "pendingInputs": 0
+  },
+  "relevantInputs": [
+    {
+      "at": "2026-10-09T13:50:58.516Z",
+      "event": "input",
+      "data": "x",
+      "columns": 40,
+      "rows": 12
+    },
+    {
+      "at": "2026-10-09T13:50:58.661Z",
+      "event": "input",
+      "data": "y",
+      "columns": 40,
+      "rows": 12
+    },
+    {
+      "at": "2026-10-09T13:50:59.761Z",
+      "event": "input",
+      "data": "z",
+      "columns": 40,
+      "rows": 12
+    },
+    {
+      "at": "2026-10-09T13:51:03.306Z",
+      "event": "input",
+      "data": "\u001bOQ",
+      "columns": 40,
+      "rows": 12
+    },
+    {
+      "at": "2026-10-09T13:51:09.270Z",
+      "event": "input",
+      "data": "\u001b",
+      "columns": 40,
+      "rows": 12
+    },
+    {
+      "at": "2026-10-09T13:51:40.762Z",
+      "event": "input",
+      "data": "\u0003",
+      "columns": 39,
+      "rows": 11
+    },
+    {
+      "at": "2026-10-09T13:52:13.456Z",
+      "event": "input",
+      "data": "\u0003",
+      "columns": 87,
+      "rows": 28
+    },
+    {
+      "at": "2026-10-09T13:52:13.735Z",
+      "event": "input",
+      "data": "\u0003",
+      "columns": 87,
+      "rows": 28
+    }
+  ],
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-supplement/manual/2026-10-09T13-49-19-372Z/operator-observation.json",
+      "sha256": "60ae8acdff523ed3984a093164a8e4a0712d0b964a894f6bb95ce8bda8156c94"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-supplement/manual/2026-10-09T13-49-19-372Z/machine.json",
+      "sha256": "c302314145f7d17ea0e092ad2dc79ed1210c3671a53ec6dd8546ce8a12992d71"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-supplement/manual/2026-10-09T13-49-19-372Z/events.jsonl",
+      "sha256": "143c18d848c104e785f6aaa246dfbf7c444cc0e806009a1bfb48690a638c5e46"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-supplement/manual/2026-10-09T13-49-19-372Z/terminal-output.ansi",
+      "sha256": "41f531bc1c9f4a4a2284a1f56d45ea283d2d60cf3e2369fe73ae7c638adc3e1d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-supplement/manual/2026-10-09T13-49-19-372Z/headless.json",
+      "sha256": "f758925b824e422d11ceedb34962a2a654e40cf90008a6333b78ad384ff59343"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-supplement/manual/2026-10-09T13-49-19-372Z/identity.json",
+      "sha256": "fdcacd6f3d651c7b6a16f49a0db0957c83590bb592350fecf71be0e882cad688"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-supplement/manual/2026-10-09T13-49-19-372Z/environment.json",
+      "sha256": "5669409e84af2a18f480b9e732285816582b777348a14cbadc98a29ee5c8dbb8"
+    }
+  ],
+  "acceptance": "S1 normal completed and S3 smaller-window recovery PASS. S2 input/menu visual observation and explicit minimum remain UNKNOWN; passing through 40x12 is not acceptance."
+}

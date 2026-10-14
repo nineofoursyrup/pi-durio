@@ -1,0 +1,1377 @@
+[
+  {
+    "seq": 66,
+    "kind": "budget.reserve",
+    "at": "2026-10-10T10:17:20.994Z",
+    "sourceId": "e1:66:42ce4e89b3dcc24011fe73327aa9ca12a697f19bf4f984cad4a72c2d6bad243c",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/42ce4e89b3dcc24011fe73327aa9ca12a697f19bf4f984cad4a72c2d6bad243c",
+      "sha256": "42ce4e89b3dcc24011fe73327aa9ca12a697f19bf4f984cad4a72c2d6bad243c",
+      "bytes": 197
+    },
+    "summary": {
+      "budgetId": "improve:v1-live-r4-improve",
+      "id": "e65dfc9a-3ba1-4414-830e-250b98b3c4f5",
+      "purpose": "improve",
+      "operationId": "improve:v1-live-r4-improve",
+      "tokens": 1056768,
+      "at": "2026-10-10T10:17:20.994Z"
+    }
+  },
+  {
+    "seq": 67,
+    "kind": "provider.dispatch",
+    "at": "2026-10-10T10:17:21.017Z",
+    "sourceId": "e1:67:3e0b326bfb90a385c1743c0b39acb2485c672565720f1e2bee22ffd59ecb33cc",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/3e0b326bfb90a385c1743c0b39acb2485c672565720f1e2bee22ffd59ecb33cc",
+      "sha256": "3e0b326bfb90a385c1743c0b39acb2485c672565720f1e2bee22ffd59ecb33cc",
+      "bytes": 272
+    },
+    "summary": {
+      "id": "e65dfc9a-3ba1-4414-830e-250b98b3c4f5",
+      "purpose": "improve",
+      "operationId": "improve:v1-live-r4-improve",
+      "url": "https://api.deepseek.com/chat/completions",
+      "method": "POST",
+      "body": {
+        "sha256": "f8c8cd131c036334d409ceaded7e84c912827ce3f72324dae76dc599fb919aba",
+        "bytes": 4853
+      }
+    }
+  },
+  {
+    "seq": 69,
+    "kind": "provider.http",
+    "at": "2026-10-10T10:17:21.283Z",
+    "sourceId": "e1:69:72abbb8071c5c17e18c3c33559a03f07c50ff9896518c2ea655f6042ea6d5ecb",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/72abbb8071c5c17e18c3c33559a03f07c50ff9896518c2ea655f6042ea6d5ecb",
+      "sha256": "72abbb8071c5c17e18c3c33559a03f07c50ff9896518c2ea655f6042ea6d5ecb",
+      "bytes": 58
+    },
+    "summary": {
+      "id": "e65dfc9a-3ba1-4414-830e-250b98b3c4f5",
+      "status": 200
+    }
+  },
+  {
+    "seq": 96,
+    "kind": "budget.settle",
+    "at": "2026-10-10T10:17:21.681Z",
+    "sourceId": "e1:96:adfb41738c90c2b6707bdade8101364eff631cc85ff6af34796b8dcc072ef392",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/adfb41738c90c2b6707bdade8101364eff631cc85ff6af34796b8dcc072ef392",
+      "sha256": "adfb41738c90c2b6707bdade8101364eff631cc85ff6af34796b8dcc072ef392",
+      "bytes": 119
+    },
+    "summary": {
+      "budgetId": "improve:v1-live-r4-improve",
+      "id": "e65dfc9a-3ba1-4414-830e-250b98b3c4f5",
+      "tokens": 1141,
+      "status": "returned"
+    }
+  },
+  {
+    "seq": 97,
+    "kind": "model.response",
+    "at": "2026-10-10T10:17:21.691Z",
+    "sourceId": "e1:97:9626cf02af9ad85e25dacc11f1d3ef2c8821a17e0e13e5274c43b3cdc99527e4",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/9626cf02af9ad85e25dacc11f1d3ef2c8821a17e0e13e5274c43b3cdc99527e4",
+      "sha256": "9626cf02af9ad85e25dacc11f1d3ef2c8821a17e0e13e5274c43b3cdc99527e4",
+      "bytes": 1007
+    },
+    "summary": {
+      "attemptId": "d196d96d-79e5-4c7c-acf3-5117ace0550c",
+      "stopReason": "toolUse",
+      "usage": {
+        "input": 468,
+        "output": 33,
+        "cacheRead": 640,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 1141,
+        "cost": {
+          "input": 0.0001404,
+          "output": 3.96e-05,
+          "cacheRead": 3.84e-06,
+          "cacheWrite": 0,
+          "total": 0.00018383999999999997
+        }
+      },
+      "contentTypes": [
+        "text",
+        "toolCall"
+      ],
+      "tools": [
+        "evidence_summary"
+      ]
+    }
+  },
+  {
+    "seq": 98,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:21.706Z",
+    "sourceId": "e1:98:33612e2170cf5293423e15fc9439fe224bad1cdb33465f71626476363c1649bb",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/33612e2170cf5293423e15fc9439fe224bad1cdb33465f71626476363c1649bb",
+      "sha256": "33612e2170cf5293423e15fc9439fe224bad1cdb33465f71626476363c1649bb",
+      "bytes": 170
+    },
+    "summary": {
+      "attemptId": "cf56a2de-a1c5-4635-9e41-59c6480986ab",
+      "durableTaskId": 12,
+      "conversationId": 1,
+      "callId": "call_00_BkNVNMzaJqX7Crb55Sgu1662",
+      "tool": "evidence_summary",
+      "args": {}
+    }
+  },
+  {
+    "seq": 99,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:21.716Z",
+    "sourceId": "e1:99:d553961e09a3f8c3dbfeb7f6fc7f80a7cc48a8d7add1c3850d04b1647027a074",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/d553961e09a3f8c3dbfeb7f6fc7f80a7cc48a8d7add1c3850d04b1647027a074",
+      "sha256": "d553961e09a3f8c3dbfeb7f6fc7f80a7cc48a8d7add1c3850d04b1647027a074",
+      "bytes": 222
+    },
+    "summary": {
+      "attemptId": "cf56a2de-a1c5-4635-9e41-59c6480986ab",
+      "durableTaskId": 12,
+      "tool": "evidence_summary",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 5066.449875,
+        "wallTime": "2026-10-10T10:17:21.716Z"
+      }
+    }
+  },
+  {
+    "seq": 100,
+    "kind": "improve.summary",
+    "at": "2026-10-10T10:17:21.729Z",
+    "sourceId": "e1:100:bba1120281748b809db78de7d2aa4605bfc10d79fc423a312e2ea097c7ac6658",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/bba1120281748b809db78de7d2aa4605bfc10d79fc423a312e2ea097c7ac6658",
+      "sha256": "bba1120281748b809db78de7d2aa4605bfc10d79fc423a312e2ea097c7ac6658",
+      "bytes": 4131
+    },
+    "summary": {}
+  },
+  {
+    "seq": 101,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:21.736Z",
+    "sourceId": "e1:101:35bd34abd03f21655db395b036ce70711aa6209907b543c8e3b38ed96787399b",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/35bd34abd03f21655db395b036ce70711aa6209907b543c8e3b38ed96787399b",
+      "sha256": "35bd34abd03f21655db395b036ce70711aa6209907b543c8e3b38ed96787399b",
+      "bytes": 4741
+    },
+    "summary": {
+      "attemptId": "cf56a2de-a1c5-4635-9e41-59c6480986ab"
+    }
+  },
+  {
+    "seq": 107,
+    "kind": "budget.reserve",
+    "at": "2026-10-10T10:17:21.801Z",
+    "sourceId": "e1:107:5c90bae9196c8a038a8206745529317e9e07d7904b20a2e0e010a280da900415",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/5c90bae9196c8a038a8206745529317e9e07d7904b20a2e0e010a280da900415",
+      "sha256": "5c90bae9196c8a038a8206745529317e9e07d7904b20a2e0e010a280da900415",
+      "bytes": 197
+    },
+    "summary": {
+      "budgetId": "improve:v1-live-r4-improve",
+      "id": "a79aa3c5-0bce-4d38-a7ed-42b7fe6fd41d",
+      "purpose": "improve",
+      "operationId": "improve:v1-live-r4-improve",
+      "tokens": 1056768,
+      "at": "2026-10-10T10:17:21.801Z"
+    }
+  },
+  {
+    "seq": 108,
+    "kind": "provider.dispatch",
+    "at": "2026-10-10T10:17:21.821Z",
+    "sourceId": "e1:108:e71e490db35210246018c192bb6125526e9611480e383df7243770045e0cf9ee",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/e71e490db35210246018c192bb6125526e9611480e383df7243770045e0cf9ee",
+      "sha256": "e71e490db35210246018c192bb6125526e9611480e383df7243770045e0cf9ee",
+      "bytes": 272
+    },
+    "summary": {
+      "id": "a79aa3c5-0bce-4d38-a7ed-42b7fe6fd41d",
+      "purpose": "improve",
+      "operationId": "improve:v1-live-r4-improve",
+      "url": "https://api.deepseek.com/chat/completions",
+      "method": "POST",
+      "body": {
+        "sha256": "a0402dafb1bb18acccf840dd6ad91e095283b52840dbf2e11b6a9479a2aec54a",
+        "bytes": 9686
+      }
+    }
+  },
+  {
+    "seq": 110,
+    "kind": "provider.http",
+    "at": "2026-10-10T10:17:22.005Z",
+    "sourceId": "e1:110:8bdab3a3b494ca0f1f5796813f8e0bee13fb46dd1c230aabad1256a877afe378",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/8bdab3a3b494ca0f1f5796813f8e0bee13fb46dd1c230aabad1256a877afe378",
+      "sha256": "8bdab3a3b494ca0f1f5796813f8e0bee13fb46dd1c230aabad1256a877afe378",
+      "bytes": 58
+    },
+    "summary": {
+      "id": "a79aa3c5-0bce-4d38-a7ed-42b7fe6fd41d",
+      "status": 200
+    }
+  },
+  {
+    "seq": 531,
+    "kind": "budget.settle",
+    "at": "2026-10-10T10:17:26.805Z",
+    "sourceId": "e1:531:13fb0c5746d12d23021b88d2d43394f1844e12c5c2c9177ff758605aa2bac653",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/13fb0c5746d12d23021b88d2d43394f1844e12c5c2c9177ff758605aa2bac653",
+      "sha256": "13fb0c5746d12d23021b88d2d43394f1844e12c5c2c9177ff758605aa2bac653",
+      "bytes": 119
+    },
+    "summary": {
+      "budgetId": "improve:v1-live-r4-improve",
+      "id": "a79aa3c5-0bce-4d38-a7ed-42b7fe6fd41d",
+      "tokens": 3096,
+      "status": "returned"
+    }
+  },
+  {
+    "seq": 532,
+    "kind": "model.response",
+    "at": "2026-10-10T10:17:26.817Z",
+    "sourceId": "e1:532:0409dc2d5e2e28f3150829fa05ffadac2e78b02f4f85bbfb52b163779139e779",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/0409dc2d5e2e28f3150829fa05ffadac2e78b02f4f85bbfb52b163779139e779",
+      "sha256": "0409dc2d5e2e28f3150829fa05ffadac2e78b02f4f85bbfb52b163779139e779",
+      "bytes": 1951
+    },
+    "summary": {
+      "attemptId": "c2f34e9c-c996-4915-b19f-87d5237fa139",
+      "stopReason": "toolUse",
+      "usage": {
+        "input": 1765,
+        "output": 435,
+        "cacheRead": 896,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 3096,
+        "cost": {
+          "input": 0.0005295,
+          "output": 0.000522,
+          "cacheRead": 5.376e-06,
+          "cacheWrite": 0,
+          "total": 0.001056876
+        }
+      },
+      "contentTypes": [
+        "text",
+        "toolCall",
+        "toolCall",
+        "toolCall",
+        "toolCall",
+        "toolCall",
+        "toolCall"
+      ],
+      "tools": [
+        "evidence_read",
+        "evidence_read",
+        "evidence_read",
+        "evidence_read",
+        "evidence_read",
+        "evidence_read"
+      ]
+    }
+  },
+  {
+    "seq": 533,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:26.830Z",
+    "sourceId": "e1:533:2e2a0e79af1139bb9c28eeb4b052a92d2a05109af006c42af2b6a98fb22b9a96",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/2e2a0e79af1139bb9c28eeb4b052a92d2a05109af006c42af2b6a98fb22b9a96",
+      "sha256": "2e2a0e79af1139bb9c28eeb4b052a92d2a05109af006c42af2b6a98fb22b9a96",
+      "bytes": 244
+    },
+    "summary": {
+      "attemptId": "315475b5-7e35-46b4-a603-aa7a5f566d89",
+      "durableTaskId": 16,
+      "conversationId": 1,
+      "callId": "call_00_j1uNHJstWsPfj4Cmi5In0556",
+      "tool": "evidence_read",
+      "args": {
+        "id": "e1:20:d2a3b2bfd0115e74d33d8bca508339e1e25547a25a17ad40fc652542cc31e8f3"
+      }
+    }
+  },
+  {
+    "seq": 534,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:26.840Z",
+    "sourceId": "e1:534:c24972a31ba358f51db817844813dfd53edb8d09911fc630acafa4ab2f1d7602",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/c24972a31ba358f51db817844813dfd53edb8d09911fc630acafa4ab2f1d7602",
+      "sha256": "c24972a31ba358f51db817844813dfd53edb8d09911fc630acafa4ab2f1d7602",
+      "bytes": 220
+    },
+    "summary": {
+      "attemptId": "315475b5-7e35-46b4-a603-aa7a5f566d89",
+      "durableTaskId": 16,
+      "tool": "evidence_read",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 10191.214584,
+        "wallTime": "2026-10-10T10:17:26.840Z"
+      }
+    }
+  },
+  {
+    "seq": 535,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:26.860Z",
+    "sourceId": "e1:535:2bfc7d0b335b76dbaf4bd06e5e0bf36615277653a675f6110e96e0415696c04d",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/2bfc7d0b335b76dbaf4bd06e5e0bf36615277653a675f6110e96e0415696c04d",
+      "sha256": "2bfc7d0b335b76dbaf4bd06e5e0bf36615277653a675f6110e96e0415696c04d",
+      "bytes": 3450
+    },
+    "summary": {
+      "state": "derived-redacted"
+    }
+  },
+  {
+    "seq": 536,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:26.870Z",
+    "sourceId": "e1:536:67a94254adcd26d98e63463650f1359be52769d74dfb9137ed46e7e73e69f20d",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/67a94254adcd26d98e63463650f1359be52769d74dfb9137ed46e7e73e69f20d",
+      "sha256": "67a94254adcd26d98e63463650f1359be52769d74dfb9137ed46e7e73e69f20d",
+      "bytes": 4034
+    },
+    "summary": {
+      "attemptId": "315475b5-7e35-46b4-a603-aa7a5f566d89"
+    }
+  },
+  {
+    "seq": 538,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:26.893Z",
+    "sourceId": "e1:538:eb9fd7405fda3d42a3a000113ce9d83016b30ec3e0ce147aa0aac1981a5272da",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/eb9fd7405fda3d42a3a000113ce9d83016b30ec3e0ce147aa0aac1981a5272da",
+      "sha256": "eb9fd7405fda3d42a3a000113ce9d83016b30ec3e0ce147aa0aac1981a5272da",
+      "bytes": 244
+    },
+    "summary": {
+      "attemptId": "23339ab0-e3d4-4a38-b24f-19a642d00e63",
+      "durableTaskId": 18,
+      "conversationId": 1,
+      "callId": "call_01_Zbe4mzy39WnB3ygte9Fj2108",
+      "tool": "evidence_read",
+      "args": {
+        "id": "e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503"
+      }
+    }
+  },
+  {
+    "seq": 539,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:26.904Z",
+    "sourceId": "e1:539:6933341c64ac7750d7fc83f91bfba86c6acb48cd9e29f77bc5a5de6cc2b90f4b",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/6933341c64ac7750d7fc83f91bfba86c6acb48cd9e29f77bc5a5de6cc2b90f4b",
+      "sha256": "6933341c64ac7750d7fc83f91bfba86c6acb48cd9e29f77bc5a5de6cc2b90f4b",
+      "bytes": 219
+    },
+    "summary": {
+      "attemptId": "23339ab0-e3d4-4a38-b24f-19a642d00e63",
+      "durableTaskId": 18,
+      "tool": "evidence_read",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 10255.40375,
+        "wallTime": "2026-10-10T10:17:26.904Z"
+      }
+    }
+  },
+  {
+    "seq": 540,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:26.917Z",
+    "sourceId": "e1:540:faedded122b2f218e8507fd28c7d6fa54f8aeb77082a9b2477b852c97e3e5525",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/faedded122b2f218e8507fd28c7d6fa54f8aeb77082a9b2477b852c97e3e5525",
+      "sha256": "faedded122b2f218e8507fd28c7d6fa54f8aeb77082a9b2477b852c97e3e5525",
+      "bytes": 2505
+    },
+    "summary": {
+      "state": "derived-redacted"
+    }
+  },
+  {
+    "seq": 541,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:26.928Z",
+    "sourceId": "e1:541:12c400e84d4a445f07f325b822ec4cf6f2d94f1a4e7663530895a2efd9c96f56",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/12c400e84d4a445f07f325b822ec4cf6f2d94f1a4e7663530895a2efd9c96f56",
+      "sha256": "12c400e84d4a445f07f325b822ec4cf6f2d94f1a4e7663530895a2efd9c96f56",
+      "bytes": 2847
+    },
+    "summary": {
+      "attemptId": "23339ab0-e3d4-4a38-b24f-19a642d00e63"
+    }
+  },
+  {
+    "seq": 543,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:26.949Z",
+    "sourceId": "e1:543:5c302c7145ca54e8668a140c1948ce001f50ac7f7f00c2f658de5787209045bc",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/5c302c7145ca54e8668a140c1948ce001f50ac7f7f00c2f658de5787209045bc",
+      "sha256": "5c302c7145ca54e8668a140c1948ce001f50ac7f7f00c2f658de5787209045bc",
+      "bytes": 244
+    },
+    "summary": {
+      "attemptId": "2292a363-0248-4fd2-b3fe-0ed34cb0df4c",
+      "durableTaskId": 20,
+      "conversationId": 1,
+      "callId": "call_02_WL50IYqtqwiJL7lrQsSX6777",
+      "tool": "evidence_read",
+      "args": {
+        "id": "e1:25:35696d254652b487ec6bab04fddf29f7ca231e63adf5d1c69e777eb23954193c"
+      }
+    }
+  },
+  {
+    "seq": 544,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:26.959Z",
+    "sourceId": "e1:544:6bf1c3c6faaae93e5a83b57e075588847314148603466607336dd4664453e1c1",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/6bf1c3c6faaae93e5a83b57e075588847314148603466607336dd4664453e1c1",
+      "sha256": "6bf1c3c6faaae93e5a83b57e075588847314148603466607336dd4664453e1c1",
+      "bytes": 220
+    },
+    "summary": {
+      "attemptId": "2292a363-0248-4fd2-b3fe-0ed34cb0df4c",
+      "durableTaskId": 20,
+      "tool": "evidence_read",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 10309.595084,
+        "wallTime": "2026-10-10T10:17:26.959Z"
+      }
+    }
+  },
+  {
+    "seq": 545,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:26.970Z",
+    "sourceId": "e1:545:85132805edae102676e37686abc9700fc3a8fec0dc08b5729b02d7b67c6c6ee5",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/85132805edae102676e37686abc9700fc3a8fec0dc08b5729b02d7b67c6c6ee5",
+      "sha256": "85132805edae102676e37686abc9700fc3a8fec0dc08b5729b02d7b67c6c6ee5",
+      "bytes": 2645
+    },
+    "summary": {
+      "state": "derived-redacted"
+    }
+  },
+  {
+    "seq": 546,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:26.979Z",
+    "sourceId": "e1:546:a213909e8ce3b511bb730cdef9f10c2c7a0f84e35c93d9d9e7f60ded50509fcc",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/a213909e8ce3b511bb730cdef9f10c2c7a0f84e35c93d9d9e7f60ded50509fcc",
+      "sha256": "a213909e8ce3b511bb730cdef9f10c2c7a0f84e35c93d9d9e7f60ded50509fcc",
+      "bytes": 3040
+    },
+    "summary": {
+      "attemptId": "2292a363-0248-4fd2-b3fe-0ed34cb0df4c"
+    }
+  },
+  {
+    "seq": 548,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:26.999Z",
+    "sourceId": "e1:548:d4791ea54cfb1356259a4f11b44e572f5a56db93a4fbdb0459933d0a559e4e57",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/d4791ea54cfb1356259a4f11b44e572f5a56db93a4fbdb0459933d0a559e4e57",
+      "sha256": "d4791ea54cfb1356259a4f11b44e572f5a56db93a4fbdb0459933d0a559e4e57",
+      "bytes": 244
+    },
+    "summary": {
+      "attemptId": "09b3efac-066b-4a76-91a4-41a9c09cd458",
+      "durableTaskId": 22,
+      "conversationId": 1,
+      "callId": "call_03_afY00EsRTN1hYRJRSfZo3324",
+      "tool": "evidence_read",
+      "args": {
+        "id": "e1:26:3f8896d0da5cc0426f7d92f9eed80708b8b289446b865d3eb47025d703e25edb"
+      }
+    }
+  },
+  {
+    "seq": 549,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:27.012Z",
+    "sourceId": "e1:549:f19f8024ebc2b67717f94efac85ccd98ae28269cb4fae69250fb3f3ceb23fafe",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/f19f8024ebc2b67717f94efac85ccd98ae28269cb4fae69250fb3f3ceb23fafe",
+      "sha256": "f19f8024ebc2b67717f94efac85ccd98ae28269cb4fae69250fb3f3ceb23fafe",
+      "bytes": 220
+    },
+    "summary": {
+      "attemptId": "09b3efac-066b-4a76-91a4-41a9c09cd458",
+      "durableTaskId": 22,
+      "tool": "evidence_read",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 10363.321209,
+        "wallTime": "2026-10-10T10:17:27.012Z"
+      }
+    }
+  },
+  {
+    "seq": 550,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:27.024Z",
+    "sourceId": "e1:550:f7ac308daafcb4f5013c1cf840177d7e9ee7dee9d6d966b05b69ff51ab46851b",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/f7ac308daafcb4f5013c1cf840177d7e9ee7dee9d6d966b05b69ff51ab46851b",
+      "sha256": "f7ac308daafcb4f5013c1cf840177d7e9ee7dee9d6d966b05b69ff51ab46851b",
+      "bytes": 2648
+    },
+    "summary": {
+      "state": "derived-redacted"
+    }
+  },
+  {
+    "seq": 551,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:27.035Z",
+    "sourceId": "e1:551:d0f8692ddd8fc081b255646d6b393a6ddc2fbbc5607e682a766851609bec55c0",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/d0f8692ddd8fc081b255646d6b393a6ddc2fbbc5607e682a766851609bec55c0",
+      "sha256": "d0f8692ddd8fc081b255646d6b393a6ddc2fbbc5607e682a766851609bec55c0",
+      "bytes": 3031
+    },
+    "summary": {
+      "attemptId": "09b3efac-066b-4a76-91a4-41a9c09cd458"
+    }
+  },
+  {
+    "seq": 553,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:27.058Z",
+    "sourceId": "e1:553:dbe312a95f89ef6fcf413148af3e567b9661e51ea4f0468ab0c2591a018bcb7a",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/dbe312a95f89ef6fcf413148af3e567b9661e51ea4f0468ab0c2591a018bcb7a",
+      "sha256": "dbe312a95f89ef6fcf413148af3e567b9661e51ea4f0468ab0c2591a018bcb7a",
+      "bytes": 244
+    },
+    "summary": {
+      "attemptId": "b3c6c4cd-2968-4f03-9edf-0eb3f7f51544",
+      "durableTaskId": 24,
+      "conversationId": 1,
+      "callId": "call_04_6oDtkQKyi6byVwwa7R051507",
+      "tool": "evidence_read",
+      "args": {
+        "id": "e1:37:1ac9fd12494f96a71673c8eab48a112e99955df63098ff523f89ce77c77b96a0"
+      }
+    }
+  },
+  {
+    "seq": 554,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:27.068Z",
+    "sourceId": "e1:554:6abd2931682eec3fdbd685bcbe15690b8c979ac876c8fd3c4907516fff9ecc22",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/6abd2931682eec3fdbd685bcbe15690b8c979ac876c8fd3c4907516fff9ecc22",
+      "sha256": "6abd2931682eec3fdbd685bcbe15690b8c979ac876c8fd3c4907516fff9ecc22",
+      "bytes": 220
+    },
+    "summary": {
+      "attemptId": "b3c6c4cd-2968-4f03-9edf-0eb3f7f51544",
+      "durableTaskId": 24,
+      "tool": "evidence_read",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 10418.533584,
+        "wallTime": "2026-10-10T10:17:27.068Z"
+      }
+    }
+  },
+  {
+    "seq": 555,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:27.078Z",
+    "sourceId": "e1:555:d2e1702b05c20084b8dd77cf9794c8082b3934d71fc22b5b6f0662d04a47d028",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/d2e1702b05c20084b8dd77cf9794c8082b3934d71fc22b5b6f0662d04a47d028",
+      "sha256": "d2e1702b05c20084b8dd77cf9794c8082b3934d71fc22b5b6f0662d04a47d028",
+      "bytes": 3392
+    },
+    "summary": {
+      "state": "derived-redacted"
+    }
+  },
+  {
+    "seq": 556,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:27.087Z",
+    "sourceId": "e1:556:1bd19446a0bb7db03c575a3ae836a7f8dfcac9347805c1096568b1172b8bfed9",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/1bd19446a0bb7db03c575a3ae836a7f8dfcac9347805c1096568b1172b8bfed9",
+      "sha256": "1bd19446a0bb7db03c575a3ae836a7f8dfcac9347805c1096568b1172b8bfed9",
+      "bytes": 3956
+    },
+    "summary": {
+      "attemptId": "b3c6c4cd-2968-4f03-9edf-0eb3f7f51544"
+    }
+  },
+  {
+    "seq": 558,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:27.108Z",
+    "sourceId": "e1:558:28971bc1adb049b9a573e3ebf0392b8579c4835f15461c8d6cb30357066342ef",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/28971bc1adb049b9a573e3ebf0392b8579c4835f15461c8d6cb30357066342ef",
+      "sha256": "28971bc1adb049b9a573e3ebf0392b8579c4835f15461c8d6cb30357066342ef",
+      "bytes": 244
+    },
+    "summary": {
+      "attemptId": "600403c2-8c36-4788-8f2c-6a80af3dcc7e",
+      "durableTaskId": 26,
+      "conversationId": 1,
+      "callId": "call_05_USkY0w5z03abx9GjcHcE3394",
+      "tool": "evidence_read",
+      "args": {
+        "id": "e1:46:58cfd7f733809326c38cc1ebed548ce80c49ac7bebbc08ffa3e97d5808db0627"
+      }
+    }
+  },
+  {
+    "seq": 559,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:27.119Z",
+    "sourceId": "e1:559:1a1d97a842d2bc518b647b52b6dc3f4e7268f0cd102832dd526b9e5f756fc280",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/1a1d97a842d2bc518b647b52b6dc3f4e7268f0cd102832dd526b9e5f756fc280",
+      "sha256": "1a1d97a842d2bc518b647b52b6dc3f4e7268f0cd102832dd526b9e5f756fc280",
+      "bytes": 220
+    },
+    "summary": {
+      "attemptId": "600403c2-8c36-4788-8f2c-6a80af3dcc7e",
+      "durableTaskId": 26,
+      "tool": "evidence_read",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 10469.811209,
+        "wallTime": "2026-10-10T10:17:27.119Z"
+      }
+    }
+  },
+  {
+    "seq": 560,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:27.129Z",
+    "sourceId": "e1:560:9fc2b6470e21aa2e996805c2052ae1d7559c569db9787bd7eb4e45834ca41872",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/9fc2b6470e21aa2e996805c2052ae1d7559c569db9787bd7eb4e45834ca41872",
+      "sha256": "9fc2b6470e21aa2e996805c2052ae1d7559c569db9787bd7eb4e45834ca41872",
+      "bytes": 3719
+    },
+    "summary": {
+      "state": "derived-redacted"
+    }
+  },
+  {
+    "seq": 561,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:27.140Z",
+    "sourceId": "e1:561:21a021939d775b9df72e50c55fbf062a11c3604caa1b0f67250c8cccc89fa3f7",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/21a021939d775b9df72e50c55fbf062a11c3604caa1b0f67250c8cccc89fa3f7",
+      "sha256": "21a021939d775b9df72e50c55fbf062a11c3604caa1b0f67250c8cccc89fa3f7",
+      "bytes": 4347
+    },
+    "summary": {
+      "attemptId": "600403c2-8c36-4788-8f2c-6a80af3dcc7e"
+    }
+  },
+  {
+    "seq": 567,
+    "kind": "budget.reserve",
+    "at": "2026-10-10T10:17:27.211Z",
+    "sourceId": "e1:567:b4bc86d044043845fe4865bf6d09a74d58330816a1c2d2f43d0188807b29564d",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/b4bc86d044043845fe4865bf6d09a74d58330816a1c2d2f43d0188807b29564d",
+      "sha256": "b4bc86d044043845fe4865bf6d09a74d58330816a1c2d2f43d0188807b29564d",
+      "bytes": 197
+    },
+    "summary": {
+      "budgetId": "improve:v1-live-r4-improve",
+      "id": "7cbe55ab-8fff-46ae-8ffc-e4e1f8efa769",
+      "purpose": "improve",
+      "operationId": "improve:v1-live-r4-improve",
+      "tokens": 1056768,
+      "at": "2026-10-10T10:17:27.211Z"
+    }
+  },
+  {
+    "seq": 568,
+    "kind": "provider.dispatch",
+    "at": "2026-10-10T10:17:27.231Z",
+    "sourceId": "e1:568:0d1e8b8cf160c717ae5cf3a2a93f3ebc4ee130a7aab19bb2261b93b3addbd885",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/0d1e8b8cf160c717ae5cf3a2a93f3ebc4ee130a7aab19bb2261b93b3addbd885",
+      "sha256": "0d1e8b8cf160c717ae5cf3a2a93f3ebc4ee130a7aab19bb2261b93b3addbd885",
+      "bytes": 273
+    },
+    "summary": {
+      "id": "7cbe55ab-8fff-46ae-8ffc-e4e1f8efa769",
+      "purpose": "improve",
+      "operationId": "improve:v1-live-r4-improve",
+      "url": "https://api.deepseek.com/chat/completions",
+      "method": "POST",
+      "body": {
+        "sha256": "f551e6a471b3ed91ee5570372ca7c9f31e4b260348140f20bf4ce97b8c229b15",
+        "bytes": 31249
+      }
+    }
+  },
+  {
+    "seq": 570,
+    "kind": "provider.http",
+    "at": "2026-10-10T10:17:27.401Z",
+    "sourceId": "e1:570:ca903811c3a38a08ccd91e9b4b874c910a1125352b11ea789b475c0e3ba2731c",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/ca903811c3a38a08ccd91e9b4b874c910a1125352b11ea789b475c0e3ba2731c",
+      "sha256": "ca903811c3a38a08ccd91e9b4b874c910a1125352b11ea789b475c0e3ba2731c",
+      "bytes": 58
+    },
+    "summary": {
+      "id": "7cbe55ab-8fff-46ae-8ffc-e4e1f8efa769",
+      "status": 200
+    }
+  },
+  {
+    "seq": 713,
+    "kind": "budget.settle",
+    "at": "2026-10-10T10:17:29.445Z",
+    "sourceId": "e1:713:d1154249a294b319fa04d46b099c6a869a29f166264583a4fc39d0ab13ecfffd",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/d1154249a294b319fa04d46b099c6a869a29f166264583a4fc39d0ab13ecfffd",
+      "sha256": "d1154249a294b319fa04d46b099c6a869a29f166264583a4fc39d0ab13ecfffd",
+      "bytes": 119
+    },
+    "summary": {
+      "budgetId": "improve:v1-live-r4-improve",
+      "id": "7cbe55ab-8fff-46ae-8ffc-e4e1f8efa769",
+      "tokens": 8471,
+      "status": "returned"
+    }
+  },
+  {
+    "seq": 714,
+    "kind": "model.response",
+    "at": "2026-10-10T10:17:29.455Z",
+    "sourceId": "e1:714:edc3b2ae301d96db03c48fdf3077889133507bccc6f7cc42e4b5d1de7222ab8b",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/edc3b2ae301d96db03c48fdf3077889133507bccc6f7cc42e4b5d1de7222ab8b",
+      "sha256": "edc3b2ae301d96db03c48fdf3077889133507bccc6f7cc42e4b5d1de7222ab8b",
+      "bytes": 1461
+    },
+    "summary": {
+      "attemptId": "f21cefce-5aec-4253-a7b6-c2a1ff850b2a",
+      "stopReason": "toolUse",
+      "usage": {
+        "input": 5188,
+        "output": 211,
+        "cacheRead": 3072,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 8471,
+        "cost": {
+          "input": 0.0015563999999999999,
+          "output": 0.0002532,
+          "cacheRead": 1.8432e-05,
+          "cacheWrite": 0,
+          "total": 0.0018280319999999998
+        }
+      },
+      "contentTypes": [
+        "text",
+        "toolCall",
+        "toolCall",
+        "toolCall",
+        "toolCall"
+      ],
+      "tools": [
+        "source_view",
+        "source_view",
+        "source_view",
+        "source_view"
+      ]
+    }
+  },
+  {
+    "seq": 715,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:29.467Z",
+    "sourceId": "e1:715:4ac59fd8be20e6ac5f29dc19928a8e37cee0f37ad3f0c5b3920c4188d3be2bf7",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/4ac59fd8be20e6ac5f29dc19928a8e37cee0f37ad3f0c5b3920c4188d3be2bf7",
+      "sha256": "4ac59fd8be20e6ac5f29dc19928a8e37cee0f37ad3f0c5b3920c4188d3be2bf7",
+      "bytes": 209
+    },
+    "summary": {
+      "attemptId": "27419b7d-9d4f-4308-b556-696535662c67",
+      "durableTaskId": 30,
+      "conversationId": 1,
+      "callId": "call_00_9zxGNWBUzYPJHhqjCa4F8785",
+      "tool": "source_view",
+      "args": {
+        "targetId": "clamp-project",
+        "path": "clamp.ts"
+      }
+    }
+  },
+  {
+    "seq": 716,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:29.477Z",
+    "sourceId": "e1:716:4c14033730a5ce58abb35bcfab1ebbd847ad989753ff9d537b6d87aaebca457f",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/4c14033730a5ce58abb35bcfab1ebbd847ad989753ff9d537b6d87aaebca457f",
+      "sha256": "4c14033730a5ce58abb35bcfab1ebbd847ad989753ff9d537b6d87aaebca457f",
+      "bytes": 218
+    },
+    "summary": {
+      "attemptId": "27419b7d-9d4f-4308-b556-696535662c67",
+      "durableTaskId": 30,
+      "tool": "source_view",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 12827.557167,
+        "wallTime": "2026-10-10T10:17:29.477Z"
+      }
+    }
+  },
+  {
+    "seq": 717,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:29.487Z",
+    "sourceId": "e1:717:d5ba9446c1647aed9089b64bce6a9b0a091cea74fb23cb403ff36b8b4f566ba7",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/d5ba9446c1647aed9089b64bce6a9b0a091cea74fb23cb403ff36b8b4f566ba7",
+      "sha256": "d5ba9446c1647aed9089b64bce6a9b0a091cea74fb23cb403ff36b8b4f566ba7",
+      "bytes": 501
+    },
+    "summary": {
+      "sourceId": "e1:49:a680a9179462aab085f0352e77a9e1c25a3d53ac56cf41015e1d20f913cf8ca7"
+    }
+  },
+  {
+    "seq": 718,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:29.497Z",
+    "sourceId": "e1:718:8c5bd05a9bce4b501d9eb383310b42b39a528162a96d2b900fea2af2f1666b9b",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/8c5bd05a9bce4b501d9eb383310b42b39a528162a96d2b900fea2af2f1666b9b",
+      "sha256": "8c5bd05a9bce4b501d9eb383310b42b39a528162a96d2b900fea2af2f1666b9b",
+      "bytes": 785
+    },
+    "summary": {
+      "attemptId": "27419b7d-9d4f-4308-b556-696535662c67"
+    }
+  },
+  {
+    "seq": 720,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:29.519Z",
+    "sourceId": "e1:720:a8d0b838f95f1f80cf39c81fd1c7a866f178a2f60ce204cd6a3076007af78be7",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/a8d0b838f95f1f80cf39c81fd1c7a866f178a2f60ce204cd6a3076007af78be7",
+      "sha256": "a8d0b838f95f1f80cf39c81fd1c7a866f178a2f60ce204cd6a3076007af78be7",
+      "bytes": 210
+    },
+    "summary": {
+      "attemptId": "8a8d6be5-46fa-4d11-870f-1a577280c483",
+      "durableTaskId": 32,
+      "conversationId": 1,
+      "callId": "call_01_d6JmhkTw7W6BWNlUjKvP9983",
+      "tool": "source_view",
+      "args": {
+        "targetId": "clamp-project",
+        "path": "check.mjs"
+      }
+    }
+  },
+  {
+    "seq": 721,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:29.532Z",
+    "sourceId": "e1:721:0b2a5153d8baf4a022ab19e4b27049550921504e06a1348ff7e4323506f8c71e",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/0b2a5153d8baf4a022ab19e4b27049550921504e06a1348ff7e4323506f8c71e",
+      "sha256": "0b2a5153d8baf4a022ab19e4b27049550921504e06a1348ff7e4323506f8c71e",
+      "bytes": 216
+    },
+    "summary": {
+      "attemptId": "8a8d6be5-46fa-4d11-870f-1a577280c483",
+      "durableTaskId": 32,
+      "tool": "source_view",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 12882.7625,
+        "wallTime": "2026-10-10T10:17:29.532Z"
+      }
+    }
+  },
+  {
+    "seq": 722,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:29.544Z",
+    "sourceId": "e1:722:cc4629e19f8afdf8b2cc78a7aec38614d0d9fc4c0bfcb934abc2c1c7e3b81312",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/cc4629e19f8afdf8b2cc78a7aec38614d0d9fc4c0bfcb934abc2c1c7e3b81312",
+      "sha256": "cc4629e19f8afdf8b2cc78a7aec38614d0d9fc4c0bfcb934abc2c1c7e3b81312",
+      "bytes": 752
+    },
+    "summary": {
+      "sourceId": "e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2"
+    }
+  },
+  {
+    "seq": 723,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:29.554Z",
+    "sourceId": "e1:723:6677b5788ba24040738136638a555efe6f769089cb08f30037dec8ab733b201c",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/6677b5788ba24040738136638a555efe6f769089cb08f30037dec8ab733b201c",
+      "sha256": "6677b5788ba24040738136638a555efe6f769089cb08f30037dec8ab733b201c",
+      "bytes": 1043
+    },
+    "summary": {
+      "attemptId": "8a8d6be5-46fa-4d11-870f-1a577280c483"
+    }
+  },
+  {
+    "seq": 725,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:29.575Z",
+    "sourceId": "e1:725:55593e42440e2ec452ea96ef73ae9cfa9206eead24a148eb8115d45726c05603",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/55593e42440e2ec452ea96ef73ae9cfa9206eead24a148eb8115d45726c05603",
+      "sha256": "55593e42440e2ec452ea96ef73ae9cfa9206eead24a148eb8115d45726c05603",
+      "bytes": 210
+    },
+    "summary": {
+      "attemptId": "e98587c3-8a5b-4215-b027-2b9e4158ba7d",
+      "durableTaskId": 34,
+      "conversationId": 1,
+      "callId": "call_02_i7lUeomcAHwG8cD4t5wy1726",
+      "tool": "source_view",
+      "args": {
+        "targetId": "clamp-project",
+        "path": "README.md"
+      }
+    }
+  },
+  {
+    "seq": 726,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:29.587Z",
+    "sourceId": "e1:726:1fedf881bd2609ca47a841aa1ec8363201cb9d878a5273d0faebe565f83562d7",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/1fedf881bd2609ca47a841aa1ec8363201cb9d878a5273d0faebe565f83562d7",
+      "sha256": "1fedf881bd2609ca47a841aa1ec8363201cb9d878a5273d0faebe565f83562d7",
+      "bytes": 218
+    },
+    "summary": {
+      "attemptId": "e98587c3-8a5b-4215-b027-2b9e4158ba7d",
+      "durableTaskId": 34,
+      "tool": "source_view",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 12937.596792,
+        "wallTime": "2026-10-10T10:17:29.587Z"
+      }
+    }
+  },
+  {
+    "seq": 727,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:29.597Z",
+    "sourceId": "e1:727:03a22fda8238c19c03c367aa3f4775ea018ce66a0719973c18b97596b50cb509",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/03a22fda8238c19c03c367aa3f4775ea018ce66a0719973c18b97596b50cb509",
+      "sha256": "03a22fda8238c19c03c367aa3f4775ea018ce66a0719973c18b97596b50cb509",
+      "bytes": 521
+    },
+    "summary": {
+      "sourceId": "e1:51:ccf3e336d85ab9b57c2361610ef0777fc8288d1d2cedec9ee0eef5133438c927"
+    }
+  },
+  {
+    "seq": 728,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:29.606Z",
+    "sourceId": "e1:728:3c18384651a1fc584ec8de19a74a4e09aed3b0c043f3d1b576b6b577eea0ed30",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/3c18384651a1fc584ec8de19a74a4e09aed3b0c043f3d1b576b6b577eea0ed30",
+      "sha256": "3c18384651a1fc584ec8de19a74a4e09aed3b0c043f3d1b576b6b577eea0ed30",
+      "bytes": 809
+    },
+    "summary": {
+      "attemptId": "e98587c3-8a5b-4215-b027-2b9e4158ba7d"
+    }
+  },
+  {
+    "seq": 730,
+    "kind": "tool.intent",
+    "at": "2026-10-10T10:17:29.631Z",
+    "sourceId": "e1:730:21228eb0788d610ca08ae46305e6c7331abc7db7192106a4b6b543940d446e05",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/21228eb0788d610ca08ae46305e6c7331abc7db7192106a4b6b543940d446e05",
+      "sha256": "21228eb0788d610ca08ae46305e6c7331abc7db7192106a4b6b543940d446e05",
+      "bytes": 213
+    },
+    "summary": {
+      "attemptId": "d4b00da0-28b0-4bf5-9a05-74f6c3485b65",
+      "durableTaskId": 36,
+      "conversationId": 1,
+      "callId": "call_03_8d7sAQoibRyWyJuS3AR11481",
+      "tool": "source_view",
+      "args": {
+        "targetId": "clamp-project",
+        "path": "package.json"
+      }
+    }
+  },
+  {
+    "seq": 731,
+    "kind": "tool.dispatch",
+    "at": "2026-10-10T10:17:29.639Z",
+    "sourceId": "e1:731:47666edf51752f10dab7860f44284754cd34a799b87ace86c9be4ad7ac790aa3",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/47666edf51752f10dab7860f44284754cd34a799b87ace86c9be4ad7ac790aa3",
+      "sha256": "47666edf51752f10dab7860f44284754cd34a799b87ace86c9be4ad7ac790aa3",
+      "bytes": 216
+    },
+    "summary": {
+      "attemptId": "d4b00da0-28b0-4bf5-9a05-74f6c3485b65",
+      "durableTaskId": 36,
+      "tool": "source_view",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 12990.2655,
+        "wallTime": "2026-10-10T10:17:29.639Z"
+      }
+    }
+  },
+  {
+    "seq": 732,
+    "kind": "improve.derived",
+    "at": "2026-10-10T10:17:29.649Z",
+    "sourceId": "e1:732:a6c66ddfb911c90a9bde948ea45eabaf2bcb4d131cf1fb07608077fb6b15a77d",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/a6c66ddfb911c90a9bde948ea45eabaf2bcb4d131cf1fb07608077fb6b15a77d",
+      "sha256": "a6c66ddfb911c90a9bde948ea45eabaf2bcb4d131cf1fb07608077fb6b15a77d",
+      "bytes": 493
+    },
+    "summary": {
+      "sourceId": "e1:52:8cc84f042f96e2325ad9daf05845f9fa1bcd0183132f01a0329b99a45bfa60b4"
+    }
+  },
+  {
+    "seq": 733,
+    "kind": "tool.result",
+    "at": "2026-10-10T10:17:29.658Z",
+    "sourceId": "e1:733:93346b4c0a21685b76e6b239a3022996bff10b6deec383d397e07599bb77cf49",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/93346b4c0a21685b76e6b239a3022996bff10b6deec383d397e07599bb77cf49",
+      "sha256": "93346b4c0a21685b76e6b239a3022996bff10b6deec383d397e07599bb77cf49",
+      "bytes": 808
+    },
+    "summary": {
+      "attemptId": "d4b00da0-28b0-4bf5-9a05-74f6c3485b65"
+    }
+  },
+  {
+    "seq": 739,
+    "kind": "budget.reserve",
+    "at": "2026-10-10T10:17:29.728Z",
+    "sourceId": "e1:739:7d6194bd2b33eae864de09b6f8da8fd68596b3ef6ff63fb6e63bb768c4c72ac0",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/7d6194bd2b33eae864de09b6f8da8fd68596b3ef6ff63fb6e63bb768c4c72ac0",
+      "sha256": "7d6194bd2b33eae864de09b6f8da8fd68596b3ef6ff63fb6e63bb768c4c72ac0",
+      "bytes": 197
+    },
+    "summary": {
+      "budgetId": "improve:v1-live-r4-improve",
+      "id": "f71601d7-3c4c-4113-9171-04c9f612063c",
+      "purpose": "improve",
+      "operationId": "improve:v1-live-r4-improve",
+      "tokens": 1056768,
+      "at": "2026-10-10T10:17:29.728Z"
+    }
+  },
+  {
+    "seq": 740,
+    "kind": "provider.dispatch",
+    "at": "2026-10-10T10:17:29.746Z",
+    "sourceId": "e1:740:5c3639c848423c232518cf6d6a8b3b87e903f841ce39d94d793c75d038180cff",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/5c3639c848423c232518cf6d6a8b3b87e903f841ce39d94d793c75d038180cff",
+      "sha256": "5c3639c848423c232518cf6d6a8b3b87e903f841ce39d94d793c75d038180cff",
+      "bytes": 273
+    },
+    "summary": {
+      "id": "f71601d7-3c4c-4113-9171-04c9f612063c",
+      "purpose": "improve",
+      "operationId": "improve:v1-live-r4-improve",
+      "url": "https://api.deepseek.com/chat/completions",
+      "method": "POST",
+      "body": {
+        "sha256": "a74d838723867fc282691da10221dc556e24a1a63712dec69efca192e4ca60cd",
+        "bytes": 34803
+      }
+    }
+  },
+  {
+    "seq": 742,
+    "kind": "provider.http",
+    "at": "2026-10-10T10:17:29.896Z",
+    "sourceId": "e1:742:42d4920dbc21e1d92158f2d0ae3d3081d64f2ded6bfe57bcced42f4f478e3493",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/42d4920dbc21e1d92158f2d0ae3d3081d64f2ded6bfe57bcced42f4f478e3493",
+      "sha256": "42d4920dbc21e1d92158f2d0ae3d3081d64f2ded6bfe57bcced42f4f478e3493",
+      "bytes": 58
+    },
+    "summary": {
+      "id": "f71601d7-3c4c-4113-9171-04c9f612063c",
+      "status": 200
+    }
+  },
+  {
+    "seq": 4288,
+    "kind": "budget.settle",
+    "at": "2026-10-10T10:17:55.689Z",
+    "sourceId": "e1:4288:f39bf6634b2a3574894e8dfdbe2639178a423f3e7a40aa36c93266c31c4d9107",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/f39bf6634b2a3574894e8dfdbe2639178a423f3e7a40aa36c93266c31c4d9107",
+      "sha256": "f39bf6634b2a3574894e8dfdbe2639178a423f3e7a40aa36c93266c31c4d9107",
+      "bytes": 120
+    },
+    "summary": {
+      "budgetId": "improve:v1-live-r4-improve",
+      "id": "f71601d7-3c4c-4113-9171-04c9f612063c",
+      "tokens": 11877,
+      "status": "returned"
+    }
+  },
+  {
+    "seq": 4289,
+    "kind": "model.response",
+    "at": "2026-10-10T10:17:55.701Z",
+    "sourceId": "e1:4289:18dcf05fdea8f765c69aa65ac1e412e68cb3b0f3f149143f19d197aa494d685e",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/18dcf05fdea8f765c69aa65ac1e412e68cb3b0f3f149143f19d197aa494d685e",
+      "sha256": "18dcf05fdea8f765c69aa65ac1e412e68cb3b0f3f149143f19d197aa494d685e",
+      "bytes": 10930
+    },
+    "summary": {
+      "attemptId": "baa70a2d-9a5b-452b-bb72-6ff813daf421",
+      "stopReason": "stop",
+      "usage": {
+        "input": 793,
+        "output": 2636,
+        "cacheRead": 8448,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 11877,
+        "cost": {
+          "input": 0.00023789999999999998,
+          "output": 0.0031631999999999997,
+          "cacheRead": 5.0688e-05,
+          "cacheWrite": 0,
+          "total": 0.003451788
+        }
+      },
+      "contentTypes": [
+        "text"
+      ],
+      "tools": []
+    }
+  },
+  {
+    "seq": 4290,
+    "kind": "submission.settled",
+    "at": "2026-10-10T10:17:55.716Z",
+    "sourceId": "e1:4290:e2d80cd5702fb1d050a8728d370909ee1e8f880bfd6a66c8d090a8284163d20f",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/e2d80cd5702fb1d050a8728d370909ee1e8f880bfd6a66c8d090a8284163d20f",
+      "sha256": "e2d80cd5702fb1d050a8728d370909ee1e8f880bfd6a66c8d090a8284163d20f",
+      "bytes": 131
+    },
+    "summary": {
+      "conversationId": 1,
+      "requestId": "45deb270-f8eb-4d7e-8413-3eba9ca61c16",
+      "type": "input",
+      "status": "done",
+      "entry": 7,
+      "id": 8,
+      "answer": 39
+    }
+  },
+  {
+    "seq": 4291,
+    "kind": "usage.projection",
+    "at": "2026-10-10T10:17:55.732Z",
+    "sourceId": "e1:4291:8a458426376cfcf62630db6981eb5d027c502b7297b4e948eb3394f99f9cb155",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/8a458426376cfcf62630db6981eb5d027c502b7297b4e948eb3394f99f9cb155",
+      "sha256": "8a458426376cfcf62630db6981eb5d027c502b7297b4e948eb3394f99f9cb155",
+      "bytes": 417
+    },
+    "summary": {
+      "source": "pi.usage",
+      "conversationId": 1,
+      "value": {
+        "models": {
+          "deepseek/deepseek-flash": {
+            "input": 8214,
+            "output": 3315,
+            "cacheRead": 13056,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 24585,
+            "cost": {
+              "input": 0.0024641999999999997,
+              "output": 0.003978,
+              "cacheRead": 7.8336e-05,
+              "cacheWrite": 0,
+              "total": 0.0065205359999999995
+            }
+          }
+        },
+        "tools": {}
+      },
+      "reportedAttempts": 4,
+      "requests": 4,
+      "attempts": 4,
+      "notDispatchedAttempts": [],
+      "completeness": "known"
+    }
+  },
+  {
+    "seq": 4292,
+    "kind": "lifecycle.close-started",
+    "at": "2026-10-10T10:17:55.743Z",
+    "sourceId": "e1:4292:915e8d4b07f341076cf586528ff58aa05c185fd1cd928f88161de4b59daaed1c",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/915e8d4b07f341076cf586528ff58aa05c185fd1cd928f88161de4b59daaed1c",
+      "sha256": "915e8d4b07f341076cf586528ff58aa05c185fd1cd928f88161de4b59daaed1c",
+      "bytes": 184
+    },
+    "summary": {
+      "action": "finish",
+      "admission": "closed",
+      "dispatch": "closed",
+      "clock": {
+        "processId": "a5cb0862-0e84-4f1f-a84b-3a5b46e1b72c",
+        "monotonicMs": 39094.5215,
+        "wallTime": "2026-10-10T10:17:55.743Z"
+      }
+    }
+  },
+  {
+    "seq": 4293,
+    "kind": "lifecycle.storage-closing",
+    "at": "2026-10-10T10:17:55.753Z",
+    "sourceId": "e1:4293:dc880edae03ff47af59e978e4e145cc419ed1fcb4e2aa11af74cbda60971fa89",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/dc880edae03ff47af59e978e4e145cc419ed1fcb4e2aa11af74cbda60971fa89",
+      "sha256": "dc880edae03ff47af59e978e4e145cc419ed1fcb4e2aa11af74cbda60971fa89",
+      "bytes": 45
+    },
+    "summary": {
+      "managedCommands": {
+        "started": 0,
+        "settled": 0
+      }
+    }
+  },
+  {
+    "seq": 4294,
+    "kind": "lifecycle.storage-closed",
+    "at": "2026-10-10T10:17:55.764Z",
+    "sourceId": "e1:4294:fd1660b276a6f290143e294e255160ae1b286bd00614251ba553197308426e48",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/fd1660b276a6f290143e294e255160ae1b286bd00614251ba553197308426e48",
+      "sha256": "fd1660b276a6f290143e294e255160ae1b286bd00614251ba553197308426e48",
+      "bytes": 20
+    },
+    "summary": {
+      "storage": "closed"
+    }
+  },
+  {
+    "seq": 4297,
+    "kind": "improve.report",
+    "at": "2026-10-10T10:17:55.797Z",
+    "sourceId": "e1:4297:33ee6de1baf727c584809056aa98e507d77c595368e255fae135053b30501cdc",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/33ee6de1baf727c584809056aa98e507d77c595368e255fae135053b30501cdc",
+      "sha256": "33ee6de1baf727c584809056aa98e507d77c595368e255fae135053b30501cdc",
+      "bytes": 16341
+    },
+    "summary": {
+      "state": "complete",
+      "reason": null,
+      "revision": "b8e9b7c7c08d06d5ed955339630fac5e1b8fe59e6e700acd6499863d932aad2a",
+      "candidateCount": 1
+    }
+  },
+  {
+    "seq": 4298,
+    "kind": "run.closed",
+    "at": "2026-10-10T10:17:55.807Z",
+    "sourceId": "e1:4298:6b9fff5c9e27bf96c0af581b48581f510298ca611f3c6161d8f041a4f1e25bec",
+    "body": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/6b9fff5c9e27bf96c0af581b48581f510298ca611f3c6161d8f041a4f1e25bec",
+      "sha256": "6b9fff5c9e27bf96c0af581b48581f510298ca611f3c6161d8f041a4f1e25bec",
+      "bytes": 27488
+    },
+    "summary": {
+      "status": "completed",
+      "cleanup": "confirmed",
+      "lifecycle": {
+        "intent": null,
+        "disposition": "completed",
+        "cleanupTimeoutMs": 10000,
+        "storage": "closed",
+        "owner": "release-after-host-close",
+        "remoteTermination": "unknown"
+      }
+    }
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "at": "2026-10-11T11:31:20.081878+00:00",
+  "sourceCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "documentationParent": "e95d0358b95afa44bf81891fd517702bffae05c2",
+  "checks": {
+    "all22TicketsAccepted": true,
+    "frontierEmpty": true,
+    "dailyUseAccepted": true,
+    "productInputsUnchanged": true,
+    "originalPendingRecordUnchanged": true,
+    "aggregateReferencesExact": true,
+    "reviewPass": true,
+    "changedMarkdownLocalLinksExist": true,
+    "scopeDocsOnly": true,
+    "diffCheck": true
+  },
+  "aggregateReferences": [
+    {
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-31/technical-acceptance.json",
+      "bytes": 2210,
+      "sha256": "a5dcd3f6796cb82270385e5c4e806a10e009a283ae4476a7092dd157e34d0c12"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/acceptance.json",
+      "bytes": 7794,
+      "sha256": "a7bf7959f78069225a64c6cdc9937ebf7d8653633aeda9b1eb9f331363fdbfee"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/review/daily-acceptance-r1/review.json",
+      "bytes": 6543,
+      "sha256": "6803159c10547db650b60c4d978efcd796d768f0672d4541ba78dba7c64cd861"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1-merge-readback.json",
+      "bytes": 12063,
+      "sha256": "74a69a852bb465664af312fb9ea18eea5d160435402a35259762445daaede66a"
+    }
+  ],
+  "localLinkCount": 85,
+  "newProductTests": 0,
+  "newProviderRequests": 0,
+  "note": "Documentation-only closeout. Existing product checks and independent affected review remain applicable; no new whole-suite PASS."
+}

@@ -1,0 +1,90 @@
+{
+  "previousCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "status": "ORIGINAL_CODE_IDENTITY_RETAINED",
+  "immutableBindings": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/artifact.json",
+      "bytes": 1905,
+      "sha256": "a1c8fb0660266c7758335a31a8773396294e3fc86d550a479be53ea2b344647b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/candidate-identity.json",
+      "bytes": 5219556,
+      "sha256": "f56d137950dbe52af7854df4d360699fe8612fa45aeb4208e2def0d6a5d0de03"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/execution/source-build.json",
+      "bytes": 92981,
+      "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/src/provider-boundary.js",
+      "bytes": 8185,
+      "sha256": "6094e3a6f2bcc72402da8a7e44a6fa895282f0fc7f3e4ba4fd0d94fe148c86e5"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/src/improve.js",
+      "bytes": 26798,
+      "sha256": "dfa8cf65a8969cb96880dc52f1568f41f9740fe8f5c59c53fe2b5b84b636f108"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/node_modules/openai/core/streaming.mjs",
+      "bytes": 24544,
+      "sha256": "1b8fa8338dc28913351993382187962082f0af42c5274a009060de3263579842"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/node_modules/openai/package.json",
+      "bytes": 7323,
+      "sha256": "8a855f81669a434ce894e2d1ae2f18e9050e93c57d14091f155cd543056bdc30"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/node_modules/@earendil-works/pi-ai/dist/api/openai-completions.js",
+      "bytes": 64669,
+      "sha256": "5a79cc5aa41dee180692695e65771720d1ea556e9a978649dc2040278be51753"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/node_modules/@earendil-works/pi-ai/package.json",
+      "bytes": 2721,
+      "sha256": "a8f10d5157b335379ae00edf9c25ae7a15bfc0f3a76107d4376a3779bb5b2995"
+    }
+  ],
+  "sourceSnapshots": [
+    {
+      "originalObservedPath": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/provider-boundary.ts",
+      "gitCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+      "gitPath": "src/provider-boundary.ts",
+      "retained": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/prior-source-9aed1af/provider-boundary.ts",
+        "bytes": 7167,
+        "sha256": "ddd688163aa6dd431609b9857fdd5c24d37a06741b9bff05083e7656da0974c5"
+      }
+    },
+    {
+      "originalObservedPath": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/improve.ts",
+      "gitCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+      "gitPath": "src/improve.ts",
+      "retained": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/prior-source-9aed1af/improve.ts",
+        "bytes": 25404,
+        "sha256": "85ecc8bd1cf206911bf83911fc5ea4cea84f2e836f6983bedb4dee4ae604a7fa"
+      }
+    },
+    {
+      "originalObservedPath": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio/src/runtime.ts",
+      "gitCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+      "gitPath": "src/runtime.ts",
+      "retained": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/prior-source-9aed1af/runtime.ts",
+        "bytes": 79700,
+        "sha256": "42001c5350161fb152ee8ec501b1f03e01475043effb972920be086593b06476"
+      }
+    }
+  ],
+  "exclusionExplanation": {
+    "from7280": 16,
+    "mutableWorktreeSourcesReplacedByExactGitSnapshots": 3,
+    "immutableExternalProductBindingsCheckedHere": 9,
+    "fixtureFilesCheckedByExistingFrozenFixtureGate": 4
+  },
+  "historicalCheckUnchanged": "r3 postrun verified all 7280 inputs unchanged at that observation time; this derivative does not edit or reinterpret that historical result."
+}

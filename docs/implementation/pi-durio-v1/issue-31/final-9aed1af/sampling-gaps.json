@@ -1,0 +1,11 @@
+{
+  "samples": 274,
+  "requestedIntervalMs": 1000,
+  "actualIntervalMs": {
+    "min": 999.762625000003,
+    "median": 1002.1746660000063,
+    "max": 3849.40625,
+    "over1500": 59
+  },
+  "observation": "Interval callbacks are delayed by synchronous work and host scheduling; retained samples are not uniformly spaced. Peak RSS is observed sampled host RSS, not a continuous maximum. First/last 30 summaries mean samples, not exact 30-second windows."
+}

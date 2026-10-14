@@ -1,0 +1,175 @@
+{
+  "ticket": 29,
+  "spec": "PI-DURIO-V1-SPEC-r1",
+  "status": "PASS applicable local acceptance; ready for coordinator acceptance and serial integration",
+  "productCommit": "863a755255da1e050b722f66d243905607b9108b",
+  "productTree": "4e42ad755b7e3dfd43ecdb96cf0a61188796bdc5",
+  "integrationBase": "ae682bc",
+  "modelRequest": {
+    "model": "gpt-6-astra",
+    "reasoning": "xhigh",
+    "backendAttestation": "Unavailable; actual backend not independently confirmed"
+  },
+  "behavior": {
+    "feedback": "Optional explicit host/user ingestion in existing journal with original statement/action, task requirement scope, occurrence/acquisition times, idempotence, revisions and withdrawals; no classifier, mandatory ratings or background prompts",
+    "intervention": "Admission-selected Ni=I+Z+U, whole-stage negatives, positive open work separate, first delivery or current #27 true termination including legal recovery",
+    "rework": "Independent first-host-delivery-selected population, unaccepted results included; fixed half-open seven-day window, maturity and unknown separate, late/outside/pre-delivery/new-scope facts preserved",
+    "readOnly": "Query-time aggregation; shared CLI/TUI/package output, immutable new-file export and received-prefix snapshots; no execution, provider calls, rollback or fee writes"
+  },
+  "checks": {
+    "tests": 198,
+    "pass": 198,
+    "fail": 0,
+    "durationMs": 590374.31275
+  },
+  "buildReuse": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/recovery-boundary-repair-build.log",
+    "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281",
+    "sourceBuild": "3dc0490e5ce3237044ef5bc2ddd3b6c2e52bd07381147d3ab703df72d4df1bfa",
+    "reason": "No build input/compiler/output changes after successful frozen build; committed changes and integration metadata only do not alter those bytes."
+  },
+  "evidence": {
+    "full": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/frozen-full-test-1.log",
+      "sha256": "09eb0c618623322533a0060937977865ec6939d09f1526b8cc14590c21c83ba0"
+    },
+    "focused": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/recovery-boundary-green.log",
+      "sha256": "1444b842719e9a58b26c823908d362f8983c0d7ac6d94e64ce397588eb60e1b6"
+    },
+    "candidateIdentity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/candidate-r1.json",
+      "sha256": "e28cc6985e6118135e55d92cb3267c59ec2f05b8dd34b42e7f53b9c8db19f90f"
+    },
+    "packageIdentity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/package-identity-r1.json",
+      "sha256": "b179f80cc0a0d818216377bf2e0bad12b8c8b5a6630ef4a36aa4950168b53012"
+    },
+    "actualPublicRuntime": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/actual-acceptance-r1/result.json",
+      "sha256": "44070a997f9fe6afdcd3ae48586b955cda48dbd281cd6d2507d2acf99c2f2d6b"
+    },
+    "actualReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/actual-acceptance-r1/report.json",
+      "sha256": "7c96da80b0e7c64fe6d61c1fa4ed24fe0077421002b6f920e2bfd1a2cc269008"
+    },
+    "originalReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/actual-acceptance-r1/original-report.json",
+      "sha256": "57aed562dab3bd9b18a0b4395b0c00e249c95411490dee54c898d8e9fa48126f"
+    },
+    "actualArtifactVerification": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/verify-actual-r1.log",
+      "sha256": "9493c0aa2b76144667ec0b08f011f1866747000e42e70761f6222bc11ca4ab19"
+    },
+    "packageVerification": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/verify-package-r1.log",
+      "sha256": "fdb9a1a9ac1960fd2657894ce529c00098877e5c277d9a4818b3a72554da32d3"
+    },
+    "TuiComponent": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/actual-acceptance-r1/tui.txt",
+      "sha256": "53942e37df680228410ce3b51b7682ce22433d47bb87eeb6da7c2400d56318c8"
+    }
+  },
+  "installedAcceptance": {
+    "runs": 3,
+    "actualDispatches": 6,
+    "sourceClass": "synthetic",
+    "intervention": {
+      "Ni": 3,
+      "I": 1,
+      "Z": 0,
+      "U": 2,
+      "events": 1,
+      "unstarted": 0,
+      "open": 0,
+      "openPositive": 0
+    },
+    "rework": {
+      "Nr": 0,
+      "Rr": 0,
+      "Zr": 0,
+      "Ur": 0,
+      "events": 0,
+      "immature": 2,
+      "immaturePositive": 1
+    },
+    "readonly": {
+      "hostShaBefore": "dae8c55cca6f9cba849a3f0f54b6f8f982794eb8d34e790888999352deeb4ac8",
+      "hostShaAfter": "dae8c55cca6f9cba849a3f0f54b6f8f982794eb8d34e790888999352deeb4ac8",
+      "through": 132,
+      "additionalDispatches": 0
+    },
+    "artifactBinding": "All actual own files and installed dependency files match retained independent producer installation",
+    "originalDelivery": "e1:45:3010e22dbd66ac2a7f0ff207ca9ced73c036f11b310233a44b0d6f4b0855dbc5",
+    "repair": {
+      "taskId": "0abc7942-f484-447d-837b-73a5a75167cd",
+      "check": "e1:86:4e47a7d861dd1caaebed76b9d54a47dd81372518320e10224de6579a491338f0",
+      "result": "e1:106:0d32f22b664b8b5548bb56eead03a153709ef8be8332033e902bf63e19a81c00"
+    }
+  },
+  "firstFailures": [
+    {
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/first-red.log",
+        "sha256": "3e834ea4e94b10ed4b81d37999aaa22efe6e72fa8ef09765b6f4bebebd4c1407"
+      },
+      "reason": "New API absent at initial test-first build; retained before implementation"
+    },
+    {
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/first-build.log",
+        "sha256": "f9b28799c9cd13a204085d6f7be3d0e640a66b94ec45629f5050451b94b828b8"
+      },
+      "reason": "Initial TypeScript narrowing/declaration errors; repaired before valid green build"
+    },
+    {
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/provenance-red.log",
+        "sha256": "c03e15ab226a0040d815bfd8c30bea8283c069eda08afec8dc6c23bf62507e55"
+      },
+      "reason": "Same original feedback re-received under another id duplicated events; fixed dedupe and preserved missing-revision unknown behavior"
+    },
+    {
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/runtime-adapter-red.log",
+        "sha256": "ffbd4031de96d5237bd79af8b1c0778089479a1890ab2dfab18a1eeff027a607"
+      },
+      "reason": "Shared TUI feedback adapter absent before integration; implemented additively over #28"
+    },
+    {
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/runtime-adapter-tests-1.log",
+        "sha256": "3e3d2903e40a057b0342fc1814986756565a8a5d6c6bf15f9263cc49a90f585d"
+      },
+      "reason": "Controlled repair fixture omitted read before replacing existing file; existing WRITE_REQUIRES_READ correctly refused. Fixture repaired; guard unchanged",
+      "diagnosis": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/runtime-first-failure-diagnosis.json",
+        "sha256": "dbf4b297d30ba7cc19bc8e706c16207667fdc23de86b2d3593513d4b591458d8"
+      },
+      "exactOriginalSourceCopy": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/runtime-first-failure-source.json",
+        "sha256": "409c424249a8150f15bd233bf0e743754ef9ac43eb3734f03a8ce0cc433ed95a"
+      },
+      "originalData": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/runtime-first-failure/data",
+      "interpretation": "Failed original evidence copy, not a passing candidate"
+    },
+    {
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-29/recovery-boundary-red.log",
+        "sha256": "a0b4cea3c67e901dfbe8773c36c1797ac004817b30a88a512f654ccd1e58c710"
+      },
+      "reason": "Prior failed close incorrectly ended intervention phase during legal recovery; now uses #27 current termination source with fixed first delivery"
+    }
+  ],
+  "notRun": [
+    "paid/live DeepSeek and #30 actual model quality",
+    "full native macOS Terminal composition and #31 technical measurement",
+    "human daily-use acceptance #32"
+  ],
+  "limits": [
+    "Synthetic feedback actors and transport are explicit controlled fixtures; counts do not estimate real user burden or model quality.",
+    "Seven-day elapsed behavior is verified with deterministic historical-time fixtures; installed runtime observations are newly delivered and correctly immature.",
+    "No evidence-free model causality or authorization for rollout, closure, release or automatic rollback."
+  ],
+  "at": "2026-10-09T19:36:23.065983+00:00"
+}

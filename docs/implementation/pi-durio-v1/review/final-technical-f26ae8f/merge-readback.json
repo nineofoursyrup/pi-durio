@@ -1,0 +1,679 @@
+{
+  "status": "PASS",
+  "startedAt": "2026-10-10T11:27:27.846024+00:00",
+  "repository": "/Users/nineofour/Durio",
+  "branch": "codex/pi-durio-v1",
+  "preMergeHead": "780a4a072ffaf45dfcdf947607008f393cfae1a4",
+  "producer": "e748b12e2add451c8b05b8a6a0721bb92f5e636b",
+  "producerCommit": "e748b12e2add451c8b05b8a6a0721bb92f5e636b",
+  "producerParent": "780a4a072ffaf45dfcdf947607008f393cfae1a4",
+  "scope": "31 added issue-31/final-f26ae8f documentation/evidence files only",
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoningEffort": "xhigh",
+  "actualBackendAttestation": "NOT_ATTESTED",
+  "independentReview": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.json",
+    "bytes": 6495,
+    "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a",
+    "standards": "PASS",
+    "spec": "PASS",
+    "blockingFindings": 0
+  },
+  "reviewMarkdown": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.md",
+    "bytes": 5589,
+    "sha256": "1b624b38a26a88fac164082e885cc1883356da648cca61ee094bf27115dece0f"
+  },
+  "productCandidate": {
+    "commit": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "tree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "preflightReused": {
+    "status": "READ_ONLY_PREFLIGHT_PASS",
+    "at": "2026-10-10T11:21:06.089236+00:00",
+    "candidateCommit": "e748b12e2add451c8b05b8a6a0721bb92f5e636b",
+    "candidateTree": "4c40ee45d26ca201878b4ef99d03de040e1f5067",
+    "changedFiles": 31,
+    "changedBytes": 350097,
+    "docsAggregateSha256": "23aeb8eceef853cbb6ad426b0244811dc028be1ec311dcb793938f9137015830",
+    "producerWorktreeExactByteEquality": true,
+    "deliveryCheckIdentity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/delivery-check.json",
+      "bytes": 5440,
+      "sha256": "1f8ec4701e56d245300dbed2040e425eb4009def85a5e4ae2c17e0b62565952e"
+    },
+    "sourceChecksUnchanged": true
+  },
+  "originalUntrackedBefore": {
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+    },
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+    },
+    "docs/wayfinder-proposal.md": {
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+    },
+    "docs/wayfinder-readback-2026-10-09.json": {
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+    }
+  },
+  "apiEnv": {
+    "readContent": false,
+    "addedToGit": false,
+    "beforeStat": {
+      "size": 118,
+      "mode": 33152,
+      "inode": 108595560,
+      "mtimeNs": 1791610965598957000,
+      "ctimeNs": 1791610965609405872
+    }
+  },
+  "distPreservation": {
+    "mode": "Docs-only Git write scope, no active hooks, directory metadata before/after; prior product/install evidence reused",
+    "directoryStatsBefore": {
+      "/Users/nineofour/Durio/dist": {
+        "size": 160,
+        "mode": 16877,
+        "inode": 108775172,
+        "mtimeNs": 1791615308122125726,
+        "ctimeNs": 1791616107004881061
+      },
+      "/Users/nineofour/Durio/dist/src": {
+        "size": 4960,
+        "mode": 16877,
+        "inode": 108775307,
+        "mtimeNs": 1791615307941569474,
+        "ctimeNs": 1791615983009005247
+      },
+      "/Users/nineofour/Durio/dist/execution": {
+        "size": 160,
+        "mode": 16877,
+        "inode": 108775298,
+        "mtimeNs": 1791615308179021628,
+        "ctimeNs": 1791615982959387733
+      },
+      "/Users/nineofour/Durio/dist/test": {
+        "size": 3936,
+        "mode": 16877,
+        "inode": 108775173,
+        "mtimeNs": 1791615308091861136,
+        "ctimeNs": 1791615982957637823
+      }
+    },
+    "fullContentScan": false,
+    "installationScan": false
+  },
+  "protectedEvidenceBindingsBefore": {
+    "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.json": {
+      "bytes": 6495,
+      "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a"
+    },
+    "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.md": {
+      "bytes": 5589,
+      "sha256": "1b624b38a26a88fac164082e885cc1883356da648cca61ee094bf27115dece0f"
+    },
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/delivery-check.json": {
+      "bytes": 5440,
+      "sha256": "1f8ec4701e56d245300dbed2040e425eb4009def85a5e4ae2c17e0b62565952e"
+    }
+  },
+  "docsContentIdentitiesBefore": {
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/NATIVE-REPORT.md": {
+      "bytes": 4303,
+      "sha256": "9619c65c7b5aabb521bbe799c94d148dda0607d8d09b586e5162206495e23336"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/README.md": {
+      "bytes": 912,
+      "sha256": "4b0604d3851ec3a4771b33f15e7b7d5eefa3f3acab951db52d53e33b3623e2b1"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/REPORT.md": {
+      "bytes": 8986,
+      "sha256": "2e2178e818bd6cd4d72d63e575ea419fe9685e873b4d7e8cead1b6d96880f601"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/STARTUP-RECOVERY.md": {
+      "bytes": 3868,
+      "sha256": "4e0e3366b61669b1327447b1855fc9e16c98f7aa67574148c803d80e417f7536"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/accounting-readback.json": {
+      "bytes": 16133,
+      "sha256": "76409a7a87ec93435fadf78ef1355cc387828bc9a7e688f94ea2654c4bad2a1c"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.json": {
+      "bytes": 140385,
+      "sha256": "228624816baedb82189d9b5f7539e72bbbe2001f430b29094feab156d6215fa5"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.md": {
+      "bytes": 8297,
+      "sha256": "defc41d43bdec6c99d79abd2bb1adb221a3fe4cb6035a88b02d13a058d2e3a17"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/freeze-verification.json": {
+      "bytes": 2179,
+      "sha256": "d8253fcbd95db366f6dfc7d2b89f636699884c6dd6633d9d48618f6c0a7d262b"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/harness-derivation.json": {
+      "bytes": 4518,
+      "sha256": "ca96f410f94e3abe1702cf21a1c7b00479701751a906b3641abf4dcff992f800"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/initial-to-r1-runtime-guard.diff": {
+      "bytes": 990,
+      "sha256": "73acf0d9c9ce32742d6dd448d8f74b4b0df9de540518863d4e12da3fc5a42f23"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/measurement-harness-inventory.json": {
+      "bytes": 1902,
+      "sha256": "d5ba46857a3cd21b29bcf135d243ac0bb01e50c77e7d010ccd890fd7857f4621"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-batch.diff": {
+      "bytes": 3298,
+      "sha256": "9b0a6aea47825c5207e32c778efd19cf5eb91dd920843bf54666f0b23c161738"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-batch.mjs": {
+      "bytes": 6102,
+      "sha256": "e0aeb3f6e6344ee7a13c1760b36f16b1a10c0fa85ae9caa1a5ce03fd05b4dc8f"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-config.json": {
+      "bytes": 2819,
+      "sha256": "bb6cbc77100405825395a8dc8bbfd6986edb37b2e799a5fea4ebd8a590532385"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-plan.json": {
+      "bytes": 3886,
+      "sha256": "b646d276552879755aaa6559cfe8923b4f26dd4de0ee1f2e6e4d43f6e09ada5b"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-readback.json": {
+      "bytes": 27198,
+      "sha256": "778dfc2f6eb092664167dafb3411042ab41d6d78c0d6065ceff4c8d96173b5f2"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery-result.json": {
+      "bytes": 1143,
+      "sha256": "af8b780fb278e431e23bd4956798d0d5bf6b387ad0b9324656d4b4504f15e55a"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery-scroll.json": {
+      "bytes": 153,
+      "sha256": "1efccc8293dbfbd3ca0e21cd64651df2f016e130181c784963a712cb19001ec1"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery.diff": {
+      "bytes": 12829,
+      "sha256": "065fab6280aa611d8563c46ea85cf4b13e66dffedfa2c7a74ac1b3b18a9dc881"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery.mjs": {
+      "bytes": 12831,
+      "sha256": "86ee066764eabc5fd242e4773023019d82dea82d2cfa288fb231af7ac811d8be"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-result.json": {
+      "bytes": 6233,
+      "sha256": "2d0a5f77c1aef6211e6cf9066a280de49111ecb05d8793b34ccb77493751ab3e"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-tool-refusal.json": {
+      "bytes": 385,
+      "sha256": "28301f977cb87756f752ac8f72f17ab785c35c80ded593133966a3679374022e"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/preparation-history.json": {
+      "bytes": 4717,
+      "sha256": "8e5979cca0f8d7b401a355ca82cca052f3df50602692ccf479ba29a6a394a0b6"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/r1-to-r2.diff": {
+      "bytes": 1717,
+      "sha256": "378dd3e4202235989d1f42015cfe66b9cb4787cdc2f118da4e33258a396f7149"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.json": {
+      "bytes": 45425,
+      "sha256": "6f5e56fac683f032d6c5c7352f403c9300add6056b985d3bcae43a3e16c4bb9d"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.md": {
+      "bytes": 8490,
+      "sha256": "87d03863772db1efcb6ce2ae9cfb522c7af89b8a108a50764954e7beda53a54e"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/revision.json": {
+      "bytes": 1128,
+      "sha256": "9cc7deed64e478bfe859e76118e358ffc75e34c4b3a87f72be45b3ad813d79e0"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/run-native.command": {
+      "bytes": 266,
+      "sha256": "33bfdb2a2fee24a701f9bfd2293c7d9919fe810758fd08007f8d057f2ee749a3"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/startup-process.json": {
+      "bytes": 777,
+      "sha256": "43a387cf486658f4e428ffdf8b965e8a3bbc61f90388c6fc3df1d7a0c14cdcfd"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/startup-result.json": {
+      "bytes": 12787,
+      "sha256": "134f5c54904806ee9972184dad86a3cf0fbed007642b7b6a14c6c1f476aea0dc"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/delivery-check.json": {
+      "bytes": 5440,
+      "sha256": "1f8ec4701e56d245300dbed2040e425eb4009def85a5e4ae2c17e0b62565952e"
+    }
+  },
+  "fullHistoricalScans": 0,
+  "productChecksRerun": false,
+  "productApiCalls": 0,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "terminalRuns": 0,
+  "statusWrites": 0,
+  "pushes": 0,
+  "remoteWrites": 0,
+  "repackaging": false,
+  "newAuthorizationCreated": false,
+  "candidateActionsByMerger": 0,
+  "externalWrites": "Only this new independent merge receipt directory",
+  "completedAt": "2026-10-10T11:27:28.781934+00:00",
+  "mergeCommit": "7664210c38d0073d3c134f0668c6a51e0ebb4f49",
+  "tree": "4c40ee45d26ca201878b4ef99d03de040e1f5067",
+  "mergeTree": "4c40ee45d26ca201878b4ef99d03de040e1f5067",
+  "parents": [
+    "780a4a072ffaf45dfcdf947607008f393cfae1a4",
+    "e748b12e2add451c8b05b8a6a0721bb92f5e636b"
+  ],
+  "producerTree": "4c40ee45d26ca201878b4ef99d03de040e1f5067",
+  "mergeTreeEqualsProducer": true,
+  "addedDocsCount": 31,
+  "addedDocsBytes": 350097,
+  "addedDocs": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/NATIVE-REPORT.md",
+      "bytes": 4303,
+      "sha256": "9619c65c7b5aabb521bbe799c94d148dda0607d8d09b586e5162206495e23336",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/README.md",
+      "bytes": 912,
+      "sha256": "4b0604d3851ec3a4771b33f15e7b7d5eefa3f3acab951db52d53e33b3623e2b1",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/REPORT.md",
+      "bytes": 8986,
+      "sha256": "2e2178e818bd6cd4d72d63e575ea419fe9685e873b4d7e8cead1b6d96880f601",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/STARTUP-RECOVERY.md",
+      "bytes": 3868,
+      "sha256": "4e0e3366b61669b1327447b1855fc9e16c98f7aa67574148c803d80e417f7536",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/accounting-readback.json",
+      "bytes": 16133,
+      "sha256": "76409a7a87ec93435fadf78ef1355cc387828bc9a7e688f94ea2654c4bad2a1c",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.json",
+      "bytes": 140385,
+      "sha256": "228624816baedb82189d9b5f7539e72bbbe2001f430b29094feab156d6215fa5",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.md",
+      "bytes": 8297,
+      "sha256": "defc41d43bdec6c99d79abd2bb1adb221a3fe4cb6035a88b02d13a058d2e3a17",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/delivery-check.json",
+      "bytes": 5440,
+      "sha256": "1f8ec4701e56d245300dbed2040e425eb4009def85a5e4ae2c17e0b62565952e",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/freeze-verification.json",
+      "bytes": 2179,
+      "sha256": "d8253fcbd95db366f6dfc7d2b89f636699884c6dd6633d9d48618f6c0a7d262b",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/harness-derivation.json",
+      "bytes": 4518,
+      "sha256": "ca96f410f94e3abe1702cf21a1c7b00479701751a906b3641abf4dcff992f800",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/initial-to-r1-runtime-guard.diff",
+      "bytes": 990,
+      "sha256": "73acf0d9c9ce32742d6dd448d8f74b4b0df9de540518863d4e12da3fc5a42f23",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/measurement-harness-inventory.json",
+      "bytes": 1902,
+      "sha256": "d5ba46857a3cd21b29bcf135d243ac0bb01e50c77e7d010ccd890fd7857f4621",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-batch.diff",
+      "bytes": 3298,
+      "sha256": "9b0a6aea47825c5207e32c778efd19cf5eb91dd920843bf54666f0b23c161738",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-batch.mjs",
+      "bytes": 6102,
+      "sha256": "e0aeb3f6e6344ee7a13c1760b36f16b1a10c0fa85ae9caa1a5ce03fd05b4dc8f",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-config.json",
+      "bytes": 2819,
+      "sha256": "bb6cbc77100405825395a8dc8bbfd6986edb37b2e799a5fea4ebd8a590532385",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-plan.json",
+      "bytes": 3886,
+      "sha256": "b646d276552879755aaa6559cfe8923b4f26dd4de0ee1f2e6e4d43f6e09ada5b",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-readback.json",
+      "bytes": 27198,
+      "sha256": "778dfc2f6eb092664167dafb3411042ab41d6d78c0d6065ceff4c8d96173b5f2",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery-result.json",
+      "bytes": 1143,
+      "sha256": "af8b780fb278e431e23bd4956798d0d5bf6b387ad0b9324656d4b4504f15e55a",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery-scroll.json",
+      "bytes": 153,
+      "sha256": "1efccc8293dbfbd3ca0e21cd64651df2f016e130181c784963a712cb19001ec1",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery.diff",
+      "bytes": 12829,
+      "sha256": "065fab6280aa611d8563c46ea85cf4b13e66dffedfa2c7a74ac1b3b18a9dc881",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery.mjs",
+      "bytes": 12831,
+      "sha256": "86ee066764eabc5fd242e4773023019d82dea82d2cfa288fb231af7ac811d8be",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-result.json",
+      "bytes": 6233,
+      "sha256": "2d0a5f77c1aef6211e6cf9066a280de49111ecb05d8793b34ccb77493751ab3e",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-tool-refusal.json",
+      "bytes": 385,
+      "sha256": "28301f977cb87756f752ac8f72f17ab785c35c80ded593133966a3679374022e",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/preparation-history.json",
+      "bytes": 4717,
+      "sha256": "8e5979cca0f8d7b401a355ca82cca052f3df50602692ccf479ba29a6a394a0b6",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/r1-to-r2.diff",
+      "bytes": 1717,
+      "sha256": "378dd3e4202235989d1f42015cfe66b9cb4787cdc2f118da4e33258a396f7149",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.json",
+      "bytes": 45425,
+      "sha256": "6f5e56fac683f032d6c5c7352f403c9300add6056b985d3bcae43a3e16c4bb9d",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.md",
+      "bytes": 8490,
+      "sha256": "87d03863772db1efcb6ce2ae9cfb522c7af89b8a108a50764954e7beda53a54e",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/revision.json",
+      "bytes": 1128,
+      "sha256": "9cc7deed64e478bfe859e76118e358ffc75e34c4b3a87f72be45b3ad813d79e0",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/run-native.command",
+      "bytes": 266,
+      "sha256": "33bfdb2a2fee24a701f9bfd2293c7d9919fe810758fd08007f8d057f2ee749a3",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/startup-process.json",
+      "bytes": 777,
+      "sha256": "43a387cf486658f4e428ffdf8b965e8a3bbc61f90388c6fc3df1d7a0c14cdcfd",
+      "equalsProducerAndDeliveryIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/startup-result.json",
+      "bytes": 12787,
+      "sha256": "134f5c54904806ee9972184dad86a3cf0fbed007642b7b6a14c6c1f476aea0dc",
+      "equalsProducerAndDeliveryIdentity": true
+    }
+  ],
+  "docsContentIdentitiesAfter": {
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/NATIVE-REPORT.md": {
+      "bytes": 4303,
+      "sha256": "9619c65c7b5aabb521bbe799c94d148dda0607d8d09b586e5162206495e23336"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/README.md": {
+      "bytes": 912,
+      "sha256": "4b0604d3851ec3a4771b33f15e7b7d5eefa3f3acab951db52d53e33b3623e2b1"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/REPORT.md": {
+      "bytes": 8986,
+      "sha256": "2e2178e818bd6cd4d72d63e575ea419fe9685e873b4d7e8cead1b6d96880f601"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/STARTUP-RECOVERY.md": {
+      "bytes": 3868,
+      "sha256": "4e0e3366b61669b1327447b1855fc9e16c98f7aa67574148c803d80e417f7536"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/accounting-readback.json": {
+      "bytes": 16133,
+      "sha256": "76409a7a87ec93435fadf78ef1355cc387828bc9a7e688f94ea2654c4bad2a1c"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.json": {
+      "bytes": 140385,
+      "sha256": "228624816baedb82189d9b5f7539e72bbbe2001f430b29094feab156d6215fa5"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.md": {
+      "bytes": 8297,
+      "sha256": "defc41d43bdec6c99d79abd2bb1adb221a3fe4cb6035a88b02d13a058d2e3a17"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/delivery-check.json": {
+      "bytes": 5440,
+      "sha256": "1f8ec4701e56d245300dbed2040e425eb4009def85a5e4ae2c17e0b62565952e"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/freeze-verification.json": {
+      "bytes": 2179,
+      "sha256": "d8253fcbd95db366f6dfc7d2b89f636699884c6dd6633d9d48618f6c0a7d262b"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/harness-derivation.json": {
+      "bytes": 4518,
+      "sha256": "ca96f410f94e3abe1702cf21a1c7b00479701751a906b3641abf4dcff992f800"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/initial-to-r1-runtime-guard.diff": {
+      "bytes": 990,
+      "sha256": "73acf0d9c9ce32742d6dd448d8f74b4b0df9de540518863d4e12da3fc5a42f23"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/measurement-harness-inventory.json": {
+      "bytes": 1902,
+      "sha256": "d5ba46857a3cd21b29bcf135d243ac0bb01e50c77e7d010ccd890fd7857f4621"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-batch.diff": {
+      "bytes": 3298,
+      "sha256": "9b0a6aea47825c5207e32c778efd19cf5eb91dd920843bf54666f0b23c161738"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-batch.mjs": {
+      "bytes": 6102,
+      "sha256": "e0aeb3f6e6344ee7a13c1760b36f16b1a10c0fa85ae9caa1a5ce03fd05b4dc8f"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-config.json": {
+      "bytes": 2819,
+      "sha256": "bb6cbc77100405825395a8dc8bbfd6986edb37b2e799a5fea4ebd8a590532385"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-plan.json": {
+      "bytes": 3886,
+      "sha256": "b646d276552879755aaa6559cfe8923b4f26dd4de0ee1f2e6e4d43f6e09ada5b"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-readback.json": {
+      "bytes": 27198,
+      "sha256": "778dfc2f6eb092664167dafb3411042ab41d6d78c0d6065ceff4c8d96173b5f2"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery-result.json": {
+      "bytes": 1143,
+      "sha256": "af8b780fb278e431e23bd4956798d0d5bf6b387ad0b9324656d4b4504f15e55a"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery-scroll.json": {
+      "bytes": 153,
+      "sha256": "1efccc8293dbfbd3ca0e21cd64651df2f016e130181c784963a712cb19001ec1"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery.diff": {
+      "bytes": 12829,
+      "sha256": "065fab6280aa611d8563c46ea85cf4b13e66dffedfa2c7a74ac1b3b18a9dc881"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery.mjs": {
+      "bytes": 12831,
+      "sha256": "86ee066764eabc5fd242e4773023019d82dea82d2cfa288fb231af7ac811d8be"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-result.json": {
+      "bytes": 6233,
+      "sha256": "2d0a5f77c1aef6211e6cf9066a280de49111ecb05d8793b34ccb77493751ab3e"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-tool-refusal.json": {
+      "bytes": 385,
+      "sha256": "28301f977cb87756f752ac8f72f17ab785c35c80ded593133966a3679374022e"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/preparation-history.json": {
+      "bytes": 4717,
+      "sha256": "8e5979cca0f8d7b401a355ca82cca052f3df50602692ccf479ba29a6a394a0b6"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/r1-to-r2.diff": {
+      "bytes": 1717,
+      "sha256": "378dd3e4202235989d1f42015cfe66b9cb4787cdc2f118da4e33258a396f7149"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.json": {
+      "bytes": 45425,
+      "sha256": "6f5e56fac683f032d6c5c7352f403c9300add6056b985d3bcae43a3e16c4bb9d"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.md": {
+      "bytes": 8490,
+      "sha256": "87d03863772db1efcb6ce2ae9cfb522c7af89b8a108a50764954e7beda53a54e"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/revision.json": {
+      "bytes": 1128,
+      "sha256": "9cc7deed64e478bfe859e76118e358ffc75e34c4b3a87f72be45b3ad813d79e0"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/run-native.command": {
+      "bytes": 266,
+      "sha256": "33bfdb2a2fee24a701f9bfd2293c7d9919fe810758fd08007f8d057f2ee749a3"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/startup-process.json": {
+      "bytes": 777,
+      "sha256": "43a387cf486658f4e428ffdf8b965e8a3bbc61f90388c6fc3df1d7a0c14cdcfd"
+    },
+    "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/startup-result.json": {
+      "bytes": 12787,
+      "sha256": "134f5c54904806ee9972184dad86a3cf0fbed007642b7b6a14c6c1f476aea0dc"
+    }
+  },
+  "existingTrackedUnchanged": true,
+  "productAndBuildInputChanges": [],
+  "originalUntrackedAfter": {
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+    },
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+    },
+    "docs/wayfinder-proposal.md": {
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+    },
+    "docs/wayfinder-readback-2026-10-09.json": {
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+    }
+  },
+  "originalUntrackedUnchanged": true,
+  "apiEnvAfterStat": {
+    "size": 118,
+    "mode": 33152,
+    "inode": 108595560,
+    "mtimeNs": 1791610965598957000,
+    "ctimeNs": 1791610965609405872
+  },
+  "apiEnvStatUnchanged": true,
+  "distDirectoryStatsAfter": {
+    "/Users/nineofour/Durio/dist": {
+      "size": 160,
+      "mode": 16877,
+      "inode": 108775172,
+      "mtimeNs": 1791615308122125726,
+      "ctimeNs": 1791616107004881061
+    },
+    "/Users/nineofour/Durio/dist/src": {
+      "size": 4960,
+      "mode": 16877,
+      "inode": 108775307,
+      "mtimeNs": 1791615307941569474,
+      "ctimeNs": 1791615983009005247
+    },
+    "/Users/nineofour/Durio/dist/execution": {
+      "size": 160,
+      "mode": 16877,
+      "inode": 108775298,
+      "mtimeNs": 1791615308179021628,
+      "ctimeNs": 1791615982959387733
+    },
+    "/Users/nineofour/Durio/dist/test": {
+      "size": 3936,
+      "mode": 16877,
+      "inode": 108775173,
+      "mtimeNs": 1791615308091861136,
+      "ctimeNs": 1791615982957637823
+    }
+  },
+  "distDirectoryStatsUnchanged": true,
+  "distAndInstallationWrittenByMerge": false,
+  "protectedEvidenceBindingsAfter": {
+    "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.json": {
+      "bytes": 6495,
+      "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a"
+    },
+    "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.md": {
+      "bytes": 5589,
+      "sha256": "1b624b38a26a88fac164082e885cc1883356da648cca61ee094bf27115dece0f"
+    },
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/delivery-check.json": {
+      "bytes": 5440,
+      "sha256": "1f8ec4701e56d245300dbed2040e425eb4009def85a5e4ae2c17e0b62565952e"
+    }
+  },
+  "protectedEvidenceBindingsUnchanged": true,
+  "docsDiffCheck": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "",
+    "reused": true,
+    "source": "Completed read-only preflight on the same immutable producer tree",
+    "appliesBecause": "Actual merge tree exactly equals checked producer tree; no docs content changed"
+  },
+  "trackedCleanAfter": true,
+  "gitStatus": "?? docs/prototypes/archive/\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json\n",
+  "mergeOutput": "Merge made by the 'ort' strategy.\n .../issue-31/final-f26ae8f/NATIVE-REPORT.md        |   44 +\n .../pi-durio-v1/issue-31/final-f26ae8f/README.md   |   13 +\n .../pi-durio-v1/issue-31/final-f26ae8f/REPORT.md   |   81 +\n .../issue-31/final-f26ae8f/STARTUP-RECOVERY.md     |   41 +\n .../final-f26ae8f/accounting-readback.json         |  435 ++++\n .../final-f26ae8f/contract-evidence-index.json     | 2571 ++++++++++++++++++++\n .../final-f26ae8f/contract-evidence-index.md       |   99 +\n .../issue-31/final-f26ae8f/delivery-check.json     |  168 ++\n .../final-f26ae8f/freeze-verification.json         |   74 +\n .../issue-31/final-f26ae8f/harness-derivation.json |   97 +\n .../final-f26ae8f/initial-to-r1-runtime-guard.diff |   10 +\n .../measurement-harness-inventory.json             |   44 +\n .../issue-31/final-f26ae8f/native-batch.diff       |   26 +\n .../issue-31/final-f26ae8f/native-batch.mjs        |   52 +\n .../issue-31/final-f26ae8f/native-config.json      |   48 +\n .../issue-31/final-f26ae8f/native-plan.json        |   76 +\n .../issue-31/final-f26ae8f/native-readback.json    |  782 ++++++\n .../final-f26ae8f/native-recovery-result.json      |   32 +\n .../final-f26ae8f/native-recovery-scroll.json      |    6 +\n .../issue-31/final-f26ae8f/native-recovery.diff    |   92 +\n .../issue-31/final-f26ae8f/native-recovery.mjs     |   92 +\n .../issue-31/final-f26ae8f/native-result.json      |  145 ++\n .../final-f26ae8f/native-tool-refusal.json         |    8 +\n .../final-f26ae8f/preparation-history.json         |   88 +\n .../issue-31/final-f26ae8f/r1-to-r2.diff           |   18 +\n .../final-f26ae8f/reconciliation-preparation.json  |  916 +++++++\n .../final-f26ae8f/reconciliation-preparation.md    |   46 +\n .../issue-31/final-f26ae8f/revision.json           |   27 +\n .../issue-31/final-f26ae8f/run-native.command      |    3 +\n .../issue-31/final-f26ae8f/startup-process.json    |   17 +\n .../issue-31/final-f26ae8f/startup-result.json     |  511 ++++\n 31 files changed, 6662 insertions(+)\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/NATIVE-REPORT.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/README.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/REPORT.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/STARTUP-RECOVERY.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/accounting-readback.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/delivery-check.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/freeze-verification.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/harness-derivation.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/initial-to-r1-runtime-guard.diff\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/measurement-harness-inventory.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-batch.diff\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-batch.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-config.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-plan.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-readback.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery-result.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery-scroll.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery.diff\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-recovery.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-result.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/native-tool-refusal.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/preparation-history.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/r1-to-r2.diff\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/revision.json\n create mode 100755 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/run-native.command\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/startup-process.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/startup-result.json\n",
+  "rootWriteLock": "RETURNED_TO_MAIN_AFTER_RECEIPT"
+}

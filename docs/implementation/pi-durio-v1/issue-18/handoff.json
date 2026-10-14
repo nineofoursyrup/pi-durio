@@ -1,0 +1,142 @@
+{
+  "issue": 18,
+  "sourceCommit": "3aecc37380a7c4678a3ce12b03740a6e2b52a332",
+  "tree": "6e351804ce7e15a1e83bb6188f3e27e1200f9204",
+  "workspace": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-18",
+  "branch": "codex/pi-durio-v1-issue-18",
+  "sharedCommits": [
+    {
+      "upstream": "01f2d3a562b12a9917b3db1dc8111ea2717d386f",
+      "local": "6ce9cb1"
+    },
+    {
+      "upstream": "ca972e836d2abcc60d89467a522c556bf45127c5",
+      "local": "507a144"
+    }
+  ],
+  "compiledTreeSha256": "e18665129c18275124ec7e4277a318e679c240c75da6bbea6c45853ae6396591",
+  "lockSha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67",
+  "package": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/candidate-3aecc37/pi-durio-0.1.0.tgz",
+    "sha256": "276d59f53887eb67f0ee13c916fc68a17b7be149ec90cec2c4bbdd05fb1ad5d7",
+    "bytes": 23122515
+  },
+  "installed": {
+    "root": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/install-3aecc37/node_modules/pi-durio",
+    "cli": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/install-3aecc37/node_modules/pi-durio/dist/src/cli.js",
+    "ownCompiledFiles": "all identical by byte hash",
+    "executionLock": "identical byte hash",
+    "checks": [
+      {
+        "command": "history",
+        "exit": 0
+      },
+      {
+        "command": "evidence",
+        "exit": 0
+      },
+      {
+        "command": "trace",
+        "exit": 0
+      },
+      {
+        "command": "usage",
+        "exit": 0
+      },
+      {
+        "command": "fixed",
+        "exit": 0
+      }
+    ],
+    "sourceHostBefore": "d5f17c8663def2ad95f5792f41c9a514eae9683fe1983dcdf24bd618696820c0",
+    "sourceHostAfter": "d5f17c8663def2ad95f5792f41c9a514eae9683fe1983dcdf24bd618696820c0",
+    "newExecution": "none; only history/evidence/trace/usage/fixed verification"
+  },
+  "demo": {
+    "root": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/demo-r2",
+    "runId": "f86d223c-3c4a-42fa-84d8-c950dd4f3c6f",
+    "result": "failed",
+    "usage": "unknown",
+    "fixedSource": "e1:48:6aedcb269bdeb1304435f5f020b64b2ff74f5e0e36c0f998f8e477af066efcdd",
+    "objects": 11840,
+    "protectedBytes": 88828283,
+    "wholeScenarioMs": 130562.291291
+  },
+  "environment": {
+    "node": "v26.8.2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "macOS": "27.2 (26B5101f)",
+    "model": "MacBookPro18,1",
+    "memoryBytes": 34359738368
+  },
+  "checks": {
+    "r2": "22/22 PASS affected history/query/TUI",
+    "r4": "5/5 PASS scope/seam/pre-start/TUI",
+    "r5": "6/6 PASS usage/originals/scope/trace/redaction",
+    "r6": "2 PASS, 1 FAIL retained: new detail inherited list scroll",
+    "r7": "1/1 PASS narrow selection/detail after repair",
+    "r8": "3/3 PASS final usage and history overlay/selection",
+    "r9": "1/1 PASS invalid filter stays readonly",
+    "build": "PASS npm pack prepack tsc",
+    "installed": "5/5 readback commands PASS; source host hash unchanged"
+  },
+  "remaining": [
+    "No paid provider execution; explicit offline transport only",
+    "Actual compaction writer routing/purpose is #19 responsibility; compaction query fixture is synthetic",
+    "Native final integrated Terminal history/queue observation belongs to #31 using shared candidate; no new standalone native gate imposed",
+    "Measured whole scenario cost is not a performance pass or user daily acceptance",
+    "No push, main merge, release or Issue closure"
+  ],
+  "modelAttestation": "Dispatch requested gpt-6-astra/xhigh; no backend attestation available",
+  "fullManifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/candidate-3aecc37/manifest.json",
+    "sha256": "56efc49094a5c9e76eb03cc65e1ec08ab3851e0e89cc93bc2eec3d51d64244b2"
+  },
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/first-failure-build.txt",
+      "sha256": "87cc71d4c8a71ccb96d57313e6af9ac645f7afe0058f93689aad1bb72c2d70f5"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/history-r1.txt",
+      "sha256": "ee79f2e037c45dd9dcc9b085cdadf636c725f53c662dc7d4613e2c937a4b736a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/checks-r2.txt",
+      "sha256": "d082da57b85367bbdf0094d5618abebdfc7fe1dc509faf55c2d556afe0a4a8b8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/tui-r3.txt",
+      "sha256": "5319cd7b32a9f6d0bc6094e9a4773396a71262b58d530eea39a7f443df5d7589"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/affected-r4.txt",
+      "sha256": "c31fe7ef04bd335cd7e69072d884a6383b30dc100177be012ff5656e4062ffda"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/usage-scope-r5.txt",
+      "sha256": "8748d84f6222367faf9eabd34c631e2483d31a757f868dc821052ebb2b77d1ae"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/final-ui-r6.txt",
+      "sha256": "82bea7d09309f65deed22db47bb64f30bdc4484f460a53337753da6dadb14b5f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/history-view-r7.txt",
+      "sha256": "eca5495485a8df1e98efe7cac3b87ff79e6955ac1cdc779f056b2a37bb250748"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/final-r8.txt",
+      "sha256": "905d0be5da9763fa63ef230566ce6b55b82c584b16591c2ee1ee498444780bac"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/history-error-r9.txt",
+      "sha256": "b67cd90168cf12f32c037ab2fa0b61e5f3c45b0613178e2a8c04c85ed362ce6a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-18/demo-r2-copy.json",
+      "sha256": "005d5392e2094125ad73b29ef2a20b4e7ce4df90b3e7865875dd4d82e33ff5c8"
+    }
+  ]
+}

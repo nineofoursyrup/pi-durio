@@ -1,0 +1,916 @@
+{
+  "schema": "pi-durio.issue-31.reconciliation-preparation.v1",
+  "at": "2026-10-10T10:53:55.919895+00:00",
+  "status": "PARTIAL_TECHNICAL_ACCEPTANCE_NOT_COMPLETE",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "tree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+  "docsBase": "fc6a62dc3de5726a845ffdeb61b5bd5543cd51d1",
+  "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+  "agentModel": {
+    "requested": "gpt-6-astra",
+    "reasoningRequested": "xhigh",
+    "actualBackend": "NOT_ATTESTED"
+  },
+  "effects": {
+    "productImports": 0,
+    "providerRequests": 0,
+    "VMStarts": 0,
+    "TerminalOperations": 0,
+    "measurementWorkloads": 0,
+    "historicalEvidenceWrites": 0,
+    "rootOrSharedStateWrites": 0,
+    "newArtifactsOnly": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f"
+  },
+  "criteria": [
+    {
+      "id": "AC1",
+      "status": "EVIDENCE_RECONCILIATION_PENDING",
+      "gap": "Current complete 62-contract / ACC-01..22 / MET-01..07 requirement-to-candidate/environment/evidence/state index must supersede historical gates without rewriting them. Existing current source/package/install and preserved full raw content are available. Latest authorized clamp after-state must be linked separately from unchanged old baselines."
+    },
+    {
+      "id": "AC2",
+      "status": "APPLICABLE_EVIDENCE_AVAILABLE_FINAL_INTEGRATION_PENDING",
+      "gap": "Independent final source/affected checks and bounded four real coding reuse exist. New #30 actual selection/regression/exact writeback/read-only reopen are now observed, awaiting coordinator merge. Only evidence alignment; no new paid or VM run justified. npm ls and consumer offline npm ci FAIL remain known install-path limitations with successful supported paths."
+    },
+    {
+      "id": "AC3",
+      "status": "BOUNDED_NATIVE_REUSE_PLUS_TARGETED_RECOVERY_GAP",
+      "gap": "Core human IME/emoji/wide/multiline/copy/small-grid observations reusable only in recorded support scope; module/dependency/method identity checked. Changed recovery inspection/text/pagination has no later native cold-recovery result, so one current-candidate native cold reopen/end/new-task/old-queue-frozen/TTY recovery observation is required. Existing final native composition/large-output behavior is independently reusable; no new human improve decision is missing after #30."
+    },
+    {
+      "id": "AC4",
+      "status": "CURRENT_CANDIDATE_TIMING_RSS_STORAGE_MEASUREMENTS_NOT_RUN",
+      "gap": "Current source/package/install inventory exists. Current process-cold startup, native idle/long-session RSS, storage growth, large-output and query/write timings are absent; old 9aed values stay historical. Reuse same existing measurement harness/parameters against new fixed install, with new output only."
+    },
+    {
+      "id": "AC5",
+      "status": "REPORT_AGGREGATION_PENDING",
+      "gap": "Deduplicated real usage/elapsed/cost/unknown across coding/eval/improve/independent maintenance and full-original disk growth need one current report. Raw #30 accounting is available. Network/model/local time is not separable where existing spans do not support decomposition. Zero undispatched maintenance requests is not measured free model work. Local current timings depend on AC4; no extra paid run needed."
+    },
+    {
+      "id": "AC6",
+      "status": "BLOCKED_ON_AC1_AC3_AC4_AC5",
+      "gap": "Do not mark technical complete or invite #32 until required actual measurements and targeted native gap resolve; retain FAIL/UNKNOWN and scope limits, then deliver installed startup/config/recovery instructions."
+    }
+  ],
+  "humanReuse": {
+    "decision": "BOUNDED_REUSE_SUPPORTED_FOR_CORE_INPUT_AND_COPY",
+    "scenarios": [
+      "#16 r5 C1-C3 and N1-N4 IME/grapheme/multiline/copy/focus",
+      "#16 r6 first Ctrl+D/Ctrl+C, caught fault, normal completed, 40x12 and 39x11 recovery",
+      "#17 r1 queue/stop and r2 observed explicit end/new-task/old-queue-frozen historical facts"
+    ],
+    "basis": [
+      "All 12635 dependency entries including symlinks identical from #16 r5/r6 to current recorded install. #17 has only esbuild/bin/esbuild difference; pi-tui dependency content unchanged.",
+      "cursor.js, drafts.js and width-probe.js are byte-identical across all candidates; current width-gate.js equals #17 r2.",
+      "constructor/start/input/stop/exit/finishExit/copyOutput/recoveryDecision/queueDecision/loadQueue/rebuild/bottom/closePanel app method bodies equal #17 r2. #16 to #17 changes are separately scoped: follow-up dispatch and recovery query hold, with actual #17 native evidence.",
+      "Current upstream Editor/MouseRegion/TuiAltScreen/clipboard and minimum-grid geometry retain the human-observed behavior. New panels add branches; old action/detail/copy paths were not replaced.",
+      "Native final 9aed long/composition behavior has an independent f26 applicability decision; automation is not relabeled as human observation."
+    ],
+    "notClaimed": [
+      "Fresh f26 human input session",
+      "Font/profile identity absent from old records",
+      "OS app-window focus probe passed",
+      "Old resource/timing values equal f26",
+      "All new recovery panel/pagination paths have native evidence"
+    ],
+    "environmentCondition": "Supported recorded local macOS27.2/arm64/Node26.8.2/Apple_Terminal488.7 context; freeze next actual environment and revisit relevant evidence if terminal/dependency/input conditions changed."
+  },
+  "staticIdentityComparisons": [
+    {
+      "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+      "manifest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manifest.json",
+        "bytes": 2247455,
+        "sha256": "de8eeefbc906e318e378b847628cfcd9d6a91de257f47468069bd2dffbc06d95"
+      },
+      "dependencyEntries": 12635,
+      "dependencyEqualEntries": 12635,
+      "dependencyDifferences": [],
+      "compiledUiIdentity": {
+        "dist/src/tui/cursor.js": {
+          "before": "d3c89482423b87ef76889591906ed69878844df6c96b6e88e73a2da1168a98d7",
+          "after": "d3c89482423b87ef76889591906ed69878844df6c96b6e88e73a2da1168a98d7",
+          "same": true
+        },
+        "dist/src/tui/drafts.js": {
+          "before": "a73709d7cf63090ed00babefc19a251cabeb973c53f8f4caaae48cf75338402d",
+          "after": "a73709d7cf63090ed00babefc19a251cabeb973c53f8f4caaae48cf75338402d",
+          "same": true
+        },
+        "dist/src/tui/width-probe.js": {
+          "before": "c8a902801a33ef6397d2f3cda975bc592525b177517dcfa23a383a64865383e2",
+          "after": "c8a902801a33ef6397d2f3cda975bc592525b177517dcfa23a383a64865383e2",
+          "same": true
+        },
+        "dist/src/tui/width-gate.js": {
+          "before": "3196336e581c62f42ad52b03e851dcb5e3066e352f098123411e5703671638be",
+          "after": "f46bb05ed314929ef2603d03523caa749ca77b8d1018b14a954b71e149951375",
+          "same": false
+        }
+      },
+      "sourceComparison": {
+        "src/tui/cursor.ts": {
+          "same": true,
+          "beforeSha256": "f2d491ec0ddd4e5bc6c505b0c3104aa171ade2ebbf579f0a1e70704ed3aefb15",
+          "afterSha256": "f2d491ec0ddd4e5bc6c505b0c3104aa171ade2ebbf579f0a1e70704ed3aefb15"
+        },
+        "src/tui/drafts.ts": {
+          "same": true,
+          "beforeSha256": "295e40cbf3f5a14624346ce55a600b0deed1584a67afda3785795d13e0059e95",
+          "afterSha256": "295e40cbf3f5a14624346ce55a600b0deed1584a67afda3785795d13e0059e95"
+        },
+        "src/tui/width-probe.ts": {
+          "same": true,
+          "beforeSha256": "8fe24930bf555ce44e2076beac619541989b01726928c22e8cfe50ccee192ec8",
+          "afterSha256": "8fe24930bf555ce44e2076beac619541989b01726928c22e8cfe50ccee192ec8"
+        },
+        "src/tui/width-gate.ts": {
+          "same": false,
+          "beforeSha256": "5a315241b6ec863319548bcb2d7e4547e6c158ce60901b351cc07be5256240cb",
+          "afterSha256": "a21cd0385dfc883a7ead407245af5d6a58782b42867b241c2689e286a9fadd1e"
+        },
+        "package-lock.json": {
+          "same": true,
+          "beforeSha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67",
+          "afterSha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67"
+        }
+      },
+      "appMethodComparison": {
+        "constructor": {
+          "same": false,
+          "beforeSha256": "bdf88d347266f37331eea3d1f1461f26a5d2469803bec979d874bf14ced0c626",
+          "afterSha256": "67235f061eb9f9c3e54902bce12fd5193d029ef48ff7de9c32acb761a9d99cfd"
+        },
+        "start": {
+          "same": false,
+          "beforeSha256": "18c0d96c78472e867dc113d7d689478bafb0620bf702a53ed1561f84471a9c83",
+          "afterSha256": "1375128076818d1583a1b9e80d1d7d09d5d0d27b3e27e541d6ac3f327024e840"
+        },
+        "input": {
+          "same": false,
+          "beforeSha256": "e1718767fbf7cb781818915e9c08851142f6c341501baf0b8502aae0674841d6",
+          "afterSha256": "fd30fcd7e495a71097dafa611f6ebb7ef554088dad5170225d82a8198b030508"
+        },
+        "stop": {
+          "same": true,
+          "beforeSha256": "c2af9e88256a2d2a22f3565b5c42b5a6b796c357d7a493813603aacbb15e5858",
+          "afterSha256": "c2af9e88256a2d2a22f3565b5c42b5a6b796c357d7a493813603aacbb15e5858"
+        },
+        "exit": {
+          "same": true,
+          "beforeSha256": "de1d3c79bbc9f205b3ba3e0399a77c5c4a2158dd3c4840544572481d4a0a8c69",
+          "afterSha256": "de1d3c79bbc9f205b3ba3e0399a77c5c4a2158dd3c4840544572481d4a0a8c69"
+        },
+        "finishExit": {
+          "same": true,
+          "beforeSha256": "f8c5df1a3e8a023a76c5b13c9fc0945107846653aee52199e90743896369b50f",
+          "afterSha256": "f8c5df1a3e8a023a76c5b13c9fc0945107846653aee52199e90743896369b50f"
+        },
+        "copyOutput": {
+          "same": true,
+          "beforeSha256": "df1712f4085dbe45877ca6c05879888a9bc6ab292cc92de3180f31f4ee3b8d3e",
+          "afterSha256": "df1712f4085dbe45877ca6c05879888a9bc6ab292cc92de3180f31f4ee3b8d3e"
+        },
+        "finished": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "e3705f1f0d558e67cf036e96b5717888f37d930d7f3d1bbb7bd39cf38e0b44ac"
+        },
+        "openRecovery": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "d8d07e9f9863939e7581aae9b36b55fbd92249e7597a0f07928ddebafcf65e38"
+        },
+        "recoveryDecision": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "7e304913ffafc168a05e09228e0a1ea2cb70ae920ed53bfcd1c5742cdc1b8c3d"
+        },
+        "queueDecision": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "69b3a1ec08d67c0899fe460c12085c62e9426ce0c5f949152846907a824c5b82"
+        },
+        "loadQueue": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "6c31b2d2f4729dae5e86476419f8acbd77d7522baf3f6c67abf1d6974a0be210"
+        },
+        "rebuild": {
+          "same": false,
+          "beforeSha256": "0e4024bc3a97446b4fe2022aa4ee85902870facaec47a32b2f8f47d095fca08f",
+          "afterSha256": "b351c953546feb6ef8b2976828b1c36a294cd14d41a4b279848a57db33be4213"
+        },
+        "bottom": {
+          "same": false,
+          "beforeSha256": "158869be1d8bb23b31fbb36c1a23157d17002801f0f9f4b101091055be425e4c",
+          "afterSha256": "9cce9bc4e6732363de94734048e0cd9df3a5b4accc01cd8927e84949d2eeca61"
+        },
+        "openPanel": {
+          "same": false,
+          "beforeSha256": "14bf3b1b527a64fcdb632abd69466b040ea6abdbee335ca1b692a160e62fef9d",
+          "afterSha256": "36c982d14950b2cc9fa36101f66833ff298f57db4c78bba59e7344dbad506fe5"
+        },
+        "panelInput": {
+          "same": false,
+          "beforeSha256": "5253f91e4610dc3a62710efb4f0d3c34a34c5aeaa6b3ceb2669a09c08d7c449b",
+          "afterSha256": "c3a5244e332daa2df6bac2464532f3d09e189e3d4a1117a05b5d564d2d858056"
+        },
+        "closePanel": {
+          "same": true,
+          "beforeSha256": "6a4a2ebc2f730f0834973c8b42335193f99fcb1635ebe18b9e35b13070996e1f",
+          "afterSha256": "6a4a2ebc2f730f0834973c8b42335193f99fcb1635ebe18b9e35b13070996e1f"
+        }
+      },
+      "methodComparisonLimit": "Method text equality is supporting scope evidence, not a behavioral proof; changed methods were separately inspected.",
+      "appDiffStat": [
+        "22\t3\tpackage.json",
+        "115\t83\tsrc/recovery.ts",
+        "444\t48\tsrc/runtime.ts",
+        "246\t27\tsrc/tui/app.ts",
+        "24\t4\tsrc/tui/width-gate.ts"
+      ]
+    },
+    {
+      "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+      "manifest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manifest.json",
+        "bytes": 2247455,
+        "sha256": "5e33c0c52eb80c2a6e5c57b0c85dd03ae37b249d2c5ed874b6cf3238f7e17e91"
+      },
+      "dependencyEntries": 12635,
+      "dependencyEqualEntries": 12635,
+      "dependencyDifferences": [],
+      "compiledUiIdentity": {
+        "dist/src/tui/cursor.js": {
+          "before": "d3c89482423b87ef76889591906ed69878844df6c96b6e88e73a2da1168a98d7",
+          "after": "d3c89482423b87ef76889591906ed69878844df6c96b6e88e73a2da1168a98d7",
+          "same": true
+        },
+        "dist/src/tui/drafts.js": {
+          "before": "a73709d7cf63090ed00babefc19a251cabeb973c53f8f4caaae48cf75338402d",
+          "after": "a73709d7cf63090ed00babefc19a251cabeb973c53f8f4caaae48cf75338402d",
+          "same": true
+        },
+        "dist/src/tui/width-probe.js": {
+          "before": "c8a902801a33ef6397d2f3cda975bc592525b177517dcfa23a383a64865383e2",
+          "after": "c8a902801a33ef6397d2f3cda975bc592525b177517dcfa23a383a64865383e2",
+          "same": true
+        },
+        "dist/src/tui/width-gate.js": {
+          "before": "efcbd2920ef62917b775eb7f83fb3bba6b217434d89f01415adabaf5cc890b99",
+          "after": "f46bb05ed314929ef2603d03523caa749ca77b8d1018b14a954b71e149951375",
+          "same": false
+        }
+      },
+      "sourceComparison": {
+        "src/tui/cursor.ts": {
+          "same": true,
+          "beforeSha256": "f2d491ec0ddd4e5bc6c505b0c3104aa171ade2ebbf579f0a1e70704ed3aefb15",
+          "afterSha256": "f2d491ec0ddd4e5bc6c505b0c3104aa171ade2ebbf579f0a1e70704ed3aefb15"
+        },
+        "src/tui/drafts.ts": {
+          "same": true,
+          "beforeSha256": "295e40cbf3f5a14624346ce55a600b0deed1584a67afda3785795d13e0059e95",
+          "afterSha256": "295e40cbf3f5a14624346ce55a600b0deed1584a67afda3785795d13e0059e95"
+        },
+        "src/tui/width-probe.ts": {
+          "same": true,
+          "beforeSha256": "8fe24930bf555ce44e2076beac619541989b01726928c22e8cfe50ccee192ec8",
+          "afterSha256": "8fe24930bf555ce44e2076beac619541989b01726928c22e8cfe50ccee192ec8"
+        },
+        "src/tui/width-gate.ts": {
+          "same": false,
+          "beforeSha256": "205a7a05173ab38e24553970e4687d4a4fde71689cde85a04b0d93eee8b64c9b",
+          "afterSha256": "a21cd0385dfc883a7ead407245af5d6a58782b42867b241c2689e286a9fadd1e"
+        },
+        "package-lock.json": {
+          "same": true,
+          "beforeSha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67",
+          "afterSha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67"
+        }
+      },
+      "appMethodComparison": {
+        "constructor": {
+          "same": false,
+          "beforeSha256": "972f05424aba1705d5f399d820e9da8983ddc5852b4f1f6b87a77bda20245a2c",
+          "afterSha256": "67235f061eb9f9c3e54902bce12fd5193d029ef48ff7de9c32acb761a9d99cfd"
+        },
+        "start": {
+          "same": false,
+          "beforeSha256": "18c0d96c78472e867dc113d7d689478bafb0620bf702a53ed1561f84471a9c83",
+          "afterSha256": "1375128076818d1583a1b9e80d1d7d09d5d0d27b3e27e541d6ac3f327024e840"
+        },
+        "input": {
+          "same": false,
+          "beforeSha256": "e1718767fbf7cb781818915e9c08851142f6c341501baf0b8502aae0674841d6",
+          "afterSha256": "fd30fcd7e495a71097dafa611f6ebb7ef554088dad5170225d82a8198b030508"
+        },
+        "stop": {
+          "same": true,
+          "beforeSha256": "c2af9e88256a2d2a22f3565b5c42b5a6b796c357d7a493813603aacbb15e5858",
+          "afterSha256": "c2af9e88256a2d2a22f3565b5c42b5a6b796c357d7a493813603aacbb15e5858"
+        },
+        "exit": {
+          "same": true,
+          "beforeSha256": "de1d3c79bbc9f205b3ba3e0399a77c5c4a2158dd3c4840544572481d4a0a8c69",
+          "afterSha256": "de1d3c79bbc9f205b3ba3e0399a77c5c4a2158dd3c4840544572481d4a0a8c69"
+        },
+        "finishExit": {
+          "same": true,
+          "beforeSha256": "f8c5df1a3e8a023a76c5b13c9fc0945107846653aee52199e90743896369b50f",
+          "afterSha256": "f8c5df1a3e8a023a76c5b13c9fc0945107846653aee52199e90743896369b50f"
+        },
+        "copyOutput": {
+          "same": true,
+          "beforeSha256": "df1712f4085dbe45877ca6c05879888a9bc6ab292cc92de3180f31f4ee3b8d3e",
+          "afterSha256": "df1712f4085dbe45877ca6c05879888a9bc6ab292cc92de3180f31f4ee3b8d3e"
+        },
+        "finished": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "e3705f1f0d558e67cf036e96b5717888f37d930d7f3d1bbb7bd39cf38e0b44ac"
+        },
+        "openRecovery": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "d8d07e9f9863939e7581aae9b36b55fbd92249e7597a0f07928ddebafcf65e38"
+        },
+        "recoveryDecision": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "7e304913ffafc168a05e09228e0a1ea2cb70ae920ed53bfcd1c5742cdc1b8c3d"
+        },
+        "queueDecision": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "69b3a1ec08d67c0899fe460c12085c62e9426ce0c5f949152846907a824c5b82"
+        },
+        "loadQueue": {
+          "same": false,
+          "beforeSha256": null,
+          "afterSha256": "6c31b2d2f4729dae5e86476419f8acbd77d7522baf3f6c67abf1d6974a0be210"
+        },
+        "rebuild": {
+          "same": false,
+          "beforeSha256": "0e4024bc3a97446b4fe2022aa4ee85902870facaec47a32b2f8f47d095fca08f",
+          "afterSha256": "b351c953546feb6ef8b2976828b1c36a294cd14d41a4b279848a57db33be4213"
+        },
+        "bottom": {
+          "same": false,
+          "beforeSha256": "158869be1d8bb23b31fbb36c1a23157d17002801f0f9f4b101091055be425e4c",
+          "afterSha256": "9cce9bc4e6732363de94734048e0cd9df3a5b4accc01cd8927e84949d2eeca61"
+        },
+        "openPanel": {
+          "same": false,
+          "beforeSha256": "14bf3b1b527a64fcdb632abd69466b040ea6abdbee335ca1b692a160e62fef9d",
+          "afterSha256": "36c982d14950b2cc9fa36101f66833ff298f57db4c78bba59e7344dbad506fe5"
+        },
+        "panelInput": {
+          "same": false,
+          "beforeSha256": "5253f91e4610dc3a62710efb4f0d3c34a34c5aeaa6b3ceb2669a09c08d7c449b",
+          "afterSha256": "c3a5244e332daa2df6bac2464532f3d09e189e3d4a1117a05b5d564d2d858056"
+        },
+        "closePanel": {
+          "same": true,
+          "beforeSha256": "6a4a2ebc2f730f0834973c8b42335193f99fcb1635ebe18b9e35b13070996e1f",
+          "afterSha256": "6a4a2ebc2f730f0834973c8b42335193f99fcb1635ebe18b9e35b13070996e1f"
+        }
+      },
+      "methodComparisonLimit": "Method text equality is supporting scope evidence, not a behavioral proof; changed methods were separately inspected.",
+      "appDiffStat": [
+        "22\t3\tpackage.json",
+        "115\t83\tsrc/recovery.ts",
+        "444\t48\tsrc/runtime.ts",
+        "244\t27\tsrc/tui/app.ts",
+        "21\t3\tsrc/tui/width-gate.ts"
+      ]
+    },
+    {
+      "candidate": "f67a2edd377d37e3f13bbc0da273028103695d6f",
+      "manifest": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manifest.json",
+        "bytes": 2253340,
+        "sha256": "4dd92b179e26ec29f1724bc256885fcb55b209addfcc4a25dadc59aef46ff693"
+      },
+      "dependencyEntries": 12635,
+      "dependencyEqualEntries": 12634,
+      "dependencyDifferences": [
+        {
+          "path": "node_modules/esbuild/bin/esbuild",
+          "before": "10b6243df618d374bb2d5c9cfbe7052e1405f6aa4e53a6164f11a91b9f2e1384",
+          "after": "183d6ead2dbc3af51aec767d5395f86fe54fbbc2d2aa8e54feb4e31d76a62f7e"
+        }
+      ],
+      "compiledUiIdentity": {
+        "dist/src/tui/cursor.js": {
+          "before": "d3c89482423b87ef76889591906ed69878844df6c96b6e88e73a2da1168a98d7",
+          "after": "d3c89482423b87ef76889591906ed69878844df6c96b6e88e73a2da1168a98d7",
+          "same": true
+        },
+        "dist/src/tui/drafts.js": {
+          "before": "a73709d7cf63090ed00babefc19a251cabeb973c53f8f4caaae48cf75338402d",
+          "after": "a73709d7cf63090ed00babefc19a251cabeb973c53f8f4caaae48cf75338402d",
+          "same": true
+        },
+        "dist/src/tui/width-probe.js": {
+          "before": "c8a902801a33ef6397d2f3cda975bc592525b177517dcfa23a383a64865383e2",
+          "after": "c8a902801a33ef6397d2f3cda975bc592525b177517dcfa23a383a64865383e2",
+          "same": true
+        },
+        "dist/src/tui/width-gate.js": {
+          "before": "f46bb05ed314929ef2603d03523caa749ca77b8d1018b14a954b71e149951375",
+          "after": "f46bb05ed314929ef2603d03523caa749ca77b8d1018b14a954b71e149951375",
+          "same": true
+        }
+      },
+      "sourceComparison": {
+        "src/tui/cursor.ts": {
+          "same": true,
+          "beforeSha256": "f2d491ec0ddd4e5bc6c505b0c3104aa171ade2ebbf579f0a1e70704ed3aefb15",
+          "afterSha256": "f2d491ec0ddd4e5bc6c505b0c3104aa171ade2ebbf579f0a1e70704ed3aefb15"
+        },
+        "src/tui/drafts.ts": {
+          "same": true,
+          "beforeSha256": "295e40cbf3f5a14624346ce55a600b0deed1584a67afda3785795d13e0059e95",
+          "afterSha256": "295e40cbf3f5a14624346ce55a600b0deed1584a67afda3785795d13e0059e95"
+        },
+        "src/tui/width-probe.ts": {
+          "same": true,
+          "beforeSha256": "8fe24930bf555ce44e2076beac619541989b01726928c22e8cfe50ccee192ec8",
+          "afterSha256": "8fe24930bf555ce44e2076beac619541989b01726928c22e8cfe50ccee192ec8"
+        },
+        "src/tui/width-gate.ts": {
+          "same": true,
+          "beforeSha256": "a21cd0385dfc883a7ead407245af5d6a58782b42867b241c2689e286a9fadd1e",
+          "afterSha256": "a21cd0385dfc883a7ead407245af5d6a58782b42867b241c2689e286a9fadd1e"
+        },
+        "package-lock.json": {
+          "same": true,
+          "beforeSha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67",
+          "afterSha256": "3a3dbf3d8a741cb5db4a132fa7f0d4151e3afdc497cd0708684bf30d86d0ba67"
+        }
+      },
+      "appMethodComparison": {
+        "constructor": {
+          "same": true,
+          "beforeSha256": "67235f061eb9f9c3e54902bce12fd5193d029ef48ff7de9c32acb761a9d99cfd",
+          "afterSha256": "67235f061eb9f9c3e54902bce12fd5193d029ef48ff7de9c32acb761a9d99cfd"
+        },
+        "start": {
+          "same": true,
+          "beforeSha256": "1375128076818d1583a1b9e80d1d7d09d5d0d27b3e27e541d6ac3f327024e840",
+          "afterSha256": "1375128076818d1583a1b9e80d1d7d09d5d0d27b3e27e541d6ac3f327024e840"
+        },
+        "input": {
+          "same": true,
+          "beforeSha256": "fd30fcd7e495a71097dafa611f6ebb7ef554088dad5170225d82a8198b030508",
+          "afterSha256": "fd30fcd7e495a71097dafa611f6ebb7ef554088dad5170225d82a8198b030508"
+        },
+        "stop": {
+          "same": true,
+          "beforeSha256": "c2af9e88256a2d2a22f3565b5c42b5a6b796c357d7a493813603aacbb15e5858",
+          "afterSha256": "c2af9e88256a2d2a22f3565b5c42b5a6b796c357d7a493813603aacbb15e5858"
+        },
+        "exit": {
+          "same": true,
+          "beforeSha256": "de1d3c79bbc9f205b3ba3e0399a77c5c4a2158dd3c4840544572481d4a0a8c69",
+          "afterSha256": "de1d3c79bbc9f205b3ba3e0399a77c5c4a2158dd3c4840544572481d4a0a8c69"
+        },
+        "finishExit": {
+          "same": true,
+          "beforeSha256": "f8c5df1a3e8a023a76c5b13c9fc0945107846653aee52199e90743896369b50f",
+          "afterSha256": "f8c5df1a3e8a023a76c5b13c9fc0945107846653aee52199e90743896369b50f"
+        },
+        "copyOutput": {
+          "same": true,
+          "beforeSha256": "df1712f4085dbe45877ca6c05879888a9bc6ab292cc92de3180f31f4ee3b8d3e",
+          "afterSha256": "df1712f4085dbe45877ca6c05879888a9bc6ab292cc92de3180f31f4ee3b8d3e"
+        },
+        "finished": {
+          "same": true,
+          "beforeSha256": "e3705f1f0d558e67cf036e96b5717888f37d930d7f3d1bbb7bd39cf38e0b44ac",
+          "afterSha256": "e3705f1f0d558e67cf036e96b5717888f37d930d7f3d1bbb7bd39cf38e0b44ac"
+        },
+        "openRecovery": {
+          "same": false,
+          "beforeSha256": "7bcbaa4af045b2789b06ad01f5067c6e8024969b0cca348dfed26d32b5655387",
+          "afterSha256": "d8d07e9f9863939e7581aae9b36b55fbd92249e7597a0f07928ddebafcf65e38"
+        },
+        "recoveryDecision": {
+          "same": true,
+          "beforeSha256": "7e304913ffafc168a05e09228e0a1ea2cb70ae920ed53bfcd1c5742cdc1b8c3d",
+          "afterSha256": "7e304913ffafc168a05e09228e0a1ea2cb70ae920ed53bfcd1c5742cdc1b8c3d"
+        },
+        "queueDecision": {
+          "same": true,
+          "beforeSha256": "69b3a1ec08d67c0899fe460c12085c62e9426ce0c5f949152846907a824c5b82",
+          "afterSha256": "69b3a1ec08d67c0899fe460c12085c62e9426ce0c5f949152846907a824c5b82"
+        },
+        "loadQueue": {
+          "same": true,
+          "beforeSha256": "6c31b2d2f4729dae5e86476419f8acbd77d7522baf3f6c67abf1d6974a0be210",
+          "afterSha256": "6c31b2d2f4729dae5e86476419f8acbd77d7522baf3f6c67abf1d6974a0be210"
+        },
+        "rebuild": {
+          "same": true,
+          "beforeSha256": "b351c953546feb6ef8b2976828b1c36a294cd14d41a4b279848a57db33be4213",
+          "afterSha256": "b351c953546feb6ef8b2976828b1c36a294cd14d41a4b279848a57db33be4213"
+        },
+        "bottom": {
+          "same": true,
+          "beforeSha256": "9cce9bc4e6732363de94734048e0cd9df3a5b4accc01cd8927e84949d2eeca61",
+          "afterSha256": "9cce9bc4e6732363de94734048e0cd9df3a5b4accc01cd8927e84949d2eeca61"
+        },
+        "openPanel": {
+          "same": false,
+          "beforeSha256": "c5cadbd35a775cfea64049e3dceeb2f58ca5b3351553df9cb4f283cfa66fc7a8",
+          "afterSha256": "36c982d14950b2cc9fa36101f66833ff298f57db4c78bba59e7344dbad506fe5"
+        },
+        "panelInput": {
+          "same": false,
+          "beforeSha256": "1236ae593c00e7ecee96a781faf5a42e24e33b241a3b1167066393933cc35084",
+          "afterSha256": "c3a5244e332daa2df6bac2464532f3d09e189e3d4a1117a05b5d564d2d858056"
+        },
+        "closePanel": {
+          "same": true,
+          "beforeSha256": "6a4a2ebc2f730f0834973c8b42335193f99fcb1635ebe18b9e35b13070996e1f",
+          "afterSha256": "6a4a2ebc2f730f0834973c8b42335193f99fcb1635ebe18b9e35b13070996e1f"
+        }
+      },
+      "methodComparisonLimit": "Method text equality is supporting scope evidence, not a behavioral proof; changed methods were separately inspected.",
+      "appDiffStat": [
+        "21\t3\tpackage.json",
+        "104\t88\tsrc/recovery.ts",
+        "299\t61\tsrc/runtime.ts",
+        "112\t20\tsrc/tui/app.ts"
+      ]
+    }
+  ],
+  "humanOriginalReferenceChecks": [
+    {
+      "expectedSha256": "a9bcabcc6bccceec07424e9d201dde8a952fadecb8a4c08b6dca21b259427842",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/user-feedback-r5-short.json",
+      "bytes": 1020,
+      "sha256": "a9bcabcc6bccceec07424e9d201dde8a952fadecb8a4c08b6dca21b259427842"
+    },
+    {
+      "expectedSha256": "c18014803c6eb54327b36f20e725a309e462313d4497961133a4b66e7cb738ea",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-normal-partial.json",
+      "bytes": 2454,
+      "sha256": "c18014803c6eb54327b36f20e725a309e462313d4497961133a4b66e7cb738ea"
+    },
+    {
+      "expectedSha256": "b4129f7bad1714487d72a15aeeceb786d7b82253d57a453067840fdf1a7cbcc2",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-stop-readback.json",
+      "bytes": 1444,
+      "sha256": "b4129f7bad1714487d72a15aeeceb786d7b82253d57a453067840fdf1a7cbcc2"
+    },
+    {
+      "expectedSha256": "23a449a607adfd007d2ec5b6a1485de46c4d44d62c1eec445c97db8e11ecbb38",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r5/native-esc-readback.json",
+      "bytes": 1015,
+      "sha256": "23a449a607adfd007d2ec5b6a1485de46c4d44d62c1eec445c97db8e11ecbb38"
+    },
+    {
+      "expectedSha256": "3ab2e4188f7ddbf31b9773f4553df5a78785ed4657d883084496090e37485a6c",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-exit-first-pair-pass.json",
+      "bytes": 3788,
+      "sha256": "3ab2e4188f7ddbf31b9773f4553df5a78785ed4657d883084496090e37485a6c"
+    },
+    {
+      "expectedSha256": "25fcf1feaac36253021dc13a60dca7f49d0ded3118c8379df9ec03b63beecf6a",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-idle-c-first-pair-pass.json",
+      "bytes": 2562,
+      "sha256": "25fcf1feaac36253021dc13a60dca7f49d0ded3118c8379df9ec03b63beecf6a"
+    },
+    {
+      "expectedSha256": "161e8388a95bcd068f75b40b05a427d787f9dbec39cc248e029f636ca3c455d6",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-fault-pass.json",
+      "bytes": 2922,
+      "sha256": "161e8388a95bcd068f75b40b05a427d787f9dbec39cc248e029f636ca3c455d6"
+    },
+    {
+      "expectedSha256": "1e26039398d2b2438defcf7a0a80d297f87e6856f0723d365fb0461aa5f9c554",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-publication/native-supplement-partial.json",
+      "bytes": 5893,
+      "sha256": "1e26039398d2b2438defcf7a0a80d297f87e6856f0723d365fb0461aa5f9c554"
+    },
+    {
+      "expectedSha256": "0e6dd0029dbf036f00a3fd57b4a1bc592791723445f599892e539693ab662c2a",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-acceptance/native-grid-confirmed.json",
+      "bytes": 3098,
+      "sha256": "0e6dd0029dbf036f00a3fd57b4a1bc592791723445f599892e539693ab662c2a"
+    },
+    {
+      "expectedSha256": "c72fdc75434df6e80c9771a448db72ab14d93ec6a0703acb8db23ef3da28fb0a",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-confirmation/handoff.json",
+      "bytes": 3944,
+      "sha256": "c72fdc75434df6e80c9771a448db72ab14d93ec6a0703acb8db23ef3da28fb0a"
+    },
+    {
+      "expectedSha256": "183a9452b7803c5883d60907c192d2435a2414d5814043b49590604746e41309",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-confirmation/merge-integration-readback.json",
+      "bytes": 14400,
+      "sha256": "183a9452b7803c5883d60907c192d2435a2414d5814043b49590604746e41309"
+    },
+    {
+      "expectedSha256": "3eeea2a26cb44d6b8c88fff4930664e6941c91c9e5d0ef4280916a47e896c187",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z/environment.json",
+      "bytes": 641,
+      "sha256": "3eeea2a26cb44d6b8c88fff4930664e6941c91c9e5d0ef4280916a47e896c187"
+    },
+    {
+      "expectedSha256": "fdfc848a873b15082866969848626096f4200844674e8024b98b2fbd689432b0",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z/preparation.json",
+      "bytes": 30956,
+      "sha256": "fdfc848a873b15082866969848626096f4200844674e8024b98b2fbd689432b0"
+    },
+    {
+      "expectedSha256": "8553237a165a17528fe725d4bc925634e5365c4536b6dbe722f7f2c2d2240827",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z/input.jsonl",
+      "bytes": 44916,
+      "sha256": "8553237a165a17528fe725d4bc925634e5365c4536b6dbe722f7f2c2d2240827"
+    },
+    {
+      "expectedSha256": "cd267b1231ca6f919a2dbb50971d1cc1c3e57415fb2775ff3191d2140d9f44b8",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z/output.ansi",
+      "bytes": 90989,
+      "sha256": "cd267b1231ca6f919a2dbb50971d1cc1c3e57415fb2775ff3191d2140d9f44b8"
+    },
+    {
+      "expectedSha256": "5a53035fbec7981800d29945ad788897c2e9bfa246e6c32f062638a0ca1c205e",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z/machine.json",
+      "bytes": 124232,
+      "sha256": "5a53035fbec7981800d29945ad788897c2e9bfa246e6c32f062638a0ca1c205e"
+    },
+    {
+      "expectedSha256": "933c055019af92b085a1ba3c11c4d6e804dde01ffad16549d7e178014e8f0dfb",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z/operator.json",
+      "bytes": 562,
+      "sha256": "933c055019af92b085a1ba3c11c4d6e804dde01ffad16549d7e178014e8f0dfb"
+    },
+    {
+      "expectedSha256": "66bd9a45526a67786290acc269b087444c4fb0a2b664d7383befd62f172573c7",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z/workflow.json",
+      "bytes": 699,
+      "sha256": "66bd9a45526a67786290acc269b087444c4fb0a2b664d7383befd62f172573c7"
+    },
+    {
+      "expectedSha256": "098ae645902e410115bd5cff2488a984e168b97f3457ca994e64bff83b4c9d51",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z/provider-payloads.json",
+      "bytes": 5313,
+      "sha256": "098ae645902e410115bd5cff2488a984e168b97f3457ca994e64bff83b4c9d51"
+    }
+  ],
+  "allSelectedHumanHashesMatch": true,
+  "recordedHumanEnvironments": [
+    {
+      "reference": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-29-31-312Z/environment.json",
+        "bytes": 469,
+        "sha256": "e09f199b26c312df1e955207ee61b7b9d192e8798cd6cc2de592a384259777a2"
+      },
+      "recorded": {
+        "at": "2026-10-09T12:29:31.313Z",
+        "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+        "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manifest.json",
+        "node": "v26.8.2",
+        "platform": "darwin",
+        "arch": "arm64",
+        "TERM": "xterm-256color",
+        "TERM_PROGRAM": "Apple_Terminal",
+        "TERM_PROGRAM_VERSION": "488.7",
+        "locale": "zh_CN.UTF-8",
+        "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2\nBuildVersion:\t\t26B5101f\n"
+      }
+    },
+    {
+      "reference": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/width-repair/r6-grid-only/manual/2026-10-09T13-59-08-535Z/environment.json",
+        "bytes": 315,
+        "sha256": "7e63f4fba56fa942146f36ba4c72e03fc7863c28816ce2240c9c6406c1283d2d"
+      },
+      "recorded": {
+        "at": "2026-10-09T13:59:08.537Z",
+        "node": "v26.8.2",
+        "platform": "darwin",
+        "arch": "arm64",
+        "TERM": "xterm-256color",
+        "TERM_PROGRAM": "Apple_Terminal",
+        "TERM_PROGRAM_VERSION": "488.7",
+        "locale": "zh_CN.UTF-8",
+        "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2\nBuildVersion:\t\t26B5101f\n"
+      }
+    },
+    {
+      "reference": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manual/2026-10-09T15-56-54-607Z/environment.json",
+        "bytes": 641,
+        "sha256": "3eeea2a26cb44d6b8c88fff4930664e6941c91c9e5d0ef4280916a47e896c187"
+      },
+      "recorded": {
+        "at": "2026-10-09T15:56:54.610Z",
+        "candidate": "f67a2edd377d37e3f13bbc0da273028103695d6f",
+        "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/manifest.json",
+        "manifestSha256": "4dd92b179e26ec29f1724bc256885fcb55b209addfcc4a25dadc59aef46ff693",
+        "runnerSha256": "a5b280f8f4244c4b50498cff69db734f442d4742d161e3c33a879458d943cb10",
+        "packageRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r2/install/node_modules/pi-durio",
+        "node": "v26.8.2",
+        "platform": "darwin",
+        "arch": "arm64",
+        "TERM_PROGRAM": "Apple_Terminal",
+        "columns": 112,
+        "rows": 35,
+        "paidProvider": "NOT RUN"
+      }
+    }
+  ],
+  "sourceReferences": [
+    {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-16/acceptance-r6.json",
+      "bytes": 4392,
+      "sha256": "4c60fd3dd5476bf1bbeb869b4fbc97c849a63073d47ce087631421d693089365"
+    },
+    {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-17/acceptance-r2.json",
+      "bytes": 3400,
+      "sha256": "96c22fad807d9498b0d49fb75d16e356ed1dafecd94d6215c883f02fcb2d16d1"
+    },
+    {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/review/f26ae8f/evidence-applicability.json",
+      "bytes": 22510,
+      "sha256": "36da7ef8eec3f12fb22a853206a92ee750a43f1b5c65df8e4a91b59fb7291da3"
+    },
+    {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/review/f26ae8f/applicable-check-gate.json",
+      "bytes": 8135,
+      "sha256": "652ef66e419d30a5a960d0d97506f445cba127892866693b2d776d6d1ca4996c"
+    },
+    {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-31/final-9aed1af/contract-evidence-index-r2.json",
+      "bytes": 334921,
+      "sha256": "a8022a362c954c916f300de88f3b46b86f6c7fd44b966fcbf9f5165c5264a78c"
+    },
+    {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-31/provider-terminal-repair-r1/measurement-summary.json",
+      "bytes": 8662,
+      "sha256": "3a81bae91bd91526d27dd50c01bba9b292faa8cfdf8ef69a9b5cc000710470dc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/candidate-identity.json",
+      "bytes": 5258817,
+      "sha256": "ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091"
+    }
+  ],
+  "newIssue30References": {
+    "actual-selection.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/actual-selection.json",
+      "bytes": 834,
+      "sha256": "48a40d980bed8f81ccbc9c06888e432bffdce084bcf3320150c58a4bd507317e"
+    },
+    "execution-start.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/execution-start.json",
+      "bytes": 1130,
+      "sha256": "cb512d046d946b087482fd689d6102a87ea5df09b61b1dd1c7ca9507fc87086c"
+    },
+    "execution-result.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/execution-result.json",
+      "bytes": 771,
+      "sha256": "b035091f16ab9f2412a77a807355e57c03bfccf6152d557111dd2692ec5ac8e8"
+    },
+    "reopened-decision.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/reopened-decision.json",
+      "bytes": 47007,
+      "sha256": "3944a175ba2181e09b94d1bc016907da3918cdd0c46bbae479ebc904c8b0410e"
+    },
+    "reopened-report.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/reopened-report.json",
+      "bytes": 110998,
+      "sha256": "86027787eb66c5a539fd8dbb1eb4ed74b5069fa4cc85b18492941acb20d2c724"
+    },
+    "formal-file-readback.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/formal-file-readback.json",
+      "bytes": 1021,
+      "sha256": "06978db8667e9560e4c36f8573057a905fd1e15be6d20ac41829ce4bc8f47e64"
+    },
+    "new-records-index.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/new-records-index.json",
+      "bytes": 3460,
+      "sha256": "8657bcce71a4d4510f4d32cbedbfd75c0395cc3fef873203a21b3aaf89217894"
+    },
+    "execution-exit.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/execution-exit.json",
+      "bytes": 397,
+      "sha256": "866ce3c827bbb10a2dcbdcb3eae201c0cb85ecb6f23ec52bd859e0a623994a27"
+    },
+    "postrun-readback/report.json": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/report.json",
+      "bytes": 20333,
+      "sha256": "52eea9ebdbdae1f25a7cf1811f4ca53144b962bd9c82299c1bcbe5c07351e3fb"
+    }
+  },
+  "formalWritebackAfterReadback": [
+    {
+      "expectedSha256": "45e016afe980df19159fc0679a6e44d88838a7a5afc398820309b576884f003c",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project/clamp.ts",
+      "bytes": 111,
+      "sha256": "45e016afe980df19159fc0679a6e44d88838a7a5afc398820309b576884f003c"
+    },
+    {
+      "expectedSha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project/check.mjs",
+      "bytes": 357,
+      "sha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d"
+    },
+    {
+      "expectedSha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project/README.md",
+      "bytes": 129,
+      "sha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce"
+    },
+    {
+      "expectedSha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+      "match": true,
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project/package.json",
+      "bytes": 87,
+      "sha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1"
+    }
+  ],
+  "minimumRemainingExecutionPlan": [
+    {
+      "id": "M1",
+      "kind": "local process-cold startup",
+      "repeat": "7 help + 7 empty readonly history queries",
+      "harness": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/process-startup.mjs",
+      "reason": "Compiled imported provider module changed; old time not new-candidate measurement."
+    },
+    {
+      "id": "M2",
+      "kind": "native idle",
+      "repeat": "3 launches, 30s idle each, 1s RSS samples",
+      "harness": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-idle.mjs",
+      "reason": "Current first-frame and idle RSS missing."
+    },
+    {
+      "id": "M3",
+      "kind": "native long session/storage/large output",
+      "repeat": "60 declared read/edit/check rounds over >=5min +1MiB output +next normal task",
+      "harness": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-session.mjs",
+      "reason": "Current representative RSS, local workload time and raw storage growth missing; one native dataset satisfies these together, headless duplicate unnecessary."
+    },
+    {
+      "id": "M4",
+      "kind": "readonly queries and full acquisitions to new output",
+      "repeat": "30 queries +5 exports on M3 retained dataset",
+      "harness": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/readonly-data.mjs",
+      "reason": "Current local acquisition/write/query time missing; preserve source-before/after equality."
+    },
+    {
+      "id": "N1",
+      "kind": "targeted native cold recovery",
+      "repeat": "one fresh local fixture stopped/frozen queue -> cold reopen -> end -> new task -> old queue remains frozen -> raw/stty restored",
+      "harnessBase": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/scripts/recovery-start-terminal-validation.mjs",
+      "reason": "openRecovery/recoveryText now includes bounded inspection/pagination and runtime/recovery implementation changed after last #17 human session. Reuse old operator workflow after exact candidate/fixture rebinding; no provider, VM, old-fixture mutation, or complete IME rerun."
+    }
+  ],
+  "executionAuthorization": "PREPARATION_ONLY; no executable new freeze/config created, no heavy window allocated. Coordinator must schedule nonoverlap/native operator availability before any workload. No new paid grant requested.",
+  "noRepeatNeeded": [
+    "Whole deterministic suite",
+    "Four paid coding cases",
+    "Paid improve analysis/selected execution/VM regression",
+    "Native successful composition or old 60-round headless run",
+    "Unchanged human IME/clipboard/grapheme core scenarios"
+  ],
+  "preservedLimitations": [
+    "npm11.19.1 bundled file npm ls and consumer offline npm ci FAIL",
+    "Historic human/automatic first failures and unknowns",
+    "1,056,768 old UNKNOWN reserved tokens, 45 physical requests,130611 known;1.4248548USD upper estimate not bill",
+    "Model alias/fingerprint not immutable weights",
+    "Actual model backend for this agent NOT_ATTESTED",
+    "Technical acceptance and user daily acceptance separate; Issues OPEN/PR Draft/no release"
+  ]
+}

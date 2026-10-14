@@ -1,0 +1,262 @@
+{
+  "ticket": 24,
+  "state": "IMPLEMENTED_AND_LOCALLY_VERIFIED_FOR_COORDINATOR_REVIEW",
+  "at": "2026-10-09T18:50:58.176091+00:00",
+  "productCommit": "6c150099a0cd8634b9f18462d62c3f4685f89476",
+  "productTree": "824d27eea1bf12083630e5afcf1af10a696ba81c",
+  "integrationBase": "3316841271c0181425795a26de51474bdbfaa37b",
+  "branch": "codex/pi-durio-v1-issue-24",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-24",
+  "scope": "PI-DURIO-V1-SPEC-r1 I4 I5 I6 I7 I10 T1 T4; structured selection, validate-only and suppression. Formal execution explicitly unsupported until #25.",
+  "implementationCommits": [
+    "a98e371",
+    "3fe2ec5",
+    "6c150099a0cd8634b9f18462d62c3f4685f89476"
+  ],
+  "checks": [
+    {
+      "name": "Required full npm run check before basis/viewport repair",
+      "result": "FAIL_REPAIRED_BY_TARGETED_CHECKS",
+      "pass": 177,
+      "fail": 1,
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/full-check-01.log",
+        "sha256": "c15833cb8267ada1ebf3060775bd47881d521f9af663790bd0e09115e00153c1",
+        "bytes": 27228
+      },
+      "explanation": "All unchanged passes reused; new TUI test observed journal completion before ownership release and UI completion. Original failure preserved."
+    },
+    {
+      "name": "Scoped decision and existing improve tests before final basis/viewport extension",
+      "result": "PASS",
+      "pass": 18,
+      "fail": 0,
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/green-final-focused-01.log",
+        "sha256": "6ad2fb5658fb368d258ce51a6848d7ce76017e19184e15deab49f7e5439e53d6",
+        "bytes": 2470
+      }
+    },
+    {
+      "name": "Final exact decision, basis, restricted execution, history, aggregate and narrow viewport checks",
+      "result": "PASS",
+      "pass": 13,
+      "fail": 0,
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/green-final-decisions-01.log",
+        "sha256": "4b0d77153d9aa7730febb1ed33aa84517229ef46a728485f1a578d0c96292ec5",
+        "bytes": 1795
+      }
+    },
+    {
+      "name": "Repaired actual TUI command path and read-only history",
+      "result": "PASS",
+      "pass": 1,
+      "fail": 0,
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/green-tui-02.log",
+        "sha256": "b186621f643f2e866e500d3228db9f18b0f9b3ffb6cdaf78b76386e8a4c729c4",
+        "bytes": 240
+      }
+    },
+    {
+      "name": "Independent installed public API/cold CLI/actual VM and fresh comparison",
+      "result": "PASS",
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/report.json",
+        "sha256": "4caf3808783c757c18020d76662eec93bf8fd2751985025696bea952cd8c6745",
+        "bytes": 1368
+      }
+    }
+  ],
+  "identity": {
+    "evidence": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/candidate-identity.json",
+      "sha256": "98685804d32b67e57c4bd0313851bf3a9d380b971807dfd13d0f0d99d3d483ed",
+      "bytes": 6006068
+    },
+    "sourceBuild": {
+      "path": "dist/execution/source-build.json",
+      "sha256": "e65f5a5a86bdb88f918952acb51cf8b255a44333aa64bfc6891ea0727e4afaf7",
+      "inputs": 125,
+      "compiler": 132,
+      "outputs": 186
+    },
+    "archive": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/source.tar.gz",
+      "bytes": 2270959,
+      "sha256": "76fe9ea914eda5e66c39f9a2c7aa18f84236d54b91fcffabc5a3c35300035bad"
+    },
+    "package": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/pack/pi-durio-0.1.0.tgz",
+      "bytes": 23403640,
+      "sha256": "8e31c29f9e188d20936dd7ef7cd1b6377bd59f8d4d0381f40047fffb102d60aa"
+    },
+    "sourceFiles": 126,
+    "compiledFiles": 262,
+    "packagedFiles": 12851,
+    "installedEntries": 12855,
+    "packageFileBytesExactMatch": true,
+    "installedCompiledMatch": true
+  },
+  "linuxPreparation": {
+    "evidence": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/linux-prepare.log",
+      "sha256": "80e16d8e15a54effbb560c1cc4573073c8990ae7b74395e8c9bdd2a9c36df3f7",
+      "bytes": 1219
+    },
+    "report": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/linux-runtime/preparation-reuse.json",
+      "sha256": "831976442616db8e687e3c08abd0f1e4cb346c66a654394a55cdcb232823c710",
+      "bytes": 1218
+    },
+    "scope": "Exact previously verified dependency bytes/lock only; all current product dist/package/vendor bytes copied from the independent installation. Previous outcomes never reused."
+  },
+  "installedDemo": {
+    "result": {
+      "status": "PASS",
+      "method": "Independent npm installation public API plus cold CLI; actual restricted VMs and fresh eval; controlled offline provider",
+      "reportRevision": "adcc436d4d2c6e900ae28f1b09cb1cd905885ce04eac5d18ae90bdaca338ec47",
+      "direct": "completed",
+      "combination": [
+        "individual A passed",
+        "individual B passed",
+        "combination failed",
+        "independent remainder explicitly continued"
+      ],
+      "fresh": {
+        "state": "completed",
+        "effect": "无明显差异",
+        "counts": {
+          "planned": 2,
+          "started": 2,
+          "completed": 2,
+          "gradable": 2,
+          "passed": 2,
+          "passRate": 1,
+          "completionRate": 1,
+          "coverageRate": 1
+        },
+        "requests": 8,
+        "asOf": 329,
+        "dataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/fresh-work/prompt/check-0/eval-data",
+        "planId": "improve-5060e162d8d085282185ace4"
+      },
+      "configFormattingEquivalence": "PASS; semantic change retained as FAIL and follow-up not-run",
+      "crossRootFixRetentionReadback": "PASS",
+      "originalTargetsByteIdentical": true,
+      "duplicateAndColdViewReadOnly": true,
+      "suppression": "defer unchanged/changed explanation; do-not-suggest reworded/new ID/more history; explicit restore",
+      "boundary": "Formal writeback/activation unsupported; paid/provider quality NOT RUN; native aggregate #31/#32 NOT RUN"
+    },
+    "evidence": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/report.json",
+      "sha256": "4caf3808783c757c18020d76662eec93bf8fd2751985025696bea952cd8c6745",
+      "bytes": 1368
+    },
+    "fresh": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/fresh-result.json",
+      "sha256": "9dd73299f6b749bdb1c5aca7b180f0fcfeb18554d3cdec3320b98bae0ff1481d",
+      "bytes": 317538
+    },
+    "crossRoot": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/cross-root-readback.json",
+      "sha256": "5af46f2e702bd8351a744f18609659c00965c7d71df49adced5c08d95fc2cc57",
+      "bytes": 6941
+    },
+    "originalTargets": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/formal-preservation.json",
+      "sha256": "f9d624ec061dc60fe252fd9040a30fccf56a42eb34a76cbac69e4c4ed2a8a79e",
+      "bytes": 1262
+    },
+    "readonly": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/readonly-inventory.json",
+      "sha256": "c3bfd1a0134730bec17777503629ef4fdcae46687c9dcc98db8bc34b7e8bbe4a",
+      "bytes": 4636415
+    },
+    "combinationFirstFailure": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/combination-first-failure.json",
+      "sha256": "f795481c8e7d6e14379fa36fbf4b0c643899c2cc40f50ca4267b07bc869966e2",
+      "bytes": 42367
+    },
+    "combinationContinuation": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/combination-continued.json",
+      "sha256": "98821042c3d1954c845bf3354374a509034a2d1da750cb8d691e0b62706c4743",
+      "bytes": 74058
+    },
+    "configSemanticFailure": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/config-semantic-first-failure.json",
+      "sha256": "68baa2f225e569cd1a08206b90c9c4a94741c3e363b8534ad47de299846fb273",
+      "bytes": 36423
+    },
+    "suppression": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/installed-demo/suppression.json",
+      "sha256": "d1bb49801e91c51ebfcad6b5ab650a3a66b9b559add0c0f6beebd4fa01d63c49",
+      "bytes": 59437
+    }
+  },
+  "firstFailures": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/red-decision-01.log",
+      "sha256": "7d01aa7c95b71cf15c50030b3df6a110860c7fbdcbaa0799be454e5c22c80306",
+      "bytes": 862
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/red-validation-02.log",
+      "sha256": "949d118a71b82d1c1dfc0737750f72cbc4f345d077183b94a13f2e82bca2d961",
+      "bytes": 1126
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/green-history-01.log",
+      "sha256": "d43b7dc1d99bcc110fc9497fce0757c959d9797761fa5574366b372f26f52241",
+      "bytes": 4937
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/red-cross-root-01.json",
+      "sha256": "97dc7fa1a925945fd797f6cb9fdcd6c019eb9eff898d5c105c0bcf3f4e466bc0",
+      "bytes": 500446
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/red-basis-01.log",
+      "sha256": "d7fa82a61c5da6f1a67240797bb3a5557ce16b4e048b9b32e14c7656a0b645ff",
+      "bytes": 1890
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/red-narrow-01.log",
+      "sha256": "ca92f36a3e4fad4b5acfd0fe231ead9d28c1d6c8924036a0ddb8000e729cc60f",
+      "bytes": 1332
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/full-check-01.log",
+      "sha256": "c15833cb8267ada1ebf3060775bd47881d521f9af663790bd0e09115e00153c1",
+      "bytes": 27228
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/green-tui-01.log",
+      "sha256": "d471117950541cb4228e92264111d3b4baccc6988a5e29204b2b08723ade0c65",
+      "bytes": 832
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24/r1/install.log",
+      "sha256": "15702d7fa423ec9ff542dc1755a9f5eba7cc110382ddb4b6964944651b775d11",
+      "bytes": 721
+    }
+  ],
+  "failureHistoryNotes": [
+    "Old child report embedded 1440 foreign BlobRef occurrences in parent improve.check/validation; reproduction read only, old fresh-development-01 unchanged. Fixed with root-qualified plan identity plus opaque parent snapshot.",
+    "Full check 177/178 retained. First attempted TUI repair waited on a transient notice overwritten by normal refresh; that targeted failure also retained. Final test waits the public idle status and disappearance of submitting text.",
+    "Initial npm install was dispatched before asynchronous npm pack completed and failed ENOENT. After pack success install-02 completed, full byte identity verified."
+  ],
+  "downstream": {
+    "issue25": "Consume all necessary checks, fixed combined effects, explicit user choice and own exact conditions. no-difference/insufficient benefit cannot enable performance change. No activation/writeback authority is inferred.",
+    "issue26": "Generic new source/runtime build and fresh runtime deployment are not provided here. Direct/regression/resource supported; prompt/config instruction fresh binding is exact; unsupported bindings reject.",
+    "issue28": "Read improve.eval root-qualified child plan only after declared path/group/check/plan validation. Parent reportOrigin.asOf is child snapshot cutoff; planSource.sequence is child plan record sequence. Parent fixing protects snapshot only; child attachment availability is independent."
+  },
+  "remaining": [
+    "Paid DeepSeek/provider quality #30 NOT RUN.",
+    "Native aggregate Terminal product acceptance #31/#32 NOT RUN.",
+    "No main merge, release, issue closure or unapproved provider spend.",
+    "No general stochastic or ordinary-host performance claim from this controlled comparison."
+  ],
+  "evidenceDirectory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-24"
+}

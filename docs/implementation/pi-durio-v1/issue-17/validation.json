@@ -1,0 +1,85 @@
+{
+  "at": "2026-10-09T14:53:16.048089+00:00",
+  "candidate": "66c7fcafb34e722eafd738140f9305e5a235db80",
+  "status": "OFFLINE_VERIFIED_NATIVE_PENDING",
+  "checks": [
+    {
+      "name": "#17 prior full check",
+      "result": "79/79 PASS",
+      "applicability": "before drain-only follow-up change; unaffected checks reused"
+    },
+    {
+      "name": "final #17 queue/close delta",
+      "result": "6/6 PASS",
+      "applicability": "after admission drain and follow-up stop correction; unchanged in combination"
+    },
+    {
+      "name": "#17 + #18 combination",
+      "result": "18/18 PASS",
+      "command": "node --test dist/test/tui.test.js dist/test/history-view.test.js dist/test/control-facts.test.js"
+    },
+    {
+      "name": "combined build",
+      "result": "PASS npm run build; pack prepack build PASS"
+    },
+    {
+      "name": "independent installed CLI",
+      "result": "PASS actual control stdin/stdout, 2 accepted tasks, distinct follow-up run, no run assigned at acceptance"
+    },
+    {
+      "name": "independent installed queries",
+      "result": "PASS history/queue/evidence/trace/usage; follow-up admission/target retained; all 160 source files byte-identical before/after reads"
+    },
+    {
+      "name": "installation binding",
+      "result": "PASS 78 compiled files and execution lock identical to build; 12725 exact manifest files verified before/after headless smoke"
+    },
+    {
+      "name": "native runner rejection",
+      "result": "PASS non-Terminal invocation refused; no manual evidence created"
+    }
+  ],
+  "native": "NOT RUN; operator card pending",
+  "paidProvider": "NOT RUN",
+  "inheritedApplicability": [
+    "#16 native rendering/IME/copy/40x12 only within prior recorded unchanged paths",
+    "No new #18 standalone native gate; eventual integrated history/queue observation is retained for #31"
+  ],
+  "mergeResolution": {
+    "conflicts": [
+      "src/cli.ts help lines",
+      "src/tui/app.ts command list and panel unions"
+    ],
+    "preserved": "#18 readonly history/error catch/narrow-window navigation; #17 controls/recovery/coding; source seam equals #18 accepted integration byte for byte"
+  },
+  "limits": [
+    "compact/improve handler execution belongs to later tickets; this candidate persists and freezes management requests at its barrier",
+    "No native acceptance, v1 acceptance, full independent review, main merge, push, release or issue closure"
+  ],
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/preintegration-validation-binding.json",
+      "sha256": "47adfc4fae522f4376abe0f33f58fa328193359233565e44bca3064ef1fc6ede"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/combined-build-r1.log",
+      "sha256": "508ed540e4756059a042b656881f240961a2c67c2068b1391000950f817c8f17"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/combined-affected-r1.log",
+      "sha256": "ca9530d686cabff86d153f58228a215a61f530229f7cdb76d334d15748b5552c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/source-binding.json",
+      "sha256": "34252d18fe6417e13fbf2aba616cc88c363ed6a19d50661960cbc173202a756e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/combined-install-validation.json",
+      "sha256": "9457c13291bd11c066762c189eb8e7f8be4d2a49772d499df0b8fa3ac7867bb0"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-17/candidate-r1/non-terminal-rejection.log",
+      "sha256": "a2f07b3665d59461193d89f07d1952f492f0304d9a84483c77d283604ffc8c3e"
+    }
+  ]
+}

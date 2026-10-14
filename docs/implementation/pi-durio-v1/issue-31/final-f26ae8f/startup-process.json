@@ -1,0 +1,17 @@
+{
+  "startedAt": "2026-10-10T10:59:19.602023+00:00",
+  "endedAt": "2026-10-10T10:59:22.639012+00:00",
+  "arguments": [
+    "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/process-startup.mjs",
+    "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install",
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/startup-r1"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 3.0368121250066906,
+  "stdout": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/startup-r1.stdout",
+  "stderr": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/startup-r1.stderr",
+  "newProviderRequests": 0,
+  "vmStarts": 0,
+  "nativeTerminal": "NOT CLAIMED"
+}

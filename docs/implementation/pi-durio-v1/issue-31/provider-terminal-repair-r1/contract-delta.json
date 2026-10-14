@@ -1,0 +1,142 @@
+{
+  "schema": "pi-durio.issue-31.contract-delta.v1",
+  "at": "2026-10-10T07:20:30.787644+00:00",
+  "status": "PARTIAL_TECHNICAL_ACCEPTANCE_NOT_COMPLETE",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "previousExecutionCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "baseIndex": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/contract-evidence-index-r2.json",
+    "bytes": 334921,
+    "sha256": "a8022a362c954c916f300de88f3b46b86f6c7fd44b966fcbf9f5165c5264a78c"
+  },
+  "baseCounts": {
+    "contracts": 62,
+    "acceptanceCases": 22,
+    "metricCases": 7
+  },
+  "method": "Additive bounded observations only. Base contract/ACC/MET rows, source text, statuses, failures and original execution identities remain unchanged; no automatic whole-contract PASS promotion. ACC/MET use existing contract_links plus these observations.",
+  "observations": [
+    {
+      "ids": [
+        "S2",
+        "S4",
+        "E1",
+        "E2",
+        "E6",
+        "V6",
+        "V7",
+        "I1"
+      ],
+      "observation": "LIVE-USD3-R3-01 repaired at f26ae8f; complete raw SSE usage/DONE plus successful normal SDK cleanup settles known. Final boundary11, Pi runtime2 and raw952→7 replay PASS, independent Standards/Spec PASS; original host UNKNOWN is unchanged.",
+      "remaining": "No new real improve success yet. Failure/abort/missing usage still unknown; no provider-model immutable weight attestation."
+    },
+    {
+      "ids": [
+        "V1",
+        "V2",
+        "V5",
+        "V9",
+        "A1"
+      ],
+      "observation": "Four distinct fixed cases each have PASS across two actual batches on9aed1af; independent review checked25 original raw responses with repaired parser and permits bounded behavior reuse.",
+      "remaining": "Original first batch remains started2/completed1/gradable1/passed1 of4; old multi-file failure/UNKNOWN/not-run retained. Not new-candidate real rerun or general performance claim. Real improve chain outstanding."
+    },
+    {
+      "ids": [
+        "S1",
+        "A2",
+        "M2",
+        "M7"
+      ],
+      "observation": "New fixed-candidate source/package/installed inventory measured: product80files7531physicalLines, compressed19222769B, installed90158076logicalB. Old timing/RSS remain9aed1af.34 actual host requests61560known+1056768reservedUNKNOWN retained.",
+      "remaining": "No numerical lightweight threshold, invoice observation or new-candidate timing/RSS equality claim. Full technical and daily acceptance remain pending."
+    },
+    {
+      "ids": [
+        "S3",
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7",
+        "E7",
+        "E8",
+        "I4",
+        "I7"
+      ],
+      "observation": "Independent review allows bounded reuse of unchanged native automated behavior; 62 old native configs bypass providerBoundary,3 budgeted synthetic improve responses compatible. Original native first failure and targeted follow-up preserved.",
+      "remaining": "No new human IME/copy/mouse/small-grid observation or human daily acceptance; original resource/timing values retain original execution candidate."
+    },
+    {
+      "ids": [
+        "I2",
+        "I5",
+        "I8",
+        "I9",
+        "I10",
+        "A3"
+      ],
+      "observation": "Source repair and offline checks are complete. Previous real improve report remains incomplete with0candidates; future analysis proposal is a new fixed batch.",
+      "remaining": "Fresh one-start paid authorization, actual candidate/report identity, explicit human selection, applicable candidate validation/writeback-or-effective/reopen, and final technical/user gates required."
+    }
+  ],
+  "unaffectedContractIds": [
+    "A4",
+    "A5",
+    "E10",
+    "E3",
+    "E4",
+    "E5",
+    "E9",
+    "I3",
+    "I6",
+    "M0",
+    "M1",
+    "M3",
+    "M4",
+    "M5",
+    "M6",
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "S5",
+    "S6",
+    "V3",
+    "V4",
+    "V8"
+  ],
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/review.json",
+      "bytes": 14768,
+      "sha256": "1f2e634e921422680862d079e8a47fd94d752cfc60ee203fc445d1a32fbc7244"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/evidence-applicability.json",
+      "bytes": 22510,
+      "sha256": "36da7ef8eec3f12fb22a853206a92ee750a43f1b5c65df8e4a91b59fb7291da3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/provider-terminal-repair-r1/measurement-summary.json",
+      "bytes": 8662,
+      "sha256": "3a81bae91bd91526d27dd50c01bba9b292faa8cfdf8ef69a9b5cc000710470dc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/report.json",
+      "bytes": 144843,
+      "sha256": "ba624384488d5e57c6baf87fc7957a646173d9d57a4df6f3cfbcca124ec15e1d"
+    }
+  ],
+  "remaining": [
+    "New real improve analysis and exact candidate human choice/validation/effect/reopen",
+    "Full technical acceptance, including explicit disposition of any final manual Terminal requirements",
+    "User Mac trial and explicit daily-use acceptance"
+  ],
+  "paidAuthorization": "NO_NEW_START_AUTHORIZED"
+}

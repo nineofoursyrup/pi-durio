@@ -1,0 +1,179 @@
+{
+  "issue": 15,
+  "ticket": "PI-DURIO-V1-TICKETS-r1:T05",
+  "spec": "PI-DURIO-V1-SPEC-r1",
+  "status": "LOCAL_ACCEPTANCE_PASS",
+  "code_commit": "057fc9ea5f53c887553ff4a7f1c8ab405856b56e",
+  "code_tree": "9327ce28c95cb43392908d34ba781f47a9321d33",
+  "integration_base": "9df8ff03b6d4df6c558ba0810f07f2390c530bcd",
+  "candidate_manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/candidate-manifest.json",
+    "sha256": "09320f8fe947336a7ddf4af6e98f74079745f54c3ee1216d76144be11e88a13b",
+    "bytes": 26486
+  },
+  "source_archive": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/source-057fc9e.tar.gz",
+    "sha256": "c0e1ada096ac7c3bb8ade33b31b220509104816264de7504ae46fd897e7cf936",
+    "bytes": 882498
+  },
+  "compiled_archive": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/compiled-057fc9e.tar.gz",
+    "sha256": "6004b1baa153271665b6e7b6548358e7905183e9b48c195825842fc0af6be62b",
+    "bytes": 136406
+  },
+  "installation_manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/installation-manifest.json",
+    "sha256": "1a124c609801e5c0905c853c86b216729a863a215ae875dd44f5f8d9eeba0511",
+    "bytes": 3152817
+  },
+  "evidence_index": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/evidence-index.json",
+    "sha256": "87e562010884c940b1fd83977b99c854f2e31a4c86f9592bc9dcdbad452f50d2",
+    "bytes": 1234149
+  },
+  "test_artifacts_index": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/test-artifacts-index.json",
+    "sha256": "cf43953797638feb6dcd5bba35d3010fdd7f0a3e696aba750e727e62b5028ff9",
+    "bytes": 448912
+  },
+  "checks": [
+    {
+      "command": "npm ci",
+      "result": "PASS",
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/install-01.log",
+        "sha256": "c4b98fb267b7a8e676b899d839ce4dc87dbaeac673a4b9e7c27aac794c046e2e",
+        "bytes": 235
+      }
+    },
+    {
+      "command": "npm run check",
+      "result": "PASS",
+      "tests": 59,
+      "passed": 59,
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/check-final-02.log",
+        "sha256": "1e564a2533e1808cfc3eda1d422797af5e8338dfd67e445fae331acb2ff444ee",
+        "bytes": 6973
+      }
+    },
+    {
+      "command": "node scripts/demo-recovery.mjs EVIDENCE_DIRECTORY",
+      "result": "PASS",
+      "cases": 4,
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/demo-final-02.log",
+        "sha256": "fc1a57b1c6fa0344a4f1dcb42b7721d2c8980746a83d33a88ebe68df32e711ad",
+        "bytes": 117
+      },
+      "summary": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/demo-cctHt2/summary.json",
+        "sha256": "26ec418940c33ad314d377111ed7482873464eada17990b28129c49ff7b8138f",
+        "bytes": 2774
+      }
+    },
+    {
+      "command": "node --test dist/test/query.test.js",
+      "result": "PASS",
+      "tests": 2,
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/host-lock-green-01.log",
+        "sha256": "9d95eab31e091354b2017f69afcb74049bd04874f8d495f1a453c0071ea342ac",
+        "bytes": 322
+      }
+    },
+    {
+      "command": "node --test --test-name-pattern='headless SIGINT and SIGTERM' dist/test/lifecycle.test.js",
+      "result": "PASS",
+      "tests": 1,
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/lifecycle-lock-green-01.log",
+        "sha256": "601ad282716dc04baf013972b8bcc4ee96220e514d6392fd113c8d89d29294c0",
+        "bytes": 214
+      }
+    },
+    {
+      "command": "node EVIDENCE_DIRECTORY/probe-startup-03.mjs",
+      "result": "PASS",
+      "cases": 8,
+      "note": "All accepted; SIGINT 130 and SIGTERM 75. Fixed build.",
+      "report": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-15/startup-probe-03.json",
+        "sha256": "542fa9ce32cfada9334c3c5f4ccd655244c3ad3f07604ce4066bb31be9976b2b",
+        "bytes": 12015
+      }
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "requirements": [
+    {
+      "acceptance": 1,
+      "coverage": [
+        "reopening committed results scans all durable receipts without rewriting sources, replay or usage",
+        "permission/configuration/content drift stays read-only; explicit end quarantines the exact old store and permits a new task",
+        "a retained owner needs observed managed cleanup as well as explicit disposition; raw crash and active owner remain fenced"
+      ],
+      "evidence": "test/recovery.test.ts; final check; immutable source DB hash assertions and retained fixtures"
+    },
+    {
+      "acceptance": 2,
+      "coverage": [
+        "the whole Harness is checked: managing one run never schedules another conversation or queued submission",
+        "foreign-pending standalone demo"
+      ],
+      "evidence": "all public tasks/submissions/entries/LiveDoc checked; resume/submit/compact/wait/abort unsupported as raw recovery actions; runtime exports no Harness; zero calls and unchanged durable files"
+    },
+    {
+      "acceptance": 3,
+      "coverage": [
+        "explicit continuation after a pre-dispatch exit preserves the original unknown and performs the authorized effect once",
+        "a completed effect without its durable commit continues with read-only capabilities even for equivalent new calls",
+        "reopening committed results scans all durable receipts without rewriting sources, replay or usage"
+      ],
+      "evidence": "real Pi Harness/SQLite/file oracle; four tools remain default unsafe; tool wrapper and Environment enforce readonly continuation"
+    },
+    {
+      "acceptance": 4,
+      "coverage": [
+        "unknown post-effect outcome needs durable headless input; an explicit retry keeps original failure and its duplicate risk",
+        "before-dispatch/after-effect/committed standalone demos"
+      ],
+      "evidence": "explicit request id + decision id + source snapshot; original unknown separate from user resolutions and recovery.closed; repeated decision zero extra calls"
+    },
+    {
+      "acceptance": 5,
+      "coverage": [
+        "permission/configuration/content drift stays read-only; explicit end quarantines the exact old store and permits a new task"
+      ],
+      "evidence": "retained actual build bytes plus current installed production inventory; exact platform and effective configuration; missing/changed content blocks; source-bound end permits separately accepted new task"
+    },
+    {
+      "acceptance": 6,
+      "coverage": [
+        "headless recovery saves a machine-readable input request and true readonly inspect changes no source",
+        "cross-store admission gaps use the committed request identity and never blindly submit it again",
+        "a stale decision cannot consume new facts; model retries retain unknown usage and their eight-attempt budget"
+      ],
+      "evidence": "exit 75 structured reasons/options; host or separate owner report saved; admission gap positive/negative, eight-attempt cap, unknown cost and original failure preserved"
+    }
+  ],
+  "first_failures": [
+    "docs/implementation/pi-durio-v1/issue-15/first-failures.md",
+    "check-final-01.log 57/58 passed; SQLite writer/read-viewer contention",
+    "host-lock-red-01.log explicitly reproduced SQLITE_BUSY",
+    "startup-probe-02.json retained invalid concurrent-build probe; not acceptance evidence",
+    "demo-ZsYQDn and demo-h3AuRY prior candidates retained"
+  ],
+  "limitations": [
+    "All provider interaction uses explicitly offline deterministic transports. Paid/live provider and real billing NOT RUN.",
+    "No TUI code edited; #17 wires the same recovery facts. This is not native Terminal acceptance.",
+    "Unknown foreign/same-session extra pending or raw SIGKILL without trusted close receipts remains BLOCKED; inspect/external-verification responsibility is explicit, not silently ended.",
+    "Owner disposal needs original storage-closed/managed-settled evidence, same token, gone local holder and explicit risk acknowledgement; PID absence/user consent alone is insufficient. External/remote effects may remain unknown.",
+    "Production file inventory adds startup/recovery I/O; #31 owns lightweight measurement. Inspect remains source-readonly.",
+    "Legacy artifacts without recoveryProtocol 1 and retained production inventory remain readonly/end-only. Original installation must still be obtainable; inventory does not reconstruct missing content.",
+    "No push, PR/tracker change, main merge, issue closure or release by this agent."
+  ]
+}

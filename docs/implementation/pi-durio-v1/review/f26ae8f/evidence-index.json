@@ -1,0 +1,55 @@
+{
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/review.json",
+      "bytes": 14768,
+      "sha256": "1f2e634e921422680862d079e8a47fd94d752cfc60ee203fc445d1a32fbc7244"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/review.md",
+      "bytes": 5202,
+      "sha256": "0cf74c758a1dee8ac555d93374246252ccc967db9cda775ae06985b43d3fc61a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/evidence-applicability.json",
+      "bytes": 22510,
+      "sha256": "36da7ef8eec3f12fb22a853206a92ee750a43f1b5c65df8e4a91b59fb7291da3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/identity-readback.json",
+      "bytes": 21004,
+      "sha256": "500f6800eccfd4504448c5c957a4a82b5ad308c60269aa1051cc434986953b4f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/identity-readback.py",
+      "bytes": 3020,
+      "sha256": "2975cc8d5dbbe257c75e8b0803697c943556f87334fd9bdde8b186816c116142"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/readonly-applicability.mjs",
+      "bytes": 5162,
+      "sha256": "90d393f8b42a6a81ede1eae2184719673df2988b2c3621cc88bfaec0e3a60d0b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/readonly-applicability-result.json",
+      "bytes": 301453,
+      "sha256": "1305bbabbb812cd3051c81f238197c6eb58b9f754ef2ea66850b91e87ad34516"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/applicable-check-gate.json",
+      "bytes": 8135,
+      "sha256": "652ef66e419d30a5a960d0d97506f445cba127892866693b2d776d6d1ca4996c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
+      "bytes": 4084,
+      "sha256": "21271432e2d61a85048c5be7d9679328b49286bf96ae86e299eb6801f945a47d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/gate-construction-first-failure.json",
+      "bytes": 661,
+      "sha256": "455de1ccbe06f454ddd66e84df91d3f6b58236bbc2b17633ca9cd3147d3bfec8"
+    }
+  ]
+}

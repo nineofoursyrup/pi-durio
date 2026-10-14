@@ -1,0 +1,288 @@
+{
+  "status": "PASS",
+  "startedAt": "2026-10-11T11:30:52.536040+00:00",
+  "repository": "/Users/nineofour/Durio",
+  "branch": "codex/pi-durio-v1",
+  "preMergeHead": "f346f77e8a9438aeeabb0a0dad67aaff7aa8bbbc",
+  "producer": "63cae24c0678a7fbf52fa257c290f476da71fe75",
+  "producerCommit": "63cae24c0678a7fbf52fa257c290f476da71fe75",
+  "producerParent": "f346f77e8a9438aeeabb0a0dad67aaff7aa8bbbc",
+  "scope": "Append five fixed reviewed daily acceptance documents only; existing pending records and historical evidence remain unchanged",
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoningEffort": "xhigh",
+  "actualBackendAttestation": "NOT_ATTESTED",
+  "independentReview": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/daily-acceptance-r1/review.json",
+    "bytes": 6543,
+    "sha256": "6803159c10547db650b60c4d978efcd796d768f0672d4541ba78dba7c64cd861",
+    "standards": "PASS",
+    "spec": "PASS",
+    "blockingFindings": 0
+  },
+  "productCandidate": {
+    "sourceCommit": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "sourceTree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+    "cliSha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b"
+  },
+  "checksReused": {
+    "gitDiffCheck": "PASS from independent review on this exact immutable producer tree",
+    "originalsPreserved": "PASS from reviewer 16 fixed original identities plus parent/producer blob equality",
+    "productTechnicalChecks": "Reused unchanged; no product commands or recursive scans by merger"
+  },
+  "originalUntrackedBefore": {
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+    },
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+    },
+    "docs/wayfinder-proposal.md": {
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+    },
+    "docs/wayfinder-readback-2026-10-09.json": {
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+    }
+  },
+  "apiEnv": {
+    "readContent": false,
+    "addedToGit": false,
+    "beforeStat": {
+      "size": 118,
+      "mode": 33152,
+      "inode": 108595560,
+      "mtimeNs": 1791610965598957000,
+      "ctimeNs": 1791610965609405872
+    }
+  },
+  "distPreservation": {
+    "mode": "Docs-only Git write scope, no active hooks, directory metadata before/after; prior product/install checks reused",
+    "directoryStatsBefore": {
+      "/Users/nineofour/Durio/dist": {
+        "size": 160,
+        "mode": 16877,
+        "inode": 108775172,
+        "mtimeNs": 1791615308122125726,
+        "ctimeNs": 1791616107004881061
+      },
+      "/Users/nineofour/Durio/dist/src": {
+        "size": 4960,
+        "mode": 16877,
+        "inode": 108775307,
+        "mtimeNs": 1791615307941569474,
+        "ctimeNs": 1791615983009005247
+      },
+      "/Users/nineofour/Durio/dist/execution": {
+        "size": 160,
+        "mode": 16877,
+        "inode": 108775298,
+        "mtimeNs": 1791615308179021628,
+        "ctimeNs": 1791615982959387733
+      },
+      "/Users/nineofour/Durio/dist/test": {
+        "size": 3936,
+        "mode": 16877,
+        "inode": 108775173,
+        "mtimeNs": 1791615308091861136,
+        "ctimeNs": 1791615982957637823
+      }
+    },
+    "fullContentScan": false,
+    "installationScan": false
+  },
+  "docsContentIdentitiesBefore": {
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/DAILY-ACCEPTANCE.md": {
+      "bytes": 4762,
+      "sha256": "c1a631e826c9f1270fc7214469850000dcf0b6be03e41432f11fe0e958ff57cb"
+    },
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/acceptance.json": {
+      "bytes": 7794,
+      "sha256": "a7bf7959f78069225a64c6cdc9937ebf7d8653633aeda9b1eb9f331363fdbfee"
+    },
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/applicable-readback.json": {
+      "bytes": 30412,
+      "sha256": "1f284f598ca8daa7728222837ddc17f99f9eef0b677c13b6d052497c9b7f0c36"
+    },
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/documentation-checks.json": {
+      "bytes": 2686,
+      "sha256": "ab450cdfe3c0df1ae3d01fe97ce81f83b5255868525d3f46459427346c9f903a"
+    },
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/user-response.json": {
+      "bytes": 1168,
+      "sha256": "29c3447c9906774c867fc17a82d09fdbb3e50369f538fcd482e00c937accad0c"
+    }
+  },
+  "fullHistoricalScans": 0,
+  "productChecksRerun": false,
+  "productApiCalls": 0,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "terminalRuns": 0,
+  "rootSharedStatusWrites": 0,
+  "pushes": 0,
+  "remoteWrites": 0,
+  "mainProductMerge": false,
+  "repackaging": false,
+  "newPaidAuthorizationCreated": false,
+  "externalWrites": "New independent merge receipt and explicit root_write_owner return only",
+  "completedAt": "2026-10-11T11:30:52.983985+00:00",
+  "mergeCommit": "e95d0358b95afa44bf81891fd517702bffae05c2",
+  "tree": "c57f922c11fda1332b8fb97a6dd009d7575e4ffe",
+  "mergeTree": "c57f922c11fda1332b8fb97a6dd009d7575e4ffe",
+  "parents": [
+    "f346f77e8a9438aeeabb0a0dad67aaff7aa8bbbc",
+    "63cae24c0678a7fbf52fa257c290f476da71fe75"
+  ],
+  "producerTree": "c57f922c11fda1332b8fb97a6dd009d7575e4ffe",
+  "mergeTreeEqualsProducer": true,
+  "addedDocsCount": 5,
+  "addedDocsBytes": 46822,
+  "addedDocs": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/DAILY-ACCEPTANCE.md",
+      "bytes": 4762,
+      "sha256": "c1a631e826c9f1270fc7214469850000dcf0b6be03e41432f11fe0e958ff57cb",
+      "equalsProducerAndReviewedIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/acceptance.json",
+      "bytes": 7794,
+      "sha256": "a7bf7959f78069225a64c6cdc9937ebf7d8653633aeda9b1eb9f331363fdbfee",
+      "equalsProducerAndReviewedIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/applicable-readback.json",
+      "bytes": 30412,
+      "sha256": "1f284f598ca8daa7728222837ddc17f99f9eef0b677c13b6d052497c9b7f0c36",
+      "equalsProducerAndReviewedIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/documentation-checks.json",
+      "bytes": 2686,
+      "sha256": "ab450cdfe3c0df1ae3d01fe97ce81f83b5255868525d3f46459427346c9f903a",
+      "equalsProducerAndReviewedIdentity": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/user-response.json",
+      "bytes": 1168,
+      "sha256": "29c3447c9906774c867fc17a82d09fdbb3e50369f538fcd482e00c937accad0c",
+      "equalsProducerAndReviewedIdentity": true
+    }
+  ],
+  "docsContentIdentitiesAfter": {
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/DAILY-ACCEPTANCE.md": {
+      "bytes": 4762,
+      "sha256": "c1a631e826c9f1270fc7214469850000dcf0b6be03e41432f11fe0e958ff57cb"
+    },
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/acceptance.json": {
+      "bytes": 7794,
+      "sha256": "a7bf7959f78069225a64c6cdc9937ebf7d8653633aeda9b1eb9f331363fdbfee"
+    },
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/applicable-readback.json": {
+      "bytes": 30412,
+      "sha256": "1f284f598ca8daa7728222837ddc17f99f9eef0b677c13b6d052497c9b7f0c36"
+    },
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/documentation-checks.json": {
+      "bytes": 2686,
+      "sha256": "ab450cdfe3c0df1ae3d01fe97ce81f83b5255868525d3f46459427346c9f903a"
+    },
+    "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/user-response.json": {
+      "bytes": 1168,
+      "sha256": "29c3447c9906774c867fc17a82d09fdbb3e50369f538fcd482e00c937accad0c"
+    }
+  },
+  "existingTrackedUnchanged": true,
+  "productAndBuildInputChanges": [],
+  "originalUntrackedAfter": {
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+    },
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+    },
+    "docs/wayfinder-proposal.md": {
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+    },
+    "docs/wayfinder-readback-2026-10-09.json": {
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+    }
+  },
+  "originalUntrackedUnchanged": true,
+  "apiEnvAfterStat": {
+    "size": 118,
+    "mode": 33152,
+    "inode": 108595560,
+    "mtimeNs": 1791610965598957000,
+    "ctimeNs": 1791610965609405872
+  },
+  "apiEnvStatUnchanged": true,
+  "distDirectoryStatsAfter": {
+    "/Users/nineofour/Durio/dist": {
+      "size": 160,
+      "mode": 16877,
+      "inode": 108775172,
+      "mtimeNs": 1791615308122125726,
+      "ctimeNs": 1791616107004881061
+    },
+    "/Users/nineofour/Durio/dist/src": {
+      "size": 4960,
+      "mode": 16877,
+      "inode": 108775307,
+      "mtimeNs": 1791615307941569474,
+      "ctimeNs": 1791615983009005247
+    },
+    "/Users/nineofour/Durio/dist/execution": {
+      "size": 160,
+      "mode": 16877,
+      "inode": 108775298,
+      "mtimeNs": 1791615308179021628,
+      "ctimeNs": 1791615982959387733
+    },
+    "/Users/nineofour/Durio/dist/test": {
+      "size": 3936,
+      "mode": 16877,
+      "inode": 108775173,
+      "mtimeNs": 1791615308091861136,
+      "ctimeNs": 1791615982957637823
+    }
+  },
+  "distDirectoryStatsUnchanged": true,
+  "distAndInstallationWrittenByMerge": false,
+  "reviewBindingUnchanged": true,
+  "docsDiffCheck": {
+    "exitCode": 0,
+    "reused": true,
+    "source": "Independent review on identical producer tree",
+    "appliesBecause": "Actual merge tree equals checked producer tree; document contents unchanged"
+  },
+  "dailyUseAccepted": true,
+  "firstVersionComplete": true,
+  "acceptanceBasis": "New direct user statement and exact independently reviewed appended records; prior pending evidence retained",
+  "trackedCleanAfter": true,
+  "gitStatus": "?? docs/prototypes/archive/\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json\n",
+  "mergeOutput": "Merge made by the 'ort' strategy.\n .../daily-acceptance-r1/DAILY-ACCEPTANCE.md        |  36 +\n .../issue-32/daily-acceptance-r1/acceptance.json   | 214 ++++++\n .../daily-acceptance-r1/applicable-readback.json   | 767 +++++++++++++++++++++\n .../daily-acceptance-r1/documentation-checks.json  |  75 ++\n .../daily-acceptance-r1/user-response.json         |  22 +\n 5 files changed, 1114 insertions(+)\n create mode 100644 docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/DAILY-ACCEPTANCE.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/acceptance.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/applicable-readback.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/documentation-checks.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/user-response.json\n",
+  "stateLockReturn": {
+    "path": "/Users/nineofour/pi-durio-v1-run/state.json",
+    "from": "/root/merge_improve_only_r2",
+    "to": "/root",
+    "onlyRootWriteOwnerChanged": true,
+    "before": {
+      "bytes": 137239,
+      "sha256": "84cc52e7a36881cdde2641c7672d353d13a561588f5e45c0bd4acb438826f3a3"
+    },
+    "after": {
+      "bytes": 137217,
+      "sha256": "850773b51911e3bd933df14c090578bb68c0b84d1ddd25457d1e1e71ea54c97d"
+    },
+    "at": "2026-10-11T11:30:53.012544+00:00"
+  },
+  "rootWriteLock": "RETURNED_TO_MAIN_IN_EXTERNAL_STATE"
+}

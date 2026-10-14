@@ -1,0 +1,435 @@
+{
+  "schema": "pi-durio.final-accounting-readback.v1",
+  "at": "2026-10-10T11:09:33.091342+00:00",
+  "status": "EXISTING_REAL_ACCOUNTING_AND_CURRENT_LOCAL_MEASUREMENT_RECONCILED",
+  "scope": "Retained authorized #30 real batches only; not account-wide billing or independent normal-coding performance.",
+  "categories": [
+    {
+      "category": "ordinary-coding",
+      "independentRealSample": false,
+      "requestsAdded": 0,
+      "reason": "Four real coding tasks ran inside formal eval. Their 33 physical requests are assigned once to eval below; guest coding mirrors are not added. Pending native 60-task fixture is synthetic and separate."
+    },
+    {
+      "category": "eval",
+      "physicalRequests": 33,
+      "knownTokens": 61560,
+      "unknownReservations": 0,
+      "fixedPriceConservativeKnownUsd": 0.073872,
+      "sourceSplit": [
+        {
+          "initial": 15,
+          "tokens": 27499
+        },
+        {
+          "supplemental": 18,
+          "tokens": 34061
+        }
+      ],
+      "billingBoundary": "These 33 physical requests are real coding/tool tasks inside formal eval. Coding is the work type; eval is this billing/experiment boundary. Count once. There is no additional independent paid normal-coding sample."
+    },
+    {
+      "category": "improve",
+      "physicalRequests": 12,
+      "knownTokens": 69051,
+      "unknownSettlements": 1,
+      "reservedUnknownTokens": 1056768,
+      "fixedPriceConservativeKnownUsd": 0.0828612,
+      "sourceSplit": [
+        {
+          "initialFailedImprove": 1,
+          "knownTokens": 0,
+          "unknownReserve": 1056768
+        },
+        {
+          "repairAnalysis": 7,
+          "knownTokens": 44466
+        },
+        {
+          "outputContractAnalysis": 4,
+          "knownTokens": 24585
+        }
+      ],
+      "selectedExecutionRequests": 0
+    },
+    {
+      "category": "independent-maintenance",
+      "physicalRequests": 0,
+      "reason": "No model-based maintenance was dispatched in this scope. Read-only accounting and measurements are local; zero dispatch is not a free completed model workload."
+    }
+  ],
+  "total": {
+    "physicalRequests": 45,
+    "knownTokens": 130611,
+    "unknownSettlements": 1,
+    "reservedUnknownTokens": 1056768,
+    "chargedUpperTokens": 1187379,
+    "fixedPriceConservativeKnownUsd": 0.1567332,
+    "fixedPriceConservativeChargedUpperUsd": 1.4248548,
+    "accountBill": "NOT_OBSERVED"
+  },
+  "priceBasis": {
+    "usdPerMillionTokens": 1.2,
+    "source": "Existing frozen price observation and budget plans; no current pricing lookup",
+    "notBill": true
+  },
+  "elapsedSpans": [
+    {
+      "scope": "final-9aed1af-usd3-r2",
+      "start": "2026-10-10T05:53:39.641Z",
+      "end": "2026-10-10T05:54:47.608Z",
+      "wallSeconds": 67.967,
+      "interpretation": "Whole authorized batch includes local preparation, model/network and validation; overlapping stage timings not independently summed."
+    },
+    {
+      "scope": "final-9aed1af-usd3-r3",
+      "start": "2026-10-10T06:38:46.776Z",
+      "end": "2026-10-10T06:41:35.851Z",
+      "wallSeconds": 169.075,
+      "interpretation": "Whole authorized batch includes local preparation, model/network and validation; overlapping stage timings not independently summed."
+    },
+    {
+      "scope": "improve-only-repair-r2",
+      "start": "2026-10-10T09:44:47.198Z",
+      "end": "2026-10-10T09:45:37.085Z",
+      "wallSeconds": 49.887,
+      "interpretation": "Analysis process total; model/network/local decomposition unavailable."
+    },
+    {
+      "scope": "improve-output-contract-r1",
+      "start": "2026-10-10T10:17:20.019Z",
+      "end": "2026-10-10T10:17:55.835Z",
+      "wallSeconds": 35.816,
+      "interpretation": "Analysis process total; model/network/local decomposition unavailable."
+    },
+    {
+      "scope": "direct-user-selected-R1-regression-and-writeback",
+      "start": "2026-10-10T10:45:25.690Z",
+      "end": "2026-10-10T10:45:29.192Z",
+      "wallSeconds": 3.502,
+      "interpretation": "One local restricted regression and exact writeback; zero new provider requests."
+    }
+  ],
+  "nonOverlappingBatchWallSeconds": 326.247,
+  "elapsedInterpretation": "Sum of recorded independent whole-batch intervals, excluding inter-batch waits and human review. Not model-only time, end-to-end project lead time or a repeated benchmark.",
+  "retainedUnknown": "Original failed improve host UNKNOWN and reservation remain unchanged. Posthoc raw 952-token observation is diagnostic only and is not substituted for or added to the host ledger.",
+  "footprint": {
+    "nativeDataRootInitialLogicalBytes": 0,
+    "nativeRetainedLogicalGrowthBytes": 42099297,
+    "checkpoints": [
+      {
+        "checkpoint": "storage-empty.json",
+        "logicalBytes": 0,
+        "allocatedByPathBytes": 0,
+        "groups": {},
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/storage-empty.json",
+          "bytes": 67,
+          "sha256": "e2e039cb67122d29f3ebfc12a083cc6b919a010452772fcc1332ffdb33e41bb2"
+        }
+      },
+      {
+        "checkpoint": "storage-round-1.json",
+        "logicalBytes": 4521737,
+        "allocatedByPathBytes": 5222400,
+        "groups": {
+          "host-database": {
+            "files": 1,
+            "logicalBytes": 24576,
+            "allocatedByPathBytes": 24576
+          },
+          "object-payloads": {
+            "files": 296,
+            "logicalBytes": 4370185,
+            "allocatedByPathBytes": 5070848
+          },
+          "durable-sessions": {
+            "files": 1,
+            "logicalBytes": 126976,
+            "allocatedByPathBytes": 126976
+          }
+        },
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/storage-round-1.json",
+          "bytes": 75785,
+          "sha256": "634f48b2f3554b6074a8b97c714037f2a7d1b7b89431a3f96472334a5f316a3f"
+        }
+      },
+      {
+        "checkpoint": "storage-round-10.json",
+        "logicalBytes": 6822961,
+        "allocatedByPathBytes": 8839168,
+        "groups": {
+          "host-database": {
+            "files": 1,
+            "logicalBytes": 126976,
+            "allocatedByPathBytes": 131072
+          },
+          "object-payloads": {
+            "files": 687,
+            "logicalBytes": 5393457,
+            "allocatedByPathBytes": 7405568
+          },
+          "durable-sessions": {
+            "files": 10,
+            "logicalBytes": 1302528,
+            "allocatedByPathBytes": 1302528
+          }
+        },
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/storage-round-10.json",
+          "bytes": 177096,
+          "sha256": "f04fb4a3f5d53f2c6f21da999038faa511fb146155fbf14e689f265a49ac29e4"
+        }
+      },
+      {
+        "checkpoint": "storage-round-20.json",
+        "logicalBytes": 10608327,
+        "allocatedByPathBytes": 14057472,
+        "groups": {
+          "host-database": {
+            "files": 1,
+            "logicalBytes": 241664,
+            "allocatedByPathBytes": 262144
+          },
+          "object-payloads": {
+            "files": 1120,
+            "logicalBytes": 7610055,
+            "allocatedByPathBytes": 11038720
+          },
+          "durable-sessions": {
+            "files": 20,
+            "logicalBytes": 2756608,
+            "allocatedByPathBytes": 2756608
+          }
+        },
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/storage-round-20.json",
+          "bytes": 289427,
+          "sha256": "2d22bbbefb417269c4bcd18208ca45224fbd7f4520a2f1231212e861c8d916a8"
+        }
+      },
+      {
+        "checkpoint": "storage-round-30.json",
+        "logicalBytes": 15695299,
+        "allocatedByPathBytes": 20574208,
+        "groups": {
+          "host-database": {
+            "files": 1,
+            "logicalBytes": 360448,
+            "allocatedByPathBytes": 393216
+          },
+          "object-payloads": {
+            "files": 1553,
+            "logicalBytes": 10964419,
+            "allocatedByPathBytes": 15810560
+          },
+          "durable-sessions": {
+            "files": 30,
+            "logicalBytes": 4370432,
+            "allocatedByPathBytes": 4370432
+          }
+        },
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/storage-round-30.json",
+          "bytes": 401760,
+          "sha256": "a4e4ba034ac11e86c80d27e4fc9a4d2d3b05cab15b4571450fa91ad0270a523b"
+        }
+      },
+      {
+        "checkpoint": "storage-round-40.json",
+        "logicalBytes": 22063987,
+        "allocatedByPathBytes": 28389376,
+        "groups": {
+          "host-database": {
+            "files": 1,
+            "logicalBytes": 479232,
+            "allocatedByPathBytes": 524288
+          },
+          "object-payloads": {
+            "files": 1987,
+            "logicalBytes": 15457139,
+            "allocatedByPathBytes": 21737472
+          },
+          "durable-sessions": {
+            "files": 40,
+            "logicalBytes": 6127616,
+            "allocatedByPathBytes": 6127616
+          }
+        },
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/storage-round-40.json",
+          "bytes": 514345,
+          "sha256": "be586bac717fe55364fd301df351db3e3e9778e8c0a8933c1dd268a28b5ff6bb"
+        }
+      },
+      {
+        "checkpoint": "storage-round-50.json",
+        "logicalBytes": 29719809,
+        "allocatedByPathBytes": 37429248,
+        "groups": {
+          "host-database": {
+            "files": 1,
+            "logicalBytes": 581632,
+            "allocatedByPathBytes": 589824
+          },
+          "object-payloads": {
+            "files": 2420,
+            "logicalBytes": 21089537,
+            "allocatedByPathBytes": 28790784
+          },
+          "durable-sessions": {
+            "files": 50,
+            "logicalBytes": 8048640,
+            "allocatedByPathBytes": 8048640
+          }
+        },
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/storage-round-50.json",
+          "bytes": 626677,
+          "sha256": "cb7e5d64e5fbaa43b0834d515e7ddb4f2950ef993a6edb89f8a53b079770eb0f"
+        }
+      },
+      {
+        "checkpoint": "storage-round-60.json",
+        "logicalBytes": 38675563,
+        "allocatedByPathBytes": 47824896,
+        "groups": {
+          "host-database": {
+            "files": 1,
+            "logicalBytes": 696320,
+            "allocatedByPathBytes": 720896
+          },
+          "object-payloads": {
+            "files": 2853,
+            "logicalBytes": 27862123,
+            "allocatedByPathBytes": 36986880
+          },
+          "durable-sessions": {
+            "files": 60,
+            "logicalBytes": 10117120,
+            "allocatedByPathBytes": 10117120
+          }
+        },
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/storage-round-60.json",
+          "bytes": 739010,
+          "sha256": "1ba316a7ba7c54857607fed4d90d791119549bf84d6936d8b59c75b413384685"
+        }
+      },
+      {
+        "checkpoint": "storage-large-output.json",
+        "logicalBytes": 41117087,
+        "allocatedByPathBytes": 50610176,
+        "groups": {
+          "host-database": {
+            "files": 1,
+            "logicalBytes": 724992,
+            "allocatedByPathBytes": 786432
+          },
+          "object-payloads": {
+            "files": 2960,
+            "logicalBytes": 30012831,
+            "allocatedByPathBytes": 39444480
+          },
+          "durable-sessions": {
+            "files": 61,
+            "logicalBytes": 10379264,
+            "allocatedByPathBytes": 10379264
+          }
+        },
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/storage-large-output.json",
+          "bytes": 766551,
+          "sha256": "b9e9904def628bb3dba1fa76d71cf145021bdb39c3943fd5ca1caf2ff621c539"
+        }
+      },
+      {
+        "checkpoint": "closed-result-final",
+        "logicalBytes": 42099297,
+        "allocatedByPathBytes": 51720192,
+        "groups": {
+          "host-database": {
+            "files": 1,
+            "logicalBytes": 733184,
+            "allocatedByPathBytes": 786432
+          },
+          "object-payloads": {
+            "files": 3004,
+            "logicalBytes": 30765665,
+            "allocatedByPathBytes": 40333312
+          },
+          "durable-sessions": {
+            "files": 62,
+            "logicalBytes": 10600448,
+            "allocatedByPathBytes": 10600448
+          }
+        },
+        "source": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-r1/long-session/result.json",
+          "bytes": 930488,
+          "sha256": "5072957a9e40a6c5b3d413f5390f17a8ad11a537ba3104ed7916cb263be05f10"
+        }
+      }
+    ],
+    "interpretation": "Controlled current native 62-task fixture data-root growth with all originals retained; not real-provider byte growth or account-wide disk occupation. Real-batch full records remain separately retained."
+  },
+  "evidence": {
+    "final-9aed1af-usd3-r2-start": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/paid-start.json",
+      "bytes": 774,
+      "sha256": "638b4db20a65f5b1a76a24671a97577868ea3bf2208c3fd9f7aa1f30adde3885"
+    },
+    "final-9aed1af-usd3-r2-end": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/batch-result.json",
+      "bytes": 465,
+      "sha256": "44fcd0fcc08784463c157329cb4bbeff00f8981762cf16273dfe42c6b9688c7f"
+    },
+    "final-9aed1af-usd3-r3-start": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/paid-start.json",
+      "bytes": 1359,
+      "sha256": "0687d92174440f87c57ef2eec2badbe28c029cbaa2a2362d0d49ab9691b4a60f"
+    },
+    "final-9aed1af-usd3-r3-end": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/batch-result.json",
+      "bytes": 1298,
+      "sha256": "154869ff682c9258eccbed4ac6b3a15882197427baef897fa0a7acaa11064c56"
+    },
+    "improve-only-repair-r2": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/report.json",
+      "bytes": 12036,
+      "sha256": "d0a1f3e9860b082fbcb0c127461ca4f0a830865aead08b883dd47317427e81d8"
+    },
+    "improve-output-contract-r1": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/report.json",
+      "bytes": 17439,
+      "sha256": "cf2e811046179892f3b699d3d238dd7a3c36e2c8467128082c4b9f9250cd508f"
+    },
+    "selected-candidate-complete": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/postrun-readback/report.json",
+      "bytes": 20333,
+      "sha256": "52eea9ebdbdae1f25a7cf1811f4ca53144b962bd9c82299c1bcbe5c07351e3fb"
+    },
+    "initial-accounting": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/postrun-diagnosis/report.json",
+      "bytes": 10878,
+      "sha256": "dfff9764f280a29eec514a59efc471cb3b1f9ad29707039e070f1f268f9fc733"
+    },
+    "supplemental-accounting": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/report.json",
+      "bytes": 144843,
+      "sha256": "ba624384488d5e57c6baf87fc7957a646173d9d57a4df6f3cfbcca124ec15e1d"
+    }
+  },
+  "readbackEffects": {
+    "providerRequests": 0,
+    "vmStarts": 0,
+    "productImports": 0,
+    "historicalWrites": 0
+  },
+  "currentLocalMeasurement": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/native-readback.json",
+    "bytes": 27198,
+    "sha256": "778dfc2f6eb092664167dafb3411042ab41d6d78c0d6065ceff4c8d96173b5f2"
+  }
+}

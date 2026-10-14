@@ -1,0 +1,35 @@
+{
+  "observedAt": "2026-10-10T05:37:29.408055+00:00",
+  "method": "Coordinator unauthenticated direct HTTP 200 official documentation snapshot; no authenticated model or account observation",
+  "retrieval": {
+    "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/retrieval.json",
+    "bytes": 715,
+    "sha256": "facf0c8d8c857ad49b2df669ebab2c72e79388f1c4ccdd9fef8f575eaab96b13"
+  },
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/pricing.html",
+      "bytes": 23982,
+      "sha256": "210f102275ccf1a6542f08a3bc9e4b4c7c83278cb74b35217bffa112df6363b2"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/models.html",
+      "bytes": 39323,
+      "sha256": "41551c3c498a93b6e6459eaeee89829940ca8acf999b24436a38a2231c7e091b"
+    }
+  ],
+  "pricingSource": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "modelSource": "https://api-docs.deepseek.com/api/list-models/",
+  "model": "deepseek-flash",
+  "documentedVersion": "DeepSeek-V4.1-Flash",
+  "contextTokens": 1048576,
+  "maximumDocumentedOutputTokens": 393216,
+  "currency": "USD",
+  "maximumListedUsdPerMillionAnyClass": 1.2,
+  "aggregateTokens": 2400000,
+  "conservativeTokenPriceEstimateUsd": 2.88,
+  "usdCeiling": 3,
+  "credentialAccess": "NOT RUN",
+  "authenticatedAvailability": "NOT RUN",
+  "limit": "Public observed tariff, not an invoice, account hard cap, or proof of immutable served model. A known tariff change must stop dispatch."
+}

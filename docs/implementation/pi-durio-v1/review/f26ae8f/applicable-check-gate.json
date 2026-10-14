@@ -1,0 +1,195 @@
+{
+  "at": "2026-10-10T07:10:31.707629+00:00",
+  "status": "PASS_WITH_APPLICABLE_REUSE",
+  "scope": "Local affected checks and content identity only. Independent repair/applicability review is PENDING; not paid, native, full technical or daily acceptance.",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "tree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+  "producerCommit": "78130b154fe8dad9097c05afb24ff9d1d24d8bce",
+  "sourceBuild": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/integration-78130b15-from-a3ea6eac-r1/producer-dist-snapshot/execution/source-build.json",
+    "bytes": 92984,
+    "sha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "identityVerified": true,
+  "unresolvedRequiredChecks": [],
+  "sourceBuildCounts": {
+    "inputs": 169,
+    "compiler": 140,
+    "outputs": 246
+  },
+  "deltaFromPrevious": {
+    "inputs": {
+      "added": [],
+      "removed": [],
+      "modified": [
+        "src/provider-boundary.ts",
+        "test/improve.test.ts",
+        "test/provider-boundary.test.ts"
+      ]
+    },
+    "compiler": {
+      "added": [],
+      "removed": [],
+      "modified": []
+    },
+    "outputs": {
+      "added": [],
+      "removed": [],
+      "modified": [
+        "dist/src/provider-boundary.js",
+        "dist/src/provider-boundary.js.map"
+      ]
+    }
+  },
+  "checks": {
+    "finalBoundary": {
+      "pass": 11,
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-boundary-checks-r3.json",
+        "bytes": 188,
+        "sha256": "6df60a0c952f9bbec69633b2516477378dbed568ece4d994e9d3d1f5fc87bc28"
+      }
+    },
+    "finalSDKRuntime": {
+      "pass": 2,
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-sdk-runtime-checks-r3.json",
+        "bytes": 334,
+        "sha256": "15afd8c4e15cd4c02ccf5341ef24f1d95c0dd52e4dd17eb388e68c2a054e5e4a"
+      }
+    },
+    "rawReplay": {
+      "status": "PASS",
+      "originalBlocks": 7,
+      "firstTokens": 952,
+      "secondTokens": 7,
+      "record": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/original-replay-r3.json",
+        "bytes": 231,
+        "sha256": "5c489c3db45e4c6f1309c568cbba77545e7e8b752ee97466ad4661fb4a29edd7"
+      }
+    },
+    "initialAffected": {
+      "pass": 26,
+      "scope": "Includes prior EOF/policy/report/budget coverage; overlapping groups are not summed."
+    }
+  },
+  "reuse": {
+    "previousCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+    "gate": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-repaired-r1/gate.json",
+      "bytes": 128895,
+      "sha256": "5041c312711237efe7af675525f5dc32b673c9dab8c9f010452e269db9e61832"
+    },
+    "basis": "Only one production source module and two tests changed; compiler/dependencies and other compiled outputs byte-identical. Old unaffected deterministic checks remain scoped evidence; affected provider terminal/cleanup behavior uses new final checks. Original combined 251/250/1 and subsequent deadline repair evidence remain separately preserved. No new whole-suite PASS claimed.",
+    "limitations": "Old paid/native executions remain their original candidate; independent applicability review pending."
+  },
+  "review": "PENDING_INDEPENDENT_REPAIR_REVIEW",
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/merge-readback.json",
+      "bytes": 16392,
+      "sha256": "357be30fdfbea080a93dbfc87468f869031355babc953c1dd4fcc44fb0687b28"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/repair-report.json",
+      "bytes": 14026,
+      "sha256": "2ddc469bad213d9c14aee2069979575e50cf902e518a4b8dd1be04a3a087503b"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/build-identity.json",
+      "bytes": 2721,
+      "sha256": "ba72d156c4e0e0c147eaa26aacb6379c02fc65e4c03b2252c5db9aae5d44643e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/affected-checks.json",
+      "bytes": 321,
+      "sha256": "9ded00de28a87996b669e262a3ac12e6df38c098b310ef857b0fbf74837a0b83"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/affected-checks.log",
+      "bytes": 3363,
+      "sha256": "fd209d772ad0cbb5228dafccf0be7a44493d8060cf435ecae151cf7540396a79"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-boundary-checks-r3.json",
+      "bytes": 188,
+      "sha256": "6df60a0c952f9bbec69633b2516477378dbed568ece4d994e9d3d1f5fc87bc28"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-boundary-checks-r3.log",
+      "bytes": 1384,
+      "sha256": "32735f2eaeca3fd4239bc6753ad0999f806286a10d86c2b93337e58ec20f7027"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-sdk-runtime-checks-r3.json",
+      "bytes": 334,
+      "sha256": "15afd8c4e15cd4c02ccf5341ef24f1d95c0dd52e4dd17eb388e68c2a054e5e4a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/final-sdk-runtime-checks-r3.log",
+      "bytes": 366,
+      "sha256": "afe0cbd340169380d327bebb32c594ecc40d2d1e916ff6bd36433108758a228c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/original-replay-r3.json",
+      "bytes": 231,
+      "sha256": "5c489c3db45e4c6f1309c568cbba77545e7e8b752ee97466ad4661fb4a29edd7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/original-replay-r3.log",
+      "bytes": 975,
+      "sha256": "2325ed75c3bbd56c229d8a2a272b1b21d2f93fdb9779d637c45e0d87023a1020"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/original-replay-result-r3.json",
+      "bytes": 975,
+      "sha256": "2325ed75c3bbd56c229d8a2a272b1b21d2f93fdb9779d637c45e0d87023a1020"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/first-red.json",
+      "bytes": 249,
+      "sha256": "3c203769151a2b24c4a32a9edb2e182707e06213d0463829a1df1f7a05f1a584"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/first-red.log",
+      "bytes": 986,
+      "sha256": "89f31209c448ae84ad8580eb5f1574ccb0ee2dd6eb58eb291d92321e698734ad"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/first-red-identity.json",
+      "bytes": 514,
+      "sha256": "9c623bef9e02458d814212c9f0192eee9000b84cc80bd198ce603f6dd49f4379"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/framing-red.json",
+      "bytes": 108,
+      "sha256": "9b1cf0fa35e2408623770277d55287087e5024a2a5d74677e7501e2393e3f6a3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/cleanup-red.json",
+      "bytes": 159,
+      "sha256": "19688c05aa42d2616491fa339a9f10d64c2ca96140b7ebdb808037d9e02dcab5"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-provider-terminal-r1/acquired-red.json",
+      "bytes": 166,
+      "sha256": "18e0975fcc1795f177f04ed156f117d8ad064c6a6ec122655ebc6e3fc0e9a915"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-repaired-r1/gate.json",
+      "bytes": 128895,
+      "sha256": "5041c312711237efe7af675525f5dc32b673c9dab8c9f010452e269db9e61832"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/review/9aed1af/spec-review.json",
+      "bytes": 9668,
+      "sha256": "3d29e6ca7b2f234ff2255b20595f1e1e26bd7e1bfd9021c01690af242f0dcf6e"
+    },
+    {
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/review/9aed1af/standards-review.json",
+      "bytes": 11186,
+      "sha256": "ac468315e1d4c2ebbe26e443764b9cf77f2c0cf4395d1929395b9204a08e0bf5"
+    }
+  ]
+}

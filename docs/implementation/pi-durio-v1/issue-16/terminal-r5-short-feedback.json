@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-09T12:33:46.731128+00:00",
+  "candidate": "e4571452a1ebf712cd60282ded0161640670d70e",
+  "source": "direct user response and actual runner observation",
+  "userQuote": "PPP，但emoji还是会占多个字符",
+  "interpretation": "C1 C2 C3 PASS only; no inference for remaining scenarios",
+  "runnerObservation": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-29-31-312Z/cursor/operator-observation.json",
+  "runnerObservationSha256": "dd20594a4025195e3eea5d9b80a13e80b1569e97e9ad578faf8597df82301e21",
+  "machine": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manual/2026-10-09T12-29-31-312Z/cursor/machine.json",
+  "machineSha256": "b08655084b563acdb8b54c7808d29f7c62487e9271b8463811b1fa4796c3d166",
+  "naturalGlyphWidth": "actual current terminal measured 👩‍💻 as 5 cells; patch matches geometry, does not change terminal glyph layout",
+  "remaining": "normal/stop/esc/exit/fault native observations pending; no dependency unlock"
+}

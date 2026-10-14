@@ -1,0 +1,227 @@
+{
+  "at": "2026-10-09T21:38:04.524213+00:00",
+  "status": "PARTIAL_LOCAL_MEASUREMENTS_NOT_TECHNICAL_ACCEPTANCE",
+  "candidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+  "producer": "2554316e5a175299d1149d02e5bb2d8a5824beef",
+  "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+  "machine": {
+    "os": "27.2",
+    "architecture": "arm64",
+    "model": "MacBookPro18,1",
+    "memoryBytes": 34359738368,
+    "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+    "nodeVersion": "v26.8.2",
+    "terminalVersion": "2.15",
+    "logicalCpus": 10
+  },
+  "inventory": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/inventory.json",
+    "sha256": "9d521f9e4bf82db7b10f2f2ba035e07e6ea6ed2d179f59720bb0415db901c4fa"
+  },
+  "sourceCategories": {
+    "root-config-and-other": {
+      "regularFiles": 9,
+      "logicalBytes": 211117,
+      "physicalTextLines": 4522
+    },
+    "documentation": {
+      "regularFiles": 180,
+      "logicalBytes": 2652862,
+      "physicalTextLines": 25391
+    },
+    "scripts": {
+      "regularFiles": 39,
+      "logicalBytes": 275006,
+      "physicalTextLines": 2418
+    },
+    "product": {
+      "regularFiles": 75,
+      "logicalBytes": 755646,
+      "physicalTextLines": 6946
+    },
+    "tests": {
+      "regularFiles": 34,
+      "logicalBytes": 403863,
+      "physicalTextLines": 3714
+    },
+    "vendor": {
+      "regularFiles": 5,
+      "logicalBytes": 1041519,
+      "physicalTextLines": 108
+    }
+  },
+  "docsExecutableHelpers": {
+    "files": 4,
+    "bytes": 49237,
+    "physicalTextLines": 231,
+    "paths": [
+      "docs/implementation/pi-durio-v1/issue-26/acceptance-demo.mjs",
+      "docs/implementation/pi-durio-v1/issue-27/acceptance-demo.mjs",
+      "docs/implementation/pi-durio-v1/issue-28/acceptance-demo.mjs",
+      "docs/implementation/pi-durio-v1/issue-29/acceptance-demo.mjs"
+    ],
+    "accounting": "Already included in documentation literal-prefix total; separate these from prose when discussing all owned maintenance helpers. Do not double add."
+  },
+  "maintainedCodePhysicalLines": {
+    "product": 6946,
+    "tests": 3714,
+    "scripts": 2418,
+    "additionalDocsHelpers": 231,
+    "note": "Physical UTF8 lines include blanks/comments and dense multi-statement lines; byte/file measures accompany them. Root configuration/original HTML, docs, archives/generated files and vendor patch are separately counted. No lightweight score."
+  },
+  "distribution": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/pi-durio-0.1.0.tgz",
+    "compressedBytes": 19189996,
+    "sha256": "5733c4dca3deeef7af079cae36cfa694dd5cf51d54dabb82b48ea36b41b22ca2",
+    "unpackedRegularFiles": 12903,
+    "unpackedLogicalFileBytes": 89958444
+  },
+  "installation": {
+    "root": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/install",
+    "regularFiles": 12906,
+    "symlinks": 5,
+    "logicalBytes": 90024769,
+    "allocatedBytesByPath": 128589824,
+    "allocatedBytesUniqueInode": 128589824,
+    "physicalTextLines": 1291497
+  },
+  "productionDependencyBoundary": {
+    "installationCommand": [
+      "npm",
+      "install",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund",
+      "pi-durio-0.1.0.tgz"
+    ],
+    "lock": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/install/package-lock.json",
+      "sha256": "3a75ec04f42b42cc7670a93d69ebc1e7ec1843a7f910a5e1d0590d71b8aa53a2"
+    },
+    "resolvedPackageEntries": 99,
+    "devFlaggedEntries": [],
+    "typescriptPresent": false,
+    "typesProperLockfilePresent": false,
+    "typesNodePresent": true,
+    "typesNodeReason": "protobufjs declares @types/node in production dependencies; included as bundled production transitive content. Presence of typings is not claimed to be zero.",
+    "nodeExecutableIncluded": false,
+    "nativeComponents": [
+      {
+        "path": "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/darwin/prebuilds/darwin-arm64/darwin-platform.node",
+        "kind": "file",
+        "bytes": 52024,
+        "allocatedBytes": 53248,
+        "textLines": null,
+        "sha256": "36e909adf35c2734a2a52b3d65b7dbfb83f2278f306d51b7e32c5045516dfb7f"
+      },
+      {
+        "path": "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/darwin/prebuilds/darwin-x64/darwin-platform.node",
+        "kind": "file",
+        "bytes": 22784,
+        "allocatedBytes": 24576,
+        "textLines": null,
+        "sha256": "7ec59a02fff9562f6354274ad070ba35f8e0998b3b111eb27ad3de579ffb6c65"
+      },
+      {
+        "path": "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/linux/prebuilds/linux-arm64/linux-platform-x11.node",
+        "kind": "file",
+        "bytes": 67240,
+        "allocatedBytes": 69632,
+        "textLines": null,
+        "sha256": "63d4545349a25b5c97e352ea6d254cea50ff3c14161212ad3ddb3fc28022ddb5"
+      },
+      {
+        "path": "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/linux/prebuilds/linux-x64/linux-platform-x11.node",
+        "kind": "file",
+        "bytes": 18008,
+        "allocatedBytes": 20480,
+        "textLines": null,
+        "sha256": "522d2550f7fa5d0d5bd204f45983f786ce2be9cf80f27f00179640d31d0689d6"
+      },
+      {
+        "path": "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/win32/prebuilds/win32-arm64/win32-platform.node",
+        "kind": "file",
+        "bytes": 9216,
+        "allocatedBytes": 12288,
+        "textLines": null,
+        "sha256": "0e5671ab39ef577940483ced58fdf29ecdf5f864f368d90a771eec4aeeae11b8"
+      },
+      {
+        "path": "node_modules/pi-durio/node_modules/@earendil-works/pi-tui/native/win32/prebuilds/win32-x64/win32-platform.node",
+        "kind": "file",
+        "bytes": 8704,
+        "allocatedBytes": 12288,
+        "textLines": null,
+        "sha256": "51bee02bcb73b165ab92af75ae15b88aba3f5d99f072e63ef60af92ffdc4d565"
+      }
+    ],
+    "duplicatedVendorArchives": "Both original and derivative Pi TUI archive bytes are included in package/installation totals.",
+    "rootDeveloperDependencies": "Separate offline copy required for root build; excluded from independent installation size."
+  },
+  "processStart": {
+    "source": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/process-startup/result.json",
+      "sha256": "d3e8d9c31280e090b6a1e27dbc07fb58db08b095fd49646dd2ec5546cdae0270"
+    },
+    "summary": [
+      {
+        "workload": "help",
+        "repetitions": 7,
+        "failures": 0,
+        "minMs": 205.00625,
+        "medianMs": 207.9145,
+        "maxMs": 362.465333,
+        "firstObservedMs": 241.458417,
+        "allObservedMs": [
+          241.458417,
+          362.465333,
+          284.791,
+          207.9145,
+          205.00625,
+          205.288375,
+          205.9475
+        ]
+      },
+      {
+        "workload": "missing-store-history",
+        "repetitions": 7,
+        "failures": 0,
+        "minMs": 201.416458,
+        "medianMs": 207.348541,
+        "maxMs": 209.752416,
+        "firstObservedMs": 201.416458,
+        "allObservedMs": [
+          201.416458,
+          208.259667,
+          202.229041,
+          205.791334,
+          209.752416,
+          207.348541,
+          208.5715
+        ]
+      }
+    ],
+    "missingStoreRemainsAbsent": true,
+    "environmentLimit": "High observed host load, Spotlight indexing and Time Machine background backup active. No product test/VM/build workload overlapped; no system services were changed. Filesystem cache was not purged. These are process-cold local observations under that background load, not machine-cold or provider latency."
+  },
+  "notRun": [
+    "native TUI first usable frame and idle RSS",
+    "at least five-minute 60-round native long-session RSS/storage growth",
+    "native fixed 1 MiB output and subsequent input",
+    "retained-data query/write/export workload",
+    "native compact/improve selection/report composition",
+    "real provider coding/eval/improve/cost",
+    "user daily-use acceptance"
+  ],
+  "nativeBatch": {
+    "status": "FROZEN_NOT_RUN_USER_LAUNCH_REQUESTED",
+    "launcher": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/local-r1/run-native.sh",
+    "configSha256": "3dc5cec2ce8d949d2d1af4042a5852278450c02506914a2f72ebf4b3d97c210f"
+  },
+  "actualPaidProviderRequests": 0,
+  "limitations": [
+    "No declared numeric performance threshold or pass score.",
+    "The complete #31 acceptance is blocked by #30 and unfinished required native measurements; this report is partial.",
+    "Review is running against this candidate; later corrections require explicit applicability, not relabeling these producer identities."
+  ]
+}

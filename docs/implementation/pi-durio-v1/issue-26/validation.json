@@ -1,0 +1,260 @@
+{
+  "schema": 1,
+  "issue": 26,
+  "state": "PASS",
+  "scope": "Implementation and controlled offline installed acceptance for registered-source executable builds and independently versioned eval assets. Coordinator integration/review and broader native acceptance remain separate.",
+  "requestedExecution": {
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "actualBackend": "Not independently attested by the execution harness; no backend identity claim."
+  },
+  "producer": {
+    "commit": "2554316e5a175299d1149d02e5bb2d8a5824beef",
+    "tree": "e83e010049656f6f89ca91bce9331bcfbc5463d5",
+    "node": "v26.8.2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "gitStatusAtFreeze": "",
+    "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+    "package": {
+      "commit": "2554316e5a175299d1149d02e5bb2d8a5824beef",
+      "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+      "install": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/install",
+      "product": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/install/node_modules/pi-durio",
+      "packageSha256": "5733c4dca3deeef7af079cae36cfa694dd5cf51d54dabb82b48ea36b41b22ca2",
+      "packageBytes": 19189996,
+      "outputCount": 231
+    },
+    "inventorySummary": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/inventory-summary.json",
+    "inventories": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/source-build.json",
+        "sha256": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+        "bytes": 88410,
+        "inputs": 156,
+        "outputs": 231,
+        "compilerFiles": 140
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/candidate-identity.json",
+        "sha256": "4865202d083a4241307abba98a5796642a7521e65fd410a88862a3b415e7c9ef",
+        "bytes": 2764363,
+        "dependencyFiles": 12771
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/install-complete-tree.json",
+        "sha256": "c687b898ec22c4b5856f887290f4c7413b6193e69728dfa717d958f267663907",
+        "bytes": 3550917,
+        "files": 12906,
+        "links": 5,
+        "completeEntryCount": 14212,
+        "entryDigest": "6bad73256c07af683cc3948b7db1b30534ef1448166b0a9c83b27ce63513ba05"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/linux-runtime-complete-tree.json",
+        "sha256": "1d3883a735da10e17c121fef463735ffa77dc0aa3f9cd86982bcef5765a9123c",
+        "bytes": 3228714,
+        "files": 12872,
+        "links": 4,
+        "completeEntryCount": 14154,
+        "entryDigest": "99bb9c51e4aa973998067661198b9b658ab3b7472120d5c3b78e32565ee75367"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/baseline-build-manifest.json",
+        "sha256": "a6c758c173a73c336486063144add871de42eff73cb3ee767387be2bae949da6",
+        "bytes": 2978588,
+        "files": 13159,
+        "contentAddress": "98e33e82bb4e7020b3e9e55d177886d301fb1ed989c214ecc9dbae270a0fff25"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/candidate-build-manifest.json",
+        "sha256": "bedffc4ca88bf4d1f8083008770e39bb18fafedf6fa38d79c2bf96ae3bc2ef60",
+        "bytes": 2978588,
+        "files": 13159,
+        "contentAddress": "e25a7e87ab469a40b2f7dfae485f2541c2f3b646db0f9ef6fedebae60b8fc18c"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/baseline-source-build.json",
+        "sha256": "62d8e97c66266c29f2ce9be18302a85ad5796150db940cc6dd1524331e92bd57",
+        "bytes": 88409,
+        "inputs": 156,
+        "outputs": 231,
+        "compilerFiles": 140
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/candidate-source-build.json",
+        "sha256": "6823a02572cd9bd0f99a5ff81240ff5dd6ad7641294a9a3259325627e1867ee3",
+        "bytes": 88409,
+        "inputs": 156,
+        "outputs": 231,
+        "compilerFiles": 140
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/eval-runtime-manifest.json",
+        "sha256": "fcd122c5455ddce8ea0a02a99c1381eb62c0d8e7ad7b57c4b1f3bb4bd050a09c",
+        "bytes": 2913755,
+        "files": 12836,
+        "contentAddress": "9859dbb77f4d3be07400f870306f2c0f13925589e0b69dbc487dbca6152f3783"
+      }
+    ],
+    "finalVerification": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/final-producer-verification.json"
+  },
+  "checks": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/pack-build.log",
+      "sha256": "f852ead95fc8ada46c6130e02a92732caf5f3f25c1ffee0f1d89e2ad2f63431f",
+      "name": "npm pack prepack TypeScript build and dependency bundling",
+      "state": "PASS",
+      "producer": "2554316e5a175299d1149d02e5bb2d8a5824beef"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r5/affected-tests.log",
+      "sha256": "8c030dd0dd8c80d45828c0f2180f9043a7a5e3000556708d43ab98f7aca34902",
+      "name": "Affected improve, eval, comparison and provider-boundary tests",
+      "state": "PASS",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "producer": "a22dab93644d0b3605a1c913fdfad57d1e142403",
+      "sourceBuild": "0ddd72c35c0ecdbc7bf3d32fde6f8a4d353ae7397f31ff23fc43c17350b08ea6",
+      "reuse": "Only src/tui/app.ts completion notice and its TUI assertion changed after this run. Improve/build/formal/rollback/eval/provider/boundary logic is byte-identical. The final installed demo separately binds the new source/build identity.",
+      "difference": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/r5-to-r6.diff"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/tui-status-green.log",
+      "sha256": "062b20d647241818002a159c543c9b3b30282defeeb8bb25f59ddd3b024442e9",
+      "name": "Actual TUI selection completion remains truthful and visible after closing result panel",
+      "state": "PASS",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "producer": "2554316e5a175299d1149d02e5bb2d8a5824beef"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/model-profile-boundary.log",
+      "sha256": "ed1be4d494f12aa9f9a4f9168a8928c71cc2f5e266ff58fba0558d20607c1b8c",
+      "name": "Real default-profile model request count/cancellation, unknown profile rejection and actual default/build memory inspection",
+      "state": "PASS",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "producer": "2554316e5a175299d1149d02e5bb2d8a5824beef"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance.log",
+      "sha256": "8aef0b3436543931421deae138ba9362f6877af18fd254582d208ac6deb1cc87",
+      "name": "Independent installed Pi API and actual restricted-VM acceptance",
+      "state": "PASS",
+      "producer": "2554316e5a175299d1149d02e5bb2d8a5824beef",
+      "report": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/report.json"
+    }
+  ],
+  "acceptance": {
+    "state": "PASS",
+    "sourceBuild": "da7c2bca6b3c2b3dc8c23d2b96ab90977135df4f9b9d74de25642e353ff22af8",
+    "baselineBuild": "98e33e82bb4e7020b3e9e55d177886d301fb1ed989c214ecc9dbae270a0fff25",
+    "candidateBuild": "e25a7e87ab469a40b2f7dfae485f2541c2f3b646db0f9ef6fedebae60b8fc18c",
+    "producerInstallation": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/install/node_modules/pi-durio",
+    "sourceRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/registered-source",
+    "originalProcessPid": 86314,
+    "newProcessPid": 89968,
+    "pendingRunId": "a15e19d7-06a8-4286-aca6-2fba6142f49a",
+    "sourceRollback": "completed",
+    "graderBefore": [
+      "FAIL",
+      "FAIL"
+    ],
+    "graderAfter": [
+      "PASS",
+      "PASS"
+    ],
+    "immutableOutcomeSources": [
+      "e1:168:2013c820645cbfc84bbfa324c758335784f3c0f24cb198ac7640141e477175f6",
+      "e1:201:a111c890f7bba797b3e1e9cc4a9f5289fe1333be42d20e63867b8bfcbcb5c594"
+    ],
+    "scope": "Controlled provider through installed actual Pi APIs, actual build/start/check VMs, explicit host new process, actual original eval runtime outcomes and independent VM regrade. No paid calls, model-quality or performance winner claim.",
+    "evidenceDirectory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance",
+    "originalEval": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/original-eval.json",
+    "regraded": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/regraded.json",
+    "priorAffectedReport": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r6/acceptance/prior-affected-report.json",
+    "sourceOutputCorrespondence": "source-build.json records 156 inputs, 231 outputs and 140 compiler files; both baseline and candidate manifests retain 13159 exact files. Candidate variant changes only declared headless JSON indentation source and its compiled correspondence.",
+    "distinctFacts": [
+      "registered source validation",
+      "restricted build receipt",
+      "startup and declared regression",
+      "formal source write",
+      "selected future entry",
+      "explicit new process spawn/exit and completed task",
+      "rollback of source and future entry",
+      "independent eval asset revision",
+      "consistent regrade over the same two saved outcomes"
+    ],
+    "retention": "Ordinary cleanup refused selected baseline/candidate manifests and before/after source objects.",
+    "authorizationAndRollback": "Unit/actual paths cover changed authorization, changed source/build modes or bytes, duplicate launch IDs, old pending rejection without mutation, later user edit rejection, exact rollback and explicit old build launch."
+  },
+  "resourceProfiles": {
+    "default": {
+      "memoryBytes": 536870912,
+      "heapOption": null,
+      "changed": false
+    },
+    "typescriptBuild": {
+      "memoryBytes": 1073741824,
+      "heapMiB": 768,
+      "fixedTrustedProfile": true,
+      "modelChannel": false
+    },
+    "decision": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/build-resource-profile-decision.json",
+    "otherIsolationControls": "same no-network namespace/capability/seccomp/mount/export/termination boundary; no caller-supplied memory or heap size"
+  },
+  "firstFailures": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/red-01-source-selection.log",
+      "reason": "Source execution initially lacked the mandatory build contract."
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/red-02-input-set.log",
+      "reason": "Registration initially missed new build-input files."
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/first-build-execution.log",
+      "reason": "Readonly dependency copy hit the restricted per-file write bound; dependencies are now mounted readonly without recopying TypeScript."
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/build-execution-r2.log",
+      "reason": "Compiler exhausted the original 256 MiB heap."
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/build-execution-r3.log",
+      "reason": "Compiler also exhausted 384 MiB; fixed trusted build profile was explicitly coordinated."
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/profile-red.log",
+      "reason": "Fixed profile support was initially missing."
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/build-execution-r4.log",
+      "reason": "Build/start/new-process had passed; the mutation test itself attempted a write to a deliberately readonly artifact. Original retained; fixture now explicitly changes mode first."
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/tui-status-red.log",
+      "reason": "Expected truthful result notice was absent because the completion refresh replaced it. Original misleading fixed text and overwritten message were repaired."
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/r5/linux-dependency-reuse.json",
+      "reason": "First inventory helper rejected node_modules/.bin symlinks. Recovered by exact lockfile package inventory; no product runtime was executed by this helper failure."
+    }
+  ],
+  "notClaimed": [
+    "No paid provider calls, model quality or performance improvement. Both grader reports retain improvement=not-evaluated.",
+    "No full repository test-suite claim; required affected checks and real installed acceptance are listed exactly.",
+    "No automatic update, current-process replacement, old-pending migration, main merge, push, release or issue closure.",
+    "Source build support is limited to existing registered src/**/*.ts files with already prepared exact lock/compiler/dependency inputs."
+  ],
+  "verificationEntry": {
+    "script": "/Users/nineofour/pi-durio-v1-run/evidence/issue-26/verify-producer.mjs",
+    "sourceInputsAfterIntegration": "node /Users/nineofour/pi-durio-v1-run/evidence/issue-26/verify-producer.mjs /Users/nineofour/Durio inputs",
+    "fullAfterRootBuild": "node /Users/nineofour/pi-durio-v1-run/evidence/issue-26/verify-producer.mjs /Users/nineofour/Durio full",
+    "behavior": "Read-only: checks exact complete source/compiler sets; full mode additionally verifies root compiled outputs, its own source-build manifest and production dependency bytes against the independent r6 installation."
+  }
+}

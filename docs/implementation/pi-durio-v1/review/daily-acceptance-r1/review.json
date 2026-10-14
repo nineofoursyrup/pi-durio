@@ -1,0 +1,168 @@
+{
+  "schema": "pi-durio.daily-acceptance-independent-review.v1",
+  "at": "2026-10-11T11:28:00.504087+00:00",
+  "reviewer": "review_final_technical",
+  "method": "Single focused independent affected review using code-review Standards and Spec axes; reuse previous full technical and handoff reviews.",
+  "candidate": {
+    "commit": "63cae24c0678a7fbf52fa257c290f476da71fe75",
+    "tree": "c57f922c11fda1332b8fb97a6dd009d7575e4ffe",
+    "parent": "f346f77e8a9438aeeabb0a0dad67aaff7aa8bbbc",
+    "worktree": "/Users/nineofour/.codex/worktrees/issue32-daily-trial/Durio",
+    "worktreeCleanAtReview": true
+  },
+  "productCandidate": {
+    "sourceCommit": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "sourceTree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+    "cliSha256": "7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b"
+  },
+  "reviewedInputs": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/DAILY-ACCEPTANCE.md",
+      "bytes": 4762,
+      "sha256": "c1a631e826c9f1270fc7214469850000dcf0b6be03e41432f11fe0e958ff57cb"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/acceptance.json",
+      "bytes": 7794,
+      "sha256": "a7bf7959f78069225a64c6cdc9937ebf7d8653633aeda9b1eb9f331363fdbfee"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/applicable-readback.json",
+      "bytes": 30412,
+      "sha256": "1f284f598ca8daa7728222837ddc17f99f9eef0b677c13b6d052497c9b7f0c36"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/documentation-checks.json",
+      "bytes": 2686,
+      "sha256": "ab450cdfe3c0df1ae3d01fe97ce81f83b5255868525d3f46459427346c9f903a"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-32/daily-acceptance-r1/user-response.json",
+      "bytes": 1168,
+      "sha256": "29c3447c9906774c867fc17a82d09fdbb3e50369f538fcd482e00c937accad0c"
+    }
+  ],
+  "reusedIndependentReviews": [
+    {
+      "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/review.json",
+      "bytes": 6495,
+      "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/review/final-technical-f26ae8f/handoff-final/review.json",
+      "bytes": 3530,
+      "sha256": "fb6b6897b1c570a54f23d4af0442461463add516ae03d067c5c972f00d9ab95a"
+    }
+  ],
+  "standards": {
+    "verdict": "PASS",
+    "findings": [],
+    "basis": "Append-only owned documentation; immutable prior evidence retained; exact user response and candidate provenance; honest scope, timestamps, uncertainty, and authority. Applicable code-review smell baseline considered; no actionable new finding."
+  },
+  "spec": {
+    "verdict": "PASS",
+    "findings": [],
+    "basis": "PI-DURIO-V1-SPEC-r1 A2/A3/A4 and T22/#32 are satisfied by applicable technical acceptance for #11–31 plus the direct user statement 已试用当前版本，日用接受，收尾. No additional duration, paid trial, questionnaire or environment-detail gate is imposed."
+  },
+  "verification": {
+    "fixedCommitTreeParentAndCleanWorktree": "PASS",
+    "fiveCommittedBlobsMatchWorkingFiles": "PASS",
+    "appendOnlyFiveFiles": {
+      "status": "PASS",
+      "totalBytes": 46822
+    },
+    "productSourcePathsUnchangedFromF26": "PASS",
+    "gitDiffCheck": "PASS",
+    "jsonParse": "PASS",
+    "referenceIdentity": {
+      "status": "PASS",
+      "referenceEntries": 73,
+      "uniqueFiles": 37,
+      "method": "SHA-256 and byte length for every path/bytes/sha256 entry using absolute or docs-relative file paths in four new JSON documents; duplicate entries counted. No recursive inventory scan."
+    },
+    "originalsPreserved": {
+      "status": "PASS",
+      "count": 16,
+      "method": "Recorded hashes plus parent/candidate Git blob equality."
+    },
+    "exactUserResponseCopy": "PASS",
+    "selectedTrialObjectMetadata": {
+      "status": "PASS",
+      "sequences": [
+        4,
+        5,
+        47,
+        51,
+        52,
+        77
+      ],
+      "fields": "Artifact candidate/environment, offline configuration, closed status/observation/cleanup/lifecycle; compared with content-addressed objects without exporting prompt or answer text."
+    },
+    "completionRuleAndUnknowns": "PASS",
+    "historicalTechnicalApplicability": "PASS_REUSED_UNCHANGED_INPUTS"
+  },
+  "conclusion": {
+    "dailyUseAccepted": true,
+    "firstVersionComplete": true,
+    "acceptedTickets": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32
+    ],
+    "pendingTickets": [],
+    "blockers": [],
+    "appliesToFixedCandidateOnly": true
+  },
+  "limitations": [
+    "Two saved offline fixture runs are supplementary candidate-binding evidence; they do not prove physical provider requests, real inference or unobserved user tasks.",
+    "Direct user statement attests actual use and explicitly accepts daily use. Exact message sent time, human trial duration, Terminal application/profile/font/dimensions remain UNKNOWN or NOT_EXPOSED.",
+    "Historical FAIL, UNKNOWN, NOT RUN, npm 11.19.1 installation-path limitations, and native scenario limits remain unchanged. No new whole-suite PASS is claimed.",
+    "Issue OPEN at producer readback is a historical remote observation. Acceptance does not assert issue closure, main merge or release; coordinator owns authorized closeout.",
+    "Requested model gpt-6-astra/xhigh; actual backend NOT_ATTESTED."
+  ],
+  "reviewerDiagnostics": [
+    {
+      "firstAttempt": "FAIL_DIRECTORY_NOT_EMPTY_GUARD",
+      "explanation": "Output directory already contained a coordinator-owned publication subdirectory; no review files were written. Retried with per-target nonexistence assertions and preserved that sibling directory. Not a product or candidate failure."
+    }
+  ],
+  "effects": {
+    "productCommands": 0,
+    "productImports": 0,
+    "productTests": 0,
+    "TUIStarts": 0,
+    "TerminalOperations": 0,
+    "providerRequestsAdded": 0,
+    "VMStarts": 0,
+    "credentialsRead": false,
+    "originalEvidenceWrites": 0,
+    "sharedStatusWrites": 0,
+    "GitHubWrites": 0,
+    "reviewerFilesCreated": 3
+  },
+  "model": {
+    "requested": "gpt-6-astra",
+    "reasoningRequested": "xhigh",
+    "actualBackend": "NOT_ATTESTED"
+  }
+}

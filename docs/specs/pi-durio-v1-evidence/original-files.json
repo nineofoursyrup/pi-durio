@@ -1,0 +1,158 @@
+{
+  "AGENTS.md": {
+    "bytes": 389,
+    "sha256": "7e83738ba1c6c52d79eabf4c24db0d6247fb051bc19b3a6277b94362a39fd545"
+  },
+  "GLOSSARY.md": {
+    "bytes": 5925,
+    "sha256": "43a4d34c092a72794bd19614c6472d61b0899803fd6ea2a05fd2ba7c6a5f4512"
+  },
+  "docs/adr/0001-local-execution-and-recovery-boundary.md": {
+    "bytes": 1284,
+    "sha256": "bcc95c95c3e3140fd325178c47c9a12b3d29414918a1e783b6b05dd6a47feac0"
+  },
+  "docs/adr/0002-full-original-records-and-user-controlled-reduction.md": {
+    "bytes": 1522,
+    "sha256": "455387761601a83c165bf3c3da7a5ffbe7af44c8e437250e25d7ab1446abd76d"
+  },
+  "docs/adr/0003-eval-isolation-and-evidence-boundary.md": {
+    "bytes": 1288,
+    "sha256": "3f1b176b12537cbab079e5e4b7650f0b91345aba2f6e9db6b3b048e8b9eb15eb"
+  },
+  "docs/agents/domain.md": {
+    "bytes": 814,
+    "sha256": "a741edfb8b44f7ee1f69c4ffe9dddc23a76157abd393d97485c6b5a2ae1ff9b8"
+  },
+  "docs/agents/issue-tracker.md": {
+    "bytes": 2431,
+    "sha256": "f417455f1623e5490057159ce2eb64f7dd37744d413687725ed11fdccf2ed73f"
+  },
+  "docs/agents/triage-labels.md": {
+    "bytes": 598,
+    "sha256": "d95bbbeee7295a17d608ccd172e24aac850a9dd9bd11130a1599b14f68687f00"
+  },
+  "docs/design/eval-and-improvement-readback.json": {
+    "bytes": 176885,
+    "sha256": "42c5282a8bdc23e59f009996ab79f0be0f2368cc4ad5b215dd90255cab3f0e6c"
+  },
+  "docs/design/eval-and-improvement.md": {
+    "bytes": 20303,
+    "sha256": "75236d043c4aa58bf146d8ac57621a54d117569044b4aff168e153366a86fd37"
+  },
+  "docs/design/first-version-acceptance-readback.json": {
+    "bytes": 34328,
+    "sha256": "5e07cb9806a90b11200997f2528c95b5f2f943c8c5a0d5993e59eab210826bae"
+  },
+  "docs/design/first-version-acceptance.md": {
+    "bytes": 19665,
+    "sha256": "4edb0e8f8b624e2e8d23d7c3a661252df586e2eaaa0aa9afcc9064704a0230d4"
+  },
+  "docs/design/first-version-scope-readback.json": {
+    "bytes": 997,
+    "sha256": "daaeb5a2a2da428a1d5cabd694c670d3f600955e17e397e14794d1e262e1b06a"
+  },
+  "docs/design/first-version-scope.md": {
+    "bytes": 7636,
+    "sha256": "6b33a042fa1d402cbef421966977c4c89969e212198a7ad8219be6eb34e5c952"
+  },
+  "docs/design/improve-workflow-readback.json": {
+    "bytes": 184638,
+    "sha256": "ad89dbd4fb904df6fea67a3bd52d0407f4644b2e4a7b278737fb23e775f92e3f"
+  },
+  "docs/design/improve-workflow.md": {
+    "bytes": 21299,
+    "sha256": "947f4b85a93b11faad37297933c73c8d85bcb921104db938b588fb4de050fb9d"
+  },
+  "docs/design/llmops-metrics-and-feedback-readback.json": {
+    "bytes": 201518,
+    "sha256": "fca2d7de23740c187b3a6666681643a7d902d2bbdacb61afc178b16443c85bba"
+  },
+  "docs/design/llmops-metrics-and-feedback.md": {
+    "bytes": 31350,
+    "sha256": "59b0869f3fe919a52e4cc659edefaa56c676966df06be93611c30d4b9ff6b158"
+  },
+  "docs/design/runtime-evidence-and-retention-readback.json": {
+    "bytes": 48709,
+    "sha256": "1d290c92460efcc7e3be8875a8ca95c6a1ea37b8d47274126e2f3c2baec78a8a"
+  },
+  "docs/design/runtime-evidence-and-retention.md": {
+    "bytes": 32027,
+    "sha256": "ab3355ed874a6a7fd33d5631de1677784fcc8548aa9e7e2e925351033fa8e0a3"
+  },
+  "docs/design/tui-minimum-interaction-readback.json": {
+    "bytes": 36550,
+    "sha256": "6af7163a6bbea9f7c3cfcf976ea0e16bdf2f796d31d0296b471b8709e66f9ec0"
+  },
+  "docs/design/tui-minimum-interaction.md": {
+    "bytes": 19515,
+    "sha256": "70e9a65fb3658eaa29c6782d3a95ec2df7baec130c029219a58fb90134c1b779"
+  },
+  "docs/design/upstream-execution-recovery-readback.json": {
+    "bytes": 4161,
+    "sha256": "c9f55cafbd4198c2b2b8095949d63b87383a3521a9f398d21ef7ce42483d4e94"
+  },
+  "docs/design/upstream-execution-recovery.md": {
+    "bytes": 18088,
+    "sha256": "faaea060fc3169ccdae531efb27fb21c01a006a1cb4aea9302fc662cbdf8398c"
+  },
+  "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+    "bytes": 153617,
+    "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+  },
+  "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+    "bytes": 35573,
+    "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+  },
+  "docs/prototypes/pi-tui-1.1.0-probe/README.md": {
+    "bytes": 3542,
+    "sha256": "746c10daea2fa2fe396b07691dd88f8e3bfc17dc7c97d9ea62d4efca623d9113"
+  },
+  "docs/prototypes/pi-tui-1.1.0-probe/probe-result.json": {
+    "bytes": 1741,
+    "sha256": "43eb91ec03e38cd73e04f4a45bfd08ac00e575818639c401d7a5ac416c236a55"
+  },
+  "docs/prototypes/pi-tui-1.1.0-probe/probe.mjs.txt": {
+    "bytes": 5447,
+    "sha256": "754420aef3472c4a9eaf79a1b260d8b35fae8caa91c6a26b888229ef8160cac2"
+  },
+  "docs/prototypes/pi-tui-1.1.0-probe/provenance-payload.json": {
+    "bytes": 1044,
+    "sha256": "0a876f1f738744241cf93f59c5d0ba7ff505beb7cca9490de4a68cb39dc04c7e"
+  },
+  "docs/prototypes/pi-tui-1.1.0-probe/registry.json": {
+    "bytes": 3423,
+    "sha256": "e5664569d88f7f21c6afbba2dc5abb5e11163088dab6608480959f204e065289"
+  },
+  "docs/prototypes/pi-tui-1.1.0-probe/source-comparison.json": {
+    "bytes": 377,
+    "sha256": "fa15b0d1cae32758d99bc12a2db702011a4108c05574bd19fd3c2896331b730f"
+  },
+  "docs/prototypes/tui-minimum-interaction-preview.png": {
+    "bytes": 166265,
+    "sha256": "4266955a2705f963c10a77eab357558137a6716d11cc408df644ef95d706a2fa"
+  },
+  "docs/prototypes/tui-minimum-interaction-prototype.html": {
+    "bytes": 43175,
+    "sha256": "b4c15bd349166429c25bd457dbf0d3da10bacd336515cc68106ac5f058c3c16e"
+  },
+  "docs/research/pi-upstream-audit-2026-10-09.md": {
+    "bytes": 8097,
+    "sha256": "56b2f86be2a891decfb2da07f1f96251d1af1c8fb803a5f6acc09f95c44c3820"
+  },
+  "docs/research/tui-improve-audit-2026-10-09.md": {
+    "bytes": 6753,
+    "sha256": "afbc06268d2fdf7963b20eec3f11df317717b430174c0bd62612ce18ee8a1903"
+  },
+  "docs/wayfinder-proposal.md": {
+    "bytes": 7649,
+    "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+  },
+  "docs/wayfinder-readback-2026-10-09.json": {
+    "bytes": 3833,
+    "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+  },
+  "pi-durable-coding-agent-spec.html": {
+    "bytes": 130848,
+    "sha256": "a9f4b877ff18170019c23f77e886fff36a7616c732d5a8caf8a7014bea9501b6"
+  }
+}

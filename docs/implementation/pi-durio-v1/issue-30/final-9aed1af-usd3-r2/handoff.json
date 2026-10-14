@@ -1,0 +1,70 @@
+{
+  "status": "INDEPENDENT_SCOPED_REVIEW_PASS; READY_FOR_SERIAL_MERGER; PAID_NOT_RUN",
+  "ticket": 30,
+  "worktree": "/Users/nineofour/.codex/worktrees/issue-30-usd3/Durio",
+  "branch": "codex/pi-durio-v1-issue-30-usd3",
+  "initialBase": "14787f0dfaadf69b6c235e5bb650d9f923a5d5a1",
+  "latestIntegrationMerged": "21de8f1027cac7a004ef542ea04f98d5020df48c",
+  "productCandidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoning": "xhigh",
+  "backendAttestation": "not exposed by available tools",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+    "bytes": 8105,
+    "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+  },
+  "checks": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/checks.json",
+    "bytes": 3317,
+    "sha256": "da5ba312c15ca7124a0b016e558ae05c7185e38b89f3bf8f8237f2097ee3168d"
+  },
+  "revisionDelta": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/revision-delta.json",
+    "bytes": 9421,
+    "sha256": "84f818d7eb363bcccacfd2c116f62e8f1b510be03a0b48bc0493841941bdc931"
+  },
+  "review": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/r2/review.json",
+    "bytes": 13742,
+    "sha256": "bf9300a5060ae9cdb23a633cdc3c9a0c25725c75bcac0e793ae3811cf201f2da"
+  },
+  "priorBlockedReview": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/review.json",
+    "bytes": 20710,
+    "sha256": "4bf7bed922f5bab737842b6b75aa4aad1616c50df32ab0218a6f12a490a82c9f"
+  },
+  "firstFailure": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+    "bytes": 907,
+    "sha256": "341b2233193117b0c05ccda0042a9ac8ab3d5c8ef34b48f45583b3612f36da07"
+  },
+  "scope": [
+    "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3/",
+    "docs/implementation/pi-durio-v1/issue-30/final-9aed1af-usd3-r2/"
+  ],
+  "frozenEntriesChangedAfterReview": false,
+  "actualCredentialReads": 0,
+  "actualProviderRequests": 0,
+  "restrictedVmStarts": 0,
+  "builds": 0,
+  "grantCreated": false,
+  "paidStartCreated": false,
+  "push": false,
+  "githubWrites": false,
+  "futureCommandForCoordinatorOnly": "/usr/bin/python3 /Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/launch.py",
+  "grantPath": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/explicit-human-grant.json",
+  "grantTemplate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/grant-template-NOT-EXECUTABLE.json",
+    "bytes": 921,
+    "sha256": "0bc051fed4688d190474e815d24ccda8dda322649718ed7cd738f6ca8db6fea0"
+  },
+  "originalGrantTime": "2026-10-10T05:34:25.010886Z",
+  "requiredCoordinatorSteps": [
+    "Serial local integration of the docs-only ticket commit; no product rebuild caused or claimed",
+    "Finish/serialize user native follow-up before any paid/provider/VM workload",
+    "Use separately preserved credential readiness; create exact r2 manifest-bound grant with original human wording/source/time and fixed USD3 limits; do not renew time or execute f0",
+    "Run fixed r2 launch.py once; retain any FAIL/UNKNOWN and remaining not-run; no automatic replacement",
+    "Return actual improve candidate/revision/baseline/check/writeback scope for separate human selection"
+  ]
+}

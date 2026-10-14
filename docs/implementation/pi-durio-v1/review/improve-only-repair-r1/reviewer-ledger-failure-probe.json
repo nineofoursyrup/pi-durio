@@ -1,0 +1,104 @@
+{
+  "status": "BUG_REPRODUCED",
+  "cases": 2,
+  "results": [
+    {
+      "name": "final-ledger-save-failure-still-exits-successfully",
+      "status": "BUG_REPRODUCED",
+      "scope": "Exact frozen harness source; API, grant, authorless authorization and receipt writes are memory-only substitutes",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "result": {
+        "status": "AWAITING_ACTUAL_CANDIDATE_SELECTION",
+        "stage": "improve",
+        "runId": "offline-improve-run",
+        "analysisStatus": "completed",
+        "cleanup": "confirmed",
+        "lifecycle": null,
+        "reportId": "v1-live-r3-improve",
+        "reportRevision": "offline-revision",
+        "candidates": 1,
+        "selection": "none; paid grant does not select unknown future candidates",
+        "reason": null,
+        "cumulativeBudgetError": "Error: OFFLINE_CONTROLLED_LEDGER_WRITE_FAILURE",
+        "budgetDisposition": "Unknown; no restart or extra allowance",
+        "at": "2026-10-10T07:00:01.000Z",
+        "deadline": "2026-10-10T08:00:01.000Z",
+        "remoteTermination": "unknown",
+        "firstFailuresRetained": true,
+        "priorUnknownReservationRetained": 1056768,
+        "modelIdentity": "Requested alias is not immutable served model proof; inspect retained raw response",
+        "cost": "Only host settlements and retained UNKNOWN reservations; SDK mirrors are never added"
+      },
+      "exitCode": 0,
+      "cumulativeBudgetSavedInMemory": false,
+      "paidStartRetainedInMemory": true,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "final-ledger-readback-failure-still-exits-successfully",
+      "status": "BUG_REPRODUCED",
+      "scope": "Exact frozen harness source; API, grant, authorless authorization and receipt writes are memory-only substitutes",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "result": {
+        "status": "AWAITING_ACTUAL_CANDIDATE_SELECTION",
+        "stage": "improve",
+        "runId": "offline-improve-run",
+        "analysisStatus": "completed",
+        "cleanup": "confirmed",
+        "lifecycle": null,
+        "reportId": "v1-live-r3-improve",
+        "reportRevision": "offline-revision",
+        "candidates": 1,
+        "selection": "none; paid grant does not select unknown future candidates",
+        "reason": null,
+        "cumulativeBudgetError": "Error: OFFLINE_CONTROLLED_LEDGER_READBACK_FAILURE",
+        "budgetDisposition": "Unknown; no restart or extra allowance",
+        "at": "2026-10-10T07:00:01.000Z",
+        "deadline": "2026-10-10T08:00:01.000Z",
+        "remoteTermination": "unknown",
+        "firstFailuresRetained": true,
+        "priorUnknownReservationRetained": 1056768,
+        "modelIdentity": "Requested alias is not immutable served model proof; inspect retained raw response",
+        "cost": "Only host settlements and retained UNKNOWN reservations; SDK mirrors are never added"
+      },
+      "exitCode": 0,
+      "cumulativeBudgetSavedInMemory": true,
+      "paidStartRetainedInMemory": true,
+      "actualRunnerWrites": 0
+    }
+  ],
+  "scope": "Focused independent failure-path check; no real authorization or product import/execution",
+  "credentialReads": 0,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "productExecutions": 0,
+  "actualRunnerWrites": 0,
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/preflight.mjs",
+      "sha256": "ec752343e4bed892a06ad684aae697ae350716f78f4af61a7e33058cc7c51230"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/ledger.mjs",
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1/harness/run.mjs",
+      "sha256": "45dcdd649a6f71bd680f1540d054a3a38bcc6bc858eb3ad194f040e902bf102d"
+    }
+  ]
+}

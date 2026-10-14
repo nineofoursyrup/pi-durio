@@ -1,0 +1,130 @@
+{
+  "schema": "pi-durio.final-technical-independent-review.v1",
+  "at": "2026-10-10T11:25:27.767876+00:00",
+  "status": "PASS_FIXED_DOCS_CANDIDATE_SUPPORTS_TECHNICAL_ACCEPTANCE",
+  "docsCandidate": {
+    "commit": "e748b12e2add451c8b05b8a6a0721bb92f5e636b",
+    "tree": "4c40ee45d26ca201878b4ef99d03de040e1f5067",
+    "parent": "780a4a072ffaf45dfcdf947607008f393cfae1a4"
+  },
+  "productCandidate": {
+    "commit": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+    "tree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+    "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821"
+  },
+  "scope": {
+    "changedFiles": 31,
+    "changedBytes": 350097,
+    "path": "docs/implementation/pi-durio-v1/issue-31/final-f26ae8f",
+    "independent": true,
+    "twoAxesOneFocusedPass": true,
+    "sourceReviewsReused": true,
+    "newWholeSuitePassClaimed": false
+  },
+  "standards": {
+    "verdict": "PASS",
+    "hardFindings": [],
+    "optionalFindings": [],
+    "basis": "Independent focused pass of the fixed documentation/evidence increment, using applicable AGENTS.md, code-review Standards and all twelve smell heuristics. No production change, undocumented standard breach, scope expansion or actionable new smell found. Preserved frozen harness copies are evidence snapshots, not a new duplicate execution framework."
+  },
+  "spec": {
+    "verdict": "PASS",
+    "findings": [],
+    "scope": "Issue #31 six criteria, complete 62-contract/22-ACC/7-MET index and final technical evidence reconciliation against PI-DURIO-V1-SPEC-r1; prior fixed source reviews and unchanged deterministic checks reused with their original scope.",
+    "supports21TicketTechnicalCompletion": true,
+    "coordinatorAcceptancePending": true,
+    "issue32ReadyForUserTrialAfterCoordinatorAcceptance": true,
+    "dailyAcceptance": "PENDING_USER",
+    "firstVersionComplete": false
+  },
+  "readbacks": {
+    "identityAndIndex": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/identity-and-index-readback.json",
+      "bytes": 105797,
+      "sha256": "97b56ee5b01654cea886d20883ba245f628964b15e5e01e6b0cbc1332db7d85f"
+    },
+    "nativeRawReadback": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/native-independent-readback.json",
+      "bytes": 1014112,
+      "sha256": "2a26594cfce0a512688a9cf862f95d4fc6a44ea497e5d5b8b8b91bc03aca1ebf"
+    },
+    "accountingAndBoundedReuse": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/accounting-and-reuse-readback.json",
+      "bytes": 11096,
+      "sha256": "87cd7319d2cb6ec4c99f05fe9b758d02ef4e91c7494e9434748a3882e7847b66"
+    },
+    "initialReviewerSchemaProbe": {
+      "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/identity-and-index-readback.initial.json",
+      "bytes": 113432,
+      "sha256": "c540a9fc4bf14f7c36ced623a2208a3f98bd71594dbec0d963b8a70d5d37c6de"
+    }
+  },
+  "sourceDocuments": {
+    "technicalReport": {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/REPORT.md",
+      "bytes": 8986,
+      "sha256": "2e2178e818bd6cd4d72d63e575ea419fe9685e873b4d7e8cead1b6d96880f601"
+    },
+    "index": {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/contract-evidence-index.json",
+      "bytes": 140385,
+      "sha256": "228624816baedb82189d9b5f7539e72bbbe2001f430b29094feab156d6215fa5"
+    },
+    "nativeReport": {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/NATIVE-REPORT.md",
+      "bytes": 4303,
+      "sha256": "9619c65c7b5aabb521bbe799c94d148dda0607d8d09b586e5162206495e23336"
+    },
+    "startupRecovery": {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/STARTUP-RECOVERY.md",
+      "bytes": 3868,
+      "sha256": "4e0e3366b61669b1327447b1855fc9e16c98f7aa67574148c803d80e417f7536"
+    },
+    "accounting": {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/accounting-readback.json",
+      "bytes": 16133,
+      "sha256": "76409a7a87ec93435fadf78ef1355cc387828bc9a7e688f94ea2654c4bad2a1c"
+    },
+    "humanReuse": {
+      "path": "/Users/nineofour/.codex/worktrees/native31-readback/Durio/docs/implementation/pi-durio-v1/issue-31/final-f26ae8f/reconciliation-preparation.json",
+      "bytes": 45425,
+      "sha256": "6f5e56fac683f032d6c5c7352f403c9300add6056b985d3bcae43a3e16c4bb9d"
+    }
+  },
+  "reviewerDiagnostics": {
+    "ACCInitialSchemaProbe": "Initial expected field was contract; old ACC uses original_row. Initial and corrected outputs retained; current 22 ACC rows exactly match. Reviewer audit issue only.",
+    "SQLiteExploratoryQuery": "Initial search for nonexistent chunk kind returned no row; corrected to tool.output schema. No original or product state changed."
+  },
+  "preservedLimits": [
+    "Original combined 250 PASS / 1 FAIL and later repair evidence retained; no new whole-suite PASS",
+    "npm11.19.1 bundled npm ls and consumer offline npm ci FAIL remain scoped limitations",
+    "Human native reuse is bounded to recorded unchanged paths; current automated native results are not human input acceptance",
+    "Terminal profile/font UNKNOWN; startup/cache/RSS/export timing limitations explicit",
+    "45 physical requests and 1056768 reserved UNKNOWN tokens retained; conservative cost estimate, no bill",
+    "All paid starts consumed; no new execution authority",
+    "#32 user trial and explicit daily acceptance pending; no main merge/release/Issue close"
+  ],
+  "effects": {
+    "productImports": 0,
+    "productTests": 0,
+    "providerRequests": 0,
+    "VMStarts": 0,
+    "TerminalOperations": 0,
+    "newMeasurements": 0,
+    "credentialsRead": false,
+    "originalEvidenceWrites": 0,
+    "rootProducerSharedStateWrites": 0,
+    "GitHubWrites": 0,
+    "newReportsOnly": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f"
+  },
+  "model": {
+    "requested": "gpt-6-astra",
+    "reasoningRequested": "xhigh",
+    "actualBackend": "NOT_ATTESTED"
+  },
+  "report": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.md",
+    "bytes": 5589,
+    "sha256": "1b624b38a26a88fac164082e885cc1883356da648cca61ee094bf27115dece0f"
+  }
+}

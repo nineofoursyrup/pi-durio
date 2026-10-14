@@ -1,0 +1,2218 @@
+{
+  "schema": "pi-durio.issue-31.native-followup-readback.v1",
+  "at": "2026-10-10T05:57:12.780789+00:00",
+  "status": "MEASURED",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "docsBaseBeforeIntegration": "5b30b9a28482f9d29546b0736936d61807aac572",
+  "batchStartedAt": "2026-10-10T05:51:08.877Z",
+  "batchFinishedAt": "2026-10-10T05:51:42.256Z",
+  "scope": "Only targeted composition rerun and read-only acquisition from retained original native long-session; does not rewrite original failure or repeat idle/60-round measurements.",
+  "identity": {
+    "config": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-config.json",
+      "bytes": 3639,
+      "sha256": "e4be939ec2e27357db9e081fe1613f992d55fdeb1083905c38b4d1417d8a9132"
+    },
+    "configMatchesBatchPlan": true,
+    "sourceBuildSha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "productCandidateUnchanged": true,
+    "harnesses": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/native-followup-batch.mjs",
+        "bytes": 7702,
+        "sha256": "b7caf603e75b6e3917479b19f175356d0e3e899ed5c80259fb60096c56458e1b"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/native-composition.mjs",
+        "bytes": 13088,
+        "sha256": "e70829545c65daa6bd793d69ef242256afb17bc1d0fafa9422a2299e4eafc3e7"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/readonly-data.mjs",
+        "bytes": 6333,
+        "sha256": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+      }
+    ],
+    "stepPlans": {
+      "composition": {
+        "harness": {
+          "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/native-composition.mjs",
+          "bytes": 13088,
+          "sha256": "e70829545c65daa6bd793d69ef242256afb17bc1d0fafa9422a2299e4eafc3e7"
+        },
+        "product": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/src/tui/app.js",
+          "bytes": 80260,
+          "sha256": "459612fbb00b0f8563de718227ea2f66a4913cbecc8266fb56c9485ab0d9b4bb"
+        },
+        "sourceBuild": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/execution/source-build.json",
+          "bytes": 92981,
+          "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+        },
+        "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+        "nodeVersion": "v26.8.2"
+      },
+      "readonly": {
+        "harness": {
+          "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-31/native-followup-r1/readonly-data.mjs",
+          "bytes": 6333,
+          "sha256": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+        },
+        "product": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/src/query.js",
+          "bytes": 4576,
+          "sha256": "f061762ac9b30837ec14331baf3c5441da876476aa1f6f80132ee7739a707813"
+        },
+        "sourceBuild": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/pi-durio/dist/execution/source-build.json",
+          "bytes": 92981,
+          "sha256": "0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886"
+        },
+        "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+        "nodeVersion": "v26.8.2"
+      }
+    },
+    "retainedSource": {
+      "directory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session",
+      "result": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/result.json",
+        "bytes": 930461,
+        "sha256": "1fb56666475f780092e95270a4992493a8967ac3df726f4123c2a9a49bbdcccf"
+      },
+      "plan": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/plan.json",
+        "bytes": 25509,
+        "sha256": "590b9dd4755da9ce7183e1b142ac5d70dc9ab86ca24513306f46a68d5d72485d"
+      },
+      "largeOutput": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/large-output.json",
+        "bytes": 3734,
+        "sha256": "94918e6b978e2194baa642ef6f3a52e2c6d8de587e22f62f8372a13534dac27f"
+      }
+    },
+    "verificationScope": "Read and hash-checked frozen config, exact harnesses, step plans and selected product/sourceBuild entries. Reused original installed identity and batch full-inventory preflight; no rebuild or repeated full install-tree readback."
+  },
+  "environment": {
+    "terminal": {
+      "program": "Apple_Terminal",
+      "version": "488.7",
+      "columns": 112,
+      "rows": 35,
+      "profile": "UNKNOWN"
+    },
+    "compositionTerminal": {
+      "program": "Apple_Terminal",
+      "version": "488.7",
+      "columns": 112,
+      "rows": 35
+    },
+    "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+    "nodeVersion": "v26.8.2",
+    "loadAverageObservations": [
+      [
+        9.47119140625,
+        9.8125,
+        7.4951171875
+      ],
+      [
+        9.47119140625,
+        9.8125,
+        7.4951171875
+      ],
+      [
+        8.208984375,
+        9.4775390625,
+        7.4541015625
+      ],
+      [
+        8.208984375,
+        9.4775390625,
+        7.4541015625
+      ],
+      [
+        7.71142578125,
+        9.35302734375,
+        7.421875
+      ]
+    ],
+    "oneMinuteLoadRange": {
+      "min": 7.71142578125,
+      "max": 9.47119140625
+    },
+    "inheritedEnvironmentNames": [
+      "HOME",
+      "PATH",
+      "TERM",
+      "TERM_PROGRAM",
+      "TERM_PROGRAM_VERSION",
+      "LANG",
+      "TMPDIR"
+    ],
+    "cacheNote": "Full installation read preflight warms caches; no machine-cold claim."
+  },
+  "batch": {
+    "status": "MEASURED",
+    "steps": [
+      {
+        "id": "composition",
+        "script": "native-composition.mjs",
+        "elapsedMs": 32434.164375000004,
+        "loadBefore": [
+          9.47119140625,
+          9.8125,
+          7.4951171875
+        ],
+        "loadAfter": [
+          8.208984375,
+          9.4775390625,
+          7.4541015625
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "measurementStatus": "PASS",
+        "ttyBefore": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+        "ttyAfter": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+        "ttyUnchanged": true
+      },
+      {
+        "id": "readonly-data",
+        "script": "readonly-data.mjs",
+        "elapsedMs": 936.1788329999981,
+        "loadBefore": [
+          8.208984375,
+          9.4775390625,
+          7.4541015625
+        ],
+        "loadAfter": [
+          7.71142578125,
+          9.35302734375,
+          7.421875
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "measurementStatus": "MEASURED",
+        "ttyBefore": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+        "ttyAfter": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+        "ttyUnchanged": true
+      }
+    ],
+    "notRun": [],
+    "exception": null,
+    "ttyAtEndBeforeRepair": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+    "ttyOriginal": "gfmt1:cflag=4b00:iflag=6b02:lflag=5cb:oflag=3:discard=f:dsusp=19:eof=4:eol=ff:eol2=ff:erase=7f:intr=3:kill=15:lnext=16:min=1:quit=1c:reprint=12:start=11:status=14:stop=13:susp=1a:time=0:werase=17:ispeed=9600:ospeed=9600",
+    "ttyRepairNeeded": false,
+    "providerPolicy": "Only declared synthetic transport; credentials not inherited",
+    "humanAcceptance": "NOT CLAIMED"
+  },
+  "composition": {
+    "status": "PASS",
+    "syntheticRequests": 7,
+    "realProviderRequests": 0,
+    "source": {
+      "taskId": "7b68febe-fe70-4b07-9a6a-0f934702e185",
+      "requestId": "7b68febe-fe70-4b07-9a6a-0f934702e185",
+      "kind": "task",
+      "input": "Create the declared long controlled response for native context maintenance.",
+      "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace",
+      "target": null,
+      "execution": {
+        "runId": "89bf1e89-9984-40f1-939b-40bded56fe03",
+        "sessionId": "b8648677-f2ba-4449-9eae-b3dec0f971df"
+      },
+      "runId": "89bf1e89-9984-40f1-939b-40bded56fe03",
+      "acceptedAt": "2026-10-10T05:51:11.717Z",
+      "acceptedSeq": 2,
+      "updatedAt": "2026-10-10T05:51:15.429Z",
+      "status": "completed",
+      "reason": null,
+      "executionVersion": {
+        "artifactId": "c3a26d10711de3ae1afdd08698e4dd43a92f48d1bc591653e8778218aa373ffd",
+        "artifactSeq": 5,
+        "configSeq": 6
+      },
+      "authorization": {
+        "tools": [
+          "read",
+          "write",
+          "edit",
+          "bash"
+        ],
+        "execution": "trusted-local-coding",
+        "requestLimit": 8,
+        "fileLimitBytes": 262144,
+        "replay": "unsafe"
+      },
+      "receipt": {
+        "seq": 30,
+        "kind": "run.closed",
+        "at": "2026-10-10T05:51:15.429Z"
+      }
+    },
+    "compaction": {
+      "finished": {
+        "seq": 52,
+        "runId": "89bf1e89-9984-40f1-939b-40bded56fe03",
+        "data": {
+          "requestId": "dfb0b7a0-788b-438c-ad0b-ca8cc05640f3",
+          "taskId": 12,
+          "state": "applied",
+          "submissionId": 14,
+          "entryId": 13
+        },
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/469533b7aeed3d22e87e5aadd090bdbaf253e685ec7298ee1130217e1ba7ef9a",
+          "bytes": 113,
+          "sha256": "469533b7aeed3d22e87e5aadd090bdbaf253e685ec7298ee1130217e1ba7ef9a"
+        }
+      },
+      "committedSummary": {
+        "seq": 50,
+        "runId": "89bf1e89-9984-40f1-939b-40bded56fe03",
+        "data": {
+          "durableCommit": 10,
+          "entry": {
+            "kind": "pi.compaction",
+            "model": [
+              {
+                "role": "user",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "The conversation history before this point was compacted into the following summary:\n\n<summary>\nControlled response: inspect actual tool evidence for acceptance.\n</summary>"
+                  }
+                ],
+                "timestamp": 1791611477129
+              }
+            ],
+            "data": {
+              "reason": "manual"
+            },
+            "id": 13,
+            "conversationId": 1,
+            "head": 11,
+            "byTaskId": 12
+          },
+          "source": "public committed CompactionEntry"
+        },
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/c0d6eaaf882aadeb7f89914ac313027a2c4a52f825086204c203629f1a61dddd",
+          "bytes": 441,
+          "sha256": "c0d6eaaf882aadeb7f89914ac313027a2c4a52f825086204c203629f1a61dddd"
+        }
+      },
+      "originalRetained": true,
+      "original90000ZResponseHashVerified": true,
+      "originalResponseEvidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/c509a938e5215092caef69b721304eeaaf9594ee765f5aeb3ff54675436803dd",
+        "bytes": 90839,
+        "sha256": "c509a938e5215092caef69b721304eeaaf9594ee765f5aeb3ff54675436803dd"
+      }
+    },
+    "analysis": {
+      "id": "native-composition-analysis",
+      "revision": "0d9bc520d4c7d38ccc3cbe10d9fc69aa1a2e89ed81f1f9b3c34778805dfd8f8e",
+      "runId": "32e8c3f4-af14-470f-89ef-c62c7e1b44f9",
+      "state": "complete",
+      "candidateCount": 1,
+      "selected": [],
+      "candidate": {
+        "id": "candidate:fbbd8d864ecae462cc449b366af887b6",
+        "revision": "08e7efce618af23bfd6b858e7f6978fcac9831649eb5a5faf299d359de2e0228",
+        "selection": "unselected",
+        "execution": "not-started",
+        "effect": "unverified",
+        "scope": [
+          "math.mjs"
+        ],
+        "gaps": [
+          "Controlled transport; no model inference claim"
+        ],
+        "activation": {
+          "writeback": true,
+          "enable": false,
+          "conditions": [
+            "All necessary checks and required predeclared benefit thresholds pass"
+          ],
+          "timing": "Only after explicit aggregate submission"
+        }
+      },
+      "budget": {
+        "requests": 3,
+        "knownTokens": 42,
+        "reservedTokens": 0,
+        "unknown": 0,
+        "violation": false,
+        "completeness": "known",
+        "deadline": "2026-10-10T05:52:50.702Z"
+      },
+      "gaps": [
+        "Synthetic native composition only",
+        "Self source is not explicitly registered; no directory search or installation edits permitted"
+      ],
+      "evidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/8efc00962d38eea5866ea3fc2f4a1ac096179f49875f181ddcdef51fb21bb6b0",
+        "bytes": 4598,
+        "sha256": "8efc00962d38eea5866ea3fc2f4a1ac096179f49875f181ddcdef51fb21bb6b0"
+      }
+    },
+    "selection": {
+      "id": "native-composition-choice",
+      "state": "completed",
+      "reportId": "native-composition-analysis",
+      "reportRevision": "0d9bc520d4c7d38ccc3cbe10d9fc69aa1a2e89ed81f1f9b3c34778805dfd8f8e",
+      "selections": [
+        {
+          "candidateId": "candidate:fbbd8d864ecae462cc449b366af887b6",
+          "candidateRevision": "08e7efce618af23bfd6b858e7f6978fcac9831649eb5a5faf299d359de2e0228",
+          "target": {
+            "id": "project",
+            "kind": "project",
+            "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace",
+            "files": [
+              {
+                "path": "math.mjs",
+                "sha256": "577b3f8de17b0a06f131cead8e49b2171e17126f0c074581047992a5f45427ba",
+                "bytes": 29,
+                "content": {
+                  "sha256": "577b3f8de17b0a06f131cead8e49b2171e17126f0c074581047992a5f45427ba",
+                  "bytes": 29
+                },
+                "sourceId": "e1:66:7e320cd10d219f2f770363475625ea8aa748e7bcd10b23e1c9faf60b1b74cbc5",
+                "state": "available",
+                "reason": []
+              }
+            ],
+            "baseline": "2156649fbfae0d8980bf6a11796b02c9e08c96e6f1ba31d0a667c130738dc1ce",
+            "applicableVersion": "c3a26d10711de3ae1afdd08698e4dd43a92f48d1bc591653e8778218aa373ffd",
+            "state": "verified",
+            "gaps": []
+          },
+          "mode": "execute-declared-scope",
+          "steps": [
+            "Prepare fixed selected content",
+            "Run all declared checks",
+            "Write only after explicit selection"
+          ],
+          "formal": {
+            "writeback": true,
+            "activate": null,
+            "failureCompensation": "none"
+          }
+        }
+      ],
+      "limits": {
+        "deadline": "2026-10-10T05:54:22.245Z",
+        "maxChecks": 1,
+        "maxRequests": 0,
+        "maxTokens": 0
+      },
+      "requestDigest": "b4241b5f5e03238cb3db0cbf59e0463ae3049857140d0f7e94b1838f5243f2d1",
+      "executionVersion": "0daa2fd7d03ac5d96860247cbae1677be6b708343b65e6001f318109fa2efb32",
+      "automatedInputEvents": [
+        {
+          "at": "2026-10-10T05:51:24.011Z",
+          "performanceMs": 15101.075041,
+          "kind": "automated-input",
+          "data": "e"
+        },
+        {
+          "at": "2026-10-10T05:51:25.020Z",
+          "performanceMs": 16109.46175,
+          "kind": "automated-input",
+          "data": "s"
+        },
+        {
+          "at": "2026-10-10T05:51:26.040Z",
+          "performanceMs": 17129.541916,
+          "kind": "automated-input",
+          "data": "\r"
+        }
+      ],
+      "operator": "Harness-injected e, s, Enter through native input callback; NOT a human choice or permission for another target."
+    },
+    "isolatedRegression": {
+      "state": "completed",
+      "effect": "direct-checks-passed",
+      "declaredProgram": "import assert from 'node:assert/strict';const {add}=await import('/work/targets/project/math.mjs');assert.equal(add(2,3),5);assert.equal(add(-2,3),1);",
+      "declaredTimeoutMs": 30000,
+      "execution": {
+        "id": "durio-i12-816eba88-f9f7-41a2-99d4-dd7c3d07f8a7",
+        "image": "pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c",
+        "resources": {
+          "profile": "default",
+          "cpus": 1,
+          "memoryBytes": 536870912,
+          "nodeHeapMiB": null
+        },
+        "observedResources": {
+          "memoryBytes": 536870912,
+          "cpus": 1,
+          "nodeHeapMiB": null
+        },
+        "status": "completed",
+        "started": true,
+        "terminated": true,
+        "reason": null,
+        "modelRequests": [],
+        "code": 0,
+        "sourceEnd": "eof"
+      },
+      "controls": [
+        {
+          "name": "version",
+          "code": 0
+        },
+        {
+          "name": "image",
+          "code": 0
+        },
+        {
+          "name": "create",
+          "code": 0
+        },
+        {
+          "name": "configuration",
+          "code": 0
+        },
+        {
+          "name": "stop",
+          "code": 0
+        },
+        {
+          "name": "stopped",
+          "code": 0
+        },
+        {
+          "name": "delete",
+          "code": 0
+        },
+        {
+          "name": "absence",
+          "code": 0
+        }
+      ],
+      "observedContainer": {
+        "id": "durio-i12-816eba88-f9f7-41a2-99d4-dd7c3d07f8a7",
+        "platform": {
+          "architecture": "arm64",
+          "os": "linux",
+          "variant": "v8"
+        },
+        "readOnlyRoot": true,
+        "resources": {
+          "cpuOverhead": 1,
+          "cpus": 1,
+          "memoryInBytes": 536870912
+        },
+        "entrypoint": "/usr/bin/unshare",
+        "arguments": [
+          "--net",
+          "--",
+          "/usr/bin/setpriv",
+          "--reuid=1000",
+          "--regid=1000",
+          "--clear-groups",
+          "--bounding-set=-all",
+          "--inh-caps=-all",
+          "--ambient-caps=-all",
+          "--no-new-privs",
+          "/usr/bin/env",
+          "-i",
+          "PATH=/usr/local/bin:/usr/bin:/bin",
+          "HOME=/work/home",
+          "TMPDIR=/work/tmp",
+          "XDG_CACHE_HOME=/work/cache",
+          "/usr/bin/python3",
+          "-I",
+          "/boundary/restrict.py",
+          "node",
+          "/input/bootstrap.mjs"
+        ],
+        "mountDestinations": [
+          {
+            "destination": "/input",
+            "options": [
+              "ro"
+            ]
+          },
+          {
+            "destination": "/work",
+            "options": []
+          },
+          {
+            "destination": "/boundary",
+            "options": [
+              "ro"
+            ]
+          }
+        ]
+      },
+      "absenceVerifiedFromRetainedOutcome": true,
+      "outputBytes": {
+        "stdout": 0,
+        "stderr": 0
+      },
+      "artifactError": null,
+      "conclusion": {
+        "effect": "direct-checks-passed",
+        "allChecksPassed": true,
+        "allDeclaredBenefitsMet": false,
+        "requiredBenefitCount": 0,
+        "diagnosticBenefitCount": 0,
+        "allRequiredBenefitsMet": true,
+        "rule": "Every declared check/protection remains necessary for every objective. All required benefits must meet their own thresholds; omitted benefit role means required. Explicit diagnostic effects remain observations and never satisfy a required benefit. Performance requires at least one required comparison. Mixed or missing conclusions are retained, never replaced by the last result."
+      },
+      "validationScope": "Only the selected combination, fixed contents and restricted checks; no per-candidate causal credit or host-performance claim.",
+      "evidence": [
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/plan.json",
+          "bytes": 2738,
+          "sha256": "ce3ee2134760f076a244d14bf28d43684eb094177f1f3e3c493e52827327aad1"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/outcome.json",
+          "bytes": 26441,
+          "sha256": "7c53c53517879146ab84fc0f3914ed0fb05175b4dba3b7a2274e1b26c4a3ba40"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/configuration.json",
+          "bytes": 4971,
+          "sha256": "04fe1d77ce0a93dbc42e00c181d0bd5c1ddffc4d7d6f0b84eaa139223b889097"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/absence.json",
+          "bytes": 2062,
+          "sha256": "3eaf884efe27d7d2b41fb84746a8d2294bd3ebb8e75755335a6a691b456c5a1f"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/create.json",
+          "bytes": 96,
+          "sha256": "21e8a7298f793266bbdf886765aff49c77e50933561da163e61b571ba4b8d5dc"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/stop.json",
+          "bytes": 96,
+          "sha256": "21e8a7298f793266bbdf886765aff49c77e50933561da163e61b571ba4b8d5dc"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/stopped.json",
+          "bytes": 5022,
+          "sha256": "28fddbe74845fe262e368af2c87ad32661eed40a54ac7fa36002dcaa44c386b2"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/delete.json",
+          "bytes": 96,
+          "sha256": "21e8a7298f793266bbdf886765aff49c77e50933561da163e61b571ba4b8d5dc"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/version.json",
+          "bytes": 111,
+          "sha256": "6d731b6fb51091a767e2737220ca78804db9ebaeb171b81655fbf99e6e9c2602"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/image.json",
+          "bytes": 9924,
+          "sha256": "2002853fd985ba61d565a314413e089c3bd3743227eb7cbd40c9ccf70cebea65"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/input/check.mjs",
+          "bytes": 150,
+          "sha256": "0e45167c235d5abc2387753519ccafee77a50dea6b8bb89c5ac27f100954ce05"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/input/bootstrap.mjs",
+          "bytes": 214,
+          "sha256": "fa0b04946cdfedb7e359d270d4fdc388e31a215ba1e0f8e7ed4fad94ba52d9ff"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/boundary/restrict.py",
+          "bytes": 2291,
+          "sha256": "acf442988bd1386fdc688c737b656eb9b6f315d9775fd6f9faa1091485f6fff7"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/validation/group/check-0/execution/work/targets/project/math.mjs",
+          "bytes": 29,
+          "sha256": "a94468f11b9e176ff2b3cf31080d67c2a31efc3dc4c0757abf90585f4e765f6a"
+        }
+      ],
+      "executionObjectEvidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/6a1fb9cf7950e70c4ef726b5a88c0a7630496cbcab729550e1efed156f3c406a",
+        "bytes": 25015,
+        "sha256": "6a1fb9cf7950e70c4ef726b5a88c0a7630496cbcab729550e1efed156f3c406a"
+      }
+    },
+    "formal": {
+      "decisionState": "completed",
+      "writeback": "written",
+      "activation": "not-enabled",
+      "group": {
+        "id": "native-composition-choice",
+        "groupId": "group",
+        "state": "completed",
+        "writeback": "written",
+        "activation": "not-enabled",
+        "files": [
+          {
+            "targetId": "project",
+            "root": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace",
+            "path": "math.mjs",
+            "before": {
+              "sha256": "577b3f8de17b0a06f131cead8e49b2171e17126f0c074581047992a5f45427ba",
+              "bytes": 29
+            },
+            "after": {
+              "sha256": "a94468f11b9e176ff2b3cf31080d67c2a31efc3dc4c0757abf90585f4e765f6a",
+              "bytes": 29
+            },
+            "identity": [
+              {
+                "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace",
+                "dev": 16777230,
+                "ino": 108640502,
+                "mode": 16877
+              },
+              {
+                "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace/math.mjs",
+                "dev": 16777230,
+                "ino": 108640503,
+                "mode": 33188
+              }
+            ]
+          }
+        ]
+      },
+      "writes": [
+        {
+          "file": {
+            "targetId": "project",
+            "root": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace",
+            "path": "math.mjs",
+            "before": {
+              "sha256": "577b3f8de17b0a06f131cead8e49b2171e17126f0c074581047992a5f45427ba",
+              "bytes": 29
+            },
+            "after": {
+              "sha256": "a94468f11b9e176ff2b3cf31080d67c2a31efc3dc4c0757abf90585f4e765f6a",
+              "bytes": 29
+            },
+            "identity": [
+              {
+                "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace",
+                "dev": 16777230,
+                "ino": 108640502,
+                "mode": 16877
+              },
+              {
+                "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace/math.mjs",
+                "dev": 16777230,
+                "ino": 108640503,
+                "mode": 33188
+              }
+            ]
+          },
+          "state": "written",
+          "sourceId": "e1:151:6c77096064973996bbbb9813e48a26d40189edea58110bbb8b3b76ff8a101383",
+          "rollback": null
+        }
+      ],
+      "fixture": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace/math.mjs",
+        "bytes": 29,
+        "sha256": "a94468f11b9e176ff2b3cf31080d67c2a31efc3dc4c0757abf90585f4e765f6a"
+      },
+      "fixtureMatchesDeclaredAfter": true,
+      "beforeFixtureEvidence": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/577b3f8de17b0a06f131cead8e49b2171e17126f0c074581047992a5f45427ba",
+        "bytes": 29,
+        "sha256": "577b3f8de17b0a06f131cead8e49b2171e17126f0c074581047992a5f45427ba"
+      },
+      "readme": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace/README.md",
+        "bytes": 48,
+        "sha256": "3f89888fb68ed309272d0638ae78927202477fbc8c80b3a5d9f72056c58102cd"
+      },
+      "readmeUnchanged": true,
+      "productSourceWasNotTarget": true
+    },
+    "subsequentTask": {
+      "task": {
+        "taskId": "d99b026d-1c8e-481c-8977-4249a3e4c6ce",
+        "requestId": "d99b026d-1c8e-481c-8977-4249a3e4c6ce",
+        "kind": "task",
+        "input": "Read math.mjs after the explicitly selected local fixture correction.",
+        "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/workspace",
+        "target": null,
+        "execution": {
+          "runId": "f5c3e9b5-7f5f-4a5c-8462-f295385b20dc",
+          "sessionId": "80299c5a-8312-4253-a71e-07b1e61904b6"
+        },
+        "runId": "f5c3e9b5-7f5f-4a5c-8462-f295385b20dc",
+        "acceptedAt": "2026-10-10T05:51:40.104Z",
+        "acceptedSeq": 155,
+        "updatedAt": "2026-10-10T05:51:41.176Z",
+        "status": "completed",
+        "reason": null,
+        "executionVersion": {
+          "artifactId": "c3a26d10711de3ae1afdd08698e4dd43a92f48d1bc591653e8778218aa373ffd",
+          "artifactSeq": 158,
+          "configSeq": 159
+        },
+        "authorization": {
+          "tools": [
+            "read",
+            "write",
+            "edit",
+            "bash"
+          ],
+          "execution": "trusted-local-coding",
+          "requestLimit": 8,
+          "fileLimitBytes": 262144,
+          "replay": "unsafe"
+        },
+        "receipt": {
+          "seq": 201,
+          "kind": "run.closed",
+          "at": "2026-10-10T05:51:41.176Z"
+        }
+      },
+      "toolResult": {
+        "seq": 181,
+        "runId": "f5c3e9b5-7f5f-4a5c-8462-f295385b20dc",
+        "data": {
+          "attemptId": "68b0af45-0cbc-45ed-9272-fda40ac029d4",
+          "durableTaskId": 12,
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "export const add=(a,b)=>a+b;\n"
+              }
+            ],
+            "diagnostics": []
+          },
+          "clock": {
+            "processId": "f0f39d51-a93f-48f5-be68-73295ba75929",
+            "monotonicMs": 32050.33475,
+            "wallTime": "2026-10-10T05:51:40.961Z"
+          }
+        },
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/0a21c34b8c2015eecb41470f5004ce3e41c0da5f84fcdbd1a7d6ccf9f5a63327",
+          "bytes": 292,
+          "sha256": "0a21c34b8c2015eecb41470f5004ce3e41c0da5f84fcdbd1a7d6ccf9f5a63327"
+        }
+      },
+      "closed": {
+        "seq": 201,
+        "runId": "f5c3e9b5-7f5f-4a5c-8462-f295385b20dc",
+        "data": {
+          "runId": "f5c3e9b5-7f5f-4a5c-8462-f295385b20dc",
+          "taskId": "d99b026d-1c8e-481c-8977-4249a3e4c6ce",
+          "sessionId": "80299c5a-8312-4253-a71e-07b1e61904b6",
+          "mode": "offline",
+          "status": "completed",
+          "answer": "Controlled response: inspect actual tool evidence for acceptance.",
+          "observation": "ok",
+          "cleanup": "confirmed",
+          "lifecycle": {
+            "intent": null,
+            "disposition": "completed",
+            "cleanupTimeoutMs": 10000,
+            "storage": "closed",
+            "owner": "release-after-host-close",
+            "remoteTermination": "unknown"
+          },
+          "executionCleanup": {
+            "managedCommands": "settled",
+            "started": 0,
+            "settled": 0,
+            "externalProcesses": "unknown"
+          },
+          "usage": {
+            "source": "pi.usage",
+            "scope": "session:80299c5a-8312-4253-a71e-07b1e61904b6",
+            "completeness": "known",
+            "value": {
+              "models": {
+                "deepseek/deepseek-flash": {
+                  "input": 20,
+                  "output": 8,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "reasoning": 0,
+                  "totalTokens": 28,
+                  "cost": {
+                    "input": 6e-06,
+                    "output": 9.6e-06,
+                    "cacheRead": 0,
+                    "cacheWrite": 0,
+                    "total": 1.56e-05
+                  }
+                }
+              },
+              "tools": {}
+            },
+            "cost": {
+              "kind": "estimate",
+              "currency": "USD",
+              "source": "@earendil-works/pi-ai@1.1.0 model price catalog",
+              "observedAt": "2026-10-10T05:51:41.176Z"
+            }
+          },
+          "clock": {
+            "processId": "f0f39d51-a93f-48f5-be68-73295ba75929",
+            "monotonicMs": 32265.860041,
+            "wallTime": "2026-10-10T05:51:41.176Z"
+          }
+        },
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/0db77a7b1214972a94bc3ed44c51d2232ab3bc08626872668ae3c60e2e056b46",
+          "bytes": 1180,
+          "sha256": "0db77a7b1214972a94bc3ed44c51d2232ab3bc08626872668ae3c60e2e056b46"
+        }
+      },
+      "readBackFixedContent": true
+    },
+    "widthCalibration": {
+      "status": "measured",
+      "error": null,
+      "blockedFrames": 25,
+      "retainedInputs": 2,
+      "pendingInputs": 0
+    },
+    "widthProfileEntries": 245,
+    "widthObservations": 245,
+    "frames": [
+      {
+        "name": "initial-frame",
+        "phase": "startup",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 1799,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/initial-frame.json",
+          "bytes": 2136,
+          "sha256": "581f73c1587bdd0d4bd7ded5b5aaf6d87755cd74bb85217730dbfdd7ef32716e"
+        }
+      },
+      {
+        "name": "long-source-frame",
+        "phase": "long-source",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 4212,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/long-source-frame.json",
+          "bytes": 4553,
+          "sha256": "6d2e55d7f290d1042efa56f4ea290fd6d9c1925ec1e4fed44e2614b0076c15ce"
+        }
+      },
+      {
+        "name": "compaction-applied-frame",
+        "phase": "compact",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 4253,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/compaction-applied-frame.json",
+          "bytes": 4590,
+          "sha256": "0925e3e567113aa15b0d17a42518cd136adb7294fc67b2451dabf614764b8cdb"
+        }
+      },
+      {
+        "name": "compactions-panel",
+        "phase": "compact",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3841,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/compactions-panel.json",
+          "bytes": 4384,
+          "sha256": "78e271c0f8b450f9c5485243561e3572a5df580e6939b352a3cc2953f33f9b6d"
+        }
+      },
+      {
+        "name": "analysis-complete",
+        "phase": "analysis",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3907,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/analysis-complete.json",
+          "bytes": 4355,
+          "sha256": "241dd6924288c4cabd2de9c3ec4aebd0b5c75894d75dd73190ff27aac1e30570"
+        }
+      },
+      {
+        "name": "selection-unselected",
+        "phase": "selection",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3971,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/selection-unselected.json",
+          "bytes": 4336,
+          "sha256": "382a4a2bfbc1485e517c5e1bf2fd3772d42fd0a4f2cf83f4847e69bf25e5e6d4"
+        }
+      },
+      {
+        "name": "selection-execute",
+        "phase": "selection",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3971,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/selection-execute.json",
+          "bytes": 4336,
+          "sha256": "8d22a859c75348441acbed03a4e391238ab30e361eafa48a72a82b96fea28e13"
+        }
+      },
+      {
+        "name": "selection-summary",
+        "phase": "selection",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3848,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/selection-summary.json",
+          "bytes": 4256,
+          "sha256": "444cc096053e468953b15be5198b3b137e9a8cf8d0edcf3cb0665ffa1e1052b4"
+        }
+      },
+      {
+        "name": "selection-result",
+        "phase": "selection",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3837,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/selection-result.json",
+          "bytes": 4245,
+          "sha256": "34f411c5ce33b9b68a6e54b92763e4fa223631ce0b2f1b56d3bb638a5e82607f"
+        }
+      },
+      {
+        "name": "post-write-status",
+        "phase": "selection",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3896,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/post-write-status.json",
+          "bytes": 4345,
+          "sha256": "3437d660d5b1e41521af4d2ea57bf3b9aa78617c7f7ff73d6314ac38d58c8051"
+        }
+      },
+      {
+        "name": "improve-reports",
+        "phase": "views",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3935,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/improve-reports.json",
+          "bytes": 4342,
+          "sha256": "caf43a802c9f442a8165f3a919cc4611640f1d67f851acc93f9c7178459def63"
+        }
+      },
+      {
+        "name": "metrics-panel",
+        "phase": "views",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3852,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/metrics-panel.json",
+          "bytes": 4248,
+          "sha256": "8ba408beb4318cbfab0b915c784cb748e349419bb7d9b32c01cfcd38218915ea"
+        }
+      },
+      {
+        "name": "history-panel",
+        "phase": "views",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 3935,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/history-panel.json",
+          "bytes": 4286,
+          "sha256": "c468f88934459de7be564a0470f2e6c3a28ecb4e31e494175535998cf0239aed"
+        }
+      },
+      {
+        "name": "subsequent-task",
+        "phase": "subsequent-task",
+        "columns": 112,
+        "rows": 35,
+        "lineCount": 35,
+        "bytes": 2191,
+        "evidence": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/subsequent-task.json",
+          "bytes": 2536,
+          "sha256": "e3a9f00f525ccdf31fddb04113326f2ad847996482287747bbf15d7dc68d0fea"
+        }
+      }
+    ],
+    "frameEvidenceMeaning": "Retained app.screen() text from the actual native ProcessTerminal run. Not an external screenshot, pixel-presentation measurement, IME/copy/mouse observation or subjective acceptance.",
+    "persistedFacts": {
+      "improve.decision": [
+        {
+          "seq": 140,
+          "runId": "32e8c3f4-af14-470f-89ef-c62c7e1b44f9",
+          "evidence": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/94668d1e95d8ee97081390b554fff62cab2d3e91042152d2b452f95920117382",
+            "bytes": 2737,
+            "sha256": "94668d1e95d8ee97081390b554fff62cab2d3e91042152d2b452f95920117382"
+          }
+        }
+      ],
+      "improve.check": [
+        {
+          "seq": 147,
+          "runId": "32e8c3f4-af14-470f-89ef-c62c7e1b44f9",
+          "evidence": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/6b64eaaac689086e5fda5be37da7e1fcc39dea50d0881644c5714ee6fb3083dc",
+            "bytes": 25546,
+            "sha256": "6b64eaaac689086e5fda5be37da7e1fcc39dea50d0881644c5714ee6fb3083dc"
+          }
+        }
+      ],
+      "improve.validation": [
+        {
+          "seq": 148,
+          "runId": "32e8c3f4-af14-470f-89ef-c62c7e1b44f9",
+          "evidence": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/2738b00051dc1098f1e5d202a6d2a32f4819ef6901aea437e9db4f3cc7f2cd20",
+            "bytes": 26910,
+            "sha256": "2738b00051dc1098f1e5d202a6d2a32f4819ef6901aea437e9db4f3cc7f2cd20"
+          }
+        }
+      ],
+      "improve.write-result": [
+        {
+          "seq": 151,
+          "runId": "32e8c3f4-af14-470f-89ef-c62c7e1b44f9",
+          "evidence": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/6c77096064973996bbbb9813e48a26d40189edea58110bbb8b3b76ff8a101383",
+            "bytes": 800,
+            "sha256": "6c77096064973996bbbb9813e48a26d40189edea58110bbb8b3b76ff8a101383"
+          }
+        }
+      ],
+      "improve.formal": [
+        {
+          "seq": 152,
+          "runId": "32e8c3f4-af14-470f-89ef-c62c7e1b44f9",
+          "evidence": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/7fe2feff54da87653fd1ac03410560fae70024b862d05ba5c71b0ce143375d3e",
+            "bytes": 826,
+            "sha256": "7fe2feff54da87653fd1ac03410560fae70024b862d05ba5c71b0ce143375d3e"
+          }
+        }
+      ],
+      "improve.batch": [
+        {
+          "seq": 153,
+          "runId": "32e8c3f4-af14-470f-89ef-c62c7e1b44f9",
+          "evidence": {
+            "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/objects/e4bb5eebc7f48513459d7a61d61d9c8b03cdc9a17423cafedb0950853e6c1f1b",
+            "bytes": 68,
+            "sha256": "e4bb5eebc7f48513459d7a61d61d9c8b03cdc9a17423cafedb0950853e6c1f1b"
+          }
+        }
+      ]
+    }
+  },
+  "readonly": {
+    "status": "MEASURED",
+    "sourceDirectory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session",
+    "queries": {
+      "count": 30,
+      "methodCounts": {
+        "queryHistory": 10,
+        "queryEvidence": 10,
+        "readEvidence": 10
+      },
+      "elapsedMsByMethod": {
+        "queryHistory": {
+          "count": 10,
+          "min": 11.486834000000044,
+          "median": 11.952374999999961,
+          "max": 14.216916000000083
+        },
+        "queryEvidence": {
+          "count": 10,
+          "min": 0.44629199999997127,
+          "median": 0.4938329999999951,
+          "max": 0.6085000000000491
+        },
+        "readEvidence": {
+          "count": 10,
+          "min": 0.6787500000000364,
+          "median": 0.76545799999991,
+          "max": 1.1283329999999978
+        }
+      },
+      "boundsVerified": true,
+      "records": [
+        {
+          "index": 1,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 14.216916000000083,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 2,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.5151250000000118,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 3,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 1.0796250000000782,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        },
+        {
+          "index": 4,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 13.468875000000025,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 5,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.550707999999986,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 6,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 0.7841660000000275,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        },
+        {
+          "index": 7,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 11.557875000000081,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 8,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.5594580000000633,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 9,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 0.6787500000000364,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        },
+        {
+          "index": 10,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 12.93999999999994,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 11,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.47254099999997834,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 12,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 0.7746249999999009,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        },
+        {
+          "index": 13,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 12.202707999999916,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 14,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.4492919999999003,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 15,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 0.7005000000000337,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        },
+        {
+          "index": 16,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 11.486834000000044,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 17,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.6085000000000491,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 18,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 1.1283329999999978,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        },
+        {
+          "index": 19,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 12.201416999999992,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 20,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.5538749999999482,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 21,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 0.8860839999999826,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        },
+        {
+          "index": 22,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 11.70333299999993,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 23,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.4720000000000937,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 24,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 0.7562909999999192,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        },
+        {
+          "index": 25,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 11.592083000000002,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 26,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.44629199999997127,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 27,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 0.7054170000000113,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        },
+        {
+          "index": 28,
+          "method": "queryHistory",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            {},
+            {
+              "limit": 10
+            }
+          ],
+          "elapsedMs": 11.571500000000015,
+          "outputBytes": 18122,
+          "outputSha256": "c4ea88dedd559e99c9136e728a03c720c7c12ff7e7d3559a72978f82f19dc6a2"
+        },
+        {
+          "index": 29,
+          "method": "queryEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "6ca09b35-f1d0-412b-aaa7-6bba1c08fffa",
+            {
+              "limit": 20
+            }
+          ],
+          "elapsedMs": 0.4538750000000391,
+          "outputBytes": 5979,
+          "outputSha256": "2cc92af68729a8c198db91b0142c0bf3dddb1ddcff53d0bd40d4ea14b8415326"
+        },
+        {
+          "index": 30,
+          "method": "readEvidence",
+          "arguments": [
+            "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/data",
+            "e1:2925:e7e412c03c1c3a840a8c676be7bde44ee0fb62e27898b8a2b3961397f4ac41a3",
+            {
+              "limit": 1024,
+              "decodedOutput": true
+            }
+          ],
+          "elapsedMs": 0.72037499999999,
+          "outputBytes": 1778,
+          "outputSha256": "8fd8d062f50b59cda3f0caffe91a2ad0155f1e004e0c31b4c6a4c7b2a14944e1"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-01.json",
+          "bytes": 26192,
+          "sha256": "18a3bc5e366ed71056ff73aac3caa5f8d3cd0497c00b4a13aff08f20163853f0"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-02.json",
+          "bytes": 8601,
+          "sha256": "ccd3ea74648ac1e11e0a0f6c32e631da300a54f7adb9e94148987638aa3659ae"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-03.json",
+          "bytes": 2421,
+          "sha256": "78c410ab44d3b5c342c27a616a78c77d27f3474271befacce931dc44b431f199"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-04.json",
+          "bytes": 26192,
+          "sha256": "8724a9ab8eb4ba078db27e93e5b57e690501e26a6fe24e03788b881db1ebaaf2"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-05.json",
+          "bytes": 8600,
+          "sha256": "57b0e06486a8dc0a13f19977f356defd8f400c442560e9ebd73f3e0bca15b38d"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-06.json",
+          "bytes": 2421,
+          "sha256": "420241c6eb9995e83a8f1bde2c543a57eb0d163019a2c8c84e2108c5e3257463"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-07.json",
+          "bytes": 26192,
+          "sha256": "8950b6ca156985b68b27b03a52592fb538511fcc9dcf0e6565b05fc97ca9a1b3"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-08.json",
+          "bytes": 8601,
+          "sha256": "c1dd3e2082b4ef05e2016ca005c5a8f97854ffd4fbc9405c68fcb88ab066d487"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-09.json",
+          "bytes": 2421,
+          "sha256": "df424e5568fd59eccd4f5ee18f02ab0736aeec94ede23d49004c269e608fd758"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-10.json",
+          "bytes": 26192,
+          "sha256": "8eae7059e99be1f08daca8d31925dccd1d88fb63840eada687403a633cccc027"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-11.json",
+          "bytes": 8603,
+          "sha256": "fc725808b0dfe61484c68e70b0c16a5b805de22d358e9b654979bd85911d7104"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-12.json",
+          "bytes": 2422,
+          "sha256": "1bcb93f9f512c2a93b8bfe86d6958f2bc56581e1b019e099f5887de84db6dba4"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-13.json",
+          "bytes": 26193,
+          "sha256": "0ee5f0158b349215f0c40bec3f4ec79f0394cf78b146b296b79b0a74d3d81394"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-14.json",
+          "bytes": 8602,
+          "sha256": "1220b5dbe5816e7832cbeb0e7728fb88a3fd2314883cad5d222e1833abb695d5"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-15.json",
+          "bytes": 2422,
+          "sha256": "14abd667562c08ebc5cdaaeb74bad42c181832e28759ab8c82367891fbc9ba01"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-16.json",
+          "bytes": 26193,
+          "sha256": "00218d4bab99dd6e3955273c903d0a4f3aa6862ef3712018a34c8f2333e72e16"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-17.json",
+          "bytes": 8602,
+          "sha256": "de4ec0a9f692a9ff4936aa4ae475b37885991b31386e690e57d583c5e9913ef5"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-18.json",
+          "bytes": 2422,
+          "sha256": "fbacd0c1d6587ce37d04aa38d4f63f76c0016a79d88a6e23cb2afb9738804226"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-19.json",
+          "bytes": 26193,
+          "sha256": "15eed6545d9de44d6843dae48b28103993c59a4418ee3ed550f8ca48562d6ffa"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-20.json",
+          "bytes": 8602,
+          "sha256": "33e06e7d87f3334b2dc5677ac66bd15f25a61d5272870065f9916bdc26ae2cf3"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-21.json",
+          "bytes": 2422,
+          "sha256": "7634e95397cb4b6acc27ec436f2f200e75ba6b67ab17b7eda0bf46893c50e0c1"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-22.json",
+          "bytes": 26192,
+          "sha256": "dda552c39a9b1b1b4f660e8f3e5a1d85f364a43170e096376f49177fb0861f4c"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-23.json",
+          "bytes": 8602,
+          "sha256": "feacb5eee17205a75ffc64e86d82d3a0141b42fd0334f7ab103eedeab86558b7"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-24.json",
+          "bytes": 2422,
+          "sha256": "3c40913400df24bdb60ba9134a2a301617a51742a069e316788c595acfd0c544"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-25.json",
+          "bytes": 26193,
+          "sha256": "6d0ed706513c60bb93cd64116e431f3975ffe992c3ad6683ae5053272736965c"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-26.json",
+          "bytes": 8603,
+          "sha256": "992edf4583935b714a12b6fabdf4ee0bf2e390f41116bbc7b0247a2342cef22c"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-27.json",
+          "bytes": 2422,
+          "sha256": "03b967db6a4c88ebef51f2dcff5bb9f444f27abc4aba0f5851746f8bb0f6bcb1"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-28.json",
+          "bytes": 26193,
+          "sha256": "df75ae85f1187ff6b0f5a1b576bf47bcc00f9789ee77e036a499386e95452ac7"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-29.json",
+          "bytes": 8602,
+          "sha256": "dff3c97d520ebfb57e89f765d7f5259758abb30404b793b3933b8c3cac08e2e5"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/query-30.json",
+          "bytes": 2420,
+          "sha256": "030ad858a66b63fe63c9ffaddc4e346b46c567ab9784833d8623a1de22f4e3a1"
+        }
+      ]
+    },
+    "fullOutputExports": {
+      "count": 5,
+      "bytesEach": 1048576,
+      "sha256Each": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+      "elapsedMs": {
+        "count": 5,
+        "min": 7.961624999999913,
+        "median": 8.404875000000061,
+        "max": 9.781375000000025
+      },
+      "records": [
+        {
+          "repetition": 1,
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-1.bin",
+          "elapsedMs": 8.968124999999986,
+          "bytes": 1048576,
+          "chunks": 64,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+          "resourceUsageBefore": {
+            "userCPUTime": 222842,
+            "systemCPUTime": 242726,
+            "maxRSS": 93504,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6156,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3509,
+            "involuntaryContextSwitches": 667
+          },
+          "resourceUsageAfter": {
+            "userCPUTime": 228078,
+            "systemCPUTime": 246909,
+            "maxRSS": 97232,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6389,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3510,
+            "involuntaryContextSwitches": 681
+          },
+          "resourceUsageCounterDelta": {
+            "userCPUTime": 5236,
+            "systemCPUTime": 4183,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "voluntaryContextSwitches": 1,
+            "involuntaryContextSwitches": 14
+          }
+        },
+        {
+          "repetition": 2,
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-2.bin",
+          "elapsedMs": 9.781375000000025,
+          "bytes": 1048576,
+          "chunks": 64,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+          "resourceUsageBefore": {
+            "userCPUTime": 228202,
+            "systemCPUTime": 247053,
+            "maxRSS": 97264,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6391,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3510,
+            "involuntaryContextSwitches": 681
+          },
+          "resourceUsageAfter": {
+            "userCPUTime": 239699,
+            "systemCPUTime": 251434,
+            "maxRSS": 98656,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6486,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3510,
+            "involuntaryContextSwitches": 726
+          },
+          "resourceUsageCounterDelta": {
+            "userCPUTime": 11497,
+            "systemCPUTime": 4381,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "voluntaryContextSwitches": 0,
+            "involuntaryContextSwitches": 45
+          }
+        },
+        {
+          "repetition": 3,
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-3.bin",
+          "elapsedMs": 8.21754199999998,
+          "bytes": 1048576,
+          "chunks": 64,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+          "resourceUsageBefore": {
+            "userCPUTime": 239760,
+            "systemCPUTime": 251548,
+            "maxRSS": 98656,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6486,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3510,
+            "involuntaryContextSwitches": 726
+          },
+          "resourceUsageAfter": {
+            "userCPUTime": 244040,
+            "systemCPUTime": 255591,
+            "maxRSS": 103680,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6800,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3511,
+            "involuntaryContextSwitches": 735
+          },
+          "resourceUsageCounterDelta": {
+            "userCPUTime": 4280,
+            "systemCPUTime": 4043,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "voluntaryContextSwitches": 1,
+            "involuntaryContextSwitches": 9
+          }
+        },
+        {
+          "repetition": 4,
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-4.bin",
+          "elapsedMs": 7.961624999999913,
+          "bytes": 1048576,
+          "chunks": 64,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+          "resourceUsageBefore": {
+            "userCPUTime": 244115,
+            "systemCPUTime": 255726,
+            "maxRSS": 103680,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6800,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3511,
+            "involuntaryContextSwitches": 736
+          },
+          "resourceUsageAfter": {
+            "userCPUTime": 249464,
+            "systemCPUTime": 259577,
+            "maxRSS": 103824,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6809,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3511,
+            "involuntaryContextSwitches": 744
+          },
+          "resourceUsageCounterDelta": {
+            "userCPUTime": 5349,
+            "systemCPUTime": 3851,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "voluntaryContextSwitches": 0,
+            "involuntaryContextSwitches": 8
+          }
+        },
+        {
+          "repetition": 5,
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-5.bin",
+          "elapsedMs": 8.404875000000061,
+          "bytes": 1048576,
+          "chunks": 64,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502",
+          "resourceUsageBefore": {
+            "userCPUTime": 249615,
+            "systemCPUTime": 259678,
+            "maxRSS": 103840,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6810,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3511,
+            "involuntaryContextSwitches": 745
+          },
+          "resourceUsageAfter": {
+            "userCPUTime": 253769,
+            "systemCPUTime": 263778,
+            "maxRSS": 106512,
+            "sharedMemorySize": 0,
+            "unsharedDataSize": 0,
+            "unsharedStackSize": 0,
+            "minorPageFault": 6977,
+            "majorPageFault": 175,
+            "swappedOut": 0,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "ipcSent": 0,
+            "ipcReceived": 0,
+            "signalsCount": 0,
+            "voluntaryContextSwitches": 3512,
+            "involuntaryContextSwitches": 754
+          },
+          "resourceUsageCounterDelta": {
+            "userCPUTime": 4154,
+            "systemCPUTime": 4100,
+            "fsRead": 0,
+            "fsWrite": 0,
+            "voluntaryContextSwitches": 1,
+            "involuntaryContextSwitches": 9
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-1.bin",
+          "bytes": 1048576,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-2.bin",
+          "bytes": 1048576,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-3.bin",
+          "bytes": 1048576,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-4.bin",
+          "bytes": 1048576,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502"
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/large-output-5.bin",
+          "bytes": 1048576,
+          "sha256": "8e3c8e0abdb626d27f3982beafe83f34f2141c86223bd1b4d3cce74a77181502"
+        }
+      ],
+      "bytesAndSha256IndependentlyReadBack": true
+    },
+    "sourceUnchanged": true,
+    "beforeAfterInventoryExactlyEqual": true,
+    "sourceInventoryEntries": 3067,
+    "inventoryRefs": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/source-before.json",
+        "bytes": 602159,
+        "sha256": "2be2ad0e17f3647b834cd94026063569bdf314e3c4d7a854b49c6f2a7b9567bf"
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/source-after.json",
+        "bytes": 602159,
+        "sha256": "2be2ad0e17f3647b834cd94026063569bdf314e3c4d7a854b49c6f2a7b9567bf"
+      }
+    ],
+    "timing": "Each query measures synchronous public call elapsed time. Each export measures enumeration, validated public object reads, JSON/base64 decode and output writes through close. OS cache is not purged; fsync is not requested.",
+    "exportDefinition": "Five explicit streaming acquisitions to new local binary files of every large-run tool.output acquired byte, read through the installed public readRunRecords and readObjectRange APIs. This harness composes bounded product reads; it is not a claim that the CLI export command provides a whole-run binary export.",
+    "limits": [
+      "No network/model time.",
+      "The recorded Node resourceUsage deltas apply to this process, and are OS-reported counters, not isolated filesystem latency.",
+      "No counterfactual without tracing, so tracing overhead is not separately measured.",
+      "Five exports read the same retained data in order; cache effects are retained."
+    ]
+  },
+  "preservedOriginals": {
+    "originalBatchResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/result.json",
+      "bytes": 5351,
+      "sha256": "5062ec149ebc874839d4dc799937e8cff993e4c64580ed14949b9eca082c72d6"
+    },
+    "originalFailure": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/composition/failure.json",
+      "bytes": 5680,
+      "sha256": "cf3c34090a4b138b1676343b05a5fa13fbce2bd2493badceb700263cdc5d2c8a"
+    },
+    "nativeSummary": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-summary.json",
+      "bytes": 46845,
+      "sha256": "cf9457281285f8d5bdc76fd5f8604136dedb3235e61877e5a4780fcf92ec02dc"
+    },
+    "nativeReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-report.md",
+      "bytes": 5423,
+      "sha256": "77cfdf8b8ff89b111db7a6bde5da593b29df4b5b9fdbacda2bba1c4dd44fdb34"
+    },
+    "partialSummary": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/partial-summary.json",
+      "bytes": 24287,
+      "sha256": "1084eaca7169014231e379b6988c854d8c54292a1b355e081c83990ae2ff7bda"
+    },
+    "partialReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/partial-report.md",
+      "bytes": 2198,
+      "sha256": "e342740ff2bbb734aa5b8d05d6a7b674729ad124713429a5774003c1a6a283bf"
+    },
+    "followupPreparation": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-preparation.json",
+      "bytes": 7571,
+      "sha256": "04d31c02ff44063f400e8b4d33e32131acf6ab07bc42a54d753bc9d5b091221c"
+    }
+  },
+  "gates": {
+    "targetedNativeComposition": "PASS_SYNTHETIC_FIXTURE",
+    "nativeSourceReadonly": "MEASURED_30_QUERIES_5_EXPORTS_SOURCE_UNCHANGED",
+    "originalNativeBatch": "MEASURED_WITH_FAILURES_PRESERVED",
+    "technicalAcceptance": "PARTIAL",
+    "paidDeepSeek": "SEPARATE_BATCH_STOPPED; #30 INCOMPLETE",
+    "fullContractApplicability": "PENDING_COORDINATOR_DISPOSITION",
+    "humanRealImproveSelection": "NOT ESTABLISHED BY THIS AUTOMATION",
+    "dailyUseAcceptance": "NOT ESTABLISHED; #32 SEPARATE"
+  },
+  "limits": [
+    "No numeric performance threshold or whole-v1 PASS follows from native completion.",
+    "All provider behavior in this native follow-up is the pinned synthetic transport; synthetic usage/cost fields do not prove paid requests or actual model identity.",
+    "Direct signed-addition regression supplies scoped functional evidence; allDeclaredBenefitsMet=false and requiredBenefitCount=0 are preserved, with no performance benefit claim.",
+    "Observed isolation completion/cleanup comes from the already-finished user-launched run. This readback did not execute a VM, build, test, provider or Terminal action.",
+    "The first native failure remains unchanged and cannot be relabelled PASS; the successful follow-up is a distinct run.",
+    "The source-data before/after check compares the retained complete inventories; this readback did not rescan the large source tree.",
+    "Earlier 3 idle starts and 60+2 rounds are reused as bound evidence, not repeated or added to follow-up counts."
+  ],
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/plan.json",
+      "bytes": 4740,
+      "sha256": "71c69fa8adf29f4e6de42212dd61e6f0e14ba33216602d85c40f991bdf3e085e"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/result.json",
+      "bytes": 2587,
+      "sha256": "c952c92b48cf9d7f1a7dcd4c83f6bf7e109143ef11236b351817f92fa4f4d0e6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition-process.json",
+      "bytes": 826,
+      "sha256": "704f4ac5063c92a0d8f4799a9267a0dbc109d3ec88b61fc0007da9e26521442c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data-process.json",
+      "bytes": 829,
+      "sha256": "24b121804337f43a380fdd5d5d13489b5f2a3f0b2f9b908637e08aa3ef2abf5d"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/plan.json",
+      "bytes": 3344,
+      "sha256": "f6cffce2c0d5458785a67b5ead17400ea2f950165eb5a490f2f15183745da4e3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/result.json",
+      "bytes": 89966,
+      "sha256": "f8ff08d6ffb52ef1ad19983ff95b9ec47495cd79917dd9da2ef5ef648b4957fb"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/events.jsonl",
+      "bytes": 5316,
+      "sha256": "48a28a2e9d4d5cd550ec2c9f70468ec03ad14e24f71dc93dda3941983b35a945"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/exact-decision-template.json",
+      "bytes": 2468,
+      "sha256": "247d1c84f76ffde43385f4e79ffd64031fa49a75d1118c6a3ed20e891eb92ea3"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/composition/data/host.sqlite",
+      "bytes": 61440,
+      "sha256": "8bf5ad1e07b5d37437ed3dd9383fb85330b7c1edc7a6b6a69e07b40264519646"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/plan.json",
+      "bytes": 2644,
+      "sha256": "25d1ceec8bb0c7d76565df319e6eb8f2dd7c7c6fedc5d073b27e7945b41675a1"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/result.json",
+      "bytes": 21873,
+      "sha256": "5783357ebe52b3fe111bba59910d6dd618e9a38459613cb6fcd1d2cd2c18c5c2"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/source-before.json",
+      "bytes": 602159,
+      "sha256": "2be2ad0e17f3647b834cd94026063569bdf314e3c4d7a854b49c6f2a7b9567bf"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1/readonly-data/source-after.json",
+      "bytes": 602159,
+      "sha256": "2be2ad0e17f3647b834cd94026063569bdf314e3c4d7a854b49c6f2a7b9567bf"
+    }
+  ],
+  "separatePaidBatchDisposition": {
+    "status": "STOPPED",
+    "at": "2026-10-10T05:54:47.608Z",
+    "reason": "Error: BATCH_TRIAL_NOT_PASS",
+    "improve": "not-run",
+    "source": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/batch-result.json",
+      "bytes": 465,
+      "sha256": "44fcd0fcc08784463c157329cb4bbeff00f8981762cf16273dfe42c6b9688c7f"
+    },
+    "scope": "Only final batch disposition is referenced here; paid diagnosis, accounting and source details remain with #30. No additional paid execution authorized or started by this readback."
+  }
+}

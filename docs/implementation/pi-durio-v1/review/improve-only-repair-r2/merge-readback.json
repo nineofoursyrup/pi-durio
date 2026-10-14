@@ -1,0 +1,485 @@
+{
+  "status": "PASS",
+  "startedAt": "2026-10-10T07:40:34.315353+00:00",
+  "repository": "/Users/nineofour/Durio",
+  "branch": "codex/pi-durio-v1",
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoningEffort": "xhigh",
+  "actualBackendAttestation": "NOT_ATTESTED",
+  "preMergeHead": "00047441c6f037ce3cf2f8add4ccf7a84fa68d69",
+  "producerCommit": "bbd01d449cf3e3c6be040b09e2b6072d54e0ed49",
+  "producerParent": "b4360dff634354db37d5965e1bf15cf69d3dbf3b",
+  "review": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2/independent-review.json",
+    "bytes": 14629,
+    "sha256": "ed542f71b5c381c47aa5d34f43f525d06d30237c7e2eafa5bd4bf2c88086b7be",
+    "standards": "PASS",
+    "spec": "PASS"
+  },
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/frozen-manifest.json",
+    "bytes": 76288,
+    "sha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a"
+  },
+  "productCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+  "scope": "59 added repository docs files; no product/build input changes",
+  "originalUntrackedBefore": {
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+    },
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+    },
+    "docs/wayfinder-proposal.md": {
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+    },
+    "docs/wayfinder-readback-2026-10-09.json": {
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+    }
+  },
+  "apiEnv": {
+    "contentRead": false,
+    "addedToGit": false,
+    "beforeMetadata": {
+      "size": 118,
+      "mode": 33152,
+      "inode": 108595560,
+      "mtimeNs": 1791610965598957000,
+      "ctimeNs": 1791610965609405872
+    }
+  },
+  "frozenAndDistBefore": {
+    "/Users/nineofour/Durio/dist": {
+      "fileCount": 370,
+      "aggregateSha256": "a73e298a6375c50fe9d16da3a4fe6a7170b1756a6d08a256f85bcdf39f3ef450"
+    },
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r1": {
+      "fileCount": 368,
+      "aggregateSha256": "71ba9e0cfe1ba8693a40429176787f31f5b131db15c9d64af0a37a2a3f79a442"
+    },
+    "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2": {
+      "fileCount": 345,
+      "aggregateSha256": "df2e4d6f9eea6734a37803ab788886f0b4fbb28f167e66aff24dc6d426ba06af"
+    },
+    "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r1": {
+      "fileCount": 6,
+      "aggregateSha256": "ab6b4fe1296e421a936fe36c3e2585e75189f484b671ae50b30a3a90a4af43c2"
+    },
+    "/Users/nineofour/pi-durio-v1-run/review/improve-only-repair-r2": {
+      "fileCount": 5,
+      "aggregateSha256": "9def75d67ab65f8c3416a6d173b95cd0ac04b3ebc4180688b7dca2bc9d640321"
+    }
+  },
+  "priorOriginalsBefore": {
+    "index": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/protected-prior-originals.json",
+    "entryCount": 7264,
+    "aggregateSha256": "6d0c5cb62233d79b2e0a90f961e710da4fa0f9e1ac8bfdf2512c41e3bb32df5b"
+  },
+  "noRerun": {
+    "productChecks": true,
+    "behavioralChecks": true,
+    "sourceInstallApplicabilityChecks": true,
+    "provider": true,
+    "vm": true,
+    "terminal": true
+  },
+  "newPaidAuthorization": false,
+  "pushed": false,
+  "r1HistoricalReview": "FAIL_PRESERVED",
+  "writes": "Authorized git merge and this independent readback only",
+  "mergeCommand": [
+    "git",
+    "merge",
+    "--no-ff",
+    "--no-edit",
+    "bbd01d449cf3e3c6be040b09e2b6072d54e0ed49",
+    "-m",
+    "docs: integrate improve-only repair r1 and r2 evidence"
+  ],
+  "mergeOutput": "Merge made by the 'ort' strategy.\n .../issue-30/improve-only-repair-r1/README.md      |   54 +\n .../artifact-binding-precheck.json                 |   28 +\n ...tion-source-template-FROZEN-NOT-EXECUTABLE.json |   20 +\n .../candidate-binding-check.json                   |   37 +\n .../improve-only-repair-r1/check-final-denials.py  |   21 +\n .../check-final-preflight.mjs                      |   31 +\n .../improve-only-repair-r1/check-r1.stderr         |   23 +\n .../improve-only-repair-r1/check-r2.stderr         |   29 +\n .../issue-30/improve-only-repair-r1/check-r5.json  |  934 ++++++++++\n .../improve-only-repair-r1/check-repair.mjs        |  111 ++\n .../improve-only-repair-r1/check-wrapper.py        |   39 +\n .../issue-30/improve-only-repair-r1/checks.json    |   61 +\n .../improve-only-repair-r1/evidence-index.json     |  405 +++++\n .../improve-only-repair-r1/final-denials-r1.json   |   29 +\n .../final-preflight-check-r1.json                  |   32 +\n .../first-failure-tracking.json                    |   96 ++\n .../improve-only-repair-r1/freeze-r1.stdout        |    1 +\n .../improve-only-repair-r1/frozen-manifest.json    | 1743 +++++++++++++++++++\n .../grant-template-FROZEN-NOT-EXECUTABLE.json      |   20 +\n .../improve-only-repair-r1/harness/common.mjs      |   50 +\n .../improve-only-repair-r1/harness/freeze.mjs      |   28 +\n .../improve-only-repair-r1/harness/launch.py       |   66 +\n .../improve-only-repair-r1/harness/ledger.mjs      |   23 +\n .../improve-only-repair-r1/harness/preflight.mjs   |  103 ++\n .../harness/prepare-repair.py                      |   76 +\n .../improve-only-repair-r1/harness/run.mjs         |   46 +\n .../proposed-batch-reviewed.json                   |  175 ++\n .../provider-observation.json                      |   35 +\n .../retained-prior-code.json                       |   90 +\n .../improve-only-repair-r1/wrapper-check-r3.json   |   23 +\n .../issue-30/improve-only-repair-r2/README.md      |   39 +\n .../improve-only-repair-r2/admission-check-r1.json |  934 ++++++++++\n .../artifact-binding-precheck.json                 |   28 +\n ...tion-source-template-FROZEN-NOT-EXECUTABLE.json |   25 +\n .../candidate-binding-check.json                   |   37 +\n .../improve-only-repair-r2/check-final-denials.py  |   21 +\n .../check-final-preflight.mjs                      |   31 +\n .../improve-only-repair-r2/check-repair.mjs        |  111 ++\n .../improve-only-repair-r2/check-reuse.json        |  124 ++\n .../check-review-repairs.mjs                       |   87 +\n .../issue-30/improve-only-repair-r2/checks.json    |   81 +\n .../improve-only-repair-r2/evidence-index.json     |  289 ++++\n .../improve-only-repair-r2/final-denials-r1.json   |   29 +\n .../final-preflight-check-r1.json                  |   32 +\n .../improve-only-repair-r2/freeze-r1.stdout        |    1 +\n .../improve-only-repair-r2/frozen-manifest.json    | 1788 ++++++++++++++++++++\n .../grant-template-FROZEN-NOT-EXECUTABLE.json      |   20 +\n .../improve-only-repair-r2/harness/common.mjs      |   50 +\n .../improve-only-repair-r2/harness/freeze.mjs      |   28 +\n .../improve-only-repair-r2/harness/launch.py       |   66 +\n .../improve-only-repair-r2/harness/ledger.mjs      |   23 +\n .../improve-only-repair-r2/harness/preflight.mjs   |  106 ++\n .../harness/prepare-repair.py                      |   76 +\n .../improve-only-repair-r2/harness/run.mjs         |   46 +\n .../proposed-batch-reviewed.json                   |  175 ++\n .../provider-observation.json                      |   35 +\n .../retained-prior-code.json                       |   90 +\n .../review-repair-check-r1.json                    |  149 ++\n .../improve-only-repair-r2/revision-delta.json     |   69 +\n 59 files changed, 9019 insertions(+)\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/README.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/artifact-binding-precheck.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/authorization-source-template-FROZEN-NOT-EXECUTABLE.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/candidate-binding-check.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-final-denials.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-final-preflight.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-r1.stderr\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-r2.stderr\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-r5.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-repair.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-wrapper.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/checks.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/evidence-index.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/final-denials-r1.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/final-preflight-check-r1.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/first-failure-tracking.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/freeze-r1.stdout\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/frozen-manifest.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/grant-template-FROZEN-NOT-EXECUTABLE.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/common.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/freeze.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/launch.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/ledger.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/preflight.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/prepare-repair.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/run.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/proposed-batch-reviewed.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/provider-observation.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/retained-prior-code.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/wrapper-check-r3.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/README.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/admission-check-r1.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/artifact-binding-precheck.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/authorization-source-template-FROZEN-NOT-EXECUTABLE.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/candidate-binding-check.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-final-denials.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-final-preflight.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-repair.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-reuse.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-review-repairs.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/checks.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/evidence-index.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/final-denials-r1.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/final-preflight-check-r1.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/freeze-r1.stdout\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/frozen-manifest.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/grant-template-FROZEN-NOT-EXECUTABLE.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/common.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/freeze.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/launch.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/ledger.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/preflight.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/prepare-repair.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/run.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/proposed-batch-reviewed.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/provider-observation.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/retained-prior-code.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/review-repair-check-r1.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/revision-delta.json\n",
+  "completedAt": "2026-10-10T07:40:36.144758+00:00",
+  "mergeCommit": "dbf80686b79fc7b01628d25eb43f9fc14e4a9e79",
+  "mergeTree": "45aadc0e402f17d1ed750dc4efb5efd709ddf15e",
+  "parents": [
+    "00047441c6f037ce3cf2f8add4ccf7a84fa68d69",
+    "bbd01d449cf3e3c6be040b09e2b6072d54e0ed49"
+  ],
+  "producerTree": "45aadc0e402f17d1ed750dc4efb5efd709ddf15e",
+  "mergeTreeEqualsProducer": true,
+  "addedDocsCount": 59,
+  "addedDocs": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/README.md",
+      "status": "A",
+      "bytes": 6260,
+      "sha256": "0e4f5a7a43fd3b53575a232a39b00d14e330e68958e4a291013477537722488c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/artifact-binding-precheck.json",
+      "status": "A",
+      "bytes": 1095,
+      "sha256": "5f13db4f80d8718e5c2af47516c82d4736add9e5783b893d43b00f02a43fa5d8"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/authorization-source-template-FROZEN-NOT-EXECUTABLE.json",
+      "status": "A",
+      "bytes": 720,
+      "sha256": "a6557f6e3440db72856bba8642669d3561bfd617f394413e050077977ee6638e"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/candidate-binding-check.json",
+      "status": "A",
+      "bytes": 1626,
+      "sha256": "4e3cf4ec766f4ba1b6edc4a8d0d437e000ad5c4ff1b2467723abf469543c9741"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-final-denials.py",
+      "status": "A",
+      "bytes": 1836,
+      "sha256": "65f8f9ecf1ede6d567208fe35a558a9e3a7062ef0008b6a26a91ac6b51e7353d"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-final-preflight.mjs",
+      "status": "A",
+      "bytes": 4945,
+      "sha256": "008d63faee4ac605d03fae7f4b95c3fd7a923a93d171827cfa9ee9179b6bc8fb"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-r1.stderr",
+      "status": "A",
+      "bytes": 600,
+      "sha256": "6b7616eb3136e9c28dc78226cb924406f3dbc678024e384defe27a6fd3a62c24"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-r2.stderr",
+      "status": "A",
+      "bytes": 898,
+      "sha256": "634143659db83bd43bbadffef73116aa3f055d26de433d06f44bc2d524789917"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-r5.json",
+      "status": "A",
+      "bytes": 99079,
+      "sha256": "d35f10a2d9a3c5f28b1bf06c16b92419e55292f415b246e6f9f11a2d1e4f8975"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-repair.mjs",
+      "status": "A",
+      "bytes": 17378,
+      "sha256": "fc777642c6c3610a76844c399c086bee845bf74d0241684b4fc98163b36ec7c0"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/check-wrapper.py",
+      "status": "A",
+      "bytes": 2274,
+      "sha256": "4a4ce4ad10730c685939ccf8109dc5f5d83546c2493bcf4e253d293e80083d70"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/checks.json",
+      "status": "A",
+      "bytes": 2787,
+      "sha256": "6177a9c2a1e0328c9955c00fefdfd30baf8090f883b4845c300963eed7965cc3"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/evidence-index.json",
+      "status": "A",
+      "bytes": 18598,
+      "sha256": "2119b49a06e518580e0bb077c32fc232e3ee670e333adbead6eebd8dfd0492c3"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/final-denials-r1.json",
+      "status": "A",
+      "bytes": 814,
+      "sha256": "41ce179b97692469ff670e509e4f5f20de33aaf8ce029f8d0647eecf0093b230"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/final-preflight-check-r1.json",
+      "status": "A",
+      "bytes": 1398,
+      "sha256": "6d4d6a0029833ada479f0a593b7f94692729f9a2b0fbf7d220433b216ff224c9"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/first-failure-tracking.json",
+      "status": "A",
+      "bytes": 4161,
+      "sha256": "8c6364eda4fc9a3bbe1e1ce43ba8d1cd16d87895e7e166d4efe800354743259a"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/freeze-r1.stdout",
+      "status": "A",
+      "bytes": 369,
+      "sha256": "9056b79cb0e010d7027a51b7c33a089c26052029f16c81891dfb0489420271f1"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/frozen-manifest.json",
+      "status": "A",
+      "bytes": 74214,
+      "sha256": "9a948eb693a20f5ca4d17443152fff0639465160628432d8d1f2eaa6b8cb1f8e"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/grant-template-FROZEN-NOT-EXECUTABLE.json",
+      "status": "A",
+      "bytes": 676,
+      "sha256": "a8185de429a6f6d9a399c17bd6faa80176736c083430bd254d57b08672ccbbe5"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/common.mjs",
+      "status": "A",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/freeze.mjs",
+      "status": "A",
+      "bytes": 4155,
+      "sha256": "1bd42f9aa15b2d4f4d90b1396527b9a8856f39ad04de08c9d190d8b0ddf9b0e6"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/launch.py",
+      "status": "A",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/ledger.mjs",
+      "status": "A",
+      "bytes": 3187,
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/preflight.mjs",
+      "status": "A",
+      "bytes": 12402,
+      "sha256": "ec752343e4bed892a06ad684aae697ae350716f78f4af61a7e33058cc7c51230"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/prepare-repair.py",
+      "status": "A",
+      "bytes": 7952,
+      "sha256": "90d44f27886bb9c85c7f8d099ed5eac2f2699e3271eb2b7d350c0b7161af515c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/harness/run.mjs",
+      "status": "A",
+      "bytes": 6091,
+      "sha256": "45dcdd649a6f71bd680f1540d054a3a38bcc6bc858eb3ad194f040e902bf102d"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/proposed-batch-reviewed.json",
+      "status": "A",
+      "bytes": 7669,
+      "sha256": "6f450286691dc7e2c1feba54031572ec2bfa7225c24c19cd769268d1e4bcc335"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/provider-observation.json",
+      "status": "A",
+      "bytes": 1560,
+      "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/retained-prior-code.json",
+      "status": "A",
+      "bytes": 4356,
+      "sha256": "666a5429aaa62680425ed041283404dd01fb224162facbbf4a11d2a5b1a6df44"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r1/wrapper-check-r3.json",
+      "status": "A",
+      "bytes": 648,
+      "sha256": "347265fcbb619ab2673810f9e85a81bee47e5dbc11990108f2c2b06359660bb9"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/README.md",
+      "status": "A",
+      "bytes": 4390,
+      "sha256": "1efadbfbc079ca8ccef098bb3e9277fb601c6afc6030e46a69b9a0d474d22b51"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/admission-check-r1.json",
+      "status": "A",
+      "bytes": 99079,
+      "sha256": "8288ca5aa1a17ce637db5d82a8b2cbe6eb50e972bb975ee6415bf2b115adf697"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/artifact-binding-precheck.json",
+      "status": "A",
+      "bytes": 1095,
+      "sha256": "5f13db4f80d8718e5c2af47516c82d4736add9e5783b893d43b00f02a43fa5d8"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/authorization-source-template-FROZEN-NOT-EXECUTABLE.json",
+      "status": "A",
+      "bytes": 982,
+      "sha256": "648bc0dc0a48c2553a53d0ac4aa96087131897f3d6aa75acb1dd4d6fd0fe7c8f"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/candidate-binding-check.json",
+      "status": "A",
+      "bytes": 1626,
+      "sha256": "0ef0a4bb6b74eb74bed57851f9e00d1b716cd420783931c47101805e889c9d3e"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-final-denials.py",
+      "status": "A",
+      "bytes": 1836,
+      "sha256": "65f8f9ecf1ede6d567208fe35a558a9e3a7062ef0008b6a26a91ac6b51e7353d"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-final-preflight.mjs",
+      "status": "A",
+      "bytes": 5054,
+      "sha256": "978644133d9b6303d029a2f69273f0befc70f4d1488fcb1a02ebc400d7bef7cb"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-repair.mjs",
+      "status": "A",
+      "bytes": 17487,
+      "sha256": "0bf6627c4c30b273d6973341949c2698e32882cbe5f5ba92970f81f706ca38f2"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-reuse.json",
+      "status": "A",
+      "bytes": 5339,
+      "sha256": "a46f020d647358990486e30ee93e3dfa4f3eeea123fe6cadbe51ca85ffe58293"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/check-review-repairs.mjs",
+      "status": "A",
+      "bytes": 14324,
+      "sha256": "ddb085d0fa367c06053fb947870743249a1144bb0d2b540f2ab17d9d84f7f428"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/checks.json",
+      "status": "A",
+      "bytes": 3430,
+      "sha256": "df77dda3419e091975f19f10af7a9c00d46c2642c728e688bef87eef6d4d2197"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/evidence-index.json",
+      "status": "A",
+      "bytes": 14773,
+      "sha256": "269ca09a9125728edb813c5eab9802021e63feb2ee9e8ae038da1d849135d1eb"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/final-denials-r1.json",
+      "status": "A",
+      "bytes": 814,
+      "sha256": "3d93555d4fd46b792c49f47efe373b6c881e7ccc51cbdc3a5bbf2c6b41a14967"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/final-preflight-check-r1.json",
+      "status": "A",
+      "bytes": 1398,
+      "sha256": "1bdd1a891d5a74f04418fcfd2d161c5a37c511b757c88b5713e45c92250bffe6"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/freeze-r1.stdout",
+      "status": "A",
+      "bytes": 369,
+      "sha256": "7551c2f964664d4f53aedd0c5aadd65b7a5c251c5bdb9801fc9e7f805d028c86"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/frozen-manifest.json",
+      "status": "A",
+      "bytes": 76288,
+      "sha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/grant-template-FROZEN-NOT-EXECUTABLE.json",
+      "status": "A",
+      "bytes": 676,
+      "sha256": "09c7b7080f2dbbc226ecd334a39d95f6f91c980bc2d0587bc7e2d7c52ffb486d"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/common.mjs",
+      "status": "A",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/freeze.mjs",
+      "status": "A",
+      "bytes": 4410,
+      "sha256": "75d152dd8801dee65ddeada359b50789237ebac38ca7f780dd9a43db4866df08"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/launch.py",
+      "status": "A",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/ledger.mjs",
+      "status": "A",
+      "bytes": 3187,
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/preflight.mjs",
+      "status": "A",
+      "bytes": 12746,
+      "sha256": "4926e7978cf23eb642dc2ac78f61f68fe6d2c77f6f674a3571be3e0992a69bdc"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/prepare-repair.py",
+      "status": "A",
+      "bytes": 8036,
+      "sha256": "15ec67c3695f336a074196d40455c824a2a92c1803cf2480c75611cf3182e642"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/harness/run.mjs",
+      "status": "A",
+      "bytes": 6224,
+      "sha256": "c2eb991f269fc3ccd6939da0f92135035f0956de3cfd013ec9d32bd3ef976a2c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/proposed-batch-reviewed.json",
+      "status": "A",
+      "bytes": 7669,
+      "sha256": "265261daf9d50792c32683cca2ecec308b2df670ec4f9902b5816e99801e5462"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/provider-observation.json",
+      "status": "A",
+      "bytes": 1560,
+      "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/retained-prior-code.json",
+      "status": "A",
+      "bytes": 4356,
+      "sha256": "f4d9feaa608b04016a3d30c444d62063ed65b4df4df17d44255fb12a8009de2d"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/review-repair-check-r1.json",
+      "status": "A",
+      "bytes": 4973,
+      "sha256": "80d548a7e9344119ca981d2918972fbfbe9f10eac942e142b294874193dac732"
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/revision-delta.json",
+      "status": "A",
+      "bytes": 3154,
+      "sha256": "a791fd1957c3447618269916d51e09e9c5391481ef9f4d3ee795c183dfca3f7f"
+    }
+  ],
+  "docsDiffCheck": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "productAndBuildInputChanges": [],
+  "trackedCleanAfter": true,
+  "originalUntrackedUnchanged": true,
+  "apiEnvMetadataUnchanged": true,
+  "frozenAndDistUnchanged": true,
+  "priorOriginalsUnchanged": true,
+  "evidencePreservation": "Frozen r1/r2, both independent review directories, dist, and all 7264 indexed prior-original files were hashed before/after; other evidence was not written by this operation.",
+  "currentGitStatus": "?? docs/prototypes/archive/\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json\n",
+  "rootWriteLock": "RETURNED_TO_MAIN_AFTER_READBACK"
+}

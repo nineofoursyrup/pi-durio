@@ -1,0 +1,133 @@
+#!/usr/bin/env node
+/** Human-run macOS Terminal acceptance. This never drives Terminal.app or synthesizes UI input. */
+import { createHash } from 'node:crypto';
+import { readFileSync, writeFileSync, mkdirSync, openSync, writeSync, closeSync, lstatSync, readlinkSync, readdirSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { createInterface } from 'node:readline/promises';
+import { parseArgs } from 'node:util';
+const {values}=parseArgs({options:{manifest:{type:'string'},scenario:{type:'string'},'verify-only':{type:'boolean'}}});
+if(!values.manifest)throw Error('Usage: node scripts/terminal-validation.mjs --manifest /absolute/candidate.json --scenario cursor|normal|stop|esc|exit|exit-first-pair|idle-c-first-pair|fault');
+const manifest=JSON.parse(readFileSync(resolve(values.manifest),'utf8'));
+const sha=value=>createHash('sha256').update(value).digest('hex');
+if(sha(readFileSync(new URL(import.meta.url)))!==manifest.runnerSha256)throw Error('CANDIDATE_RUNNER_CHANGED');
+const actualPaths=[];
+function inventory(relative=''){for(const name of readdirSync(join(manifest.packageRoot,relative))){const path=join(relative,name),stat=lstatSync(join(manifest.packageRoot,path));if(stat.isDirectory())inventory(path);else if(stat.isFile()||stat.isSymbolicLink())actualPaths.push(path);else throw Error(`CANDIDATE_UNEXPECTED_FILE_TYPE: ${path}`);}}
+inventory();
+const expectedPaths=new Set(manifest.files.map(entry=>entry.path)),actualSet=new Set(actualPaths);
+const missing=[...expectedPaths].filter(path=>!actualSet.has(path)),extra=actualPaths.filter(path=>!expectedPaths.has(path));
+if(missing.length||extra.length||expectedPaths.size!==manifest.files.length)throw Error(`CANDIDATE_FILE_SET_CHANGED: missing ${JSON.stringify(missing)}; extra ${JSON.stringify(extra)}`);
+for(const entry of manifest.files){const file=join(manifest.packageRoot,entry.path);const stat=lstatSync(file);const actual=stat.isSymbolicLink()?`link:${readlinkSync(file)}`:sha(readFileSync(file));if(actual!==entry.sha256)throw Error(`CANDIDATE_CHANGED: ${entry.path}`);}
+if(values['verify-only']){console.log(JSON.stringify({verified:true,commit:manifest.commit,files:manifest.files.length,packageRoot:manifest.packageRoot}));process.exit(0);}
+const scenarios=[values.scenario];
+if(!['cursor','normal','stop','esc','exit','exit-first-pair','idle-c-first-pair','fault'].includes(values.scenario))throw Error('ONE_SCENARIO_REQUIRED: use --scenario; each invocation records exactly one acceptance item or named group');
+if(process.platform!=='darwin'||process.arch!=='arm64'||process.env.TERM_PROGRAM!=='Apple_Terminal'||!process.stdin.isTTY||!process.stdout.isTTY)throw Error('REAL_MACOS_TERMINAL_REQUIRED: 在 macOS Terminal.app 中运行本命令；其他终端不作为本票验收');
+const root=join(manifest.evidenceRoot,'manual',new Date().toISOString().replace(/[:.]/g,'-'));mkdirSync(root,{recursive:true,mode:0o700});
+const environment={at:new Date().toISOString(),candidate:manifest.commit,manifest:resolve(values.manifest),node:process.version,platform:process.platform,arch:process.arch,TERM:process.env.TERM,TERM_PROGRAM:process.env.TERM_PROGRAM,TERM_PROGRAM_VERSION:process.env.TERM_PROGRAM_VERSION,locale:process.env.LANG,os:spawnSync('/usr/bin/sw_vers',[],{encoding:'utf8'}).stdout};
+writeFileSync(join(root,'environment.json'),JSON.stringify(environment,null,2));
+const {ReadOnlyTui,copyToMacClipboard}=await import(pathToFileURL(join(manifest.packageRoot,'dist/src/tui/app.js')).href);
+const {demoTransport}=await import(pathToFileURL(join(manifest.packageRoot,'dist/src/offline.js')).href);
+const {ProcessTerminal}=await import(pathToFileURL(join(manifest.packageRoot,'node_modules/@earendil-works/pi-tui/dist/index.js')).href);
+const results=[];
+writeFileSync(join(root,'plan.json'),JSON.stringify({candidate:manifest.commit,scenarios,terminalObservations:'NOT RUN until the operator reports them',paidProvider:'NOT RUN; deterministic offline transport only'},null,2));
+for(const scenario of scenarios){
+  const folder=join(root,scenario),workspace=join(folder,'project'),dataRoot=join(folder,'data');mkdirSync(workspace,{recursive:true});
+  writeFileSync(join(workspace,'README.md'),'# Terminal 验收 fixture\n果实数量 7；中文 👩‍💻 é 宽字符；只读。\n'+Array.from({length:2300},(_,i)=>`第 ${String(i).padStart(4,'0')} 行：中文👩‍💻 é ${String.fromCodePoint(0x4e00+i%128)} | 可复制的长输出 | fruit count 7`).join('\n'));
+  const steps=scenario==='cursor'?[
+    '1. 粘贴下一行（不要按 Enter）。等显示稳定后，确认光标恰好在 B 后；左右移动，没有残留光标。',
+    'A👩‍💻é中B',
+    '2. 在末尾粘贴下一行新字符，等显示稳定；光标仍应在文本末尾。Terminal 原生 emoji 字形间隙不计为这项失败。',
+    ' 🇨🇳 👍🏽 ✈️ Ω',
+    '3. 将窗口缩小到约 40×12 再恢复，检查插入点；然后空闲 Ctrl+C 清草稿，800ms 内再按 Ctrl+C 退出。',
+    '发现光标/文字错位就直接退出，本轮会在反馈后停止，不要求继续五个场景。'
+  ]:scenario==='normal'?[
+    '1. 先用中文输入法组合“读取 README”，选择候选时按 Enter；观察它仅确认候选、不提交。',
+    '2. 添加 👩‍💻、é、中文；分别 Shift+Enter、Ctrl+J、反斜杠后 Enter 换行；粘贴两行，确认不提交。',
+    '3. 提交请求后，输出期间持续用中文 IME 组合并选择候选：观察新增非 ASCII 的校准是否把候选窗/硬件光标移到其他行。随后写“保留草稿”，按 Enter；应保留且未受理。显示更新期间未应用的动作，请待画面稳定后重新操作。',
+    '4. 输出期间 PageUp/鼠标上滚，确认不跟随、不抢输入焦点；F2→bottom 返回最新。',
+    '5. 拖选已显示的输出，应复制；粘贴到输入区查看文本（本脚本也核对本次复制后的 pbpaste）。',
+    '6. Ctrl+O 查看原文，n/p 翻片，左右换记录，↑↓滚动，y 复制；Esc 关闭。F2/help 和 /help 补全可导航。',
+    '7. 缩放到 40×12 附近、再更小并恢复，记录可用最小字符格；检查输入、菜单、宽字符和工具失败/截断标记。',
+    '8. 完成后 Ctrl+L 重绘；在 A👩‍💻中B 的 emoji 前 Ctrl+D 应删完整字符簇。Ctrl+C 清草稿，/restore 恢复。F2→exit，Esc 返回；再 F2→exit 确认退出。'
+  ]:scenario==='exit-first-pair'?[
+    '1. 本次只测首次 Ctrl+D 确认。输入 read README 并按 Enter，等状态显示运行中、画面稳定；输入区保持空白。',
+    '2. 此前不要按 Ctrl+C/D，也不要测试超时或取消。按住 Control，按 D、松开 D，再按 D；两次间隔约 0.2–0.5 秒，最多 800ms。两次之间不输入、不移动焦点或缩放。',
+    '3. 第一对就应请求退出，等待清理后回到原终端缓冲区，光标可见、可以继续输入。只评分这一对；若第一对失败，用 F2→exit 安全退出后填 F，不能以后续成功覆盖。'
+  ]:scenario==='idle-c-first-pair'?[
+    '1. 本次只测空闲首次 Ctrl+C 确认。输入 keep this draft，不按 Enter；等画面稳定，保持空闲。',
+    '2. 此前不要按 Ctrl+C/D。按住 Control，按 C、松开 C，再按 C；两次间隔约 0.2–0.5 秒，最多 800ms。两次之间不输入、不移动焦点或缩放。',
+    '3. 第一次应保存并清空草稿，第二次应退出并恢复终端；全程不提交任务。只评分这一对；若第一对失败，用 F2→exit 安全退出后填 F，不能以后续成功覆盖。'
+  ]:scenario==='stop'?['提交一个请求后，在“运行中”按 Ctrl+C；应先显示中止中，再已中止/unknown。等待期间再按 Ctrl+C 不退出。完成后空闲 Ctrl+C 两次退出。']:scenario==='esc'?['提交一个请求；F2 打开菜单，Esc 只关菜单；再按 Esc 中止。确认真实状态后退出。']:scenario==='exit'?['提交一个请求；保持空输入，Ctrl+D，等超过 800ms，再 Ctrl+D 不应退出；按方向键/切换窗口使确认失效，再试。最后 800ms 内两次 Ctrl+D 请求退出，等待清理。']:['提交一个请求；约 1.2 秒后 fixture 触发可捕获故障，观察恢复到原终端缓冲区、可见光标、可正常输入。'];
+  console.log(`\n候选 ${manifest.commit}\n场景 ${scenario}，证据 ${folder}\n${steps.join('\n')}\n本次仅记录测试输入/显示；剪贴板会被测试复制覆盖。`);
+  const ready=createInterface({input:process.stdin,output:process.stdout});await ready.question('按 Enter 开始（请勿输入私人信息）：');ready.close();
+  const stty=()=>spawnSync('/bin/stty',['-g'],{stdio:['inherit','pipe','pipe'],encoding:'utf8'}).stdout.trim();
+  const before={raw:!!process.stdin.isRaw,stty:stty(),columns:process.stdout.columns,rows:process.stdout.rows};
+  const eventsFd=openSync(join(folder,'events.jsonl'),'wx',0o600),screenFd=openSync(join(folder,'terminal-output.ansi'),'wx',0o600);
+  const event=data=>writeSync(eventsFd,JSON.stringify({at:new Date().toISOString(),...data})+'\n');
+  const controlInputs=[];
+  const terminal=new ProcessTerminal(),originalStart=terminal.start.bind(terminal);
+  terminal.start=(input,resize)=>originalStart(data=>{if(data==='\x03'||data==='\x04')controlInputs.push({at:new Date().toISOString(),code:data==='\x03'?'0x03':'0x04'});event({event:'input',data,columns:terminal.columns,rows:terminal.rows});input(data);},()=>{event({event:'resize',columns:terminal.columns,rows:terminal.rows});resize();});
+  let outputOffset=0;
+  const originalWrite=process.stdout.write;process.stdout.write=function(...args){const data=typeof args[0]==='string'?args[0]:Buffer.from(args[0]);const bytes=Buffer.byteLength(data);event({event:'terminal-write',offset:outputOffset,bytes});writeSync(screenFd,data);outputOffset+=bytes;return originalWrite.apply(this,args);};
+  const fixture=demoTransport();let calls=0,cancelled=false;const timers=new Set();
+  const transport=async(url,init)=>{
+    calls++;event({event:'provider-request',ordinal:calls});
+    const original=await fixture.fetch(url,init),chunks=(await original.text()).split('\n\n').filter(Boolean);
+    const expanded=chunks.flatMap(chunk=>{if(!chunk.startsWith('data: {'))return[chunk+'\n\n'];const value=JSON.parse(chunk.slice(6));const content=value.choices?.[0]?.delta?.content;if(!content)return[chunk+'\n\n'];return Array.from({length:Math.ceil(content.length/(scenario==='normal'?60:120))},(_,index)=>'data: '+JSON.stringify({...value,choices:[{...value.choices[0],delta:{content:content.slice(index*(scenario==='normal'?60:120),(index+1)*(scenario==='normal'?60:120))}}]})+'\n\n');});
+    if(scenario==='fault'){const timer=setTimeout(()=>{timers.delete(timer);throw Error('TERMINAL_VALIDATION_CAPTURED_FAULT');},1200);timers.add(timer);}
+    return new Response(new ReadableStream({start(stream){
+      let stopped=false;const schedule=(fn,ms)=>{const timer=setTimeout(()=>{timers.delete(timer);fn();},ms);timers.add(timer);};
+      const abort=()=>{if(stopped)return;stopped=true;cancelled=true;event({event:'provider-cancellation-received'});schedule(()=>{event({event:'provider-stream-terminated'});stream.error(new Error('offline transport cancelled'));},200);};
+      init.signal.addEventListener('abort',abort,{once:true});
+      const send=()=>{if(stopped)return;const text=expanded.shift();if(text){stream.enqueue(new TextEncoder().encode(text));schedule(send,scenario==='normal'?80:15);}else{stopped=true;init.signal.removeEventListener('abort',abort);stream.close();event({event:'provider-stream-completed'});}};
+      schedule(send,scenario==='normal'||scenario==='cursor'?1500:45000);
+    }}),{headers:{'content-type':'text/event-stream'}});
+  };
+  const clipboard=[];
+  const copy=async text=>{const copied=await copyToMacClipboard(text);const readback=copied===true?spawnSync('/usr/bin/pbpaste',[],{encoding:'utf8'}):undefined;const observed={copied,bytes:Buffer.byteLength(text),sha256:sha(text),readbackEqual:readback?.status===0&&readback.stdout===text};clipboard.push(observed);event({event:'clipboard',...observed});return copied;};
+  let result;
+  try{const app=new ReadOnlyTui({workspace,dataRoot,mode:'offline',transport,terminal,copy,draftRoot:join(root,'drafts')});try{app.start();result=await app.closed;}finally{await app.exit();}}
+  finally{for(const timer of timers)clearTimeout(timer);process.stdout.write=originalWrite;closeSync(screenFd);}
+  const after={raw:!!process.stdin.isRaw,stty:stty(),columns:process.stdout.columns,rows:process.stdout.rows};
+  let readback;
+  if(result?.result){const child=spawnSync(process.execPath,[join(manifest.packageRoot,'dist/src/cli.js'),'show','--data-root',dataRoot,'--run',result.result.runId],{encoding:'utf8',maxBuffer:4*1024*1024});writeFileSync(join(folder,'headless.json'),child.stdout);writeFileSync(join(folder,'headless.stderr'),child.stderr);const parsed=child.status===0?JSON.parse(child.stdout):undefined;readback={status:child.status,sameResult:parsed&&JSON.stringify(parsed.result)===JSON.stringify(result.result)};}
+  const expectedControl=scenario==='exit-first-pair'?'0x04':scenario==='idle-c-first-pair'?'0x03':undefined;
+  const firstPair=expectedControl?{expectedControl,controls:controlInputs,firstTwoMatch:controlInputs.length>=2&&controlInputs.slice(0,2).every(key=>key.code===expectedControl),intervalMs:controlInputs.length>=2?Date.parse(controlInputs[1].at)-Date.parse(controlInputs[0].at):null,lifecycleIntent:result?.result?.lifecycle?.intent??null,runtimeMatched:scenario==='exit-first-pair'?calls>0&&result?.result?.lifecycle?.intent==='exit'&&result.result.cleanup==='confirmed'&&readback?.sameResult===true:calls===0&&!result?.result&&result?.draftSaved===true,note:'Key/timing and runtime facts only; operator feedback and the full input/resize log establish first-pair behavior. A stop intent does not satisfy EXIT_FIRST_PAIR.'}:undefined;
+  const machine={scenario,result,calls,cancelled,clipboard,before,after,rawRestored:before.raw===after.raw,sttyRestored:before.stty===after.stty,readback,firstPair,note:'Machine checks do not prove IME, glyph layout, visual original-buffer restoration, or native copy selection.'};
+  writeFileSync(join(folder,'machine.json'),JSON.stringify(machine,null,2));event({event:'scenario-finished'});closeSync(eventsFd);
+  console.log(`\n场景 ${scenario} 已退出；raw/stty 恢复：${machine.rawRestored}/${machine.sttyRestored}；headless 同一结果：${readback?.sameResult??'无运行结果'}。`);
+  const report=createInterface({input:process.stdin,output:process.stdout});
+  const items=scenario==='cursor'?[
+    ['C1','原始 A👩‍💻é中B 的 caret 位于 B 后、只有一个光标'],
+    ['C2','首见 🇨🇳 👍🏽 ✈️ Ω 测量后插入点正确，没有误提交'],
+    ['C3','40×12 附近缩放再恢复后 caret 正确，退出恢复正常']
+  ]:scenario==='normal'?[
+    ['N1','中文候选 Enter 不提交；持续新增 Unicode 输出时 IME 候选窗和 caret 留在输入处'],
+    ['N2','多行三种键位、整段粘贴及 é/emoji 整簇删除正确，忙时 Enter 不启动新任务'],
+    ['N3','滚动/菜单/详情不抢焦点，鼠标选文内容正确，复制内容核对正确'],
+    ['N4','缩放及小窗口可恢复，退出回到原缓冲区并可正常输入']
+  ]:scenario==='exit-first-pair'?[
+    ['EXIT_FIRST_PAIR','运行中、空输入的首次 Ctrl+D 双按（800ms 内）即退出，完成清理并恢复终端']
+  ]:scenario==='idle-c-first-pair'?[
+    ['IDLE_C_FIRST_PAIR','空闲首次 Ctrl+C 清空并保存草稿，800ms 内第二次退出并恢复终端，未提交任务']
+  ]:[[scenario.toUpperCase(),steps[0]]];
+  const ratings=[];
+  for(const [id,label] of items){
+    const answer=await report.question(`${id}. ${label} — P=PASS / F=FAIL / U=UNKNOWN（可附原因）：`);
+    const token=/^(PASS|FAIL|UNKNOWN|P|F|U)(?:$|[\s:：])/i.exec(answer.trim())?.[1]?.toUpperCase();
+    const status=token==='P'||token==='PASS'?'PASS':token==='F'||token==='FAIL'?'FAIL':'UNKNOWN';
+    ratings.push({id,label,status,answer});
+  }
+  const minimumGrid=scenario==='normal'?await report.question('实际可用的最小窗口列×行（没核实填 UNKNOWN）：'):undefined;
+  report.close();
+  const observed={at:new Date().toISOString(),scenario,candidate:manifest.commit,reportedBy:'human-terminal-operator',ratings,minimumGrid};
+  writeFileSync(join(folder,'operator-observation.json'),JSON.stringify(observed,null,2));
+  results.push({scenario,ratings,rawRestored:machine.rawRestored,sttyRestored:machine.sttyRestored});
+  if(scenario==='cursor'&&(ratings.some(item=>item.status!=='PASS')||!machine.rawRestored||!machine.sttyRestored||result?.widthCalibration?.error)){
+    console.log('短复测未全部通过；后续场景保持 NOT RUN，请把下面证据目录发回。');break;
+  }
+
+}
+writeFileSync(join(root,'workflow.json'),JSON.stringify({candidate:manifest.commit,planned:scenarios,completed:results,notRun:scenarios.filter(name=>!results.some(result=>result.scenario===name)),paidProvider:'NOT RUN'},null,2));
+console.log(`证据已保存：${root}\n请将目录发回协调 chat；任何未明确观察的项目继续保持 UNKNOWN。`);

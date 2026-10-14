@@ -1,0 +1,27 @@
+{
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "diagnosisComplete": true,
+  "requiredProductContentFixIdentified": false,
+  "npmLs": {
+    "status": "FAIL",
+    "exitCode": 1,
+    "code": "ELSPROBLEMS",
+    "attribution": "npm 11.19.1 bundled local-file source-metadata validation; installed content matches authorized derivative"
+  },
+  "consumerOfflineNpmCi": {
+    "status": "FAIL",
+    "exitCode": 1,
+    "code": "EUSAGE",
+    "missingOptionalNonHostPlatformCount": 25,
+    "attribution": "npm generated consumer lock omits absent bundled optional nodes which npm ci requires"
+  },
+  "freshOfflineInstall": "PASS",
+  "repeatOfflineInstall": "PASS",
+  "cliHelpAnd12PublicImportsAfterEachInstallAndAfterCiFailure": "PASS",
+  "sourceRepositoryNpmCi": "Not rerun; parent supplied existing PASS; full source lock includes all 25 entries",
+  "originalInputsUnchanged": true,
+  "resourceWindowReleased": true,
+  "report": "REPORT.md",
+  "fullTechnicalAcceptance": "NOT DETERMINED by this diagnosis",
+  "productChanges": []
+}

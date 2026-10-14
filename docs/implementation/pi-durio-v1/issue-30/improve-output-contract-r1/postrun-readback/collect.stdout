@@ -1,0 +1,1 @@
+{"status": "READ_ONLY_POSTRUN_VERIFIED", "report": {"path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/report.json", "bytes": 17439, "sha256": "cf2e811046179892f3b699d3d238dd7a3c36e2c8467128082c4b9f9250cd508f"}, "hostRequests": 4, "knownTokens": 24585, "formalCandidates": 1, "rawDrafts": 1, "originalsUnchanged": 15558}

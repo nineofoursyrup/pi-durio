@@ -1,0 +1,53 @@
+{
+  "at": "2026-10-09T13:37:58.530565+00:00",
+  "candidate": "231f206e859f0ed889a69d943b9c17f92a20cf79",
+  "reportedScenario": "exit-first-pair",
+  "humanRatings": [
+    {
+      "id": "EXIT_FIRST_PAIR",
+      "label": "运行中、空输入的首次 Ctrl+D 双按（800ms 内）即退出，完成清理并恢复终端",
+      "status": "PASS",
+      "answer": "P"
+    }
+  ],
+  "firstPair": {
+    "expectedControl": "0x04",
+    "controls": [
+      {
+        "at": "2026-10-09T13:36:16.106Z",
+        "code": "0x04"
+      },
+      {
+        "at": "2026-10-09T13:36:16.889Z",
+        "code": "0x04"
+      }
+    ],
+    "firstTwoMatch": true,
+    "intervalMs": 783,
+    "lifecycleIntent": null,
+    "runtimeMatched": false,
+    "note": "Key/timing and runtime facts only; operator feedback and the full input/resize log establish first-pair behavior. A stop intent does not satisfy EXIT_FIRST_PAIR."
+  },
+  "rawRestored": true,
+  "sttyRestored": true,
+  "providerCalls": 0,
+  "finding": "Human P preserved. Trace contains two Ctrl+D presses, no request text or Enter; no runtime result. Confirms idle first-pair exit and terminal restoration, not the requested running-task exit. Running case remains NOT VERIFIED and was requested again with explicit readiness steps.",
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-36-03-506Z/exit-first-pair/operator-observation.json",
+      "sha256": "cbb29adea934a0d5022e5f1967f58d0e4d273c54ee3f9b05551617057b542ab2"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-36-03-506Z/exit-first-pair/machine.json",
+      "sha256": "23bf74360fafd97033a9147832b5d450bde82158e94734d874f76de9894fdab0"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-36-03-506Z/exit-first-pair/events.jsonl",
+      "sha256": "f891728dbda54f2d5936c022cccd6b33d91e11744843cb1c1cde78bb7c0349f6"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r6/manual/2026-10-09T13-36-03-506Z/exit-first-pair/terminal-output.ansi",
+      "sha256": "db4aad982383a604ef7958f5fe4009386cf9cb4183b3f8527e93702fee9969f4"
+    }
+  ]
+}

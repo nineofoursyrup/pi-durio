@@ -1,0 +1,233 @@
+{
+  "issue": 14,
+  "contract": "PI-DURIO-V1-TICKETS-r1:T04",
+  "status": "LOCAL_ACCEPTANCE_PASS",
+  "implementation_commit": "c62f340cf0eb3029248bfede14a9483044ea86fb",
+  "integration_base": "372fcf3038b5b5e7ad6a41b41ac946be5c95009b",
+  "integration_merge": "2773cab05d34d8f0003d34d5b9c0bc7b4b2f7ef3",
+  "code_candidate": {
+    "commit": "c0350714439dfc272f7c53759129e0dc6d2e182f",
+    "tree": "5ed78f743594bdb743f2da46489bb91bdf273306",
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/candidate-manifest.json",
+      "sha256": "c1f5cf5a40eebbd1b276a08478e8eb2575b7c93e256c8afa71e23838ff88d93d",
+      "bytes": 21986
+    },
+    "archives": [
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/source-c035071.tar.gz",
+        "sha256": "f5bf2a8b68d3986681e924c28c01caa75d2691813a11bcfa2091d2472235304e",
+        "bytes": 844556
+      },
+      {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/compiled-c035071.tar.gz",
+        "sha256": "b49caf14d742048aa898bd032c264fa43430135da240ac28052e18c6899e988a",
+        "bytes": 124825
+      }
+    ]
+  },
+  "checks": [
+    {
+      "command": "npm ci",
+      "result": "PASS",
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/integrated-install.log",
+        "sha256": "c48cef70f54852f02c833102c649c1a907f505620b6fbd119f527bb9db20aa21",
+        "bytes": 235
+      }
+    },
+    {
+      "command": "npm run check",
+      "result": "PASS",
+      "tests": 44,
+      "passed": 44,
+      "failed": 0,
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/integrated-check-02.log",
+        "sha256": "78b07a1a43dd92fa7361df1baf8ba4c10bd8bfea8ceb0237c11962f0ff5368ab",
+        "bytes": 5173
+      }
+    },
+    {
+      "command": "node scripts/demo-lifecycle.mjs /Users/nineofour/pi-durio-v1-run/evidence/issue-14",
+      "result": "PASS",
+      "cases": 9,
+      "log": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/demo-final.log",
+        "sha256": "8c35b4af35bcabdba15f03f4c52581fff46844a5b6f2111cb2914d839b3ed7b0",
+        "bytes": 188
+      },
+      "summary": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/demo-Utx4Os/summary.json",
+        "sha256": "45c98b1e656a0974e9cb3abccbe3d33e5b87dc3daf7cbd44385ea06dd15f94b8",
+        "bytes": 12974
+      }
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "test_artifacts": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/test-artifacts-index.json",
+    "sha256": "7ddd23b7dd27a033c6821d7aa656a1c5bb329932b0ba28930de675dfc963bfe2",
+    "bytes": 262676
+  },
+  "requirements": [
+    {
+      "criterion": 1,
+      "status": "PASS",
+      "evidence": [
+        "lifecycle first-intent/setup/final-dispatch tests",
+        "CLI SIGINT/SIGTERM test",
+        "demo finish/stop/exit/wait-only"
+      ]
+    },
+    {
+      "criterion": 2,
+      "status": "PASS",
+      "evidence": [
+        "lifecycle stop failure/storage failure/owner lost/cleanup deadline tests",
+        "demo crash",
+        "demo cleanup-timeout-headless",
+        "demo cleanup-timeout-tui-adapter"
+      ]
+    },
+    {
+      "criterion": 3,
+      "status": "PASS",
+      "evidence": [
+        "reused applicable runtime/coding original-failure/partial-stream/usage tests",
+        "demo stream/timeout",
+        "late transport response test"
+      ]
+    },
+    {
+      "criterion": 4,
+      "status": "PASS",
+      "evidence": [
+        "durable closed snapshot stop pending empty/exit pending retained",
+        "waitForRun cancellation test",
+        "first-intent idempotency test",
+        "readonly reopen hash comparisons",
+        "owner persistent marker and different-data-root workspace guard"
+      ]
+    },
+    {
+      "criterion": 5,
+      "status": "PASS",
+      "evidence": [
+        "demo 9 cases with actual targets and persistent records",
+        "34 original-baseline checks and 44 combined checks",
+        "preserved original failures in first-failures.md"
+      ]
+    }
+  ],
+  "limitations": [
+    "Offline transport controls responses; no paid model inference, live authentication or billing validation.",
+    "TUI mechanical adapter test is not macOS Terminal human acceptance; fixed issue-16 r3 install unchanged.",
+    "No cross-restart resume/recovery approval; issue 15 owns recovery checks and decisions.",
+    "Unknown/late close never proves all external or remote side effects stopped, and does not release retained owner.",
+    "No tracker writes, push, main merge, issue close or release."
+  ],
+  "first_failures": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/check-02.log",
+      "sha256": "d2fc1c0b491a6371758ec514958d83a79fdc4549cf25983117579f982d4987bb",
+      "bytes": 492
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/check-03.log",
+      "sha256": "eeadf7d0a6db95b191b6f0d5bde116ac7716704fdc0719e8cbd78ff74ba708dc",
+      "bytes": 5766
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/demo-01.log",
+      "sha256": "5f39ed1616f74922f98fcd364188318e6dafbb2dd1d41ef1b434f6a923d0c4ed",
+      "bytes": 346
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/demo-02.log",
+      "sha256": "465e1f0df58ec966aca982d41e7cd09bc22b3ee89a4721b823f10cc58f4b8f94",
+      "bytes": 382
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/green-02-build.log",
+      "sha256": "508ed540e4756059a042b656881f240961a2c67c2068b1391000950f817c8f17",
+      "bytes": 66
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/green-02-test.log",
+      "sha256": "b0c9c37748947251ee8d362d46af48e023e5eda8fc7a16f340438dfb95ea3a94",
+      "bytes": 1257
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/green-03-build.log",
+      "sha256": "508ed540e4756059a042b656881f240961a2c67c2068b1391000950f817c8f17",
+      "bytes": 66
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/green-03-test.log",
+      "sha256": "2864a29d89fafb896e0e605be3ee220326ddab54d8a667f23c93c24b09797f0b",
+      "bytes": 1256
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/green-04-build.log",
+      "sha256": "508ed540e4756059a042b656881f240961a2c67c2068b1391000950f817c8f17",
+      "bytes": 66
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/green-04-test.log",
+      "sha256": "334db52748c827f8be83263d569634193271ef39f7c8c52a67dd8505f1f51820",
+      "bytes": 1378
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/red-01-build.log",
+      "sha256": "508ed540e4756059a042b656881f240961a2c67c2068b1391000950f817c8f17",
+      "bytes": 66
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/red-01-test.log",
+      "sha256": "19341d7c8c539a33957f7767499e8d9f73f3e815180331d7b4687b20c1adb8db",
+      "bytes": 1469
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/red-02-build.log",
+      "sha256": "ed38b8d4f0995ba8ff7ba9dc7d0ba147319ef9dcd60e1d06a1872203788a7fa4",
+      "bytes": 444
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/red-03-build.log",
+      "sha256": "508ed540e4756059a042b656881f240961a2c67c2068b1391000950f817c8f17",
+      "bytes": 66
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/red-03-test.log",
+      "sha256": "8d48a3d4ed58e067f4b93ebd9214592f6839d0748b62d95e1dcf1566675a2af5",
+      "bytes": 925
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/red-04-build.log",
+      "sha256": "508ed540e4756059a042b656881f240961a2c67c2068b1391000950f817c8f17",
+      "bytes": 66
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/red-04-test.log",
+      "sha256": "33a00ccf86ca885ed821e73794f62d8ef5dd966e6244164a833eb21f39d9411f",
+      "bytes": 902
+    }
+  ],
+  "tui_exit_adapter": {
+    "status": "PASS",
+    "exitCode": 75,
+    "boundedSummaryFlushed": true,
+    "activeIntervalDidNotHang": true,
+    "ownerRetained": true,
+    "terminalStopped": true,
+    "cursorShown": true,
+    "alternateBufferDisabled": true,
+    "actualMacTerminal": false,
+    "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-14/demo-Utx4Os/tui-cleanup-timeout/view.json"
+  },
+  "verification_reuse": "Code, dependency and compiled bytes checked at c035071 are unchanged by subsequent issue-14 documentation commits; retain integrated-check-02 and demo-final without repeating deterministic checks."
+}

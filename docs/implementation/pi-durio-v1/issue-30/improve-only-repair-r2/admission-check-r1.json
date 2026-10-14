@@ -1,0 +1,934 @@
+{
+  "status": "PASS",
+  "cases": 30,
+  "scope": "Exact source in node:vm module sandbox; candidate/grant/review records, API and receipts are artificial memory-only fixtures. No real repaired candidate or authorization implied.",
+  "results": [
+    {
+      "name": "false-grant",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "EXPLICIT_NEW_PAID_GRANT_REQUIRED\n\nfalse !== true\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "unfrozen-candidate",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "REPAIRED_CANDIDATE_NOT_FROZEN\n+ actual - expected\n\n+ 'PREPARATION_ONLY'\n- 'FROZEN_IMPROVE_REPAIR_PENDING_NEW_EXPLICIT_ONE_START'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "old-supplement-grant",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "GRANT_BATCH_MISMATCH\n+ actual - expected\n\n+ 'pi-durio-v1-live-r2-usd3-supplement'\n- 'pi-durio-v1-live-r3-improve-repair'\n                     ^\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "old-larger-limits",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "EXACT_REPAIR_LIMITS_REQUIRED\n+ actual - expected\n\n  {\n    activeMs: 3600000,\n    cumulativeMaxRequests: 42,\n    cumulativeMaxTokens: 2318328,\n    grantToStartMs: 86400000,\n+   maxRequests: 32,\n-   maxRequests: 8,\n    maxTokens: 1200000,\n    starts: 1,\n    usdCeiling: 3\n  }\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "old-exact-authorization-source",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "OLD_AUTHORIZATION_NOT_REUSABLE",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "old-auth-kind",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "NEW_AUTHORIZATION_KIND_REQUIRED\n+ actual - expected\n\n+ 'supplemental-one-start'\n- 'improve-repair-one-start'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "grant-before-r3-ended",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "NEW_GRANT_EXPIRED_OR_INVALID",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "grant-expired",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "NEW_GRANT_EXPIRED_OR_INVALID",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "grant-future",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "NEW_GRANT_EXPIRED_OR_INVALID",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "grant-source-time-mismatch",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "NEW_GRANT_TIME_MUST_MATCH_SOURCE\n+ actual - expected\n\n+ '2026-10-10T07:00:00.001Z'\n- '2026-10-10T07:00:00.000Z'\n                         ^\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "old-budget-source",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "PRIOR_UNKNOWN_LEDGER_LINK_REQUIRED\n+ actual - expected\n\n+ '0000000000000000000000000000000000000000000000000000000000000000'\n- '07e58fa36dc54441da52658e2eed29a0ad35eff233b8b2817bc28b2fe1e3b997'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "already-started",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "BATCH_ALREADY_STARTED\n\ntrue !== false\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "prior-ledger-raw952-substitution",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "PRIOR_LEDGER_CHANGED\n+ actual - expected\n\n+ '771e5ab08c18ac0e511d5bff851095bb4de6f13dd5bbe9672251b1ad9d5b9fc7'\n- '07e58fa36dc54441da52658e2eed29a0ad35eff233b8b2817bc28b2fe1e3b997'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "same-old-product",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "REPAIRED_CANDIDATE_REQUIRED",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "producer-is-not-fixed-candidate",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "CANDIDATE_GATE_BINDING_REQUIRED\n+ actual - expected\n\n+ 'dddddddddddddddddddddddddddddddddddddddd'\n- 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "repair-not-reviewed",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "Expected values to be strictly equal:\n\n'PENDING' !== 'PASS'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "prior-pass-relabelled",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "PRIOR_PASS_EXECUTION_IDENTITIES_CHANGED\n+ actual - expected\n\n  [\n    {\n+     candidate: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',\n-     candidate: '9aed1af6ee3b156bb7354961496217aa5e64843e',\n      grade: 'e1:687:d3f92c3c6db88c384d5220ce9c3267c4e48a6a802704f68469a8afabdb27c947',\n      outcome: 'e1:684:3452d528da95ff7f4aabe09522fa8bdbcefb3df57b71c8bafabe02094670a180',\n      trialId: 'v1-live-r1-local-fix'\n    },\n    {\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "improve-extra-requests",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "PROPOSAL_NOT_EXACT_IMPROVE_REPAIR\n+ actual - expected\n... Skipped lines\n\n  {\n    aggregate: {\n      conservativeUsdUpper: 2.7819936,\n      cumulativeChargedTokens: 2318328,\n      cumulativeRequests: 42,\n...\n          maxRequestTokens: 1056768,\n+         maxRequests: 9,\n-         maxRequests: 8,\n          maxTokens: 1200000\n        },\n        purpose: 'Analyze the retained failed clamp check and the explicitly registered project sources. Explain the observed defect and propose a minimal deterministic repair only if supported by acquired evidence. Only clamp.ts may be proposed for change; README.md, check.mjs and package.json are protected. No performance improvement is claimed. Return your own structured candidate, or zero candidates with the actual gaps. This is analysis only; user selection is separate.',\n        query: {\n          maxEvidenceBytes: 32768,\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "extra-paid-eval",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "PROPOSAL_NOT_EXACT_IMPROVE_REPAIR\n+ actual - expected\n... Skipped lines\n\n  {\n    aggregate: {\n      conservativeUsdUpper: 2.7819936,\n      cumulativeChargedTokens: 2318328,\n      cumulativeRequests: 42,\n...\n    eval: 'No paid eval in this batch. Prior four different case PASS records retain their original product/run identities; affected applicability review is separate.',\n+   evalPlan: {\n+     authorization: {\n+       paid: false,\n+       scope: 'run-all-listed-trials'\n+     },\n+     budget: {\n+       deadline: null,\n+       maxRequestTokens: 1052672,\n+       maxRequests: 24,\n+       maxTokens: 1172501,\n+       unknownUpperBound: {\n+         source: 'https://api-docs.deepseek.com/api/list-models/',\n+         tokens: 1052672\n+       }\n+     },\n+     cases: [\n+       {\n+         category: 'multi-file',\n+         dependencyLock: '{\"lockfileVersion\":3,\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"packages\":{\"\":{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\"}}}',\n+         dirty: {},\n+         files: {\n+           'README.md': 'Public Node/TypeScript fixture. No network or package installation required.\\n',\n+           'greeting.ts': 'export const greeting = () => \"Hello!\";\\n',\n+           'main.ts': \"import {greeting} from './greeting.ts'; export const message = greeting();\\n\",\n+           'package.json': '{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}'\n+         },\n+         grader: {\n+           expectedStdout: '[\"Hello, Sam!\",\"Hello, Ada!\"]\\n',\n+           program: \"import {greeting} from './project/greeting.ts'; import {message} from './project/main.ts';console.log(JSON.stringify([greeting('Sam'),message]));\",\n+           required: [\n+             'named greeting',\n+             'caller wiring'\n+           ],\n+           version: 'node-check-v1'\n+         },\n+         id: 'multi-file',\n+         input: 'Add named greeting(name) in greeting.ts, and use it in main.ts. greeting must return Hello, NAME! and main greet Ada. Only these two files may change.',\n+         visibility: 'public-development',\n+         writable: [\n+           'greeting.ts',\n+           'main.ts'\n+         ]\n+       },\n+       {\n+         category: 'regression',\n+         dependencyLock: '{\"lockfileVersion\":3,\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"packages\":{\"\":{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\"}}}',\n+         dirty: {},\n+         files: {\n+           'README.md': 'Public Node/TypeScript fixture. No network or package installation required.\\n',\n+           'mean.ts': 'export const mean = (xs: number[]) => xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : null;\\n',\n+           'package.json': '{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}'\n+         },\n+         grader: {\n+           expectedStdout: '[null,3,-1]\\n',\n+           program: \"import {mean} from './project/mean.ts';console.log(JSON.stringify([mean([]),mean([2,4]),mean([-4,2])]));\",\n+           required: [\n+             'empty input stays fixed',\n+             'signed input',\n+             'no unnecessary edits'\n+           ],\n+           version: 'node-check-v1'\n+         },\n+         id: 'regression',\n+         input: 'Verify the fixed mean.ts: empty input returns null, signed numbers average correctly. Do not change files when checks pass.',\n+         visibility: 'public-development',\n+         writable: []\n+       },\n+       {\n+         category: 'no-change',\n+         dependencyLock: '{\"lockfileVersion\":3,\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"packages\":{\"\":{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\"}}}',\n+         dirty: {},\n+         files: {\n+           'README.md': 'Public Node/TypeScript fixture. No network or package installation required.\\n',\n+           'math.ts': 'export const subtract = (a: number, b: number) => a - b;\\n',\n+           'package.json': '{\"name\":\"durio-eval-fixture\",\"version\":\"1.0.0\",\"private\":true,\"type\":\"module\"}'\n+         },\n+         grader: {\n+           expectedStdout: '[3,-5]\\n',\n+           program: \"import {readFileSync} from 'node:fs';import {subtract} from './project/math.ts';const result=JSON.parse(readFileSync('/input/product-result.json','utf8'));let answer;try{answer=JSON.parse(result.answer);}catch{}if(answer?.operator==='subtraction'&&JSON.stringify(answer.examples)==='[3,-5]'&&answer.changeNeeded===false)console.log(JSON.stringify([subtract(5,2),subtract(-2,3)]));else console.log('necessary analysis answer missing');\",\n+           required: [\n+             'subtraction correct',\n+             'answer identifies operator and signed examples',\n+             'analysis must not modify files'\n+           ],\n+           version: 'analysis-check-v2'\n+         },\n+         id: 'no-change',\n+         input: 'Analyze math.ts only. Do not modify any file. Return ONLY JSON with operator: subtraction, examples: [3,-5] for subtract(5,2) and subtract(-2,3), and changeNeeded: false.',\n+         visibility: 'public-development',\n+         writable: []\n+       }\n+     ],\n+     environment: {\n+       boundaryFiles: [\n+         {\n+           mode: 420,\n+           path: 'boundary.mjs',\n+           ref: {\n+             bytes: 16697,\n+             sha256: '47e4f311f8436a784981ee652e615b320327919b9ab9965b48a5c45783aa8054'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'export.mjs',\n+           ref: {\n+             bytes: 2858,\n+             sha256: '40be732ecb0c569dca61eac981cb7769f5136b0ab5d2ad09af5633148b3080ba'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'restrict.py',\n+           ref: {\n+             bytes: 2291,\n+             sha256: 'acf442988bd1386fdc688c737b656eb9b6f315d9775fd6f9faa1091485f6fff7'\n+           }\n+         }\n+       ],\n+       cache: 'fixed read-only dependencies only',\n+       hostFiles: [\n+         {\n+           mode: 420,\n+           path: 'artifact.d.ts',\n+           ref: {\n+             bytes: 621,\n+             sha256: '094b8dfe77867926796bf1953e2ef3e3b5d5c4276187bdda88cf198e00432f30'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'artifact.js',\n+           ref: {\n+             bytes: 5539,\n+             sha256: '87c8661b5880b588a0ffb2fae0e75fada29d796fdd14a2ad8afcd9f16524d792'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'artifact.js.map',\n+           ref: {\n+             bytes: 5651,\n+             sha256: '220c0bc431e17e5f1412f1bf8d5ef30135565ae45e1d8f41186d5d86bc14ee69'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'cli.d.ts',\n+           ref: {\n+             bytes: 31,\n+             sha256: '43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012'\n+           }\n+         },\n+         {\n+           mode: 493,\n+           path: 'cli.js',\n+           ref: {\n+             bytes: 21189,\n+             sha256: '7ebcc3f3efe35554d11232d7fbd3671c3dd21fdaef13d0024a03e2ee887b6f9b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'cli.js.map',\n+           ref: {\n+             bytes: 17137,\n+             sha256: 'd9830ff900e0f9bb8d1ccb68644c95ef5aa46630b5676cd8873e372a289af625'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'coding-environment.d.ts',\n+           ref: {\n+             bytes: 745,\n+             sha256: 'a3972c489f61971c9b65f26d3a5ce89a865772b50cb2d42be8c4afac69f24eff'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'coding-environment.js',\n+           ref: {\n+             bytes: 9200,\n+             sha256: '4c5fe4557c77e6336baa1bdea289e7426421fdd9d5488692a583925d9c357cf0'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'coding-environment.js.map',\n+           ref: {\n+             bytes: 8448,\n+             sha256: '25cf70f64f07bfeeef2b66c2a033a9e6fff4786d897b47fa1ed22c1127d3c510'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'compaction.d.ts',\n+           ref: {\n+             bytes: 1929,\n+             sha256: '2d941e86d6d0107fefbdea6cd5b4779d9b278b5443660d33717292a1af599b44'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'compaction.js',\n+           ref: {\n+             bytes: 8934,\n+             sha256: '4928eb67ea4180cf2e242be143cac9b8d00c4e511881fc88a1fbe1dd9843eeea'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'compaction.js.map',\n+           ref: {\n+             bytes: 9532,\n+             sha256: 'd33c9820f0c0a9a6825fe322211fb7858ba8792f3e061f330f266ac6680b32c2'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'control.d.ts',\n+           ref: {\n+             bytes: 2979,\n+             sha256: 'e28497b779b4b1d3ee868bfe74ef49e3a44cf0313d1c67bdd143d0e5f7d35523'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'control.js',\n+           ref: {\n+             bytes: 12087,\n+             sha256: 'c698b0bbd6c6f38a804b9cc34505da65c8b6973768532a1288bb692263c542f3'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'control.js.map',\n+           ref: {\n+             bytes: 12450,\n+             sha256: '91027fd6c84e9af3b51ffa4e8f4b7329c21b9586b64a8f65f6acc0daebc6a434'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'derived-evidence.d.ts',\n+           ref: {\n+             bytes: 1082,\n+             sha256: '48f2479c88655640525b418d2f48eed07ab8d977e0f7631117dde644d04cb0d6'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'derived-evidence.js',\n+           ref: {\n+             bytes: 4036,\n+             sha256: '99908a511572911f23677c2c4d166a11d8d8bb2d57f5107347fb13bb561e4735'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'derived-evidence.js.map',\n+           ref: {\n+             bytes: 3432,\n+             sha256: '7a523e2f671cef7265927cf6616ca06711a0a1726438220c85e8847dbaf64177'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'detail-page.d.ts',\n+           ref: {\n+             bytes: 485,\n+             sha256: 'fa42a0c18ba7272356a7aba86e4454c43e5851dd9b0bac999e1f245978a30b11'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'detail-page.js',\n+           ref: {\n+             bytes: 870,\n+             sha256: '29a1da3bc3cd7c8202a3cff25148ce5795831bba375cb8c61b9cfc0caebb1062'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'detail-page.js.map',\n+           ref: {\n+             bytes: 1186,\n+             sha256: '75f916f7c796207fe3613027905bba69768b06a75e4aac2ba132c81c807f5619'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/cli.d.ts',\n+           ref: {\n+             bytes: 148,\n+             sha256: '5292213b15835c3427c7f65b3ba531cfa7c4c8f9c2467e94bd97dcacca597908'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/cli.js',\n+           ref: {\n+             bytes: 3320,\n+             sha256: 'e8f6c28f01d33af078879c38f5c142da9fd5cfea66417f2133ca37a5c44c7027'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/cli.js.map',\n+           ref: {\n+             bytes: 3650,\n+             sha256: '534208650be9c93be188edbd67da9ff277cbcca3990aa04cb803811a42e0f434'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/comparison.d.ts',\n+           ref: {\n+             bytes: 4106,\n+             sha256: '2372a4f2ad9f7ca79659ea0fd4fc3ff7a7b8dab3ce0397ffd5cc2feceb1cf12d'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/comparison.js',\n+           ref: {\n+             bytes: 11963,\n+             sha256: '4fd1f7fbeef65d68821c6adeac776660777da9449d2189c16f954b9a3554c6d6'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/comparison.js.map',\n+           ref: {\n+             bytes: 15638,\n+             sha256: 'f4a07839564000aa0f27c693ebcdab1120be66f3bc5859b918d5797bc3df44bc'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/fixtures.d.ts',\n+           ref: {\n+             bytes: 807,\n+             sha256: 'b5df9003a4b17a18aac40f7ec2ad29c9dc2a35e620645743f7d2ad2b9f7575c6'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/fixtures.js',\n+           ref: {\n+             bytes: 4821,\n+             sha256: '04bb1cdfee37c0fa1274732c24638695775a4e0c74bda6f23b90a18894a1b974'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/fixtures.js.map',\n+           ref: {\n+             bytes: 3009,\n+             sha256: '0211aa9dd29e85404031a06aa4beeff15fbb1eeafb5e25a5daaef4640cefaba9'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/guest.d.ts',\n+           ref: {\n+             bytes: 11,\n+             sha256: '8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/guest.js',\n+           ref: {\n+             bytes: 4076,\n+             sha256: '9e42585ecdd76e7c473079f0a128d6f6784ef601b069c0ad3d5877cabd4a269c'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/guest.js.map',\n+           ref: {\n+             bytes: 4880,\n+             sha256: '212b81de6b5487c2369daac9c19a889ae9a9d0e127f03e96e13b70aba026bb53'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/mediator.d.ts',\n+           ref: {\n+             bytes: 618,\n+             sha256: 'a1aa531ce022e93b92f2a6584e6d109df207ec965aa4dbe0927bc362a44da39e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/mediator.js',\n+           ref: {\n+             bytes: 6019,\n+             sha256: '7593a459b739c292d1d4d54de8b09354d031da66ca45bc2f10ec9c67044ae3fa'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/mediator.js.map',\n+           ref: {\n+             bytes: 6005,\n+             sha256: '4b210591acc15db09a204536471b10be99c77609f07b30282d53d553ee9c60ce'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/plan.d.ts',\n+           ref: {\n+             bytes: 3139,\n+             sha256: 'cc2832840cd389461c939bde49012d45bd9fcb0541138e30ffaff2e13ae5468c'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/plan.js',\n+           ref: {\n+             bytes: 10425,\n+             sha256: 'a52be1a32073877a7918a58da6a87862efcc03d1ef5cf888889a983e56862c3d'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/plan.js.map',\n+           ref: {\n+             bytes: 11810,\n+             sha256: 'd6411617fd4214e4671994be9de723385550c01475681419a85b719c9f574b2a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/probes.d.ts',\n+           ref: {\n+             bytes: 777,\n+             sha256: 'c23a722d82ce5321e12c614842fbd4ca3ab64a1152f268df1464371c058f7302'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/probes.js',\n+           ref: {\n+             bytes: 2960,\n+             sha256: '33e7d4818121ff0e9adea23774fc50945c18308bd4b1844edef6d006b1a30e54'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/probes.js.map',\n+           ref: {\n+             bytes: 3583,\n+             sha256: 'cb27f9ee0931b14c547e3c9c465ce63e5fa06997605ec609f4da5db706c0d13f'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/runner.d.ts',\n+           ref: {\n+             bytes: 21159,\n+             sha256: 'e05c584d3ec474efc6b9173b8b26ae3e441a86fc2309c254ff64dcd25707426a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/runner.js',\n+           ref: {\n+             bytes: 41058,\n+             sha256: '2dc784688063af42a2cd30e193e19e4622d1ecc38e66f57f79058728b2d35be4'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/runner.js.map',\n+           ref: {\n+             bytes: 46021,\n+             sha256: '7a57571462ff60f4c490817f37a306dfa26c0a2bc61795738bd6bc1c571741a5'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/store.d.ts',\n+           ref: {\n+             bytes: 920,\n+             sha256: '15d92d7812ee78297621f936eebb1fe83b32dd5691dcce4070b1fe09d34aff1c'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/store.js',\n+           ref: {\n+             bytes: 3130,\n+             sha256: '873c706d9a4cda7d0bc9bba7ebc3998a3282677985776e4c8d57a4f26da80ed3'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'eval/store.js.map',\n+           ref: {\n+             bytes: 4009,\n+             sha256: 'fce7b3ad7fc84904912a5b7b2db2aeaca4114ee83d805a4ab192a667af714b38'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'evidence.d.ts',\n+           ref: {\n+             bytes: 4063,\n+             sha256: 'cbbf4acd4b500e16721cb68c6cdc2ed58688612ef64eb08c682e7b7195e60982'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'evidence.js',\n+           ref: {\n+             bytes: 11600,\n+             sha256: '4f2aa5f772d3c6adecc45f2296bd3cd2a15805726ea6c78291e165b8b06a78cb'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'evidence.js.map',\n+           ref: {\n+             bytes: 12049,\n+             sha256: '5b64b79267d43815474aede536b6e9f3d274cfa69df4bcf9764ae94c726841d8'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'execution-config.d.ts',\n+           ref: {\n+             bytes: 2598,\n+             sha256: 'eaafb1245277c26ec0a04fff60dc25ab2572ea2b66dcb2e4538d7e51b826d0b6'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'execution-config.js',\n+           ref: {\n+             bytes: 2887,\n+             sha256: '35fa668b7e61fbbb984365eba49acc0c8d1d6b6ca6aa012399d1a2a2396d0a0a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'execution-config.js.map',\n+           ref: {\n+             bytes: 2465,\n+             sha256: '7c090be97ce1a77e6c3c8239a0bda64010a0bb18aefc0294a118dda37ae02f83'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'execution-output.d.ts',\n+           ref: {\n+             bytes: 616,\n+             sha256: 'd06f4d6b2dbd3ed093687f295e279dbbe0ed8923019878378038ca01bff8ce57'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'execution-output.js',\n+           ref: {\n+             bytes: 2442,\n+             sha256: 'edc9e9c413e72e547e6ed51e9d04b2a4a83e6ab6328a61c5099bccc46f206985'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'execution-output.js.map',\n+           ref: {\n+             bytes: 2204,\n+             sha256: '6a884bf142d000233985dce90b7f54d3fff9399685c0eb63a394fdf9961f181b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'fact-clock.d.ts',\n+           ref: {\n+             bytes: 581,\n+             sha256: '0e3831ca9ecc56f519961dbbecc7a47c0b34bbec0a90da79422ca65707f19047'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'fact-clock.js',\n+           ref: {\n+             bytes: 995,\n+             sha256: '98795dbc0df0b70e4e03987476e103eb3b6ada004a115231815051370cdfd887'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'fact-clock.js.map',\n+           ref: {\n+             bytes: 930,\n+             sha256: 'af5079702cf6789c08bea4841156a232c93c47e0d3d00f65d21b98bcf9431ee7'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'file-inventory.d.ts',\n+           ref: {\n+             bytes: 101,\n+             sha256: 'f8ca28b40f30660d435359673f289fd82f2a40d6bc0b847f61ed0f1b991769d4'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'file-inventory.js',\n+           ref: {\n+             bytes: 853,\n+             sha256: 'b175b1b3e390eddb108473ca50f2a939450c7b3335e0bdb50b0ca39a4f292345'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'file-inventory.js.map',\n+           ref: {\n+             bytes: 1112,\n+             sha256: '18f33adf93856dcd81c72fbcc35376462d8f65a066b8bf5e8e117586294f245e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'fixed-evidence.d.ts',\n+           ref: {\n+             bytes: 1909,\n+             sha256: 'bb91a19401a327eebd8e6e7e6e1a73a66f066291af218f97a6daa37bc88b9f3b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'fixed-evidence.js',\n+           ref: {\n+             bytes: 13287,\n+             sha256: '896b0b9b94efe6dc40ee99166a707aaaa1d7b95a727789814133478ff424ad4a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'fixed-evidence.js.map',\n+           ref: {\n+             bytes: 14085,\n+             sha256: '9ddfa55ff5f1f8cc46acc5e7e3b0028861f4ad961071bc0d7be2114d9be855e9'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'headless-lifecycle.d.ts',\n+           ref: {\n+             bytes: 364,\n+             sha256: 'daf2217adc908462b51efe6fb3e677115fa3c0699828e37334e9b9c770a1cff4'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'headless-lifecycle.js',\n+           ref: {\n+             bytes: 846,\n+             sha256: '45a9215f617351fc0fad0a85f11d1b3c1b04b0eddb219e8d3d1cb093407005f9'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'headless-lifecycle.js.map',\n+           ref: {\n+             bytes: 791,\n+             sha256: 'ed3aec974f6c6777a3e75d6ecab95c152d170e31c072c7d3bd8888e1a1eabe1f'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'history-cli.d.ts',\n+           ref: {\n+             bytes: 134,\n+             sha256: '0bafbbcddf7e89441dad37145b64b1603dfc7db7974804224b12923ec959e8c3'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'history-cli.js',\n+           ref: {\n+             bytes: 3321,\n+             sha256: 'cb13cbc15f4c92460ce8e99c54968f0e624f583607114870a61fc1692c3b96fd'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'history-cli.js.map',\n+           ref: {\n+             bytes: 4081,\n+             sha256: '0920cd5989bba314d71ec49aa18f1e8d64fdd0ca94990bacbcdace9be1d77a82'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'history.d.ts',\n+           ref: {\n+             bytes: 4734,\n+             sha256: '164854695b232632c1c53e0a98fd98cd1f8515fc4c5ff688e02b70d0c31ba07c'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'history.js',\n+           ref: {\n+             bytes: 15284,\n+             sha256: '5464e3aa15661d843914102002ac4ed481284adc6ca34812cf5f00e3d1a9b625'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'history.js.map',\n+           ref: {\n+             bytes: 16892,\n+             sha256: '869d7b513fdfe190134b72049120cf2286f2ead98bb56000ddd573e23b0f61f9'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-build.d.ts',\n+           ref: {\n+             bytes: 1978,\n+             sha256: '116d84e8f51eae9feef898c3534aff9d6b01cdeb3b5605d9ecafad6ce4e8a003'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-build.js',\n+           ref: {\n+             bytes: 13540,\n+             sha256: '9e1050b1cd55a6bdc02f7a0d8d93e4d55034b2aa189538e43b365dde811ab908'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-build.js.map',\n+           ref: {\n+             bytes: 15031,\n+             sha256: '7c0cdc854332ac345cbae3cd6dbfc8b05e0e582fa1aad10a1a8615ccc118b721'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-cli.d.ts',\n+           ref: {\n+             bytes: 155,\n+             sha256: '0f8f4f4af24fb3589c55a4728a92f4a38c4143ba15a7546901be9c7bcdecd920'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-cli.js',\n+           ref: {\n+             bytes: 6445,\n+             sha256: '47c75df5006ea52e2eed487b5305f8902b386919408284ad342ea38a2def68af'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-cli.js.map',\n+           ref: {\n+             bytes: 6930,\n+             sha256: '5929bbfacc0cf7261f53b3c61f7e55a707eca7aaefcd2e27151f632bcf5633a3'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-decisions.d.ts',\n+           ref: {\n+             bytes: 4556,\n+             sha256: '530bf2448dadf5eb73eeb826f8573c3d9700d13e9a51eeb11d253fb04e0b09d0'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-decisions.js',\n+           ref: {\n+             bytes: 24053,\n+             sha256: '0454a2f19be20cc04eb71a9fa95bd82830a22a36203f0816269e1a44ac64033e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-decisions.js.map',\n+           ref: {\n+             bytes: 27319,\n+             sha256: '3396ff4bbd48cef0c1c28030617dea17e85ea45747917cd9ff4990c2ced8eacb'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-defaults.d.ts',\n+           ref: {\n+             bytes: 1512,\n+             sha256: 'd9485dbe4d83bdf5c202b061fa8ffcf91daf151c1786018e5d2cfbdfb788bb51'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-defaults.js',\n+           ref: {\n+             bytes: 3866,\n+             sha256: 'f0f8add557bcf3f42c9a2d20149056a4f366c061c4deeec68c7b6227f046e87a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-defaults.js.map',\n+           ref: {\n+             bytes: 5082,\n+             sha256: '3297c23747f1568439215f248b99b71f4646362b0bb5352d4f86733410df30f7'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-eval-assets.d.ts',\n+           ref: {\n+             bytes: 7875,\n+             sha256: '7f2b4ff63f9a8e3054d9cd73ddf2ef7f04facfc0a015e7e7786b8ad15b29add8'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-eval-assets.js',\n+           ref: {\n+             bytes: 5374,\n+             sha256: '618caf42d27ab2a7aae9dc3b87c55361eef1677089e8ccf584154a9a03154a28'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-eval-assets.js.map',\n+           ref: {\n+             bytes: 6204,\n+             sha256: 'addfc602915e017a101a6b71b46a8e3b93c6471f1b894ed994c1f818c7d507b0'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-formal.d.ts',\n+           ref: {\n+             bytes: 1949,\n+             sha256: '60ad11da45ce9a017b7573d26c2c0a5c442ebb410393b11bc5b7f31464812bc8'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-formal.js',\n+           ref: {\n+             bytes: 9596,\n+             sha256: '7485e0ab086e8516387f30bd4a53f096aaf4e1359e5dd85ea7810d101fb0598a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-formal.js.map',\n+           ref: {\n+             bytes: 10442,\n+             sha256: '185f45c4559530a83e72218a55522742a5d819b2c7da996e5442d78a81465151'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-history.d.ts',\n+           ref: {\n+             bytes: 2009,\n+             sha256: '56e3ced4abcb6ae6d715ad6a0dbd461696a058973612f9c37d421c77de4fdf35'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-history.js',\n+           ref: {\n+             bytes: 12517,\n+             sha256: '64d4e0f48dc55cc0a7638e1a208de38ab4dd7ec20b349dbbd902820419d03104'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-history.js.map',\n+           ref: {\n+             bytes: 14915,\n+             sha256: '6e564905960b14df4b1bf5c8b75e316f7017c2ac93dcb7899cabcf9193740dbb'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-process.d.ts',\n+           ref: {\n+             bytes: 2018,\n+             sha256: '2ac1623750ae9188f1785c725a8a81105b5c493225f033c34f9891dcb111c77e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-process.js',\n+           ref: {\n+             bytes: 12167,\n+             sha256: 'f6192cdb05ddbe158fce491ebb1c6a514bdff8812d60c1664de8bec6c0ddbd73'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-process.js.map',\n+           ref: {\n+             bytes: 13609,\n+             sha256: '8ed14ed68a7b38c3a706ccf869b6f392200746022beee75c3c86dfb609e94a97'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-profile-validation.d.ts',\n+           ref: {\n+             bytes: 1124,\n+             sha256: 'eeea3bddd15bd1b2b75434478a1b7389a1220e0d752943e66c27cce97ca91e83'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-profile-validation.js',\n+           ref: {\n+             bytes: 3328,\n+             sha256: 'e11f6235998e7fd345725495881eeb07e0c3441cd3c072ed62bae27d9f331db4'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-profile-validation.js.map',\n+           ref: {\n+             bytes: 3212,\n+             sha256: '03a9084b19380ba0fcb5c3c86757800cb931c9d249c0f5f4b248e74a50685ec4'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-rollback.d.ts',\n+           ref: {\n+             bytes: 943,\n+             sha256: 'e02a8e84375637bb288e59231c61a571ae50384209e04853de8d225694604c8a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-rollback.js',\n+           ref: {\n+             bytes: 8511,\n+             sha256: '2db6ccac7d1cbdd9a7cf307f5cf6ebe1b2f6b2358c9290db6d124e9c1c4f2144'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-rollback.js.map',\n+           ref: {\n+             bytes: 8863,\n+             sha256: '86af16c872be81dc7208e1ebea6fe92d86427f21db98e59411322494fecd2e68'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-source.d.ts',\n+           ref: {\n+             bytes: 1558,\n+             sha256: '9e835846d4419afcc4e23beff1b82f5f92a5ef6e0329e0679b0d7265826d5a2d'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-source.js',\n+           ref: {\n+             bytes: 9563,\n+             sha256: 'e1b01150d7d2133748c5ab348745b3b5c61ed4c8819a304d9e93109063382a31'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-source.js.map',\n+           ref: {\n+             bytes: 10225,\n+             sha256: 'da02bc7146925a68ce55bf77fd2450ad65f5e44fec41bc9e4a04a205cf6927a6'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-validation.d.ts',\n+           ref: {\n+             bytes: 4363,\n+             sha256: '1298c48bf7294f61c51bc36faada4a751517e0ff3e1e0e2c59c49f4cab776f45'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-validation.js',\n+           ref: {\n+             bytes: 24978,\n+             sha256: '83da3de532a0388caf825266937155f55927afdc65dc379af0dc5fb85fb99558'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve-validation.js.map',\n+           ref: {\n+             bytes: 27011,\n+             sha256: 'fc2e3e4a341891d0d59d88744bae2e6a47b081e963c0e5abafb806b205dbaae6'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve.d.ts',\n+           ref: {\n+             bytes: 7400,\n+             sha256: '6405c625de60248091a318648d4130df0cc4b35053f61543d6b4a1bf5b49a8fb'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve.js',\n+           ref: {\n+             bytes: 26798,\n+             sha256: 'dfa8cf65a8969cb96880dc52f1568f41f9740fe8f5c59c53fe2b5b84b636f108'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'improve.js.map',\n+           ref: {\n+             bytes: 26614,\n+             sha256: '38f25ec18d0d39b9fc9338a451a63d9fe28e505d7ad6f5176904c240fc3f7a72'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/acceptance.d.ts',\n+           ref: {\n+             bytes: 4148,\n+             sha256: 'cf5d08b5a2f73a030af1205884996b49c9ac5bb018996514dafed585b8eca3ff'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/acceptance.js',\n+           ref: {\n+             bytes: 20523,\n+             sha256: '20c932c9468819ab09644d1095eb535c14bb9a5ea6ba88a47730eb185bc81305'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/acceptance.js.map',\n+           ref: {\n+             bytes: 23435,\n+             sha256: '87eb1745c6d0b7411b8ab6f024dea31afac121c874e7536ba538e2e5f7e0afe6'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/cli.d.ts',\n+           ref: {\n+             bytes: 125,\n+             sha256: '9327b72e5ed48122f49269b7b2991e74ef70bc849494f3e5db504f8c44c44dd1'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/cli.js',\n+           ref: {\n+             bytes: 2130,\n+             sha256: '424b97e04a6a71ea95ba4eda9832161383aa18781700bd8a84d6ddd31c4ed7de'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/cli.js.map',\n+           ref: {\n+             bytes: 2324,\n+             sha256: 'c675dde6ea1dfd6f9cd1d38c55651adee36f3de3f4d68cd9768ab25efd051985'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/clocks.d.ts',\n+           ref: {\n+             bytes: 1942,\n+             sha256: '3df4c9a81d79f4fa0231fd525f631a48da42a73f3baa4556281b13a45749bea7'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/clocks.js',\n+           ref: {\n+             bytes: 7514,\n+             sha256: '4f83a18ca653e24437a210e577be8ca3c0f8282f9f5299e00b9a50cc9b1034bd'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/clocks.js.map',\n+           ref: {\n+             bytes: 9641,\n+             sha256: '72789a31629b93a2f1119be25fe496fe5321db9a149512a317440810e7330f70'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/costs.d.ts',\n+           ref: {\n+             bytes: 3966,\n+             sha256: '4d75f3e4f17b518a0556b527fcdb18d6fc4a2f5391f8a45b058b6dc9bc48a861'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/costs.js',\n+           ref: {\n+             bytes: 19402,\n+             sha256: '0f0c3cd7a1b9af5be4664e48ef9fc88fb22624ab81d05d9f19521f7d4eb8ce4e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/costs.js.map',\n+           ref: {\n+             bytes: 23190,\n+             sha256: '736c788e16018161d9581e36df61e87b3a16c21be90453a0c3bef9365034747e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/faults.d.ts',\n+           ref: {\n+             bytes: 5714,\n+             sha256: 'fa2f964379b334b48eadff51800ea392c732dae7fbe51e9f906b95d4d5130649'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/faults.js',\n+           ref: {\n+             bytes: 18302,\n+             sha256: '4467e30f995cd1a17183ff62b881f87327aba3db344ff73e8796ef358f744b91'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/faults.js.map',\n+           ref: {\n+             bytes: 20652,\n+             sha256: 'a31be34266e24f8709918b9e88ba19b224870c574c5a41b71f207699852c770d'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/feedback-report.d.ts',\n+           ref: {\n+             bytes: 17148,\n+             sha256: '1513bae9f0acff8f1b8f7e25f6f4790b8b9469bc62403eea02705198215c6219'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/feedback-report.js',\n+           ref: {\n+             bytes: 13765,\n+             sha256: 'bef50e26ce58b30a80fa1fda210dfcbe4aa17a6d744c2bce468200e6cca45c9b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/feedback-report.js.map',\n+           ref: {\n+             bytes: 17553,\n+             sha256: '13228647d51063ffb0f278880e8f66ef0a4808b3768530c5f5ce2235046d6791'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/feedback.d.ts',\n+           ref: {\n+             bytes: 1787,\n+             sha256: 'c7d552a6cee83b20037906cde28a3e3da3e3326413639a205ff55477e79fa32a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/feedback.js',\n+           ref: {\n+             bytes: 7339,\n+             sha256: '3ef9c6fa2a2cd053d772d49bcded9eedeec97345eb3cd531de6dd41f7687f949'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/feedback.js.map',\n+           ref: {\n+             bytes: 8574,\n+             sha256: 'f143d41c0f7e45898b61dfececdfbfbb1b951827b99beebbdad99f4ef6314a68'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/index.d.ts',\n+           ref: {\n+             bytes: 944,\n+             sha256: 'c8ca4488671c3856b6b11facc0d7356d62a7ecda3e36fca92d13645626c4e140'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/index.js',\n+           ref: {\n+             bytes: 507,\n+             sha256: 'c1b385d96f69fa771030a919d5b2f97b47c1a87e95f7ac91121f919f03f6f12f'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/index.js.map',\n+           ref: {\n+             bytes: 485,\n+             sha256: 'e70ad57043cb2a990cc7cfc3bbaa1029f72bda4340bc2b636ea1a9fa87863563'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/operations.d.ts',\n+           ref: {\n+             bytes: 16381,\n+             sha256: 'b699690efb3919aafd01b8639ee8215e5ca513d7104caaea5513488f1696bddd'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/operations.js',\n+           ref: {\n+             bytes: 9487,\n+             sha256: 'ff8905efd4e8081eb0a7ab2be7593f8bb3a19d8d5f3b13994f0a718b9ea3a9f0'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/operations.js.map',\n+           ref: {\n+             bytes: 10403,\n+             sha256: 'bc5054a9095da102b7643214e04e58f4bf10767ae2a11e886c939bfd79b61d1e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/report.d.ts',\n+           ref: {\n+             bytes: 6672,\n+             sha256: '3447c1d3351fa7fe0112610cb05a5c7fc6b050b817b78da720cfe74c8dcfac5b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/report.js',\n+           ref: {\n+             bytes: 14320,\n+             sha256: 'abebdbb75bf592b6e380b950e3b5674047aca9368531ed307958cf5fd72e2ba4'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'metrics/report.js.map',\n+           ref: {\n+             bytes: 17304,\n+             sha256: '69cfd81acb77e809a850d67dfe10afb7f9fda7bf82d31887d84564095e93175f'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'offline.d.ts',\n+           ref: {\n+             bytes: 520,\n+             sha256: 'b5251ee16423cc5496b5dabbdc7d050889aecbc08ca314c114d03ccea674d31b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'offline.js',\n+           ref: {\n+             bytes: 3027,\n+             sha256: '7c41fe9c344e119b09b4ba91d62508fa038cdea9939f63d01bbf8d4588632d06'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'offline.js.map',\n+           ref: {\n+             bytes: 3731,\n+             sha256: '14996cec7025196946471e4ecbae9b28b7c03a518fae641b5eb8e36b6f2fd424'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'ownership.d.ts',\n+           ref: {\n+             bytes: 723,\n+             sha256: 'c71e0fd3695cdd843605578f6899a32cd261c113d2b9c6d59c79a92e583d740e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'ownership.js',\n+           ref: {\n+             bytes: 6321,\n+             sha256: '4aa219211efc65b363c8537c62e5abb297f61d2d2f9130a8add29a0965684404'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'ownership.js.map',\n+           ref: {\n+             bytes: 6418,\n+             sha256: '3136e711808aba752b1565da5d0cf0d35d5ff235a7d4a013fd7041a7a57521aa'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'preflight.d.ts',\n+           ref: {\n+             bytes: 1496,\n+             sha256: '4e4ea2351fe7c0dcca4a264407402f694fb76686cfeef0cad7715adb166fa850'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'preflight.js',\n+           ref: {\n+             bytes: 11968,\n+             sha256: 'a34c8b4856a23e4e94e34eb218acb73c08703f702bfbcf7f59b31ddf88b537d4'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'preflight.js.map',\n+           ref: {\n+             bytes: 10225,\n+             sha256: '5abc010d73c93f8123d3138d8240ecdd494cfd3480a9137f3b702ef8e7997e8b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'provider-boundary.d.ts',\n+           ref: {\n+             bytes: 2172,\n+             sha256: 'd12a80958394d5fee1da769ba240e33c678701be52311ce429cd707b5e2621dd'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'provider-boundary.js',\n+           ref: {\n+             bytes: 8185,\n+             sha256: '6094e3a6f2bcc72402da8a7e44a6fa895282f0fc7f3e4ba4fd0d94fe148c86e5'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'provider-boundary.js.map',\n+           ref: {\n+             bytes: 8510,\n+             sha256: 'f8390794c02711d2e0bed78bca04884dea950845db54c519465d4d21978bfcae'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'query.d.ts',\n+           ref: {\n+             bytes: 1441,\n+             sha256: '592c1631ecfeae42512da4aadf759f22152e29f1cef6a326508abacd8688e94a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'query.js',\n+           ref: {\n+             bytes: 4576,\n+             sha256: 'f061762ac9b30837ec14331baf3c5441da876476aa1f6f80132ee7739a707813'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'query.js.map',\n+           ref: {\n+             bytes: 5541,\n+             sha256: 'f85b74fdaa51474b17201d2bfe6f7ed9ba0e6fb69964b24fc4dafe49e78de826'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'read-environment.d.ts',\n+           ref: {\n+             bytes: 208,\n+             sha256: '58c54501ba6a8fe721e9c5b1820aa42d21668a634592f9ad7d0ffce588247faa'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'read-environment.js',\n+           ref: {\n+             bytes: 2978,\n+             sha256: 'c768aedd08eb7e2bc32bd0cc52b285e28b0a8f0883818df9279eefb82bb8f082'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'read-environment.js.map',\n+           ref: {\n+             bytes: 2708,\n+             sha256: 'befadcc011441efd8a13496e6c50f98395f9ea6d39ba328e7ce71c594050ce17'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'recovery-facts.d.ts',\n+           ref: {\n+             bytes: 1469,\n+             sha256: 'eb1d242ae30a0977cbc2af41125d85962b4bd344f31d8c7da5e0e2a841b753ce'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'recovery-facts.js',\n+           ref: {\n+             bytes: 3414,\n+             sha256: '317a71b5bb4cf195aa6e507eb346b23f2b46dddee55572724986aa82de8e83c2'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'recovery-facts.js.map',\n+           ref: {\n+             bytes: 3314,\n+             sha256: '08caa8c306b003a1820a111c00d5b66d7624538af9a21a0b1ec11d273de42d15'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'recovery-projection.d.ts',\n+           ref: {\n+             bytes: 3543,\n+             sha256: 'f9747bb53cc53715745fc928359519a72225ad20e11680d2c8aa2a9bffc2bd41'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'recovery-projection.js',\n+           ref: {\n+             bytes: 14513,\n+             sha256: 'b70257d17676f1ccd419323b0212dc12002c8583c7793acf552e8ad019bc4d5a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'recovery-projection.js.map',\n+           ref: {\n+             bytes: 13781,\n+             sha256: '09c0286c8ef3297f4596279f723336aa8764f2eb038e169c66fc7f145d801ba8'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'recovery.d.ts',\n+           ref: {\n+             bytes: 10540,\n+             sha256: 'ab32fae78e1928272566f2b93d5d51160dfc7398a20c2a51e343c51323d3842b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'recovery.js',\n+           ref: {\n+             bytes: 28013,\n+             sha256: 'eea33333e604ef2df1b3eec4758aabad978cb229c7c1b8332ae60c7e7de18124'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'recovery.js.map',\n+           ref: {\n+             bytes: 26945,\n+             sha256: '07af6f992118a59f51e4d6390f8393796c801eacb65ede1f132851637ff4f736'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'retention.d.ts',\n+           ref: {\n+             bytes: 1914,\n+             sha256: '87f237eb3e04a68de3a9f7a5959fd7aeada15884945505794a101fae12ce9899'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'retention.js',\n+           ref: {\n+             bytes: 16677,\n+             sha256: 'ddf7f001ef64018830d85432b561666bdab95f3527331ffeac36f9087c8c7bb3'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'retention.js.map',\n+           ref: {\n+             bytes: 17995,\n+             sha256: 'fa14f55ce789f5bf1ba5feaf570b334822d8f2cee75f7f79fec0aa233fc0cfd2'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'runtime.d.ts',\n+           ref: {\n+             bytes: 6265,\n+             sha256: 'b2ae362ac09c94eebba48d8948df81882dd65f7fdd915c2c9ef6af9a5c145b2b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'runtime.js',\n+           ref: {\n+             bytes: 86759,\n+             sha256: '36e1439f09a08043627a47c656cc92e201a9b228d2bcca698eda530426220378'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'runtime.js.map',\n+           ref: {\n+             bytes: 79605,\n+             sha256: 'd844ecda4d2a225a49464834ae47c3f92727cf08cf67528a00af2cfafc1b50f8'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-archive.d.ts',\n+           ref: {\n+             bytes: 3957,\n+             sha256: 'bff7b559bdeab22f2532f289c4760a65749b100524dd9bf78d134db7ef598c3a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-archive.js',\n+           ref: {\n+             bytes: 12728,\n+             sha256: '34d48035ad78da97c0087b8e37be09d0ab07b25f1d184abccc357b87871c0550'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-archive.js.map',\n+           ref: {\n+             bytes: 12847,\n+             sha256: '003daf4063a2f4fe2ecff8ddd3ac296e3dbf6fb00f5ff670c0024c972ed35ae7'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-cli.d.ts',\n+           ref: {\n+             bytes: 162,\n+             sha256: '616b9de44daf2bde1d8dad7cc4475a871363da57ed6daedd2f131253d3a29b9e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-cli.js',\n+           ref: {\n+             bytes: 2773,\n+             sha256: '780dce6b50f50fa1f4cd7e6ca25b497a68b7f42742dabeb01eab7263cd9113b8'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-cli.js.map',\n+           ref: {\n+             bytes: 2950,\n+             sha256: '5ba21224dc660e77dfef47f6c62a67d0e1e982fc18d97562a0527cba3ffae537'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-disposition.d.ts',\n+           ref: {\n+             bytes: 387,\n+             sha256: 'a08089a995500734e98bb8f7c2c48ff5b0735ed6ffc580e646ec4a7e22ab0c76'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-disposition.js',\n+           ref: {\n+             bytes: 4231,\n+             sha256: '119469f563ca3805112c07964fefb310d5400655be628ae5fa4fe04d42aec72a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-disposition.js.map',\n+           ref: {\n+             bytes: 4520,\n+             sha256: '2b31252627c34c4c3cf385180d9737021ce5b5599e8441f72dd7e49a15776a85'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-files.d.ts',\n+           ref: {\n+             bytes: 1255,\n+             sha256: '2ae7c18a3445f90eebaf06e533de4f8e085b8372e6ffbbf83c26e3e8f40aa8e8'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-files.js',\n+           ref: {\n+             bytes: 5384,\n+             sha256: '32115ee7c15a924e383a20c216b3c0c7c57a2fce76613fe732b86b5ce5c38864'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-files.js.map',\n+           ref: {\n+             bytes: 6484,\n+             sha256: 'ef0c22bc8038f548c1c90a4ac50e9b64947a48539b893d143ddbb795a55d6802'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-projection.d.ts',\n+           ref: {\n+             bytes: 3675,\n+             sha256: '5277b9457bb137280d429482534c59c9fd717884f662dafcfd6c156c4c274b41'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-projection.js',\n+           ref: {\n+             bytes: 7094,\n+             sha256: 'fccde55b8259d44dffaffd8366aa3b5088ff2601f370bb8811da5b6ec16dad27'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage-projection.js.map',\n+           ref: {\n+             bytes: 6976,\n+             sha256: '658416c564d6d0027d05aa278f845aa221ab54d9654879a726243590bd0da13a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage.d.ts',\n+           ref: {\n+             bytes: 1668,\n+             sha256: '0a2412cac21132a717b34fa59d82a1165e46a18a5643abb9acd125dc86281227'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage.js',\n+           ref: {\n+             bytes: 13202,\n+             sha256: '13915a4403913359cad83b1147baeddce5eacae0a89bebbc0484655d842f57b1'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'storage.js.map',\n+           ref: {\n+             bytes: 15094,\n+             sha256: 'ed788d1fa715c037a880d5bc3258110f33599c93f0c8b501db7193665b0246b2'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'task-profile.d.ts',\n+           ref: {\n+             bytes: 1048,\n+             sha256: '64cfa67ce8fb8fb2250b0d2d48f51c8669b34761b7dd2290d84457244a9b00d1'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'task-profile.js',\n+           ref: {\n+             bytes: 3519,\n+             sha256: '74b4d361bbe53209565a56d4b6b9c5f3aad00bdaf3157da121b9c2844394a110'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'task-profile.js.map',\n+           ref: {\n+             bytes: 4084,\n+             sha256: 'ba6ad222225eb5d6f20e58fee5d4fa08753649f6be9814b29346ed2ddd0ea31b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/app.d.ts',\n+           ref: {\n+             bytes: 3678,\n+             sha256: 'f8a841e851c8c394cd6be8e5e0aed93a63826a0f1ae403f880b04b3cafa3df97'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/app.js',\n+           ref: {\n+             bytes: 80260,\n+             sha256: '459612fbb00b0f8563de718227ea2f66a4913cbecc8266fb56c9485ab0d9b4bb'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/app.js.map',\n+           ref: {\n+             bytes: 79653,\n+             sha256: 'd0dd973b0766cafa0f9d870e30f3a60304320f773a2fe88329d0461d3de5e6cb'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/cursor.d.ts',\n+           ref: {\n+             bytes: 400,\n+             sha256: '51b70078b9de5bf62741e16b3b308576e788061c5a0166f6e0c023ef0704c1b4'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/cursor.js',\n+           ref: {\n+             bytes: 1370,\n+             sha256: 'd3c89482423b87ef76889591906ed69878844df6c96b6e88e73a2da1168a98d7'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/cursor.js.map',\n+           ref: {\n+             bytes: 1077,\n+             sha256: 'b8f1423e8d95b03c02a1a0c7a6b5524513eb20cbf4da146547949dba06a57ad0'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/drafts.d.ts',\n+           ref: {\n+             bytes: 550,\n+             sha256: '8054ca8f59da2071efbe2fc87383b419aa103d98c073bfd282cefaf194d17620'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/drafts.js',\n+           ref: {\n+             bytes: 3008,\n+             sha256: 'a73709d7cf63090ed00babefc19a251cabeb973c53f8f4caaae48cf75338402d'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/drafts.js.map',\n+           ref: {\n+             bytes: 3336,\n+             sha256: '946fac4150b36b9c742d233e69616c3e279ef889ed5efcfa404adc387eeb21e1'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/eval.d.ts',\n+           ref: {\n+             bytes: 674,\n+             sha256: '0d7a3a0317814686a90bed7be3079882c4cfdc05760f4970ebb10f47b339a086'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/eval.js',\n+           ref: {\n+             bytes: 6407,\n+             sha256: '9e68b44546ce16b7de9058b0623aaae18ad3a4078e51196af799fc4aa9e25ba8'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/eval.js.map',\n+           ref: {\n+             bytes: 7748,\n+             sha256: '69a069d3c2dbb0d6c6f830c00e148a5b938655bc27da108a22eb0b60d4abf322'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/history.d.ts',\n+           ref: {\n+             bytes: 823,\n+             sha256: '0d72a3e208b262f8d8c3e0fd35dc0907b0f047225706e7ace09e43354b16f3a5'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/history.js',\n+           ref: {\n+             bytes: 9453,\n+             sha256: '1b9f05753a995f02af64918308f15f15cd4cd16afd01859f853a2c88808c8abd'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/history.js.map',\n+           ref: {\n+             bytes: 11081,\n+             sha256: 'b053b7ea426b2f0392b05eb467a6d788af440ef3b7f0137fded21a97d33c27f5'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/improve-selection.d.ts',\n+           ref: {\n+             bytes: 946,\n+             sha256: 'bda726a3260d79b54542604d877460b624603a50c4f5c2860c60330629b7a34a'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/improve-selection.js',\n+           ref: {\n+             bytes: 6802,\n+             sha256: '938158b705dace005a914c733c065f1f9d5af1d7e3747d4190c968b7d247dae4'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/improve-selection.js.map',\n+           ref: {\n+             bytes: 7773,\n+             sha256: '130235bfe60f5a1c76fd4667aeaa5ac99461d3d94e247a50b73fce7bfa36c720'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/improve.d.ts',\n+           ref: {\n+             bytes: 444,\n+             sha256: 'cf5d92a5c87ab329382c4dbeb817aa587e2412693c2dad77ece58d3e59b96e8b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/improve.js',\n+           ref: {\n+             bytes: 3364,\n+             sha256: 'b7d62744eb02a18d256c958077591b22bf714858be59cf002b974bfc7801061e'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/improve.js.map',\n+           ref: {\n+             bytes: 3933,\n+             sha256: '65712e8aa7bcfff0c27d5ec43afe11764f1d5087da4bad3f8b84a46d2c876f78'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/metrics.d.ts',\n+           ref: {\n+             bytes: 43740,\n+             sha256: 'ff1915e9dbcb2ea1ddc5da571fe8c7e0d1c91736a10ba597f0239f1c6ea3e896'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/metrics.js',\n+           ref: {\n+             bytes: 8198,\n+             sha256: '4b787bbb7501bc8e65223ecb6749128bd3e743bf20c3c26c44406f6492e4e5b1'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/metrics.js.map',\n+           ref: {\n+             bytes: 10416,\n+             sha256: 'f102cf885afb78a37e89af672d1d2b93bd45018900827ba231dd2bb2c20941c1'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/storage.d.ts',\n+           ref: {\n+             bytes: 651,\n+             sha256: '78897bf6e5440a7accc134b2fe817a9503b7a40bd17ccd7f0490659780553862'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/storage.js',\n+           ref: {\n+             bytes: 5831,\n+             sha256: '845378fcd144c3c36c0f3c020b688dd209fa9b569262990e74109d42ef1ca4cb'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/storage.js.map',\n+           ref: {\n+             bytes: 6497,\n+             sha256: '379e4023c9705a94255a52c8edd016331debde35a290dd05539126a0a0337dbb'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/width-gate.d.ts',\n+           ref: {\n+             bytes: 2191,\n+             sha256: '232d8b60374c41b5111a42db0baaf3d760e43bc540082b9e866425f1d4ecbf1d'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/width-gate.js',\n+           ref: {\n+             bytes: 9732,\n+             sha256: 'f46bb05ed314929ef2603d03523caa749ca77b8d1018b14a954b71e149951375'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/width-gate.js.map',\n+           ref: {\n+             bytes: 9675,\n+             sha256: '508ccd817ddf2b79bf49d4a8a2a5042a8d9541738f0ff5dbdde0c7219126cb70'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/width-probe.d.ts',\n+           ref: {\n+             bytes: 994,\n+             sha256: '653c6cdc3a7a23ce47cc6d0a949ea9dceb8654c1c796578b953e9d84aaefa1ee'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/width-probe.js',\n+           ref: {\n+             bytes: 5304,\n+             sha256: 'c8a902801a33ef6397d2f3cda975bc592525b177517dcfa23a383a64865383e2'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'tui/width-probe.js.map',\n+           ref: {\n+             bytes: 5063,\n+             sha256: '13e92557de851c8e5a56de5e804c115a85b30e8b2f26cd70851cefb5ee3798c7'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'usage-query.d.ts',\n+           ref: {\n+             bytes: 2115,\n+             sha256: 'b854f66370831f5f855f18dee5e242fafa48de27de565da7dd2015d55ba1b035'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'usage-query.js',\n+           ref: {\n+             bytes: 12455,\n+             sha256: 'd49cfafefcb6f8c274ee5927e3e1a051b1701999b940e65bd1b1afe4e390f198'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'usage-query.js.map',\n+           ref: {\n+             bytes: 12276,\n+             sha256: '2b7c71fca2ef0ed2053fece9e8b08eb1a555593a110cf2d1c31a248de4b45133'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'workspace-fence.d.ts',\n+           ref: {\n+             bytes: 616,\n+             sha256: 'c77119490ae5a831b01169347ed6f79f147df34684875d896e0ffb805ac16e2b'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'workspace-fence.js',\n+           ref: {\n+             bytes: 2596,\n+             sha256: '65ba8684ffd957710dc61e8a1212f0c3f7067662710f3e086679c04ab62e990f'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'workspace-fence.js.map',\n+           ref: {\n+             bytes: 2671,\n+             sha256: '353bf42e7fde0dacfba2df21bf39d57aec28d367582caf45d9d8dbcb963553e9'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'workspace-ownership.d.ts',\n+           ref: {\n+             bytes: 580,\n+             sha256: '5722075ed2be9df8545d16dd4536e59d4f52302b5688f4884b61f443b5a9486d'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'workspace-ownership.js',\n+           ref: {\n+             bytes: 4106,\n+             sha256: '16e68393ccdce8237f0d167a5169835167a8a27cc6679973b863f3b9dffccbbc'\n+           }\n+         },\n+         {\n+           mode: 420,\n+           path: 'workspace-ownership.js.map',\n+           ref: {\n+             bytes: 3979,\n+             sha256: '7c9a325bb695eed41deb0ad20ce725d55aa4f84ec07f743b28c5793cc286d269'\n+           }\n+         }\n+       ],\n+       isolation: 'Apple container 1.4.1 VM + namespace/capability/seccomp',\n+       node: 'v24.8.0',\n+       writable: 'fresh session, HOME, TMPDIR, cache, workspace and data-root each trial'\n+     },\n+     gradingTimeoutMs: 30000,\n+     id: 'pi-durio-v1-live-r2-usd3-supplement',\n+     image: 'pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c',\n+     improvementConclusion: 'not-evaluated',\n+     mainObjective: 'task requirements',\n+     maxOutputTokens: 4096,\n+     mode: 'live',\n+     model: {\n+       endpoint: 'https://api.deepseek.com/chat/completions',\n+       id: 'deepseek-flash',\n+       provider: 'deepseek'\n+     },\n+     price: {\n+       currency: 'USD',\n+       perMillionTokens: 1.2,\n+       source: 'https://api-docs.deepseek.com/quick_start/pricing/',\n+       version: 'DeepSeek-public-2026-10-09-maximum-class'\n+     },\n+     protection: [\n+       'fixture initial state',\n+       'declared writable scope',\n+       'isolation',\n+       'complete acquired originals'\n+     ],\n+     purpose: 'One supplemental real-provider batch: three unchanged single trials after retained first failure; prior local-fix PASS reused; no first-attempt 4/4 or population claim',\n+     requestRetryLimit: 0,\n+     runtime: {\n+       bytes: 98527701,\n+       id: '5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a',\n+       manifest: {\n+         bytes: 2338378,\n+         sha256: '5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a'\n+       }\n+     },\n+     trialTimeoutMs: 300000,\n+     trials: [\n+       {\n+         caseId: 'multi-file',\n+         id: 'v1-live-r2-multi-file',\n+         pair: null,\n+         repeat: 1,\n+         side: 'candidate',\n+         version: '5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a'\n+       },\n+       {\n+         caseId: 'regression',\n+         id: 'v1-live-r2-regression',\n+         pair: null,\n+         repeat: 1,\n+         side: 'candidate',\n+         version: '5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a'\n+       },\n+       {\n+         caseId: 'no-change',\n+         id: 'v1-live-r2-no-change',\n+         pair: null,\n+         repeat: 1,\n+         side: 'candidate',\n+         version: '5957b89d214074d12353abb58bd88460cc2160e54943b8fc094896e246512d7a'\n+       }\n+     ]\n+   },\n    finding: 'LIVE-USD3-R3-01',\n    futureSelection: 'Only a later explicit human choice of an actual report/revision/candidate may authorize candidate execution or writeback; the paid grant selects nothing.',\n    improve: {\n      allowedWriteback: [\n        'clamp.ts'\n",
+      "effects": [],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "expires-during-installation",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": "GRANT_EXPIRED_BEFORE_START",
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve"
+      ],
+      "resultStatus": null,
+      "cumulativeBudget": null,
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "exact-window-boundary",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "AWAITING_ACTUAL_CANDIDATE_SELECTION",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 952,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 35,
+        "requestCompleteness": "known",
+        "knownTokens": 62512,
+        "reservedTokens": 1056768,
+        "chargedUpperTokens": 1119280,
+        "conservativeKnownUsd": 0.0750144,
+        "conservativeChargedUpperUsd": 1.343136,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "known-new-usage-prior-unknown-retained",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "AWAITING_ACTUAL_CANDIDATE_SELECTION",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 952,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 35,
+        "requestCompleteness": "known",
+        "knownTokens": 62512,
+        "reservedTokens": 1056768,
+        "chargedUpperTokens": 1119280,
+        "conservativeKnownUsd": 0.0750144,
+        "conservativeChargedUpperUsd": 1.343136,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "new-unknown-stops",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED_BUDGET_INCOMPLETE_OR_EXCEEDED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 0,
+            "reservedTokens": 1056768,
+            "unknown": 1,
+            "completeness": "unknown",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 35,
+        "requestCompleteness": "known",
+        "knownTokens": 61560,
+        "reservedTokens": 2113536,
+        "chargedUpperTokens": 2175096,
+        "conservativeKnownUsd": 0.073872,
+        "conservativeChargedUpperUsd": 2.6101152,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "provider-bound-exceeded",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED_BUDGET_INCOMPLETE_OR_EXCEEDED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 1056769,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": true,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 35,
+        "requestCompleteness": "known",
+        "knownTokens": 1118329,
+        "reservedTokens": 1056768,
+        "chargedUpperTokens": 2175097,
+        "conservativeKnownUsd": 1.3419948,
+        "conservativeChargedUpperUsd": 2.6101164,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": true,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "unavailable-ledger-full-new-stage-held",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED_BUDGET_INCOMPLETE_OR_EXCEEDED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": null,
+            "dispatches": null,
+            "knownTokens": 0,
+            "reservedTokens": 1200000,
+            "unknown": null,
+            "completeness": "unavailable-full-stage-held",
+            "violation": null,
+            "error": "Error: OFFLINE_READ_GAP",
+            "warning": "Hold the full authorized stage allowance; unavailable evidence is never treated as zero usage or permission to resume"
+          }
+        ],
+        "knownRequests": 34,
+        "requestCompleteness": "unknown",
+        "knownTokens": 61560,
+        "reservedTokens": 2256768,
+        "chargedUpperTokens": 2318328,
+        "conservativeKnownUsd": 0.073872,
+        "conservativeChargedUpperUsd": 2.7819936,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "http401-stops-next-reservation",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 952,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 35,
+        "requestCompleteness": "known",
+        "knownTokens": 62512,
+        "reservedTokens": 1056768,
+        "chargedUpperTokens": 1119280,
+        "conservativeKnownUsd": 0.0750144,
+        "conservativeChargedUpperUsd": 1.343136,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "http403-stops-next-reservation",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 952,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 35,
+        "requestCompleteness": "known",
+        "knownTokens": 62512,
+        "reservedTokens": 1056768,
+        "chargedUpperTokens": 1119280,
+        "conservativeKnownUsd": 0.0750144,
+        "conservativeChargedUpperUsd": 1.343136,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "repeated-cancel-keeps-cleanup-handlers",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove",
+        "cleanup-with-handlers"
+      ],
+      "resultStatus": "CANCELLED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 952,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 35,
+        "requestCompleteness": "known",
+        "knownTokens": 62512,
+        "reservedTokens": 1056768,
+        "chargedUpperTokens": 1119280,
+        "conservativeKnownUsd": 0.0750144,
+        "conservativeChargedUpperUsd": 1.343136,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "analysis-error-no-retry",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 952,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 35,
+        "requestCompleteness": "known",
+        "knownTokens": 62512,
+        "reservedTokens": 1056768,
+        "chargedUpperTokens": 1119280,
+        "conservativeKnownUsd": 0.0750144,
+        "conservativeChargedUpperUsd": 1.343136,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    },
+    {
+      "name": "zero-candidate-no-selection-or-retry",
+      "status": "PASS",
+      "scope": "Exact-source memory-only fixture",
+      "error": null,
+      "effects": [
+        "verify-installation",
+        "installed",
+        "validate-improve",
+        "credential-lookup",
+        "analyzeImprove"
+      ],
+      "resultStatus": "STOPPED_NO_EXECUTABLE_CHAIN",
+      "cumulativeBudget": {
+        "prior": {
+          "requests": 34,
+          "knownTokens": 61560,
+          "reservedTokens": 1056768,
+          "unknown": 1
+        },
+        "stages": [
+          {
+            "stage": "improve",
+            "limits": {
+              "maxRequests": 8,
+              "maxTokens": 1200000,
+              "maxRequestTokens": 1056768,
+              "maxOutputTokens": 8192
+            },
+            "runId": "offline-improve-run",
+            "entered": true,
+            "requests": 1,
+            "dispatches": 1,
+            "knownTokens": 952,
+            "reservedTokens": 0,
+            "unknown": 0,
+            "completeness": "known",
+            "violation": false,
+            "evidence": [
+              {
+                "id": "request-1",
+                "reservation": "e1:1:fixture-1",
+                "settlement": "e1:3:fixture-3",
+                "dispatch": "e1:2:fixture-2"
+              }
+            ]
+          }
+        ],
+        "knownRequests": 35,
+        "requestCompleteness": "known",
+        "knownTokens": 62512,
+        "reservedTokens": 1056768,
+        "chargedUpperTokens": 1119280,
+        "conservativeKnownUsd": 0.0750144,
+        "conservativeChargedUpperUsd": 1.343136,
+        "limits": {
+          "maxRequests": 8,
+          "maxTokens": 1200000,
+          "cumulativeMaxRequests": 42,
+          "cumulativeMaxTokens": 2318328,
+          "usdCeiling": 3,
+          "grantToStartMs": 86400000,
+          "activeMs": 3600000,
+          "starts": 1
+        },
+        "boundExceeded": false,
+        "accountBill": "Not observed",
+        "rule": "Only host stage reservations and settlements are counted; failed/unknown reservations remain charged. SDK/guest mirrors are not added. Original STOPPED and failed trial remain unchanged."
+      },
+      "actualRunnerWrites": 0
+    }
+  ],
+  "realCredentialReads": 0,
+  "newProviderRequests": 0,
+  "newRestrictedVmStarts": 0,
+  "actualRunnerWrites": 0,
+  "sources": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/preflight.mjs",
+      "sha256": "4926e7978cf23eb642dc2ac78f61f68fe6d2c77f6f674a3571be3e0992a69bdc"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/ledger.mjs",
+      "sha256": "0a61bdce8e48e5e0bac3c2b880019987a12b5fd9cc8d14dbffaf42458a3d1df7"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/harness/run.mjs",
+      "sha256": "c2eb991f269fc3ccd6939da0f92135035f0956de3cfd013ec9d32bd3ef976a2c"
+    }
+  ]
+}

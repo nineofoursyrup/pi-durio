@@ -1,0 +1,118 @@
+{
+  "schema": 3,
+  "axis": "Standards",
+  "verdict": "PASS",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "candidateTree": "d76896b400bb90c3beb82d847d9b43ba86fc5a07",
+  "baseline": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+  "originalBootstrap": "25d311616136766b37c0274f3f490ec1105f9592",
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoningEffort": "xhigh",
+  "actualBackend": "not independently attestable",
+  "scope": "Independent affected Standards review of STD-04 deadline admission and result attribution repair, including adjacent build/startup/direct-check/eval-runtime/grader callers. Unchanged areas reuse the previous Standards review. Declared delivery remains #11-29 implementation and #30 offline preparation.",
+  "method": "Read-only Git, source, contract, test-source and retained-evidence review. Independently hashed listed source/compiler/output/test files, compared the complete dist file set, and verified original first-failure references and VM outcome hashes. No build, test, VM, provider, Terminal, package diagnostic, Git/state/product mutation or Spec-review read.",
+  "previousAxisReport": "/Users/nineofour/pi-durio-v1-run/review/74a91ea/standards-review.json",
+  "standardsSources": [
+    "Provided global/project AGENTS.md instructions",
+    "/Users/nineofour/AGENTS.md",
+    "AGENTS.md",
+    "docs/agents/domain.md",
+    "GLOSSARY.md",
+    "README.md",
+    "docs/specs/pi-durio-v1-spec.md:72,82-99,117-121",
+    "docs/adr/0001-local-execution-and-recovery-boundary.md",
+    "docs/adr/0002-full-original-records-and-user-controlled-reduction.md",
+    "docs/adr/0003-eval-isolation-and-evidence-boundary.md",
+    "docs/design/improve-workflow.md:68-82",
+    "docs/design/eval-and-improvement.md:65-81",
+    "docs/design/runtime-evidence-and-retention.md"
+  ],
+  "originalFindingDispositions": [
+    {"id":"STD-01","disposition":"RESOLVED_REUSED","basis":"Unchanged bounded metadata/original-reader code and applicable prior Standards evidence."},
+    {"id":"STD-02","disposition":"RESOLVED_REUSED_WITH_AFFECTED_CHECK","basis":"Output acquisition/retention code is unchanged; the real output-limit check and controller byte readback cover the affected execution/result path."},
+    {"id":"STD-03","disposition":"RESOLVED_REUSED","basis":"Unchanged single-writer metrics/ownership code and applicable prior Standards evidence."},
+    {
+      "id":"STD-04",
+      "previousPriority":2,
+      "disposition":"RESOLVED",
+      "standards":[
+        {"file":"docs/specs/pi-durio-v1-spec.md","line":97,"rule":"I5: execute checks within the declared budget."},
+        {"file":"docs/specs/pi-durio-v1-spec.md","line":99,"rule":"I7: budget expansion requires a new decision; failed/cancelled/unknown stops remaining work and preserves states."},
+        {"file":"docs/specs/pi-durio-v1-spec.md","line":86,"rule":"V6: fence new execution by time budget and retain distinct failure/timeout/cancellation/budget-stop/not-run facts."},
+        {"file":"docs/design/improve-workflow.md","line":74,"rule":"Stop affected work when declared validation scope or budget is exceeded."}
+      ],
+      "evidence":"Same absolute deadline reaches every affected restricted caller. Boundary refusal after staging and after create/configuration precedes create/start, and the execution timer takes the remaining budget without a minimum extension. Created resources still require stop/inspect/delete/absence; termination_unconfirmed overrides a cancellation/refusal. Improve classifies and retains execution before optional artifact export, records artifactError separately on known failure, and still rejects incomplete or changed successful candidates. Eval refusal/timeout retains the intended classification and remaining trials do not start after batch deadline/cancellation. Original failure and the new explicitly budgeted happy-path plan remain distinct."
+    }
+  ],
+  "affectedHunkAssessment": [
+    {"file":"scripts/isolation/boundary.mjs","lines":[58,67,88,97,133,173,228,241],"result":"No documented-standard breach found. Absolute admission at actual side-effect boundaries; cleanup uncertainty retains priority; original output acquisition unchanged."},
+    {"file":"src/improve-build.ts","lines":[52,70,73,86,91],"result":"No documented-standard breach found. Build/startup pass the same deadline, retain actual execution/output and propagate unknown cleanup ahead of cancellation. Successful content/build identity checks remain."},
+    {"file":"src/improve-validation.ts","lines":[99,103,135,160],"result":"No documented-standard breach found. Classified execution is preserved before optional export; failed/cancelled missing targets and export gaps retain primary reason, while completed results still require exact candidate content. Remaining checks freeze."},
+    {"file":"src/eval/runner.ts","lines":[33,34,93,116,127,146],"result":"No new documented-standard breach found in changed branches. Runtime/grader share fixed deadline; non-start refusal is distinct from termination uncertainty; timeout/cancellation without bootstrap output is not reclassified as preparation error; remaining trials check retained budget/cancellation."},
+    {"file":"scripts/isolation/test/boundary.test.mjs","lines":[163,197],"result":"Seven focused negative tests use the actual boundary with a protocol controller; they do not claim real VM isolation."},
+    {"file":"test/improve-deadline.test.ts","lines":[17,87],"result":"Ten actual caller regressions exercise refusal, primary failure attribution, retained acquired bytes, successful missing-content rejection and remaining-work stop. Wrapper explicitly excludes inherited NODE_TEST_CONTEXT."},
+    {"file":"test/improve-build.test.ts","lines":[44,48],"result":"New fixture budget fixed before execution at 600000ms; no automatic production budget extension and no rewriting the original 300000ms failure."}
+  ],
+  "findings": [],
+  "optionalSmells": [
+    {
+      "id":"SMELL-01",
+      "name":"possible Duplicated Code",
+      "classification":"optional-judgment",
+      "blocking":false,
+      "disposition":"RETAINED_OPTIONAL",
+      "locations":[{"file":"src/derived-evidence.ts","start":26,"end":28},{"file":"src/improve-source.ts","start":13,"end":15}],
+      "quote":"if(/\\u0000|�/.test(text))reasons.push(...);",
+      "suggestion":"Unchanged previous optional observation: consider sharing text classification predicates while preserving caller policy; no demonstrated semantic drift."
+    },
+    {
+      "id":"SMELL-02",
+      "name":"possible Duplicated Code",
+      "classification":"optional-judgment",
+      "blocking":false,
+      "disposition":"NEW_OPTIONAL",
+      "locations":[{"file":"src/improve-build.ts","start":72,"end":73},{"file":"src/improve-build.ts","start":88,"end":89}],
+      "quote":"execution.status==='invalid'||!execution.terminated&&execution.status!=='not-started'?'unknown':execution.reason==='cancelled'?'cancelled':...",
+      "suggestion":"The same precedence is repeated for event state and thrown failure in build/startup. A local shared classification could reduce future drift. This is a maintenance judgment only; no semantic defect or violated hard rule demonstrated."
+    }
+  ],
+  "fowlerBaselineConsidered":["Mysterious Name","Duplicated Code","Feature Envy","Data Clumps","Primitive Obsession","Repeated Switches","Shotgun Surgery","Divergent Change","Speculative Generality","Message Chains","Middle Man","Refused Bequest"],
+  "counts":{"resolvedOriginalHardFindings":4,"unresolvedOriginalHardFindings":0,"newHardFindings":0,"P1":0,"P2":0,"optionalSmells":2},
+  "identityReadback": {
+    "headAndTreeMatch":true,
+    "trackedClean":true,
+    "untrackedOriginalPlanningFiles":4,
+    "sourceBuildSha256":"0559e34005b6b6f981af0b09877f4a8c4d7bcb15dc05e9ce21435370145d6886",
+    "rootManifestMatchesProducer":true,
+    "hashedFiles":{"inputs":169,"compiler":140,"outputs":246,"compiledTestsAndFixtures":123},
+    "contentMismatches":[],
+    "distFileSet":{"expected":370,"actual":370,"extra":[],"missing":[]},
+    "originalFirstFailureReferences":{"verified":12,"mismatches":[]},
+    "vmOutcomes":{"hashesVerified":11,"mismatches":[],"allRecordedTerminated":true,"stopInspectDeleteAbsenceAllRecordedExitZero":true},
+    "readbackScriptIncident":"The first read-only summary attempt raised KeyError(category) because compiled test rows omit that field. Corrected field handling completed the same hash readback. No product code or evidence was changed; this was not a product test failure."
+  },
+  "validation": {
+    "coordinatorGate":"PASS_WITH_APPLICABLE_REUSE",
+    "gate":"/Users/nineofour/pi-durio-v1-run/evidence/final-repaired-r1/gate.json",
+    "originalCombination":{"candidate":"74a91eac93c19e17e82a91a9ad38c3aaea023273","tests":251,"pass":250,"fail":1,"unchanged":true},
+    "affectedEvidence":{"boundaryNegative":{"red":7,"green":7},"controllerCallerRegressions":{"pass":10,"isolationClaim":false},"realBoundarySmoke":{"pass":2,"vms":4},"sourceHappyPath":{"pass":1,"vms":3,"durationMs":246140.769791,"predeclaredDeadlineMs":600000,"originalDeadlineMs":300000},"realOutputRetention":{"pass":1,"vms":2},"offlineEval":{"trials":1,"graders":1,"passed":1,"vms":2,"paidCalls":0}},
+    "countPolicy":"Separate scoped evidence groups are not summed into a new whole-suite PASS. The original failure remains retained; only applicable unchanged evidence is reused.",
+    "excludedEvidence":["improve-green-r1.tap: nested tests skipped via inherited NODE_TEST_CONTEXT; nominal wrapper PASS excluded","improve-green-r2.tap: invalid cancellation fixture assumption about emitted versus actually acquired bytes; first failure retained"],
+    "reviewerExecuted":{"builds":0,"tests":0,"vms":0,"providerCalls":0,"terminalOperations":0}
+  },
+  "evidenceDirectory":"/Users/nineofour/pi-durio-v1-run/evidence/repair-26-deadline",
+  "deliveryCheckBoundary": {
+    "state":"UNRESOLVED_SEPARATE_DIAGNOSIS",
+    "record":"/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install-first-failure.json",
+    "observed":"Independent macOS install, help and 12 public imports passed; npm 11.19.1 / Node 26.8.2 npm ls --omit=dev --all --json exited 1 for bundled pi-tui file dependency marked invalid.",
+    "productAttribution":"UNKNOWN; delegated diagnostic not duplicated",
+    "implication":"This scoped Standards PASS does not settle complete package-install acceptance."
+  },
+  "externalGates":[
+    {"issue":30,"state":"NOT_ACCEPTED","required":"Authorized real paid DeepSeek batch and full real improve analysis/selection/execution evidence."},
+    {"issue":31,"state":"NOT_ACCEPTED","required":"Final native Terminal and complete technical/resource acceptance."},
+    {"issue":32,"state":"NOT_ACCEPTED","required":"Explicit human daily-use acceptance."}
+  ],
+  "limitations":["Standards axis only; no Spec conclusions read or imported.","Authorized #16 Pi TUI width exception and prior evidence boundaries preserved.","No complete product acceptance, main merge, push, publication or release is established.","Prior reports and original failure evidence were not rewritten."],
+  "artifacts":["standards-review.json","standards-review.md"]
+}

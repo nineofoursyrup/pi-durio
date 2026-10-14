@@ -1,0 +1,68 @@
+{
+  "at": "2026-10-10T05:46:45.477Z",
+  "status": "PASS",
+  "firstFailure": {
+    "name": "Error",
+    "message": "IMPROVE_REPORT_NOT_FOUND"
+  },
+  "delayedReportReadback": {
+    "elapsedMs": 308.77216599999997,
+    "observed": [
+      {
+        "atPerformanceMs": 296.400209,
+        "error": "Error: IMPROVE_REPORT_NOT_FOUND"
+      },
+      {
+        "atPerformanceMs": 398.163209,
+        "state": "interrupted-or-running"
+      },
+      {
+        "atPerformanceMs": 501.326334,
+        "state": "interrupted-or-running"
+      },
+      {
+        "atPerformanceMs": 604.144875,
+        "state": "complete"
+      }
+    ],
+    "report": {
+      "id": "delayed-report",
+      "revision": "r1",
+      "runId": "analysis",
+      "target": {
+        "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-poll-regression/fixture-workspace",
+        "runId": "source",
+        "taskId": "task",
+        "sessionId": "session"
+      },
+      "candidates": [],
+      "targets": [],
+      "selected": [],
+      "state": "complete",
+      "evidence": []
+    }
+  },
+  "otherErrors": [
+    {
+      "message": "EVIDENCE_CORRUPT",
+      "rethrownSameObject": true
+    },
+    {
+      "message": "IMPROVE_REPORT_NOT_FOUND: unrelated suffix",
+      "rethrownSameObject": true
+    }
+  ],
+  "realProviderRequests": 0,
+  "nativeExecuted": false,
+  "vmExecuted": false,
+  "productSourceChanged": false,
+  "limits": [
+    "Fixture records are intentionally minimal; this proves the missing-to-started-to-complete polling behavior only.",
+    "This offline regression does not establish native follow-up, isolation regression, fixture writeback or human acceptance."
+  ],
+  "plan": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-poll-regression/plan.json",
+    "bytes": 1618,
+    "sha256": "5aaf22993f8019cbfe379220b9f2d949f63ce2c9bd396c8118f3078de9823e1a"
+  }
+}

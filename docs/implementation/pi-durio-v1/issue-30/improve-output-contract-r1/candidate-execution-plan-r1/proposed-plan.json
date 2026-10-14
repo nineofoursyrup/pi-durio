@@ -1,0 +1,192 @@
+{
+  "status": "UNAUTHORIZED_PROPOSAL",
+  "authorized": false,
+  "actualChoice": null,
+  "purpose": "One explicit human selection of the actual R1 candidate; fixed restricted regression then exact clamp.ts writeback only if all checks pass.",
+  "availableHumanChoices": [
+    "execute-declared-scope",
+    "defer-with-no-product-action"
+  ],
+  "report": {
+    "id": "v1-live-r4-improve",
+    "revision": "b8e9b7c7c08d06d5ed955339630fac5e1b8fe59e6e700acd6499863d932aad2a",
+    "canonicalSource": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/live-improve-result.json",
+      "bytes": 31482,
+      "sha256": "0af461d88657ca817387b34d3a55828b9e6b050b7411f2d45cfbf5f9255564f2"
+    },
+    "record": {
+      "seq": 4297,
+      "kind": "improve.report",
+      "at": "2026-10-10T10:17:55.797Z",
+      "sourceId": "e1:4297:33ee6de1baf727c584809056aa98e507d77c595368e255fae135053b30501cdc",
+      "body": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/33ee6de1baf727c584809056aa98e507d77c595368e255fae135053b30501cdc",
+        "sha256": "33ee6de1baf727c584809056aa98e507d77c595368e255fae135053b30501cdc",
+        "bytes": 16341
+      }
+    }
+  },
+  "candidate": {
+    "id": "candidate:197afe0a113c5c58ad0810ca24a4ad98",
+    "display": "R1",
+    "revision": "49e9331f282cda12efe5fb89f4b6ef35b8e50a8dc2d8140fa48c5fe3824c91c8",
+    "baseline": "46864e756634ac28260fe43119d15103008ce1a2fbc9b37b548c2b2027ab257f",
+    "applicableVersion": "c3a26d10711de3ae1afdd08698e4dd43a92f48d1bc591653e8778218aa373ffd",
+    "conditionKey": "2b0d2f5cc94ec16c8ae984afdd659866788ef20395d862a39f21da155bfdc3fe",
+    "target": {
+      "id": "clamp-project",
+      "kind": "project",
+      "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project",
+      "files": [
+        {
+          "path": "clamp.ts",
+          "sha256": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+          "bytes": 111,
+          "content": {
+            "sha256": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+            "bytes": 111
+          },
+          "sourceId": "e1:49:a680a9179462aab085f0352e77a9e1c25a3d53ac56cf41015e1d20f913cf8ca7",
+          "state": "available",
+          "reason": []
+        },
+        {
+          "path": "check.mjs",
+          "sha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d",
+          "bytes": 357,
+          "content": {
+            "sha256": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d",
+            "bytes": 357
+          },
+          "sourceId": "e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2",
+          "state": "available",
+          "reason": []
+        },
+        {
+          "path": "README.md",
+          "sha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+          "bytes": 129,
+          "content": {
+            "sha256": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+            "bytes": 129
+          },
+          "sourceId": "e1:51:ccf3e336d85ab9b57c2361610ef0777fc8288d1d2cedec9ee0eef5133438c927",
+          "state": "available",
+          "reason": []
+        },
+        {
+          "path": "package.json",
+          "sha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+          "bytes": 87,
+          "content": {
+            "sha256": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1",
+            "bytes": 87
+          },
+          "sourceId": "e1:52:8cc84f042f96e2325ad9daf05845f9fa1bcd0183132f01a0329b99a45bfa60b4",
+          "state": "available",
+          "reason": []
+        }
+      ],
+      "baseline": "46864e756634ac28260fe43119d15103008ce1a2fbc9b37b548c2b2027ab257f",
+      "applicableVersion": "c3a26d10711de3ae1afdd08698e4dd43a92f48d1bc591653e8778218aa373ffd",
+      "state": "verified",
+      "gaps": []
+    },
+    "scope": [
+      "clamp.ts"
+    ],
+    "originalCandidate": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/postrun-readback/canonical-candidate-copy.json",
+      "bytes": 8837,
+      "sha256": "6ef254121b198beb905a70396f4909131c90912773f720ed50030291104b889f"
+    }
+  },
+  "productArtifact": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/artifact.json",
+    "bytes": 2792,
+    "sha256": "6608f6149f3e45051fc73eadcdb1dac8b77aa0d070070ef642ed3e26cd276661"
+  },
+  "candidateGate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
+    "bytes": 4084,
+    "sha256": "21271432e2d61a85048c5be7d9679328b49286bf96ae86e299eb6801f945a47d"
+  },
+  "staticReview": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/improve-output-contract-r1-candidate/static-analysis.json",
+    "bytes": 3819,
+    "sha256": "f1eca720d5005ba5c90908ba87b7876bd96fe486cabf3dda9c55ba46e86dcf77"
+  },
+  "reasoningCaveat": "Original summary and hypotheses[1] incorrectly claim the old in-range and above-upper cases pass. Static algebra disproves that. Original report/candidate/revisions remain unchanged; proposal supported for human consideration, not validated.",
+  "data": {
+    "immutableOriginal": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data",
+    "closedTree": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/closed-seed-tree.json",
+      "bytes": 708195,
+      "sha256": "f433294284116b793be9a58879d54d8aec8a47d685e852eac9ed26c6a1d2548b"
+    },
+    "clone": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/candidate-execution-plan-r1/decision-data",
+    "cloneGlobalCutoff": 4298,
+    "cloneOriginalProviderDispatches": 4,
+    "newCandidateActions": "Only newly appended records after cloneGlobalCutoff; original retained report and blobs remain unchanged.",
+    "newProviderRequests": 0
+  },
+  "time": {
+    "grantToStartMs": 86400000,
+    "activeMs": 300000,
+    "checkTimeoutMs": 30000,
+    "protectedChildTimeoutMs": 10000,
+    "starts": 1,
+    "deadline": null,
+    "rule": "After a new direct human choice, begin within 24 hours; freeze startedAt and deadline=startedAt+5min once. Preparation has no current deadline. No retry or deadline extension."
+  },
+  "budget": {
+    "maxChecks": 1,
+    "maxRequests": 0,
+    "maxTokens": 0,
+    "cumulativeHostLedger": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/cumulative-budget.json",
+      "bytes": 2806,
+      "sha256": "ea3f2100966346170682aa19184bc9765503f18f06cb11ccd53505d2b84da2eb"
+    },
+    "priorCumulativeRequests": 45,
+    "priorKnownTokens": 130611,
+    "priorUnknownReservedTokens": 1056768,
+    "priorChargedUpperTokens": 1187379,
+    "priorChargedUpperUsd": 1.4248548,
+    "usdCeiling": 3,
+    "extraProviderCost": 0,
+    "cloneAccounting": "Copied prior records are inherited history, not additional provider requests or expense."
+  },
+  "writeback": {
+    "allowed": [
+      "clamp.ts"
+    ],
+    "before": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+    "after": "45e016afe980df19159fc0679a6e44d88838a7a5afc398820309b576884f003c",
+    "protected": {
+      "check.mjs": "c7ff9d37e93b43050ec8e7e56371e43f857e8f251ca834e5dc19b19618ea820d",
+      "README.md": "66b2eaead2ee3c7859749b068f3f381642e948c1f5ee5a90b1aebf953d49c8ce",
+      "package.json": "ac4558b746dd921592c414feef5948a29f59d570c95f64dc24f8557f71d863b1"
+    },
+    "activate": null,
+    "failureCompensation": "none"
+  },
+  "failure": "Any failure/cancel/timeout/unknown/identity or baseline drift stops the one attempt. Preserve first result and partial/unknown receipts. No retry, resume, automatic rollback, next analysis or additional provider.",
+  "rollback": {
+    "authorized": false,
+    "method": "Only a later explicitly authorized rollbackImproveDecision with exact decisionSource/group may restore retained before bytes if current bytes still equal this batch; preserve later user edits.",
+    "beforeBytesRetained": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data/objects/b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+    "beforeSha256": "b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc",
+    "automatic": false
+  },
+  "publicEntry": "Installed pi-durio/improve-decisions previewImproveDecision then submitImproveDecision; readImproveDecision and pi-durio/improve readImproveReport for readback. No Harness.open or new analysis.",
+  "preparationEffects": {
+    "providerCalls": 0,
+    "productApiCalls": 0,
+    "vmStarts": 0,
+    "candidateExecutions": 0,
+    "formalWrites": 0,
+    "clonedDataRoots": 0
+  }
+}

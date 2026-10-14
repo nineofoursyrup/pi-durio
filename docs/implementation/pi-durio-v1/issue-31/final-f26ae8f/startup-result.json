@@ -1,0 +1,511 @@
+{
+  "at": "2026-10-10T10:59:22.635Z",
+  "plan": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/startup-r1/plan.json",
+    "bytes": 2223,
+    "sha256": "fcb6c2effd711841aa74d25937d054a75a3717006ebef7c5a9800195e5c72375"
+  },
+  "rows": [
+    {
+      "workload": "help",
+      "repetition": 1,
+      "elapsedMs": 229.04175,
+      "loadBefore": [
+        3.287109375,
+        3.6396484375,
+        3.85791015625
+      ],
+      "loadAfter": [
+        3.287109375,
+        3.6396484375,
+        3.85791015625
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 6373,
+        "sha256": "0e2118c09695f84b30261ff646489a419f6971ba0b84c49158f852a8c325c427"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": null
+    },
+    {
+      "workload": "help",
+      "repetition": 2,
+      "elapsedMs": 219.918667,
+      "loadBefore": [
+        3.287109375,
+        3.6396484375,
+        3.85791015625
+      ],
+      "loadAfter": [
+        3.287109375,
+        3.6396484375,
+        3.85791015625
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 6373,
+        "sha256": "0e2118c09695f84b30261ff646489a419f6971ba0b84c49158f852a8c325c427"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": null
+    },
+    {
+      "workload": "help",
+      "repetition": 3,
+      "elapsedMs": 211.429125,
+      "loadBefore": [
+        3.287109375,
+        3.6396484375,
+        3.85791015625
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 6373,
+        "sha256": "0e2118c09695f84b30261ff646489a419f6971ba0b84c49158f852a8c325c427"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": null
+    },
+    {
+      "workload": "help",
+      "repetition": 4,
+      "elapsedMs": 212.936542,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 6373,
+        "sha256": "0e2118c09695f84b30261ff646489a419f6971ba0b84c49158f852a8c325c427"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": null
+    },
+    {
+      "workload": "help",
+      "repetition": 5,
+      "elapsedMs": 215.615416,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 6373,
+        "sha256": "0e2118c09695f84b30261ff646489a419f6971ba0b84c49158f852a8c325c427"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": null
+    },
+    {
+      "workload": "help",
+      "repetition": 6,
+      "elapsedMs": 208.572125,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 6373,
+        "sha256": "0e2118c09695f84b30261ff646489a419f6971ba0b84c49158f852a8c325c427"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": null
+    },
+    {
+      "workload": "help",
+      "repetition": 7,
+      "elapsedMs": 209.5075,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 6373,
+        "sha256": "0e2118c09695f84b30261ff646489a419f6971ba0b84c49158f852a8c325c427"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": null
+    },
+    {
+      "workload": "missing-store-history",
+      "repetition": 1,
+      "elapsedMs": 214.063458,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 269,
+        "sha256": "82c986b6c69286dc359b8217cbb013ea249ec767178b9049e480581746cc494b"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": {
+        "items": 0,
+        "coverage": {
+          "snapshot": 0,
+          "current": 0,
+          "stale": true,
+          "scanned": 0,
+          "missing": 1,
+          "index": "host evidence store unavailable",
+          "emptyMeans": "missing source; no absence conclusion"
+        }
+      }
+    },
+    {
+      "workload": "missing-store-history",
+      "repetition": 2,
+      "elapsedMs": 207.640125,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 269,
+        "sha256": "82c986b6c69286dc359b8217cbb013ea249ec767178b9049e480581746cc494b"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": {
+        "items": 0,
+        "coverage": {
+          "snapshot": 0,
+          "current": 0,
+          "stale": true,
+          "scanned": 0,
+          "missing": 1,
+          "index": "host evidence store unavailable",
+          "emptyMeans": "missing source; no absence conclusion"
+        }
+      }
+    },
+    {
+      "workload": "missing-store-history",
+      "repetition": 3,
+      "elapsedMs": 211.910292,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 269,
+        "sha256": "82c986b6c69286dc359b8217cbb013ea249ec767178b9049e480581746cc494b"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": {
+        "items": 0,
+        "coverage": {
+          "snapshot": 0,
+          "current": 0,
+          "stale": true,
+          "scanned": 0,
+          "missing": 1,
+          "index": "host evidence store unavailable",
+          "emptyMeans": "missing source; no absence conclusion"
+        }
+      }
+    },
+    {
+      "workload": "missing-store-history",
+      "repetition": 4,
+      "elapsedMs": 213.577,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 269,
+        "sha256": "82c986b6c69286dc359b8217cbb013ea249ec767178b9049e480581746cc494b"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": {
+        "items": 0,
+        "coverage": {
+          "snapshot": 0,
+          "current": 0,
+          "stale": true,
+          "scanned": 0,
+          "missing": 1,
+          "index": "host evidence store unavailable",
+          "emptyMeans": "missing source; no absence conclusion"
+        }
+      }
+    },
+    {
+      "workload": "missing-store-history",
+      "repetition": 5,
+      "elapsedMs": 206.777458,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 269,
+        "sha256": "82c986b6c69286dc359b8217cbb013ea249ec767178b9049e480581746cc494b"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": {
+        "items": 0,
+        "coverage": {
+          "snapshot": 0,
+          "current": 0,
+          "stale": true,
+          "scanned": 0,
+          "missing": 1,
+          "index": "host evidence store unavailable",
+          "emptyMeans": "missing source; no absence conclusion"
+        }
+      }
+    },
+    {
+      "workload": "missing-store-history",
+      "repetition": 6,
+      "elapsedMs": 204.739542,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 269,
+        "sha256": "82c986b6c69286dc359b8217cbb013ea249ec767178b9049e480581746cc494b"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": {
+        "items": 0,
+        "coverage": {
+          "snapshot": 0,
+          "current": 0,
+          "stale": true,
+          "scanned": 0,
+          "missing": 1,
+          "index": "host evidence store unavailable",
+          "emptyMeans": "missing source; no absence conclusion"
+        }
+      }
+    },
+    {
+      "workload": "missing-store-history",
+      "repetition": 7,
+      "elapsedMs": 207.689917,
+      "loadBefore": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "loadAfter": [
+        3.50390625,
+        3.6787109375,
+        3.8701171875
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "bytes": 269,
+        "sha256": "82c986b6c69286dc359b8217cbb013ea249ec767178b9049e480581746cc494b"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "interpretation": {
+        "items": 0,
+        "coverage": {
+          "snapshot": 0,
+          "current": 0,
+          "stale": true,
+          "scanned": 0,
+          "missing": 1,
+          "index": "host evidence store unavailable",
+          "emptyMeans": "missing source; no absence conclusion"
+        }
+      }
+    }
+  ],
+  "summary": [
+    {
+      "workload": "help",
+      "repetitions": 7,
+      "failures": 0,
+      "minMs": 208.572125,
+      "medianMs": 212.936542,
+      "maxMs": 229.04175,
+      "firstObservedMs": 229.04175,
+      "allObservedMs": [
+        229.04175,
+        219.918667,
+        211.429125,
+        212.936542,
+        215.615416,
+        208.572125,
+        209.5075
+      ]
+    },
+    {
+      "workload": "missing-store-history",
+      "repetitions": 7,
+      "failures": 0,
+      "minMs": 204.739542,
+      "medianMs": 207.689917,
+      "maxMs": 214.063458,
+      "firstObservedMs": 214.063458,
+      "allObservedMs": [
+        214.063458,
+        207.640125,
+        211.910292,
+        213.577,
+        206.777458,
+        204.739542,
+        207.689917
+      ]
+    }
+  ],
+  "absentDataRootStillAbsent": true,
+  "limits": [
+    "The absent-store history path must retain missing-source coverage; it is not a successful query of an initialized dataset.",
+    "Each process gets only the listed minimal environment; no inherited model key or user HOME.",
+    "No provider/runtime task is requested; local scheduling and process exit costs are included."
+  ],
+  "status": "MEASURED",
+  "interpretation": "No numeric acceptance threshold. Every sample, including failures, is retained; these values only characterize the two named local process paths."
+}

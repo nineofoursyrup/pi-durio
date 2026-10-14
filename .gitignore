@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.scratch/
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+*.tsbuildinfo
+*.tgz
+!vendor/pi-tui/*.tgz
+!vendor/pi-tui/upstream/*.tgz
+
+# Local provider credentials
+/api.env

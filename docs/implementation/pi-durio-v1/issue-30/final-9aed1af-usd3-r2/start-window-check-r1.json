@@ -1,0 +1,55 @@
+{
+  "status": "PASS",
+  "cases": 2,
+  "manifestSha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486",
+  "scope": "Exact frozen run/preflight source evaluated with memory-only API/clock/output fixtures; no real grant, credential, product import, provider, restricted VM, build or paid-start file",
+  "results": [
+    {
+      "name": "expires-during-preparation",
+      "status": "PASS",
+      "preflightAt": "2026-10-11T05:34:25.009Z",
+      "grantExpiresAt": "2026-10-11T05:34:25.010Z",
+      "afterInstallationAt": "2026-10-11T05:34:25.011Z",
+      "paidStartCreated": false,
+      "authorizedPlanCreated": false,
+      "error": "GRANT_EXPIRED_BEFORE_START",
+      "effects": [
+        {
+          "kind": "installation-check-synthetic-delay",
+          "from": "2026-10-11T05:34:25.009Z"
+        }
+      ]
+    },
+    {
+      "name": "valid-start-at-original-window-boundary",
+      "status": "PASS",
+      "preflightAt": "2026-10-11T05:34:25.009Z",
+      "grantExpiresAt": "2026-10-11T05:34:25.010Z",
+      "afterInstallationAt": "2026-10-11T05:34:25.010Z",
+      "paidStartCreated": true,
+      "authorizedPlanCreated": true,
+      "error": null,
+      "effects": [
+        {
+          "kind": "installation-check-synthetic-delay",
+          "from": "2026-10-11T05:34:25.009Z"
+        },
+        {
+          "kind": "synthetic-credential-lookup",
+          "at": "2026-10-11T05:34:25.010Z"
+        },
+        {
+          "kind": "prepareEval",
+          "at": "2026-10-11T05:34:25.010Z"
+        },
+        {
+          "kind": "runEval",
+          "at": "2026-10-11T05:34:25.010Z"
+        }
+      ]
+    }
+  ],
+  "actualFilesWrittenByRunner": 0,
+  "realCredentialRead": false,
+  "providerRequests": 0
+}

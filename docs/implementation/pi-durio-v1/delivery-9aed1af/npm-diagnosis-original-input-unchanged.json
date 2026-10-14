@@ -1,0 +1,30 @@
+[
+  {
+    "path": "/Users/nineofour/Durio/package.json",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/nineofour/Durio/package-lock.json",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install-first-failure.json",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/installed-dependencies.log",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/package.json",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/package-lock.json",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install/node_modules/.package-lock.json",
+    "unchanged": true
+  }
+]

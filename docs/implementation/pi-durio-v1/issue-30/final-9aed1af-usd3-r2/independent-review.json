@@ -1,0 +1,293 @@
+{
+  "reviewedAt": "2026-10-10T05:50:39.171062+00:00",
+  "reviewer": "/root/review_usd3",
+  "independence": "Same independent focused reviewer; affected-scope re-review after separate implementer repair",
+  "scope": "R2 external harness derivative; exact frozen manifest, runner expiry fix, new boundary check, generator path and unchanged content identity; earlier unaffected review carries forward",
+  "manifest": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+    "bytes": 8105,
+    "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+  },
+  "baselineReview": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/review.json",
+    "bytes": 20710,
+    "sha256": "4bf7bed922f5bab737842b6b75aa4aad1616c50df32ab0218a6f12a490a82c9f"
+  },
+  "productCommit": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "standards": {
+    "verdict": "PASS",
+    "hardDefects": [],
+    "optionalSmells": [],
+    "summary": "No documented-standard breach or actionable Fowler smell found in affected diff."
+  },
+  "spec": {
+    "verdict": "PASS",
+    "hardDefects": [],
+    "optionalSuggestions": [],
+    "resolved": [
+      {
+        "id": "USD3-SPEC-01",
+        "originalSeverity": "P2",
+        "status": "RESOLVED_FOR_R2_ONLY",
+        "file": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/run.mjs",
+        "lines": {
+          "start": 16,
+          "end": 21
+        },
+        "resolution": "After installation/runtime/fixture/request validation, capture the actual startedAt once and check it against the unchanged grantedAt and reviewed grantToStartMs before environment credential lookup or paid-start. The identical timestamp is then saved and determines the 60 minute deadline.",
+        "evidence": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/start-window-check-r1.json",
+        "priorManifest": {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/frozen-manifest.json",
+          "bytes": 7837,
+          "sha256": "f0ccad818a62f66d00e274f4efba03c52d4e5570f465476500dbe6fd1642aecc"
+        },
+        "priorVerdict": "BLOCKED remains retained; never relabeled PASS"
+      }
+    ],
+    "summary": "Original 24h grant window now checked against actual saved start timestamp after potentially slow preparation. No budget, model, source, trial, active-window or selection expansion."
+  },
+  "hardBlockCount": 0,
+  "reviewExecutionGate": "NO_CODE_REVIEW_HARD_BLOCK_FOR_THIS_MANIFEST",
+  "executionConditions": [
+    "Coordinator must supply exact manifest-bound explicit-human-grant from the already recorded user authorization, preserving original 2026-10-10T05:34:25.010886Z grantedAt.",
+    "Use only fixed r2 launch.py after ordinary live workload/isolation readiness checks; do not launch superseded f0 or old USD5 candidates.",
+    "Current hashes, original grant window, single-start markers, safe credential parsing and product identity must continue to pass at execution time.",
+    "Stop on failure, authentication, budget/window violation or cleanup unknown; actual improve candidate still needs separate structured human selection."
+  ],
+  "verification": {
+    "r2FrozenEntriesMatched": 17,
+    "unchangedByteForByte": [
+      "preflight.mjs",
+      "common.mjs",
+      "launch.py",
+      "check-preflight.mjs",
+      "check-credential.py"
+    ],
+    "runnerUnchangedSuffix": "const output onward",
+    "proposalChangesFromF0": "Only evalDataRoot, evalDirectory, improve.dataRoot and providerRecheck.path repointed to sibling r2; all semantic values unchanged",
+    "deriveChanges": "Only NEW sibling path and accurate reusedBodies.run explanation",
+    "newBoundaryEvidence": {
+      "status": "PASS",
+      "cases": 2,
+      "manifestSha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486",
+      "scope": "Exact frozen run/preflight source evaluated with memory-only API/clock/output fixtures; no real grant, credential, product import, provider, restricted VM, build or paid-start file",
+      "results": [
+        {
+          "name": "expires-during-preparation",
+          "status": "PASS",
+          "preflightAt": "2026-10-11T05:34:25.009Z",
+          "grantExpiresAt": "2026-10-11T05:34:25.010Z",
+          "afterInstallationAt": "2026-10-11T05:34:25.011Z",
+          "paidStartCreated": false,
+          "authorizedPlanCreated": false,
+          "error": "GRANT_EXPIRED_BEFORE_START",
+          "effects": [
+            {
+              "kind": "installation-check-synthetic-delay",
+              "from": "2026-10-11T05:34:25.009Z"
+            }
+          ]
+        },
+        {
+          "name": "valid-start-at-original-window-boundary",
+          "status": "PASS",
+          "preflightAt": "2026-10-11T05:34:25.009Z",
+          "grantExpiresAt": "2026-10-11T05:34:25.010Z",
+          "afterInstallationAt": "2026-10-11T05:34:25.010Z",
+          "paidStartCreated": true,
+          "authorizedPlanCreated": true,
+          "error": null,
+          "effects": [
+            {
+              "kind": "installation-check-synthetic-delay",
+              "from": "2026-10-11T05:34:25.009Z"
+            },
+            {
+              "kind": "synthetic-credential-lookup",
+              "at": "2026-10-11T05:34:25.010Z"
+            },
+            {
+              "kind": "prepareEval",
+              "at": "2026-10-11T05:34:25.010Z"
+            },
+            {
+              "kind": "runEval",
+              "at": "2026-10-11T05:34:25.010Z"
+            }
+          ]
+        }
+      ],
+      "actualFilesWrittenByRunner": 0,
+      "realCredentialRead": false,
+      "providerRequests": 0
+    },
+    "newTestsRerunByReviewer": false,
+    "reusedGuardCases": 24,
+    "reusedCredentialCases": 12,
+    "reuseReason": "Preflight/wrapper/parser/common source bytes unchanged; added start check has directly applicable new expiry and valid-boundary test records tied to this manifest.",
+    "f0ReviewUnchangedSha256": "4bf7bed922f5bab737842b6b75aa4aad1616c50df32ab0218a6f12a490a82c9f",
+    "realCredentialRead": false,
+    "providerRequests": 0,
+    "buildsOrProductVm": 0,
+    "actualExecutableGrantExistsAtReview": false,
+    "actualPaidStartExistsAtReview": false
+  },
+  "limitations": [
+    "This is a scoped code review, not real-provider, authenticated model availability, actual billing, native technical, daily-use or #30 acceptance.",
+    "Observed tariff is frozen evidence and its USD 2.88 bound is not proof of account billing or immutable served model.",
+    "All existing first failures and f0 BLOCKED review remain immutable historical evidence.",
+    "No product source, build, credential or paid execution was modified or performed."
+  ],
+  "reviewedFiles": [
+    {
+      "role": "pinned-manifest",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+      "bytes": 8105,
+      "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/proposed-batch-reviewed.json",
+      "bytes": 68908,
+      "sha256": "9753ea7302890d89f67be4723c5ed98e79c37c5ff5e493301c555947ff355037"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/artifact.json",
+      "bytes": 1905,
+      "sha256": "a1c8fb0660266c7758335a31a8773396294e3fc86d550a479be53ea2b344647b"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/check-credential.py",
+      "bytes": 3015,
+      "sha256": "aadd6a3763f85155a2bb4c94157ba5286e99f36c16f9b77587946cd63386cd3b"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/check-preflight.mjs",
+      "bytes": 10637,
+      "sha256": "8092ed2ffa2d898ba0821c9eb8d41e926e00237d5de4a2dbd71536515441b60c"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/check-start-window.mjs",
+      "bytes": 5777,
+      "sha256": "9892cdfb270b20515118d0ffc0a01e44ed22d99279b47df1d566d19c47068c3b"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/common.mjs",
+      "bytes": 2998,
+      "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/derive.py",
+      "bytes": 8099,
+      "sha256": "adbdf6c14fb17a5d54060d74298426393b40452e1a7ccbc1286260d86d92f471"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/launch.py",
+      "bytes": 2523,
+      "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/preflight.mjs",
+      "bytes": 7899,
+      "sha256": "bffdfd6e5addf0e268e4cd53065d2ea1feea3b76fe4a8412fa6a19869c779891"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/run.mjs",
+      "bytes": 7255,
+      "sha256": "aa88a4132158cd7b04412f271e44ec3eead133e035b17d7b3cb33a3a9b67cfdd"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/Durio/docs/implementation/pi-durio-v1/issue-30/cases.json",
+      "bytes": 5131,
+      "sha256": "666962275c6b5a7a6176a4733d614061d23d57fa20727a782c7ff112434fe84c"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/provider-observation.json",
+      "bytes": 1560,
+      "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/user-budget-20261010.json",
+      "bytes": 1294,
+      "sha256": "8761b7ac09591484979324959210608e88ff958ed809b82c8110e6a75fe0bc89"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/frozen-manifest.json",
+      "bytes": 5355,
+      "sha256": "d5272b244660c2a54a2fc70d1f5c50785ed20edf92a3dfb78a7e24ef7dfb3a22"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/retrieval.json",
+      "bytes": 715,
+      "sha256": "facf0c8d8c857ad49b2df669ebab2c72e79388f1c4ccdd9fef8f575eaab96b13"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/pricing.html",
+      "bytes": 23982,
+      "sha256": "210f102275ccf1a6542f08a3bc9e4b4c7c83278cb74b35217bffa112df6363b2"
+    },
+    {
+      "role": "r2-frozen-reviewed-or-identity-verified",
+      "path": "/Users/nineofour/pi-durio-v1-run/preparation/issue-30/provider-usd3-20261010/models.html",
+      "bytes": 39323,
+      "sha256": "41551c3c498a93b6e6459eaeee89829940ca8acf999b24436a38a2231c7e091b"
+    },
+    {
+      "role": "new-boundary-test-evidence",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/start-window-check-r1.json",
+      "bytes": 1726,
+      "sha256": "2942c7cb6f55cdf500fc8aa6961779269659fc7046c886802659188310edb187"
+    },
+    {
+      "role": "r2-derivation",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/derivation.json",
+      "bytes": 7675,
+      "sha256": "96af6b2c289ee57bc0ec7e44d723539cc6a96c67516a4df9a7f153460de026cc"
+    },
+    {
+      "role": "r2-nonexecutable-template",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/grant-template-NOT-EXECUTABLE.json",
+      "bytes": 921,
+      "sha256": "0bc051fed4688d190474e815d24ccda8dda322649718ed7cd738f6ca8db6fea0"
+    },
+    {
+      "role": "retained-prior-independent-review",
+      "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/review.json",
+      "bytes": 20710,
+      "sha256": "4bf7bed922f5bab737842b6b75aa4aad1616c50df32ab0218a6f12a490a82c9f"
+    },
+    {
+      "role": "reused-unchanged-guard-evidence",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/offline-checks/summary.json",
+      "bytes": 7025,
+      "sha256": "a6f50c614fffdc6f1faa1ae71148d1c7b013bd5cf651f354416c0970c0b665b4"
+    },
+    {
+      "role": "reused-unchanged-wrapper-evidence",
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/credential-check-r1.json",
+      "bytes": 985,
+      "sha256": "49913057315ce07cead2580230dae43c81e8b66f7578b64cdae390ffc3043fd1"
+    },
+    {
+      "role": "retained-first-confirmed-defect",
+      "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+      "bytes": 907,
+      "sha256": "341b2233193117b0c05ccda0042a9ac8ab3d5c8ef34b48f45583b3612f36da07"
+    }
+  ]
+}

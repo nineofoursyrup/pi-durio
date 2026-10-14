@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-09T23:33:35.912254+00:00",
+  "status": "DEPENDENCY_REPORT_FAILURE_UNDER_DIAGNOSIS",
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "completed": [
+    "source archive exact Git files and bytes",
+    "prepare-pack byte-preserving",
+    "npm pack --ignore-scripts",
+    "npm install --omit=dev --ignore-scripts --no-audit --no-fund --offline",
+    "package entries versus installed bytes and production compiled outputs",
+    "installed CLI --help",
+    "all12 installed public imports"
+  ],
+  "failed": {
+    "command": "npm ls --omit=dev --all --json",
+    "exitCode": 1,
+    "log": "installed-dependencies.log",
+    "error": "ELSPROBLEMS invalid bundled @earendil-works/pi-tui@1.1.0-durio-width.1 for file:vendor/pi-tui/pi-tui-1.1.0-durio-width.1.tgz",
+    "node": "v26.8.2",
+    "npm": "11.19.1"
+  },
+  "notYetProduced": [
+    "candidate-identity.json",
+    "install-complete-tree.json",
+    "result.json"
+  ],
+  "originalsPreserved": true,
+  "productAttribution": "UNKNOWN pending content and npm resolution diagnosis",
+  "paidRequests": 0
+}

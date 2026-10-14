@@ -1,0 +1,65 @@
+{
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "evidence": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/start.json",
+      "bytes": 882,
+      "sha256": "027fc7de4fc8196db318b9e003ecbf4daa9b00685d37d258d60005830faf5b68"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/candidate-identity.json",
+      "bytes": 5258817,
+      "sha256": "ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/source.tar.gz",
+      "bytes": 3167614,
+      "sha256": "508268f5708ba67e169a24ad71103bb9a560293983d0fad7b8991e29aefb73b4"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/result.json",
+      "bytes": 969,
+      "sha256": "bbc68a12cb79278d86114edcb0577e479b9de5f13f572522243f2666a2da8a26"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/artifact.json",
+      "bytes": 2792,
+      "sha256": "6608f6149f3e45051fc73eadcdb1dac8b77aa0d070070ef642ed3e26cd276661"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install-complete-tree.json",
+      "bytes": 3555012,
+      "sha256": "8800e7bfd67290ac39f7269799fc185998df46877b4a48062b5d4a1549591eb8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/pack-result.json",
+      "bytes": 532,
+      "sha256": "186b8a5d873ea5a3029827c6d1bc9e0cc947189455fbff84ac73f12f344e118a"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install-result.json",
+      "bytes": 632,
+      "sha256": "e5c35c4e54e58b494f5c97f91bb52f1ba8dc384e85e4ed978f1922119e990883"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/installed-help-result.json",
+      "bytes": 571,
+      "sha256": "701769f206cc4c92b4cd45442dcf19e79999b2074add4d6d5f935dd922c28bb4"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/installed-imports-result.json",
+      "bytes": 817,
+      "sha256": "d922427b5ed85ed9ba056db556bf9f008bccffac6f417fd4a1d11dc187d72d3c"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/dependency-check-applicability.json",
+      "bytes": 833,
+      "sha256": "4227b4fc176dda7776530f0cb5488d905e3732c6d49e3083e32d7214576cb1b8"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/linux-runtime-derivation.json",
+      "bytes": 1509,
+      "sha256": "244df4541bd47b3c2260a8df009b47a519aa5d9c96127cd0ef6b63423f12654e"
+    }
+  ]
+}

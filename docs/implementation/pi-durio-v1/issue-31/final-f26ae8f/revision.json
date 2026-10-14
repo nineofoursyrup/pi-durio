@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-10T11:02:18.199958+00:00",
+  "kind": "STATIC_PREEXECUTION_HARNESS_REVIEW_FIX",
+  "priorNativeRun": "NOT RUN",
+  "oldConfig": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/native-config.json",
+    "bytes": 2526,
+    "sha256": "61a0c12ef0c9737f7fd54e72ba5b302844bfa423f13899112d897c87d1626c92"
+  },
+  "oldFreeze": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r1/freeze-verification.json",
+    "bytes": 2179,
+    "sha256": "3e274d59529423c420dfbe07ea11ff63f009358b651cb591edb0810f5725e4ba"
+  },
+  "newConfig": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/native-config.json",
+    "bytes": 2819,
+    "sha256": "bb6cbc77100405825395a8dc8bbfd6986edb37b2e799a5fea4ebd8a590532385"
+  },
+  "diff": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-f26ae8f/preparation-r2/r1-to-r2.diff",
+    "bytes": 1717,
+    "sha256": "378dd3e4202235989d1f42015cfe66b9cb4787cdc2f118da4e33258a396f7149"
+  },
+  "oldPreparationPreserved": true,
+  "productChanges": 0
+}

@@ -1,0 +1,10 @@
+--- initial-frozen/native-recovery.mjs
++++ r1-handoff/native-recovery.mjs
+@@ -66,6 +66,7 @@
+ finally{process.stdout.write=stdout;closeSync(events);closeSync(output);}
+ const after={raw:!!process.stdin.isRaw,stty:stty()},tasks=readAcceptedTasks(dataRoot,{limit:200}).tasks,queue=readQueue(dataRoot,{limit:200}).items,source=await readRun(dataRoot,original.runId),newTask=tasks.find(task=>task.input==='全新任务'),ansi=readFileSync(join(root,'output.ansi'),'utf8');
+ const requiredFacts={
++  noRuntimeError:result.error===undefined,finalCleanupConfirmed:result.result?.cleanup==='confirmed',
+   recoveryReportSaved:source.records.some(record=>record.kind==='recovery.report'),
+   noWidthTimeout:!ansi.includes('WIDTH_CPR_TIMEOUT'),noRetryNeeded:!inputs.some(input=>input.data==='\x0c'),measured:result.widthCalibration?.status==='measured',
+   sourceExplicitlyEnded:tasks.find(task=>task.runId===original.runId)?.status==='ended',sourceOriginalPreserved:source.result.status==='aborted',

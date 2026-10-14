@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "issue": 26,
+  "finding": "STD-02",
+  "state": "PASS_FOR_LOCAL_REPAIR_SCOPE",
+  "base": "8b1d9b0fa08ed9da49c649f4e51e2d58bdc5d723",
+  "commit": "04c10387b4d17aed4cd3274b1d356aae39264e6a",
+  "tree": "61f6b42074a3dbe2dc862a4185e3d04d32f70232",
+  "worktree": "/Users/nineofour/pi-durio-v1-run/worktrees/repair-26-output",
+  "status": "",
+  "sourceBuild": {
+    "sha256": "a1e6dd2975aa3f346e1bf43fccbce308a5d702eebf6e73205d763ea5ecb4410e",
+    "inputs": 158,
+    "outputs": 234,
+    "compilerInputs": 140,
+    "readbackMismatches": []
+  },
+  "requestedExecution": {
+    "model": "gpt-6-astra",
+    "effort": "xhigh",
+    "actualBackend": "not independently attested"
+  },
+  "checks": [
+    {
+      "log": "focused-2.log",
+      "passed": 36,
+      "skipped": 4,
+      "scope": "eval/history/storage and output/controller; unchanged applicable results reused"
+    },
+    {
+      "log": "output-final.log",
+      "passed": 9,
+      "skipped": 4,
+      "scope": "final production output implementation; only later new VM test fixture changed"
+    },
+    {
+      "log": "vm-integration.log",
+      "passed": 2,
+      "failed": 1,
+      "scope": "registered build/startup/explicit launch/rollback and cancelled/record-failed batch passed; new fixture precondition failure retained"
+    },
+    {
+      "log": "vm-output-acquired.log",
+      "passed": 1,
+      "failed": 0,
+      "scope": "corrected fixture; stdout and stderr actual acquisition preserved in product Evidence"
+    },
+    {
+      "result": "maximum-output-result.json",
+      "status": "PASS",
+      "scope": "maximum configured bounded acquisition and durable reference pagination"
+    }
+  ],
+  "reusedProductionIdentity": {
+    "before": "49a0a8a74b5828f9dc595024b3ae561320f75cfd3dcc0131130c283eedcce443",
+    "after": "a1e6dd2975aa3f346e1bf43fccbce308a5d702eebf6e73205d763ea5ecb4410e",
+    "changedInputs": [
+      "test/improve-decisions.test.ts"
+    ],
+    "productionOutputsIdentical": true,
+    "compilerIdentical": true
+  },
+  "vm": {
+    "executions": 7,
+    "allTerminated": true,
+    "remainingOwnedIds": []
+  },
+  "preservedFailures": [
+    "red-boundary.log",
+    "red-process-build.log",
+    "vm-integration.log",
+    "vm-output-fixed-fixture.log",
+    "vm-output-final.log",
+    "vm-output-assumption-failure.json",
+    "vm-output-exit.json"
+  ],
+  "notRun": [
+    "full repository npm test",
+    "separate npm pack/install acceptance",
+    "real provider or paid execution",
+    "native Terminal or daily-use acceptance"
+  ],
+  "authority": "local branch commit only; no push/main/Issue changes; parent merger owns combination and fresh review"
+}

@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "cases": 2,
+  "results": [
+    {
+      "name": "actual-preflight-false-grant",
+      "status": "PASS",
+      "exit": 1,
+      "stderr": "PREFLIGHT_DENIED: EXPLICIT_NEW_PAID_GRANT_REQUIRED\n\nfalse !== true\n\n"
+    },
+    {
+      "name": "actual-fixed-wrapper-missing-grant",
+      "status": "PASS",
+      "exit": 1,
+      "credentialAndExecEffects": []
+    }
+  ],
+  "wrapperSha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4",
+  "preflightSha256": "ec752343e4bed892a06ad684aae697ae350716f78f4af61a7e33058cc7c51230",
+  "realCredentialReads": 0,
+  "newProviderRequests": 0,
+  "productExecutions": 0
+}

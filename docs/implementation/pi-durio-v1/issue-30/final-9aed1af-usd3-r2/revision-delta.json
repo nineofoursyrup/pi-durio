@@ -1,0 +1,141 @@
+{
+  "revision": "r2",
+  "previous": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/frozen-manifest.json",
+    "bytes": 7837,
+    "sha256": "f0ccad818a62f66d00e274f4efba03c52d4e5570f465476500dbe6fd1642aecc"
+  },
+  "current": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/frozen-manifest.json",
+    "bytes": 8105,
+    "sha256": "51ff05f19a55cd14653f1f00dc7a07d4bc5f9931b7107091ad5207ce0e269486"
+  },
+  "finding": "USD3-SPEC-01",
+  "firstFailure": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/expiry-probe-result.json",
+    "bytes": 907,
+    "sha256": "341b2233193117b0c05ccda0042a9ac8ab3d5c8ef34b48f45583b3612f36da07"
+  },
+  "previousReview": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/usd3/review.json",
+    "bytes": 20710,
+    "sha256": "4bf7bed922f5bab737842b6b75aa4aad1616c50df32ab0218a6f12a490a82c9f"
+  },
+  "previousDisposition": "BLOCKED, immutable f0 package retained and must not execute",
+  "preciseHarnessDiff": {
+    "run.mjs": [
+      "--- f0/run.mjs\n",
+      "+++ r2/run.mjs\n",
+      "@@ -13,8 +13,12 @@\n",
+      " assert.equal(api.validation.describeImproveRuntime(artifact.linux),artifact.linuxRuntimeIdentity,'LINUX_RUNTIME_CHANGED');\n",
+      " const fixture=freeze.fixture;for(const [path,hash]of Object.entries(fixture.fileHashes))assert.equal(sha(readFileSync(join(proposal.improve.workspace,path))),hash,`FIXTURE_CHANGED:${path}`);\n",
+      " api.improve.validateImproveRequest(proposal.improve.request,'live');\n",
+      "+const startedAt=new Date(),grantTime=Date.parse(grant.grantedAt);\n",
+      "+// Installation/runtime validation may consume the remaining grant window.\n",
+      "+// Admission uses this exact saved timestamp; never renew the human grant.\n",
+      "+assert.ok(Number.isFinite(grantTime)&&grantTime<=startedAt.getTime()&&startedAt.getTime()-grantTime<=proposal.window.grantToStartMs,'GRANT_EXPIRED_BEFORE_START');\n",
+      " assert.ok(process.env.DEEPSEEK_API_KEY?.trim(),'AUTH_MISSING: load only the human-permitted source into DEEPSEEK_API_KEY');\n",
+      "-const startedAt=new Date(),deadline=new Date(startedAt.getTime()+proposal.window.activeMs).toISOString();\n",
+      "+const deadline=new Date(startedAt.getTime()+proposal.window.activeMs).toISOString();\n",
+      " const output=freeze.output;\n",
+      " save(join(output,'paid-start.json'),{batchId:proposal.batchId,manifest:file(freezePath),grant:file(grantPath),startedAt:startedAt.toISOString(),deadline,credentialSource:grant.credentialSource,credentialValue:'never retained',scope:'one start; all SDK retries and compactions share stage budgets; no resume'});\n",
+      " const controller=new AbortController(),timer=setTimeout(()=>controller.abort(Error('BATCH_DEADLINE')),Math.max(1,Date.parse(deadline)-Date.now()));\n"
+    ],
+    "derive.py": [
+      "--- f0/derive.py\n",
+      "+++ r2/derive.py\n",
+      "@@ -9,7 +9,7 @@\n",
+      " import subprocess\n",
+      " \n",
+      " OLD = Path('/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af')\n",
+      "-NEW = OLD.with_name('final-9aed1af-usd3')\n",
+      "+NEW = OLD.with_name('final-9aed1af-usd3-r2')\n",
+      " SOURCE = Path(__file__).resolve().parent\n",
+      " AUTH = Path('/Users/nineofour/pi-durio-v1-run/preparation/issue-30/user-budget-20261010.json')\n",
+      " OBS = AUTH.parent / 'provider-usd3-20261010'\n",
+      "@@ -99,5 +99,5 @@\n",
+      " save(NEW / 'grant-template-NOT-EXECUTABLE.json', {'paidApproved': False, 'manifestSha256': file(NEW / 'frozen-manifest.json')['sha256'], 'batchId': proposal['batchId'], 'humanAuthorization': json.loads(AUTH.read_text())['budgetAuthorization']['exactHumanReply'], 'authorizationSource': file(AUTH), 'credentialSource': '/Users/nineofour/Durio/api.env', 'grantedAt': json.loads(AUTH.read_text())['receivedAt'], 'limits': limits, 'note': 'Template only. Coordinator must review, confirm credential readiness and workload isolation, then create explicit-human-grant.json without changing the original grant time. This task creates no executable grant.'})\n",
+      " for entry in preserved:\n",
+      "     assert file(Path(entry['path'])) == entry, 'Original evidence changed'\n",
+      "-save(NEW / 'derivation.json', {'status': 'PREPARED_NOT_STARTED', 'base': '14787f0dfaadf69b6c235e5bb650d9f923a5d5a1', 'product': '9aed1af6ee3b156bb7354961496217aa5e64843e', 'original': file(OLD / 'frozen-manifest.json'), 'manifest': file(NEW / 'frozen-manifest.json'), 'proposalDelta': diff(original, proposal), 'originalEvalKinds': kinds, 'preservedOriginals': preserved, 'dataRootDerivation': 'APFS clone of closed existing data roots; separate inode/writes; no generator, new seed, VM or provider; original fixture workspace used read-only to retain source identity', 'reusedBodies': {'common': 'byte-identical', 'run': 'identity/API/materialization/cancel/retry/cleanup body byte-identical from const identity onward; only preflight replaced'}, 'credentialRead': False, 'paidRequests': 0})\n",
+      "+save(NEW / 'derivation.json', {'status': 'PREPARED_NOT_STARTED', 'base': '14787f0dfaadf69b6c235e5bb650d9f923a5d5a1', 'product': '9aed1af6ee3b156bb7354961496217aa5e64843e', 'original': file(OLD / 'frozen-manifest.json'), 'manifest': file(NEW / 'frozen-manifest.json'), 'proposalDelta': diff(original, proposal), 'originalEvalKinds': kinds, 'preservedOriginals': preserved, 'dataRootDerivation': 'APFS clone of closed existing data roots; separate inode/writes; no generator, new seed, VM or provider; original fixture workspace used read-only to retain source identity', 'reusedBodies': {'common': 'byte-identical', 'run': 'r2 adds the same original grant window check immediately before actual start; original materialization/cancel/retry/cleanup body remains byte-identical from const output onward'}, 'credentialRead': False, 'paidRequests': 0})\n",
+      " print(json.dumps(file(NEW / 'frozen-manifest.json')))\n"
+    ]
+  },
+  "newRegressionScript": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/check-start-window.mjs",
+    "bytes": 5777,
+    "sha256": "9892cdfb270b20515118d0ffc0a01e44ed22d99279b47df1d566d19c47068c3b"
+  },
+  "unchangedHarness": [
+    {
+      "name": "common.mjs",
+      "old": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/common.mjs",
+        "bytes": 2998,
+        "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+      },
+      "current": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/common.mjs",
+        "bytes": 2998,
+        "sha256": "643fa69f2e3d19033ea546f6f38fe82090914ea51d17f993e05b15dc529ba58d"
+      }
+    },
+    {
+      "name": "preflight.mjs",
+      "old": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/preflight.mjs",
+        "bytes": 7899,
+        "sha256": "bffdfd6e5addf0e268e4cd53065d2ea1feea3b76fe4a8412fa6a19869c779891"
+      },
+      "current": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/preflight.mjs",
+        "bytes": 7899,
+        "sha256": "bffdfd6e5addf0e268e4cd53065d2ea1feea3b76fe4a8412fa6a19869c779891"
+      }
+    },
+    {
+      "name": "launch.py",
+      "old": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/launch.py",
+        "bytes": 2523,
+        "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+      },
+      "current": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/launch.py",
+        "bytes": 2523,
+        "sha256": "0bc874e203ee5d9ef975a3861db7c268d6a5f62c1a8d2c97b58316d07948b2e4"
+      }
+    },
+    {
+      "name": "check-preflight.mjs",
+      "old": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/check-preflight.mjs",
+        "bytes": 10637,
+        "sha256": "8092ed2ffa2d898ba0821c9eb8d41e926e00237d5de4a2dbd71536515441b60c"
+      },
+      "current": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/check-preflight.mjs",
+        "bytes": 10637,
+        "sha256": "8092ed2ffa2d898ba0821c9eb8d41e926e00237d5de4a2dbd71536515441b60c"
+      }
+    },
+    {
+      "name": "check-credential.py",
+      "old": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3/harness/check-credential.py",
+        "bytes": 3015,
+        "sha256": "aadd6a3763f85155a2bb4c94157ba5286e99f36c16f9b77587946cd63386cd3b"
+      },
+      "current": {
+        "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/harness/check-credential.py",
+        "bytes": 3015,
+        "sha256": "aadd6a3763f85155a2bb4c94157ba5286e99f36c16f9b77587946cd63386cd3b"
+      }
+    }
+  ],
+  "unchangedBody": "const output onward exactly equal; all materialization, authentication-stop, cancellation, retry, cleanup and report logic retained",
+  "proposalRevision": "Only derivative output/data-root/provider-observation file paths move from usd3 to usd3-r2; same literal batchId names one logical authorization, not a second budget",
+  "dataRoots": "Fresh APFS clone from original final-9aed1af closed roots; f0 roots untouched",
+  "productUnchanged": true
+}

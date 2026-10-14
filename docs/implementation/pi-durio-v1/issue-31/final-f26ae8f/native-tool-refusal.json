@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-10T10:58:30.540463+00:00",
+  "tool": "mcp__cua_repl.js",
+  "operation": "await cua.getApp(\"com.apple.Terminal\")",
+  "result": "Computer Use is not allowed to use the app 'com.apple.Terminal' for safety reasons.",
+  "effect": "No UI action occurred",
+  "disposition": "Do not bypass; user must launch native frozen batch in own Terminal. M1 remains independent."
+}

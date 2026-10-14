@@ -1,0 +1,165 @@
+I have all acquirable evidence. Returning my structured report.
+
+```json
+{
+  "summary": "The registered project target 'clamp-project' exposes one small module clamp.ts plus a protected black-box check (check.mjs), a protected README.md and a protected package.json. clamp.ts defines clamp(value,lower,upper) as Math.min(upper, Math.min(lower, value)). Because Math.min is associative/commutative, this composition reduces to min(upper, lower, value), which never returns a value above lower. The protected check.mjs requires an above-upper case [14,0,10,10] (expect 10) and a below-lower case [-9,-5,-1,-5] (expect -5). The retained run seq 20 invoked 'node check.mjs', and the shell result seq 25 reports exitCode 1 with seq 26 'Command exited with code 1', confirming at least one declared case failed. The raw tool.output text (seq 24) is withheld/boundary-redacted, so the exact failing assertion and message are not acquired. From static analysis, the above-upper case is the one that cannot pass under the current composition: min(10, min(0,14)) = min(10,0) = 0 != 10, while the below-lower case min(-1, min(-5,-9)) = min(-1,-5) = -5 does equal the expected -5. The defect is an inverted/composed nesting that lacks the lower-bound saturation (Math.max with lower). The minimal deterministic repair is to replace the inner composition with Math.min(upper, Math.max(lower, value)), changing only clamp.ts. No performance claim is made; this is a correctness (bug) repair. Highest-priority candidate: one. Candidate 1 is the clamp fix. A second, independent candidate holds the missing/withheld acceptance evidence (the exact failing assertion) as a gap; it is NOT proposed as an execution change because check.mjs is protected and eval assets must be independent of any runtime change.",
+  "candidates": [
+    {
+      "title": "Repair clamp lower-bound saturation in clamp.ts (value above upper collapses to lower)",
+      "problem": "clamp.ts computes Math.min(upper, Math.min(lower, value)). Since Math.min is associative, this is min(upper, lower, value), so an input value greater than upper is clamped down to lower instead of upper. The protected check.mjs case [14,0,10,10] expects 10 and cannot be satisfied; the retained run exited with code 1.",
+      "problemKey": "clamp.bounds.lowersaturation",
+      "objective": "bug",
+      "targetId": "clamp-project",
+      "facts": [
+        {
+          "claim": "clamp.ts exports clamp as Math.min(upper, Math.min(lower, value)); the inner reduction saturates to lower and the outer min collapses all three operands.",
+          "evidence": ["e1:49:a680a9179462aab085f0352e77a9e1c25a3d53ac56cf41015e1d20f913cf8ca7"]
+        },
+        {
+          "claim": "check.mjs declares 6 cases and requires the inclusive-bounds contract, including above-upper [14,0,10,10]->10 and below-lower [-9,-5,-1,-5]->-5.",
+          "evidence": ["e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2"]
+        },
+        {
+          "claim": "The retained run invoked 'node check.mjs'.",
+          "evidence": ["e1:20:d2a3b2bfd0115e74d33d8bca508339e1e25547a25a17ad40fc652542cc31e8f3"]
+        },
+        {
+          "claim": "The check run exited with code 1, i.e. at least one assertion failed.",
+          "evidence": ["e1:25:35696d254652b487ec6bab04fddf29f7ca231e63adf5d1c69e777eb23954193c", "e1:26:3f8896d0da5cc0426f7d92f9eed80708b8b289446b865d3eb47025d703e25edb"]
+        },
+        {
+          "claim": "README.md states the intended contract: clamp to the inclusive lower and upper bounds; lower is never greater than upper.",
+          "evidence": ["e1:51:ccf3e336d85ab9b57c2361610ef0777fc8288d1d2cedec9ee0eef5133438c927"]
+        },
+        {
+          "claim": "package.json marks the project as private ESM ('type':'module'), matching the ESM import './clamp.ts' in check.mjs.",
+          "evidence": ["e1:52:8cc84f042f96e2325ad9daf05845f9fa1bcd0183132f01a0329b99a45bfa60b4"]
+        }
+      ],
+      "hypotheses": [
+        "The failing assertion is the above-upper case [14,0,10,10], because min(10, min(0,14)) = 0 while the expected value is 10; the below-lower case min(-1, min(-5,-9)) = -5 coincidentally matches its expectation and would pass.",
+        "The defect is localized to the nesting in clamp.ts and is independent of the module system, since package.json declares ESM consistently with check.mjs.",
+        "Replacing the inner expression with Math.max(lower, value) and keeping the outer Math.min(upper, ...) makes all six declared cases pass by direct evaluation."
+      ],
+      "successCounterexamples": [
+        {
+          "claim": "The below-lower and in-range declared cases are already satisfied by the current code, so the fix must not regress them: [-9,-5,-1,-5]->-5 and [6,0,10,6]->6 hold under both old and proposed formulas.",
+          "evidence": ["e1:50:7597a83cc3e5106c4d685678a74204e57da979d405b4b20e79a15965715425f2"]
+        }
+      ],
+      "gaps": [
+        "The exact failing assertion text and error message are not acquired: the tool.output body for seq 24 is boundary-withheld ([WITHHELD]) at every offset, so I cannot cite the specific Node assertion error.",
+        "No post-fix execution result is available; passing the protected check after the change is inferred by static evaluation, not observed.",
+        "The 'lower never greater than upper' precondition is stated in README.md but no case in check.mjs exercises lower>upper, so behavior under that precondition-violating input is unknown and out of scope.",
+        "No success counterexample proving the fix improves behavior beyond the six declared cases was acquired (no additional run evidence exists in the retained window)."
+      ],
+      "mechanismsReviewed": [
+        "clamp.ts value normalization (Math.min/Math.max composition)",
+        "check.mjs declared acceptance cases over the public export",
+        "ESM module resolution (package.json type:module vs import './clamp.ts')"
+      ],
+      "steps": [
+        "Edit only clamp.ts: change the body to Math.min(upper, Math.max(lower, value)), preserving the named export signature (value, lower, upper).",
+        "Do not modify check.mjs, README.md or package.json (protected).",
+        "Verify statically against each declared case: [-4,0,10]->0, [0,0,10]->0, [6,0,10]->6, [14,0,10]->10, [-3,-5,-1]->-3, [-9,-5,-1]->-5."
+      ],
+      "scope": ["clamp.ts"],
+      "validation": {
+        "method": "Re-run the protected black-box check (node check.mjs) after the edit and require exit code 0; treat that check as an independent acceptance oracle, not as a co-changed asset.",
+        "checks": [
+          "node check.mjs exits 0 and prints 'All declared clamp requirements pass'",
+          "For value=14, lower=0, upper=10 the result is exactly 10 (upper)",
+          "For value=-9, lower=-5, upper=-1 the result is exactly -5 (lower)",
+          "In-range value=6, lower=0, upper=10 returns 6 unchanged"
+        ],
+        "budget": "One source-file edit (clamp.ts, single line) plus one check invocation",
+        "protections": [
+          "check.mjs is read-only and used only as the independent oracle",
+          "README.md and package.json remain unchanged",
+          "No dependency or configuration changes",
+          "No performance claim is asserted or relied upon"
+        ]
+      },
+      "risks": [
+        "Static evaluation could miss a subtle numeric edge (e.g., NaN or -0) not covered by the declared cases, since no such case exists in check.mjs.",
+        "If the true failing case were the below-lower case instead of the above-upper case (unverifiable because seq 24 is withheld), the diagnosis would need revision; the static reduction of Math.min strongly supports the above-upper case, though.",
+        "Changing the export body while check.mjs remains protected is safe only if the export name and arity are preserved."
+      ],
+      "rollback": "Revert clamp.ts to the recorded baseline content (sha256 b33b7f38ce6fa4d07899ebd5494dd7d800d2b554752b25ed7645d9b0827bd4fc); no other file is touched, so rollback is a single-file restore.",
+      "activation": {
+        "writeback": false,
+        "enable": false,
+        "conditions": [
+          "Only if the user selects this candidate",
+          "Only after the withheld failing assertion is confirmed to be the above-upper case, or the static reduction is accepted as sufficient"
+        ],
+        "timing": "Analysis only now; no writeback or activation occurs during this report."
+      },
+      "dependencies": [],
+      "conflicts": [2]
+    },
+    {
+      "title": "Missing/withheld acceptance evidence for the clamp check failure (gap-only, no executable scope)",
+      "problem": "The retained tool.output body (seq 24) that contains the actual failing assertion/message is boundary-withheld and unreadable at every offset, so the precise failing case and error cannot be confirmed from acquired evidence. This is a validation-observability gap, not a runtime defect.",
+      "problemKey": "clamp.check.evidencewithheld",
+      "objective": "validation",
+      "targetId": "clamp-project",
+      "facts": [
+        {
+          "claim": "The tool.output event seq 24 is marked derived-redacted with reason 'raw acquired chunk has incomplete boundary context' and its text is [WITHHELD] at offset 0 and every attempted offset.",
+          "evidence": ["e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503"]
+        },
+        {
+          "claim": "Only the exit status is acquired (exitCode 1), not the assertion message.",
+          "evidence": ["e1:25:35696d254652b487ec6bab04fddf29f7ca231e63adf5d1c69e777eb23954193c", "e1:26:3f8896d0da5cc0426f7d92f9eed80708b8b289446b865d3eb47025d703e25edb"]
+        }
+      ],
+      "hypotheses": [
+        "The withheld body would name the failing assertion and confirm the above-upper case diagnosis, but this remains unverified."
+      ],
+      "successCounterexamples": [],
+      "gaps": [
+        "The failing assertion text is unacquirable within the retained window; no independent comparison record exists.",
+        "check.mjs is protected and must not be altered to add diagnostics; therefore any additional observability would require separate authorization not granted here.",
+        "No success counterexample can be stated: there is no acquired evidence of a post-fix passing run."
+      ],
+      "mechanismsReviewed": [
+        "Evidence redaction/boundary policy on tool.output",
+        "Black-box check as acceptance oracle (check.mjs)"
+      ],
+      "steps": [],
+      "scope": [],
+      "validation": {
+        "method": "None executable within granted scope; this candidate records a gap only.",
+        "checks": [],
+        "budget": "None",
+        "protections": [
+          "No edits to check.mjs or any protected file",
+          "No eval/grader asset is used to justify a simultaneous runtime change"
+        ]
+      },
+      "risks": [
+        "Attempting to widen scope or read the withheld body could violate the analysis-only boundary; explicitly declined."
+      ],
+      "rollback": "Not applicable; no change proposed.",
+      "activation": {
+        "writeback": false,
+        "enable": false,
+        "conditions": [
+          "Never activated as an executable change; gap-only record"
+        ],
+        "timing": "N/A"
+      },
+      "dependencies": [],
+      "conflicts": [1]
+    }
+  ],
+  "gaps": [
+    "The retained failing tool.output (seq 24, sha256 64d57d6f...) is withheld at every offset, so the exact failing assertion and Node error message are not acquired; all diagnosis of which case fails rests on static reduction of clamp.ts and the declared expectations in check.mjs.",
+    "No post-fix execution evidence exists in the retained window; the proposed fix's passing status is inferred statically and must be confirmed by the protected check at validation time.",
+    "lower > upper behavior is unspecified by any executed case (README.md states the precondition but check.mjs does not test its violation), so out-of-precondition behavior is unknown.",
+    "Self source is not explicitly registered ('self-source-unregistered', state incomplete), so no self-source claims are made.",
+    "The raw evidence body might contain additional context not visible through redaction; empty or withheld evidence is not treated here as proof of absence or presence."
+  ]
+}
+```

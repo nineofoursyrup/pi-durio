@@ -1,0 +1,347 @@
+{
+  "review": "Spec",
+  "review_kind": "Independent repair-delta review reusing the previous complete Spec review for unchanged scope",
+  "status": "PASS",
+  "status_scope": "No open demonstrable Spec defect in the reviewed repair delta and adjacent behavior; not full v1 acceptance or delivery authorization",
+  "completed_at": "2026-10-09T22:57:51.037894+00:00",
+  "identity": {
+    "baseline": "25d311616136766b37c0274f3f490ec1105f9592",
+    "previous_candidate": "1be8e2826fa5d523e9224677838dd97b2d4d8ac3",
+    "candidate": "74a91eac93c19e17e82a91a9ad38c3aaea023273",
+    "candidate_tree": "e3089debbbbc34a3a4ba48980087cf9bbd12589d",
+    "checkout": "/Users/nineofour/Durio",
+    "worktree_status": "?? docs/prototypes/archive/\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json",
+    "tracked_worktree_diff_empty": true,
+    "tracked_index_diff_empty": true,
+    "repair_diff_sha256": "7af3e6126869fbd68e103af6d94c4efbdbcd0e7ea9c238dddd2b133b05f9ffe1",
+    "untracked_scope": "Original planning files only; excluded from product review"
+  },
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "xhigh",
+  "actual_backend_attestation": "UNAVAILABLE; requested model is not independent proof of the serving backend",
+  "finding_count": 0,
+  "highest_priority": null,
+  "findings": [],
+  "scope_creep_findings": [],
+  "optional_suggestions": [],
+  "prior_findings": [
+    {
+      "id": "SPEC-01",
+      "original_priority": 1,
+      "disposition": "RESOLVED_IN_REVIEWED_CANDIDATE",
+      "original_status_preserved": "Original CHANGES_REQUESTED and memory/OOM observations are unchanged; this is a new candidate disposition",
+      "contract": [
+        {
+          "path": "docs/specs/pi-durio-v1-spec.md",
+          "lines": [
+            49,
+            55
+          ],
+          "requirement": "R3/R5/R6: read-only recovery, complete pending-work and authorization checks, immutable execution content"
+        },
+        {
+          "path": "docs/specs/pi-durio-v1-spec.md",
+          "lines": [
+            69,
+            73
+          ],
+          "quote": "内存、显示及送模有界，长输出分块持久化、背压和引用分页。"
+        },
+        {
+          "path": "docs/design/runtime-evidence-and-retention.md",
+          "lines": [
+            39,
+            41
+          ],
+          "quote": "内存、显示窗口和送模上下文仍须有界；它们与磁盘原文保留是不同维度。"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "src/preflight.ts",
+          "lines": [
+            25,
+            57
+          ],
+          "finding": "Owner/path and main+WAL source/copy hash fences remain, with public Storage opened only on a temporary copy and closed in finally."
+        },
+        {
+          "path": "src/preflight.ts",
+          "lines": [
+            63,
+            168
+          ],
+          "finding": "Admission discards task/submission pages and selected fact bodies; cross-session authorization/source joins reside in a disposable SQLite index, not all-history arrays."
+        },
+        {
+          "path": "src/recovery-facts.ts",
+          "lines": [
+            34,
+            78
+          ],
+          "finding": "Fixed-watermark lazy records and streamed digests still validate all selected original bodies; original content is not deleted or reclassified."
+        },
+        {
+          "path": "src/recovery-projection.ts",
+          "lines": [
+            26,
+            142
+          ],
+          "finding": "Whole task/submission scans, exact assistant/outcome entry reads and disk-backed joins determine pending, ownership, compaction, unknown attempts and resolution coverage; display pages are bounded."
+        },
+        {
+          "path": "src/recovery.ts",
+          "lines": [
+            90,
+            163
+          ],
+          "finding": "Full reason count/hash binds the snapshot; blocked or external work is not concealed by the displayed page. Original close fact remains addressable."
+        },
+        {
+          "path": "src/recovery.ts",
+          "lines": [
+            265,
+            314
+          ],
+          "finding": "Continuation re-inspects all unknown tools, rejects missing/invalid resolutions and stale snapshots; read-only capability downgrade uses full-snapshot facts."
+        },
+        {
+          "path": "src/runtime.ts",
+          "lines": [
+            642,
+            652
+          ],
+          "finding": "Previously queued steer submissions are passively re-read by request ID and withdrawn before scheduling; display pagination cannot reattach them."
+        },
+        {
+          "path": "src/storage-projection.ts",
+          "lines": [
+            69,
+            108
+          ],
+          "finding": "Close spools all usage documents, emits source-bound projections only after final source validation, and compaction withdrawal reads exact task/summary IDs."
+        },
+        {
+          "path": "src/runtime.ts",
+          "lines": [
+            763,
+            769
+          ],
+          "finding": "Ordinary confirmed close no longer serializes the full transcript into the bounded host fact."
+        },
+        {
+          "path": "src/retention.ts",
+          "lines": [
+            90,
+            114
+          ],
+          "finding": "Whole-session pending/readability protection remains; finite projection excess fails closed."
+        },
+        {
+          "path": "src/storage-archive.ts",
+          "lines": [
+            34,
+            41
+          ],
+          "finding": "Archive validation scans every session while returning bounded display summaries; manifest/restored originals remain authoritative."
+        }
+      ],
+      "reused_evidence": [
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-preflight/benchmark-gc-results.json",
+          "result": "Six limited-heap host admission/recovery-snapshot cases completed, including 24 MiB originals under 24 MiB old-space; stage evidence only."
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/checks.json",
+          "result": "Separately identified r5 affected 43/43, r6 affected 34/34, and final navigation 2/2; not summed into a final-candidate total."
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/affected-r2.log",
+          "result": "Actual log confirms 34 pass, zero fail; includes 64 MiB target session under 48 MiB heap, bounded ordinary close beyond old 2 MiB snapshot seam, full late-page recovery checks and runtime/lifecycle/control consumers."
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-15-target-session/navigation-final.log",
+          "result": "Final CLI/API and TUI pagination checks 2/2 pass."
+        }
+      ],
+      "applicability": "The target-session implementation and regression inputs match their final stage manifest. Subsequent owner/output repairs were reviewed here; their interaction still belongs to the in-progress fixed-candidate combined gate. Small-heap/fixture results are regression evidence, not representative RSS or daily-use acceptance."
+    },
+    {
+      "id": "SPEC-02",
+      "original_priority": 1,
+      "disposition": "RESOLVED_IN_REVIEWED_CANDIDATE",
+      "original_status_preserved": "Original signal failures and subsequent repair first failures retained without rewriting",
+      "contract": [
+        {
+          "path": "docs/specs/pi-durio-v1-spec.md",
+          "lines": [
+            51,
+            51
+          ],
+          "quote": "退出停止接收新工作，请求取消并等待受管执行清理、存储关闭后再释放所有权，保留可恢复工作；"
+        },
+        {
+          "path": "docs/design/eval-and-improvement.md",
+          "lines": [
+            73,
+            79
+          ],
+          "quote": "超时/取消停止放行并终止受管执行。"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "scripts/live-batch/run.mjs",
+          "lines": [
+            17,
+            19
+          ],
+          "finding": "Actual runner/common must be frozen and content-verified before product preparation or credential use."
+        },
+        {
+          "path": "scripts/live-batch/run.mjs",
+          "lines": [
+            36,
+            55
+          ],
+          "finding": "SIGINT/SIGTERM retain the first cancellation intent, abort the shared controller and block eval admission after cancelled preparation."
+        },
+        {
+          "path": "scripts/live-batch/run.mjs",
+          "lines": [
+            65,
+            82
+          ],
+          "finding": "Awaited eval/improve retains failed or unknown cleanup; aborted eval cannot start improve, repeated signals do not bypass cleanup, final receipt precedes handler removal and exits 130/143."
+        },
+        {
+          "path": "src/eval/runner.ts",
+          "lines": [
+            64,
+            119
+          ],
+          "finding": "Same signal reaches restricted trials, stops remaining trial admission and completes the existing owner/evidence lifecycle."
+        },
+        {
+          "path": "scripts/isolation/boundary.mjs",
+          "lines": [
+            146,
+            226
+          ],
+          "finding": "Abort terminates local controller pipes; final stop/inspect/delete/absence still determines VM termination. No claim of remote provider cancellation is made."
+        }
+      ],
+      "reused_evidence": [
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/compiled-r2.log",
+          "result": "6/6 tests; real OS SIGINT/SIGTERM, repeated signal, prepare/eval/improve cancellation, cleanup unknown and frozen entry identity. Installed product APIs are offline fixtures; no provider/VM proof."
+        },
+        {
+          "path": "/Users/nineofour/pi-durio-v1-run/evidence/repair-30-cancel/checks.json",
+          "result": "First signal/compilation/identity failures and final source-build applicability recorded separately."
+        }
+      ],
+      "applicability": "Runner/common/test inputs match the repaired stage. Existing stage tests are reused within their explicit synthetic installed-API scope. Future paid execution needs a newly frozen manifest and bound authorization; prior preparation grants are not inherited."
+    }
+  ],
+  "adjacent_repair_review": [
+    {
+      "area": "Output originals",
+      "contracts": [
+        "S3",
+        "E1",
+        "E2",
+        "E5",
+        "I10"
+      ],
+      "files": [
+        "scripts/isolation/boundary.mjs",
+        "src/execution-output.ts",
+        "src/eval/runner.ts",
+        "src/improve-build.ts",
+        "src/improve-validation.ts",
+        "src/improve-process.ts"
+      ],
+      "conclusion": "No new demonstrable Spec violation. All delivered raw pipe chunks, including the threshold-crossing event, remain ordered byte blocks; truncated UTF-8 previews are separately labeled. Complete block references enter fixation/retention through execution.output. Persistence failure does not publish a complete receipt or replay effects. Constant acquisition bounds and bounded metadata remain; this review makes no RSS claim."
+    },
+    {
+      "area": "Owner boundary",
+      "contracts": [
+        "R2",
+        "E4",
+        "M7"
+      ],
+      "files": [
+        "src/ownership.ts",
+        "src/metrics/acceptance.ts",
+        "src/metrics/costs.ts",
+        "src/metrics/feedback.ts"
+      ],
+      "conclusion": "No new demonstrable Spec violation. Mutation acquires or verifies the data-root owner before writable Evidence access; same-process borrowing validates the module-held lease, actual root/lock identity and claim. Alias/competing-process, lost/releasing lease and cleanup failures remain blocked; read-only reporting does not acquire a writer."
+    }
+  ],
+  "checks": {
+    "new_behavior_probes": [],
+    "read_only_identity_verification": "/Users/nineofour/pi-durio-v1-run/review/74a91ea/spec-evidence-readback.json",
+    "current_manifest_checks": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/source-build.json",
+      "sha256": "ccd9ac5775ebe6e5f75a74e10cc7f41873ac804662d4e3975b9b4bdc07ac3850",
+      "counts": {
+        "inputs": 168,
+        "compiler": 140,
+        "outputs": 246
+      },
+      "mismatches": []
+    },
+    "compiled_test_fixture_checks": {
+      "count": 120,
+      "mismatches": []
+    },
+    "combined_build": {
+      "status": "PASS",
+      "source": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/build-result.json",
+      "exitCode": 0
+    },
+    "combined_tests": {
+      "status": "IN_PROGRESS",
+      "testFiles": 39,
+      "concurrency": 2,
+      "source": "/Users/nineofour/pi-durio-v1-run/evidence/final-combined-r1/test-start.json",
+      "result_file_absent_at_readback": true,
+      "claim": "No full-suite PASS is asserted; coordinator must read the completed result against the same source/build candidate."
+    },
+    "stage_tests": "Existing stage observations are kept with their original source/build identity and applicability; test totals are not added together."
+  },
+  "external_gates": [
+    {
+      "issue": 30,
+      "status": "NOT_RUN_AWAITING_AUTHORIZATION_AND_INPUT",
+      "contract": "A1, A3; V5/V6; I3",
+      "remaining": "Fresh exact runner/build/installation/fixture/grader/seed manifest, explicit paid grant and permitted credential source; real DeepSeek representative tasks and generated improve candidate followed by separate actual user selection/execution/effect/reopen chain. No actual calls performed in this review."
+    },
+    {
+      "issue": 31,
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "contract": "A1/A2/A3, T7",
+      "remaining": "Complete candidate-applicable local resource/technical evidence and native macOS Terminal acceptance; prior local/VM/synthetic evidence keeps its declared scope. No VM, Terminal or resource workload was started by this reviewer."
+    },
+    {
+      "issue": 32,
+      "status": "NOT_RUN_AWAITING_EXPLICIT_HUMAN_ACCEPTANCE",
+      "contract": "A2/A3",
+      "remaining": "User local trial and explicit daily-use acceptance after required technical evidence; cannot be inferred from repaired code or passing tests."
+    }
+  ],
+  "approved_exceptions": "Previously authorized #16 two public width seams and #26 declared build resource profile are retained; no new exception or scope expansion is inferred.",
+  "limitations": [
+    "This updates the previous independent full Spec review on the changed and adjacent paths; unchanged coverage is reused, not claimed as a second complete line-by-line audit.",
+    "No Standards review report was consulted as review evidence.",
+    "No product, Git, root-state or previous review artifacts modified; no commit/push/PR/Issue write, provider/credential access, VM, native Terminal, new behavior probe or full suite run.",
+    "A scoped review PASS does not settle the integration test gate, technical acceptance, daily acceptance or release."
+  ],
+  "previous_report": {
+    "markdown": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/spec-review.md",
+    "json": "/Users/nineofour/pi-durio-v1-run/review/1be8e282/spec-review.json",
+    "preserved": true
+  }
+}

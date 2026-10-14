@@ -1,0 +1,20 @@
+{
+  "paidApproved": false,
+  "manifestSha256": "809aa5350c2d1d3cd3fac9281210ce41e2ff643e889a565bd15f25ae02e30856",
+  "batchId": "pi-durio-v1-live-r4-improve-report",
+  "humanAuthorization": null,
+  "authorizationSource": null,
+  "credentialSource": "/Users/nineofour/Durio/api.env",
+  "grantedAt": null,
+  "limits": {
+    "maxRequests": 8,
+    "maxTokens": 1200000,
+    "cumulativeMaxRequests": 49,
+    "cumulativeMaxTokens": 2362794,
+    "usdCeiling": 3,
+    "grantToStartMs": 86400000,
+    "activeMs": 3600000,
+    "starts": 1
+  },
+  "note": "No fresh human paid-start approval exists. New frozen manifest and independent review must precede a new direct human one-start approval."
+}

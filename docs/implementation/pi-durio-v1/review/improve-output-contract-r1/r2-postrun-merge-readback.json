@@ -1,0 +1,219 @@
+{
+  "status": "PASS",
+  "startedAt": "2026-10-10T09:56:49.330581+00:00",
+  "repository": "/Users/nineofour/Durio",
+  "branch": "codex/pi-durio-v1",
+  "preMergeHead": "70842fcba8375cf549f664e2ec147d4871461fa5",
+  "producerCommit": "5c38a384c65ce06a81331d5b384bda336ace3732",
+  "scope": "19 new postrun-readback docs only; no status or existing tracked files modified",
+  "requestedModel": "gpt-6-astra",
+  "requestedReasoningEffort": "xhigh",
+  "actualBackendAttestation": "NOT_ATTESTED",
+  "originalUntrackedBefore": {
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-preview.png": {
+      "bytes": 153617,
+      "sha256": "5d6d472eba3417f5411478627272e024c8b57b4d48fe32c4f3a469936bd89822"
+    },
+    "docs/prototypes/archive/before-claude-code-keybindings/tui-minimum-interaction-prototype.html": {
+      "bytes": 35573,
+      "sha256": "72770e281c17ff0cffa5753e951b7c4b835b24749255bcad7f81c5a5c0408c77"
+    },
+    "docs/wayfinder-proposal.md": {
+      "bytes": 7649,
+      "sha256": "86cfe925f5d045d6ceabcc63b465a6f1ad4e2e15b716d94ca7411b49e2eea006"
+    },
+    "docs/wayfinder-readback-2026-10-09.json": {
+      "bytes": 3833,
+      "sha256": "fa08e35489cb1d29ef8e33098a30dda6fbb6408544377c3bb3b0a9c765d2f5f9"
+    }
+  },
+  "apiEnv": {
+    "readContent": false,
+    "addedToGit": false,
+    "beforeStat": {
+      "size": 118,
+      "mode": 33152,
+      "inode": 108595560,
+      "mtimeNs": 1791610965598957000,
+      "ctimeNs": 1791610965609405872
+    }
+  },
+  "distBefore": {
+    "fileCount": 370,
+    "aggregateSha256": "a73e298a6375c50fe9d16da3a4fe6a7170b1756a6d08a256f85bcdf39f3ef450"
+  },
+  "priorOriginalsPreservation": {
+    "mode": "REUSED_EXISTING_BEFORE_AFTER_HASH_EVIDENCE",
+    "originalFiles": 12074,
+    "allMatched": true,
+    "bindingFiles": {
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/report.json": {
+        "bytes": 12036,
+        "sha256": "d0a1f3e9860b082fbcb0c127461ca4f0a830865aead08b883dd47317427e81d8"
+      },
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/REPORT.md": {
+        "bytes": 5607,
+        "sha256": "fedb5f8a90ddfd6717067610ec862e601fd58206d1f152299ad210cade8ea0d9"
+      },
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/evidence-index.json": {
+        "bytes": 9141,
+        "sha256": "87da8b40af1d9db7919efc995d1aacd0470dc306cf99abd897cb0b36bd334e25"
+      },
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/read-identities.json": {
+        "bytes": 3380142,
+        "sha256": "8af12422214af83f0a47b800ad7c449d90a1d1d1e8109e7fbbc0f7e42c95ebbd"
+      }
+    },
+    "originalFilesRescanned": false,
+    "reason": "Authorized docs-only merge cannot write external original evidence; existing immutable readback and hash-index identities are reused."
+  },
+  "productChecksRerun": false,
+  "providerCalls": 0,
+  "vmStarts": 0,
+  "terminalRuns": 0,
+  "statusWrites": 0,
+  "pushes": 0,
+  "externalWrites": "Only this new independent merge receipt directory",
+  "completedAt": "2026-10-10T09:56:50.032594+00:00",
+  "mergeCommit": "c616a75cd10bfd41d59f246e956a5d756abbc653",
+  "mergeTree": "8c85bb4a2611af88f75593ee682d71183e138c31",
+  "parents": [
+    "70842fcba8375cf549f664e2ec147d4871461fa5",
+    "5c38a384c65ce06a81331d5b384bda336ace3732"
+  ],
+  "producerTree": "8c85bb4a2611af88f75593ee682d71183e138c31",
+  "mergeTreeEqualsProducer": true,
+  "addedDocsCount": 19,
+  "addedDocsBytes": 191541,
+  "addedDocs": [
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/REPORT.md",
+      "bytes": 5607,
+      "sha256": "fedb5f8a90ddfd6717067610ec862e601fd58206d1f152299ad210cade8ea0d9",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/collect-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/collect-r1.stdout",
+      "bytes": 370,
+      "sha256": "426255b86e2e7a97d468faf50b27dfa257dfeef439c231b29b7d272ab22a0c3f",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/collect.py",
+      "bytes": 18775,
+      "sha256": "85582cb27db55b154408a603fcdb4e15db2cb17485d96101193e1e817fe4af7b",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/DIAGNOSIS.md",
+      "bytes": 2198,
+      "sha256": "8730f2694f623e485cfc2b684f91545ab3122646bb86d89599c4209e8c00e033",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/collect-inputs.py",
+      "bytes": 1940,
+      "sha256": "502b087f1785eb90974e65ec55be9ebbf4e987a9a22413208307559cf4889359",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/first-collector-failure.json",
+      "bytes": 374,
+      "sha256": "3ddbdd836ebec201adc14a75224480aac040b34494398f59b7560eac6e99450f",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/inputs.json",
+      "bytes": 5764,
+      "sha256": "cb4d2e4e7443c7e20bc0869be6295634eccf16a6f166149372b25463830a3989",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/probe-result.json",
+      "bytes": 2588,
+      "sha256": "b88599097ceb636ac9bb0524fbac0f4156277fac758e2f67c190523e1ce3ecc0",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/probe.mjs",
+      "bytes": 3689,
+      "sha256": "c23fb81d9e8205717f36d316345b558e2e150dc6e3be4cae6c1fe3dbee2556b5",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/evidence-index.json",
+      "bytes": 9141,
+      "sha256": "87da8b40af1d9db7919efc995d1aacd0470dc306cf99abd897cb0b36bd334e25",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/evidence-summary-1685.json",
+      "bytes": 5194,
+      "sha256": "6e6450e99c09eaedc5be3560d8a42d790184f7e9822cde115f88d2e14126914e",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/evidence-summary-99.json",
+      "bytes": 5194,
+      "sha256": "6e6450e99c09eaedc5be3560d8a42d790184f7e9822cde115f88d2e14126914e",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/fixture-readback.json",
+      "bytes": 963,
+      "sha256": "fb38f34615d8616fc464b34c5e240ccd257d83f0f7a5bd8fb798609541c2bf3a",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/raw-analysis-answer.txt",
+      "bytes": 12413,
+      "sha256": "71e132306496fb3b8f35d1734aca0e6170c06fd6984f4cd67affc0f0a13d14a1",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/raw-answer-index.json",
+      "bytes": 4870,
+      "sha256": "b50ff749ce7f24296cb347fc62ce322d321a0fa0115688503e4199e2d4a59df5",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/report.json",
+      "bytes": 12036,
+      "sha256": "d0a1f3e9860b082fbcb0c127461ca4f0a830865aead08b883dd47317427e81d8",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/requests.json",
+      "bytes": 32065,
+      "sha256": "8d7cf0228a0b2161f5ab877a405e74d52e466299ec987c1d76e5fce07d99103a",
+      "equalsProducerAndExternal": true
+    },
+    {
+      "path": "docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/timeline.json",
+      "bytes": 68360,
+      "sha256": "d089460a1f86585f8293c81ea265ee96937f8cbefff67a12a7c8918068f3b484",
+      "equalsProducerAndExternal": true
+    }
+  ],
+  "existingTrackedUnchanged": true,
+  "productAndBuildInputChanges": [],
+  "originalUntrackedUnchanged": true,
+  "apiEnvStatUnchanged": true,
+  "distUnchanged": true,
+  "priorPreservationEvidenceUnchanged": true,
+  "docsDiffCheck": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "trackedCleanAfter": true,
+  "gitStatus": "?? docs/prototypes/archive/\n?? docs/wayfinder-proposal.md\n?? docs/wayfinder-readback-2026-10-09.json\n",
+  "mergeOutput": "Merge made by the 'ort' strategy.\n .../postrun-readback/REPORT.md                     |   60 +\n .../postrun-readback/collect-r1.stderr             |    0\n .../postrun-readback/collect-r1.stdout             |    1 +\n .../postrun-readback/collect.py                    |  247 +++\n .../postrun-readback/diagnostic-only/DIAGNOSIS.md  |   15 +\n .../diagnostic-only/collect-inputs.py              |   26 +\n .../diagnostic-only/first-collector-failure.json   |    7 +\n .../postrun-readback/diagnostic-only/inputs.json   |  143 ++\n .../diagnostic-only/probe-result.json              |   77 +\n .../postrun-readback/diagnostic-only/probe.mjs     |   28 +\n .../postrun-readback/evidence-index.json           |  188 ++\n .../postrun-readback/evidence-summary-1685.json    |  125 ++\n .../postrun-readback/evidence-summary-99.json      |  125 ++\n .../postrun-readback/fixture-readback.json         |   25 +\n .../postrun-readback/raw-analysis-answer.txt       |  165 ++\n .../postrun-readback/raw-answer-index.json         |   70 +\n .../postrun-readback/report.json                   |  298 ++++\n .../postrun-readback/requests.json                 |  830 +++++++++\n .../postrun-readback/timeline.json                 | 1843 ++++++++++++++++++++\n 19 files changed, 4273 insertions(+)\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/REPORT.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/collect-r1.stderr\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/collect-r1.stdout\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/collect.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/DIAGNOSIS.md\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/collect-inputs.py\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/first-collector-failure.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/inputs.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/probe-result.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/diagnostic-only/probe.mjs\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/evidence-index.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/evidence-summary-1685.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/evidence-summary-99.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/fixture-readback.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/raw-analysis-answer.txt\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/raw-answer-index.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/report.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/requests.json\n create mode 100644 docs/implementation/pi-durio-v1/issue-30/improve-only-repair-r2/postrun-readback/timeline.json\n",
+  "rootWriteLock": "RETURNED_TO_MAIN_AFTER_RECEIPT"
+}

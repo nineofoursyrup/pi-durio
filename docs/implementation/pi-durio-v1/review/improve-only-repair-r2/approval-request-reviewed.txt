@@ -1,0 +1,7 @@
+上一批 r3 的一次启动授权已经消费。本次申请针对 batch `pi-durio-v1-live-r3-improve-repair`、冻结 manifest SHA256 `c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a`，仅启动一次 improve analysis。产品为 `f26ae8f4b8039608a1fa796e1c69da4d8173d112`，使用原 clamp fixture、原 synthetic seed 和新的 r2 dataRoot。
+
+新批最多 8 次请求、1,200,000 charged tokens，单请求预留上限 1,056,768、输出上限 8,192。保留旧 34 次请求与 1,118,328 charged tokens（含 1,056,768 UNKNOWN 预留），累计最多 42 次请求、2,318,328 charged tokens。按冻结最高列出单价 USD 1.2/M，累计保守估价上界 USD 2.7819936，仍受原累计 USD 3 上限约束；该估算不是账户账单或平台硬限额证明。
+
+仅在你的新回复后 24 小时内启动，活动截止为实际启动后 60 分钟，分析自身最多 5 分钟；固定凭据来源 `/Users/nineofour/Durio/api.env`。任何新 unknown、失败、鉴权失败、取消、超时、预算或记录失败都停止，不自动补跑。本次不运行 eval，也不选择、执行、验证、启用或写回任何候选；实际候选产生后另行展示 report/revision、baseline 和保护范围供你选择。
+
+是否授权这一次启动？

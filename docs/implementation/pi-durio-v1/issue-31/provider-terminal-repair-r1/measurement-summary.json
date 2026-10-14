@@ -1,0 +1,219 @@
+{
+  "schema": "pi-durio.issue-31.repaired-candidate-inventory.v1",
+  "at": "2026-10-10T07:13:21.423373+00:00",
+  "status": "NEW_CANDIDATE_INVENTORY_MEASURED_TECHNICAL_ACCEPTANCE_PARTIAL",
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "tree": "ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0",
+  "machine": {
+    "os": "27.2",
+    "architecture": "arm64",
+    "model": "MacBookPro18,1",
+    "memoryBytes": 34359738368,
+    "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+    "nodeVersion": "v26.8.2",
+    "terminalVersion": "2.15"
+  },
+  "sourceCategories": {
+    "root-config-and-other": {
+      "regularFiles": 9,
+      "symlinks": 0,
+      "logicalBytes": 212380,
+      "allocatedBytesByPath": 233472,
+      "allocatedBytesUniqueInode": 233472,
+      "physicalTextLines": 4527
+    },
+    "documentation": {
+      "regularFiles": 399,
+      "symlinks": 0,
+      "logicalBytes": 5612802,
+      "allocatedBytesByPath": 6443008,
+      "allocatedBytesUniqueInode": 6443008,
+      "physicalTextLines": 89354
+    },
+    "scripts": {
+      "regularFiles": 39,
+      "symlinks": 0,
+      "logicalBytes": 286749,
+      "allocatedBytesByPath": 376832,
+      "allocatedBytesUniqueInode": 376832,
+      "physicalTextLines": 2557
+    },
+    "product": {
+      "regularFiles": 80,
+      "symlinks": 0,
+      "logicalBytes": 795472,
+      "allocatedBytesByPath": 950272,
+      "allocatedBytesUniqueInode": 950272,
+      "physicalTextLines": 7531
+    },
+    "tests": {
+      "regularFiles": 42,
+      "symlinks": 0,
+      "logicalBytes": 486214,
+      "allocatedBytesByPath": 573440,
+      "allocatedBytesUniqueInode": 573440,
+      "physicalTextLines": 4640
+    },
+    "vendor": {
+      "regularFiles": 5,
+      "symlinks": 0,
+      "logicalBytes": 1041519,
+      "allocatedBytesByPath": 1052672,
+      "allocatedBytesUniqueInode": 1052672,
+      "physicalTextLines": 108
+    }
+  },
+  "distribution": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/pack/pi-durio-0.1.0.tgz",
+    "compressedBytes": 19222769,
+    "sha256": "0be03d6d7e090f3ba58f55297f1c9dd50b28540fbba0ed76ae55d34419f1221b",
+    "unpackedRegularFiles": 12921,
+    "unpackedLogicalFileBytes": 90091731
+  },
+  "installation": {
+    "root": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install",
+    "regularFiles": 12924,
+    "symlinks": 5,
+    "logicalBytes": 90158076,
+    "allocatedBytesByPath": 128770048,
+    "allocatedBytesUniqueInode": 128770048,
+    "physicalTextLines": 1293516
+  },
+  "installationBreakdown": {
+    "installation-root-files": {
+      "regularFiles": 2,
+      "symlinks": 0,
+      "logicalBytes": 33271,
+      "allocatedBytesByPath": 40960,
+      "allocatedBytesUniqueInode": 40960,
+      "physicalTextLines": 1207
+    },
+    "other-installed-modules-and-links": {
+      "regularFiles": 1,
+      "symlinks": 1,
+      "logicalBytes": 33074,
+      "allocatedBytesByPath": 36864,
+      "allocatedBytesUniqueInode": 36864,
+      "physicalTextLines": 1201
+    },
+    "package-own-files": {
+      "regularFiles": 285,
+      "symlinks": 0,
+      "logicalBytes": 2490409,
+      "allocatedBytesByPath": 3125248,
+      "allocatedBytesUniqueInode": 3125248,
+      "physicalTextLines": 29172
+    },
+    "bundled-production-dependencies": {
+      "regularFiles": 12631,
+      "symlinks": 4,
+      "logicalBytes": 86559803,
+      "allocatedBytesByPath": 124514304,
+      "allocatedBytesUniqueInode": 124514304,
+      "physicalTextLines": 1261828
+    },
+    "package-vendor-archives": {
+      "regularFiles": 5,
+      "symlinks": 0,
+      "logicalBytes": 1041519,
+      "allocatedBytesByPath": 1052672,
+      "allocatedBytesUniqueInode": 1052672,
+      "physicalTextLines": 108
+    }
+  },
+  "deltaFrom9aed1af": {
+    "ownedProductBytes": 2633,
+    "ownedProductPhysicalLines": 50,
+    "compressedPackageBytes": 1531,
+    "installedLogicalBytes": 7908
+  },
+  "priorExecutions": {
+    "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+    "timingAndRSS": "Retain original measured candidate; no new-candidate timing/RSS measurement or equality claim",
+    "native": "Original automated native batch plus successful composition/readonly follow-up retained; final manual IME/copy/small-grid and daily acceptance are not inferred",
+    "paidCoding": {
+      "casesWithPass": [
+        "local-fix",
+        "multi-file",
+        "regression",
+        "no-change"
+      ],
+      "scope": "Each has one PASS across two batches; original first batch remains 1/4 completed/graded. Old multi-file failure/UNKNOWN and all not-run states retained. Not a new four-of-four batch or a new-candidate rerun."
+    },
+    "paidImprove": "Original r3 failed after first HTTP200, zero candidates, host UNKNOWN=1 retained. New repair has offline evidence, no new live improve yet."
+  },
+  "paidAccountingOnOriginalCandidate": {
+    "oldPhysicalDispatches": 15,
+    "newEvalPhysicalDispatches": 18,
+    "newImprovePhysicalDispatches": 1,
+    "cumulativePhysicalDispatches": 34,
+    "newRawHttp200": 19,
+    "hostKnownTokens": 61560,
+    "hostReservedTokens": 1056768,
+    "hostUnknown": 1,
+    "hostChargedUpperTokens": 1118328,
+    "conservativeKnownUsd": 0.073872,
+    "conservativeChargedUpperUsd": 1.3419936,
+    "posthocImproveRawUsageTokens": 952,
+    "posthocAllRawTokens": 62512,
+    "posthocRawEstimateUsd": 0.0750144,
+    "rule": "952 is separately observed raw response usage. Original UNKNOWN settlement/reservation and cumulative ledger remain unchanged; do not add SDK/guest mirrors.",
+    "accountBill": "NOT OBSERVED"
+  },
+  "independentApplicability": "PENDING_SEPARATE_REVIEW; inventory alone does not establish reuse of behavior",
+  "evidence": {
+    "newInventory": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/provider-terminal-repair-r1/inventory.json",
+      "bytes": 11747913,
+      "sha256": "88aed069b4c118a6ebfba04fb3b38b40ec0b7cd4d07a9140c051d36c27640424"
+    },
+    "newInstallResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/result.json",
+      "bytes": 969,
+      "sha256": "bbc68a12cb79278d86114edcb0577e479b9de5f13f572522243f2666a2da8a26"
+    },
+    "newCandidateIdentity": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/candidate-identity.json",
+      "bytes": 5258817,
+      "sha256": "ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091"
+    },
+    "newArtifact": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/artifact.json",
+      "bytes": 2792,
+      "sha256": "6608f6149f3e45051fc73eadcdb1dac8b77aa0d070070ef642ed3e26cd276661"
+    },
+    "dependencyCompatibility": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/dependency-check-applicability.json",
+      "bytes": 833,
+      "sha256": "4227b4fc176dda7776530f0cb5488d905e3732c6d49e3083e32d7214576cb1b8"
+    },
+    "previousMeasurement": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/partial-summary.json",
+      "bytes": 24287,
+      "sha256": "1084eaca7169014231e379b6988c854d8c54292a1b355e081c83990ae2ff7bda"
+    },
+    "paidPostrun": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/report.json",
+      "bytes": 144843,
+      "sha256": "ba624384488d5e57c6baf87fc7957a646173d9d57a4df6f3cfbcca124ec15e1d"
+    },
+    "nativeOriginal": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-summary.json",
+      "bytes": 46845,
+      "sha256": "cf9457281285f8d5bdc76fd5f8604136dedb3235e61877e5a4780fcf92ec02dc"
+    },
+    "nativeFollowup": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1-summary.json",
+      "bytes": 87837,
+      "sha256": "a508257a7d366a69f490e43f1b8c94ba33b49065328b7a2c624e6e5a7640c03d"
+    }
+  },
+  "limits": [
+    "Physical UTF-8 lines include blanks/comments; source category excludes scripts/tests/vendor/docs, which remain separate.",
+    "Installed logical bytes include bundled dependencies/vendor plus install-root files; external Node excluded. Allocated APFS bytes are not unique physical usage.",
+    "No predetermined numerical lightweight threshold; measurement is not a lightweight PASS.",
+    "Known npm ls and consumer offline npm ci compatibility failures remain; exact old dependency bytes/toolchain evidence reused.",
+    "New inventory is read-only; no additional native, build, product test, VM or provider execution.",
+    "Full #30 improve chain, #31 complete technical acceptance and #32 explicit user daily-use acceptance remain outstanding."
+  ]
+}

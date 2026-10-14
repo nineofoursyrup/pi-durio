@@ -1,0 +1,67 @@
+{
+  "candidate": "9aed1af6ee3b156bb7354961496217aa5e64843e",
+  "node": "/opt/homebrew/Cellar/node/26.8.2/bin/node",
+  "nodeVersion": "v26.8.2",
+  "install": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install",
+  "installInventory": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/install-complete-tree.json",
+    "bytes": 3555010,
+    "sha256": "13e3237a9a36ab342c8fc25a18522dcb574547002a9fa5f68d742d30c771aa35"
+  },
+  "identity": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/candidate-identity.json",
+    "bytes": 5219556,
+    "sha256": "f56d137950dbe52af7854df4d360699fe8612fa45aeb4208e2def0d6a5d0de03"
+  },
+  "packageDisposition": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-9aed1af/dependency-report-disposition.json",
+    "bytes": 3230,
+    "sha256": "1b93c4965e57e2d01af0c9a9fe0d6a4aa00ef4f7fe3f36f6db3c0741adc9cd46"
+  },
+  "providerPolicy": "Fixed synthetic transports only; no model key inherited",
+  "humanAcceptance": "NOT CLAIMED",
+  "resourcePolicy": "Coordinator headless/resource preparation must finish before asking user to launch; no competing controlled VM/build/measurement workload while native batch runs.",
+  "status": "FROZEN_FOR_LOCAL_NATIVE_FOLLOWUP",
+  "output": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-followup-r1",
+  "harnesses": {
+    "native-followup-batch.mjs": "b7caf603e75b6e3917479b19f175356d0e3e899ed5c80259fb60096c56458e1b",
+    "native-composition.mjs": "e70829545c65daa6bd793d69ef242256afb17bc1d0fafa9422a2299e4eafc3e7",
+    "readonly-data.mjs": "f4bd38199b67fead2b806d4c87e895a38577e1664dde6f3cd48ab102515fc655"
+  },
+  "originalConfig": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native-config.json",
+    "bytes": 1879,
+    "sha256": "d044ef17458909e07af31dd35d0928caf1a875aad88cd8fba65c140423bb77d7"
+  },
+  "originalBatchPlan": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/plan.json",
+    "bytes": 2916,
+    "sha256": "8daa6827157a87ee0c8d33bf7f01e334f69f721e6a3dfa2921553b904e476c13"
+  },
+  "originalBatchResult": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/result.json",
+    "bytes": 5351,
+    "sha256": "5062ec149ebc874839d4dc799937e8cff993e4c64580ed14949b9eca082c72d6"
+  },
+  "sourceLongSession": {
+    "directory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session",
+    "result": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/result.json",
+      "bytes": 930461,
+      "sha256": "1fb56666475f780092e95270a4992493a8967ac3df726f4123c2a9a49bbdcccf"
+    },
+    "plan": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/plan.json",
+      "bytes": 25509,
+      "sha256": "590b9dd4755da9ce7183e1b142ac5d70dc9ab86ca24513306f46a68d5d72485d"
+    },
+    "largeOutput": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-31/final-9aed1af/native/long-session/large-output.json",
+      "bytes": 3734,
+      "sha256": "94918e6b978e2194baa642ef6f3a52e2c6d8de587e22f62f8372a13534dac27f"
+    }
+  },
+  "scope": "Targeted follow-up only: rerun corrected composition, then readonly-data against the unchanged retained successful original native long-session; no idle or 60-round repetition.",
+  "pollingCorrection": "Only Error.message exactly IMPROVE_REPORT_NOT_FOUND returns null during analysis polling; all other errors propagate.",
+  "prelaunchStatus": "PREPARED_NOT_RUN"
+}

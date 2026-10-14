@@ -1,0 +1,104 @@
+{
+  "schema": "pi-durio.handoff-affected-independent-review.v1",
+  "at": "2026-10-10T11:35:19.570268+00:00",
+  "status": "PASS_FIXED_HANDOFF_DOCS_CANDIDATE",
+  "candidate": "4cbebb8dc1f475945483f8b38eec48eab401327f",
+  "tree": "cee29ad170629a1e91ed1e4677c28dc842baec51",
+  "parent": "af559570433282249f32154f3c547246225f2dc9",
+  "base": "7664210c38d0073d3c134f0668c6a51e0ebb4f49",
+  "productCandidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+  "scope": {
+    "firstSegmentFiles": 10,
+    "secondSegmentFiles": 3,
+    "total": 13,
+    "onlyDocumentation": true,
+    "independentFocusedTwoAxisPass": true,
+    "changedProductOrBuildInputs": false
+  },
+  "standards": {
+    "verdict": "PASS",
+    "hardFindings": [],
+    "optionalFindings": []
+  },
+  "spec": {
+    "verdict": "PASS",
+    "findings": [],
+    "scope": "Technical-acceptance status and #32 trial handoff preparation; not user acceptance",
+    "technicalAcceptedTickets": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "issue32HandoffReady": true,
+    "issue32Complete": false,
+    "actualUserTrial": "PENDING",
+    "actualUserDecision": "PENDING",
+    "firstVersionComplete": false
+  },
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final/affected-readback.json",
+    "bytes": 8595,
+    "sha256": "5422c1f39f57a0815dfdc4827683b9f4c333feb7e6e9cf5c36e8af6aba2100c2"
+  },
+  "firstSegmentPreparation": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final/first-segment-preparation.json",
+    "bytes": 3232,
+    "sha256": "dca66f7ee18815e8eb3ba08eddcc183b4defe185a1e9193714728ef7012e0af3"
+  },
+  "priorReview": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/review.json",
+    "bytes": 6495,
+    "sha256": "00bd1019b57489419820cefe445195ac6ef20cd80d271cabbd08f113712f249a",
+    "applicability": "Unchanged final product/technical evidence; no repeated underlying checks."
+  },
+  "preservedBoundaries": [
+    "Offline fixed-response demo is not model capability or user acceptance",
+    "Actual trial candidate/environment/feedback/source/time remain null/PENDING",
+    "No new paid grant, mandatory paid trial, questionnaire or duration threshold",
+    "Correction request keeps acceptance pending; originals/first failures preserved",
+    "Issues OPEN; PR Draft; no product main merge/release/automatic parent closure",
+    "Prior original technical review and reviewer schema-probe records remain unchanged"
+  ],
+  "effects": {
+    "underlyingTechnicalInputsRescanned": false,
+    "installationInventoryRerun": false,
+    "productCommands": 0,
+    "tests": 0,
+    "providerRequests": 0,
+    "VMStarts": 0,
+    "TerminalOperations": 0,
+    "credentialsRead": false,
+    "rootProducerSharedStateWrites": 0,
+    "GitHubWrites": 0,
+    "writesOnly": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final"
+  },
+  "model": {
+    "requested": "gpt-6-astra",
+    "reasoningRequested": "xhigh",
+    "actualBackend": "NOT_ATTESTED"
+  },
+  "report": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/final-technical-f26ae8f/handoff-final/review.md",
+    "bytes": 2981,
+    "sha256": "7c6b144ec9882971095429d41deafc774a0b2df4f5eda30cfefea8b29fabaa88"
+  }
+}

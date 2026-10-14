@@ -1,0 +1,53 @@
+--- a/packages/tui/src/utils.ts
++++ b/packages/tui/src/utils.ts
+@@ -51,6 +51,31 @@
+ const WIDTH_CACHE_SIZE = 512;
+ const widthCache = new Map<string, number>();
+ 
++/**
++ * Set measured widths for exact non-ASCII graphemes in one terminal session.
++ * Hosts must serialize updates with input/paint, invalidate mounted components,
++ * clear cell-coordinate selections and force a full redraw after each update.
++ * Values are copied. Unlisted graphemes keep the existing width calculation.
++ * This is process-wide: concurrent renderer profiles are not supported.
++ */
++let graphemeWidthOverrides = new Map<string, number>();
++export function setGraphemeWidthOverrides(widths?: ReadonlyMap<string, number>): void {
++	const next = new Map<string, number>();
++	for (const [grapheme, width] of widths ?? []) {
++		const segments = [...graphemeSegmenter.segment(grapheme)];
++		if (segments.length !== 1 || isPrintableAscii(grapheme) || /[\x00-\x1f\x7f-\x9f]/.test(grapheme)) {
++			throw new Error("Width override requires one non-ASCII grapheme without controls");
++		}
++		if (!Number.isSafeInteger(width) || width < 0) {
++			throw new Error("Width override must be a non-negative safe integer");
++		}
++		next.set(grapheme, width);
++	}
++	graphemeWidthOverrides = next;
++	widthCache.clear();
++}
++
++
+ export const cjkBreakRegex =
+ 	/[\p{Script_Extensions=Han}\p{Script_Extensions=Hiragana}\p{Script_Extensions=Katakana}\p{Script_Extensions=Hangul}\p{Script_Extensions=Bopomofo}]/u;
+ 
+@@ -180,6 +205,8 @@
+  * check to avoid running the RGI_Emoji regex unnecessarily.
+  */
+ function graphemeWidth(segment: string): number {
++	const measured = graphemeWidthOverrides.get(segment);
++	if (measured !== undefined) return measured;
+ 	if (segment.length === 1) {
+ 		const code = segment.charCodeAt(0);
+ 		if (code >= 0x20 && code <= 0x7e) return 1;
+--- a/packages/tui/src/index.ts
++++ b/packages/tui/src/index.ts
+@@ -185,6 +185,7 @@
+ // Utilities
+ export {
+ 	getOsc8LinkAtColumn,
++	setGraphemeWidthOverrides,
+ 	sliceByColumn,
+ 	stripTerminalSequences,
+ 	truncateToWidth,

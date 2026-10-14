@@ -1,0 +1,99 @@
+{
+  "status": "READ_ONLY_POSTRUN_REPORT",
+  "failureId": "LIVE-USD3-R3-01",
+  "externalDirectory": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback",
+  "repositoryCopies": [
+    {
+      "name": "REPORT.md",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/REPORT.md",
+      "bytes": 5229,
+      "sha256": "abfb97e7ca1aa9a52094b5a8d43942f375af71b5a229c768d229f4518d7468b5"
+    },
+    {
+      "name": "IMPROVE-FAILURE.md",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/IMPROVE-FAILURE.md",
+      "bytes": 4561,
+      "sha256": "7ed9606bcb558a1f3305db9dbe820f4e5694379492e51c7df0f2bc8a04e3ef99"
+    },
+    {
+      "name": "report.json",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/report.json",
+      "bytes": 144843,
+      "sha256": "ba624384488d5e57c6baf87fc7957a646173d9d57a4df6f3cfbcca124ec15e1d"
+    },
+    {
+      "name": "improve-timeline.json",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/improve-timeline.json",
+      "bytes": 35721,
+      "sha256": "5e7507c45da7f2b6c2001354a0a7ca7f1b4e65b64847ae7a5896289e32593668"
+    },
+    {
+      "name": "improve-response-derived.sse",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/improve-response-derived.sse",
+      "bytes": 3830,
+      "sha256": "32104d7dc8f7ef436b2f65544a3ec748e1c4a282f6c7a318dc970a1889421555"
+    },
+    {
+      "name": "collect.py",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/collect.py",
+      "bytes": 15097,
+      "sha256": "4f70840ae2f3fdab722582620c1440de2611977d9b74b604666c7c9f7e5d132c"
+    },
+    {
+      "name": "collect-r1-source.py",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/collect-r1-source.py",
+      "bytes": 14976,
+      "sha256": "5dc6ad4c9974169da7caa535295d855a8193a390fe952abeadb871eb478d060b"
+    },
+    {
+      "name": "collect-r1.stderr",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/collect-r1.stderr",
+      "bytes": 355,
+      "sha256": "a089d1b7c03d2b2957b86146fc64f909ce9a9a576e73fcf4417ce66ccab33d40"
+    },
+    {
+      "name": "collect-r1.stdout",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/collect-r1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "collect-r2.stderr",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/collect-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "collect-r2.stdout",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/collect-r2.stdout",
+      "bytes": 252,
+      "sha256": "b92c7c3c28379374ea7e041a7da002913e989f11ed4e623a8b34d0b9570eee5f"
+    },
+    {
+      "name": "originals-unchanged.json",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/originals-unchanged.json",
+      "bytes": 227,
+      "sha256": "df6c93c05999569c8f0efc084fdaa6131808d31af9446a9ec2c2b00f5dad6171"
+    },
+    {
+      "name": "write-report.py",
+      "external": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/write-report.py",
+      "bytes": 16731,
+      "sha256": "9896e8974ed5db6a4de02f0f16fbac3025c9d193f92a00cb8f96fbebe3a1387e"
+    }
+  ],
+  "externalOnly": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/observed-facts.json",
+      "bytes": 635324,
+      "sha256": "e987587232947726b27185eb6d4986d7c774f5073512e759e6629fec2e898e36"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/read-identities.json",
+      "bytes": 2031167,
+      "sha256": "cf760cc55e8eefee6a92380aee6d14de1cacaf41ad0f99e23287d7c1fbb0bf86"
+    }
+  ],
+  "originalsUnchanged": 7280,
+  "productOrProviderExecutionByDiagnosis": 0
+}

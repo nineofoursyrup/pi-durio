@@ -1,0 +1,77 @@
+{
+  "status": "DIAGNOSIS_CONFIRMED_NO_CANONICAL_REPAIR",
+  "directParseError": "SyntaxError: Unexpected token 'I', \"I have all\"... is not valid JSON",
+  "isolatedFenceExtraction": {
+    "scope": "Diagnostic only; no adoption or mutation",
+    "jsonSyntax": "valid",
+    "rawDrafts": 2,
+    "exactInstalledValidatorError": "Error: IMPROVE_CANDIDATE_CONTRACT_INCOMPLETE"
+  },
+  "draftRequirements": [
+    {
+      "draft": 1,
+      "stepsCount": 3,
+      "validationChecksCount": 4,
+      "unacquiredClaimEvidence": [],
+      "futureWriteback": false,
+      "futureEnable": false
+    },
+    {
+      "draft": 2,
+      "stepsCount": 0,
+      "validationChecksCount": 0,
+      "unacquiredClaimEvidence": [
+        "e1:24:64d57d6fd60f8f21e7f6c2c43223de542e935cdc39b9a4842a853e852db66503"
+      ],
+      "futureWriteback": false,
+      "futureEnable": false
+    }
+  ],
+  "factualChecks": [
+    {
+      "input": [
+        -9,
+        -5,
+        -1
+      ],
+      "modelClaim": "current result is -5 / already satisfied",
+      "actualCurrentExpression": -9,
+      "expectedFromProtectedSource": -5
+    },
+    {
+      "input": [
+        6,
+        0,
+        10
+      ],
+      "modelClaim": "current result is 6 / already satisfied",
+      "actualCurrentExpression": 0,
+      "expectedFromProtectedSource": 6
+    }
+  ],
+  "canonicalReport": {
+    "state": "incomplete",
+    "candidates": 0,
+    "revision": "aaaa4af52f3e34ecb287d99b27d861da3baf3d5c21b1a48987b9cd12daf0fd90",
+    "unchanged": true
+  },
+  "sourceIdentities": [
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/live-improve-result.json",
+      "sha256": "9083ba7573ffe72cfbfdc252a71c149222c175db1fb3edb54647ef47d5551d0f"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/src/improve.js",
+      "sha256": "dfa8cf65a8969cb96880dc52f1568f41f9740fe8f5c59c53fe2b5b84b636f108"
+    },
+    {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/install/node_modules/pi-durio/dist/src/improve-history.js",
+      "sha256": "64d4e0f48dc55cc0a7638e1a208de38ab4dd7ec20b349dbbd902820419d03104"
+    }
+  ],
+  "limitations": [
+    "Schema validation cannot prove natural-language factual accuracy.",
+    "Evaluated only two disputed claims against the unchanged baseline expression, not a candidate or protected check execution.",
+    "No product code, report, journal, fixture, grant or original raw output changed; no provider, VM, candidate selection or candidate validation executed."
+  ]
+}

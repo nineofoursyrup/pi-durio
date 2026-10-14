@@ -1,0 +1,66 @@
+[
+  {
+    "issue": 2,
+    "current_state": "closed",
+    "body_exact": true,
+    "comment_bodies_exact": true,
+    "old_comments": 1,
+    "new_comments": 1
+  },
+  {
+    "issue": 3,
+    "current_state": "closed",
+    "body_exact": true,
+    "comment_bodies_exact": true,
+    "old_comments": 1,
+    "new_comments": 1
+  },
+  {
+    "issue": 4,
+    "current_state": "closed",
+    "body_exact": true,
+    "comment_bodies_exact": true,
+    "old_comments": 1,
+    "new_comments": 1
+  },
+  {
+    "issue": 5,
+    "current_state": "closed",
+    "body_exact": true,
+    "comment_bodies_exact": true,
+    "old_comments": 1,
+    "new_comments": 1
+  },
+  {
+    "issue": 6,
+    "current_state": "closed",
+    "body_exact": true,
+    "comment_bodies_exact": true,
+    "old_comments": 1,
+    "new_comments": 1
+  },
+  {
+    "issue": 7,
+    "current_state": "closed",
+    "body_exact": true,
+    "comment_bodies_exact": true,
+    "old_comments": 1,
+    "new_comments": 1
+  },
+  {
+    "issue": 8,
+    "current_state": "closed",
+    "body_exact": true,
+    "comment_bodies_exact": true,
+    "old_comments": 1,
+    "new_comments": 1
+  },
+  {
+    "issue": 9,
+    "current_state": "closed",
+    "body_exact": true,
+    "comment_bodies_exact": true,
+    "old_comments": 1,
+    "new_comments": 1
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-09T12:26:41.584Z",
+  "sourceCommit": "e4571452a1ebf712cd60282ded0161640670d70e",
+  "sourceBinding": "PASS",
+  "sourceFilesCompared": 59,
+  "candidateInventoryPreviouslyVerified": 12704,
+  "manifestSha256": "de8eeefbc906e318e378b847628cfcd9d6a91de257f47468069bd2dffbc06d95",
+  "runnerSha256": "a1efd4c08e5cdcb37056afde98617ae9529592c79eec31a957bc80f9901c58b3",
+  "nativeTerminalAcceptance": "NOT RUN",
+  "manifest": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manifest.json",
+  "sourceWorktree": "/Users/nineofour/pi-durio-v1-run/worktrees/issue-16-width",
+  "installedPackage": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/install/node_modules/pi-durio",
+  "archive": "/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/pi-durio-0.1.0.tgz",
+  "archiveSha256": "766082797f3863a38d4483407cf81380ff9299b0ed4e53f9f5cda0eed512b16d",
+  "command": "node '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/terminal-validation.mjs' --manifest '/Users/nineofour/pi-durio-v1-run/evidence/issue-16/candidate-r5/manifest.json'",
+  "automatedChecks": [
+    "65/65 full npm check",
+    "8/8 final affected checks",
+    "actual ProcessTerminal synthetic PTY PASS",
+    "offline independent pack installation/run/readback PASS"
+  ],
+  "status": "FIXED_CANDIDATE_NATIVE_ACCEPTANCE_NOT_RUN"
+}

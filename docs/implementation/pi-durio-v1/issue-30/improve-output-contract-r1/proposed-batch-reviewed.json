@@ -1,0 +1,232 @@
+{
+  "status": "PENDING_EXPLICIT_NEW_HUMAN_GRANT; not an executable paid plan",
+  "batchId": "pi-durio-v1-live-r4-improve-report",
+  "artifact": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/final-candidate-f26ae8f/artifact.json",
+    "bytes": 2792,
+    "sha256": "6608f6149f3e45051fc73eadcdb1dac8b77aa0d070070ef642ed3e26cd276661"
+  },
+  "improve": {
+    "request": {
+      "id": "v1-live-r4-improve",
+      "purpose": "Analyze the retained failed clamp check and the explicitly registered project sources. Explain only defects supported by acquired evidence. Only clamp.ts may be proposed for change; README.md, check.mjs and package.json are protected. No performance improvement is claimed. Return exactly one JSON object matching the supplied report and Candidate contracts, with no prose before or after it and no Markdown fences. Return zero candidates when evidence is insufficient, or at most one supported minimal project repair candidate with nonempty executable steps, explicit allowed scope and nonempty protected validation checks. Put missing or withheld evidence in report.gaps and candidate gaps, not in a gap-only candidate; never cite withheld body text as an acquired factual source. Facts and successCounterexamples must use actual acquired source IDs and accurately supported claims; distinguish static reasoning from observed execution. Do not invent a successful counterexample when none was acquired; use an empty successCounterexamples list and record the gap. activation.writeback describes intended future writeback only: a supported project repair that requires a file change may declare it true, conditional on a later explicit human choice and protected validation passing. This declaration does not authorize any current change. This is analysis only: do not execute, validate, activate or write back a candidate. Preserve the supplied field types and use report-local dependencies/conflicts only when supported.",
+      "limits": {
+        "maxRequests": 8,
+        "maxTokens": 1200000,
+        "maxRequestTokens": 1056768,
+        "maxDurationMs": 300000,
+        "maxOutputTokens": 8192
+      },
+      "sources": [
+        {
+          "id": "clamp-project",
+          "kind": "project",
+          "paths": [
+            "clamp.ts",
+            "check.mjs",
+            "README.md",
+            "package.json"
+          ]
+        }
+      ],
+      "query": {
+        "maxRuns": 1,
+        "maxRecords": 50,
+        "maxEvidenceBytes": 32768,
+        "maxSourceBytes": 32768
+      }
+    },
+    "workspace": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/improve-project",
+    "dataRoot": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/improve-data",
+    "targetRunId": "1ff5b41c-5fde-460f-9dcf-8a3ebe090d03",
+    "seed": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af/seed-result.json",
+      "bytes": 1448,
+      "sha256": "6d7603ef15f6de162ea44b6a0af4686a53948b1c945b18ebef3494ff3711909a"
+    },
+    "allowedWriteback": [
+      "clamp.ts"
+    ],
+    "protected": [
+      "README.md",
+      "package.json",
+      "check.mjs"
+    ]
+  },
+  "model": {
+    "provider": "deepseek",
+    "id": "deepseek-flash",
+    "endpoint": "https://api.deepseek.com/chat/completions"
+  },
+  "price": {
+    "version": "DeepSeek-public-2026-10-09-maximum-class",
+    "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "currency": "USD",
+    "perMillionTokens": 1.2
+  },
+  "aggregate": {
+    "newRequests": 8,
+    "newTokens": 1200000,
+    "prior": {
+      "requests": 41,
+      "knownTokens": 106026,
+      "reservedTokens": 1056768,
+      "unknown": 1
+    },
+    "cumulativeRequests": 49,
+    "cumulativeChargedTokens": 2362794,
+    "conservativeUsdUpper": 2.8353528,
+    "usdCeiling": 3
+  },
+  "window": {
+    "grantToStartMs": 86400000,
+    "activeMs": 3600000,
+    "starts": 1,
+    "definition": "One fresh improve-only start within 24 hours of the new grant; immutable deadline start+60 minutes. No resume or replacement after interruption, unknown usage or expiry."
+  },
+  "credential": {
+    "source": "/Users/nineofour/Durio/api.env",
+    "readiness": "PENDING_NEW_EXPLICIT_ONE_START; no credential read during preparation"
+  },
+  "providerRecheck": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-output-contract-r1/provider-observation.json",
+    "bytes": 1560,
+    "sha256": "9f845d29fe98c56df9961ae7ea1a06ac49abb904364146411b9099f9ee95060c"
+  },
+  "prior": {
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/frozen-manifest.json",
+      "bytes": 10012,
+      "sha256": "07ed36fdeb17f24d7e8d6caea0db4efd41dd31111fa7ef6ea4cb0a51daa0251e"
+    },
+    "proposal": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/proposed-batch-reviewed.json",
+      "bytes": 70103,
+      "sha256": "e48f678b8364d1cdd4166330ac72bc5475662800a802f9938bcf7b093efa46c5"
+    },
+    "paidStart": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/paid-start.json",
+      "bytes": 1359,
+      "sha256": "0687d92174440f87c57ef2eec2badbe28c029cbaa2a2362d0d49ab9691b4a60f"
+    },
+    "batchResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/batch-result.json",
+      "bytes": 1298,
+      "sha256": "154869ff682c9258eccbed4ac6b3a15882197427baef897fa0a7acaa11064c56"
+    },
+    "evalResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/live-eval-result.json",
+      "bytes": 907697,
+      "sha256": "a860278cfa000b18e06aa7c51643d4a22d7056d009b25d7f529f729853115d82"
+    },
+    "improveResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/live-improve-result.json",
+      "bytes": 6695,
+      "sha256": "c4fa18dc8db841b7b07db18c3372ad157c434202d1d39a975d58f3ee88948efa"
+    },
+    "cumulativeBudget": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/cumulative-budget.json",
+      "bytes": 8907,
+      "sha256": "07e58fa36dc54441da52658e2eed29a0ad35eff233b8b2817bc28b2fe1e3b997"
+    },
+    "postrunReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3/postrun-readback/report.json",
+      "bytes": 144843,
+      "sha256": "ba624384488d5e57c6baf87fc7957a646173d9d57a4df6f3cfbcca124ec15e1d"
+    },
+    "protectedIndex": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/protected-prior-originals.json",
+      "bytes": 2100488,
+      "sha256": "c1fa1c8df933209dcf7767ec086b7b6521e140752aebbc7c83f33126d43a45e3"
+    },
+    "protectedRoots": [
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2",
+      "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r3"
+    ],
+    "firstBatchResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/batch-result.json",
+      "bytes": 465,
+      "sha256": "44fcd0fcc08784463c157329cb4bbeff00f8981762cf16273dfe42c6b9688c7f"
+    },
+    "firstEvalResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/final-9aed1af-usd3-r2/live-eval-result.json",
+      "bytes": 713898,
+      "sha256": "be42c821efef34d0bd9adc13696057a666432c823385db9ee1246e657cbc6669"
+    },
+    "codeBindings": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/retained-prior-code.json",
+      "bytes": 4356,
+      "sha256": "f4d9feaa608b04016a3d30c444d62063ed65b4df4df17d44255fb12a8009de2d"
+    }
+  },
+  "candidateGate": {
+    "path": "/Users/nineofour/pi-durio-v1-run/review/provider-terminal-repair-r1/candidate-gate.json",
+    "bytes": 4084,
+    "sha256": "21271432e2d61a85048c5be7d9679328b49286bf96ae86e299eb6801f945a47d"
+  },
+  "previousImprove": {
+    "manifest": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/frozen-manifest.json",
+      "bytes": 76288,
+      "sha256": "c1a3904f047ff3c19b16ba7c7e66dc57316f2ff9ad08a7080791ee5babe5fb2a"
+    },
+    "proposal": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/proposed-batch-reviewed.json",
+      "bytes": 7669,
+      "sha256": "265261daf9d50792c32683cca2ecec308b2df670ec4f9902b5816e99801e5462"
+    },
+    "paidStart": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/paid-start.json",
+      "bytes": 1314,
+      "sha256": "18dd72ef84d314e144c70b3ee4d8a06f35a5be931ba8d9732bf2b378055ce671"
+    },
+    "grant": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/explicit-human-grant.json",
+      "bytes": 961,
+      "sha256": "64bdd050d7f363293548aa8e15d7e74aae22f1f6a461ad2fd2d3f059189b7540"
+    },
+    "authorizationSource": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/authorization-source.json",
+      "bytes": 1044,
+      "sha256": "5d024e4ef30339f146a8774ee25d2d80fa5a26b6b484a69e9495d3b1e49ee905"
+    },
+    "batchResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/batch-result.json",
+      "bytes": 1257,
+      "sha256": "0125613c9d3d130e82c1f172df062b90f7f0f3ecfb92bb98ce5e41adb7614ba5"
+    },
+    "improveResult": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/live-improve-result.json",
+      "bytes": 20724,
+      "sha256": "9083ba7573ffe72cfbfdc252a71c149222c175db1fb3edb54647ef47d5551d0f"
+    },
+    "reopenedReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/reopened-improve-report.json",
+      "bytes": 34843,
+      "sha256": "c454293fd77e52fecd8c1a0630a4b589b9f8aa635db30fe9518e795556214f64"
+    },
+    "cumulativeBudget": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/cumulative-budget.json",
+      "bytes": 3927,
+      "sha256": "70ed19f4d827abdc020eada8fddeca2316ece0fee3617381d96b0eb7a6eadc28"
+    },
+    "postrunReport": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/report.json",
+      "bytes": 12036,
+      "sha256": "d0a1f3e9860b082fbcb0c127461ca4f0a830865aead08b883dd47317427e81d8"
+    },
+    "protectedIndex": {
+      "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-30/improve-only-repair-r2/postrun-readback/read-identities.json",
+      "bytes": 3380142,
+      "sha256": "8af12422214af83f0a47b800ad7c449d90a1d1d1e8109e7fbbc0f7e42c95ebbd"
+    }
+  },
+  "stops": [
+    "Any authentication, cancellation, failed/incomplete report, new unknown usage, deadline or budget violation stops; no automatic retry or restart.",
+    "Zero candidates remain zero; no fabricated or silently substituted candidate."
+  ],
+  "futureSelection": "Only a later explicit human choice of an actual report/revision/candidate may authorize candidate execution or writeback; the paid grant selects nothing.",
+  "eval": "No paid eval in this batch. Prior four different case PASS records retain their original product/run identities; affected applicability review is separate.",
+  "finding": "Output format and content rejected by the unchanged report contract",
+  "preservation": "Keep the complete prior coding FAIL/UNKNOWN chain and the latest incomplete improve report with zero canonical candidates. Raw drafts remain unselected source text; old UNKNOWN 1056768 is never replaced by raw 952."
+}

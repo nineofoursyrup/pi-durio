@@ -1,0 +1,39 @@
+{
+  "issue": 20,
+  "acceptedAt": "2026-10-09T15:49:24.561467+00:00",
+  "status": "integrated-accepted",
+  "scope": "T10 applicable ticket acceptance; native integrated management panel remains #31",
+  "productSource": "68fb251623326b1a6357e7efb8b2602ecbc74f3e",
+  "ticketTip": "30f25fac6c8c94546355bf03b94622f994b22714",
+  "integrationMerge": "6d2d3aba847965542a3cab4e1653a2bc340bf92a",
+  "mergeTree": "7ca48e629bf98a72866e11032f1e8947ed961040",
+  "readback": {
+    "path": "/Users/nineofour/pi-durio-v1-run/evidence/issue-20/merge-integration-readback.json",
+    "sha256": "e0abf4c16274036fceaae2153bd7b51c4761036f08569de4acb0d02f9b7931f0"
+  },
+  "acceptedCriteria": {
+    "retention": "PASS: actual fixed source and dependency objects block deletion; explicit unfix appends retained decisions",
+    "archive": "PASS: explicit whole-root archive and actual restore have identical 155 files/3558434 bytes",
+    "cleanup": "PASS: preview identities and exact bytes; partial completion resumes only remaining same-operation parts; unrelated new sources reject stale preview",
+    "failurePreservation": "PASS: simulated ENOSPC and unsupported host format refuse while originals remain",
+    "migration": "PASS: committed 49472-byte WAL included in consistent migration and public target readback; execution remains unauthorized",
+    "publicSurfaces": "PASS: shared storage APIs, CLI and TUI management/preview/confirmation paths"
+  },
+  "validation": {
+    "required": "91/91 full check before #17 combination; 26/26 affected combination; 11/11 final storage regressions",
+    "installed": "99 compiled files and 12631 dependency files matched frozen r2; new installed cleanup continuation/stale-source demo PASS",
+    "reuse": "Unchanged r1 archive/retention/migration/failure demonstrations reused after exact source and candidate binding; no integration product delta"
+  },
+  "preservedFailures": [
+    "r1 compile",
+    "r2 /var alias",
+    "r4 object key ordering",
+    "r7 completed-part and remaining-session regression"
+  ],
+  "limits": [
+    "Explicit offline provider only; actual shell exit 7 differs from fixture assistant completed",
+    "Whole r1 demo 149071 ms is not per-step latency or a performance acceptance",
+    "Original host records remain permanent; cleanup removes only declared eligible attachments/sessions",
+    "No new #17 acceptance; #31 full technical measurement, #32 daily use, paid calls and final independent review remain"
+  ]
+}
