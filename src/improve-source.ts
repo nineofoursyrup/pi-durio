@@ -1,6 +1,7 @@
-import {readFileSync,readdirSync,realpathSync,lstatSync,openSync,closeSync,fstatSync,constants} from 'node:fs';
+import {readFileSync,readdirSync,realpathSync,lstatSync,openSync,closeSync,fstatSync,constants,mkdirSync,writeFileSync,existsSync} from 'node:fs';
 import {join,relative,isAbsolute,resolve,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {randomUUID} from 'node:crypto';
 import {regularFiles} from './file-inventory.js';
 import {Evidence,digest,type BlobRef} from './evidence.js';
 
@@ -54,6 +55,7 @@ export function captureImproveSources(evidence:Evidence,workspace:string,sources
    if(source.kind!=='self-source'&&(root===realpathSync(installation)||inside(realpathSync(installation),root)))throw Error('SELF_SOURCE_EXPLICIT_REGISTRATION_REQUIRED');
    if(source.kind==='project'&&root!==workspace)throw Error('IMPROVE_CROSS_PROJECT_SOURCE_DENIED');
    if(source.kind==='self-source'){if(!source.root)throw Error('SELF_SOURCE_EXPLICIT_REGISTRATION_REQUIRED');applicableVersion=verifySelfSource(root);target.applicableVersion=applicableVersion;}
+   if(source.kind==='eval-asset'){verifyRegisteredSourceFingerprints(evidence.root,workspace);}
    for(const path of source.paths){try{const bytes=sourceBytes(root,path,Math.max(0,Math.min(262144,1048576-total)));total+=bytes.length;if(total>1048576)throw Error('IMPROVE_SOURCE_TOTAL_LIMIT');const redaction=redactAnalysisText(bytes.toString('utf8')),content=evidence.blob(bytes),data={targetId:source.id,kind:source.kind,root,path,content,redaction:{reasons:redaction.reasons,coverage:redaction.coverage},applicableVersion};const seq=evidence.append('improve.source',data),sourceId=`e1:${seq}:${digest(JSON.stringify(data))}`;
     target.files.push({path,...content,content,sourceId,state:redaction.reasons.length?'withheld':'available',reason:redaction.reasons});texts.set(`${source.id}\0${path}`,{text:redaction.text,sourceId,redaction});
    }catch(error){gaps.push(`${path}: ${String(error)}`);}}
@@ -61,4 +63,54 @@ export function captureImproveSources(evidence:Evidence,workspace:string,sources
   if(gaps.length)target.state='incomplete';target.baseline=digest(JSON.stringify({workspace:target.workspace,files:target.files.map(f=>({path:f.path,sha256:f.sha256})),applicableVersion,gaps}));targets.push(target);
  }
  return {targets,texts};
+}
+
+// Source registration: persisted per dataRoot; re-verified at each analysis start.
+// Only eval-asset and self-source require explicit registration per I3.
+export interface SourceRegistration {id:string;workspace:string;kind:'self-source'|'eval-asset';root:string;paths:string[];fingerprints:{path:string;sha256:string;bytes:number}[];registeredAt:string}
+
+function registrationPath(dataRoot:string){return join(dataRoot,'source-registrations.json');}
+
+function readRegistrationStore(dataRoot:string):{registrations:SourceRegistration[],unregistered:string[]}{
+ try{return JSON.parse(readFileSync(registrationPath(dataRoot),'utf8'));}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {registrations:[],unregistered:[]};throw error;}
+}
+
+function writeRegistrationStore(dataRoot:string,store:{registrations:SourceRegistration[],unregistered:string[]}){
+ mkdirSync(dataRoot,{recursive:true,mode:0o700});
+ writeFileSync(registrationPath(dataRoot),JSON.stringify(store,null,2)+'\n',{mode:0o600});
+}
+
+/** Register a self-source or eval-asset path in the data root with content fingerprints.
+ * On subsequent analyses the host re-verifies the current content matches the stored fingerprints. */
+export function registerImproveSource(dataRoot:string,workspace:string,source:{kind:'self-source'|'eval-asset';root:string;paths:string[]}):SourceRegistration{
+ const root=realpathSync(source.root);
+ const fingerprints=source.paths.map(path=>{const bytes=sourceBytes(root,path);return {path,sha256:digest(bytes),bytes:bytes.length};});
+ const id=randomUUID();
+ const reg:SourceRegistration={id,workspace:realpathSync(workspace),kind:source.kind,root,paths:source.paths,fingerprints,registeredAt:new Date().toISOString()};
+ const store=readRegistrationStore(dataRoot);store.registrations.push(reg);writeRegistrationStore(dataRoot,store);
+ return reg;
+}
+
+export function listRegisteredSources(dataRoot:string,workspace?:string):SourceRegistration[]{
+ const store=readRegistrationStore(dataRoot);
+ const unregistered=new Set(store.unregistered??[]);
+ return store.registrations.filter(r=>!unregistered.has(r.id)&&(!workspace||r.workspace===workspace));
+}
+
+export function unregisterImproveSource(dataRoot:string,registrationId:string):void{
+ const store=readRegistrationStore(dataRoot);
+ if(!store.registrations.some(r=>r.id===registrationId))throw Error('IMPROVE_SOURCE_REGISTRATION_NOT_FOUND');
+ if(!(store.unregistered??[]).includes(registrationId)){store.unregistered=[...(store.unregistered??[]),registrationId];writeRegistrationStore(dataRoot,store);}
+}
+
+/** Verify that registered eval-asset sources have not changed since registration.
+ * Called at analysis start; throws with a descriptive error if content has drifted. */
+export function verifyRegisteredSourceFingerprints(dataRoot:string,workspace:string):void{
+ for(const reg of listRegisteredSources(dataRoot,workspace)){
+  if(reg.kind!=='eval-asset')continue;
+  for(const fp of reg.fingerprints){
+   let current:Buffer;try{current=sourceBytes(reg.root,fp.path);}catch(error){throw Error(`IMPROVE_REGISTERED_SOURCE_UNAVAILABLE: ${reg.root}/${fp.path}: ${String(error)}`);}
+   if(current.length!==fp.bytes||digest(current)!==fp.sha256)throw Error(`IMPROVE_REGISTERED_SOURCE_CHANGED: ${reg.root}/${fp.path} changed since registration ${reg.id}`);
+  }
+ }
 }
