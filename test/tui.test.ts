@@ -89,17 +89,17 @@ test('editor keeps graphemes, multiline and recoverable drafts; overlays consume
   } finally { await f.app.exit(); }
 });
 
-test('viewport/focus changes invalidate confirmations, and explicit menu exit preserves the live draft', async () => {
+test('viewport/focus changes invalidate confirmations, and explicit /exit preserves the saved draft', async () => {
   const f=fixture(),key=(s:string)=>f.terminal.input(s);
   try {
     for(const change of ['\x1b[O','\x1b[5~','\x1b[<64;5;5M']) {
       key('\x04'); key(change); key('\x04'); assert.equal(f.terminal.stopped,false);
       key('x');key('\x7f');
     }
-    key('需要保留的草稿');key('\x1bOQ');key('\x1b[B');key('\r');
+    key('需要保留的草稿');key('\x03');key('/exit');key('\r');
     assert.match(f.screen(),/退出并保留草稿/);
-    key('\x1b');assert.match(f.screen(),/需要保留的草稿/);
-    key('\x1bOQ');key('\x1b[B');key('\r');key('\r');
+    key('\x1b');key('/restore');key('\r');assert.match(f.screen(),/需要保留的草稿/);
+    key('\x03');key('/exit');key('\r');key('\r');
     const result=await f.app.closed; assert.equal(result.draftSaved,true);
     assert.equal(f.transport.calls.length,0);
   } finally {await f.app.exit();}
@@ -113,7 +113,7 @@ test('in-flight stop waits for actual stream cancellation; repeated keys and mod
   const f=fixture(transport),key=(s:string)=>f.terminal.input(s);
   try {
     key('Read');key('\r');await until(()=>calls===1);
-    key('保留');key('\x1bOQ');key('\x1b');assert.equal(terminated,false);
+    key('保留');key('\x12');key('\x1b');assert.equal(terminated,false);
     key('\x03');assert.match(f.screen(),/中止中/);key('\x03');assert.equal(f.terminal.stopped,false);
     await until(()=>f.screen().includes('已中止'));assert.equal(terminated,true);assert.equal(calls,1);
     key('\x03');assert.equal(f.terminal.stopped,false);key('\x03');
@@ -206,7 +206,7 @@ test('streaming preserves a paused viewport, fixed draft and bounded windows acr
     for(let i=40;i<80;i++)source!.enqueue(encode(`line ${i} 中文👩‍💻\n`));
     await new Promise(r=>setTimeout(r,150));
     assert.equal(f.screen().split('\n').slice(2,-7).join('\n'),before);assert.match(f.screen(),/稳定草稿/);
-    key('\x1bOQ');key('\x1b[B');key('\x1b[B');key('\x1b[B');key('\r');
+    (f.app as unknown as {bottom():void}).bottom();
     assert.match(f.screen(),/line 79/);assert.match(f.screen(),/稳定草稿/);
     f.terminal.columns=40;f.terminal.rows=12;f.terminal.resize();assert.equal(f.app.screen().length,12);
     f.terminal.columns=30;f.terminal.rows=8;f.terminal.resize();assert.match(f.screen(),/窗口过小/);
@@ -249,9 +249,9 @@ test('focused editor uses one hardware caret without a competing painted caret',
     assert.equal(visible,true,'focused editor must show its hardware caret for IME');
     assert.doesNotMatch(ansi,/\x1b\[7m/, 'software caret competes with the visible hardware caret');
     f.terminal.writes=[];
-    key('\x1bOQ');f.app.screen();
+    key('\x12');f.app.screen();
     const overlay=f.terminal.writes.join('');
-    assert.ok(overlay.lastIndexOf('\x1b[?25l')>overlay.lastIndexOf('\x1b[?25h'),'menu owns focus and hides the editor caret');
+    assert.ok(overlay.lastIndexOf('\x1b[?25l')>overlay.lastIndexOf('\x1b[?25h'),'a view owns focus and hides the editor caret');
     assert.doesNotMatch(overlay,/\x1b\[7m/,'blurred editor must not leave a painted caret behind');
     key('\x1b');f.app.screen();
     assert.match(f.terminal.writes.at(-1)!,/\x1b\[20;12H\x1b\[\?25h/,'return to the unchanged editor insertion point');
@@ -310,14 +310,14 @@ test('repainting hides the hardware caret before moving it through display rows'
 test('history overlay is reachable and consumes command-like text without changing the active execution target', async () => {
   const f=fixture(),key=(s:string)=>f.terminal.input(s);
   try {
-    key('/history {broken');key('\r');assert.match(f.screen(),/历史查询失败/);assert.equal(f.terminal.stopped,false);assert.equal(f.transport.calls.length,0);
+    key('/history {broken');key('\r');assert.match(f.screen(),/参数有误/);assert.doesNotMatch(f.screen(),/历史 · 只读/);key('\x15');assert.equal(f.terminal.stopped,false);assert.equal(f.transport.calls.length,0);
     key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);assert.equal(f.transport.calls.length,0);key('\x1b');
     key('Read README');key('\r');await until(()=>f.screen().includes('已完成'));
     const calls=f.transport.calls.length;
     key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);
     // A session display number in the /history filter selects the same session; the filter keeps the full identity.
     const sessionId=(f.app as any).historyView.history.items[0].sessionId as string;key('\x1b');
-    key('/history '+JSON.stringify({session:readDisplayIndex(join(f.root,'data')).label('session',sessionId)}));key('\r');
+    key('/history '+readDisplayIndex(join(f.root,'data')).label('session',sessionId));key('\r');
     assert.equal((f.app as any).historyView.history.filter.session,sessionId);assert.equal((f.app as any).historyView.history.items.length,1);
     key('\r');assert.match(f.screen(),/task.accepted/);key('\r');
     key('/compact');key('\r');key('/exit');key('\r');assert.equal(f.terminal.stopped,false);assert.equal(f.transport.calls.length,calls);
@@ -326,11 +326,11 @@ test('history overlay is reachable and consumes command-like text without changi
   } finally {await f.app.exit();}
 });
 
-test('compact has a visible menu, idle summary reaches next input, and readonly history cannot compress',async()=>{
+test('compact is listed in help, idle summary reaches next input, and readonly history cannot compress',async()=>{
  const calls:any[]=[];const transport:typeof fetch=async(url,init)=>{calls.push(JSON.parse(String(init?.body)));const response=await scriptedTransport([]).fetch(url,init);return new Response((await response.text()).replace('Controlled response: inspect actual tool evidence for acceptance.',calls.length===1?'INITIAL FINAL '+'z'.repeat(90000):calls.length===2?'VISIBLE COMPACT SUMMARY':'NEXT FINAL'),{headers:{'content-type':'text/event-stream'}});};
  const f=fixture(transport),key=(s:string)=>f.terminal.input(s),dataRoot=join(f.root,'data');
  try{
-  key('\x1bOQ');assert.match(f.screen(),/compact/);key('\x1b');
+  key('?');for(let i=0;i<3&&!/\/compact /.test(f.screen());i++)key('n');assert.match(f.screen(),/\/compact /);key('\x1b');
   key('ORIGINAL UI REQUEST');key('\r');await until(()=>f.screen().includes('已完成'));
   key('/compact');key('\r');await until(()=>f.screen().includes('上下文压缩 applied'));assert.equal(calls.length,2);assert.equal(readAcceptedTasks(dataRoot).tasks.length,1);
   key('/compactions');key('\r');assert.match(f.screen(),/上下文压缩/);key('\x1b');
@@ -402,7 +402,7 @@ test('full-screen views stack: Esc returns layer by layer; in-view Ctrl+C and gl
     assert.equal(script.calls.length,2,'session task finished normally');
     // Instant feedback replaces the key-hint line until the next key.
     key('\x18');assert.match(f.screen(),/按 Enter 明确排到下一任务/);
-    key('x');assert.doesNotMatch(f.screen(),/按 Enter 明确排到下一任务/);assert.match(f.screen(),/\/help · Ctrl\+O 详情/);
+    key('x');assert.doesNotMatch(f.screen(),/按 Enter 明确排到下一任务/);assert.match(f.screen(),/Enter 提交 · \/ 命令 · Ctrl\+R 历史 · \? 帮助/);
     key('\x03');key('\x03');const exit=await f.app.closed;assert.equal(exit.result?.status,'completed');
   }finally{await f.app.exit();}
 });
@@ -418,4 +418,53 @@ test('queue panel names requests by q- number and /withdraw accepts it (v1 fixtu
     key('\x1b');key(`/withdraw ${q}`);key('\r');
     await until(()=>readQueue(dataRoot).items.find(item=>item.requestId==='frozen-follow')!.status==='withdrawn');
   } finally { await app.exit(); }
+});
+
+test('? opens help only on empty input; F2 does nothing; help fits 80x24 and 40x12', async () => {
+  const f=fixture(),key=(data:string)=>f.terminal.input(data);
+  try {
+    assert.match(f.screen(),/描述要查看或分析的内容… {3}\/ 命令  @ 文件  Shift\+Enter 换行/,'read-only placeholder on empty input');
+    assert.match(f.screen(),/Enter 提交 · \/ 命令 · Ctrl\+R 历史 · \? 帮助/);
+    key('a?');assert.doesNotMatch(f.screen(),/会话屏键位/);assert.match(f.screen(),/a\?/);
+    key('\x7f');key('\x7f');key('\x1bOQ');assert.doesNotMatch(f.screen(),/操作菜单|会话屏键位/,'F2 is inert');
+    for(const [columns,rows] of [[80,24],[40,12]] as const) {
+      f.terminal.columns=columns;f.terminal.rows=rows;f.terminal.resize();
+      key('?');const lines=f.app.screen().map(stripTerminalSequences);
+      assert.equal(lines.length,rows);for(const line of lines)assert.ok(line.trimEnd().length<=columns,`${columns}x${rows}: ${line}`);
+      const text=lines.join('\n');assert.match(text,/帮助/);assert.match(text,/会话屏键位/);assert.match(text,/Esc 返回会话/);
+      for(let i=0;i<40;i++)key('n');assert.match(f.screen(),/\/compactions/,'the command list scrolls to its end');assert.match(f.screen(),/Esc 返回会话/);
+      key('\x1b');assert.doesNotMatch(f.screen(),/会话屏键位/);
+    }
+    f.terminal.columns=30;f.terminal.rows=10;f.terminal.resize();assert.match(f.screen(),/窗口过小/);
+    f.terminal.columns=80;f.terminal.rows=24;f.terminal.resize();
+    key('/help');key('\r');assert.match(f.screen(),/会话屏键位/);key('\x1b');
+    // Narrow footers drop hints from the right; `? 帮助` goes last.
+    const hints=(f.app as unknown as {sessionHints():string[]}).sessionHints();assert.deepEqual(hints,['Enter 提交','/ 命令','Ctrl+R 历史','? 帮助']);
+  } finally { await f.app.exit(); }
+});
+
+test('bad command arguments open no view and list the valid values in the status line', async () => {
+  const f=fixture(),key=(data:string)=>f.terminal.input(data);
+  try {
+    key('/history --sort x');key('\r');assert.match(f.screen(),/参数有误：未知选项 --sort · 可用 --from --to --project --status/);assert.doesNotMatch(f.screen(),/历史 · 只读/);
+    assert.match(f.screen(),/\/history --sort x/,'the command stays in the input box to fix');
+    key('\x15');key('/history --from 10/01');key('\r');assert.match(f.screen(),/日期写 MM-DD 或 YYYY-MM-DD/);
+    key('\x15');key('/stats --source live');key('\r');assert.match(f.screen(),/可用 ordinary synthetic diagnostic/);
+    key('\x15');key('/metrics');key('\r');assert.match(f.screen(),/未知命令 \/metrics/);
+    key('\x15');key('/stats');key('\r');assert.doesNotMatch(f.screen(),/参数有误/);key('\x1b');
+    key('\x12');assert.match(f.screen(),/历史 · 只读/,'Ctrl+R opens history');key('\x1b');
+    assert.equal(f.transport.calls.length,0);
+  } finally { await f.app.exit(); }
+});
+
+test('/ and @ completion in the editor: subcommand, option value, and a file path only', async () => {
+  const f=fixture(),key=(data:string)=>f.terminal.input(data),text=()=>(f.app as unknown as {editor:{getText():string;isShowingAutocomplete():boolean}}).editor;
+  try {
+    for(const c of '/history --status a')key(c);
+    await until(()=>text().isShowingAutocomplete());key('\t');assert.equal(text().getText(),'/history --status aborted ');
+    key('\x15');for(const c of '/improve h')key(c);await until(()=>text().isShowingAutocomplete());key('\t');assert.equal(text().getText(),'/improve history ');
+    key('\x15');for(const c of 'read @READ')key(c);await until(()=>text().isShowingAutocomplete());
+    assert.match(f.screen(),/README\.md/);key('\t');assert.equal(text().getText(),'read @README.md ');
+    assert.equal(f.transport.calls.length,0);
+  } finally { await f.app.exit(); }
 });

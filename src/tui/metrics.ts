@@ -36,7 +36,7 @@ export class MetricsView {
  scroll(delta:number){this.line=Math.max(0,this.line+delta);}
  render(width:number,height:number){
   const wrap=(text:string)=>wrapTextWithAnsi(stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,'�'),Math.max(1,width-2));
-  const lines=wrap('任务指标 · 只读；/metrics JSON 与 headless scope 相同'),starts:number[]=[];
+  const lines=wrap('任务指标 · 只读；/stats 选项与 headless scope 相同'),starts:number[]=[];
   if(this.mode==='sources')for(const [i,source]of this.sources.entries()){starts.push(lines.length);lines.push(...wrap(`${i===this.selected?'›':' '} ${source.id}${source.root!==this.root?' @ '+source.root:''}`));}else lines.push(...wrap(this.content));
   const h=Math.max(1,height-1),chosen=starts[this.selected];if(chosen!==undefined){if(chosen<this.line)this.line=chosen;else if(chosen>=this.line+h)this.line=chosen-h+1;}
   this.line=Math.min(this.line,Math.max(0,lines.length-h));return[...lines.slice(this.line,this.line+h),truncateToWidth('f介入/返工 o成本/故障 ↑↓滚动 e来源 Enter原文 r旧修订 n/p分页 b返回 Esc关闭',width)];
