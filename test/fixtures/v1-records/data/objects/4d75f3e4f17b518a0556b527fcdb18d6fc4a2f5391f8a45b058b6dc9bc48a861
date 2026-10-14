@@ -1,0 +1,146 @@
+import type { TaskMetricsReport } from './report.js';
+import type { OperationRun } from './operations.js';
+export interface CostEstimateInput {
+    id: string;
+    requestSource: string;
+    amount: number;
+    currency: string;
+    price: {
+        source: string;
+        version: string;
+        effectiveAt: string;
+        provider: string;
+        model: string;
+    };
+    usageSources: string[];
+    reason: string;
+    revisionOf?: string;
+}
+/** An explicit sourced estimate/re-estimate is an original host fact, not a new ledger.
+ * Caller supplies the declared tariff/calculation; this does not claim provider billing. */
+export declare function recordCostEstimate(root: string, input: CostEstimateInput): {
+    source: string;
+    repeated: boolean;
+};
+export interface CostRequest {
+    id: string;
+    dataRoot: string;
+    parentImprove: OperationRun['parentImprove'] | null;
+    runId: string;
+    taskId: string | null;
+    kind: string;
+    stage: string | null;
+    side: string | null;
+    at: string;
+    source: string;
+    dispatchSources: string[];
+    usageSources: string[];
+    purpose: string;
+    currency: string | null;
+    amount: number | null;
+    state: 'complete' | 'partial' | 'unknown' | 'not-applicable';
+    gaps: string[];
+    history: any[];
+    price: any;
+    association: string;
+    usage: unknown;
+}
+export declare function costReport(parentRoot: string, sample: TaskMetricsReport, runs: OperationRun[], childGaps?: {
+    runId: string;
+    source: string;
+    reason: string;
+    mayAffectSample: boolean;
+}[]): {
+    sample: {
+        basis: string;
+        sampleId: string;
+        state: string;
+        perSuccessState: string;
+        currencies: {
+            [k: string]: {
+                knownAmount: number;
+                perSuccess: {
+                    state: string;
+                    value: number | null;
+                    knownPartPerSuccess: number | null;
+                    denominator: number | null;
+                    unit: string;
+                    interpretation: string;
+                };
+            };
+        };
+        requestIds: string[];
+        gaps: {
+            runId: string;
+            source: string | null;
+            reason: string;
+            mayAffectSample: boolean;
+        }[];
+        missingRequests: {
+            id: string;
+            gaps: string[];
+        }[];
+        groups: {
+            [k: string]: string[];
+        };
+    };
+    period: {
+        basis: string;
+        state: string;
+        perSuccessState: string;
+        currencies: {
+            [k: string]: {
+                knownAmount: number;
+                perSuccess: {
+                    state: string;
+                    value: number | null;
+                    knownPartPerSuccess: number | null;
+                    denominator: number | null;
+                    unit: string;
+                    interpretation: string;
+                };
+            };
+        };
+        requestIds: string[];
+        gaps: {
+            runId: string;
+            source: string | null;
+            reason: string;
+            mayAffectSample: boolean;
+        }[];
+        missingRequests: {
+            id: string;
+            gaps: string[];
+        }[];
+        groups: {
+            [k: string]: string[];
+        };
+    };
+    requests: CostRequest[];
+    gaps: {
+        runId: string;
+        source: string | null;
+        reason: string;
+        mayAffectSample: boolean;
+    }[];
+    sessionUsage: any[];
+    sessionEstimates: any[];
+    evalStages: {
+        dataRoot: string;
+        planId: string;
+        parentImprove: {
+            dataRoot: string;
+            decisionId: string;
+            decisionSource: string;
+            linkSource: string;
+        } | null;
+        stages: {
+            [k: string]: {
+                requests: string[];
+                sources: string[];
+            };
+        };
+        basis: string;
+    }[];
+    rule: string;
+};

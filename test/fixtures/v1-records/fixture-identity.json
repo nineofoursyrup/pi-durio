@@ -1,0 +1,32 @@
+{
+  "names": {
+    "run.coding": "8a35564a-b872-42a7-9fec-e29bb52264b7",
+    "session.coding": "35068ed0-e1b4-4c2d-8b0c-8fce56f949fe",
+    "run.read": "5efcc32a-6535-43ff-a23a-7bdcc6f33482",
+    "session.read": "7b95bc1d-3ccd-4b2a-b545-8ffaa74310ee",
+    "run.fork-1": "189d813a-84db-4dcd-8c74-fef8253be715",
+    "session.fork-1": "5f96228d-532e-472f-9df7-b0e56aa3109b",
+    "run.fork-2": "8f5c51db-7ddf-4f15-aa89-112c97468191",
+    "session.fork-2": "fb214d3b-e0bb-4d80-a756-5602b1ae8346",
+    "run.early-abort": "98719d5f-fe56-4981-8e4c-72ffba39f010",
+    "run.uncertain-source": "022137de-be8d-4304-9878-aae3d639f721",
+    "session.uncertain": "25b38758-db3f-4759-b498-7a30eea54ef1",
+    "recovery.snapshot-uncertain": "e3e26c35551bd17dab2cd2b532ee66e02f58f5fe032872e713d48cc59b06e04d",
+    "run.recovery-skip": "022137de-be8d-4304-9878-aae3d639f721",
+    "run.readonly-followup": "721ef228-347b-453c-b016-b56b979fb271",
+    "run.improve": "5445994d-3a71-451c-ba37-fe94ecd83993",
+    "improve.report": "fixture-improve-1",
+    "improve.decision-defer": "improve-decision-defer-1",
+    "improve.decision-validate": "improve-decision-validate-1",
+    "improve.decision-suppress": "improve-decision-suppress-1",
+    "improve.suppression": "e1:327:9177d3031e943d141faf363207221a50ec4ffa578de0cee2fa8e71e84c488e78:ccea68ed9b9dab8f1222b563eaa688a0bd685c844a8c4e358cdcdd9e5c4a8c50",
+    "improve.decision-execute": "improve-decision-execute-1",
+    "run.frozen-source": "45aa5ee1-095d-4b0c-b6ba-048d54208388",
+    "session.frozen-source": "eb92b037-b619-4d67-ae8e-68814a3731b1",
+    "eval.plan": "fixture-eval-plan-1",
+    "eval.trial": "fixture-eval-plan-1-pair-1-baseline"
+  },
+  "generatedBy": "f26ae8f",
+  "generatedAt": "2026-10-14T13:27:19.992Z",
+  "note": "All records written by the v1 build at f26ae8f using offline transport. No paid model calls."
+}

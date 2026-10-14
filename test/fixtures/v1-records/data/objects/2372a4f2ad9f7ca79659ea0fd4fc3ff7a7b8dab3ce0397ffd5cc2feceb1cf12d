@@ -1,0 +1,150 @@
+import type { BlobRef } from '../evidence.js';
+import { type EffectiveTask } from '../task-profile.js';
+export type Metric = 'requests' | 'tokens' | 'cost' | 'taskMs' | 'task-pass';
+export interface RuntimeContent {
+    id: string;
+    manifest: BlobRef;
+    bytes: number;
+}
+export interface ComparisonPlan {
+    kind: 'deterministic' | 'stochastic';
+    repetitions: number;
+    repetitionBasis: string;
+    change: string;
+    hypothesis: string;
+    roles: Record<string, 'objective' | 'protection'>;
+    objective: {
+        metric: Metric;
+        direction: 'lower' | 'higher';
+        delta: number | null;
+        basis: string;
+    };
+    protections: ({
+        id: string;
+        kind: 'hard';
+        check: string;
+        cases: string[];
+    } | {
+        id: string;
+        kind: 'soft';
+        metric: Exclude<Metric, 'task-pass'>;
+        direction: 'lower' | 'higher';
+        tolerance: number;
+        basis: string;
+        cases: string[];
+    })[];
+    trialBudget: {
+        maxRequests: number;
+        maxTokens: number;
+    };
+    sides: Record<'baseline' | 'candidate', {
+        runtime: RuntimeContent;
+        instructions: string;
+        effectiveTask?: EffectiveTask;
+    }>;
+}
+export interface ComparisonTrial {
+    id: string;
+    caseId: string;
+    repeat: number;
+    side: string;
+    pair: string | null;
+    version: string;
+    outcome: {
+        source?: string;
+        status: string;
+        valid: boolean;
+        reason?: string | null;
+        timing?: {
+            taskMs: number;
+        };
+    };
+    grade: {
+        judgment: string;
+        graderVersion: string;
+        outcome: string;
+        revision?: string;
+        checks: {
+            name: string;
+            passed: boolean;
+        }[];
+    } | null;
+    metrics: Record<Exclude<Metric, 'task-pass'>, number | null>;
+    metricReasons: Partial<Record<Metric, string>>;
+    modelIdentity?: {
+        returned: string[];
+        missing: number;
+    };
+}
+export declare function validateComparison(plan: ComparisonPlan, caseIds: string[], trials: {
+    id: string;
+    caseId: string;
+    repeat: number;
+    side: string;
+    pair: string | null;
+}[], budget: {
+    maxRequests: number;
+    maxTokens: number;
+}): void;
+export declare function pairedTrials(id: string, caseIds: string[], repetitions: number): {
+    id: string;
+    caseId: string;
+    side: string;
+    repeat: number;
+    pair: string;
+}[];
+/** Pure arithmetic over already verified host facts. The runner supplies evidence validity. */
+export declare function compareTrials(plan: ComparisonPlan, trials: ComparisonTrial[], externalGaps?: string[]): {
+    conclusion: "改善" | "退化" | "无明显差异" | "证据不足";
+    reason: string;
+    scope: string;
+    allComplete: boolean;
+    metricsComplete: boolean;
+    evidenceGaps: string[];
+    thresholdValid: boolean;
+    repetitionValid: boolean;
+    validPairs: number;
+    pairs: {
+        caseId: string;
+        role: "objective" | "protection";
+        repeat: number;
+        id: string;
+        baseline: string;
+        candidate: string;
+        valid: boolean;
+        before: number | null;
+        after: number | null;
+        delta: number | null;
+        exclusion: string | null;
+        metricGaps: string[];
+    }[];
+    candidateFailures: {
+        trial: string;
+        judgment: string;
+        evidenceValid: boolean;
+    }[];
+    hardRegressions: string[];
+    softRegressions: string[];
+    regression: {
+        counts: {
+            planned: number;
+            valid: number;
+            regressed: number;
+            regressionRate: number | null;
+            coverageRate: number | null;
+        };
+        pairs: {
+            requirement: string;
+            caseId: string;
+            repeat: number;
+            kind: "hard" | "soft";
+            before: number | boolean | null;
+            after: number | boolean | null;
+            delta: number | null;
+            valid: boolean;
+            regressed: boolean;
+            candidatePassed: boolean;
+            reason: string | null;
+        }[];
+    };
+};

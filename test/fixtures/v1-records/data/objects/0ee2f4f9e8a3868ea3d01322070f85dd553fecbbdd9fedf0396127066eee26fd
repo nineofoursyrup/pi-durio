@@ -1,0 +1,1 @@
+{"source":"pi.usage","conversationId":1,"value":{"models":{"deepseek/deepseek-flash":{"input":20,"output":8,"cacheRead":0,"cacheWrite":0,"reasoning":0,"totalTokens":28,"cost":{"input":0.000006,"output":0.0000096,"cacheRead":0,"cacheWrite":0,"total":0.0000156}}},"tools":{}},"reportedAttempts":2,"requests":2,"attempts":2,"notDispatchedAttempts":[],"completeness":"known"}

@@ -1,0 +1,8 @@
+import { Evidence } from './evidence.js';
+/** Persist bounded acquired output in ordinary Evidence objects. The fact has
+ * direct block references so existing fixation/retention sees every dependency.
+ * Mutation occurs only after the content and receipt are durable. */
+export declare function retainExecutionOutput(evidence: Evidence, execution: any, identity: Record<string, unknown>): void;
+/** Journal/UI projection only. Original text and original byte blocks remain in
+ * the separately retained execution document and its output references. */
+export declare function executionPreview(execution: any): any;

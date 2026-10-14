@@ -1,0 +1,16 @@
+/** Deterministic transport fixture: real Pi DeepSeek adapter + Harness, no network/model inference. */
+export declare function demoTransport(): {
+    calls: unknown[];
+    fetch: typeof fetch;
+};
+/** Explicit scripted tool calls for wiring tests/demos. This is neither inference nor a correctness oracle. */
+export declare function scriptedTransport(steps: readonly ({
+    name: string;
+    args: unknown;
+} | readonly {
+    name: string;
+    args: unknown;
+}[])[]): {
+    calls: unknown[];
+    fetch: typeof fetch;
+};

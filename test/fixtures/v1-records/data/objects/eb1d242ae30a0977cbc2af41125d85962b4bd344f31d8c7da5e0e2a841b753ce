@@ -1,0 +1,22 @@
+import type { EvidenceRecord } from './evidence.js';
+/** A fixed-watermark view, not an array or body cache. Predicates can select by kind/seq
+ * before touching data; each selected body still goes through content-address validation.
+ */
+export declare class RecoveryRecords implements Iterable<EvidenceRecord> {
+    private readonly scan;
+    constructor(scan: () => Iterable<EvidenceRecord>);
+    [Symbol.iterator](): Iterator<EvidenceRecord, any, any>;
+    filter(predicate: (record: EvidenceRecord) => boolean): RecoveryRecords;
+    find(predicate: (record: EvidenceRecord) => boolean): EvidenceRecord | undefined;
+    findLast(predicate: (record: EvidenceRecord) => boolean): EvidenceRecord | undefined;
+    some(predicate: (record: EvidenceRecord) => boolean): boolean;
+    get length(): number;
+    /** Explicit result projection for the selected report fields; filters never materialize bodies. */
+    map<T>(project: (record: EvidenceRecord) => T): T[];
+}
+export declare function recoveryRecords(root: string, runId?: string): RecoveryRecords;
+/** Same JSON bytes as the previous array snapshot, streamed one bounded fact at a time.
+ * Reading data here is intentional: recovery identities must validate/bind every original body.
+ */
+export declare function recoverySnapshotId(source: unknown, facts: RecoveryRecords, authorization: unknown, reasons: string[]): string;
+export declare function ownerSnapshotId(facts: RecoveryRecords, claims: unknown): string;

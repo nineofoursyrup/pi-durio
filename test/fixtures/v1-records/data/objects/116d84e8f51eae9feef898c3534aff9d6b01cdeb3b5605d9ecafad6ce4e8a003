@@ -1,0 +1,54 @@
+import { Evidence, type BlobRef } from './evidence.js';
+import { type SourceTarget } from './improve-source.js';
+import { type ContentFile } from './eval/store.js';
+import type { ContentChange } from './improve-validation.js';
+export interface ImproveBuildArtifact {
+    id: string;
+    directory: string;
+    entry: string;
+    manifest: BlobRef;
+    files: number;
+    bytes: number;
+    compatibility: {
+        node: string;
+        platform: string;
+        arch: string;
+    };
+    sourceBuild: string;
+}
+export interface ImproveBuildPair {
+    state: 'completed';
+    targetId: string;
+    sourceRoot: string;
+    baseline: ImproveBuildArtifact;
+    candidate: ImproveBuildArtifact;
+    execution: BlobRef;
+    startup: BlobRef;
+    environment: {
+        image: string;
+        compiler: string;
+    };
+    scope: string;
+}
+export declare function buildFiles(root: string, build: ImproveBuildArtifact): ContentFile[];
+/** Verify actual retained executable/dependency/configuration bytes, not package names. */
+export declare function verifyImproveBuild(root: string, build: ImproveBuildArtifact, compatibility?: boolean): ContentFile[];
+/** Current registered source may be before or after this exact selected write,
+ * depending on rollback; unrelated user/build-input edits always remain visible. */
+export declare function verifyBuildSource(root: string, pair: ImproveBuildPair, side: 'baseline' | 'candidate' | 'either'): void;
+export declare class ImproveBuildFailure extends Error {
+    readonly state: 'failed' | 'cancelled' | 'unknown';
+    constructor(state: 'failed' | 'cancelled' | 'unknown', message: string);
+}
+export declare function prepareImproveBuild(o: {
+    evidence: Evidence;
+    target: SourceTarget;
+    changes: ContentChange[];
+    directory: string;
+    timeoutMs: number;
+    deadline: string;
+    signal: AbortSignal;
+    groupId: string;
+    record: (kind: string, data: any) => string;
+    guard: () => void;
+}): Promise<ImproveBuildPair>;

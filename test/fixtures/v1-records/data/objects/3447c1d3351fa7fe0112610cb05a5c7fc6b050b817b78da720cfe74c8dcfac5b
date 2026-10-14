@@ -1,0 +1,233 @@
+export interface MetricsScope {
+    from?: string;
+    to?: string;
+    asOf?: string;
+    project?: string;
+    taskType?: string;
+    version?: string;
+    source?: 'ordinary' | 'synthetic' | 'diagnostic';
+    through?: number;
+    revisionOf?: string;
+}
+export declare function ratio(numerator: number, denominator: number): {
+    numerator: number;
+    denominator: number;
+    value: number | null;
+    state: string;
+    unit: string;
+};
+/** Shared read-only input for #28/#29. No Harness, provider or writable DB is opened. */
+export declare function queryTaskMetrics(root: string, input?: MetricsScope): {
+    schema: string;
+    ruleVersion: string;
+    scope: {
+        through: number;
+        from: string;
+        to: string;
+        asOf: string;
+        source: "ordinary" | "synthetic" | "diagnostic";
+        project?: string;
+        taskType?: string;
+        version?: string;
+        revisionOf?: string;
+    };
+    snapshot: {
+        current: number;
+        through: number;
+        blockedAt: string | null;
+        rollback: boolean;
+        policy: string;
+    };
+    counts: {
+        N: number;
+        B: number;
+        C: number;
+        G: number;
+        S: number;
+        terminated: number;
+    };
+    rates: {
+        success: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+        completion: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+        coverage: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+    };
+    statusCounts: {
+        [k: string]: number;
+    };
+    terminationReasons: {
+        [k: string]: number;
+    };
+    unknown: {
+        taskTypes: number;
+        executionVersions: number;
+        acceptance: number;
+    };
+    clocks: {
+        execution: {
+            unit: string;
+            state: string;
+            total: number;
+            valid: number;
+            missing: number;
+            pending: number;
+            sum: number | null;
+            mean: number | null;
+            p50: number | null;
+            p95: number | null;
+            method: string;
+        };
+        executionByStatus: any;
+        acceptance: {
+            unit: string;
+            state: string;
+            total: number;
+            valid: number;
+            missing: number;
+            pending: number;
+            sum: number | null;
+            mean: number | null;
+            p50: number | null;
+            p95: number | null;
+            method: string;
+        };
+        acceptanceByOutcome: {
+            [k: string]: {
+                unit: string;
+                state: string;
+                total: number;
+                valid: number;
+                missing: number;
+                pending: number;
+                sum: number | null;
+                mean: number | null;
+                p50: number | null;
+                p95: number | null;
+                method: string;
+            };
+        };
+    };
+    tasks: {
+        taskId: string;
+        requestId: string;
+        runId: string | null;
+        evidenceRunId: string;
+        project: any;
+        workspace: string;
+        kind: string | null;
+        sourceClass: string | null;
+        taskType: string | null;
+        parentTaskId: string | null;
+        trialId: string | null;
+        version: string | null;
+        expectedVersion: string | null;
+        acceptedAt: string;
+        acceptedSource: string;
+        startedSource: string | null;
+        terminationSource: string | null;
+        status: any;
+        reason: any;
+        normalCompleted: boolean;
+        terminated: boolean;
+        terminationScope: string;
+        acceptance: {
+            history: {
+                id: string;
+                type: "result" | "withdraw" | "requirements" | "judgment" | "dispute";
+                source: string;
+                occurredAt: string;
+                receivedAt: string;
+                withdrawn: boolean;
+                disputed: boolean;
+                revisionOf: string | null;
+                supersedes: string[];
+                reason: string | null;
+            }[];
+            missingSources: {
+                source: string;
+                runId: string;
+                taskAttribution: "unknown";
+                scope: string;
+                reason: string;
+            }[];
+            requirements: {
+                id: string;
+                source: string;
+                ruleVersion: any;
+            }[];
+            results: {
+                id: string;
+                source: string;
+                evidence: any;
+            }[];
+            judgments: import("./acceptance.js").Assessed[];
+            firstValid: import("./acceptance.js").Assessed | null;
+            firstValidOrder: {
+                method: string;
+                reliability: string;
+                reason: string | null;
+            };
+            conflict: boolean;
+            requirementsChanged: boolean;
+            outcome: import("./acceptance.js").Verdict;
+            reasons: string[];
+        };
+        clocks: {
+            execution: import("./clocks.js").Duration;
+            acceptance: import("./clocks.js").Duration;
+            acceptanceOutcome: string;
+            rollback: boolean;
+            segments: import("./clocks.js").Segment[];
+            partition: {
+                unit: string;
+                measured: Record<"unknown" | import("./clocks.js").SegmentKind, number | null>;
+                overlapMs: number;
+                totalState: string;
+                scope: string;
+            };
+        };
+        missing: {
+            source: string;
+            reason: any;
+        }[];
+        sources: string[];
+    }[];
+    excluded: {
+        taskId: string;
+        source: string;
+        reasons: string[];
+        kind: string | null;
+        sourceClass: string | null;
+        version: string | null;
+        taskType: string | null;
+    }[];
+    duplicates: {
+        taskId: string;
+        source: string;
+        reason: string;
+    }[];
+    limits: string[];
+    id: string;
+    generatedAt: string;
+    revisionOf: string | null;
+};
+export type TaskMetricsReport = ReturnType<typeof queryTaskMetrics>;
+/** Readable output is a rendering of the same machine report, with every reference retained. */
+export declare function formatTaskMetrics(report: TaskMetricsReport): string;

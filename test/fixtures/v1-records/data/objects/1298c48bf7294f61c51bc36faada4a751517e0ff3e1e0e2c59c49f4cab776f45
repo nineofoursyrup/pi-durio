@@ -1,0 +1,133 @@
+import { Evidence } from './evidence.js';
+import type { ImproveCandidate } from './improve.js';
+import { type PrepareEvalOptions, type PrepareComparison } from './eval/runner.js';
+import type { DefaultChange, TaskType, DefaultScope } from './improve-defaults.js';
+import { type EffectiveProfileChange } from './improve-profile-validation.js';
+import { type ImproveBuildPair } from './improve-build.js';
+export interface ContentChange {
+    targetId: string;
+    path: string;
+    content: string;
+}
+export type BenefitRole = 'required' | 'diagnostic';
+export interface DirectCheck {
+    benefit?: BenefitRole;
+    kind: 'direct' | 'regression' | 'resource';
+    program: string;
+    timeoutMs: number;
+    resource?: {
+        direction: 'lower' | 'higher';
+        delta: number;
+        unit: string;
+        basis: string;
+    };
+}
+export interface FreshCheck {
+    kind: 'fresh';
+    benefit?: BenefitRole;
+    installation: string;
+    runtimeIdentity: string;
+    effectiveTask?: TaskType;
+    files: {
+        targetId: string;
+        path: string;
+    }[];
+    options: Omit<PrepareEvalOptions, 'dataRoot' | 'id' | 'installation' | 'comparison' | 'image'>;
+    comparison: Omit<PrepareComparison, 'sides'>;
+}
+export type ImproveCheck = DirectCheck | FreshCheck;
+export interface ValidationGroup {
+    id: string;
+    candidateIds: string[];
+    changes: ContentChange[];
+    checks: ImproveCheck[];
+    build?: {
+        targetId: string;
+        timeoutMs: number;
+    };
+    profileScope?: DefaultScope;
+    basis?: {
+        impact: 'no-behavior' | 'deterministic-fix' | 'model-behavior' | 'unknown';
+        reason: string;
+        checkIndices: number[];
+        equivalence?: 'exact' | 'trim-instructions-end';
+        expectedProfiles?: EffectiveProfileChange[];
+    };
+}
+export declare function describeImproveRuntime(installation: string): string;
+export declare function groupReservation(group: ValidationGroup): {
+    checks: number;
+    requests: number;
+    tokens: number;
+};
+/** All declared checks are necessary. A later success never replaces an earlier
+ * failed protection, unknown check or unmet benefit. Activation still needs its
+ * own exact contract in #25; this projection grants no write/enable authority. */
+export declare function scopedImproveSource(dataRoot: string, source: string): {
+    scope: string;
+    dataRoot: string;
+    sequence: number;
+    digest: string;
+};
+export declare function summarizeImproveValidation(checks: {
+    kind: string;
+    state: string;
+    effect?: string;
+    benefit?: BenefitRole;
+}[]): {
+    effect: string;
+    allChecksPassed: boolean;
+    allDeclaredBenefitsMet: boolean;
+    requiredBenefitCount: number;
+    diagnosticBenefitCount: number;
+    allRequiredBenefitsMet: boolean;
+    rule: string;
+};
+export declare function validateGroup(group: ValidationGroup, candidates: ImproveCandidate[], deadline: string): void;
+/** Host constructs only declared bytes; all candidate/check code runs in the
+ * existing single VM boundary. Formal paths are never mounted into that VM. */
+export declare function validateImproveGroup(options: {
+    evidence: Evidence;
+    decisionSource: string;
+    decisionId: string;
+    group: ValidationGroup;
+    candidates: ImproveCandidate[];
+    defaults?: DefaultChange[];
+    directory: string;
+    deadline: string;
+    signal: AbortSignal;
+    record: (kind: string, data: unknown) => string;
+    guard: () => void;
+}): Promise<{
+    state: string;
+    reason: string | null;
+    construction: {
+        expectedProfiles?: import("./evidence.js").BlobRef | undefined;
+        effectiveProfiles?: import("./evidence.js").BlobRef | undefined;
+        targets: {
+            id: string;
+            workspace: string | null;
+            baseline: string;
+        }[];
+        files: {
+            path: string;
+            before: import("./evidence.js").BlobRef;
+            after: import("./evidence.js").BlobRef;
+        }[];
+    };
+    checks: any[];
+    build: ImproveBuildPair | undefined;
+    effect: string;
+    conclusion: {
+        effect: string;
+        allChecksPassed: boolean;
+        allDeclaredBenefitsMet: boolean;
+        requiredBenefitCount: number;
+        diagnosticBenefitCount: number;
+        allRequiredBenefitsMet: boolean;
+        rule: string;
+    };
+    scope: string;
+    writeback: string;
+    activation: string;
+}>;

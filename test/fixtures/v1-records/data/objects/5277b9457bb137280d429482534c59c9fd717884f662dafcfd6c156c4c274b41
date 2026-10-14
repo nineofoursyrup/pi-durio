@@ -1,0 +1,82 @@
+import { DatabaseSync } from 'node:sqlite';
+import type { Storage, ConversationId, JsonObject } from '@earendil-works/pi-durable';
+import type { OwnerLease } from './ownership.js';
+/** Only the public read surface is available inside the fenced copy's lifetime. */
+export type StorageReader = Pick<Storage, 'scanEntries' | 'scanTasks' | 'scanSubmissions' | 'scanConversations' | 'entry' | 'task' | 'submission' | 'submissionByRequest' | 'findDocument' | 'document'>;
+export declare function withProjectionIndex<T>(use: (index: DatabaseSync) => Promise<T>): Promise<T>;
+/** Deterministic directory traversal without a history-sized name array. */
+export declare function forEachDirectory(path: string, visit: (entry: {
+    name: string;
+    isDirectory: boolean;
+}) => Promise<void>): Promise<void>;
+export declare function scanTasks(storage: StorageReader): AsyncGenerator<import("@earendil-works/pi-durable").TaskRecord<import("@earendil-works/chord").JsonValue, import("@earendil-works/chord").JsonValue, import("@earendil-works/chord").JsonValue>, void, unknown>;
+export declare function scanSubmissions(storage: StorageReader): AsyncGenerator<import("@earendil-works/pi-durable").SubmissionRecord, void, unknown>;
+export declare function scanConversations(storage: StorageReader): AsyncGenerator<import("@earendil-works/pi-durable").ConversationRecord, void, unknown>;
+export declare function conversationDocument(storage: StorageReader, conversationId: ConversationId, kind: string): Promise<{
+    conversationId: ConversationId;
+    documentId: import("@earendil-works/pi-durable").DocumentId;
+    value: JsonObject;
+} | undefined>;
+/** Management plans already have explicit finite limits. Exceeding the projection limit fails closed. */
+export declare function inspectStorageState(path: string, owner: OwnerLease, options?: {
+    conversationLimit?: number;
+    failOnLimit?: boolean;
+}): Promise<{
+    source: string;
+    method: string;
+    snapshotSha256: string;
+    sourceFiles: {
+        path: string;
+        sha256: string;
+    }[];
+} & {
+    conversations: number[];
+    conversationCount: number;
+    conversationIdSha256: string;
+    taskCount: number;
+    submissionCount: number;
+    pendingCount: number;
+    pending: {
+        kind: string;
+        id: number;
+        status: string;
+    }[];
+}>;
+/** Each receipt is a projection with durable source identities, never another copy of transcript originals.
+ * Spool all usage documents, then publish only after the final source fence succeeds. The first document
+ * still supplies runtime's session usage; every document retains queryUsage's attribution/dedup semantics.
+ */
+export declare function inspectClosedSession(path: string, owner: OwnerLease, receipt: (value: unknown) => void): Promise<{
+    firstUsage: JsonObject | undefined;
+    source: string;
+    method: string;
+    snapshotSha256: string;
+    sourceFiles: {
+        path: string;
+        sha256: string;
+    }[];
+    conversationCount: number;
+    usageCount: number;
+    projection: string;
+    taskCount: number;
+    submissionCount: number;
+    pendingCount: number;
+    pending: {
+        kind: string;
+        id: number;
+        status: string;
+    }[];
+}>;
+export declare function inspectCompaction(path: string, owner: OwnerLease, taskId?: number): Promise<{
+    source: string;
+    method: string;
+    snapshotSha256: string;
+    sourceFiles: {
+        path: string;
+        sha256: string;
+    }[];
+} & {
+    outcome: import("@earendil-works/pi-durable").TaskOutcome<import("@earendil-works/chord").JsonValue> | undefined;
+    result: any;
+    summary: import("@earendil-works/pi-durable").SubmissionRecord | undefined;
+}>;

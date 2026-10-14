@@ -1,0 +1,69 @@
+import { type Terminal, type TuiAltScreen } from '@earendil-works/pi-tui';
+export interface UnappliedInput {
+    data: string;
+    context: string;
+}
+export interface WidthGateOptions {
+    terminal: Terminal;
+    tui: TuiAltScreen;
+    sources: () => string[];
+    priorityInput: (data: string) => boolean;
+    context: () => string;
+    ready: () => void;
+    retain: (inputs: UnappliedInput[], reason: string) => void;
+    timeoutMs?: number;
+}
+/** Serializes actual-terminal measurements, geometry-dependent input and complete redraws. */
+export declare class TerminalWidthGate {
+    private readonly options;
+    private readonly originalWrite;
+    private readonly originalStart;
+    private readonly probe;
+    private profile;
+    private pendingInputs;
+    private inputBytes;
+    private wanted;
+    private lastFrame;
+    private acceptInput?;
+    private busy;
+    private queryHolds;
+    private calibration?;
+    private error?;
+    private closing;
+    private epoch;
+    private controller?;
+    private blockedFrames;
+    private retainedInputs;
+    private cursorVisible;
+    constructor(options: WidthGateOptions);
+    /** Outer input observers must consume these before treating an event as a user action. */
+    consumeTerminalReply(data: string): boolean;
+    get blocked(): boolean;
+    /** Keep synchronous host checks out of a timed CPR exchange, including any already in flight. */
+    withoutQueries<T>(work: () => Promise<T>): Promise<T>;
+    inspect(extra?: string[]): void;
+    private calibrate;
+    private fail;
+    private message;
+    private drain;
+    /** Explicit Ctrl+L also remeasures after a font/settings change; no cross-session cache. */
+    retry(reset?: boolean): void;
+    private retain;
+    retainPending(reason: string): void;
+    beginClose(): void;
+    settle(): Promise<boolean>;
+    snapshot(): {
+        status: string;
+        error: string | null;
+        profile: [string, number][];
+        observations: {
+            grapheme: string;
+            width: number;
+            elapsedMs: number;
+        }[];
+        blockedFrames: number;
+        retainedInputs: number;
+        pendingInputs: number;
+    };
+    dispose(): void;
+}

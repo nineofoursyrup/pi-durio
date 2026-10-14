@@ -1,0 +1,135 @@
+import type { ManagementFault } from './storage.js';
+export declare function verifyArchive(archive: string): Promise<{
+    archive: string;
+    identity: string;
+    scope: "whole-root" | "attachments";
+    files: number;
+    bytes: number;
+    readable: {
+        hostRecords: number;
+        declaredUnavailable: number;
+        sessions: {
+            sessionId: string;
+            conversations: number[];
+            conversationCount: number;
+            conversationIdSha256: string;
+            tasks: number;
+            submissions: number;
+            pending: number;
+        }[];
+        sessionSummary: import("./detail-page.js").DetailSummary;
+        detailSource: string;
+        execution: string;
+    } | {
+        objects: number;
+        bytes: number;
+        execution: string;
+    };
+    verified: boolean;
+}>;
+/** Lossless whole-root archive explicitly includes every project in the shared host store.
+ * Selected object archives are independent attachments. Neither operation removes its source. */
+export declare function archiveStorage(root: string, request: {
+    destination: string;
+    scope: 'whole-root' | 'attachments';
+    objects?: string[];
+}, options?: {
+    fault?: ManagementFault;
+}): Promise<{
+    archive: string;
+    sourceRetained: boolean;
+    identity: string;
+    scope: "whole-root" | "attachments";
+    files: number;
+    bytes: number;
+    readable: {
+        hostRecords: number;
+        declaredUnavailable: number;
+        sessions: {
+            sessionId: string;
+            conversations: number[];
+            conversationCount: number;
+            conversationIdSha256: string;
+            tasks: number;
+            submissions: number;
+            pending: number;
+        }[];
+        sessionSummary: import("./detail-page.js").DetailSummary;
+        detailSource: string;
+        execution: string;
+    } | {
+        objects: number;
+        bytes: number;
+        execution: string;
+    };
+    verified: boolean;
+}>;
+export declare function restoreArchive(archive: string, destination: string, options?: {
+    fault?: ManagementFault;
+}): Promise<{
+    destination: string;
+    archive: string;
+    identity: string;
+    scope: "whole-root" | "attachments";
+    files: number;
+    bytes: number;
+    readable: {
+        hostRecords: number;
+        declaredUnavailable: number;
+        sessions: {
+            sessionId: string;
+            conversations: number[];
+            conversationCount: number;
+            conversationIdSha256: string;
+            tasks: number;
+            submissions: number;
+            pending: number;
+        }[];
+        sessionSummary: import("./detail-page.js").DetailSummary;
+        detailSource: string;
+        execution: string;
+    } | {
+        objects: number;
+        bytes: number;
+        execution: string;
+    };
+    sourceRetained: boolean;
+}>;
+/** Current v1 migration is a verified same-format root relocation, never a cross-version resume. */
+export declare function migrateStorage(root: string, request: {
+    destination: string;
+    backup: string;
+}, options?: {
+    fault?: ManagementFault;
+}): Promise<{
+    backup: string;
+    migration: string;
+    executionAuthorized: boolean;
+    destination: string;
+    archive: string;
+    identity: string;
+    scope: "whole-root" | "attachments";
+    files: number;
+    bytes: number;
+    readable: {
+        hostRecords: number;
+        declaredUnavailable: number;
+        sessions: {
+            sessionId: string;
+            conversations: number[];
+            conversationCount: number;
+            conversationIdSha256: string;
+            tasks: number;
+            submissions: number;
+            pending: number;
+        }[];
+        sessionSummary: import("./detail-page.js").DetailSummary;
+        detailSource: string;
+        execution: string;
+    } | {
+        objects: number;
+        bytes: number;
+        execution: string;
+    };
+    sourceRetained: boolean;
+}>;

@@ -1,0 +1,60 @@
+import { type StorageUnit } from './retention.js';
+export { storageUsage } from './retention.js';
+export { archiveStorage, restoreArchive, migrateStorage, verifyArchive } from './storage-archive.js';
+export { unfixEvidence } from './fixed-evidence.js';
+export interface CleanupRequest {
+    id: string;
+    units: string[];
+    reason: string;
+}
+export interface CleanupPlan {
+    version: 1;
+    id: string;
+    root: string;
+    request: CleanupRequest;
+    createdAt: string;
+    units: StorageUnit[];
+    blocked: {
+        id: string;
+        reasons: string[];
+    }[];
+    bytes: number;
+    loss: string;
+}
+export type ManagementFault = (point: string, unit?: string) => void;
+/** Preview writes only its immutable plan. No implicit default, expiry, or context compaction caller. */
+export declare function previewCleanup(root: string, request: CleanupRequest): Promise<{
+    repeated: boolean;
+    plan: CleanupPlan;
+    identity: string;
+}>;
+export declare function readCleanup(root: string, id: string): {
+    id: string;
+    identity: string;
+    plan: CleanupPlan;
+    parts: {
+        id: string;
+        bytes: number;
+        status: any;
+        reason: any;
+    }[];
+    status: string;
+};
+/** The identity is the explicit confirmation token returned by preview; retries keep the same operation. */
+export declare function commitCleanup(root: string, request: {
+    id: string;
+    identity: string;
+}, options?: {
+    fault?: ManagementFault;
+}): Promise<{
+    id: string;
+    identity: string;
+    plan: CleanupPlan;
+    parts: {
+        id: string;
+        bytes: number;
+        status: any;
+        reason: any;
+    }[];
+    status: string;
+}>;
