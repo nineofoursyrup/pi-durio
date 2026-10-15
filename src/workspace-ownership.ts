@@ -32,6 +32,33 @@ export async function resolveWorkspaceRoot(workspace: string) {
   return root;
 }
 
+export interface WorkspaceHolder { registered: string; path: string; pid?: number; host?: string; started?: string }
+/**
+ * Read-only R2 probe (welcome screen): the protocol holder whose registered root overlaps `workspace`, or null.
+ * Takes neither the registry gate nor any lock, so it can race a concurrent acquire; acceptance still decides.
+ * A marker with a missing or unreadable registration counts as held, as acquisition would refuse it.
+ */
+export async function probeWorkspaceOwner(workspace: string): Promise<{ root: string; holder: WorkspaceHolder | null }> {
+  const root = await resolveWorkspaceRoot(workspace);
+  let entries;
+  try { entries = await readdir(registry, { withFileTypes: true }); }
+  catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return { root, holder: null }; throw error; }
+  for (const entry of entries) {
+    if (!entry.isDirectory() || !/^[a-f0-9]{64}$/.test(entry.name)) continue;
+    const path = join(registry, entry.name);
+    let held = false;
+    for (const marker of [`${path}.lock`, join(path, 'owner.json')]) {
+      try { await access(marker); held = true; } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+    }
+    if (!held) continue;
+    const registered = await readFile(join(path, 'workspace.json'), 'utf8').then(text => String(JSON.parse(text).root), () => '');
+    if (registered && !contains(root, registered) && !contains(registered, root)) continue;
+    const owner = await readFile(join(path, 'owner.json'), 'utf8').then(text => JSON.parse(text), () => ({}));
+    return { root, holder: { registered, path, pid: typeof owner.pid === 'number' ? owner.pid : undefined, host: typeof owner.host === 'string' ? owner.host : undefined, started: typeof owner.started === 'string' ? owner.started : undefined } };
+  }
+  return { root, holder: null };
+}
+
 export async function acquireWorkspaceOwner(workspace: string, onCompromised: (error: Error) => void) {
   const root = await resolveWorkspaceRoot(workspace);
   await mkdir(registry, { recursive: true, mode: 0o700 });

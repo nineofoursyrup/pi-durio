@@ -30,6 +30,7 @@ import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageLine, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
 import { ConfirmDialog, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
+import { TIPS, WelcomeScreen, readWelcomeFacts, welcomeStatus } from './welcome.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
 type PanelKind='help'|'exit'|'detail'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics';
@@ -135,6 +136,8 @@ export class ReadOnlyTui {
   private events:string[]=[];
   private refreshes=0;
   private usageMemo?:{key:string;scope:'本会话'|'本任务';tokens:number;cost:string};
+  /** 1a 欢迎屏：本进程受理第一个任务前显示，之后为 1b 布局（U1）。 */
+  private welcome?:WelcomeScreen;
 
   constructor(private readonly options:TuiOptions) {
     if(options.widthCalibration===false&&!options.terminal)throw Error('WIDTH_CALIBRATION_TEST_TERMINAL_REQUIRED');
@@ -164,9 +167,19 @@ export class ReadOnlyTui {
     const status:Component={invalidate(){},render:width=>{const parts=this.statusParts();return [statusLine(parts,width,narrowing(width,this.headerState(),parts).statusHint)];}};
     const footer:Component={invalidate(){},render:width=>{
       const usage=this.usageText(),feedback=this.hintFeedback??(this.notice||undefined);
-      return [usageLine(this.model,this.contextUsage(),usage.scope,usage.tokens,usage.cost,width),feedback!==undefined?hintLine([],width,{feedback}):hintLine(this.sessionHints(),width,{keepLast:'? 帮助'})];
+      // 1a 空闲时第一行是欢迎屏的状态行（#71），否则是 1b 底栏用量。
+      return [this.welcome&&this.phase==='idle'&&!this.viewingRecovery?welcomeStatus(this.welcome.facts.model.id,this.contextUsage(),width):usageLine(this.model,this.contextUsage(),usage.scope,usage.tokens,usage.cost,width),feedback!==undefined?hintLine([],width,{feedback}):hintLine(this.sessionHints(),width,{keepLast:'? 帮助'})];
     }};
-    const layout=new VStack([{component:header,basis:1},{component:this.scroll,basis:0,grow:1,minSize:1},{component:status,basis:1},{component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6},{component:footer,basis:2}]);
+    if(!options.runId){
+      const tip=TIPS[Math.floor(Math.random()*TIPS.length)];
+      this.welcome=new WelcomeScreen({coding:!!options.coding,
+        read:()=>readWelcomeFacts({workspace:options.workspace,dataRoot:options.dataRoot,coding:!!options.coding,mode:options.mode,toolEnvironment:options.toolEnvironment},id=>this.shown('session',id),tip),
+        height:width=>this.terminal.rows-2-Math.min(6,Math.max(3,this.editor.render(width).length)),
+        open:session=>{try{this.command(parseCommand(`/history ${session}`));}catch(error){this.notice=error instanceof CommandError?error.line:safe(String(error));}this.tui.requestRender();},
+        changed:()=>this.tui.requestRender(),inspect:lines=>this.widths?.inspect(lines)});
+    }
+    const welcome=this.welcome?[{component:this.welcome,basis:0,grow:1,visible:()=>!!this.welcome}]:[];
+    const layout=new VStack([{component:header,basis:1,visible:()=>!this.welcome},...welcome,{component:this.scroll,basis:0,grow:1,minSize:1,visible:()=>!this.welcome},{component:status,basis:1,visible:()=>!this.welcome},{component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6},{component:footer,basis:2}]);
     const root:Component={invalidate:()=>layout.invalidate(),render:width=>{
       if(width<40 || this.terminal.rows<12) return new Text(`窗口过小：建议至少 40 × 12 字符格（待真实终端确认）\n当前 ${width} × ${this.terminal.rows}\n扩大窗口继续；Ctrl+C 中止/再次退出。草稿保留。`,0,0).render(width).slice(0,this.terminal.rows);
       return layout.render(width);
@@ -219,6 +232,7 @@ export class ReadOnlyTui {
     this.terminal.write('\x1b[?1004h'); // Focus reports invalidate any pending exit confirmation.
     this.timer=setInterval(()=>{if(this.pendingRefresh)this.refresh();else if(this.phase!=='idle')this.tui.requestRender();},SPINNER_INTERVAL_MS);
     this.loadQueue();
+    void this.welcome?.probeLock();
     this.tui.requestRender();
   }
   /** Visible frame for diagnostics/tests; no runtime internals or writable handles. */
@@ -345,7 +359,7 @@ export class ReadOnlyTui {
     const contextRunId=this.result?.status==='completed'&&this.result.improve?.runId!==this.result.runId&&this.result.cleanup==='confirmed'?this.result.runId:undefined;
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
     if(!contextRunId)this.context=this.prefix();
-    this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.toggled.clear();this.events=[];this.historyWindow=false;this.scroll.scrollToEnd();
+    this.welcome=undefined;this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.toggled.clear();this.events=[];this.historyWindow=false;this.scroll.scrollToEnd();
     this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.rebuild();
     const self=this;
     const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}};
@@ -468,7 +482,7 @@ export class ReadOnlyTui {
   /** 后台完成事件：在主区末尾插一行。 */
   private event(text:string) {this.events.push(text);this.rebuild();}
   private finished() {
-    this.activity=undefined;this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting')this.phase='idle';this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
+    this.activity=undefined;this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting'){this.phase='idle';void this.welcome?.refresh().catch(error=>{this.notice=`欢迎屏事实不可读取：${safe(String(error))}`;});}this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
   }
   private enqueue(text:string,kind:'steer'|'follow-up'|'compact'|'improve') {
     const target=this.control.target();
@@ -504,7 +518,7 @@ export class ReadOnlyTui {
       } else {
         if(this.phase!=='idle')throw Error('正在清理，暂不接受决定');
         if(action==='reattach') {
-          this.closeViews();this.phase='running';this.controller=new AbortController();this.cancellation='exit';
+          this.closeViews();this.welcome=undefined;this.phase='running';this.controller=new AbortController();this.cancellation='exit';
           const self=this;
           this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
           return;
@@ -516,7 +530,7 @@ export class ReadOnlyTui {
   }
   private async openRecovery(runId:string,offset?:number,snapshotId?:string) {
     if(this.phase!=='idle'){const running=this.control.target()?.runId??this.runId;this.notice=`正在执行 ${running?this.shown('run',running):'受理中'}；先停止或退出后核对`;this.tui.requestRender();return;}
-    this.viewingRecovery=true;this.runId=runId;
+    this.welcome=undefined;this.viewingRecovery=true;this.runId=runId;
     const inspect=()=>offset!==undefined?inspectRecovery({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),page:{offset,snapshotId}}):checkRecovery({dataRoot:this.options.dataRoot,runId,authorization:this.authorization()});
     try {this.recovery=await (this.widths?this.widths.withoutQueries(inspect):inspect());if(this.stopped||this.exiting)return;this.pendingRefresh=true;this.refresh();this.openPanel('recovery');}
     catch(error){this.notice=`恢复核对受阻：${safe(String(error))}`;this.tui.requestRender();}

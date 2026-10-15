@@ -134,7 +134,7 @@ test('controlled exit of a running task preserves unknown result and restores th
 test('real runtime facts stream into bounded read-only UI without changing drafts, usage or executing busy text', async () => {
   const f=fixture(); const key=(s:string)=>f.terminal.input(s);
   try {
-    assert.match(f.screen(),/○ 空闲/);assert.match(f.screen(),/deepseek-flash · ctx ≈\d+ \/ 1M · 本会话 0 tok/,'before acceptance: estimated fixed prefix');
+    assert.match(f.screen(),/○ 空闲 · deepseek-flash · ctx ≈\d+ \/ 1M · 本会话 0 tok/,'before acceptance: welcome status line with the estimated fixed prefix');
     key('\x1b[200~中文\n第二行\x1b[201~'); assert.equal(f.transport.calls.length,0);
     key('\n'); key('第三行\\'); key('\r'); assert.equal(f.transport.calls.length,0);
     key('\r'); key('保留草稿'); key('\r');
