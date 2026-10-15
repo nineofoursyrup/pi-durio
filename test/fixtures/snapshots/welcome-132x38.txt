@@ -1,0 +1,67 @@
+132x33 truecolor
+00|                                                                                                                                    |
+   0-131 -/bg.base
+01|                                                                                                                                    |
+   0-131 -/bg.base
+02|                                                                                                                                    |
+   0-131 -/bg.base
+03|                                                                                                                                    |
+   0-131 -/bg.base
+04|                                                                                                                                    |
+   0-131 -/bg.base
+05|                                                                                                                                    |
+   0-131 -/bg.base
+06|                                                                                                                                    |
+   0-131 -/bg.base
+07|                                                                                                                                    |
+   0-131 -/bg.base
+08|                                                                                                                                    |
+   0-131 -/bg.base
+09|      ◆ pi·durio                                                                                                                    |
+   0-5 -/bg.base ; 6-6 ac.brand/bg.base/b ; 7-9 fg.primary/bg.base/b ; 10-10 fg.faint/bg.base/b ; 11-131 fg.primary/bg.base/b
+10|      本机 coding agent · v0.1.0 · f26ae8f                                                                                            |
+   0-5 -/bg.base ; 6-20 fg.primary/bg.base ; 21-23 fg.faint/bg.base ; 24-129 fg.label/bg.base ; 130-131 -/-
+11|                                                                                                                                    |
+   0-131 -/bg.base
+12|      工作区      ~/code/shop-api · ✓ 写入者锁可取得                                                                                          |
+   0-5 -/bg.base ; 6-14 fg.label/bg.base ; 15-29 ac.path/bg.base ; 30-32 fg.faint/bg.base ; 33-33 ac.ok/bg.base ; 34-121 fg.muted/bg.base ; 122-131 -/-
+13|      模型        deepseek-flash · openai-completions · api.deepseek.com                                                              |
+   0-5 -/bg.base ; 6-15 fg.label/bg.base ; 16-29 ac.model/bg.base ; 30-129 fg.faint/bg.base ; 130-131 -/-
+14|      执行版本    build f26ae8f · deps 9c1e · 指令 3f2a · 4 tools · improve 默认 1 项                                                        |
+   0-5 -/bg.base ; 6-13 fg.label/bg.base ; 14-122 fg.muted/bg.base ; 123-131 -/-
+15|      数据根      ~/Library/Application Support/pi-durio                                                                               |
+   0-5 -/bg.base ; 6-14 fg.label/bg.base ; 15-128 fg.muted/bg.base ; 129-131 -/-
+16|                                                                                                                                    |
+   0-131 -/bg.base
+17|      最近会话 · 点击只读打开，不会调用模型或工具                                                                                                       |
+   0-5 -/bg.base ; 6-9 fg.label/bg.base ; 10-111 fg.gutter/bg.base ; 112-131 -/-
+18|      s-7f3a · 修复购物车满减金额四舍五入                                        ✓ 完成       · 今天 10:12                                           |
+   0-5 -/bg.base ; 6-11 fg.primary/bg.base ; 12-14 fg.faint/bg.base ; 15-67 fg.body/bg.base ; 68-77 ac.ok/bg.base ; 78-114 fg.faint/bg.base ; 115-131 -/-
+19|      s-6c01 · 订单导出 CSV 增加时区列                                           ◈ 待恢复核对 · 昨天 22:40                                          |
+   0-5 -/bg.base ; 6-11 fg.primary/bg.base ; 12-14 fg.faint/bg.base ; 15-71 fg.body/bg.base ; 72-78 ac.warn/bg.base ; 79-115 fg.faint/bg.base ; 116-131 -/-
+20|      s-5e9b · improve · 测试重复运行成本                                        ◇ 已中止     ·      10-09                                     |
+   0-5 -/bg.base ; 6-11 fg.primary/bg.base ; 12-14 fg.faint/bg.base ; 15-24 ac.improve/bg.base ; 25-72 fg.body/bg.base ; 73-81 fg.muted/bg.base ; 82-120 fg.faint/bg.base ; 121-131 -/-
+21|                                                                                                                                    |
+   0-131 -/bg.base
+22|                                                                                                                                    |
+   0-131 -/bg.base
+23|                                                                                                                                    |
+   0-131 -/bg.base
+24|                                                                                                                                    |
+   0-131 -/bg.base
+25|                                                                                                                                    |
+   0-131 -/bg.base
+26|                                                                                                                                    |
+   0-131 -/bg.base
+27|                                                                                                                                    |
+   0-131 -/bg.base
+28|                                                                                                                                    |
+   0-131 -/bg.base
+29|                                                                                                                                    |
+   0-131 -/bg.base
+30|                                                                                                                                    |
+   0-131 -/bg.base
+31| Tip: 空闲时 Enter 提交新任务；运行中 Enter 变为 steer，在当前工具轮次边界接入。                                                                               |
+   0-0 -/bg.base ; 1-104 fg.label/bg.base/b ; 105-131 -/-
+32|○ 空闲 · deepseek-flash · ctx ≈863 / 1M · 本会话 0 tok ≈ ¥0.00                                                                           |
+   0-3 ac.ok/bg.base ; 4-6 fg.faint/bg.base ; 7-20 ac.model/bg.base ; 21-23 fg.faint/bg.base ; 24-126 fg.label/bg.base ; 127-131 -/-
