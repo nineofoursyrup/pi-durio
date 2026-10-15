@@ -13,8 +13,8 @@ import { readObject, type QueueItemFact } from '../evidence.js';
 import { calculateContextTokens } from '@earendil-works/pi-ai/utils/estimate';
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
-import { MetricsView } from './metrics.js';
-import { recordAcceptance, type MetricsScope } from '../metrics/index.js';
+import { StatsView, readStats, statsRequest } from './stats.js';
+import { recordAcceptance } from '../metrics/index.js';
 import type { HistoryFilter } from '../history.js';
 import { HistoryView } from './history.js';
 import { EvalView } from './eval.js';
@@ -102,7 +102,7 @@ export class ReadOnlyTui {
   private viewStack:ViewEntry[]=[];
   private get panel(){return this.viewStack.at(-1);}
   private historyView?:HistoryView;
-  private metricsView?:MetricsView;
+  private metricsView?:StatsView;
   private evalView?:EvalView;
   private improveView?:ImproveView;
   private improveSelectionView?:ImproveSelectionView;
@@ -352,15 +352,9 @@ export class ReadOnlyTui {
     case 'bottom':this.bottom();break;
     case 'older':this.window('older');break;
     case 'newer':this.window('newer');break;
-    case 'stats':{
-      // 首版指标面板；选项按 MetricsScope 传入（1e 由 #83 重做）。
-      const scope:MetricsScope={from:options.from as string|undefined,to:options.to as string|undefined,asOf:options['as-of'] as string|undefined,project:options.project==='all'?undefined:options.project as string|undefined,taskType:options.type as string|undefined,version:options.version as string|undefined,source:options.source as MetricsScope['source'],through:options.snapshot===undefined?undefined:Number(options.snapshot)};
-      if(scope.asOf!==undefined&&!Number.isFinite(Date.parse(scope.asOf)))throw new CommandError(`--as-of 不是可识别的时间：${scope.asOf}`);
-      if(scope.through!==undefined&&!Number.isSafeInteger(scope.through))throw new CommandError(`--snapshot 要整数序号：${options.snapshot}`);
-      for(const key of Object.keys(scope) as (keyof MetricsScope)[])if(scope[key]===undefined)delete scope[key];
-      try{this.metricsView=new MetricsView(root,scope);this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
+    case 'stats':
+      try{this.metricsView=new StatsView(statsRequest(options,this.options.workspace),scope=>readStats(root,scope));this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
       break;
-    }
     case 'acceptance':
       try{const input=JSON.parse(raw);if(typeof input?.taskId==='string')input.taskId=resolveDisplayInput(root,'task',input.taskId);const receipt=recordAcceptance(root,input);this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();break;
     case 'eval':{
