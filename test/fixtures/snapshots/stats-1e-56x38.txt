@@ -1,0 +1,77 @@
+56x38 truecolor
+00| 指标 · 本机实测                                              |
+   0-0 -/bg.base ; 1-2 fg.primary/bg.base/b ; 3-5 fg.faint/bg.base/b ; 6-49 fg.label/bg.base/b ; 50-55 -/-
+01| ◆ stats  日常 · 受理 [09-16, 10-16) · 样本 10（筛除 3）          |
+   0-2 ac.model/bg.base ; 3-9 fg.primary/bg.base/b ; 10-45 fg.faint/bg.base/b ; 46-55 -/-
+02|   as_of 10-15 14:05 · shop-api · f26ae8f               |
+   0-2 -/bg.base ; 3-55 fg.faint/bg.base
+03|                                                        |
+   0-55 -/-
+04|  任务验收          80.0%                                   |
+   0-1 -/bg.zebra ; 2-15 fg.primary/bg.zebra ; 16-51 ac.ok/bg.zebra/b ; 52-55 -/-
+05|    成功 S/G = 4/5 · 完成 C/N = 6/10 = 60%                  |
+   0-3 -/bg.zebra ; 4-51 fg.body/bg.zebra ; 52-55 -/-
+06|  成本              ≈ ¥20.00 /成功                          |
+   0-1 -/bg.base ; 2-17 fg.primary/bg.base ; 18-25 fg.primary/bg.base/b ; 26-51 fg.faint/bg.base/b ; 52-55 -/-
+07|    样本累计 ≈ ¥80.00 ÷ S=4 · 含失败、取消、重试与自动…                 |
+   0-3 -/bg.base ; 4-37 fg.body/bg.base ; 38-38 -/- ; 39-39 -/bg.base ; 40-55 -/-
+08|  双时钟            12m / 24h                              |
+   0-1 -/bg.zebra ; 2-16 fg.primary/bg.zebra ; 17-52 fg.primary/bg.zebra/b ; 53-55 -/-
+09|    均值 · 队列 2m · 用户等待 3m · 活跃 7m                        |
+   0-3 -/bg.zebra ; 4-45 fg.body/bg.zebra ; 46-55 -/-
+10|  人工介入          25.0%                                   |
+   0-1 -/bg.base ; 2-15 fg.primary/bg.base ; 16-51 ac.warn/bg.base/b ; 52-55 -/-
+11|    I/Ni = 2/8 · 逻辑范围 [25%, 62.5%] 非置信区间                |
+   0-3 -/bg.base ; 4-34 fg.body/bg.base ; 35-46 fg.faint/bg.base ; 47-55 -/-
+12|  回归              1/3                                   |
+   0-1 -/bg.zebra ; 2-17 fg.primary/bg.zebra ; 18-53 ac.err/bg.zebra/b ; 54-55 -/-
+13|    R/V = 1/3（P=4）· ep-c03e                             |
+   0-3 -/bg.zebra ; 4-53 fg.body/bg.zebra ; 54-55 -/-
+14|  返工              1/3                                   |
+   0-1 -/bg.base ; 2-17 fg.primary/bg.base ; 18-53 ac.err/bg.base/b ; 54-55 -/-
+15|    Rr/Nr = 1/3 · 未成熟阳性 1 另列                            |
+   0-3 -/bg.base ; 4-14 fg.body/bg.base ; 15-48 fg.muted/bg.base ; 49-55 -/-
+16|  运行故障          25.0%                                   |
+   0-1 -/bg.zebra ; 2-15 fg.primary/bg.zebra ; 16-51 ac.err/bg.zebra/b ; 52-55 -/-
+17|    F/B = 2/8 · 完整率 unknown · 范围 [25%, 37.5%]           |
+   0-3 -/bg.zebra ; 4-19 fg.body/bg.zebra ; 20-26 ac.warn/bg.zebra ; 27-50 fg.body/bg.zebra ; 51-55 -/-
+18|                                                        |
+   0-55 -/-
+19| 期间开销（去重）· 请求发生于 [09-16, 10-16)                         |
+   0-42 fg.label/bg.base ; 43-55 -/-
+20|  coding            ≈ ¥80.00 · 412k tok · 任务执行与自…       |
+   0-1 -/bg.base ; 2-19 fg.body/bg.base ; 20-38 fg.muted/bg.base ; 39-47 fg.faint/bg.base ; 48-48 -/- ; 49-49 -/bg.base ; 50-55 -/-
+21|  eval              ≈ ¥20.00 · 96k tok · 两侧 + 评分        |
+   0-1 -/bg.base ; 2-19 fg.body/bg.base ; 20-37 fg.muted/bg.base ; 38-51 fg.faint/bg.base ; 52-55 -/-
+22|  improve           ≈ ¥10.00 · 51k tok · 分析 + 候选制作      |
+   0-1 -/bg.base ; 2-19 fg.body/bg.base ; 20-37 fg.muted/bg.base ; 38-49 fg.faint/bg.base ; 50-55 -/-
+23|  维护              ≈ ¥5.00 · 24k tok · 空闲手动 /compa…      |
+   0-1 -/bg.base ; 2-17 fg.body/bg.base ; 18-34 fg.muted/bg.base ; 35-48 fg.faint/bg.base ; 49-55 -/-
+24|  共同/未归属       ≈ ¥3.00 · 14k tok · 不分给具体任务              |
+   0-1 -/bg.base ; 2-14 fg.body/bg.base ; 15-31 fg.muted/bg.base ; 32-43 fg.faint/bg.base ; 44-55 -/-
+25|  合计              ≈ ¥118.00 · 597k tok · 去重汇总           |
+   0-1 -/bg.base ; 2-17 fg.primary/bg.base ; 18-37 fg.muted/bg.base ; 38-49 fg.faint/bg.base ; 50-55 -/-
+26|                                                        |
+   0-55 -/-
+27|                                                        |
+   0-55 -/-
+28|                                                        |
+   0-55 -/-
+29|                                                        |
+   0-55 -/-
+30|                                                        |
+   0-55 -/-
+31|                                                        |
+   0-55 -/-
+32|                                                        |
+   0-55 -/-
+33|                                                        |
+   0-55 -/-
+34|                                                        |
+   0-55 -/-
+35| ❯ /stats --from 09-16 --to 10-16                       |
+   0-2 ac.brand/bg.base ; 3-55 fg.body/bg.base
+36| 零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈…               |
+   0-39 fg.label/bg.base ; 40-40 -/- ; 41-42 -/bg.base ; 43-55 -/-
+37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                             |
+   0-45 fg.label/bg.base ; 46-55 -/-
