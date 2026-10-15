@@ -125,7 +125,7 @@ test('product first paste is measured before paint, keeps later keys ordered and
     key('\x1b[200~A👩‍💻é中B\x1b[201~');
     await until(()=>f.painted()&&f.terminal.samples.includes('👩‍💻'));
     assert.equal(visibleWidth('A👩‍💻é中B'),10);
-    assert.match(f.terminal.writes.at(-1)!,/\x1b\[20;11H\x1b\[\?25h/);
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;11H\x1b\[\?25h/);
     assert.equal(f.transport.calls.length,0);
     key('\x03');await until(f.painted);
     key('e');key('\u0301');await until(()=>f.painted()&&f.terminal.samples.includes('é'));
@@ -187,7 +187,7 @@ test('Enter arriving while a run is busy cannot become a new task after that run
   try {
     await until(f.painted);key('Read README');key('\r');await until(()=>calls===1);
     f.terminal.hold='Ω';key('Ω');key('next');key('\r');await until(()=>f.terminal.held.length===1);
-    releaseRun();await until(()=>f.app.screen().join('\n').includes('已完成'));
+    releaseRun();await until(()=>f.app.screen().join('\n').replace(/\x1b\[[0-9;]*m/g,'').includes('✓ 完成'));
     f.terminal.release();key('\x0c');await until(f.painted);await new Promise(r=>setTimeout(r,50));
     assert.equal(calls,2,'only the original tool-and-answer task ran; queued Enter never started another');
     const retained=readdirSync(join(f.draftRoot,'pending-input')).map(name=>JSON.parse(readFileSync(join(f.draftRoot,'pending-input',name),'utf8')));
