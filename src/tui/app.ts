@@ -2,7 +2,6 @@ import {ImproveView} from './improve.js';
 import {ImproveSelectionView} from './improve-selection.js';
 import {submitImproveDecision,resumeImproveDecision,restoreImproveSuggestion,rollbackImproveDecision,type ImproveDecision} from '../improve-decisions.js';
 import {validateImproveRequest,type ImproveRequest} from '../improve.js';
-import { readCompactions } from '../compaction.js';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { realpathSync } from 'node:fs';
@@ -20,6 +19,7 @@ import type { HistoryFilter } from '../history.js';
 import { HistoryView } from './history.js';
 import { EvalView } from './eval.js';
 import { StorageView } from './storage.js';
+import { TraceView } from './trace.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
 import { readDisplayIndex, readRunOrdinals, modelRequestNumber, resolveDisplayInput, isUserChosenId, type DisplayIndex, type DisplayKind } from '../display-number.js';
@@ -31,7 +31,7 @@ import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgumen
 import { TIPS, WelcomeScreen, readWelcomeFacts, welcomeStatus } from './welcome.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
-type PanelKind='help'|'exit'|'detail'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics';
+type PanelKind='help'|'exit'|'detail'|'queue'|'recovery'|'history'|'eval'|'storage'|'trace'|'improve'|'improve-selection'|'metrics';
 type ViewEntry={kind:PanelKind;ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
 const identity=(s:string)=>s;
 const theme={borderColor:makeBorderColor('border.input'), selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
@@ -46,6 +46,8 @@ function label(result?:RunResult) { return result ? ({completed:'已完成',fail
 export interface TuiOptions {
   workspace:string; dataRoot:string; mode:'live'|'offline'; transport?:typeof fetch;
   coding?:boolean;toolEnvironment?:ToolEnvironmentConfig;runId?:string;
+  /** 启动后直接打开该 run 的 2a（`pi-durio show … --trace`）。 */
+  trace?:string;
   terminal?:Terminal; draftRoot?:string; copy?:(text:string)=>Promise<boolean|string>;
   /** Only deterministic injected-terminal tests may skip native measurement. */
   widthCalibration?:false;
@@ -106,6 +108,7 @@ export class ReadOnlyTui {
   private improveView?:ImproveView;
   private improveSelectionView?:ImproveSelectionView;
   private storageView?:StorageView;
+  private traceView?:TraceView;
   private hidePanel?:()=>void;
   /** 即时反馈：临时替换底栏键位提示行（全屏视图保留最右边的 Esc），下一次按键后恢复（U12）。 */
   private hintFeedback?:string;
@@ -224,6 +227,7 @@ export class ReadOnlyTui {
     // Claim the query hold before the first calibration can start. Recovery verifies
     // installed bytes synchronously; a valid terminal reply must not queue behind it.
     if(this.runId){this.pendingRefresh=true;void this.openRecovery(this.runId);}
+    else if(this.options.trace)this.openTrace(this.options.trace);
     this.widths?.inspect();
     this.terminal.write('\x1b[?1004h'); // Focus reports invalidate any pending exit confirmation.
     this.timer=setInterval(()=>{if(this.pendingRefresh)this.refresh();else if(this.phase!=='idle')this.tui.requestRender();},SPINNER_INTERVAL_MS);
@@ -301,6 +305,7 @@ export class ReadOnlyTui {
     if(matchesKey(data,'ctrl+r')) {this.command(parseCommand('/history'));return {consume:true};}
     if(data==='?'&&this.editor.focused&&!this.editor.getExpandedText()) {this.openPanel('help');return {consume:true};}
     if(matchesKey(data,'ctrl+o')) {this.openDetail(this.records.at(-1));return {consume:true};}
+    if(matchesKey(data,'ctrl+t')) {this.openTrace();return {consume:true};}
     if(matchesKey(data,'ctrl+x')) {this.followChord=this.editor.focused;this.feedback('按 Enter 明确排到下一任务；普通 Enter 默认补充当前任务');return {consume:true};}
     if(matchesKey(data,'escape')) {if(this.phase==='running')this.stop();return {consume:true};}
     if(ctrlC||ctrlD) {
@@ -386,6 +391,7 @@ export class ReadOnlyTui {
       try{this.historyView=new HistoryView(root,filter);this.openPanel('history');}catch(error){fail('历史查询失败（当前工作未改变）：',error);}
       break;
     }
+    case 'trace':this.openTrace(positional[0]===undefined?undefined:resolveArgument(root,positional[0],['run']).id);break;
     case 'details':this.openDetail(this.records.at(-1));break;
     case 'copy':void this.copyOutput();break;
     case 'stop':this.stop();break;
@@ -398,7 +404,6 @@ export class ReadOnlyTui {
       void this.queueDecision(resolveArgument(root,positional[0],['queue-request']).id,parsed.spec.name as 'withdraw'|'reattach');break;
     case 'decide':try{void this.recoveryDecision(JSON.parse(raw));}catch(error){this.notice=`决定 JSON 无效：${String(error)}`;}break;
     case 'compact':void this.compact();break;
-    case 'compactions':this.openPanel('compaction');break;
     case 'improves':case 'improve history':{
       const id=positional[0]===undefined?undefined:resolveArgument(root,positional[0],['improve-report']).id;
       try{this.improveView=new ImproveView(root,id);this.openPanel('improve');}catch(error){fail('improve 报告不可读取：',error);}
@@ -441,19 +446,9 @@ export class ReadOnlyTui {
     if(this.phase!=='idle'||this.result?.status!=='completed'||this.result.cleanup!=='confirmed'){this.notice='压缩需要已完成且清理确认的活动会话';this.tui.requestRender();return;}
     const runId=this.result.runId;this.controller=new AbortController();this.cancellation='exit';this.phase='running';this.notice='正在压缩当前上下文；原文保留，摘要生成与接入分别记录';const self=this;
     this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:()=>{this.pendingRefresh=true;}}).then(result=>{
-      this.result=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；/compactions 查看源范围、摘要与接入事实；磁盘原文保留`;
+      this.result=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；Ctrl+T 在 trace 中查看源范围、摘要与接入事实；磁盘原文保留`;
     }).catch(error=>{this.notice=`压缩未执行：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();await this.active;
-  }
-  private compactionText() {
-    if(!this.runId)return '暂无活动会话；未调用模型';
-    try {const page=readCompactions(this.options.dataRoot,this.runId,{after:this.panel?.offset,limit:20});if(this.panel)this.panel.next=page.next;
-      return `上下文压缩 · run ${this.runId}\n原文始终保留；token 变化不代表磁盘释放\n`+page.items.map(item=>{const d=item.data as any;return `${item.seq} ${item.kind}\n${safe(JSON.stringify(item.kind==='compaction.source'?{taskId:d.taskId,trigger:d.trigger,firstKept:d.firstKept,sourceEntryIds:d.entries?.map((e:any)=>e.id)}:d).slice(0,3000))}`;}).join('\n')+'\n/queue 可撤回手动请求；c 取消最新压缩任务（已接入不能回滚）\nn/p 分页；摘要全文及请求/用量来源见原文详情';
-    }catch(error){return `压缩事实不可取得：${safe(String(error))}`;}
-  }
-  private async cancelLatestCompaction(){
-    const target=this.control.target();if(!target||!this.runId){this.notice='当前没有可取消的活动压缩；重开先恢复核对';return;}
-    try{let after:number|undefined,taskId:number|undefined;do{const page=readCompactions(this.options.dataRoot,this.runId,{after,limit:200});for(const item of page.items)if(item.kind==='compaction.task')taskId=(item.data as any).taskId;after=page.next??undefined;}while(after);if(taskId===undefined)throw Error('尚无压缩任务；排队项请在 /queue 撤回');const result=await this.control.cancelCompaction({id:randomUUID(),taskId,target});this.notice=`取消结果 ${safe(JSON.stringify(result))}`;}catch(error){this.notice=`取消未执行：${safe(String(error))}`;}this.tui.requestRender();
   }
   private applyResult(result:RunResult) {
     this.result=result;this.sessionId=result.sessionId;this.runId=result.runId;
@@ -623,9 +618,9 @@ export class ReadOnlyTui {
         // A large event is kept as a reference; it is never printed as transport JSON.
       } else if(ref.kind==='model.response'){
         const text=value?.message?.content?.filter((item:{type?:string})=>item.type==='text').map((item:{text:string})=>item.text).join('\n');
-        if(text&&value.purpose==='compaction'){entries.push({ref,role:'notice',title:'压缩摘要（生成记录；接入见 /compactions）',text:text.slice(0,800),limited:text.length>800});continue;}
+        if(text&&value.purpose==='compaction'){entries.push({ref,role:'notice',title:'压缩摘要（生成记录；接入见 Ctrl+T trace）',text:text.slice(0,800),limited:text.length>800});continue;}
         if(text){const entry=assistant(ref,value);entry.text=text.slice(0,4000);entry.limited=text.length>4000;entry.title=value.completeness==='partial'?'助手（未完成的响应）':'助手';}
-      } else if(ref.kind==='compaction.generated'||ref.kind==='compaction.finished')entries.push({ref,role:'notice',title:ref.kind==='compaction.generated'?'压缩摘要已生成':`上下文压缩 ${value?.state??'未知'}`,text:'原文保留；/compactions 查看覆盖范围、摘要与接入事实'});
+      } else if(ref.kind==='compaction.generated'||ref.kind==='compaction.finished')entries.push({ref,role:'notice',title:ref.kind==='compaction.generated'?'压缩摘要已生成':`上下文压缩 ${value?.state??'未知'}`,text:'原文保留；Ctrl+T 在 trace 中查看覆盖范围、摘要与接入事实'});
       else if(ref.kind==='run.abort-intent'&&!this.result)entries.push({ref,role:'notice',title:'正在中止',text:'等待 runtime 确认清理；当前未接入草稿不会执行。'});
       else if(ref.kind==='run.exit-intent'&&!this.result)entries.push({ref,role:'notice',title:'正在退出',text:'等待执行清理和存储关闭。'});
     }
@@ -665,6 +660,12 @@ export class ReadOnlyTui {
     if(!page.records.length){this.notice='已到记录边界（只读历史）；/bottom 返回活动会话';this.tui.requestRender();return;}
     this.historyWindow=true;this.records=page.records;this.rebuild();this.scroll.scrollTo(0,{disableFollow:true});this.notice='只读历史窗口；/older /newer 翻页，/bottom 跟随最新';
   }
+  /** 2a：指定 run，或当前会话正在运行 / 最近一次的 run；尚无 run 时只提示（U7）。 */
+  private openTrace(runId=this.runId) {
+    if(!runId){this.feedback('尚无 run · 完成或开始一个任务后再按 Ctrl+T');return;}
+    try{this.traceView=new TraceView(this.options.dataRoot,runId,()=>this.phase==='running'&&this.runId===runId);this.openPanel('trace');}
+    catch(error){this.notice=`trace 不可读取：${safe(String(error))}`;this.tui.requestRender();}
+  }
   private openDetail(record?:RecordReference) {
     if(!record){this.notice='暂无持久记录';return;}
     this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
@@ -677,7 +678,8 @@ export class ReadOnlyTui {
     if(kind==='detail')this.loadDetail();
     const component:Component={invalidate(){},render:width=>this.panelLines(width),handleInput:data=>this.panelInput(data),handleMouse:event=>{
       const panel=this.panel;if(!panel)return;
-      if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
+      if(event.type==='click'&&panel.kind==='trace'){this.traceView?.click(event.y);this.tui.requestRender();return {handled:true};}
+      if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else if(panel.kind==='trace')this.traceView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
     }};
     const overlay=this.tui.showOverlay(component,{width:'96%',maxHeight:'90%',anchor:'center'});this.hidePanel=()=>overlay.hide();this.tui.requestRender();
   }
@@ -727,10 +729,10 @@ export class ReadOnlyTui {
     if(panel.kind==='storage') {const lines=this.storageView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='metrics') {const lines=this.metricsView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='history') {const lines=this.historyView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='trace') {const lines=this.traceView?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
     let text:string;
     if(panel.kind==='help')return this.helpLines(width);
-    if(panel.kind==='compaction')text=this.compactionText();
-    else if(panel.kind==='queue')text=this.queueText();
+    if(panel.kind==='queue')text=this.queueText();
     else if(panel.kind==='recovery')text=this.recoveryText();
     else if(panel.kind==='exit')text='退出并保留草稿？\nEnter：保存文本，取消在途请求并等待清理\nEsc：返回；不改变任务状态';
     else text=`原文 #${panel.ref?.seq} ${panel.ref?.kind}\n字节 ${panel.offset} / ${panel.ref?.ref.bytes}；源 JSON，显示有界\n${panel.error??safe(panel.raw)}\n${panel.next===null?'本原文已到末尾':'还有下一片（n）'}`;
@@ -753,7 +755,7 @@ export class ReadOnlyTui {
     if(panel.kind==='improve'){this.improveView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='eval'){this.evalView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='storage') {void this.storageView?.handleInput(data);this.tui.requestRender();return;}
-    if(panel.kind==='compaction'){if(data==='n'&&panel.next!==null){panel.previous.push(panel.offset);panel.offset=panel.next;panel.line=0;}else if(data==='p'&&panel.previous.length){panel.offset=panel.previous.pop()!;panel.line=0;}else if(data==='c')void this.cancelLatestCompaction();}
+    if(panel.kind==='trace'){this.traceView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='metrics') {this.metricsView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='history') {this.historyView?.handleInput(data);this.tui.requestRender();return;}
     if(matchesKey(data,'up'))panel.line=Math.max(0,panel.line-1);
