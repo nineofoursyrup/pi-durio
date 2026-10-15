@@ -135,10 +135,10 @@ test('released installation bytes retain manifest provenance and are eligible on
 });
 
 test('TUI management requires a rendered preview and CLI readback uses the same durable operation',async()=>{
-  const f=await fixture(),view=new StorageView(f.root);await view.ready;
-  assert.match(view.render(38,8).join('\n'),/存储管理/);await view.handleInput('\r');assert.equal(await exists(join(f.root,'sessions',f.sessionId)),true);
-  await view.handleInput('c');await view.handleInput('\r');assert.equal(await exists(join(f.root,'sessions',f.sessionId)),true,'Enter before preview rendering cannot delete');
-  assert.match(view.render(38,8).join('\n'),/Enter/);await view.handleInput('\r');assert.equal(await exists(join(f.root,'sessions',f.sessionId)),false);
+  const f=await fixture(),confirms:(()=>Promise<void>)[]=[],view=new StorageView(f.root,{changed(){},busy:()=>false,feedback(){},confirm:(_config,confirm)=>{confirms.push(confirm);}});await view.ready;
+  assert.match(view.render(80,8).join('\n'),/storage/);
+  await view.handleInput('\r');assert.equal(confirms.length,1);assert.equal(await exists(join(f.root,'sessions',f.sessionId)),true,'preview alone deletes nothing');
+  await confirms[0]();assert.equal(await exists(join(f.root,'sessions',f.sessionId)),false);
   const operations=[...records(f.root,{kinds:['management.preview']})].map(r=>decode(f.root,r));const id=operations[0].id;
   const cli=spawnSync(process.execPath,['dist/src/cli.js','storage','status','--data-root',f.root,'--id',id],{cwd:resolve('.'),encoding:'utf8'});assert.equal(cli.status,0,cli.stderr);assert.equal(JSON.parse(cli.stdout).status,'completed');
   const history=spawnSync(process.execPath,['dist/src/cli.js','history','--data-root',f.root],{cwd:resolve('.'),encoding:'utf8'});assert.equal(history.status,0,history.stderr);assert.equal(JSON.parse(history.stdout).items[0].status,'failed');
