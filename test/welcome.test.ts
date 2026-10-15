@@ -181,10 +181,10 @@ test('after the first task is accepted the welcome screen does not come back', a
     assert.ok(plain(tui.screen()).some(line => line.includes('◆ pi·durio')));
     terminal.input('Read README.md'); terminal.input('\r');
     await until(() => !tui.screen().some(line => line.includes('pi·durio')), 'welcome gone');
-    await until(() => tui.screen().some(line => line.includes('已完成')), 'task completed', 120000);
+    await until(() => plain(tui.screen()).some(line => line.includes('✓ 完成')), 'task completed', 120000);
     await wait(200);
     const text = plain(tui.screen()).join('\n');
     assert.doesNotMatch(text, /pi·durio|最近会话|Tip:/);
-    assert.match(text, /◆ pi-durio · 只读/);
+    assert.match(text, /◆ pi-durio .* 只读 · 任务 1 · ✓ 完成/);
   } finally { await tui.exit(); }
 });

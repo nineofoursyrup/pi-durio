@@ -48,7 +48,7 @@ test('coding UI delivers busy Enter and Ctrl+X Enter to authoritative queue fact
     assert.equal(readAcceptedTasks(root).tasks.length,2);assert.equal(readAcceptedTasks(root).tasks[1].runId,null);
     key('/queue');key('\r');key('\x1b[C');key('w');await until(()=>readQueue(root).items[1].status==='withdrawn');
     key('\x1b');key('Follow-up to execute');key('\x18');key('\r');await until(()=>readQueue(root).items.length===3);
-    await until(()=>f.screen().includes('已完成'));
+    await until(()=>f.screen().includes('✓ 完成'));
     assert.equal(script.calls.length,3);assert.doesNotMatch(JSON.stringify(script.calls),/Follow-up to withdraw/);assert.match(JSON.stringify(script.calls.at(-1)),/Keep this original task/);
     key('/older');key('\r');key('readonly history input');key('\r');assert.match(f.screen(),/只读历史/);assert.equal(script.calls.length,3);
     key('\x03');key('\x03');const exit=await f.app.closed;assert.equal(exit.result?.status,'completed');
@@ -68,7 +68,7 @@ test('closing the recovery panel cannot unlock execution; explicit end preserves
     key('\x03');key('/bottom');key('\r');assert.match(screen(),/恢复限制仍生效/);
     key('/recover');key('\r');await until(()=>screen().includes('恢复核对 ·'));key('e');await until(()=>screen().includes('恢复决定：ended'));
     assert.equal(transport.calls.length,0);assert.equal(((await readRun(dataRoot,original.runId)).result as {status:string}).status,'unknown');
-    key('New explicit task');key('\r');await until(()=>screen().includes('已完成'));assert.equal(transport.calls.length,2);
+    key('New explicit task');key('\r');await until(()=>screen().includes('✓ 完成'));assert.equal(transport.calls.length,2);
   }finally{await app.exit();}
 });
 
@@ -138,24 +138,24 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     key('\x1b[200~中文\n第二行\x1b[201~'); assert.equal(f.transport.calls.length,0);
     key('\n'); key('第三行\\'); key('\r'); assert.equal(f.transport.calls.length,0);
     key('\r'); key('保留草稿'); key('\r');
-    await until(()=>f.screen().includes('已完成'));
+    await until(()=>f.screen().includes('✓ 完成'));
     assert.match(f.screen(),/保留草稿/); assert.equal(f.transport.calls.length,2);
     assert.doesNotMatch(f.screen(),/model\.provider-event|tool\.summary|attemptId|"runId"/);
     assert.equal(f.screen().match(/Offline fixture readback/g)?.length,1);
     // Header, status notice and readback use display numbers; the full identity resolves from them.
     assert.doesNotMatch(f.screen(),/[a-f0-9]{8}-[a-f0-9]{4}-/);
-    const shown=f.screen().match(/清理已确认；run (r-[0-9a-f]{4,})/)?.[1]; assert.ok(shown);
-    assert.match(f.screen(),/session s-[0-9a-f]{4,} · /);
-    // Transcript attempts carry hierarchical numbers: the tool call under the run's hex part, the answer as the run's second model request.
-    assert.match(f.screen(),new RegExp(`tc-${shown.slice(2)}-01 · `)); assert.match(f.screen(),/llm #2 · 助手/);
+    // 1b header: workspace, session and run display numbers; task N and the terminal state on the right.
+    const shown=f.screen().match(/◆ pi-durio .* · 会话 s-[0-9a-f]{4,} · run (r-[0-9a-f]{4,}) +只读 · 任务 1 · ✓ 完成/)?.[1]; assert.ok(shown,f.screen());
+    // Tool rows: glyph · tool · argument · system-held fact (read line count); folded by default.
+    assert.match(f.screen(),/✓ read README\.md 1 行/);assert.doesNotMatch(f.screen(),/^ {4}Fixture 中文/m);
     const runId=resolveDisplayInput(join(f.root,'data'),'run',shown); assert.equal(runId,readAcceptedTasks(join(f.root,'data')).tasks[0].runId);
     const before=await readRun(join(f.root,'data'),runId);
-    key('\x0f'); key('n'); key('p'); key('\x0c'); key('\x1b'); assert.equal(f.transport.calls.length,2);
+    // Ctrl+O expands every tool row, again folds them; neither executes anything.
+    key('\x0f'); assert.match(f.screen(),/^ {4}Fixture 中文/m); key('\x0f'); assert.doesNotMatch(f.screen(),/^ {4}Fixture 中文/m);
+    key('\x0c'); key('\x1b'); assert.equal(f.transport.calls.length,2);
     assert.deepEqual(await readRun(join(f.root,'data'),runId),before);
-    assert.match(f.screen(),/known/);
-    assert.match(f.screen(),/已完成 · ctx 14 \/ 1M · usage/,'final reply usage is exact');
-    // Fixture usage is tiny: a non-zero CNY estimate below one fen is never shown as zero.
-    assert.match(f.screen(),/usage known · in \d+ out \d+ · < ¥0\.01\s*\n/); assert.match(f.screen(),/清理已确认；run r-[0-9a-f]{4,} · 费用 < ¥0\.01/);
+    // Idle footer: this session's usage (the chain's runs); tok = input incl. cache hits + output.
+    assert.match(f.screen(),/deepseek-flash · offline · ctx 14 \/ 1M · 本会话 28 tok < ¥0\.01/,'final reply usage is exact');
     key('\x03'); key('\x03'); const closed=await f.app.closed;
     assert.equal(closed.result?.status,'completed'); assert.equal(closed.result?.cleanup,'confirmed');
     assert.match(exitCostSummary(join(f.root,'data'),closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01（估算 · 非账单）$/);
@@ -181,13 +181,13 @@ test('usage line and exit summary show CNY estimates with unknown and partial re
   const f=fixture(transport),key=(s:string)=>f.terminal.input(s),dataRoot=join(f.root,'data');
   f.terminal.columns=140;f.terminal.resize();
   try {
-    key('Read the readme');key('\r');await until(()=>f.screen().includes('已完成'));
+    key('Read the readme');key('\r');await until(()=>f.screen().includes('✓ 完成'));
     // 1M cache-miss input plus 1M output: ¥10.00 at peak, ¥5.00 off-peak; the second response has no usage.
-    assert.match(f.screen(),/ · ≈ ¥(10|5)\.00 \+1 unknown\s*\n/);assert.match(f.screen(),/费用 ≈ ¥(10|5)\.00 \+1 unknown/);
+    assert.match(f.screen(),/ · 本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown\s*\n/);
     const first=(await readRun(dataRoot,readAcceptedTasks(dataRoot).tasks[0].runId!)).result as {sessionId:string};
-    key('Again');key('\r');await until(()=>readAcceptedTasks(dataRoot).tasks.length===2&&f.screen().includes('已完成')&&f.screen().includes('partial'));
-    // No cache-hit count in the provider usage report: the estimate is partial.
-    assert.match(f.screen(),/ · < ¥0\.01 partial\s*\n/);
+    key('Again');key('\r');await until(()=>readAcceptedTasks(dataRoot).tasks.length===2&&f.screen().includes('✓ 完成')&&f.screen().includes('partial'));
+    // The idle footer sums the session's chain; the new run lacks a cache-hit count, so the sum is partial.
+    assert.match(f.screen(),/ · 本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown partial\s*\n/);
     key('\x03');key('\x03');const closed=await f.app.closed;
     assert.match(exitCostSummary(dataRoot,closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01 partial（估算 · 非账单）$/);
     assert.match(exitCostSummary(dataRoot,{...closed.result!,sessionId:first.sessionId}),/费用 ≈ ¥(10|5)\.00 \+1 unknown（估算 · 非账单）$/);
@@ -214,7 +214,7 @@ test('streaming preserves a paused viewport, fixed draft and bounded windows acr
     f.terminal.columns=30;f.terminal.rows=8;f.terminal.resize();assert.match(f.screen(),/窗口过小/);
     f.terminal.columns=80;f.terminal.rows=24;f.terminal.resize();assert.match(f.screen(),/稳定草稿/);
     source!.enqueue(new TextEncoder().encode('data: {"id":"stream","model":"deepseek-flash","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n'));source!.close();
-    await until(()=>f.screen().includes('已完成'));
+    await until(()=>f.screen().includes('✓ 完成'));
   } finally {await f.app.exit();}
 });
 
@@ -230,9 +230,10 @@ test('real read tools show source truncation and failure while folded without ex
     writeFileSync(join(f.workspace,'README.md'),kind==='truncated'?'long readable text 中文\n'.repeat(3000):Buffer.from([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82]));
     try {
       key('Read README');key('\r');await until(()=>calls===2);
-      await until(()=>f.screen().includes(kind==='truncated'?'源输出截断':'读取 · 失败'));
+      // A partial read names its range; a failed read keeps its error lines visible while folded.
+      await until(()=>(kind==='truncated'?/✓ read README\.md 第 1–\d+ 行 \/ 共 3000 行/:/✗ read README\.md\s*\n {4}\S/).test(f.screen()));
       assert.doesNotMatch(f.screen(),/tool\.summary|tool\.result|attemptId/);
-      release();await until(()=>f.screen().includes('已完成'));
+      release();await until(()=>f.screen().includes('✓ 完成'));
     } finally {release();await f.app.exit();}
   }
 });
@@ -256,7 +257,7 @@ test('focused editor uses one hardware caret without a competing painted caret',
     assert.ok(overlay.lastIndexOf('\x1b[?25l')>overlay.lastIndexOf('\x1b[?25h'),'a view owns focus and hides the editor caret');
     assert.doesNotMatch(overlay,/\x1b\[7m/,'blurred editor must not leave a painted caret behind');
     key('\x1b');f.app.screen();
-    assert.match(f.terminal.writes.at(-1)!,/\x1b\[20;12H\x1b\[\?25h/,'return to the unchanged editor insertion point');
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;12H\x1b\[\?25h/,'return to the unchanged editor insertion point');
   } finally { await f.app.exit(); }
 });
 
@@ -281,7 +282,7 @@ test('real bracketed paste preserves combining text and keeps caret visible thro
     key('\x1b[200~A👩‍💻é中B\x1b[201~');f.app.screen();
     assert.equal(f.transport.calls.length,0,'paste must not submit');
     assert.match(f.screen(),/A👩‍💻é中B/);
-    assert.match(f.terminal.writes.at(-1)!,/\x1b\[20;8H\x1b\[\?25h/,'wide and combining text position the hardware caret in terminal cells');
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;8H\x1b\[\?25h/,'wide and combining text position the hardware caret in terminal cells');
     key('\x01');key('\x1b[C');key('\x1b[C');key('\x04');
     assert.match(f.screen(),/A👩‍💻中B/,'Ctrl+D removes the complete combining grapheme');
     key('\x03');
@@ -305,7 +306,7 @@ test('repainting hides the hardware caret before moving it through display rows'
     const paint=f.terminal.writes.find(value=>value.includes('\x1b[2K'));
     assert.ok(paint,'typing must repaint the real ANSI frame');
     assert.match(paint,/^\x1b\[\?2026h\x1b\[\?25l/,'hide before drawing on terminals without synchronized-output support');
-    assert.match(paint,/\x1b\[20;2H\x1b\[\?25h\x1b\[\?2026l$/,'restore the hardware caret at the actual insertion point');
+    assert.match(paint,/\x1b\[21;2H\x1b\[\?25h\x1b\[\?2026l$/,'restore the hardware caret at the actual insertion point');
   } finally {await f.app.exit();}
 });
 
@@ -314,7 +315,7 @@ test('history overlay is reachable and consumes command-like text without changi
   try {
     key('/history {broken');key('\r');assert.match(f.screen(),/参数有误/);assert.doesNotMatch(f.screen(),/历史 · 只读/);key('\x15');assert.equal(f.terminal.stopped,false);assert.equal(f.transport.calls.length,0);
     key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);assert.equal(f.transport.calls.length,0);key('\x1b');
-    key('Read README');key('\r');await until(()=>f.screen().includes('已完成'));
+    key('Read README');key('\r');await until(()=>f.screen().includes('✓ 完成'));
     const calls=f.transport.calls.length;
     key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);
     // A session display number in the /history filter selects the same session; the filter keeps the full identity.
@@ -324,7 +325,7 @@ test('history overlay is reachable and consumes command-like text without changi
     key('\r');assert.match(f.screen(),/task.accepted/);key('\r');
     key('/compact');key('\r');key('/exit');key('\r');assert.equal(f.terminal.stopped,false);assert.equal(f.transport.calls.length,calls);
     key('\x03');key('\x04');assert.equal(f.terminal.stopped,false);key('\x1b');
-    assert.match(f.screen(),/已完成/);assert.equal(f.transport.calls.length,calls);
+    assert.match(f.screen(),/✓ 完成/);assert.equal(f.transport.calls.length,calls);
   } finally {await f.app.exit();}
 });
 
@@ -334,10 +335,10 @@ test('compact is listed in help, idle summary reaches next input, and readonly h
  try{
   key('\x14');assert.match(f.screen(),/尚无 run/);assert.doesNotMatch(f.screen(),/◆ trace/);
   key('?');for(let i=0;i<3&&!/\/compact /.test(f.screen());i++)key('n');assert.match(f.screen(),/\/compact /);key('\x1b');
-  key('ORIGINAL UI REQUEST');key('\r');await until(()=>f.screen().includes('已完成'));
+  key('ORIGINAL UI REQUEST');key('\r');await until(()=>f.screen().includes('✓ 完成'));
   key('/compact');key('\r');await until(()=>f.screen().includes('上下文压缩 applied'));assert.equal(calls.length,2);assert.equal(readAcceptedTasks(dataRoot).tasks.length,1);
   key('\x14');assert.match(f.screen(),/trace/);assert.match(f.screen(),/compaction 手动/);assert.match(f.screen(),/另有维护 1 项/);key('\x1b');assert.doesNotMatch(f.screen(),/另有维护/);
-  key('NEXT UI REQUEST');key('\r');await until(()=>calls.length===3&&f.screen().includes('已完成'));
+  key('NEXT UI REQUEST');key('\r');await until(()=>calls.length===3&&f.screen().includes('✓ 完成'));
   assert.match(JSON.stringify(calls[2]),/VISIBLE COMPACT SUMMARY/);assert.doesNotMatch(JSON.stringify(calls[2]),/ORIGINAL UI REQUEST/);assert.equal(readAcceptedTasks(dataRoot).tasks.length,2);
   key('/older');key('\r');key('/compact');key('\r');assert.match(f.screen(),/只读历史\/恢复视图不能压缩/);assert.equal(calls.length,3);
  }finally{await f.app.exit();}
@@ -346,7 +347,7 @@ test('compact is listed in help, idle summary reaches next input, and readonly h
 test('a failed TUI task never implicitly supplies context to the next independent request',async()=>{
  const calls:any[]=[];const transport:typeof fetch=async(url,init)=>{calls.push(JSON.parse(String(init?.body)));return calls.length===1?new Response('controlled denied',{status:401}):scriptedTransport([]).fetch(url,init);};
  const f=fixture(transport),key=(s:string)=>f.terminal.input(s);
- try{key('FAILED ORIGINAL INPUT');key('\r');await until(()=>f.screen().includes('失败'));key('EXPLICIT NEW INPUT');key('\r');await until(()=>f.screen().includes('已完成'));assert.equal(calls.length,2);assert.doesNotMatch(JSON.stringify(calls[1]),/FAILED ORIGINAL INPUT/);}finally{await f.app.exit();}
+ try{key('FAILED ORIGINAL INPUT');key('\r');await until(()=>f.screen().includes('失败'));key('EXPLICIT NEW INPUT');key('\r');await until(()=>f.screen().includes('✓ 完成'));assert.equal(calls.length,2);assert.doesNotMatch(JSON.stringify(calls[1]),/FAILED ORIGINAL INPUT/);}finally{await f.app.exit();}
 });
 
 test('improve is reachable with explicit limits; report navigation and ordinary text never select a candidate',async()=>{
@@ -354,14 +355,14 @@ test('improve is reachable with explicit limits; report navigation and ordinary 
  const analysis=offlineImproveTransport(),coding=scriptedTransport([]);
  const transport:typeof fetch=async(url,init)=>JSON.parse(String(init?.body)).tools.some((t:any)=>t.function.name==='evidence_summary')?analysis.fetch(url,init):coding.fetch(url,init);
  const f=fixture(transport),key=(text:string)=>f.terminal.input(text);
- try{key('Original task');key('\r');await until(()=>f.screen().includes('已完成'));key('/improve');key('\r');assert.match(f.screen(),/尚未启动/);assert.equal(analysis.calls.length,0);
+ try{key('Original task');key('\r');await until(()=>f.screen().includes('✓ 完成'));key('/improve');key('\r');assert.match(f.screen(),/尚未启动/);assert.equal(analysis.calls.length,0);
  key('/improve '+JSON.stringify({id:'tui-report',purpose:'Inspect current task',limits:{maxRequests:4,maxTokens:1024,maxRequestTokens:256,maxDurationMs:30000,maxOutputTokens:128}}));key('\r');
- // The analysis notice names the target run by its display number, never the full UUID.
- const target=readAcceptedTasks(join(f.root,'data')).tasks[0].runId!;assert.ok(f.screen().includes(`improve 分析中 · 目标 ${readDisplayIndex(join(f.root,'data')).label('run',target)}；`));assert.ok(!f.screen().includes(target));
- await until(()=>f.screen().includes('improve complete'));assert.equal(analysis.calls.length,2);
+ // The status line shows the analysis by its report display number; completion is a main-area event line.
+ const target=readAcceptedTasks(join(f.root,'data')).tasks[0].runId!;assert.match(f.screen(),/⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏/);assert.match(f.screen(),/ improve 分析 ir-[0-9a-f]{4,}/);assert.ok(!f.screen().includes(target));
+ await until(()=>/✓ improve ir-[0-9a-f]{4,} 分析完成/.test(f.screen()));assert.equal(analysis.calls.length,2);
  key('/improves tui-report');key('\r');assert.match(f.screen(),/只读报告/);key('please execute all');key('\r');assert.equal(analysis.calls.length,2);key('\x1b');
  const report=readImproveReport(join(f.root,'data'),'tui-report').report!;
- key('/improve-select '+JSON.stringify({id:'tui-empty-choice',reportId:readDisplayIndex(join(f.root,'data')).label('improve-report',report.id),reportRevision:report.revision,selections:[],groups:[],limits:{deadline:new Date(Date.now()+30000).toISOString(),maxChecks:0,maxRequests:0,maxTokens:0}}));key('\r');assert.match(f.screen(),/结构化选择/);key('s');f.screen();key('\r');await until(()=>{try{return readImproveDecision(join(f.root,'data'),'tui-empty-choice').state==='completed';}catch{return false;}});await until(()=>/已完成 · ctx [^·]+ · usage/.test(f.screen())&&!f.screen().includes('正在保存明确决定'));assert.equal(analysis.calls.length,2);key('\x1b');assert.match(f.screen(),/决定 tui-empty-choice · completed；具体写回\/启用见结果/);assert.ok(JSON.stringify(readImproveDecision(join(f.root,'data'),'tui-empty-choice')).includes(`"reportId":"${report.id}"`));assert.doesNotMatch(f.screen(),/正式目标未写回、未启用/);
+ key('/improve-select '+JSON.stringify({id:'tui-empty-choice',reportId:readDisplayIndex(join(f.root,'data')).label('improve-report',report.id),reportRevision:report.revision,selections:[],groups:[],limits:{deadline:new Date(Date.now()+30000).toISOString(),maxChecks:0,maxRequests:0,maxTokens:0}}));key('\r');assert.match(f.screen(),/结构化选择/);key('s');f.screen();key('\r');await until(()=>{try{return readImproveDecision(join(f.root,'data'),'tui-empty-choice').state==='completed';}catch{return false;}});await until(()=>f.screen().includes('✓ 完成')&&!f.screen().includes('improve 执行'));assert.equal(analysis.calls.length,2);key('\x1b');assert.match(f.screen(),/决定 tui-empty-choice · completed；具体写回\/启用见结果/);assert.ok(JSON.stringify(readImproveDecision(join(f.root,'data'),'tui-empty-choice')).includes(`"reportId":"${report.id}"`));assert.doesNotMatch(f.screen(),/正式目标未写回、未启用/);
  key('/older');key('\r');key('/improve {}');key('\r');assert.match(f.screen(),/只读历史\/恢复视图不能发起分析/);assert.equal(listImproveReports(join(f.root,'data')).items.length,1);
  }finally{await f.app.exit();}
 });
@@ -401,7 +402,7 @@ test('full-screen views stack: Esc returns layer by layer; in-view Ctrl+C and gl
     key('\x1b');assert.doesNotMatch(f.screen(),/测试确认/);assert.match(f.screen(),/帮助/,'dialog Esc does not pop the view');
     views.openConfirm({title:'测试确认',action:'确认'},selected=>{confirmed=selected;});key('\r');assert.deepEqual(confirmed,[]);
     key('\x1b');
-    await until(()=>f.screen().includes('已完成'));
+    await until(()=>f.screen().includes('✓ 完成'));
     assert.equal(script.calls.length,2,'session task finished normally');
     // Instant feedback replaces the key-hint line until the next key.
     key('\x18');assert.match(f.screen(),/按 Enter 明确排到下一任务/);
