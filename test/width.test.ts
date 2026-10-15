@@ -145,8 +145,8 @@ test('pending calibration preserves modal priority and Ctrl+C exit saves unappli
   const f=calibratedFixture(),key=(data:string)=>f.terminal.key(data);
   try {
     await until(f.painted);
-    key('\x1bOQ');await new Promise(r=>setTimeout(r,10));
-    // Menu consumes cancellation first, whether its new characters are still being measured or ready.
+    key('?');await new Promise(r=>setTimeout(r,10));
+    // The help view consumes cancellation first, whether its new characters are still being measured or ready.
     key('\x03');key('\x03');assert.equal(f.terminal.stopped,false);key('\x1b');await until(f.painted);
     f.terminal.hold='Ω';key('Ω');key('unapplied');key('\r');await until(()=>f.terminal.held.length===1);
     key('\x03');key('\x03');f.terminal.release();
@@ -204,7 +204,7 @@ test('stop remains responsive while new output widths are waiting, without leaki
   const f=calibratedFixture(transport),key=(data:string)=>f.terminal.key(data);
   try {
     await until(f.painted);key('Read');key('\r');await until(()=>started);
-    key('\x1bOQ');key('\x1b');assert.equal(aborted,false,'first Esc closes the action menu');await until(f.painted);
+    key('?');key('\x1b');assert.equal(aborted,false,'first Esc closes the help view');await until(f.painted);
     f.terminal.hold='Ω';key('Ω');key('\r');await until(()=>f.terminal.held.length===1);
     key('\x1b');await until(()=>aborted);assert.equal(f.terminal.stopped,false);
     f.terminal.release();await until(f.painted);

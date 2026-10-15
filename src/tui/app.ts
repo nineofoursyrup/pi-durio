@@ -8,14 +8,15 @@ import { join, resolve } from 'node:path';
 import { realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiAltScreen, VStack, matchesKey, isKeyRelease, isKeyRepeat, stripTerminalSequences, truncateToWidth, wrapTextWithAnsi, type Component, type AutocompleteProvider, type Terminal } from '@earendil-works/pi-tui';
+import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiAltScreen, VStack, matchesKey, isKeyRelease, isKeyRepeat, stripTerminalSequences, truncateToWidth, wrapTextWithAnsi, type Component, type Terminal } from '@earendil-works/pi-tui';
 import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, inspectRecovery, checkRecovery, recoverRun, estimateTaskPrefix, type ContextUsage, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
 import { readObject, type QueueItemFact } from '../evidence.js';
 import { calculateContextTokens } from '@earendil-works/pi-ai/utils/estimate';
 import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
 import { MetricsView } from './metrics.js';
-import { recordAcceptance } from '../metrics/index.js';
+import { recordAcceptance, type MetricsScope } from '../metrics/index.js';
+import type { HistoryFilter } from '../history.js';
 import { HistoryView } from './history.js';
 import { EvalView } from './eval.js';
 import { StorageView } from './storage.js';
@@ -25,24 +26,15 @@ import { readDisplayIndex, readRunOrdinals, modelRequestNumber, resolveDisplayIn
 import { readSessionChains } from '../session-chain.js';
 import { estimateRunRequests, estimateSessionRequests, sessionRunIds, sumCostEstimates, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
 import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, statusText, makeBorderColor } from './theme.js';
-import { ConfirmDialog, escHint, hintLine, viewKey, type ConfirmConfig } from './view-stack.js';
+import { ConfirmDialog, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig } from './view-stack.js';
+import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
-type PanelKind='help'|'exit'|'detail'|'actions'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics';
+type PanelKind='help'|'exit'|'detail'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics';
 type ViewEntry={kind:PanelKind;ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
 const identity=(s:string)=>s;
 const theme={borderColor:makeBorderColor('border.input'), selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
-const commands=[['help','帮助'],['exit','退出并保留草稿'],['restore','恢复草稿（不执行）'],['bottom','回到底部'],['older','上一窗口'],['newer','下一窗口'],['details','查看原文详情'],['history','查询历史（只读）'],['metrics','任务验收与双时钟（只读）'],['storage','存储占用与显式清理'],['copy','复制选文或最新可见输出'],['stop','中止实际运行任务'],['queue','队列与原目标'],['recover','恢复核对当前任务'],['follow-up','将输入排到下一任务'],['compact','压缩当前上下文（原文保留）'],['compactions','查看摘要生成与接入事实'],['improve','受限分析（需声明范围和预算）'],['improves','查看 improve 报告（只读）'],['improve-select','结构化逐项选择与汇总提交'],['improve-suppressions','查看建议抑制'],['improve-restore','JSON明确恢复建议'],['improve-continue','JSON明确继续独立未跑项'],['improve-rollback','JSON明确回退本批精确产物']] as const;
 const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed','compaction.generated','compaction.finished'];
-const completion:AutocompleteProvider={
-  triggerCharacters:['/'],
-  async getSuggestions(lines,line,col) {
-    const prefix=lines[line]?.slice(0,col)??'';
-    if(!/^\/[a-z]*$/.test(prefix)) return null;
-    return {prefix,items:commands.filter(([name])=>`/${name}`.startsWith(prefix)).map(([name,description])=>({value:`/${name}`,label:`/${name}`,description}))};
-  },
-  applyCompletion(lines,line,col,item,prefix) { const next=[...lines]; next[line]=`${lines[line].slice(0,col-prefix.length)}${item.value}${lines[line].slice(col)}`; return {lines:next,cursorLine:line,cursorCol:col-prefix.length+item.value.length}; }
-};
 function safe(text:string) { return stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,'�'); }
 /** Status-line magnitude: 950, 18.2k, 1M. */
 function tokenCount(tokens:number) {
@@ -76,7 +68,7 @@ export class ReadOnlyTui {
   private resolveClosed!:(result:TuiExit)=>void;
   private readonly terminal:Terminal;
   private readonly tui:TuiAltScreen;
-  private readonly editor:Editor;
+  private readonly editor:HardwareCursorEditor;
   private readonly transcript=new Container();
   private readonly scroll:ScrollView;
   private readonly drafts:Drafts;
@@ -151,7 +143,8 @@ export class ReadOnlyTui {
     this.closed=new Promise(resolve=>{this.resolveClosed=resolve;});
     this.tui=new TuiAltScreen(this.terminal,true,undefined,{copySelection:this.copy,copyOnSelect:true,scrollToEndIndicator:()=> ' ↓ 回到底部 · /bottom '});
     this.editor=new HardwareCursorEditor(this.tui,theme,{autocompleteMaxVisible:2});
-    this.editor.setAutocompleteProvider(completion);
+    this.editor.setAutocompleteProvider(commandCompletion(options.workspace));
+    this.editor.placeholder=()=>this.placeholder();
     this.editor.onChange=()=>{
       const text=this.editor.getExpandedText();
       this.confirmation=undefined;
@@ -168,11 +161,9 @@ export class ReadOnlyTui {
     const status:Component={invalidate(){},render:width=>[
       styledLine([{text:this.statusLine()},{text:` · ${this.contextUsage()} · usage ${this.usage()}`,fg:'fg.faint'}],width),
       styledLine([{text:this.notice,fg:'fg.body'}],width),
-      styledLine([{text:this.hintFeedback??`${this.scroll.isFollowingEnd&&!this.historyWindow?'跟随':'已暂停跟随 /bottom'} · /help · Ctrl+O 详情 · Ctrl+C 中止/退出`,fg:'fg.label'}],width)
+      this.hintFeedback!==undefined?hintLine([],width,{feedback:this.hintFeedback}):hintLine(this.sessionHints(),width,{keepLast:'? 帮助'})
     ]};
-    const footer=new MouseRegion(status,event=>{if(event.type==='click'&&event.y===2) {this.bottom();return {handled:true};}});
-    const menuHeader=new MouseRegion(header,event=>{if(event.type==='click'&&event.y===0){this.openPanel('actions');return {handled:true};}});
-    const layout=new VStack([{component:menuHeader,basis:2},{component:this.scroll,basis:0,grow:1,minSize:1},{component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6},{component:footer,basis:3}]);
+    const layout=new VStack([{component:header,basis:2},{component:this.scroll,basis:0,grow:1,minSize:1},{component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6},{component:status,basis:3}]);
     const root:Component={invalidate:()=>layout.invalidate(),render:width=>{
       if(width<40 || this.terminal.rows<12) return new Text(`窗口过小：建议至少 40 × 12 字符格（待真实终端确认）\n当前 ${width} × ${this.terminal.rows}\n扩大窗口继续；Ctrl+C 中止/再次退出。草稿保留。`,0,0).render(width).slice(0,this.terminal.rows);
       return layout.render(width);
@@ -294,7 +285,8 @@ export class ReadOnlyTui {
     }
     if(this.followChord&&matchesKey(data,'enter')){this.followChord=false;this.submit(this.editor.getExpandedText(),true);return {consume:true};}
     if(matchesKey(data,'ctrl+l')) {if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return {consume:true};}
-    if(matchesKey(data,'f2')) {this.openPanel('actions');return {consume:true};}
+    if(matchesKey(data,'ctrl+r')) {this.command(parseCommand('/history'));return {consume:true};}
+    if(data==='?'&&this.editor.focused&&!this.editor.getExpandedText()) {this.openPanel('help');return {consume:true};}
     if(matchesKey(data,'ctrl+o')) {this.openDetail(this.records.at(-1));return {consume:true};}
     if(matchesKey(data,'ctrl+x')) {this.followChord=this.editor.focused;this.feedback('按 Enter 明确排到下一任务；普通 Enter 默认补充当前任务');return {consume:true};}
     if(matchesKey(data,'escape')) {if(this.phase==='running')this.stop();return {consume:true};}
@@ -322,7 +314,9 @@ export class ReadOnlyTui {
     if(command.startsWith('/')) {
       // Editor clears on submit; restore previous draft for command actions where available.
       this.editor.setText('');this.lastText='';
-      if(!this.command(command)) {this.editor.setText(text);this.lastText=text;this.notice='未知或尚未接入的命令；没有调用模型。/help 查看当前入口';}
+      // 参数有误时不打开视图：文本放回输入框，状态行写原因与可用值。
+      try {this.command(parseCommand(command));}
+      catch(error){if(!(error instanceof CommandError))throw error;this.editor.setText(text);this.lastText=text;this.notice=error.line;}
       this.tui.requestRender(); return;
     }
     if(!text.trim())return;
@@ -342,51 +336,79 @@ export class ReadOnlyTui {
     this.active=run(options).then(result=>this.applyResult(result)).catch(error=>{this.failure=String(error);this.notice=`未完成：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();
   }
-  private command(command:string) {
-    if(command==='/help') this.openPanel('help');
-    else if(command==='/exit') this.requestExit();
-    else if(command==='/restore') {this.editor.setText(this.savedDraft??this.drafts.latest()??'');this.lastText=this.editor.getExpandedText();this.notice='草稿已恢复；尚未提交';}
-    else if(command==='/bottom')this.bottom();
-    else if(command==='/older')this.window('older');
-    else if(command==='/newer')this.window('newer');
-    else if(command==='/metrics'||command.startsWith('/metrics ')){
-      try{this.metricsView=new MetricsView(this.options.dataRoot,command==='/metrics'?{}:JSON.parse(command.slice(9)));this.openPanel('metrics');}catch(error){this.notice=`任务指标不可读取：${String(error)}`;this.tui.requestRender();}
+  /** 按命令表解析后的命令分派；写法见 commands.ts。resolveArgument 的 CommandError 交给 submit 写状态行。 */
+  private command(parsed:ParsedCommand) {
+    const root=this.options.dataRoot,{positional,options,raw}=parsed;
+    const fail=(prefix:string,error:unknown)=>{if(error instanceof CommandError)throw error;this.notice=`${prefix}${safe(String(error))}`;this.tui.requestRender();};
+    switch(parsed.path.length?`${parsed.spec.name} ${parsed.path.join(' ')}`:parsed.spec.name){
+    case 'help':this.openPanel('help');break;
+    case 'exit':this.requestExit();break;
+    case 'restore':this.editor.setText(this.savedDraft??this.drafts.latest()??'');this.lastText=this.editor.getExpandedText();this.notice='草稿已恢复；尚未提交';break;
+    case 'bottom':this.bottom();break;
+    case 'older':this.window('older');break;
+    case 'newer':this.window('newer');break;
+    case 'stats':{
+      // 首版指标面板；选项按 MetricsScope 传入（1e 由 #83 重做）。
+      const scope:MetricsScope={from:options.from as string|undefined,to:options.to as string|undefined,asOf:options['as-of'] as string|undefined,project:options.project==='all'?undefined:options.project as string|undefined,taskType:options.type as string|undefined,version:options.version as string|undefined,source:options.source as MetricsScope['source'],through:options.snapshot===undefined?undefined:Number(options.snapshot)};
+      if(scope.asOf!==undefined&&!Number.isFinite(Date.parse(scope.asOf)))throw new CommandError(`--as-of 不是可识别的时间：${scope.asOf}`);
+      if(scope.through!==undefined&&!Number.isSafeInteger(scope.through))throw new CommandError(`--snapshot 要整数序号：${options.snapshot}`);
+      for(const key of Object.keys(scope) as (keyof MetricsScope)[])if(scope[key]===undefined)delete scope[key];
+      try{this.metricsView=new MetricsView(root,scope);this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
+      break;
     }
-    else if(command.startsWith('/acceptance ')){
-      try{const input=JSON.parse(command.slice(12));if(typeof input?.taskId==='string')input.taskId=resolveDisplayInput(this.options.dataRoot,'task',input.taskId);const receipt=recordAcceptance(this.options.dataRoot,input);this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();
+    case 'acceptance':
+      try{const input=JSON.parse(raw);if(typeof input?.taskId==='string')input.taskId=resolveDisplayInput(root,'task',input.taskId);const receipt=recordAcceptance(root,input);this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();break;
+    case 'eval':{
+      const id=positional[0]===undefined?undefined:resolveArgument(root,positional[0],['eval-plan']).id;
+      try{this.evalView=new EvalView(root,id);this.openPanel('eval');}catch(error){fail('Eval记录不可读取：',error);}
+      break;
     }
-    else if(command==='/eval'||command.startsWith('/eval ')){
-      try{const id=command.slice(6).trim();this.evalView=new EvalView(this.options.dataRoot,id?resolveDisplayInput(this.options.dataRoot,'eval-plan',id):undefined);this.openPanel('eval');}catch(error){this.notice=`Eval记录不可读取：${String(error)}`;this.tui.requestRender();}
+    case 'storage':this.storageView=new StorageView(root,()=>this.tui.requestRender());this.openPanel('storage');break;
+    case 'history':{
+      const filter:HistoryFilter={};
+      if(positional[0]!==undefined){
+        const target=resolveArgument(root,positional[0],['session','run']);
+        if(target.kind==='session')filter.session=target.id;
+        else {const session=readSessionChains(root).sessionOfRun(target.id);if(!session)throw new CommandError(`${positional[0]} 没有会话记录`);filter.session=session.id;}
+      }
+      if(options.from)filter.from=options.from as string;
+      if(options.to)filter.to=options.to as string;
+      if(options.project&&options.project!=='all')filter.project=options.project as string;
+      // recovery = 结果未知、需恢复核对的任务。
+      if(options.status)filter.status=options.status==='recovery'?'unknown':options.status as string;
+      try{this.historyView=new HistoryView(root,filter);this.openPanel('history');}catch(error){fail('历史查询失败（当前工作未改变）：',error);}
+      break;
     }
-    else if(command==='/storage') {this.storageView=new StorageView(this.options.dataRoot,()=>this.tui.requestRender());this.openPanel('storage');}
-    else if(command==='/history'||command.startsWith('/history ')) {
-      try{const filter=command==='/history'?{}:JSON.parse(command.slice(9));if(typeof filter?.session==='string')filter.session=resolveDisplayInput(this.options.dataRoot,'session',filter.session);this.historyView=new HistoryView(this.options.dataRoot,filter);this.openPanel('history');}
-      catch(error){this.notice=`历史查询失败（当前工作未改变）：${safe(String(error))}`;this.tui.requestRender();}
+    case 'details':this.openDetail(this.records.at(-1));break;
+    case 'copy':void this.copyOutput();break;
+    case 'stop':this.stop();break;
+    case 'queue':this.loadQueue();this.openPanel('queue');break;
+    case 'recover':{const [requested,offset,snapshotId]=raw.split(/\s+/).filter(Boolean);let run=this.runId;try{if(requested)run=resolveDisplayInput(root,'run',requested);}catch(error){this.notice=safe(String(error));break;}if(run)void this.openRecovery(run,offset?Number(offset):undefined,snapshotId);else this.notice='暂无需核对的 run';break;}
+    case 'follow-up':{const draft=this.editor.getExpandedText();if(draft)this.submit(draft,true);else this.notice='输入后按 Ctrl+X → Enter，明确排到下一任务';break;}
+    case 'withdraw':case 'reattach':
+      // 不带参数打开队列视图（T1）；带 q- 号时 /withdraw 直接撤回。/reattach 的确认框由 #77 接入。
+      if(!positional.length){this.loadQueue();this.openPanel('queue');break;}
+      void this.queueDecision(resolveArgument(root,positional[0],['queue-request']).id,parsed.spec.name as 'withdraw'|'reattach');break;
+    case 'decide':try{void this.recoveryDecision(JSON.parse(raw));}catch(error){this.notice=`决定 JSON 无效：${String(error)}`;}break;
+    case 'compact':void this.compact();break;
+    case 'compactions':this.openPanel('compaction');break;
+    case 'improves':case 'improve history':{
+      const id=positional[0]===undefined?undefined:resolveArgument(root,positional[0],['improve-report']).id;
+      try{this.improveView=new ImproveView(root,id);this.openPanel('improve');}catch(error){fail('improve 报告不可读取：',error);}
+      break;
     }
-    else if(command==='/details')this.openDetail(this.records.at(-1));
-    else if(command==='/copy')void this.copyOutput();
-    else if(command==='/stop')this.stop();
-    else if(command==='/queue'){this.loadQueue();this.openPanel('queue');}
-    else if(command==='/recover'||command.startsWith('/recover ')){const [requested,offset,snapshotId]=command.slice(9).trim().split(/\s+/);let run=this.runId;try{if(requested)run=resolveDisplayInput(this.options.dataRoot,'run',requested);}catch(error){this.notice=safe(String(error));return true;}if(run)void this.openRecovery(run,offset?Number(offset):undefined,snapshotId);else this.notice='暂无需核对的 run';}
-    else if(command==='/follow-up'){const draft=this.editor.getExpandedText();if(draft)this.submit(draft,true);else this.notice='输入后按 Ctrl+X → Enter，明确排到下一任务';}
-    else if(command.startsWith('/withdraw '))void this.queueDecision(command.slice(10).trim(),'withdraw');
-    else if(command.startsWith('/reattach '))void this.queueDecision(command.slice(10).trim(),'reattach');
-    else if(command.startsWith('/decide ')){try{void this.recoveryDecision(JSON.parse(command.slice(8)));}catch(error){this.notice=`决定 JSON 无效：${String(error)}`;}}
-    else if(command==='/compact')void this.compact();
-    else if(command==='/compactions')this.openPanel('compaction');
-    else if(command==='/improves'||command.startsWith('/improves ')){try{const id=command.slice(10).trim();this.improveView=new ImproveView(this.options.dataRoot,id?resolveDisplayInput(this.options.dataRoot,'improve-report',id):undefined);this.openPanel('improve');}catch(error){this.notice=`improve 报告不可读取：${String(error)}`;}}
-    else if(command==='/improve-suppressions'){try{this.improveView=new ImproveView(this.options.dataRoot,undefined,true);this.openPanel('improve');}catch(error){this.notice=String(error);}}
-    else if(command.startsWith('/improve-restore ')||command.startsWith('/improve-continue ')||command.startsWith('/improve-rollback ')){
-      if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许新决定';return true;}
-      try{const action=command.startsWith('/improve-restore ')?'restore':command.startsWith('/improve-rollback ')?'rollback':'continue',spec=JSON.parse(command.slice(command.indexOf(' ')+1));this.phase='running';this.controller=new AbortController();this.cancellation='exit';const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:this.options.dataRoot}):action==='rollback'?rollbackImproveDecision({...spec,dataRoot:this.options.dataRoot,signal:this.controller.signal}):resumeImproveDecision({...spec,dataRoot:this.options.dataRoot,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
+    case 'improve-suppressions':case 'improve suppressions':try{this.improveView=new ImproveView(root,undefined,true);this.openPanel('improve');}catch(error){fail('',error);}break;
+    case 'improve-restore':case 'improve-continue':case 'improve-rollback':{
+      if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许新决定';break;}
+      try{const action=parsed.spec.name.slice(8) as 'restore'|'continue'|'rollback',spec=JSON.parse(raw);this.phase='running';this.controller=new AbortController();this.cancellation='exit';const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:root}):action==='rollback'?rollbackImproveDecision({...spec,dataRoot:root,signal:this.controller.signal}):resumeImproveDecision({...spec,dataRoot:root,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
+      break;
     }
-    else if(command==='/improve-select'||command.startsWith('/improve-select ')){
-      if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';return true;}
-      try{const template=JSON.parse(command.slice(16).trim()) as ImproveDecision;if(typeof template?.reportId==='string')template.reportId=resolveDisplayInput(this.options.dataRoot,'improve-report',template.reportId);this.improveSelectionView=new ImproveSelectionView(this.options.dataRoot,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
+    case 'improve-select':
+      if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';break;}
+      try{const template=JSON.parse(raw) as ImproveDecision;if(typeof template?.reportId==='string')template.reportId=resolveDisplayInput(root,'improve-report',template.reportId);this.improveSelectionView=new ImproveSelectionView(root,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
+      break;
+    case 'improve':void this.improve(raw);break;
     }
-    else if(command==='/improve'||command.startsWith('/improve '))void this.improve(command.slice(8).trim());
-    else return false;
-    return true;
   }
   private async improve(input:string) {
     if(this.historyWindow||this.viewingRecovery){this.notice='只读历史/恢复视图不能发起分析；返回活动目标并完成核对';this.tui.requestRender();return;}
@@ -649,10 +671,6 @@ export class ReadOnlyTui {
     const component:Component={invalidate(){},render:width=>this.panelLines(width),handleInput:data=>this.panelInput(data),handleMouse:event=>{
       const panel=this.panel;if(!panel)return;
       if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
-      if(event.type==='click'&&panel.kind==='actions'){
-        const index=event.y+panel.line-1;
-        if(commands[index]){const command=commands[index][0];this.closeViews();this.command(`/${command}`);return {handled:true};}
-      }
     }};
     const overlay=this.tui.showOverlay(component,{width:'96%',maxHeight:'90%',anchor:'center'});this.hidePanel=()=>overlay.hide();this.tui.requestRender();
   }
@@ -672,6 +690,28 @@ export class ReadOnlyTui {
     if(this.hintFeedback!==undefined&&lines.length)lines[lines.length-1]=hintLine([],width,{feedback:this.hintFeedback,esc:escHint(this.viewStack.length)});
     return lines;
   }
+  private overlayHeight(){return Math.max(3,Math.floor(this.terminal.rows*0.9)-1);}
+  /** 帮助视图：会话屏键位与命令清单（同一张命令表），正文在固定头尾之间滚动。 */
+  private helpLines(width:number) {
+    const panel=this.panel!;
+    const frame=fixedFrame([styledLine([{text:'帮助',fg:'fg.primary',bold:true}],width)],helpBody(width),[hintLine(['↑↓ 滚动','n/p 翻页'],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),panel.line);
+    panel.line=frame.offset;this.widths?.inspect(frame.lines);
+    return frame.lines;
+  }
+  /** 会话屏底栏键位提示（#42 第 4 节）；宽度不够时从右往左去掉，空闲时 `? 帮助` 最后去掉。 */
+  private sessionHints():string[] {
+    if(this.phase==='stopping'||this.phase==='exiting')return [];
+    if(this.viewingRecovery)return ['/recover 打开核对','Ctrl+C 退出（保留可恢复工作）'];
+    if(this.phase==='running')return ['Enter steer','Ctrl+X Enter follow-up','Ctrl+C 中止','Ctrl+O 详情'];
+    return ['Enter 提交','/ 命令','Ctrl+R 历史','? 帮助'];
+  }
+  /** 输入为空时的占位文案（#42 第 4 节）。 */
+  private placeholder() {
+    if(this.phase==='stopping'||this.phase==='exiting')return '正在清理 · 输入保留为草稿，不会受理';
+    if(this.viewingRecovery)return '恢复核对进行中 · 输入已保存为草稿，不会提交';
+    if(this.phase==='running')return '补充当前任务…   Ctrl+X Enter 排到下一任务';
+    return `${this.options.coding?'描述要完成的修改…':'描述要查看或分析的内容…'}   / 命令  @ 文件  Shift+Enter 换行`;
+  }
   private panelBody(width:number):string[] {
     const panel=this.panel;if(!panel)return[];
     if(panel.kind==='improve-selection'){const lines=this.improveSelectionView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
@@ -681,9 +721,8 @@ export class ReadOnlyTui {
     if(panel.kind==='metrics') {const lines=this.metricsView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='history') {const lines=this.historyView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     let text:string;
-    if(panel.kind==='actions')text='操作菜单（保留输入草稿）\n'+commands.map(([name,description],index)=>`${panel.offset===index?'›':' '} /${name}  ${description}`).join('\n');
-    else if(panel.kind==='help')text='帮助\nEnter 新任务；忙时 Enter 补充当前任务\nCtrl+X → Enter 后续请求\nCtrl+J / Shift+Enter / \\ 后 Enter 换行\nCtrl+C 中止；空闲清输入，再按退出\n空输入 Ctrl+D 两次退出（800ms）\nCtrl+D 非空：删除光标后字符簇\nF2 菜单；Ctrl+O 详情；Ctrl+L 重绘\nPageUp/PageDown 滚动；/bottom 活动会话\n/older /newer 只读窗口；/restore 草稿\n/improve JSON 范围与预算受限分析；/improves 只读报告\n/improve-select JSON 逐项选择、s汇总、Enter提交\n/eval 固定评估报告（只读）\n/history 历史查询（只读）\n/metrics [JSON] 三率与双时钟（只读）\n/acceptance JSON 可选明确补记/纠正\n/compact 压缩当前上下文；/compactions 查看结果\n/queue 队列，w 撤回，r 明确重新接入\n/recover [runId] 恢复面板，e 结束旧工作\n/decide JSON 与 headless 同一结构化决定\n/stop 中止；/exit 退出；Esc 关闭弹层';
-    else if(panel.kind==='compaction')text=this.compactionText();
+    if(panel.kind==='help')return this.helpLines(width);
+    if(panel.kind==='compaction')text=this.compactionText();
     else if(panel.kind==='queue')text=this.queueText();
     else if(panel.kind==='recovery')text=this.recoveryText();
     else if(panel.kind==='exit')text='退出并保留草稿？\nEnter：保存文本，取消在途请求并等待清理\nEsc：返回；不改变任务状态';
@@ -710,15 +749,9 @@ export class ReadOnlyTui {
     if(panel.kind==='compaction'){if(data==='n'&&panel.next!==null){panel.previous.push(panel.offset);panel.offset=panel.next;panel.line=0;}else if(data==='p'&&panel.previous.length){panel.offset=panel.previous.pop()!;panel.line=0;}else if(data==='c')void this.cancelLatestCompaction();}
     if(panel.kind==='metrics') {this.metricsView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='history') {this.historyView?.handleInput(data);this.tui.requestRender();return;}
-    if(panel.kind==='actions') {
-      if(matchesKey(data,'up')) panel.offset=(panel.offset+commands.length-1)%commands.length;
-      if(matchesKey(data,'down')||matchesKey(data,'tab')) panel.offset=(panel.offset+1)%commands.length;
-      if(matchesKey(data,'enter')) {const command=commands[panel.offset][0];this.closeViews();this.command(`/${command}`);return;}
-      panel.line=Math.max(0,panel.offset-Math.floor(this.terminal.rows*0.9)+4);
-    } else {
-      if(matchesKey(data,'up'))panel.line=Math.max(0,panel.line-1);
-      if(matchesKey(data,'down'))panel.line++;
-    }
+    if(matchesKey(data,'up'))panel.line=Math.max(0,panel.line-1);
+    if(matchesKey(data,'down'))panel.line++;
+    if(panel.kind==='help'){const page=Math.max(1,this.overlayHeight()-2);if(data==='n')panel.line+=page;if(data==='p')panel.line=Math.max(0,panel.line-page);}
     if(panel.kind==='exit'&&matchesKey(data,'enter')){this.closeViews();void this.exit();return;}
     if(panel.kind==='queue') {
       if(matchesKey(data,'left'))panel.offset=Math.max(0,panel.offset-1);
