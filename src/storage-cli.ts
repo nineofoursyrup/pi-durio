@@ -1,4 +1,5 @@
 import { resolveDisplayInput } from './display-number.js';
+import { sessionStorageUnits } from './storage-groups.js';
 import { storageUsage, previewCleanup, commitCleanup, readCleanup, archiveStorage, restoreArchive, migrateStorage, verifyArchive, unfixEvidence } from './storage.js';
 
 export async function storageCommand(command:string|undefined,action:string|undefined,root:string,values:Record<string,unknown>) {
@@ -9,7 +10,15 @@ export async function storageCommand(command:string|undefined,action:string|unde
   let result:unknown;
   switch(action??'usage') {
     case 'usage':result=await storageUsage(root,{after:str('after')?Number(str('after')):undefined,limit:str('limit')?Number(str('limit')):undefined});break;
-    case 'preview':result=await previewCleanup(root,{id:required('id'),units:required('units').split(',').map(unit=>unit.startsWith('session:')?`session:${resolveDisplayInput(root,'session',unit.slice(8))}`:unit),reason:required('reason')});break;
+    case 'preview':{
+      // `session:<s- number>` names a derived session (会话): every durable store of its tasks. A full id stays one store.
+      const units:string[]=[];
+      for(const unit of required('units').split(',')) {
+        const input=unit.startsWith('session:')?unit.slice(8):undefined,id=input===undefined?undefined:resolveDisplayInput(root,'session',input);
+        if(id!==undefined&&id!==input)units.push(...await sessionStorageUnits(root,id));else units.push(unit);
+      }
+      result=await previewCleanup(root,{id:required('id'),units:[...new Set(units)],reason:required('reason')});break;
+    }
     case 'commit':{const outcome=await commitCleanup(root,{id:required('id'),identity:required('confirm')});result=outcome;if(outcome.status!=='completed')process.exitCode=75;break;}
     case 'status':result=readCleanup(root,required('id'));break;
     case 'archive':{const scope=required('scope');if(scope!=='whole-root'&&scope!=='attachments')throw Error('USAGE: scope is whole-root or attachments');result=await archiveStorage(root,{destination:required('destination'),scope,objects:str('objects')?.split(',')});break;}
