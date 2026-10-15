@@ -91,7 +91,7 @@ export function sessionTime(at: string, now: Date): string {
   return date.getFullYear() === now.getFullYear() ? md : `${date.getFullYear()}-${md}`;
 }
 
-function lockSegments(lock: WelcomeLock): TextSegment[] {
+function lockSegments(lock: WelcomeLock, now: Date): TextSegment[] {
   switch (lock.state) {
     case 'probing': return [{ text: '写入者锁探测中', fg: 'fg.faint' }];
     case 'readonly': return [{ text: '只读 · 不取写入者锁', fg: 'fg.muted' }];
@@ -99,7 +99,7 @@ function lockSegments(lock: WelcomeLock): TextSegment[] {
     case 'unknown': return [{ text: GLYPHS.warn, fg: 'ac.warn' }, { text: ` 写入者锁状态未知 · ${lock.reason}`, fg: 'fg.muted' }];
     case 'held': {
       const { pid, host, started } = lock.holder;
-      const who = [pid === undefined ? '持有者未记录' : `pid ${pid}`, host, started && sessionTime(started, new Date())].filter(Boolean).join(' · ');
+      const who = [pid === undefined ? '持有者未记录' : `pid ${pid}`, host, started && sessionTime(started, now)].filter(Boolean).join(' · ');
       return [{ text: GLYPHS.err, fg: 'ac.err' }, { text: ` 被占用 · ${clean(who)}`, fg: 'fg.body' }];
     }
   }
@@ -122,7 +122,7 @@ export function renderWelcome(facts: WelcomeFacts, width: number, height: number
   const version: Row = { segments: [{ text: '本机 coding agent', fg: 'fg.primary' }, { text: ' · ', fg: 'fg.faint' }, { text: `v${facts.version} · ${facts.build}`, fg: 'fg.label' }] };
 
   // 工作区与锁：放得下时同一行；被占用时持有者与恢复方法各占一行（宽终端恢复方法可换行）。
-  const workspace = home(facts.workspace), lock = lockSegments(facts.lock), lockWidth = lock.reduce((w, s) => w + visibleWidth(s.text), 0);
+  const workspace = home(facts.workspace), lock = lockSegments(facts.lock, now), lockWidth = lock.reduce((w, s) => w + visibleWidth(s.text), 0);
   const workspaceRows: Row[] = [];
   if (facts.lock.state !== 'held' && visibleWidth(workspace) + 3 + lockWidth <= valueWidth)
     workspaceRows.push({ segments: [label('工作区'), { text: workspace, fg: 'ac.path' }, { text: ' · ', fg: 'fg.faint' }, ...lock] });
