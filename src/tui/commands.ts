@@ -63,6 +63,7 @@ export const COMMANDS: readonly CommandSpec[] = [
     positional: [{ label: 's-号|r-号', kinds: ['session', 'run'] }],
     options: [date('from'), date('to'), project, { name: 'status', value: '状态', values: ['completed', 'failed', 'aborted', 'recovery'] }],
   },
+  { name: 'trace', summary: 'run 的 span 瀑布（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'r-号', kinds: ['run'] }] },
   { name: 'details', summary: '查看最新原文详情', bare: 'view' },
   { name: 'queue', summary: '队列与原目标', bare: 'view' },
   { name: 'withdraw', summary: '撤回待接入的请求', bare: 'view', withArgs: 'direct', positional: [{ label: 'q-号', kinds: ['queue-request'], required: true }] },
@@ -90,7 +91,6 @@ export const COMMANDS: readonly CommandSpec[] = [
   { name: 'improve-rollback', summary: '明确回退本批精确产物', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
   { name: 'recover', summary: '恢复核对当前任务', bare: 'view', withArgs: 'open', raw: '[r-号 [偏移 快照]]' },
   { name: 'decide', summary: '提交恢复决定', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
-  { name: 'compactions', summary: '查看摘要生成与接入事实', bare: 'view' },
 ];
 
 /** 会话屏键位（帮助视图第一段）。键位改了的屏票同时改这里。 */
@@ -103,6 +103,7 @@ export const SESSION_KEYS: readonly (readonly [string, string])[] = [
   ['Ctrl+D', '非空时向前删除；空输入 800ms 内再按退出'],
   ['Ctrl+O', '查看最新原文详情'],
   ['Ctrl+R', '打开历史'],
+  ['Ctrl+T', '打开当前或最近一次 run 的 trace'],
   ['Ctrl+L', '重绘并重新测量字宽'],
   ['?', '输入为空时打开帮助'],
   ['/', '命令补全；Tab 补子命令与选项值'],

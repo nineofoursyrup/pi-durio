@@ -138,8 +138,10 @@ export function readDisplayIndex(root: string) {
 }
 
 /**
- * Per-run ordinals of tool-call intents and model requests (`tool.intent` / `model.intent`), 1-based
- * in record order and keyed by attempt ID. Recovery continuations of the same run continue the count.
+ * Per-run ordinals keyed by attempt ID. Model requests (`model.intent`) are numbered 1-based in record
+ * order, compaction requests included. Tool calls are numbered by logical call: attempts of the same
+ * durable tool task (a re-execution after recovery) keep the call's original number. Recovery
+ * continuations of the same run continue both counts.
  */
 export function readRunOrdinals(root: string, runId: string) {
   const ordinals = { tool: new Map<string, number>(), model: new Map<string, number>() };
@@ -149,13 +151,19 @@ export function readRunOrdinals(root: string, runId: string) {
   let rows: Record<string, unknown>[];
   try { rows = db.prepare("SELECT kind,body FROM records WHERE run_id=? AND kind IN ('tool.intent','model.intent') ORDER BY seq").all(runId) as Record<string, unknown>[]; }
   finally { db.close(); }
-  let tools = 0, models = 0;
+  let models = 0, calls = 0;
+  const byTask = new Map<number, number>();
   for (const row of rows) {
-    const ref = JSON.parse(String(row.body)), ordinal = row.kind === 'tool.intent' ? ++tools : ++models;
-    // Intents are written with attemptId first; a model intent also carries its whole context, so read only the head.
-    const head = /^\{"attemptId":"([^"\\]+)"/.exec(readObjectRange(root, ref, { limit: 256 }).bytes.toString('utf8'))?.[1];
-    const attemptId = head ?? JSON.parse(readObject(root, ref).toString()).attemptId;
-    if (typeof attemptId === 'string') (row.kind === 'tool.intent' ? ordinals.tool : ordinals.model).set(attemptId, ordinal);
+    const ref = JSON.parse(String(row.body)), model = row.kind === 'model.intent', ordinal = model ? ++models : 0;
+    // Intents are written with attemptId (then durableTaskId) first; a model intent also carries its whole context, so read only the head.
+    const head = /^\{"attemptId":"([^"\\]+)"(?:,"durableTaskId":(\d+))?/.exec(readObjectRange(root, ref, { limit: 256 }).bytes.toString('utf8'));
+    const data = head ? { attemptId: head[1], durableTaskId: head[2] === undefined ? undefined : Number(head[2]) } : JSON.parse(readObject(root, ref).toString());
+    if (typeof data.attemptId !== 'string') continue;
+    if (model) { ordinals.model.set(data.attemptId, ordinal); continue; }
+    const task = typeof data.durableTaskId === 'number' ? data.durableTaskId : undefined;
+    const call = task !== undefined && byTask.has(task) ? byTask.get(task)! : ++calls;
+    if (task !== undefined) byTask.set(task, call);
+    ordinals.tool.set(data.attemptId, call);
   }
   return ordinals;
 }

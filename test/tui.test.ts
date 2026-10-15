@@ -332,10 +332,11 @@ test('compact is listed in help, idle summary reaches next input, and readonly h
  const calls:any[]=[];const transport:typeof fetch=async(url,init)=>{calls.push(JSON.parse(String(init?.body)));const response=await scriptedTransport([]).fetch(url,init);return new Response((await response.text()).replace('Controlled response: inspect actual tool evidence for acceptance.',calls.length===1?'INITIAL FINAL '+'z'.repeat(90000):calls.length===2?'VISIBLE COMPACT SUMMARY':'NEXT FINAL'),{headers:{'content-type':'text/event-stream'}});};
  const f=fixture(transport),key=(s:string)=>f.terminal.input(s),dataRoot=join(f.root,'data');
  try{
+  key('\x14');assert.match(f.screen(),/尚无 run/);assert.doesNotMatch(f.screen(),/◆ trace/);
   key('?');for(let i=0;i<3&&!/\/compact /.test(f.screen());i++)key('n');assert.match(f.screen(),/\/compact /);key('\x1b');
   key('ORIGINAL UI REQUEST');key('\r');await until(()=>f.screen().includes('已完成'));
   key('/compact');key('\r');await until(()=>f.screen().includes('上下文压缩 applied'));assert.equal(calls.length,2);assert.equal(readAcceptedTasks(dataRoot).tasks.length,1);
-  key('/compactions');key('\r');assert.match(f.screen(),/上下文压缩/);key('\x1b');
+  key('\x14');assert.match(f.screen(),/trace/);assert.match(f.screen(),/compaction 手动/);assert.match(f.screen(),/另有维护 1 项/);key('\x1b');assert.doesNotMatch(f.screen(),/另有维护/);
   key('NEXT UI REQUEST');key('\r');await until(()=>calls.length===3&&f.screen().includes('已完成'));
   assert.match(JSON.stringify(calls[2]),/VISIBLE COMPACT SUMMARY/);assert.doesNotMatch(JSON.stringify(calls[2]),/ORIGINAL UI REQUEST/);assert.equal(readAcceptedTasks(dataRoot).tasks.length,2);
   key('/older');key('\r');key('/compact');key('\r');assert.match(f.screen(),/只读历史\/恢复视图不能压缩/);assert.equal(calls.length,3);
@@ -434,7 +435,7 @@ test('? opens help only on empty input; F2 does nothing; help fits 80x24 and 40x
       key('?');const lines=f.app.screen().map(stripTerminalSequences);
       assert.equal(lines.length,rows);for(const line of lines)assert.ok(line.trimEnd().length<=columns,`${columns}x${rows}: ${line}`);
       const text=lines.join('\n');assert.match(text,/帮助/);assert.match(text,/会话屏键位/);assert.match(text,/Esc 返回会话/);
-      for(let i=0;i<40;i++)key('n');assert.match(f.screen(),/\/compactions/,'the command list scrolls to its end');assert.match(f.screen(),/Esc 返回会话/);
+      for(let i=0;i<40;i++)key('n');assert.match(f.screen(),/\/decide/,'the command list scrolls to its end');assert.match(f.screen(),/Esc 返回会话/);
       key('\x1b');assert.doesNotMatch(f.screen(),/会话屏键位/);
     }
     f.terminal.columns=30;f.terminal.rows=10;f.terminal.resize();assert.match(f.screen(),/窗口过小/);
