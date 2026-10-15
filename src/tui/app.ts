@@ -22,26 +22,23 @@ import { EvalView } from './eval.js';
 import { StorageView } from './storage.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
-import { readDisplayIndex, readRunOrdinals, modelRequestNumber, resolveDisplayInput, isUserChosenId, type DisplayIndex, type DisplayKind } from '../display-number.js';
+import { readDisplayIndex, resolveDisplayInput, isUserChosenId, type DisplayIndex, type DisplayKind } from '../display-number.js';
 import { readSessionChains } from '../session-chain.js';
-import { estimateRunRequests, estimateSessionRequests, sessionRunIds, sumCostEstimates, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
-import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, statusText, makeBorderColor } from './theme.js';
+import { estimateSessionRequests, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
+import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor } from './theme.js';
+import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
+import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageLine, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
 import { ConfirmDialog, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
 type PanelKind='help'|'exit'|'detail'|'queue'|'recovery'|'history'|'eval'|'storage'|'compaction'|'improve'|'improve-selection'|'metrics';
 type ViewEntry={kind:PanelKind;ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
+/** 主区窗口：每次读取当前任务最近的记录条数（查询上限）。 */
+const WINDOW=50;
 const identity=(s:string)=>s;
 const theme={borderColor:makeBorderColor('border.input'), selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
-const visibleKinds=['task.accepted','tool.intent','tool.result','tool.error','tool.summary','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed','compaction.generated','compaction.finished'];
 function safe(text:string) { return stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,'�'); }
-/** Status-line magnitude: 950, 18.2k, 1M. */
-function tokenCount(tokens:number) {
-  const [value,unit]=tokens>=999_950?[tokens/1e6,'M']:tokens>=1000?[tokens/1e3,'k']:[tokens,''];
-  return unit?`${value.toFixed(1).replace(/\.0$/,'')}${unit}`:String(value);
-}
-function label(result?:RunResult) { return result ? ({completed:'已完成',failed:'失败',aborted:'已中止',unknown:'结果未知；需恢复核对'}[result.status]) : '等待输入'; }
 export interface TuiOptions {
   workspace:string; dataRoot:string; mode:'live'|'offline'; transport?:typeof fetch;
   coding?:boolean;toolEnvironment?:ToolEnvironmentConfig;runId?:string;
@@ -74,11 +71,10 @@ export class ReadOnlyTui {
   private readonly drafts:Drafts;
   private readonly copy:(text:string)=>Promise<boolean|string>;
   private records:RecordReference[]=[];
-  private summaries=new Map<number,string>();
   private latestText='';
   private runId?:string;
   private sessionId?:string;
-  private model='DeepSeek / deepseek-flash（尚未受理）';
+  private model='deepseek-flash';
   private result?:RunResult;
   private active?:Promise<void>;
   private controller?:AbortController;
@@ -91,7 +87,8 @@ export class ReadOnlyTui {
   private recovery?:RecoveryReport;
   private viewingRecovery=false;
   private phase:'idle'|'running'|'stopping'|'exiting'='idle';
-  private notice='Enter 新任务；忙时 Enter 补充当前任务；Ctrl+X → Enter 排后续请求';
+  /** 状态反馈：与即时反馈一样替换会话屏底部键位提示行，下一次按键后恢复（U12）。 */
+  private notice='';
   private savedDraft?:string;
   private lastText='';
   private confirmation?:{key:string;at:number};
@@ -124,12 +121,20 @@ export class ReadOnlyTui {
   private displaySources:string[]=[];
   private displayIndex?:DisplayIndex;
   private displayMisses=new Set<string>();
-  private runOrdinals?:{runId:string}&ReturnType<typeof readRunOrdinals>;
   /** Live values come from the runtime; without one, the fixed-prefix estimate or the run's latest reported total. */
   private context:Omit<ContextUsage,'runId'>&{runId?:string};
   private readonly showContext=(usage:ContextUsage)=>{this.context=usage;this.tui.requestRender();};
-  /** Session estimate for the usage line, recomputed only when the run has a newer model response. */
-  private cost?:{sessionId:string;through:number;runIds:string[];text:string};
+  /** 各 run 的主区取数缓存（第 M 轮、工具调用、用量）。 */
+  private readonly views=new Map<string,RunView>();
+  /** Ctrl+O 展开全部；点击单行切换，记在 toggled 里（与 expandAll 相反）。 */
+  private expandAll=false;
+  private readonly toggled=new Set<string>();
+  /** 状态行的后台工作（improve 分析/执行、eval 批次）。 */
+  private activity?:Activity;
+  /** 后台完成事件：在主区末尾各插一行（U2、U12）；新任务开始时清空。 */
+  private events:string[]=[];
+  private refreshes=0;
+  private usageMemo?:{key:string;scope:'本会话'|'本任务';tokens:number;cost:string};
 
   constructor(private readonly options:TuiOptions) {
     if(options.widthCalibration===false&&!options.terminal)throw Error('WIDTH_CALIBRATION_TEST_TERMINAL_REQUIRED');
@@ -154,16 +159,14 @@ export class ReadOnlyTui {
     };
     this.editor.onSubmit=text=>this.submit(text);
     this.scroll=new ScrollView(this.transcript,{follow:'end',primary:true});
-    const header:Component={invalidate(){},render:width=>[
-      styledLine([{text:'◆ pi-durio',fg:'ac.brand',bold:true},{text:` · ${options.coding?'coding':'只读'} · ${safe(options.workspace)}`,fg:'fg.faint'}],width),
-      styledLine([{text:`session ${this.sessionId?this.runId?this.sessionOf(this.runId):'…':'未受理'}`,fg:'fg.body'},{text:` · ${this.model}`,fg:'fg.faint'}],width)
-    ]};
-    const status:Component={invalidate(){},render:width=>[
-      styledLine([{text:this.statusLine()},{text:` · ${this.contextUsage()} · usage ${this.usage()}`,fg:'fg.faint'}],width),
-      styledLine([{text:this.notice,fg:'fg.body'}],width),
-      this.hintFeedback!==undefined?hintLine([],width,{feedback:this.hintFeedback}):hintLine(this.sessionHints(),width,{keepLast:'? 帮助'})
-    ]};
-    const layout=new VStack([{component:header,basis:2},{component:this.scroll,basis:0,grow:1,minSize:1},{component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6},{component:status,basis:3}]);
+    // 1b（U2）：头部一行；主区；状态行；输入框；底栏用量与键位提示（状态反馈替换键位提示行）。
+    const header:Component={invalidate(){},render:width=>{const state=this.headerState();return [headerLine(state,width,narrowing(width,state,this.statusParts()).headerRight)];}};
+    const status:Component={invalidate(){},render:width=>{const parts=this.statusParts();return [statusLine(parts,width,narrowing(width,this.headerState(),parts).statusHint)];}};
+    const footer:Component={invalidate(){},render:width=>{
+      const usage=this.usageText(),feedback=this.hintFeedback??(this.notice||undefined);
+      return [usageLine(this.model,this.contextUsage(),usage.scope,usage.tokens,usage.cost,width),feedback!==undefined?hintLine([],width,{feedback}):hintLine(this.sessionHints(),width,{keepLast:'? 帮助'})];
+    }};
+    const layout=new VStack([{component:header,basis:1},{component:this.scroll,basis:0,grow:1,minSize:1},{component:status,basis:1},{component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6},{component:footer,basis:2}]);
     const root:Component={invalidate:()=>layout.invalidate(),render:width=>{
       if(width<40 || this.terminal.rows<12) return new Text(`窗口过小：建议至少 40 × 12 字符格（待真实终端确认）\n当前 ${width} × ${this.terminal.rows}\n扩大窗口继续；Ctrl+C 中止/再次退出。草稿保留。`,0,0).render(width).slice(0,this.terminal.rows);
       return layout.render(width);
@@ -198,7 +201,7 @@ export class ReadOnlyTui {
     process.on('unhandledRejection',rejection); this.removeSignals.push(()=>process.off('unhandledRejection',rejection));
     this.restoreTerminalWrite=hideCursorDuringPaint(this.terminal);
     if(this.options.widthCalibration!==false)this.widths=new TerminalWidthGate({terminal:this.terminal,tui:this.tui,
-      sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,this.contextUsage(),this.usage(),...this.displaySources],
+      sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,this.contextUsage(),this.usageText().cost,...this.displaySources],
       priorityInput:data=>{
         // Preserve the normal modal/focus order. A nonempty Ctrl+D is still editor deletion.
         if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+d')&&!matchesKey(data,'escape')&&!matchesKey(data,'ctrl+l')&&data!=='\x1b[I'&&data!=='\x1b[O')return false;
@@ -227,51 +230,64 @@ export class ReadOnlyTui {
     return this.displayIndex;
   }
   private shown(kind:DisplayKind,id:string) {return this.indexed(kind,id).label(kind,id);}
-  private chainSession?:{runId:string;id:string};
-  /** `s-` number of the derived session a run belongs to; rederived only when the run changes. */
-  private sessionOf(runId:string) {
-    if(this.chainSession?.runId!==runId){const session=readSessionChains(this.options.dataRoot).sessionOfRun(runId);if(!session)return '未记录';this.chainSession={runId,id:session.id};}
-    return this.shown('session',this.chainSession.id);
+  /** 当前 run 在会话链中的位置；只在 run 变化时重新推导（受理记录可见之前不缓存）。 */
+  private chainSession?:{runId:string;id:string;number:number;first:number;status?:string;forkedFrom:{sessionId:string;number:number}|null;contextRunIds:string[]};
+  private chainOf(runId:string) {
+    if(this.chainSession?.runId!==runId){
+      const chains=readSessionChains(this.options.dataRoot),of=chains.sessionOfRun(runId),summary=of&&chains.session(of.id);
+      if(!of||!summary)return undefined;
+      // context.imported 在 run.started 之前写下；执行段开始前推导的深度可能还不含接续，不缓存。
+      const chain={runId,id:of.id,number:of.number,first:summary.first.number,status:chains.tasks(of.id,{after:of.number-1,limit:1}).items[0]?.status,forkedFrom:summary.forkedFrom,contextRunIds:chains.contextRunIds(runId)};
+      if(this.phase==='running'&&!this.views.get(runId)?.progress.segmentStart)return chain;
+      this.chainSession=chain;
+    }
+    return this.chainSession;
   }
-  /** `tc-…-NN` / `llm #N` of a transcript attempt; the run's ordinals are reread only when an attempt is new to them. */
-  private attemptNumber(runId:string,role:'tool'|'assistant',attempt:string) {
-    const kind=role==='tool'?'tool':'model',key=`${kind}:${runId}:${attempt}`;
-    if(this.runOrdinals?.runId!==runId||!this.runOrdinals[kind].has(attempt)&&!this.displayMisses.has(key)){this.runOrdinals={runId,...readRunOrdinals(this.options.dataRoot,runId)};if(!this.runOrdinals[kind].has(attempt))this.displayMisses.add(key);}
-    const ordinal=this.runOrdinals[kind].get(attempt);
-    return ordinal===undefined?undefined:kind==='tool'?this.indexed('run',runId).toolCall(runId,ordinal):modelRequestNumber(ordinal);
+  /** `s-` number of the derived session a run belongs to. */
+  private sessionOf(runId:string) {const chain=this.chainOf(runId);return chain?this.shown('session',chain.id):'未记录';}
+  private view(runId:string) {let view=this.views.get(runId);if(!view){view=new RunView(this.options.dataRoot,runId);this.views.set(runId,view);}return view;}
+  /** 当前任务的终态：本进程的运行结果，否则取会话链中记录的状态。 */
+  private runStatus():RunStatus|undefined {
+    if(this.result)return this.result.status;
+    const status=this.runId?this.chainOf(this.runId)?.status:undefined;
+    return status==='completed'||status==='failed'||status==='aborted'||status==='unknown'?status:undefined;
   }
-  private statusLine() {
-    const target=this.control.target();
-    const extra=this.phase==='running'?(target?this.shown('run',target.runId):'受理中'):'';
-    const frame=Math.floor(Date.now()/SPINNER_INTERVAL_MS)%SPINNER_FRAMES.length;
-    return statusText(this.phase,this.viewingRecovery,this.result,frame,extra,COLOR_TIER);
+  private headerState():HeaderState {
+    const chain=this.runId?this.chainOf(this.runId):undefined,home=homedir(),workspace=this.options.workspace;
+    const round=this.runId?this.views.get(this.runId)?.progress.round:undefined;
+    return {workspace:safe(workspace.startsWith(`${home}/`)?`~${workspace.slice(home.length)}`:workspace),readOnly:!this.options.coding,
+      session:chain?this.shown('session',chain.id):undefined,run:this.runId?this.shown('run',this.runId):undefined,task:chain?.number,
+      ...(this.phase==='running'?{round:round||undefined}:{status:this.runStatus()})};
+  }
+  private statusParts() {
+    const progress=this.runId?this.views.get(this.runId)?.progress:undefined,start=progress?.segmentStart;
+    // 计时从当前执行段开始（run.started，恢复后为 recovery.started），不计中断时间（T2）。
+    return statusParts({phase:this.phase,recovery:this.viewingRecovery,status:this.runStatus(),activity:this.activity,round:progress?.round??0,retry:progress?.retry??false,
+      elapsedMs:this.phase==='running'&&start?Date.now()-Date.parse(start):undefined,frame:Math.floor(Date.now()/SPINNER_INTERVAL_MS)});
   }
   private prefix() {return estimateTaskPrefix({dataRoot:this.options.dataRoot,workspace:this.options.workspace,coding:!!this.options.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}
   private contextUsage() {return `ctx ${this.context.estimated?'≈':''}${tokenCount(this.context.tokens)} / ${tokenCount(this.context.contextWindow)}`;}
-  private usage() {
-    const cost=this.cost&&this.cost.sessionId===this.sessionId?` · ${this.cost.text}`:'';
-    if(!this.result) return `unknown${cost}`;
-    const usage=this.result.usage;
-    const model=usage.value?.models['deepseek/deepseek-flash'];
-    return `${usage.completeness}${model?` · in ${model.input} out ${model.output}`:''}${cost}`;
-  }
-  /** CNY estimate of every run in the current session (the same scope as the exit summary). Display only. */
-  private updateCost() {
-    if(!this.sessionId||!this.runId)return;
-    const {sessionId,runId}=this,previous=this.cost?.sessionId===sessionId?this.cost:undefined;
-    try{
-      const through=readRunRecords(this.options.dataRoot,runId,{tail:true,limit:1,kinds:['model.response']}).records.at(-1)?.seq??0;
-      if(previous?.through===through)return;
-      const runIds=previous?.runIds.length?previous.runIds:sessionRunIds(this.options.dataRoot,[sessionId]);
-      if(!runIds.includes(runId))runIds.push(runId);
-      this.cost={sessionId,through,runIds,text:formatCostTotals(sumCostEstimates(runIds.flatMap(id=>estimateRunRequests(this.options.dataRoot,id).requests)))};
-    }catch{this.cost={sessionId,through:-1,runIds:[],text:'unknown'};}
+  /**
+   * 底栏用量：运行时为本任务（当前 run），空闲时为本会话（上下文链上各 run 之和）；tok = 输入（含缓存命中）+ 输出。
+   * 每次刷新或状态变化后重算一次；只是显示，读取失败只让金额未知。
+   */
+  private usageText() {
+    const scope=this.phase==='running'?'本任务' as const:'本会话' as const,key=`${scope}:${this.runId}:${this.refreshes}`;
+    if(this.usageMemo?.key!==key){
+      let tokens=0,cost:string;
+      try{
+        const runIds=!this.runId?[]:scope==='本任务'?[this.runId]:this.chainOf(this.runId)?.contextRunIds??[this.runId];
+        const total=sumUsage(runIds.map(id=>this.view(id).usage()));tokens=total.tokens;cost=formatCostTotals(total.totals);
+      }catch{cost='unknown';}
+      this.usageMemo={key,scope,tokens,cost};
+    }
+    return this.usageMemo;
   }
   private input(data:string) {
     const ctrlC=matchesKey(data,'ctrl+c'),ctrlD=matchesKey(data,'ctrl+d');
     if(isKeyRelease(data)||((ctrlC||ctrlD)&&isKeyRepeat(data)))return {consume:true};
     if(!ctrlC&&!ctrlD) this.confirmation=undefined;
-    if(this.hintFeedback){this.hintFeedback=undefined;this.tui.requestRender();}
+    if(this.hintFeedback!==undefined||this.notice){this.hintFeedback=undefined;this.notice='';this.tui.requestRender();}
     if(data==='\x1b[I'||data==='\x1b[O') {this.confirmation=undefined;return {consume:true};}
     if(this.dialog) {this.dialogInput(data);return {consume:true};}
     if(this.panel) {this.panelInput(data);return {consume:true};}
@@ -287,7 +303,8 @@ export class ReadOnlyTui {
     if(matchesKey(data,'ctrl+l')) {if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return {consume:true};}
     if(matchesKey(data,'ctrl+r')) {this.command(parseCommand('/history'));return {consume:true};}
     if(data==='?'&&this.editor.focused&&!this.editor.getExpandedText()) {this.openPanel('help');return {consume:true};}
-    if(matchesKey(data,'ctrl+o')) {this.openDetail(this.records.at(-1));return {consume:true};}
+    // Ctrl+O 展开或折叠全部工具行（T1、#41）；单行由点击切换。
+    if(matchesKey(data,'ctrl+o')) {this.expandAll=!this.expandAll;this.toggled.clear();this.tui.requestRender();return {consume:true};}
     if(matchesKey(data,'ctrl+x')) {this.followChord=this.editor.focused;this.feedback('按 Enter 明确排到下一任务；普通 Enter 默认补充当前任务');return {consume:true};}
     if(matchesKey(data,'escape')) {if(this.phase==='running')this.stop();return {consume:true};}
     if(ctrlC||ctrlD) {
@@ -328,8 +345,8 @@ export class ReadOnlyTui {
     const contextRunId=this.result?.status==='completed'&&this.result.improve?.runId!==this.result.runId&&this.result.cleanup==='confirmed'?this.result.runId:undefined;
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
     if(!contextRunId)this.context=this.prefix();
-    this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.summaries.clear();this.historyWindow=false;this.scroll.scrollToEnd();
-    this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.notice='任务正在受理；忙时 Enter 补充当前任务，Ctrl+X → Enter 后续请求';this.rebuild();
+    this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.toggled.clear();this.events=[];this.historyWindow=false;this.scroll.scrollToEnd();
+    this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.rebuild();
     const self=this;
     const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}};
     const run=this.options.coding?runCodingTask:runReadTask;
@@ -418,14 +435,14 @@ export class ReadOnlyTui {
     if(this.phase!=='idle'||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前仍在清理或结果未知；尚未启动分析，先完成恢复核对';this.tui.requestRender();return;}
     if(!this.runId){this.notice='尚无活动任务；先完成一项工作再针对其证据分析';this.tui.requestRender();return;}
     const targetRunId=this.result?.improve?.runId===this.runId?this.result.improve.target.runId:this.runId;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
-    this.notice=`improve 分析中 · 目标 ${this.shown('run',targetRunId)}；默认不选中任何候选`;
-    this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);this.notice=`improve ${result.improve?.state??result.status} · ${this.shown('improve-report',request.id)}；/improves 查看；没有执行候选`;}).catch(error=>{this.notice=`分析未完成：${String(error)}`;}).finally(()=>this.finished());this.tui.requestRender();
+    this.activity={kind:'improve-analysis',report:this.shown('improve-report',request.id)};
+    this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);const state=result.improve?.state??result.status;this.event(`${state==='complete'?'✓':'✗'} improve ${this.shown('improve-report',request.id)} 分析${state==='complete'?'完成':`未完成 · ${state}`} · /improves 查看；没有执行候选`);}).catch(error=>{this.event(`✗ improve 分析未完成 · ${safe(String(error))}`);}).finally(()=>this.finished());this.tui.requestRender();
   }
   private async submitImproveChoice(decision:ImproveDecision){
     if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery)throw Error('IMPROVE_SELECTION_CURRENT_STATE_BLOCKED');
-    this.phase='running';this.controller=new AbortController();this.cancellation='exit';
+    this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.activity={kind:'improve-execution',report:this.shown('improve-report',decision.reportId)};
     const promise=submitImproveDecision({dataRoot:this.options.dataRoot,decision,signal:this.controller.signal});
-    this.active=promise.then(value=>{this.notice=`决定 ${value.id} · ${value.state}；具体写回/启用见结果`}).catch(error=>{this.notice=`决定未完成：${String(error)}`;}).finally(()=>{const notice=this.notice;this.finished();this.notice=notice;this.tui.requestRender();});
+    this.active=promise.then(value=>{this.event(`${value.state==='completed'?'✓':'✗'} 决定 ${value.id} · ${value.state}；具体写回/启用见结果`);}).catch(error=>{this.event(`✗ 决定未完成：${safe(String(error))}`);}).finally(()=>this.finished());
     return promise;
   }
   private async compact() {
@@ -451,11 +468,13 @@ export class ReadOnlyTui {
   private applyResult(result:RunResult) {
     this.result=result;this.sessionId=result.sessionId;this.runId=result.runId;
     this.viewingRecovery=result.status==='unknown'||result.cleanup==='unknown';
-    this.updateCost();
-    this.notice=(result.controls?'队列已冻结；/queue 查看目标与原因，普通输入不会接入旧项':result.improve?`improve ${result.improve.state} · ${this.shown('improve-report',result.improve.id)}；/improves 查看；没有执行候选`:result.cleanup==='confirmed'?`清理已确认；run ${this.shown('run',result.runId)}`:'清理未知；原工作保留，/recover 核对')+(this.cost?.sessionId===result.sessionId?` · 费用 ${this.cost.text}`:'');
+    // 终态在状态行与头部；这里只留需要处理的事。
+    this.notice=result.controls?'队列已冻结；/queue 查看目标与原因，普通输入不会接入旧项':result.cleanup!=='confirmed'?'清理未知；原工作保留，/recover 核对':'';
   }
+  /** 后台完成事件：在主区末尾插一行。 */
+  private event(text:string) {this.events.push(text);this.rebuild();}
   private finished() {
-    this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting')this.phase='idle';this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
+    this.activity=undefined;this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting')this.phase='idle';this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
   }
   private enqueue(text:string,kind:'steer'|'follow-up'|'compact'|'improve') {
     const target=this.control.target();
@@ -536,7 +555,7 @@ export class ReadOnlyTui {
     this.loadQueue();
     if(!this.runId||this.stopped)return;
     try {
-      const current=readRunRecords(this.options.dataRoot,this.runId,{tail:true,limit:24,kinds:visibleKinds});
+      const current=readRunRecords(this.options.dataRoot,this.runId,{tail:true,limit:WINDOW,kinds:VISIBLE_KINDS});
       // Read only bounded small identity/result records; authoritative RunResult arrives from runtime.
       const identityRecords=readRunRecords(this.options.dataRoot,this.runId,{limit:8}).records;
       let contextWindow:number|undefined;
@@ -547,7 +566,7 @@ export class ReadOnlyTui {
         }
         if(record.kind==='execution.config') {
           const bytes=readObjectRange(this.options.dataRoot,record.ref,{limit:16384});
-          if(bytes.next===null) {const data=JSON.parse(bytes.bytes.toString());this.model=`${data.model.provider} / ${data.model.id}${data.mode==='offline'?' · offline fixture':''}`;contextWindow=data.model.contextWindow;}
+          if(bytes.next===null) {const data=JSON.parse(bytes.bytes.toString());this.model=`${data.model.id}${data.mode==='offline'?' · offline':''}`;contextWindow=data.model.contextWindow;}
         }
       }
       if(this.phase==='idle'&&this.context.runId!==this.runId) {
@@ -555,96 +574,49 @@ export class ReadOnlyTui {
         const reported=readRunRecords(this.options.dataRoot,this.runId,{tail:true,limit:8,kinds:['model.response']}).records.map(record=>JSON.parse(readObject(this.options.dataRoot,record.ref).toString())).findLast(data=>data.usage==='reported'&&calculateContextTokens(data.message.usage)>0);
         this.context=reported?{runId:this.runId,tokens:calculateContextTokens(reported.message.usage),estimated:true,contextWindow:contextWindow??this.context.contextWindow}:{...this.prefix(),runId:this.runId};
       }
-      this.updateCost();
+      this.view(this.runId).updateProgress();this.refreshes++;
+      // 上滚或打开视图时保留阅读位置；“↓ 回到底部”提示由滚动区给出。
       if(!this.historyWindow&&this.scroll.isFollowingEnd&&!this.panel) {this.records=current.records;this.rebuild();}
-      else this.notice='新事实已持久保存；当前阅读位置保留。/bottom 回到最新';
       this.tui.requestRender();
     } catch(error) {this.notice=`原文不可取得：${safe(String(error))}；执行结果不会由显示猜测`;this.tui.requestRender();}
   }
-  private projectConversation() {
-    type Entry={ref:RecordReference;role:'user'|'assistant'|'tool'|'notice';title:string;text:string;attempt?:string;limited?:boolean};
-    const entries:Entry[]=[];
-    const decoded=new Map<number,{value?:any;error?:string}>();
-    for(const ref of this.records) {
-      try {
-        const page=readObjectRange(this.options.dataRoot,ref.ref,{limit:4096});
-        decoded.set(ref.seq,page.next===null?{value:JSON.parse(page.bytes.toString())}:{});
-      }catch(error){decoded.set(ref.seq,{error:String(error)});}
-    }
-    const summaries=new Map<number,any>();
-    for(const ref of this.records) {const value=decoded.get(ref.seq)?.value;if(ref.kind==='tool.summary'&&value?.resultSeq)summaries.set(value.resultSeq,value);}
-    const tool=(ref:RecordReference,value:any)=>{
-      const attempt=value?.attemptId;
-      let entry=entries.find(row=>row.role==='tool'&&attempt&&row.attempt===attempt);
-      if(!entry){entry={ref,role:'tool',title:'读取',text:'',attempt};entries.push(entry);}
-      entry.ref=ref;return entry;
-    };
-    const assistant=(ref:RecordReference,value:any)=>{
-      const attempt=value?.attemptId;
-      let entry=entries.find(row=>row.role==='assistant'&&attempt&&row.attempt===attempt);
-      if(!entry){entry={ref,role:'assistant',title:'助手（当前窗口）',text:'',attempt};entries.push(entry);}
-      entry.ref=ref;return entry;
-    };
-    const toolState=(entry:Entry,value:any)=>{
-      const truncated=value.truncation?.truncated||value.diagnostics?.some((d:{code?:string})=>d.code==='truncated');
-      entry.title=`${value.tool&&value.tool!=='read'?value.tool:'读取'} · ${value.isError===true?'失败':value.isError===false?'已返回':'状态未知'}${truncated?' · 源输出截断':''}`;
-      const diagnostics=(value.diagnostics??[]).map((d:{message?:string})=>d.message??'').join('\n');
-      entry.text=[entry.text,diagnostics].filter(Boolean).join('\n').slice(0,500);
-      if(value.diagnosticsOmitted)entry.text+='\n[更多诊断见详情]';
-    };
-    for(const ref of this.records) {
-      const data=decoded.get(ref.seq)!,value=data.value;
-      if(data.error){entries.push({ref,role:'notice',title:'原文暂不可取得',text:safe(data.error)});continue;}
-      if(ref.kind==='task.accepted')entries.push({ref,role:'user',title:'你',text:value?.input??'已受理的长请求（内容见详情）'});
-      else if(ref.kind==='tool.intent'){
-        const entry=tool(ref,value);entry.title=`${value?.tool&&value.tool!=='read'?value.tool:'读取'} · 进行中`;entry.text=typeof value?.args?.path==='string'?value.args.path:value?.args?.command??'项目文件';
-      } else if(ref.kind==='tool.result'){
-        if(summaries.has(ref.seq))continue;
-        const entry=tool(ref,value);entry.title='读取 · 结果已保存';
-        if(value?.result){const text=value.result.content?.filter((item:{type?:string})=>item.type==='text').map((item:{text:string})=>item.text).join('\n')??'';entry.text=text.slice(0,180);entry.limited=text.length>180;toolState(entry,{isError:typeof value.result.isError==='boolean'?value.result.isError:null,diagnostics:value.result.diagnostics,truncation:value.result.details?.truncation});}
-        else entry.text='输出较长；状态摘要暂不可取得，查看详情核对。';
-      } else if(ref.kind==='tool.summary'){
-        if(!value){entries.push({ref,role:'tool',title:'读取 · 状态未知',text:'摘要不可取得；查看原文。'});continue;}
-        const entry=tool(ref,value);toolState(entry,value);
-        if(value.resultSeq)entry.ref=this.records.find(record=>record.seq===value.resultSeq)??readRunRecords(this.options.dataRoot,this.runId!,{after:value.resultSeq-1,limit:1}).records.find(record=>record.seq===value.resultSeq)??ref;
-        if(!entry.text)entry.text='输出已保存；点击或 Ctrl+O 查看详情。';
-      } else if(ref.kind==='tool.error'){
-        const entry=tool(ref,value);entry.title='读取 · 失败';entry.text=value?.error??'错误详情不可取得';
-      } else if(ref.kind==='model.provider-event'){
-        const text=value?.event?.choices?.map((choice:{delta?:{content?:string}})=>choice.delta?.content??'').join('')??'';
-        if(text&&value.purpose!=='compaction'){const entry=assistant(ref,value);const combined=entry.text+text;entry.limited=entry.limited||combined.length>4000;entry.text=combined.slice(-4000);}
-        // A large event is kept as a reference; it is never printed as transport JSON.
-      } else if(ref.kind==='model.response'){
-        const text=value?.message?.content?.filter((item:{type?:string})=>item.type==='text').map((item:{text:string})=>item.text).join('\n');
-        if(text&&value.purpose==='compaction'){entries.push({ref,role:'notice',title:'压缩摘要（生成记录；接入见 /compactions）',text:text.slice(0,800),limited:text.length>800});continue;}
-        if(text){const entry=assistant(ref,value);entry.text=text.slice(0,4000);entry.limited=text.length>4000;entry.title=value.completeness==='partial'?'助手（未完成的响应）':'助手';}
-      } else if(ref.kind==='compaction.generated'||ref.kind==='compaction.finished')entries.push({ref,role:'notice',title:ref.kind==='compaction.generated'?'压缩摘要已生成':`上下文压缩 ${value?.state??'未知'}`,text:'原文保留；/compactions 查看覆盖范围、摘要与接入事实'});
-      else if(ref.kind==='run.abort-intent'&&!this.result)entries.push({ref,role:'notice',title:'正在中止',text:'等待 runtime 确认清理；当前未接入草稿不会执行。'});
-      else if(ref.kind==='run.exit-intent'&&!this.result)entries.push({ref,role:'notice',title:'正在退出',text:'等待执行清理和存储关闭。'});
-    }
-    if(this.result?.answer&&!this.historyWindow) {
-      const ref=this.records.findLast(record=>record.kind==='run.closed')??this.records.at(-1);
-      if(ref){const entry:Entry=entries.findLast(row=>row.role==='assistant')??{ref,role:'assistant',title:'助手',text:''};if(!entries.includes(entry))entries.push(entry);entry.ref=ref;entry.title='助手';entry.text=this.result.answer.slice(0,4000);entry.limited=this.result.answer.length>4000;}
-    }
-    return entries;
-  }
+  /** 主区（U2）：前序任务行、当前任务的窗口投影、后台事件行；工具行按渲染时的展开态与时钟绘制。 */
   private rebuild() {
-    this.transcript.clear();this.summaries.clear();
+    this.transcript.clear();
     this.displaySources=[];
+    const block=(render:(width:number)=>string[],click?:()=>void)=>this.transcript.addChild(new MouseRegion({invalidate(){},render},event=>{
+      if(event.type==='press'||event.type==='drag')this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
+      if(event.type==='click'&&click){click();this.tui.requestRender();return {handled:true};}
+      return undefined;
+    }));
+    const chain=this.runId?this.chainOf(this.runId):undefined;
+    const preceding=chain&&precedingText({session:this.shown('session',chain.id),preceding:chain.number-chain.first,forkedFrom:chain.forkedFrom?{session:this.shown('session',chain.forkedFrom.sessionId),number:chain.forkedFrom.number}:undefined});
+    if(preceding){this.displaySources.push(preceding.text);block(width=>plainLines(preceding.text,width,'fg.faint'),()=>this.command(parseCommand(preceding.command)));}
     if(!this.records.length) {
       const text=`在输入区发起一个${this.options.coding?'coding':'只读'}项目请求。\n${this.options.mode==='offline'?'offline-demo：真实 runtime + 固定传输；没有模型推理。':'DeepSeek 凭据从环境读取；没有自动 fallback。'}\nCtrl+J / Shift+Enter / 反斜杠后 Enter 换行。\n忙时 Enter 补充当前任务；Ctrl+X → Enter 后续请求。\n/queue 队列；/recover 恢复；拖选复制。`;
-      this.displaySources.push(text);this.transcript.addChild(new Text(text,0,0));
+      this.displaySources.push(text);block(width=>plainLines(text,width,'fg.muted'));
     }
-    if(this.records.length&&this.records[0].kind!=='task.accepted')this.transcript.addChild(new Text('当前内容窗口 · /older 查看更早内容\n',0,0));
-    for(const entry of this.projectConversation()) {
-      const clipped=entry.limited||(entry.role!=='assistant'&&entry.text.length>500);
-      const text=safe(entry.role==='assistant'?entry.text:entry.text.slice(0,500));
-      const number=entry.attempt&&(entry.role==='tool'||entry.role==='assistant')?this.attemptNumber(this.runId!,entry.role,entry.attempt):undefined;
-      const summary=`${number?`${number} · `:''}${entry.title}\n${text}${clipped?'… [显示截断，详情可继续阅读]':''}\n`;
-      this.displaySources.push(summary);
-      this.summaries.set(entry.ref.seq,summary);this.latestText=text;
-      this.transcript.addChild(new MouseRegion(new Text(summary,0,0),event=>{if(event.type==='press'||event.type==='drag')this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});if(event.type==='click'){this.openDetail(entry.ref);return {handled:true};}}));
+    if(this.records.length&&this.records[0].kind!=='task.accepted')block(width=>plainLines('当前内容窗口 · /older 查看更早内容',width,'fg.faint'));
+    const entries=this.runId?this.view(this.runId).project(this.records,{active:this.phase!=='idle',answer:this.result?.answer&&!this.historyWindow?this.result.answer:undefined}):[];
+    let previous:string|undefined;
+    for(const entry of entries) {
+      // 区块之间空一行；相邻工具行连成一组。
+      if(previous&&!(previous==='tool'&&entry.kind==='tool'))block(width=>[styledLine([],width)]);
+      previous=entry.kind;
+      if(entry.kind==='user'){const text=safe(entry.text);this.displaySources.push(text);block(width=>userLines(text,width,entry.steer));}
+      else if(entry.kind==='assistant'){const text=safe(entry.text)+(entry.limited?' … [显示截断，/details 继续阅读]':'');this.latestText=text;this.displaySources.push(text);block(width=>assistantLines(text,width));}
+      else if(entry.kind==='notice'){const text=`${entry.title}\n${safe(entry.text)}`;this.displaySources.push(text);block(width=>plainLines(text,width,'fg.muted'));}
+      else {
+        const id=entry.attemptId,expanded=()=>this.expandAll!==this.toggled.has(id),frame=()=>Math.floor(Date.now()/SPINNER_INTERVAL_MS);
+        entry.args=safe(entry.args);if(entry.output)entry.output.lines=entry.output.lines.map(safe);if(entry.diff)entry.diff=entry.diff.map(safe);
+        this.displaySources.push(`${entry.tool} ${entry.args} ${entry.summary}`,...(entry.output?.lines??[]),...(entry.diff??[]));
+        const lines=(width:number)=>toolLines(entry,width,expanded(),Date.now(),frame());
+        block(width=>{const tool=lines(width);return [tool.row,...tool.body];},()=>{if(!this.toggled.delete(id))this.toggled.add(id);});
+        // “分页查看”进入原文（2a 原文层改版前为首版详情）。
+        block(width=>{const paging=lines(width).paging;return paging?[paging]:[];},()=>this.openDetail(entry.detail));
+      }
     }
+    for(const text of this.events){this.displaySources.push(text);block(width=>[styledLine([],width),...plainLines(safe(text),width,'fg.label')]);}
     this.widths?.inspect(this.displaySources);
     this.tui.requestRender();
   }
@@ -654,7 +626,7 @@ export class ReadOnlyTui {
   private window(direction:'older'|'newer') {
     if(!this.runId)return;
     this.historyWindow=true;
-    const page=readRunRecords(this.options.dataRoot,this.runId,direction==='older'?{before:this.records[0]?.seq,limit:24,kinds:visibleKinds}:{after:this.records.at(-1)?.seq,limit:24,kinds:visibleKinds});
+    const page=readRunRecords(this.options.dataRoot,this.runId,direction==='older'?{before:this.records[0]?.seq,limit:WINDOW,kinds:VISIBLE_KINDS}:{after:this.records.at(-1)?.seq,limit:WINDOW,kinds:VISIBLE_KINDS});
     if(!page.records.length){this.notice='已到记录边界（只读历史）；/bottom 返回活动会话';this.tui.requestRender();return;}
     this.historyWindow=true;this.records=page.records;this.rebuild();this.scroll.scrollTo(0,{disableFollow:true});this.notice='只读历史窗口；/older /newer 翻页，/bottom 跟随最新';
   }
@@ -702,7 +674,7 @@ export class ReadOnlyTui {
   private sessionHints():string[] {
     if(this.phase==='stopping'||this.phase==='exiting')return [];
     if(this.viewingRecovery)return ['/recover 打开核对','Ctrl+C 退出（保留可恢复工作）'];
-    if(this.phase==='running')return ['Enter steer','Ctrl+X Enter follow-up','Ctrl+C 中止','Ctrl+O 详情'];
+    if(this.phase==='running')return ['Enter steer','Ctrl+X Enter follow-up','Ctrl+C 中止','Ctrl+O 展开'];
     return ['Enter 提交','/ 命令','Ctrl+R 历史','? 帮助'];
   }
   /** 输入为空时的占位文案（#42 第 4 节）。 */
