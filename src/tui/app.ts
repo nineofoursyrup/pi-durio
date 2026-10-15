@@ -357,7 +357,7 @@ export class ReadOnlyTui {
       try{this.evalView=new EvalView(root,id);this.openPanel('eval');}catch(error){fail('Eval记录不可读取：',error);}
       break;
     }
-    case 'storage':this.storageView=new StorageView(root,()=>this.tui.requestRender());this.openPanel('storage');break;
+    case 'storage':this.storageView=new StorageView(root,{changed:()=>this.tui.requestRender(),busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,confirm)=>this.openConfirm(config,()=>void confirm())});this.openPanel('storage');break;
     case 'history':{
       const filter:HistoryFilter={};
       if(positional[0]!==undefined){
@@ -732,7 +732,7 @@ export class ReadOnlyTui {
     this.confirmation=undefined;
     // 全屏视图层的全局键（T6）：Esc 返回上一层；Ctrl+C 只停本视图的操作，不传给会话屏；Ctrl+D/O/T/R、? 不起作用。
     const key=viewKey(data);
-    if(key==='back') {if(panel.kind==='storage'&&this.storageView?.inProgress)return;if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
+    if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
     if(key==='redraw'){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
     if(key==='stop'){if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
     if(key==='inert')return;
