@@ -71,7 +71,7 @@
    0-131 -/-
 35|                                                                                                                                    |
    0-131 -/-
-36| ❯ /stats --from 09-16 --to 10-16                                                                                                   |
+36| ❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                      |
    0-2 ac.brand/bg.base ; 3-131 fg.body/bg.base
 37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                                                                                                         |
    0-121 fg.label/bg.base ; 122-131 -/-

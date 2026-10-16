@@ -69,7 +69,7 @@
    0-131 -/-
 34|                                                                                                                                    |
    0-131 -/-
-35| ❯ /stats --from 09-16 --to 10-16                                                                                                   |
+35| ❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                      |
    0-2 ac.brand/bg.base ; 3-131 fg.body/bg.base
 36| 零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈旧不写成「没有发生」                                                                                  |
    0-108 fg.label/bg.base ; 109-131 -/-

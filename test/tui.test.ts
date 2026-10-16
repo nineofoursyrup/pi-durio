@@ -112,8 +112,21 @@ test('viewport/focus changes invalidate confirmations, and explicit /exit preser
     key('\x1b');key('/restore');key('\r');assert.match(f.screen(),/需要保留的草稿/);
     key('\x03');key('/exit');key('\r');key('\r');
     const result=await f.app.closed; assert.equal(result.draftSaved,true);
+    assert.match(result.summary.join('\n'),/草稿已保存 · 1 行 · 下次 \/restore 恢复/);
+    assert.doesNotMatch(result.summary[0],/会话/);
     assert.equal(f.transport.calls.length,0);
   } finally {await f.app.exit();}
+});
+
+test('exit reports a terminal restore failure without losing the saved draft or hanging closure', async () => {
+  const f=fixture();
+  f.terminal.input('保留的草稿');
+  f.terminal.stop=()=>{throw Error('fixture terminal stop failed');};
+  const closed=await f.app.exit();
+  assert.equal(closed.draftSaved,true);
+  assert.match(closed.error!,/terminal stop failed/);
+  assert.match(closed.summary.join('\n'),/终端恢复未确认 · 请运行 reset/);
+  assert.doesNotMatch(closed.summary.join('\n'),/终端已恢复/);
 });
 
 test('in-flight stop waits for actual stream cancellation; repeated keys and modal Esc do not grant exit', async () => {
@@ -170,6 +183,9 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     key('\x03'); key('\x03'); const closed=await f.app.closed;
     assert.equal(closed.result?.status,'completed'); assert.equal(closed.result?.cleanup,'confirmed');
     assert.match(exitCostSummary(join(f.root,'data'),closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01（估算 · 非账单）$/);
+    assert.ok(f.terminal.stopped);
+    assert.match(closed.summary.join('\n'),/◆ pi-durio 已退出[\s\S]*✓ 任务 1 完成[\s\S]*◇ 写入者锁已释放 · storage 已关闭 · 终端已恢复/);
+    assert.doesNotMatch(closed.summary.join('\n'),/Read back:|"tui"|[\x1b\x07]/);
     // Without a live runtime the latest reported total stands in, marked as an estimate.
     const terminal=new TestTerminal(),viewer=new ReadOnlyTui({workspace:f.workspace,dataRoot:join(f.root,'data'),runId,draftRoot:join(f.root,'drafts'),mode:'offline',transport:f.transport.fetch,terminal,widthCalibration:false});viewer.start();
     // Opening a run starts its recovery check; a completed run needs no panel.
@@ -200,8 +216,8 @@ test('usage line and exit summary show CNY estimates with unknown and partial re
     // The idle footer sums the session's chain; the new run lacks a cache-hit count, so the sum is partial.
     assert.match(f.screen(),/ · 本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown partial\s*\n/);
     key('\x03');key('\x03');const closed=await f.app.closed;
-    assert.match(exitCostSummary(dataRoot,closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01 partial（估算 · 非账单）$/);
-    assert.match(exitCostSummary(dataRoot,{...closed.result!,sessionId:first.sessionId}),/费用 ≈ ¥(10|5)\.00 \+1 unknown（估算 · 非账单）$/);
+    assert.match(exitCostSummary(dataRoot,closed.result!),new RegExp(`^本次会话 ${readDisplayIndex(dataRoot).label('session',first.sessionId)} 费用 ≈ ¥(10|5)\\.00 \\+1 unknown partial（估算 · 非账单）$`));
+    assert.match(closed.summary.join('\n'),/本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown partial（估算 · 非账单）/);
   } finally { await f.app.exit(); }
 });
 
@@ -408,6 +424,28 @@ test('improve confirmed while a task runs is queued independently, never a steer
   const chains=readSessionChains(data),busy=readAcceptedTasks(data).tasks.find(t=>t.input==='Busy task')!.runId!,next=readAcceptedTasks(data).tasks.find(t=>t.input==='Continue it')!.runId!;
   assert.equal(chains.sessionOfRun(next)?.id,chains.sessionOfRun(busy)?.id);
  }finally{await f.app.exit();}
+});
+
+test('exit keeps the successful main task separate from unconfirmed cleanup of its queued improve analysis',async()=>{
+ const coding=scriptedTransport([{name:'bash',args:{command:`'${process.execPath}' hold.cjs`}}]);
+ let analysisStarted=false,releaseAnalysis:((response:Response)=>void)|undefined;
+ const transport:typeof fetch=async(url,init)=>JSON.parse(String(init?.body)).tools.some((t:any)=>t.function.name==='evidence_summary')?new Promise<Response>(resolve=>{releaseAnalysis=resolve;analysisStarted=true;}):coding.fetch(url,init);
+ const f=fixture(transport,true),key=(text:string)=>f.terminal.input(text),data=join(f.root,'data');
+ f.terminal.columns=132;
+ writeFileSync(join(f.workspace,'hold.cjs'),"require('node:fs').writeFileSync('started.txt','started');setInterval(()=>{if(require('node:fs').existsSync('release'))process.exit(0);},20);");
+ try{
+  key('Successful main task');key('\r');await until(()=>existsSync(join(f.workspace,'started.txt')));
+  key('/improve new --scope session --focus "look at bash"');key('\r');key('\r');await until(()=>readQueue(data).items.length===1);
+  writeFileSync(join(f.workspace,'release'),'');await until(()=>analysisStarted);
+  const closed=await f.app.exit();
+  assert.equal(closed.result?.status,'completed');assert.equal(closed.result?.cleanup,'confirmed');
+  assert.equal(closed.cleanupResult?.cleanup,'unknown');
+  assert.notEqual(closed.cleanupResult?.runId,closed.result?.runId);
+  const lines=closed.summary.join('\n');
+  assert.match(lines,/任务 1 完成 · Successful main task/);assert.match(lines,/清理未确认 · 写入者锁保留/);
+  assert.match(lines,new RegExp(`pi-durio resume ${readDisplayIndex(data).label('session',closed.cleanupResult!.sessionId)} 核对`));
+  assert.doesNotMatch(lines,/写入者锁已释放|^继续 /m);
+ }finally{await f.app.exit();releaseAnalysis?.(new Response('data: [DONE]\n\n',{headers:{'content-type':'text/event-stream'}}));}
 });
 
 test('several unknowns are resolved one by one and submitted once; paged facts are all collected', async () => {
