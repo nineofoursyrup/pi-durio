@@ -1,5 +1,7 @@
 # 本机试用：技术验收完成，日用接受待确认
 
+本页保留首版固定候选的历史入口与当时事实。当前改版源码已删除 `tui` 子命令，试用请使用[当前试用说明](../../../usage/TRIAL.md)；不要把新命令套到下面的旧安装路径。
+
 #11–#31 的技术范围已由协调接受；[#32](https://github.com/nineofoursyrup/pi-durio/issues/32) 留给你在自己的 Mac 实际使用后决定。当前可用产品是 `f26ae8f4b8039608a1fa796e1c69da4d8173d112`，已独立安装，无需重新安装。后续文档提交不改变这份已验证的可执行候选。
 
 [技术接受结论](../issue-31/TECHNICAL-ACCEPTANCE.md)与[独立 Standards / Spec PASS](../review/final-technical-f26ae8f/review.md)是当前状态；原[技术报告](../issue-31/final-f26ae8f/REPORT.md)内的“待独立审查”保留其生成时事实。[91 行证据索引](../issue-31/final-f26ae8f/contract-evidence-index.md)提供完整合同、ACC 与 MET 的适用证据，行数不表示独立测试次数。

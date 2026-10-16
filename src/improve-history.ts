@@ -84,3 +84,18 @@ export function readImproveDecision(root:string,id:string){
   facts:related.map(f=>({sourceId:f.sourceId,kind:f.kind,runId:f.runId,state:f.data.state??null,reason:f.data.reason??null})),
   reserved:related.filter(f=>f.kind==='improve.group-started').reduce((n,f)=>({checks:n.checks+f.data.reserved.checks,requests:n.requests+f.data.reserved.requests,tokens:n.tokens+f.data.reserved.tokens}),{checks:0,requests:0,tokens:0})};
 }
+
+/** The latest explicit choice is authoritative. A successful validation has one
+ * narrow follow-up: execute the same candidate, with a fresh validation budget. */
+export function improveCandidateDecisions(root:string,reportId:string) {
+ const result=new Map<string,{decisionId:string;mode:string;state:string;canExecute:boolean}>();
+ for(const fact of improveFacts(root).filter(f=>f.kind==='improve.decision'&&f.data.decision.reportId===reportId)) {
+  const state=readImproveDecision(root,fact.data.id);
+  for(const selection of fact.data.decision.selections??fact.data.decisions??[]) {
+   const group=state.groups.find((g:any)=>g.candidateIds.includes(selection.candidateId));
+   result.set(selection.candidateId,{decisionId:fact.data.id,mode:selection.mode,state:group?.state??state.state,
+    canExecute:selection.mode==='validate-only'&&group?.state==='completed'&&group.result?.conclusion?.allChecksPassed===true&&group.result?.conclusion?.allRequiredBenefitsMet===true});
+  }
+ }
+ return result;
+}

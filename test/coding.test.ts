@@ -8,6 +8,7 @@ import { setTimeout } from 'node:timers/promises';
 import { renameSync, writeFileSync, unlinkSync, existsSync } from 'node:fs';
 import { runCodingTask, runReadTask, readRun } from '../src/runtime.js';
 import { scriptedTransport as script } from '../src/offline.js';
+import { exitSummary } from '../src/tui/exit-summary.js';
 
 async function fixture() {
   const root = await mkdtemp(join(tmpdir(), 'durio-coding-'));
@@ -44,6 +45,9 @@ test('public runtime repairs a real project with read/edit/write/bash and preser
   const summaries = page.records.filter(r => r.kind === 'tool.summary').map(r => r.data as any);
   assert.equal(summaries.length, 4);
   assert.ok(summaries.every(s => s.isError === false && page.records.some(r => r.seq === s.resultSeq && r.kind === 'tool.result')));
+  const exit = await exitSummary(paths.dataRoot, { workspace: paths.workspace, runId: result.runId, cleanup: result, elapsedMs: 0, draftLines: 0, terminalRestored: true }, 200);
+  assert.match(exit[1], /2 文件 \+2 −1$/);
+  assert.doesNotMatch(exit.join('\n'), /sum check passed|检查.*通过/);
 });
 
 test('original output failure and cancellation stop a real in-flight producer without rerunning side effects', async () => {

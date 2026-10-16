@@ -70,11 +70,11 @@ test('default scope: 30 whole local days [today-29, tomorrow), current workspace
   assert.equal(r.scope.asOf, NOW.toISOString());
   assert.equal(r.scope.project, '/Users/me/code/shop-api');
   assert.equal(r.scope.source, 'ordinary');
-  assert.equal(r.command, '/stats --from 09-16 --to 10-16');
+  assert.equal(r.command, '/stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api');
   const all = request({ project: 'all', source: 'synthetic', from: new Date(2026, 9, 1).toISOString() });
   assert.equal(all.scope.project, undefined);
   assert.equal(all.scope.to, new Date(2026, 9, 31).toISOString());
-  assert.equal(all.command, '/stats --from 10-01 --to 10-31 --project all --source synthetic');
+  assert.equal(all.command, '/stats --from 2026-10-01 --to 2026-10-31 --as-of 2026-10-15T06:05:00.000Z --project all --source synthetic');
   assert.throws(() => request({ 'as-of': 'soon' }), CommandError);
   assert.throws(() => request({ snapshot: '1.5' }), CommandError);
 });
@@ -164,7 +164,7 @@ test('132x38 golden with the six oracle examples', () => {
   const lines = view().render(132, 38, 'truecolor');
   assert.equal(lines.length, 38);
   const screen = text(lines);
-  for (const fragment of ['指标 · 本机实测', '◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api · f26ae8f · 样本 10（筛除 3）', '只读 · 不调用模型 · 不重记费用', '期间开销（去重）· 请求发生于 [09-16, 10-16)', '❯ /stats --from 09-16 --to 10-16', '零分母显示 N/A', 'Esc 返回会话'])
+  for (const fragment of ['指标 · 本机实测', '◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api · f26ae8f · 样本 10（筛除 3）', '只读 · 不调用模型 · 不重记费用', '期间开销（去重）· 请求发生于 [09-16, 10-16)', '❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api', '零分母显示 N/A', 'Esc 返回会话'])
     assert.ok(screen.includes(fragment), fragment);
   assertGolden(captureSnapshot(lines, 132, 38, 'truecolor'), 'stats-1e-132x38');
 });

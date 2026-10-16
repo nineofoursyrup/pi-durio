@@ -1,6 +1,8 @@
 import {ImproveView} from './improve.js';
-import {ImproveSelectionView} from './improve-selection.js';
-import {submitImproveDecision,resumeImproveDecision,restoreImproveSuggestion,rollbackImproveDecision,type ImproveDecision} from '../improve-decisions.js';
+import {ImproveSelectionView,improveSelectionPrefill,improveChoiceError,type ImprovePrefill} from './improve-selection.js';
+import {resumeImproveDecision,restoreImproveSuggestion,rollbackImproveDecision,type ImproveDecision} from '../improve-decisions.js';
+import {ImproveBatchController} from '../improve-batch.js';
+import {improveReportContract} from '../improve-contract.js';
 import type {ImproveRequest} from '../improve.js';
 import {ImproveHome,type HomeItem} from './improve-home.js';
 import {ImproveLaunchDialog,type LaunchPrefill} from './improve-launch.js';
@@ -17,7 +19,9 @@ import { readObject, type QueueItemFact } from '../evidence.js';
 import { calculateContextTokens } from '@earendil-works/pi-ai/utils/estimate';
 import { readRunRecords, readObjectRange, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
-import { StatsView, readStats, statsRequest } from './stats.js';
+import { statsRequest } from './stats.js';
+import { StatsBrowser } from './stats-browser.js';
+import { statsChoices } from './stats-filter.js';
 import { recordAcceptance } from '../metrics/index.js';
 import type { HistoryFilter } from '../history.js';
 import { HistoryView } from './history.js';
@@ -32,7 +36,9 @@ import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
 import { readDisplayIndex, resolveDisplayInput, isUserChosenId, type DisplayIndex, type DisplayKind } from '../display-number.js';
 import { readSessionChains } from '../session-chain.js';
-import { estimateSessionRequests, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
+import { formatCostTotals } from '../cost-estimate.js';
+import { exitSummary, ProcessCleanupReceipts, type EvalExitFact } from './exit-summary.js';
+export { exitCostSummary } from './exit-summary.js';
 import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageLine, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
@@ -68,8 +74,10 @@ export interface TuiOptions {
   terminal?:Terminal; draftRoot?:string; copy?:(text:string)=>Promise<boolean|string>;
   /** Only deterministic injected-terminal tests may skip native measurement. */
   widthCalibration?:false;
+  /** Host-prepared Linux eval runtime; default dataRoot/eval-runtime. No implicit install. */
+  improveRuntime?:string;
 }
-export interface TuiExit { result?:RunResult; error?:string; draftSaved:boolean; widthCalibration?:ReturnType<TerminalWidthGate['snapshot']>; }
+export interface TuiExit { result?:RunResult; cleanupResult?:RunResult; error?:string; draftSaved:boolean; summary:string[]; eval?:EvalExitFact; widthCalibration?:ReturnType<TerminalWidthGate['snapshot']>; }
 
 /** macOS clipboard adapter: exit code acknowledges the actual clipboard write. No shell or OSC 52 fallback. */
 export async function copyToMacClipboard(text:string):Promise<boolean|string> {
@@ -101,6 +109,13 @@ export class ReadOnlyTui {
   private sessionId?:string;
   private model='deepseek-flash';
   private result?:RunResult;
+  /** 最近实际返回的 runtime 清理事实；独立 improve 分析不更换主会话，但仍须报告其清理结果。 */
+  private cleanupResult?:RunResult;
+  private cleanupAttempted=false;
+  private readonly cleanupReceipts=new ProcessCleanupReceipts();
+  /** #82：仅在本进程请求停止并等待 runner/VM 后填写；不从历史计划推断。 */
+  private evalExit?:EvalExitFact;
+  private readonly startedAt=Date.now();
   private active?:Promise<void>;
   private controller?:AbortController;
   private cancellation:'stop'|'exit'='exit';
@@ -126,7 +141,7 @@ export class ReadOnlyTui {
   private viewStack:ViewEntry[]=[];
   private get panel(){return this.viewStack.at(-1);}
   private historyView?:HistoryView;
-  private metricsView?:StatsView;
+  private metricsView?:StatsBrowser;
   private evalList?:EvalListView;
   private evalPlan?:EvalPlanView;
   private evalTrial?:TrialTraceView;
@@ -137,6 +152,9 @@ export class ReadOnlyTui {
   /** 进行中的 improve 分析：空闲时发起（主区与 runId 留在当前会话），或排队后在任务结束时开始（queued）。 */
   private analysis?:{requestId:string;runId?:string;queued:boolean};
   private improveSelectionView?:ImproveSelectionView;
+  private readonly improveSelections=new Map<string,ImproveSelectionView>();
+  /** #82 uses origin from PlanSource to stop this entire submission and await cleanup. */
+  readonly improveBatch:ImproveBatchController;
   private storageView?:StorageView;
   private traceView?:TraceView;
   private traceRaw?:TraceRawView;
@@ -185,6 +203,7 @@ export class ReadOnlyTui {
     if(options.widthCalibration===false&&!options.terminal)throw Error('WIDTH_CALIBRATION_TEST_TERMINAL_REQUIRED');
     options.workspace=realpathSync(options.workspace);
     options.dataRoot=resolve(options.dataRoot);
+    this.improveBatch=new ImproveBatchController(options.dataRoot);
     this.runId=options.runId;this.viewingRecovery=!!options.runId;
     this.context=this.prefix();
     this.terminal=options.terminal??new ProcessTerminal();
@@ -342,14 +361,15 @@ export class ReadOnlyTui {
     const round=this.runId?this.views.get(this.runId)?.progress.round:undefined;
     return {workspace:safe(workspace.startsWith(`${home}/`)?`~${workspace.slice(home.length)}`:workspace),readOnly:!this.options.coding||!!this.options.show,elsewhere:this.options.elsewhere,
       session:chain?this.shown('session',chain.id):undefined,run:this.runId?this.shown('run',this.runId):undefined,task:chain?.number,
-      ...(this.phase==='running'&&!this.analysis?{round:round||undefined}:{status:this.runStatus()})};
+      ...(this.phase==='running'&&!this.analysis&&!this.improveBatch.running?{round:round||undefined}:{status:this.runStatus()})};
   }
   private statusParts() {
+    if(this.activity?.kind==='improve-execution')this.activity.progress=this.improveBatch.progress();
     // improve 分析期间：第 M 轮与计时取分析 run（#59 第 5 节）。
     const run=this.analysis?this.analysis.runId:this.runId,progress=run?this.views.get(run)?.progress:undefined,start=progress?.segmentStart;
     // 计时从当前执行段开始（run.started，恢复后为 recovery.started），不计中断时间（T2）。
     return statusParts({phase:this.phase,recovery:this.viewingRecovery,status:this.runStatus(),activity:this.activity,round:progress?.round??0,retry:progress?.retry??false,
-      elapsedMs:this.phase==='running'&&start?Date.now()-Date.parse(start):undefined,frame:Math.floor(Date.now()/SPINNER_INTERVAL_MS)});
+      elapsedMs:this.improveBatch.running?this.improveBatch.elapsedMs:this.phase==='running'&&start?Date.now()-Date.parse(start):undefined,frame:Math.floor(Date.now()/SPINNER_INTERVAL_MS)});
   }
   private prefix() {return estimateTaskPrefix({dataRoot:this.options.dataRoot,workspace:this.options.workspace,coding:!!this.options.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}
   private contextUsage() {return `ctx ${this.context.estimated?'≈':''}${tokenCount(this.context.tokens)} / ${tokenCount(this.context.contextWindow)}`;}
@@ -358,7 +378,7 @@ export class ReadOnlyTui {
    * 每次刷新或状态变化后重算一次；只是显示，读取失败只让金额未知。
    */
   private usageText() {
-    const scope=this.phase==='running'&&!this.analysis?'本任务' as const:'本会话' as const,key=`${scope}:${this.runId}:${this.refreshes}`;
+    const scope=this.phase==='running'&&!this.analysis&&!this.improveBatch.running?'本任务' as const:'本会话' as const,key=`${scope}:${this.runId}:${this.refreshes}`;
     if(this.usageMemo?.key!==key){
       let tokens=0,cost:string;
       try{
@@ -432,6 +452,7 @@ export class ReadOnlyTui {
     if(this.historyWindow||this.viewingRecovery){this.editor.setText(text);this.lastText=text;this.notice='只读历史/恢复视图不能提交；/bottom 返回活动会话，恢复限制仍需显式处置';this.tui.requestRender();return;}
     // improve 分析期间 Enter 保留文字、不受理，也不作为 steer；结束后下一次 Enter 接续当前会话（T3）。
     if(this.analysis){this.editor.setText(text);this.lastText=text;this.notice='improve 分析进行中 · 文字保留，未受理；分析结束后 Enter 接续当前会话';this.tui.requestRender();return;}
+    if(this.improveBatch.running){this.editor.setText(text);this.lastText=text;this.notice='improve 执行进行中 · 文字保留，未受理；结束后 Enter 接续当前会话';this.tui.requestRender();return;}
     if(this.phase==='running') {this.enqueue(text,followUp?'follow-up':'steer');return;}
     if(this.phase!=='idle') {this.editor.setText(text);this.lastText=text;this.notice='当前正在清理；草稿保留，未受理';this.tui.requestRender();return;}
     if(followUp){this.editor.setText(text);this.lastText=text;this.notice='当前没有运行任务；文本保留，按普通 Enter 明确提交新任务';this.tui.requestRender();return;}
@@ -445,6 +466,7 @@ export class ReadOnlyTui {
     const self=this;
     const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe};
     const run=this.options.coding?runCodingTask:runReadTask;
+    this.beginCleanupAttempt();
     this.active=run(options).then(result=>this.applyResult(result)).catch(error=>{this.failure=String(error);this.notice=`未完成：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();
   }
@@ -461,7 +483,7 @@ export class ReadOnlyTui {
     case 'older':this.window('older');break;
     case 'newer':this.window('newer');break;
     case 'stats':
-      try{this.metricsView=new StatsView(statsRequest(options,this.options.workspace),scope=>readStats(root,scope));this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
+      try{this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),statsChoices(root,this.options.workspace).projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.evalPlan=new EvalPlanView(target.source,this.evalHost);this.pushView('eval-plan');}}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
       break;
     case 'acceptance':
       if(!mayWrite(this.writeAccess))break;
@@ -525,7 +547,7 @@ export class ReadOnlyTui {
     case 'improve-restore':case 'improve-continue':case 'improve-rollback':{
       if(!mayWrite(this.writeAccess))break;
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许新决定';break;}
-      try{const action=parsed.spec.name.slice(8) as 'restore'|'continue'|'rollback',spec=JSON.parse(raw);this.phase='running';this.controller=new AbortController();this.cancellation='exit';const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:root}):action==='rollback'?rollbackImproveDecision({...spec,dataRoot:root,signal:this.controller.signal}):resumeImproveDecision({...spec,dataRoot:root,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
+      try{const action=parsed.spec.name.slice(8) as 'restore'|'continue'|'rollback',spec=JSON.parse(raw);this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.beginCleanupAttempt();const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:root}):action==='rollback'?rollbackImproveDecision({...spec,dataRoot:root,signal:this.controller.signal}):resumeImproveDecision({...spec,dataRoot:root,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
       break;
     }
     case 'improve-select':
@@ -533,7 +555,12 @@ export class ReadOnlyTui {
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';break;}
       try{const template=JSON.parse(raw) as ImproveDecision;if(typeof template?.reportId==='string')template.reportId=resolveDisplayInput(root,'improve-report',template.reportId);this.improveSelectionView=new ImproveSelectionView(root,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
       break;
-    case 'improve':this.openImproveHome();break;
+    case 'improve':{
+      if(!positional[0]){if(Object.keys(options).length)throw new CommandError('选择参数需要先写报告号',['/improve ir-号 --execute C-01']);this.openImproveHome();break;}
+      const id=resolveArgument(root,positional[0],['improve-report']).id,report=readReportRecord(root,id);if(!report)throw new CommandError('报告不可读取');
+      try {const prefill=improveSelectionPrefill(report,options);if(prefill.length&&!mayWrite(this.writeAccess))break;this.openImproveSelection(id,prefill,true);}
+      catch(error){throw error instanceof CommandError?error:new CommandError(improveChoiceError(error),['本报告的 C-号或完整 id']);}break;
+    }
     case 'improve new':{
       if(!mayWrite(this.writeAccess))break;
       const sources=typeof options.source==='string'?options.source.split(',') as ('self'|'eval')[]:undefined;
@@ -553,15 +580,33 @@ export class ReadOnlyTui {
     const activity=this.activity;
     if(activity?.kind!=='improve-analysis'&&activity?.kind!=='improve-execution')return undefined;
     return this.statusParts().left.map(s=>s.text).join('').replace(/ improve (分析|执行)/,' $1').replace(/ · \/improve 查看$/,'');
-    return undefined;
   }
   private openImproveItem(item:HomeItem) {
     const root=this.options.dataRoot;
     if(item.kind==='new'){this.openLaunch();return;}
-    if(item.kind==='current'){if(this.activity?.kind==='improve-execution'&&this.improveSelectionView)this.pushView('improve-selection');else this.feedback('分析进行中 · 结束后在会话主区插一行，报告出现在“待选择”');return;}
-    // 待选择的报告进入 1d（#90）；1d 改版前只读打开该报告。历史报告与建议抑制的改版由 #91 实现。
-    try{this.improveView=item.kind==='report'?new ImproveView(root,item.id):new ImproveView(root,undefined,item.kind==='suppressions');this.pushView('improve');}
+    if(item.kind==='current'){const current=this.improveBatch.origin&&this.improveSelections.get(this.improveBatch.origin.reportId);if(current){this.improveSelectionView=current;current.showProgress();this.pushView('improve-selection');}else this.feedback('分析进行中 · 结束后在会话主区插一行，报告出现在“待选择”');return;}
+    if(item.kind==='report'){try{this.openImproveSelection(item.id);}catch(error){this.feedback(`improve 报告不可读取：${safe(String(error))}`);}return;}
+    // 历史报告与建议抑制的改版由 #91 实现。
+    try{this.improveView=new ImproveView(root,undefined,item.kind==='suppressions');this.pushView('improve');}
     catch(error){this.feedback(`improve 报告不可读取：${safe(String(error))}`);}
+  }
+  private improveSubmitBlocked() {
+    return this.writeAccess.writeBlocked()??(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'?'当前执行/恢复状态不允许新决定':undefined);
+  }
+  private openImproveSelection(id:string,prefill:ImprovePrefill=[],fromCommand=false) {
+    const root=this.options.dataRoot,report=readReportRecord(root,id);if(!report)throw Error('IMPROVE_REPORT_NOT_FOUND');
+    const contract=improveReportContract(report);
+    if(contract==='legacy'||contract==='unknown'&&report.candidates.length>0){
+      if(prefill.length)throw new CommandError('此报告只读，不能预填执行；请重新分析');
+      const view=new ImproveView(root,id);if(fromCommand)this.openImproveHome();this.improveView=view;this.pushView('improve');return;
+    }
+    let view=this.improveSelections.get(id);
+    if(!view){view=new ImproveSelectionView(root,id,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender(),{
+      access:this.writeAccess,installation:this.options.improveRuntime,submitBlocked:()=>this.improveSubmitBlocked(),
+      openEval:source=>{this.evalPlan=new EvalPlanView(source,this.evalHost,{runningHere:()=>this.improveBatch.canStop(source.origin)});this.pushView('eval-plan');},
+    });this.improveSelections.set(id,view);}else view.refresh();
+    if(prefill.length)view.prefill(prefill);
+    if(fromCommand)this.openImproveHome();this.improveSelectionView=view;this.pushView('improve-selection');
   }
   /** 不能发起分析的原因（只读历史、恢复核对、清理中、已有分析、尚无任务）；可以时 undefined。 */
   private launchBlocked() {
@@ -606,9 +651,10 @@ export class ReadOnlyTui {
     const targetRunId=this.runId!;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
     this.analysis={requestId:request.id,queued:false};this.activity={kind:'improve-analysis',report:this.shown('improve-report',request.id)};
     // 主区、runId 与本进程的任务结果都留在当前会话；分析结果只插一行，不自动打开 1d（I1）。
+    this.beginCleanupAttempt();
     this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},
-      onObservation:event=>{if(this.analysis)this.analysis.runId=event.runId;this.pendingRefresh=true;}})
-      .then(result=>this.analysisEnded(request.id,result.improve??null,result.status==='unknown'||result.cleanup==='unknown'?`清理未知 · pi-durio resume ${this.shown('session',result.sessionId)} 核对`:undefined))
+      onObservation:event=>{this.cleanupReceipts.observe(this.options.dataRoot,event);if(this.analysis)this.analysis.runId=event.runId;this.pendingRefresh=true;}})
+      .then(result=>{this.cleanupResult=result;this.analysisEnded(request.id,result.improve??null,result.status==='unknown'||result.cleanup==='unknown'?`清理未知 · pi-durio resume ${this.shown('session',result.sessionId)} 核对`:undefined);})
       .catch(error=>this.analysisEnded(request.id,readReportRecord(this.options.dataRoot,request.id),safe(String(error))))
       .finally(()=>this.finished());
     this.tui.requestRender();
@@ -625,7 +671,8 @@ export class ReadOnlyTui {
    * 任务 run 的观察回调。排队的 improve 分析在任务结束后由 runtime 在同一次执行里开始：它的 run 不进主区，
    * 只设状态行；之后的 follow-up run 照常成为主区的当前 run。
    */
-  private readonly observe=(event:{runId:string})=>{
+  private readonly observe=(event:{kind:string;runId:string})=>{
+    this.cleanupReceipts.observe(this.options.dataRoot,event);
     this.pendingRefresh=true;
     if(event.runId===this.runId||event.runId===this.analysis?.runId)return;
     let accepted:any;
@@ -637,10 +684,11 @@ export class ReadOnlyTui {
   };
   private async submitImproveChoice(decision:ImproveDecision){
     if(!mayWrite(this.writeAccess))throw Error('TUI_READ_ONLY');
-    if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery)throw Error('IMPROVE_SELECTION_CURRENT_STATE_BLOCKED');
+    const blocked=this.improveSubmitBlocked();if(blocked)throw Error(blocked);
     this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.activity={kind:'improve-execution',report:this.shown('improve-report',decision.reportId)};
-    const promise=submitImproveDecision({dataRoot:this.options.dataRoot,decision,signal:this.controller.signal});
-    this.active=promise.then(value=>{this.event(`${value.state==='completed'?'✓':'✗'} 决定 ${value.id} · ${value.state}；具体写回/启用见结果`);}).catch(error=>{this.event(`✗ 决定未完成：${safe(String(error))}`);}).finally(()=>this.finished());
+    this.beginCleanupAttempt();
+    const promise=this.improveBatch.start(decision,this.controller.signal);
+    this.active=promise.then(value=>{const passed=value.groups.filter((g:any)=>g.state==='completed').length,total=value.groups.length;this.event(`${value.state==='completed'?'✓':'✗'} improve ${this.shown('improve-report',decision.reportId)} ${value.state==='completed'?'已结束':'已停止'} · ${total?`${passed}/${total} 组通过`:`${decision.selections.length} 项决定已记录`}${value.reason?' · '+safe(value.reason):''} · /improve 查看`);}).catch(error=>{this.event(`✗ improve ${this.shown('improve-report',decision.reportId)} 未完成：${safe(String(error))}`);}).finally(()=>this.finished());
     return promise;
   }
   private async compact() {
@@ -652,13 +700,15 @@ export class ReadOnlyTui {
     if(continuation?.state!=='ready'){this.notice='压缩需要已完成且清理确认的活动会话';this.tui.requestRender();return;}
     if(continuation.versionChanged!==false){this.notice=COMPACT_VERSION_CHANGED;this.tui.requestRender();return;}
     const runId=continuation.tailRunId;this.controller=new AbortController();this.cancellation='exit';this.phase='running';this.notice='正在压缩当前上下文；原文保留，摘要生成与接入分别记录';const self=this;
-    this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:()=>{this.pendingRefresh=true;}}).then(result=>{
-      this.result=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；Ctrl+T 在 trace 中查看源范围、摘要与接入事实；磁盘原文保留`;
+    this.beginCleanupAttempt();
+    this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.cleanupReceipts.observe(this.options.dataRoot,event);this.pendingRefresh=true;}}).then(result=>{
+      this.result=result;this.cleanupResult=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；Ctrl+T 在 trace 中查看源范围、摘要与接入事实；磁盘原文保留`;
     }).catch(error=>{this.notice=`压缩未执行：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();await this.active;
   }
+  private beginCleanupAttempt() {this.cleanupAttempted=true;this.cleanupResult=undefined;}
   private applyResult(result:RunResult) {
-    this.result=result;this.sessionId=result.sessionId;this.runId=result.runId;
+    this.result=result;this.cleanupResult=result;this.sessionId=result.sessionId;this.runId=result.runId;
     if(result.improve?.runId!==result.runId)this.continueFrom=result.runId;
     this.viewingRecovery=result.status==='unknown'||result.cleanup==='unknown';
     // 终态在状态行与头部；这里只留需要处理的事。
@@ -708,6 +758,7 @@ export class ReadOnlyTui {
         if(action==='reattach') {
           this.closeViews();this.welcome=undefined;this.phase='running';this.controller=new AbortController();this.cancellation='exit';
           const self=this;
+          this.beginCleanupAttempt();
           this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
           return;
         }
@@ -724,6 +775,7 @@ export class ReadOnlyTui {
     this.welcome=undefined;this.viewingRecovery=true;this.runId=runId;this.recoveryChecking=true;
     const dataRoot=this.options.dataRoot,authorization=this.authorization();
     const load=async()=>{
+      this.beginCleanupAttempt();
       const first=await checkRecovery({dataRoot,runId,authorization});
       const pages=await recoveryPages(first,offset=>inspectRecovery({dataRoot,runId,authorization,page:{offset,snapshotId:first.snapshotId}}));
       this.loadQueue();
@@ -790,6 +842,7 @@ export class ReadOnlyTui {
     if(!mayWrite(this.writeAccess))return;
     if(this.phase!=='idle'||!this.recovery){this.notice='先打开恢复核对获取当前事实';return;}
     const runId=this.recovery.runId;this.closeViews();this.recoveryOpen=false;this.recoveryPanel=undefined;this.viewingRecovery=false;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
+    this.beginCleanupAttempt();
     this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe}).then(result=>{
       if('usage' in result){this.recovery=undefined;this.applyResult(result);}
       else if(result.status==='ended'){this.recovery=result;this.result=undefined;this.notice='旧工作已结束 · 新任务开启新会话，不接续旧上下文';}
@@ -815,7 +868,7 @@ export class ReadOnlyTui {
     this.confirmation=undefined;
     if(this.phase!=='running')return;
     this.widths?.retainPending('stop-preserve-unapplied-input');
-    this.cancellation='stop';this.phase='stopping';this.notice=this.analysis?`请求停止 improve 分析 ${this.shown('improve-report',this.analysis.requestId)}；等待 runtime 确认`:`请求中止 run ${this.runId?this.shown('run',this.runId):'受理中'}；等待 runtime 确认`;this.controller?.abort();this.tui.requestRender();
+    this.cancellation='stop';this.phase='stopping';this.notice=this.analysis?`请求停止 improve 分析 ${this.shown('improve-report',this.analysis.requestId)}；等待 runtime 确认`:this.improveBatch.origin?`请求停止 improve 提交批次 ${this.shown('improve-report',this.improveBatch.origin.reportId)}；等待清理，剩余项不启动`:`请求中止 run ${this.runId?this.shown('run',this.runId):'受理中'}；等待 runtime 确认`;this.controller?.abort();this.tui.requestRender();
   }
   private refresh() {
     if(this.widths?.blocked){this.pendingRefresh=true;return;}
@@ -953,14 +1006,14 @@ export class ReadOnlyTui {
     catch(error){this.notice=`trace 不可读取：${safe(String(error))}`;this.tui.requestRender();}
   }
   /** 2a 列表层；Enter 进原文层、`p` 固定为证据经 TraceHost 回到这里。 */
-  private traceOf(runId:string) {
+  private traceOf(runId:string,root=this.options.dataRoot) {
     const host:TraceHost={writeBlocked:this.writeAccess.writeBlocked,busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,run)=>this.openConfirm(config,()=>void run()),changed:()=>this.tui.requestRender(),openRaw:span=>this.openRaw(span)};
-    return new TraceView(this.options.dataRoot,runId,()=>this.phase==='running'&&this.runId===runId,host);
+    return new TraceView(root,runId,()=>root===this.options.dataRoot&&this.phase==='running'&&this.runId===runId,host);
   }
   /** 在 2a 列表层之上压入原文层（Esc 回到列表层，仍选中该 span）。 */
   private openRaw(span:TraceSpan,item?:string) {
     if(!this.traceView)return;
-    this.traceRaw=new TraceRawView(this.options.dataRoot,this.traceView,span.key,{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender()},item);
+    this.traceRaw=new TraceRawView(this.traceView.root,this.traceView,span.key,{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender()},item);
     this.pushView('trace-raw');
   }
   /** `/details` 与“分页查看”：打开 2a 并选中该 span，直接进入原文层（先显示输出）；Esc 先回列表层，再回会话。 */
@@ -993,7 +1046,7 @@ export class ReadOnlyTui {
   /** 视图各行；有即时反馈时替换末行（视图的键位提示行），保留最右边的 Esc。 */
   private panelLines(width:number) {
     const lines=this.panelBody(width);
-    if(this.hintFeedback!==undefined&&lines.length)lines[lines.length-1]=hintLine([],width,{feedback:this.hintFeedback,esc:escHint(this.viewStack.length)});
+    if(this.hintFeedback!==undefined&&lines.length)lines[lines.length-1]=hintLine([],width,{feedback:this.hintFeedback,esc:escHint(this.panel?.kind==='metrics'?this.metricsView?.depth??1:this.viewStack.length)});
     return lines;
   }
   private overlayHeight(){return Math.max(3,Math.floor(this.terminal.rows*0.9)-1);}
@@ -1009,6 +1062,7 @@ export class ReadOnlyTui {
     if(this.phase==='stopping'||this.phase==='exiting')return [];
     if(this.viewingRecovery)return this.recoveryOpen?['Ctrl+R 历史','Ctrl+T trace','? 帮助']:['Enter 打开恢复核对','Ctrl+C 退出（保留可恢复工作）'];
     if(this.analysis)return ['Ctrl+C 停止分析','Ctrl+T 分析 trace','/improve 查看','? 帮助'];
+    if(this.improveBatch.running)return ['Ctrl+C 停止执行','/improve 查看','? 帮助'];
     if(this.phase==='running')return ['Enter steer','Ctrl+X Enter follow-up','Ctrl+C 中止','Ctrl+O 展开'];
     return ['Enter 提交','/ 命令','Ctrl+R 历史','? 帮助'];
   }
@@ -1017,6 +1071,7 @@ export class ReadOnlyTui {
     if(this.phase==='stopping'||this.phase==='exiting')return '正在清理 · 输入保留为草稿，不会受理';
     if(this.viewingRecovery)return '恢复核对进行中 · 输入不会提交';
     if(this.analysis)return 'improve 分析进行中 · 输入照常编辑，结束后 Enter 接续当前会话';
+    if(this.improveBatch.running)return 'improve 执行进行中 · 输入保留，结束后 Enter 接续当前会话';
     if(this.phase==='running')return '补充当前任务…   Ctrl+X Enter 排到下一任务';
     return `${this.options.coding?'描述要完成的修改…':'描述要查看或分析的内容…'}   / 命令  @ 文件  Shift+Enter 换行`;
   }
@@ -1048,7 +1103,9 @@ export class ReadOnlyTui {
     this.confirmation=undefined;
     // 全屏视图层的全局键（T6）：Esc 返回上一层；Ctrl+C 只停本视图的操作，不传给会话屏；Ctrl+D/O/T/R、? 不起作用。
     const key=viewKey(data);
-    if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='eval-trial'){if(this.evalTrial?.back())return;this.evalTrial?.close();}if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
+    if(panel.kind==='metrics'&&this.metricsView?.acceptsInput&&(key===undefined||key==='back'||data==='?')){this.metricsView.handleInput(data);this.tui.requestRender();return;}
+    if(key==='back'&&panel.kind==='metrics'&&this.metricsView?.back())return;
+    if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='eval-trial'){if(this.evalTrial?.back())return;this.evalTrial?.close();}if(panel.kind==='improve-selection'&&this.improveSelectionView?.back()){this.tui.requestRender();return;}this.closePanel();return;}
     if(key==='redraw'){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
     if(key==='stop'){if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
     if(key==='inert')return;
@@ -1135,20 +1192,22 @@ export class ReadOnlyTui {
     this.phase='exiting';this.confirmation=undefined;this.notice='退出中；等待 runtime 清理与 storage 关闭';this.tui.requestRender();
     try {this.widths?.beginClose();}catch(error){this.failure=`待处理输入保存失败：${String(error)}`;}
     if(!this.controller?.signal.aborted)this.cancellation='exit';this.controller?.abort();
-    let draftSaved=false;
-    try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
+    let draftSaved=false,draftLines=0,terminalRestored=true;
+    try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;draftLines=draft.split(/\r\n|\r|\n/).length;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
     try {await this.active;} finally {
       this.evalTrial?.close();
       this.stopped=true;if(this.timer)clearInterval(this.timer);this.removeInput?.();for(const remove of this.removeSignals)remove();
       if(this.started) {
-        try {if(this.widths&&!await this.widths.settle())this.failure??='WIDTH_QUERY_BOUNDARY_UNKNOWN: terminal drain is bounded';}catch(error){this.failure??=`字宽清理失败：${String(error)}`;}
-        try {await this.terminal.drainInput(150,30);} catch(error){this.failure??=`终端 drain 失败：${String(error)}`;}
+        try {if(this.widths&&!await this.widths.settle()){terminalRestored=false;this.failure??='WIDTH_QUERY_BOUNDARY_UNKNOWN: terminal drain is bounded';}}catch(error){terminalRestored=false;this.failure??=`字宽清理失败：${String(error)}`;}
+        try {await this.terminal.drainInput(150,30);} catch(error){terminalRestored=false;this.failure??=`终端 drain 失败：${String(error)}`;}
         try {this.terminal.write('\x1b[?1004l');this.tui.stop({preserveScreen:true});}
-        catch(error){this.failure??=`终端清理失败：${String(error)}`;try{this.terminal.stop();}catch{/* Preserve the cleanup failure. */}}
-        finally {try{this.terminal.showCursor();}catch{/* Earlier failure remains visible in the exit result. */}this.widths?.dispose();this.restoreTerminalWrite?.();}
+        catch(error){terminalRestored=false;this.failure??=`终端清理失败：${String(error)}`;try{this.terminal.stop();}catch{/* Preserve the cleanup failure. */}}
+        finally {try{this.terminal.showCursor();}catch(error){terminalRestored=false;this.failure??=`光标恢复失败：${String(error)}`;}this.widths?.dispose();this.restoreTerminalWrite?.();}
       }
     }
-    const result={result:this.result,error:this.failure,draftSaved,widthCalibration:this.widths?.snapshot()};
+    const cleanupResult=this.cleanupReceipts.result(this.cleanupResult);
+    const summary=await exitSummary(this.options.dataRoot,{workspace:this.options.workspace,runId:this.runId??this.options.show?.run??this.options.trace,cleanup:cleanupResult,cleanupAttempted:this.cleanupAttempted,elapsedMs:Date.now()-this.startedAt,draftLines,terminalRestored,eval:this.evalExit,error:this.failure},this.terminal.columns);
+    const result={result:this.result,cleanupResult,error:this.failure,draftSaved,summary,eval:this.evalExit,widthCalibration:this.widths?.snapshot()};
     this.resolveClosed(result);return result;
   }
 }
@@ -1161,13 +1220,6 @@ function analysisReason(reason:string) {
   if(/Analysis stop/.test(reason))return '已停止';
   if(/Analysis exit/.test(reason))return '退出时中止';
   return safe(code??reason.slice(0,120));
-}
-
-/** Exit summary line for "本次会话": every run of the session the summary reports, estimated in CNY. */
-export function exitCostSummary(dataRoot:string,result:RunResult) {
-  // The exit status reflects the run; an unreadable cost source only leaves the amount unknown.
-  let amount:string;try{amount=formatCostTotals(estimateSessionRequests(dataRoot,[result.sessionId]).totals);}catch{amount='unknown';}
-  return `本次会话 ${readDisplayIndex(dataRoot).label('session',result.sessionId)} 费用 ${amount}（${COST_ESTIMATE_NOTICE}）`;
 }
 
 export async function runTui(options:TuiOptions) {

@@ -17,7 +17,7 @@ node dist/src/cli.js --help
 在 macOS Terminal 启动只读离线演示：
 
 ```sh
-node dist/src/cli.js tui --workspace "$PWD/test/fixtures/project" \
+node dist/src/cli.js --read-only --workspace "$PWD/test/fixtures/project" \
   --data-root "$HOME/Library/Application Support/pi-durio-demo" --offline-demo
 ```
 
@@ -37,11 +37,13 @@ node dist/src/cli.js run --workspace "$PWD/test/fixtures/project" \
 
 默认 provider 为 `deepseek/deepseek-flash`，地址为 `https://api.deepseek.com`，认证从 `DEEPSEEK_API_KEY` 读取。**去掉 `--offline-demo` 后，提交任务会发出可能计费的请求。** 本轮各固定真实批次均已消费各自单次启动授权，不能使用原授权重复启动；[实施状态](docs/implementation/pi-durio-v1/status.md)记录结果与剩余条件。缺凭据或认证失败不会静默切换 provider。
 
-`run` / `tui` 默认只提供 `read`。为明确指定的项目和任务加入 `--coding`，才开放 `read/write/edit/bash`。普通 coding 是可信本机执行，没有 OS 沙箱保证；工作区锁防止本产品内部重叠写入，不能隔离外部编辑器或其他本机程序。文件工具当前支持最多 256 KiB，普通任务最多 8 次 provider 尝试，输入最多 32 KiB。
+当前源码的交互入口是无子命令的 `pi-durio`，默认提供 `read/write/edit/bash`，`--read-only` 收窄为 `read`；已删除 `tui` 子命令。headless `run` / `control` 仍默认只读，显式加入 `--coding` 才开放四种工具。普通 coding 是可信本机执行，没有 OS 沙箱保证；工作区锁防止本产品内部重叠写入，不能隔离外部编辑器或其他本机程序。文件工具当前支持最多 256 KiB，普通任务最多 8 次 provider 尝试，输入最多 32 KiB。
 
-TUI 使用全屏单列布局。空闲时 Enter 提交新任务；忙时 Enter 补充当前任务，Ctrl+X 后 Enter 排后续请求。`/queue` 查看队列，`/history` 查看历史，`/bottom` 回到当前任务。`/help` 和 F2 菜单列出可用操作。
+TUI 使用全屏单列布局。空闲时 Enter 提交新任务；忙时 Enter 补充当前任务，Ctrl+X 后 Enter 排后续请求。`/queue` 查看队列，`/history` 查看历史，`/bottom` 回到当前任务。`/help` 或空输入时的 `?` 列出可用操作。
 
 运行中 Ctrl+C 请求中止，等待实际清理；空闲退出优先使用 `/exit`。双击 Ctrl+C / Ctrl+D 受当前草稿、面板和确认窗口约束。中止和退出不会撤销文件变化或已发生的费用，未接入队列保留并冻结。
+
+退出后在原终端缓冲区输出最多 8 行摘要，不再输出 JSON 或 `Read back:`。文件与行数只计 edit/write 的成功结果；费用与空闲底栏使用同一会话上下文链，unknown/partial 保留。摘要中的“继续”只在可接续时出现，中断写“恢复核对”。当前源码的[试用说明](docs/usage/TRIAL.md)与[启动、配置及恢复](docs/usage/STARTUP-RECOVERY.md)使用这些新入口；首版固定候选的历史操作记录保持原样。
 
 ## 原文、重开与恢复
 
@@ -50,13 +52,13 @@ TUI 使用全屏单列布局。空闲时 Enter 提交新任务；忙时 Enter �
 以下命令只读查看指定任务，不自动重跑：
 
 ```sh
-node dist/src/cli.js show --data-root /absolute/data-root --run RUN_UUID
-node dist/src/cli.js show --data-root /absolute/data-root --run RUN_UUID --originals --limit 20
-node dist/src/cli.js recover --data-root /absolute/data-root --run RUN_UUID --inspect
+node dist/src/cli.js show r-号 --data-root /absolute/data-root --trace
+node dist/src/cli.js show r-号 --data-root /absolute/data-root --format json --originals --limit 20
+node dist/src/cli.js recover r-号 --data-root /absolute/data-root --inspect
 node dist/src/cli.js history --data-root /absolute/data-root --format json
 ```
 
-遇到旧 pending、遗留 owner、未知副作用或版本不兼容时，先查看恢复报告。普通 `recover` 保存报告并在需要决定时返回非零退出码；实际继续、结束旧工作或确认清理由绑定报告身份的结构化决定触发。TUI 的 `--run RUN_UUID` 打开恢复事实，关闭面板不会解除限制。不要通过删除锁或原文绕过核对。[恢复接口与限制](docs/implementation/pi-durio-v1/issue-15/README.md)。
+`show` 不带 `--format` 时打开只读 TUI；在非终端环境必须加 `--format json|text`。`resume s-号` 打开会话链尾，待恢复核对时直接显示恢复面板，不自动继续；已完成且可接续时，下一次 Enter 才开始新任务。遇到旧 pending、遗留 owner、未知副作用或版本不兼容时，先查看恢复报告。普通 `recover` 保存报告并在需要决定时返回非零退出码；实际继续、结束旧工作或确认清理由绑定报告身份的结构化决定触发。关闭面板不会解除限制，不要通过删除锁或原文绕过核对。[当前恢复入口](docs/usage/STARTUP-RECOVERY.md)。
 
 ## eval、improve 与报告
 
