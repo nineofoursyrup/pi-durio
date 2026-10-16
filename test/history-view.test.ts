@@ -93,6 +93,18 @@ test('v1 recovery notices retain the original skip explanation and readonly reco
   assert.match(text(view), /只读续跑/);
 });
 
+test('history renders the frozen v1 readonly write refusal without relabeling it as a repeated completed call', () => {
+  const fixture = fileURLToPath(new URL('../../test/fixtures/v1-readonly-denial', import.meta.url));
+  const identity = JSON.parse(readFileSync(join(fixture, 'fixture-identity.json'), 'utf8'));
+  const root = join(fixture, 'data'), hostBefore = readFileSync(join(root, 'host.sqlite'));
+  const view = new HistoryView(root, { run: identity.names.run }), body = text(view);
+  assert.match(body, /只读 · 不能提交/);
+  assert.match(body, /只读续跑/);
+  assert.match(body, /被拒 · 只读续跑不允许 write/);
+  assert.doesNotMatch(body, /该操作已完成，不重做/);
+  assert.deepEqual(readFileSync(join(root, 'host.sqlite')), hostBefore, 'Reading history leaves the frozen v1 host facts unchanged');
+});
+
 test('ordinary read-only recovery retries do not acquire the old restricted-continuation label', () => {
   const root = mkdtempSync(join(tmpdir(), 'durio-history-read-retry-')), e = new Evidence(root, 'read-retry');
   e.append('task.accepted', { sessionId: 'session', taskId: 'task', input: 'Normal read task', authorization: { tools: ['read'] } });
