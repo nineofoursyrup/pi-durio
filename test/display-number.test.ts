@@ -73,21 +73,30 @@ test('CLI --run accepts display numbers and full UUIDs; ambiguity exits nonzero 
   assert.ok(JSON.parse(byDisplay.stdout).records.length > 0);
 
   const sqlite = join(dataRoot, 'host.sqlite');
-  for (const args of [['show', 'r-abcd', '--format', 'json'], ['recover', '--run', 'r-abcd']]) {
+  const rejected = (...args: string[]) => {
     const before = readFileSync(sqlite), seq = watermark(dataRoot);
     const child = cli(...args);
     assert.notEqual(child.status, 0, args.join(' '));
-    const error = JSON.parse(child.stderr).error;
+    assert.equal(child.stdout, '');
+    assert.equal(existsSync(`${dataRoot}.lock`), false); assert.equal(existsSync(join(dataRoot, 'owner.json')), false);
+    assert.equal(watermark(dataRoot), seq); assert.deepEqual(readFileSync(sqlite), before);
+    return JSON.parse(child.stderr).error;
+  };
+  for (const args of [['show', 'r-abcd', '--format', 'json'], ['recover', '--run', 'r-abcd'], ['recover', 'r-abcd']]) {
+    const error = rejected(...args);
     assert.equal(error.code, 'DISPLAY_AMBIGUOUS');
     assert.deepEqual(error.candidates.map((c: any) => [c.display, c.kind, c.id, c.project]), [['r-abcde0', 'run', A, '/p1'], ['r-abcde1', 'run', B, '/p2']]);
     assert.ok(error.candidates.every((c: any) => typeof c.at === 'string'));
     assert.match(error.message, /r-abcde0 \(run · project \/p1 · /);
-    assert.equal(child.stdout, '');
-    assert.equal(existsSync(`${dataRoot}.lock`), false); assert.equal(existsSync(join(dataRoot, 'owner.json')), false);
-    assert.equal(watermark(dataRoot), seq); assert.deepEqual(readFileSync(sqlite), before);
   }
-  const missing = cli('recover', '--run', 'r-ffff');
-  assert.notEqual(missing.status, 0); assert.equal(JSON.parse(missing.stderr).error.code, 'DISPLAY_NOT_FOUND');
+  const sessionAmbiguity = rejected('recover', 's-5e55');
+  assert.equal(sessionAmbiguity.code, 'DISPLAY_AMBIGUOUS');
+  assert.deepEqual(sessionAmbiguity.candidates.map((c: any) => [c.display, c.kind, c.id, c.project]), [['s-5e550', 'session', SA, '/p1'], ['s-5e551', 'session', SB, '/p2']]);
+  for (const target of [['--run', 'r-ffff'], ['r-ffff'], ['s-ffff'], ['t-abcd']]) assert.equal(rejected('recover', ...target).code, 'DISPLAY_NOT_FOUND');
+  for (const args of [[], [display, '--run', result.runId], [display, 'extra'], ['--run', result.runId, 'extra'], [display, '--inspect', '--decision', join(base, 'missing.json')]]) {
+    assert.equal(rejected('recover', ...args).code, 'USAGE');
+  }
+  assert.equal(rejected('recover', 'r-abc').code, 'RUN_NOT_FOUND');
 
   // Ownership-taking command: the display number reaches the command as the full identity.
   const recovered = cli('recover', '--run', display);
@@ -96,6 +105,18 @@ test('CLI --run accepts display numbers and full UUIDs; ambiguity exits nonzero 
   assert.equal(JSON.parse(recovered.stdout).runId, result.runId);
   assert.equal(resolveDisplayInput(dataRoot, 'run', result.runId), result.runId);
   assert.throws(() => resolveDisplayInput(dataRoot, 'run', 'r-abcd'), DisplayInputError);
+});
+
+test('recover rejects a nonexistent full run identity without creating a data root or taking ownership', () => {
+  const base = mkdtempSync(join(tmpdir(), 'durio-recover-missing-')), dataRoot = join(base, 'missing');
+  for (const target of [[C], ['--run', C]]) {
+    const child = spawnSync(process.execPath, ['dist/src/cli.js', 'recover', ...target, '--data-root', dataRoot], { encoding: 'utf8' });
+    assert.notEqual(child.status, 0, child.stderr);
+    assert.equal(JSON.parse(child.stderr).error.code, 'RUN_NOT_FOUND');
+    assert.equal(child.stdout, '');
+    assert.equal(existsSync(dataRoot), false);
+    assert.equal(existsSync(`${dataRoot}.lock`), false);
+  }
 });
 
 test('JSON and unit inputs accept display numbers: history filter, storage session units, acceptance task, improve specs', async () => {
