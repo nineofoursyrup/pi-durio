@@ -98,7 +98,7 @@ export class TraceView {
   private readonly fixations: { source: string; selected: Set<string> }[] = [];
   private readonly verified = new Map<string, boolean>();
   /** `host` 接入原文与固定操作；`adjust` 让 eval trial 使用宿主中介记录的用量与金额。 */
-  constructor(private readonly root: string, readonly runId: string, private readonly live: () => boolean = () => false, private readonly host?: TraceHost, private readonly adjust: (trace: Trace) => Trace = trace => trace) {
+  constructor(readonly root: string, readonly runId: string, private readonly live: () => boolean = () => false, private readonly host?: TraceHost, private readonly adjust: (trace: Trace) => Trace = trace => trace) {
     this.reader = new TraceReader(root, runId);
     this.index = readDisplayIndex(root);
     this.current = adjust(this.reader.trace(live()));

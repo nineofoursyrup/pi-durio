@@ -29,22 +29,25 @@ export interface PlanSource {
   origin: { label: string; reportId: string; decisionId: string } | null;
   /** improve 发起且已结束：主数据根中 `improve.check` 保留的报告快照 */
   snapshot: { root: string; ref: BlobRef } | null;
+  /** A stats drilldown is pinned to this source-root acquisition sequence. */
+  through?: number;
 }
 
 /**
  * 列表层的来源：主数据根最近 50 份计划，加上主数据根 `improve.eval` 记录指向的最近 50 份 improve 发起的计划，
  * 按固定时间倒序。只读主数据根；子数据根只在读报告时打开。
  */
-export function listPlanSources(root: string): PlanSource[] {
+export function listPlanSources(root: string, options: { through?: number; limit?: number | null } = {}): PlanSource[] {
+  const through = options.through ?? Number.MAX_SAFE_INTEGER, limit = options.limit === null ? -1 : options.limit ?? 50;
   let db: ReturnType<typeof openHostReadonly>;
   try { db = openHostReadonly(root); }
   catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []; throw error; }
   let plans: Record<string, unknown>[], links: Record<string, unknown>[], checks: Record<string, unknown>[], decisions: Record<string, unknown>[];
   try {
-    plans = db.prepare("SELECT run_id,at FROM records WHERE kind='eval.plan' ORDER BY seq DESC LIMIT 50").all();
-    links = db.prepare("SELECT at,body FROM records WHERE kind='improve.eval' ORDER BY seq DESC LIMIT 50").all();
-    checks = links.length ? db.prepare("SELECT body FROM records WHERE kind='improve.check' ORDER BY seq").all() : [];
-    decisions = links.length ? db.prepare("SELECT body FROM records WHERE kind='improve.decision' ORDER BY seq").all() : [];
+    plans = db.prepare("SELECT run_id,at FROM records WHERE kind='eval.plan' AND seq<=? ORDER BY seq DESC LIMIT ?").all(through, limit);
+    links = db.prepare("SELECT at,body FROM records WHERE kind='improve.eval' AND seq<=? ORDER BY seq DESC LIMIT ?").all(through, limit);
+    checks = links.length ? db.prepare("SELECT body FROM records WHERE kind='improve.check' AND seq<=? ORDER BY seq").all(through) : [];
+    decisions = links.length ? db.prepare("SELECT body FROM records WHERE kind='improve.decision' AND seq<=? ORDER BY seq").all(through) : [];
   } finally { db.close(); }
   const decode = (row: Record<string, unknown>) => JSON.parse(readObject(root, JSON.parse(String(row.body))).toString());
   const index = readDisplayIndex(root);
@@ -80,8 +83,12 @@ export function ownPlanSource(root: string, id: string): PlanSource {
  * 其余从计划所在数据根实时读（`asOf` 为旧报告修订）。
  */
 export function readPlanReport(source: PlanSource, options: { asOf?: number } = {}): { report: EvalReport; from: 'live' | 'snapshot' } {
-  if (source.snapshot) return { report: JSON.parse(readObject(source.snapshot.root, source.snapshot.ref).toString()), from: 'snapshot' };
-  return { report: evalReport(source.root, source.id, options), from: 'live' };
+  const asOf = source.through === undefined ? options.asOf : Math.min(options.asOf ?? source.through, source.through);
+  if (source.snapshot) {
+    const report: EvalReport = JSON.parse(readObject(source.snapshot.root, source.snapshot.ref).toString());
+    if (asOf === undefined || report.asOf <= asOf) return { report, from: 'snapshot' };
+  }
+  return { report: evalReport(source.root, source.id, { asOf }), from: 'live' };
 }
 
 export type PlanState = 'not-started' | 'running' | 'ended' | 'stopped';

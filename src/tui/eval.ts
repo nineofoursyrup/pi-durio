@@ -268,13 +268,13 @@ export class EvalPlanView {
 
   constructor(readonly source: PlanSource, private readonly host: PlanViewHost, private readonly options: PlanViewOptions = {}) {
     this.read();
-    if (this.current) this.revisions = [undefined, ...this.current.gradingRevisions.toReversed().map(r => Number(String(r.source).split(':')[1]) - 1)];
+    if (this.current) this.revisions = [source.through, ...this.current.gradingRevisions.toReversed().map(r => Number(String(r.source).split(':')[1]) - 1)];
   }
   get report() { return this.current; }
   private now() { return this.options.now?.() ?? Date.now(); }
   private runningHere() { return !!this.options.runningHere?.(); }
   /** 批次未结束（运行中）且看的是最新报告：宿主定时重绘，render 每秒最多重读一次。 */
-  get live() { return !!this.current && this.revision === 0 && planState(this.current) === 'running'; }
+  get live() { return this.source.through === undefined && !!this.current && this.revision === 0 && planState(this.current) === 'running'; }
   private read() {
     try { const read = readPlanReport(this.source, { asOf: this.revisions[this.revision] }); this.current = read.report; this.from = read.from; this.error = undefined; }
     catch (error) { const text = clean(String((error as Error)?.message ?? error)); this.error = { message: '计划报告不可读取', code: text.replace(/^Error:\s*/, '').split(/[\s:]/)[0] || 'EVAL_REPORT_UNAVAILABLE' }; }
@@ -366,8 +366,8 @@ export class EvalPlanView {
     const sides = !c ? '无对照' : this.source.origin
       ? `A = 基线 ${c.sides.baseline.runtime.id.slice(0, 7)} · B = ${this.source.origin.label}`
       : `A = ${short('baseline')} · B = ${short('candidate')}`;
-    const old = this.revision ? ` · 报告修订 #${this.revisions[this.revision]}` : '';
-    const left: TextSegment[] = [{ text: ' ◆ ', fg: 'ac.info' }, { text: 'eval', fg: 'fg.primary', bold: true }, { text: `  计划 ${this.source.label} · ${clean(report.purpose)} · ${sides}${old}`, fg: 'fg.faint' }];
+    const old = this.revision ? ` · 报告修订 #${this.revisions[this.revision]}` : this.source.through !== undefined ? ` · stats 截止 #${this.source.through}` : '';
+    const left: TextSegment[] = [{ text: ' ◆ ', fg: 'ac.info' }, { text: 'eval', fg: 'fg.primary', bold: true }, { text: `  计划 ${this.source.label}${old} · ${clean(report.purpose)} · ${sides}`, fg: 'fg.faint' }];
     const badge = isolationBadge(report);
     const right: TextSegment[] = [{ text: badge.text, fg: badge.fg }, { text: ` · ${graderText(report)}${this.from === 'snapshot' ? ' · 报告快照' : ''} `, fg: 'fg.faint' }];
     // 头部右侧是事实：放不下（宽度小于 100）时移到第二行，不收起（U12）。
