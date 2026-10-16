@@ -627,7 +627,7 @@ export class ReadOnlyTui {
   private openImproveHistory(id?:string,nested=false,suppressions=false) {
     const management=this.improveManagement();
     const view=new ImproveView(this.options.dataRoot,id,suppressions,{workspace:this.options.workspace,action:a=>management.action(a),restore:id=>management.restore(id),feedback:text=>this.feedback(text),
-      openEval:source=>{this.evalPlan=new EvalPlanView(source,this.evalHost,{runningHere:()=>this.improveBatch.canStop(source.origin)});this.pushView('eval-plan');}});
+      openEval:source=>this.openEvalPlan(source)});
     this.improveView=view;if(nested)this.pushView('improve');else this.openPanel('improve');
   }
   private async runImproveManagement(label:string,reportId:string|undefined,work:(signal:AbortSignal)=>Promise<unknown>) {
@@ -1374,7 +1374,7 @@ export class ReadOnlyTui {
     let draftSaved=false,draftLines=0,terminalRestored=true;
     try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;draftLines=draft.split(/\r\n|\r|\n/).length;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
     try {await evalStopping;await this.active;} finally {
-      this.closeTrial();await Promise.allSettled(this.trialClosures);this.metricsView?.cancel();
+      this.closeTrial();this.metricsView?.cancel();await Promise.allSettled(this.trialClosures);
       this.stopped=true;if(this.timer)clearInterval(this.timer);this.removeInput?.();for(const remove of this.removeSignals)remove();
       if(this.started) {
         try {if(this.widths&&!await this.widths.settle()){terminalRestored=false;this.failure??='WIDTH_QUERY_BOUNDARY_UNKNOWN: terminal drain is bounded';}}catch(error){terminalRestored=false;this.failure??=`字宽清理失败：${String(error)}`;}
