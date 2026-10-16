@@ -302,8 +302,9 @@ test('trial trace: restricted-side raw beside host-mediated usage; fallback list
   const screen = () => plain(app.screen()).join('\n'), key = (data: string) => terminal.input(data);
   try {
     app.start(); key(`/eval ${source.label}`); key('\r'); key('\r');
-    for (let i = 0; i < 200 && !/run r-/.test(screen()); i++) await new Promise(resolve => setTimeout(resolve, 10));
+    for (let i = 0; i < 200 && !screen().includes('◆ trace'); i++) await new Promise(resolve => setTimeout(resolve, 10));
     assert.match(screen(), /◆ trial/);
+    assert.match(screen(), /◆ trace/, 'wait for the copied trace, not the show run label behind the loading view');
     assert.match(screen(), /run r-/);
     for (let i = 0; i < 10 && !/tool · read/.test(screen()); i++) key('\x1b[B');
     assert.match(screen(), /tool · read/);
