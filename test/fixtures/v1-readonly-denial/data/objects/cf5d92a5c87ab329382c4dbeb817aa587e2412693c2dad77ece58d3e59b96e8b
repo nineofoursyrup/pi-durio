@@ -1,0 +1,14 @@
+/** Report viewer has no runtime, provider, selection or write capability. */
+export declare class ImproveView {
+    private root;
+    private page;
+    private after;
+    private previous;
+    private selected;
+    private line;
+    private content;
+    constructor(root: string, id?: string, suppressions?: boolean);
+    scroll(delta: number): void;
+    handleInput(data: string): void;
+    render(width: number, height: number): string[];
+}

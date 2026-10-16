@@ -1,0 +1,123 @@
+import { type Terminal } from '@earendil-works/pi-tui';
+import { type RunResult, type ToolEnvironmentConfig } from '../runtime.js';
+import { TerminalWidthGate } from './width-gate.js';
+export interface TuiOptions {
+    workspace: string;
+    dataRoot: string;
+    mode: 'live' | 'offline';
+    transport?: typeof fetch;
+    coding?: boolean;
+    toolEnvironment?: ToolEnvironmentConfig;
+    runId?: string;
+    terminal?: Terminal;
+    draftRoot?: string;
+    copy?: (text: string) => Promise<boolean | string>;
+    /** Only deterministic injected-terminal tests may skip native measurement. */
+    widthCalibration?: false;
+}
+export interface TuiExit {
+    result?: RunResult;
+    error?: string;
+    draftSaved: boolean;
+    widthCalibration?: ReturnType<TerminalWidthGate['snapshot']>;
+}
+/** macOS clipboard adapter: exit code acknowledges the actual clipboard write. No shell or OSC 52 fallback. */
+export declare function copyToMacClipboard(text: string): Promise<boolean | string>;
+/** Product UI owns presentation/drafts. Execution and decisions use the shared checked host boundary. */
+export declare class ReadOnlyTui {
+    private readonly options;
+    readonly closed: Promise<TuiExit>;
+    private resolveClosed;
+    private readonly terminal;
+    private readonly tui;
+    private readonly editor;
+    private readonly transcript;
+    private readonly scroll;
+    private readonly drafts;
+    private readonly copy;
+    private records;
+    private summaries;
+    private latestText;
+    private runId?;
+    private sessionId?;
+    private model;
+    private result?;
+    private active?;
+    private controller?;
+    private cancellation;
+    private readonly control;
+    private queue;
+    private queueAfter?;
+    private queuePrevious;
+    private queueNext;
+    private recovery?;
+    private viewingRecovery;
+    private phase;
+    private notice;
+    private savedDraft?;
+    private lastText;
+    private confirmation?;
+    private followChord;
+    private panel?;
+    private historyView?;
+    private metricsView?;
+    private evalView?;
+    private improveView?;
+    private improveSelectionView?;
+    private storageView?;
+    private hidePanel?;
+    private pendingRefresh;
+    private timer?;
+    private started;
+    private stopped;
+    private exiting?;
+    private failure?;
+    private historyWindow;
+    private removeInput?;
+    private restoreTerminalWrite?;
+    private removeSignals;
+    private widths?;
+    private displaySources;
+    constructor(options: TuiOptions);
+    start(): void;
+    /** Visible frame for diagnostics/tests; no runtime internals or writable handles. */
+    screen(): string[];
+    private status;
+    private usage;
+    private input;
+    private submit;
+    private command;
+    private improve;
+    private submitImproveChoice;
+    private compact;
+    private compactionText;
+    private cancelLatestCompaction;
+    private applyResult;
+    private finished;
+    private enqueue;
+    private loadQueue;
+    private queueText;
+    private authorization;
+    private queueDecision;
+    private openRecovery;
+    private recoveryText;
+    private recoveryDecision;
+    private stop;
+    private refresh;
+    private projectConversation;
+    private rebuild;
+    private bottom;
+    private window;
+    private openDetail;
+    private openPanel;
+    private panelLines;
+    private panelInput;
+    private loadDetail;
+    private closePanel;
+    private requestExit;
+    private copyOutput;
+    /** Controlled exit is shared by explicit UI exits and catchable process faults/signals. */
+    exit(): Promise<TuiExit>;
+    private finishExit;
+}
+export declare function runTui(options: TuiOptions): Promise<TuiExit>;

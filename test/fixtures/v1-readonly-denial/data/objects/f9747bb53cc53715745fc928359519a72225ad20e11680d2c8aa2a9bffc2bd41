@@ -1,0 +1,96 @@
+import { DetailPage } from './detail-page.js';
+export { DetailPage, type DetailSummary } from './detail-page.js';
+import type { ConversationId, EntryId, SubmissionRecord } from '@earendil-works/pi-durable';
+import type { RecoveryRecords } from './recovery-facts.js';
+import type { RecoveryDecision, RecoveryTool } from './recovery.js';
+import { type StorageReader } from './storage-projection.js';
+export interface RecoveryPage {
+    offset?: number;
+    limit?: number;
+    snapshotId?: string;
+}
+export declare const boundedText: (text: string, max?: number) => string;
+export declare function recoverySteerRequests(records: RecoveryRecords, accepted: any, runId: string): Generator<string, void, unknown>;
+type CompactionDetail = {
+    taskId: number;
+    reason: string;
+    status: string;
+    submissionId?: number;
+    submissionStatus?: string;
+    entryId?: number;
+};
+/** All decision booleans/counts come from the complete scan. Display pages cannot grant authority. */
+export declare function projectRecovery(storage: StorageReader, records: RecoveryRecords, accepted: any, started: any, runId: string, page: RecoveryPage, resolutions: NonNullable<RecoveryDecision['resolutions']>, reason: (value: string) => void): Promise<{
+    tools: DetailPage<RecoveryTool>;
+    compactions: DetailPage<CompactionDetail>;
+    unknownModelAttempts: DetailPage<string>;
+    pending: DetailPage<{
+        kind: string;
+        id: number;
+        status: string;
+    }>;
+    taskCount: number;
+    submissionCount: number;
+    main: ({
+        readonly id: import("@earendil-works/pi-durable").SubmissionId;
+        readonly conversationId: ConversationId;
+        readonly requestId?: string;
+    } & {
+        readonly type: "input";
+    } & {
+        readonly status: "queued";
+        readonly entry?: never;
+        readonly answer?: never;
+        readonly reason?: never;
+        readonly detail?: never;
+    }) | ({
+        readonly id: import("@earendil-works/pi-durable").SubmissionId;
+        readonly conversationId: ConversationId;
+        readonly requestId?: string;
+    } & {
+        readonly type: "input";
+    } & {
+        readonly status: "placed";
+        readonly entry: EntryId;
+        readonly answer?: never;
+        readonly reason?: never;
+        readonly detail?: never;
+    }) | ({
+        readonly id: import("@earendil-works/pi-durable").SubmissionId;
+        readonly conversationId: ConversationId;
+        readonly requestId?: string;
+    } & {
+        readonly type: "input";
+    } & {
+        readonly status: "done";
+        readonly entry: EntryId;
+        readonly answer: EntryId;
+        readonly reason?: never;
+        readonly detail?: never;
+    }) | ({
+        readonly id: import("@earendil-works/pi-durable").SubmissionId;
+        readonly conversationId: ConversationId;
+        readonly requestId?: string;
+    } & {
+        readonly type: "input";
+    } & {
+        readonly status: "unanswered";
+        readonly entry?: EntryId;
+        readonly answer?: never;
+        readonly reason: string;
+        readonly detail?: import("@earendil-works/chord").JsonValue;
+    }) | undefined;
+    placed: SubmissionRecord | undefined;
+    modelAttempts: number;
+    toolCounts: {
+        committed: number;
+        'completed-uncommitted': number;
+        'not-dispatched': number;
+        unknown: number;
+    };
+    unknownTools: number;
+    unresolvedTools: number;
+    matchedResolutions: number;
+    readOnly: boolean;
+    agent: import("@earendil-works/pi-durable").JsonObject | undefined;
+}>;

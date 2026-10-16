@@ -1,0 +1,79 @@
+import type { Conversation, Harness } from '@earendil-works/pi-durable';
+import { type ControlAdmission, type ControlKind, type ControlTarget, type QueueItemFact } from './evidence.js';
+export interface ControlInput {
+    id: string;
+    kind: ControlKind;
+    input: string;
+    target: ControlTarget;
+}
+export interface QueueDecision {
+    id: string;
+    requestId: string;
+    action: 'withdraw' | 'reattach';
+    target: ControlTarget;
+    receiptSeq: number;
+}
+export declare function findQueueItem(root: string, id: string): QueueItemFact | undefined;
+export declare function findCoalescedControl(root: string, id: string): {
+    id: string;
+    requestId: string;
+    input: ControlInput;
+} | undefined;
+export declare function validControlId(value: string): void;
+export declare function previousQueueDecision(root: string, decision: QueueDecision): boolean;
+export interface CompactionCancellation {
+    id: string;
+    taskId: number;
+    target: ControlTarget;
+}
+export interface ControlBinding {
+    cancelCompaction?(input: CompactionCancellation): Promise<unknown>;
+    readonly target: ControlTarget;
+    submit(input: ControlInput): Promise<QueueItemFact>;
+    withdraw(decision: QueueDecision): Promise<QueueItemFact>;
+}
+/** Public host controller: no writable storage, Conversation or Harness handle escapes. */
+export declare class TaskControl {
+    private binding?;
+    target(): ControlTarget | null;
+    submit(input: ControlInput): Promise<QueueItemFact>;
+    withdraw(decision: QueueDecision): Promise<QueueItemFact>;
+    cancelCompaction(input: CompactionCancellation): Promise<unknown>;
+    /** @internal Runtime ownership only. */
+    attach(binding: ControlBinding): void;
+    /** @internal */ detach(binding: ControlBinding): void;
+}
+/** Host admission boundary around the public Pi submission API, never an agent loop. */
+export declare class RunControls {
+    private readonly options;
+    private line;
+    private items;
+    private remove;
+    private closedReason?;
+    readonly target: ControlTarget;
+    constructor(options: {
+        root: string;
+        target: ControlTarget;
+        version: ControlAdmission['executionVersion'];
+        authorization: unknown;
+        conversation: Conversation;
+        harness: Harness;
+        guard: () => void;
+        record: (kind: string, data: unknown) => number;
+        failure: (error: unknown) => void;
+        cancelCompaction?: (taskId: number) => Promise<unknown>;
+    });
+    private serial;
+    private receipt;
+    private fact;
+    private observe;
+    submit(input: ControlInput): Promise<QueueItemFact>;
+    cancelCompaction(input: CompactionCancellation): Promise<unknown>;
+    withdraw(decision: QueueDecision): Promise<QueueItemFact>;
+    /** Closes admission synchronously before awaiting any storage operation. */
+    freeze(reason: string): Promise<void>;
+    settleSteers(): Promise<void>;
+    pending(): QueueItemFact[];
+    drain(): Promise<void>;
+    close(): void;
+}

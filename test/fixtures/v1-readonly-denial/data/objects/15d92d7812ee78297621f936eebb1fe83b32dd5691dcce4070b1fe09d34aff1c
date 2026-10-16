@@ -1,0 +1,24 @@
+import { Evidence, type BlobRef } from '../evidence.js';
+export interface ContentFile {
+    path: string;
+    ref: BlobRef;
+    mode?: number;
+}
+export interface EvalFact {
+    seq: number;
+    at: string;
+    kind: string;
+    data: any;
+    source: string;
+}
+export declare function evalFacts(root: string, id?: string): EvalFact[];
+export declare function appendFact(e: Evidence, kind: string, data: unknown): string;
+export { regularFiles } from '../file-inventory.js';
+export declare function captureFiles(e: Evidence, root: string, names: readonly string[]): {
+    files: ContentFile[];
+    bytes: number;
+    id: string;
+};
+export declare function materialize(root: string, files: readonly ContentFile[], destination: string): void;
+/** Only execution modules go to the VM. Host runner, fixtures, graders and reports are excluded. */
+export declare function installedRuntimeFiles(installation: string): string[];

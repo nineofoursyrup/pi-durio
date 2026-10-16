@@ -1,0 +1,1 @@
+export declare function improveCommand(action: string | undefined, dataRoot: string, values: Record<string, string | boolean | undefined>): Promise<void>;

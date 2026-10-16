@@ -1,0 +1,15 @@
+export declare const workspaceOwnerRegistry: string;
+export declare function resolveWorkspaceRoot(workspace: string): Promise<string>;
+export declare function acquireWorkspaceOwner(workspace: string, onCompromised: (error: Error) => void): Promise<{
+    root: string;
+    path: string;
+    claim: Readonly<{
+        pid: number;
+        host: string;
+        started: string;
+        token: `${string}-${string}-${string}-${string}-${string}`;
+    }>;
+    setOnCompromised: (listener: (error: Error) => void) => void;
+    assertHeld: () => void;
+    release(): Promise<void>;
+}>;

@@ -1,0 +1,20 @@
+import { executionConfig } from './execution-config.js';
+import { type DefaultChange, type TaskType } from './improve-defaults.js';
+import type { ValidationGroup } from './improve-validation.js';
+export interface EffectiveConfig {
+    instructions: string;
+    settings: ReturnType<typeof executionConfig>['settings'];
+}
+export interface EffectiveProfileChange {
+    workspace: string;
+    taskType: TaskType;
+    before: EffectiveConfig;
+    after: EffectiveConfig;
+}
+/** Read-only authoring input. This is the currently selected actual loader
+ * configuration, never inferred from a candidate file that has not been used. */
+export declare function readImproveEffectiveConfig(root: string, workspace: string, taskType: TaskType): EffectiveConfig;
+export declare function effectiveProfileChanges(changes: DefaultChange[]): EffectiveProfileChange[];
+/** A file-only check cannot stand in for changed loading behavior. Exact full
+ * expectations are user plan data and execute before each selected regression. */
+export declare function validateProfileBasis(group: ValidationGroup, profiles: EffectiveProfileChange[]): void;

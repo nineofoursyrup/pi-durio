@@ -1,0 +1,27 @@
+import { type ImproveDecision } from '../improve-decisions.js';
+/** A local unselected draft. Only a rendered aggregate followed by Enter calls
+ * the shared host submission API supplied by the application's lifecycle. */
+export declare class ImproveSelectionView {
+    private root;
+    private template;
+    private submit;
+    private changed;
+    private report;
+    private selected;
+    private line;
+    private revealSelection;
+    private viewport;
+    private modes;
+    private stage;
+    private shown;
+    private busy;
+    private message;
+    private prepared?;
+    constructor(root: string, template: ImproveDecision, submit: (d: ImproveDecision) => Promise<unknown>, changed?: () => void);
+    get inProgress(): boolean;
+    draft(): ImproveDecision;
+    scroll(delta: number): void;
+    handleInput(data: string): Promise<void>;
+    render(width: number, height: number): string[];
+}
+export { ImproveView } from './improve.js';

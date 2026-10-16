@@ -1,0 +1,144 @@
+import { type TaskOrigin } from './fact-clock.js';
+import { type ImproveRequest, type ImproveReport } from './improve.js';
+import { type CompactionResultFact } from './compaction.js';
+import { type ProviderBoundary } from './provider-boundary.js';
+import { type UsageState } from '@earendil-works/pi-durable';
+import { type QueueItemFact, type FaultInjector } from './evidence.js';
+import { TaskControl, type QueueDecision } from './control.js';
+import { type ToolEnvironmentConfig } from './coding-environment.js';
+import { type TaskProfile } from './task-profile.js';
+import { type RecoveryAuthorization, type RecoveryOptions, type RecoveryDecision, type RecoveryReport } from './recovery.js';
+export { readRun, readObject, readAcceptedTasks, readQueue } from './evidence.js';
+export { TaskControl } from './control.js';
+export type { ControlInput, QueueDecision } from './control.js';
+export { readRecoveryDetail, inspectRecovery, checkRecovery, settleRecoveryOwners } from './recovery.js';
+export type { RecoveryOptions, RecoveryDecision, RecoveryReport, RecoveryAuthorization } from './recovery.js';
+export interface ReadTaskOptions {
+    dataRoot: string;
+    workspace: string;
+    input: string;
+    mode: 'live' | 'offline';
+    /** Trusted embedding host only; never accepted from candidate messages or tools. */
+    taskOrigin?: TaskOrigin;
+    /** Explicit offline transport boundary. Never silently fall back from a live provider. */
+    transport?: typeof fetch;
+    /** Trusted host dispatch capability; never accepted from model/tool data. */
+    providerBoundary?: ProviderBoundary;
+    /** Offline controlled validation of the same public compaction path. */
+    verificationCompaction?: {
+        reserveTokens: number;
+        keepRecentTokens: number;
+    };
+    /** Fixed eval profile; requires the trusted provider dispatch capability. */
+    verificationProfile?: TaskProfile;
+    signal?: AbortSignal;
+    /** stop persists abort intent; exit preserves unfinished work and closes. */
+    cancellation?: 'stop' | 'exit';
+    /** Host cleanup waiting policy, not a claim that work stops at the deadline. */
+    cleanupTimeoutMs?: number;
+    onObservation?: (event: {
+        kind: string;
+        runId: string;
+    }) => void;
+    fault?: FaultInjector;
+    /** Injectable credential source for embedding/tests; value is never recorded. */
+    apiKey?: string;
+    /** UI and headless share the same admission/withdrawal boundary. */
+    control?: TaskControl;
+    /** Import a verified, completed active context into this independent task. */
+    contextRunId?: string;
+}
+export interface CodingTaskOptions extends ReadTaskOptions {
+    toolEnvironment?: ToolEnvironmentConfig;
+}
+export type { ToolEnvironmentConfig } from './coding-environment.js';
+export interface RunResult {
+    runId: string;
+    sessionId: string;
+    taskId: string;
+    mode: 'live' | 'offline';
+    status: 'completed' | 'failed' | 'aborted' | 'unknown';
+    answer?: string;
+    reason?: string;
+    observation: 'ok' | 'degraded';
+    cleanup: 'confirmed' | 'unknown';
+    lifecycle?: {
+        intent: 'stop' | 'exit' | null;
+        disposition: 'completed' | 'failed' | 'aborted' | 'resumable' | 'needs-recovery';
+        cleanupTimeoutMs: number;
+        storage: 'not-opened' | 'closed' | 'unknown';
+        owner: 'release-after-host-close' | 'retained';
+        remoteTermination: 'unknown';
+    };
+    executionCleanup?: {
+        managedCommands: 'settled' | 'unknown';
+        started: number;
+        settled: number;
+        externalProcesses: 'unknown';
+    };
+    compaction?: CompactionResultFact;
+    improve?: ImproveReport;
+    controls?: {
+        status: 'needs-decision';
+        exitCode: 75;
+        requestIds: string[];
+        reason: string;
+    };
+    usage: {
+        source: 'pi.usage';
+        scope: string;
+        completeness: 'known' | 'partial' | 'unknown';
+        value: UsageState | null;
+        cost: {
+            kind: 'estimate';
+            currency: 'USD';
+            source: string;
+            observedAt: string;
+        };
+    };
+}
+export declare function runReadTask(options: ReadTaskOptions): Promise<RunResult>;
+export declare function runCodingTask(options: CodingTaskOptions): Promise<RunResult>;
+export declare function waitForRun(run: Promise<RunResult>, signal?: AbortSignal): Promise<RunResult>;
+/** Explicit recovery is a checked reopening of the same run, not a new scheduler or task loop. */
+export declare function recoverRun(options: RecoveryOptions & {
+    decision: RecoveryDecision;
+    transport?: typeof fetch;
+    apiKey?: string;
+    signal?: AbortSignal;
+    cancellation?: 'stop' | 'exit';
+    onObservation?: ReadTaskOptions['onObservation'];
+    fault?: FaultInjector;
+    control?: TaskControl;
+}): Promise<RunResult | RecoveryReport>;
+export interface CompactOptions extends Omit<CodingTaskOptions, 'workspace' | 'input' | 'mode'> {
+    runId: string;
+    requestId: string;
+    authorization: RecoveryAuthorization;
+}
+/** Explicit idle-session maintenance. A request is its authorization; history queries never call this. */
+export declare function compactContext(options: CompactOptions): Promise<RunResult>;
+export interface ImproveOptions extends Omit<ReadTaskOptions, 'input' | 'providerBoundary' | 'control' | 'contextRunId' | 'verificationCompaction'> {
+    targetRunId: string;
+    request: ImproveRequest;
+}
+/** Explicit scoped analysis in the same Pi runtime; report reads never enter it. */
+export declare function analyzeImprove(options: ImproveOptions): Promise<RunResult>;
+/** Persist a machine-readable decision requirement without opening the upstream Harness. */
+export declare function checkQueue(dataRoot: string): Promise<{
+    status: string;
+    exitCode: number;
+    items: QueueItemFact[];
+    options: string[];
+    reason: string;
+}>;
+/** Headless/TUI source-bound queue decision. Reattachment runs the same checked runtime. */
+export declare function decideQueue(options: RecoveryOptions & {
+    decision: QueueDecision;
+    transport?: typeof fetch;
+    apiKey?: string;
+    signal?: AbortSignal;
+    cancellation?: 'stop' | 'exit';
+    control?: TaskControl;
+    onObservation?: ReadTaskOptions['onObservation'];
+}): Promise<QueueItemFact | RunResult>;

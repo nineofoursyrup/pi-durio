@@ -1,0 +1,61 @@
+import { type BlobRef } from './evidence.js';
+export interface FixRequest {
+    id: string;
+    sources: readonly string[];
+    dependencies?: readonly string[];
+    purpose: string;
+}
+/** Fixed facts protect verified content, not just a link. No runtime/session is opened. */
+export declare function fixEvidence(root: string, request: FixRequest): Promise<any>;
+export declare function verifyFixed(root: string, id: string): {
+    source: string;
+    state: string;
+    release: any;
+    manifest?: undefined;
+    scope?: undefined;
+    objects?: undefined;
+    error?: undefined;
+} | {
+    source: string;
+    state: string;
+    manifest: any;
+    scope: string;
+    objects: number;
+    release?: undefined;
+    error?: undefined;
+} | {
+    source: string;
+    state: string;
+    error: string;
+    release?: undefined;
+    manifest?: undefined;
+    scope?: undefined;
+    objects?: undefined;
+};
+/** Cleanup implementations consume this closure and must retain the manifest itself too. */
+export declare function iterateFixedDependencies(root: string): Generator<BlobRef, void, unknown>;
+export declare function unfixedEvidence(root: string, fixedEvidenceId: string): any;
+/** An explicit release affects only this fixation. Other fixed scopes still protect shared content. */
+export declare function unfixEvidence(root: string, request: {
+    id: string;
+    fixedEvidenceId: string;
+    reason: string;
+}): Promise<any>;
+export declare function fixedDependencies(root: string): BlobRef[];
+export declare function estimateUsage(root: string, request: {
+    id: string;
+    runIds: string[];
+    through: number;
+    price: {
+        version: string;
+        source: string;
+        currency: 'USD';
+        effectiveAt: string;
+        perMillion: {
+            input: number;
+            output: number;
+            cacheRead: number;
+            cacheWrite: number;
+        };
+    };
+}): Promise<any>;

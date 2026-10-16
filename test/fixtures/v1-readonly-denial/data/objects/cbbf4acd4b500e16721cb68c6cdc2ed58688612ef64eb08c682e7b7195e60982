@@ -1,0 +1,139 @@
+import { DatabaseSync } from 'node:sqlite';
+export declare const digest: (bytes: string | Uint8Array) => string;
+export interface EvidenceRecord {
+    seq: number;
+    kind: string;
+    at: string;
+    data: unknown;
+}
+export interface BlobRef {
+    sha256: string;
+    bytes: number;
+}
+export type FaultInjector = (kind: string) => void;
+export interface FactReceipt {
+    seq: number;
+    kind: string;
+    at: string;
+}
+export interface ControlTarget {
+    workspace: string;
+    sessionId: string;
+    taskId: string;
+    runId: string;
+}
+export type ControlKind = 'steer' | 'follow-up' | 'compact' | 'improve';
+export type QueueStatus = 'pending' | 'dispatching' | 'applied' | 'withdrawn' | 'frozen';
+export interface ControlAdmission {
+    requestId: string;
+    kind: ControlKind;
+    input: string;
+    taskId: string | null;
+    target: ControlTarget;
+    executionVersion: {
+        artifactId: string;
+        configSeq: number;
+        artifactSeq: number;
+    };
+    authorization: unknown;
+}
+export interface ControlReceipt {
+    requestId: string;
+    status: QueueStatus;
+    reason: string;
+    execution?: {
+        runId: string;
+        sessionId: string;
+    } | null;
+    upstream?: {
+        submissionId: number;
+        status: string;
+        entry?: number;
+    } | null;
+}
+export interface QueueItemFact extends ControlAdmission {
+    runId: string | null;
+    execution: {
+        runId: string;
+        sessionId: string;
+    } | null;
+    acceptedAt: string;
+    acceptedSeq: number;
+    updatedAt: string;
+    status: QueueStatus;
+    reason: string;
+    receipt: FactReceipt;
+    upstream: {
+        submissionId: number;
+        status: string;
+        entry?: number;
+    } | null;
+}
+export interface AcceptedTaskFact {
+    taskId: string;
+    requestId: string;
+    kind: 'task' | 'follow-up';
+    input: string;
+    workspace: string;
+    /** Immutable originating identity, separate from the later execution linkage. */
+    target: ControlTarget | null;
+    execution: {
+        runId: string;
+        sessionId: string;
+    } | null;
+    runId: string | null;
+    acceptedAt: string;
+    acceptedSeq: number;
+    updatedAt: string;
+    status: string;
+    reason: string | null;
+    executionVersion: ControlAdmission['executionVersion'] | null;
+    authorization: unknown;
+    receipt: FactReceipt;
+}
+export interface FactPageOptions {
+    after?: number;
+    limit?: number;
+    through?: number;
+}
+/** Strictly readonly. `through` bounds admissions AND all status/link/decision facts on every page. */
+export declare function readQueue(root: string, options?: FactPageOptions & {
+    targetRunId?: string;
+}): {
+    items: QueueItemFact[];
+    through: number;
+    next: number | null;
+};
+/** One member per independent acceptance; steer is never a member and a linked follow-up is never counted twice. */
+export declare function readAcceptedTasks(root: string, options?: FactPageOptions): {
+    tasks: AcceptedTaskFact[];
+    through: number;
+    next: number | null;
+};
+/** Host-owned facts, separate from upstream durable state. Appends and blobs are synchronous backpressure. */
+export declare class Evidence {
+    readonly root: string;
+    readonly runId: string;
+    private readonly fault?;
+    readonly db: DatabaseSync;
+    constructor(root: string, runId: string, fault?: FaultInjector | undefined);
+    blob(bytes: string | Uint8Array): BlobRef;
+    append(kind: string, data: unknown): number;
+    close(): void;
+}
+export declare function readObject(root: string, ref: BlobRef): Buffer;
+/** No Harness or writable storage is opened. Paginated host facts reference durable content-addressed originals. */
+export declare function openHostReadonly(root: string): DatabaseSync;
+export declare function readRun(root: string, runId: string, options?: {
+    after?: number;
+    limit?: number;
+}): Promise<{
+    records: EvidenceRecord[];
+    next: number | null;
+    recovery?: EvidenceRecord | undefined;
+    resultClock?: {} | undefined;
+    runId: string;
+    result: {
+        [x: string]: unknown;
+    };
+}>;
