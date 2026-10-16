@@ -127,7 +127,7 @@ export class RunView {
         if (entry) { seen.add(attempt); entries.push(entry); }
       } else if (ref.kind === 'recovery.capability-denied') {
         const tool = String(value?.tool ?? '工具');
-        entries.push({ kind: 'tool', ref, attemptId: `denied:${ref.seq}`, tool, args: '', argKind: 'text', state: 'denied', startedAt: ref.at, summary: `被拒 · 只读续跑不允许 ${tool}`, detail: ref });
+        entries.push({ kind: 'tool', ref, attemptId: `denied:${ref.seq}`, tool, args: '', argKind: 'text', state: 'denied', startedAt: ref.at, summary: value?.duplicate ? '已拦截 · 该操作已完成，不重做' : `被拒 · 只读续跑不允许 ${tool}`, detail: ref });
       } else if (ref.kind === 'control.receipt') {
         // 已接入的 steer 在接入位置显示为标 steer 的用户消息块；follow-up 等开自己的 run，不在这里显示。
         if (value?.status !== 'applied') continue;

@@ -1,10 +1,15 @@
-/** 2a trace 视图的列表层与详情栏（U7）。只读：不调用模型、不写记录、不取锁。 */
+/** 2a trace 视图的列表层与详情栏（U7）。只读：不调用模型、不取锁；只有 `p` 固定为证据经确认后写一条固定记录。 */
+import { randomUUID } from 'node:crypto';
+import { existsSync, realpathSync } from 'node:fs';
+import { join } from 'node:path';
 import { matchesKey, visibleWidth, wrapTextWithAnsi } from '@earendil-works/pi-tui';
+import { records, decode } from '../history.js';
+import { fixEvidence, verifyFixed } from '../fixed-evidence.js';
 import { TraceReader, RAW_STATE_LABEL, type Trace, type TraceSpan, type TraceLlm, type TraceRaw } from '../trace.js';
 import { readDisplayIndex, type DisplayIndex } from '../display-number.js';
 import { formatCostTotals, requestCostView } from '../cost-estimate.js';
 import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, resetSgr, type TextSegment, type TokenName } from './theme.js';
-import { clean, hintLine, statusEmpty, truncateEnd, truncateMiddle } from './view-stack.js';
+import { clean, hintLine, statusEmpty, truncateEnd, truncateMiddle, type ConfirmConfig } from './view-stack.js';
 
 /** 秒级耗时：0.04s、8.7s、1m02s、3h12m。 */
 export function formatDuration(ms: number) {
@@ -34,6 +39,24 @@ function line(segments: TextSegment[], width: number): string {
   });
   return used < width ? out + styledLine([], width - used) : out;
 }
+
+/** 列表层的 Enter 与 `p` 需要宿主（app.ts）提供的；不传时这两个键不起作用。 */
+export interface TraceHost {
+  /** 本进程有任务运行（持有写入者锁）。 */
+  busy(): boolean;
+  feedback(text: string): void;
+  /** 打开确认框（U12）；Enter 后调用 run。 */
+  confirm(config: ConfirmConfig, run: () => Promise<void>): void;
+  changed(): void;
+  /** Enter：为选中的 span 进入原文层。 */
+  openRaw(span: TraceSpan): void;
+}
+
+/** 数据根写入者锁是否被占用（只看锁标记，不取锁）。 */
+function ownerHeld(root: string) {
+  try { const canonical = realpathSync(root); return existsSync(`${canonical}.lock`) || existsSync(join(canonical, 'owner.json')); } catch { return false; }
+}
+const failureCode = (error: unknown) => clean((error as NodeJS.ErrnoException).code ?? (error instanceof Error ? error.message : String(error)).split(/[\s:]/)[0]) || 'FIX_FAILED';
 
 type Row = { kind: 'run' } | { kind: 'span'; span: TraceSpan; last: boolean } | { kind: 'gap'; text: string };
 
@@ -70,12 +93,60 @@ export class TraceView {
   private rows: Row[] = [];
   private bodyTop = 0;
   private lastRead = 0;
-  constructor(private readonly root: string, readonly runId: string, private readonly live: () => boolean = () => false) {
+  /** 未解除的固定记录（来源记录集合）；核对结果按固定记录缓存。 */
+  private readonly fixations: { source: string; selected: Set<string> }[] = [];
+  private readonly verified = new Map<string, boolean>();
+  constructor(private readonly root: string, readonly runId: string, private readonly live: () => boolean = () => false, private readonly host?: TraceHost) {
     this.reader = new TraceReader(root, runId);
     this.index = readDisplayIndex(root);
     this.current = this.reader.trace(live());
+    for (const ref of records(root, { kinds: ['evidence.fixed'] })) {
+      try { this.fixations.push({ source: ref.id, selected: new Set(decode(root, ref).selected ?? []) }); } catch { /* 不可读的固定记录不算已固定。 */ }
+    }
   }
   get trace() { return this.current; }
+  get runLabel() { return this.index.label('run', this.runId); }
+  /** 行名的简写，用于原文层头部与固定用途：`llm #3`、`tc-…-02 bash`、`compaction 自动 · llm #5`。 */
+  spanName(span: TraceSpan) {
+    if (span.kind === 'llm') return `llm #${span.llm!.number}`;
+    if (span.kind === 'compaction') return `compaction ${span.compaction!.trigger === 'automatic' ? '自动' : '手动'} · ${requestRange(span.compaction!.requests)}`;
+    const tool = span.tool!;
+    return `${tool.call !== null ? `${this.index.toolCall(this.runId, tool.call)} ` : ''}${tool.name}${tool.denied ? ' 被拒' : ` · attempt ${tool.attempt}`}`;
+  }
+  /** 该 span 被固定为证据（未解除、内容核对完整）时返回固定记录 id。E2：已缺失内容不显示固定成功。 */
+  fixedOf(span: TraceSpan) {
+    for (const fixation of this.fixations) {
+      if (!span.sources.some(source => fixation.selected.has(source))) continue;
+      if (!this.verified.has(fixation.source)) { let ok = false; try { ok = verifyFixed(this.root, fixation.source).state === 'protected'; } catch { /* 核对失败不算已固定。 */ } this.verified.set(fixation.source, ok); }
+      if (this.verified.get(fixation.source)) return fixation.source;
+    }
+    return undefined;
+  }
+  /** 列表层 `p`：以所选 span 的记录为来源固定为证据（依赖闭包沿用 fixEvidence，覆盖整个 run）。 */
+  private pin(host: TraceHost) {
+    const span = this.selectedSpan;
+    if (!span) { host.feedback('选中一个 span 后按 p 固定为证据'); return; }
+    if (this.fixedOf(span)) { host.feedback('已固定为证据 · 不重复固定'); return; }
+    // fixEvidence 要取数据根写入者锁：锁被占用时不弹框，只提示（#47 第 6 节）。
+    if (host.busy() || ownerHeld(this.root)) { host.feedback('有任务运行中，结束后再固定'); return; }
+    const purpose = `trace：${this.runLabel} ${this.spanName(span)}`, sources = span.sources.slice(0, 50);
+    host.confirm({
+      title: '固定为证据', action: '固定',
+      body: [`来源 ${this.spanName(span)} 的 ${sources.length} 条记录`, `用途 ${purpose}`, 'id 自动生成 · 自定义用途用 CLI pi-durio fix'],
+      fixed: [`范围：整个 run ${this.runLabel} 截至此刻的全部原文与执行版本安装文件（依赖闭包）`, '写入一条固定记录 · 不调用模型 · 固定的内容不会被存储清理删除，解除用 pi-durio storage unfix'],
+    }, async () => {
+      try {
+        const result = await fixEvidence(this.root, { id: `tui-fix-${randomUUID()}`, sources, purpose });
+        this.fixations.push({ source: result.source, selected: new Set(result.selected) });
+        this.verified.delete(result.source);
+        host.feedback(this.fixedOf(span) ? '已固定为证据' : '固定记录已写入，但内容核对未通过');
+      } catch (error) {
+        const code = failureCode(error);
+        host.feedback(code.startsWith('OWNER_') ? '有任务运行中，结束后再固定' : `固定失败 · ${code}`);
+      }
+      host.changed();
+    });
+  }
   /** 当前选中的 span；选中 run 行时为 undefined。#79 的原文层与 `p` 从这里取。 */
   get selectedSpan() { return this.current.spans.find(span => span.key === this.selected); }
   select(key: string) { this.selected = key; this.follow = true; }
@@ -86,6 +157,12 @@ export class TraceView {
     else if (matchesKey(data, 'down')) this.select(keys[Math.min(keys.length - 1, at + 1)]);
     else if (matchesKey(data, 'home')) this.select(keys[0]);
     else if (matchesKey(data, 'end')) this.select(keys.at(-1)!);
+    else if (this.host && matchesKey(data, 'enter')) {
+      const span = this.selectedSpan;
+      if (!span) this.host.feedback('选中一个 span 后按 Enter 查看原文');
+      else if (!span.raws.length) this.host.feedback('这一行没有原文项');
+      else this.host.openRaw(span);
+    } else if (this.host && data === 'p') this.pin(this.host);
   }
   scroll(delta: number) { this.offset = Math.max(0, this.offset + delta); this.follow = false; }
   /** 鼠标点击：y 为视图内行号。 */
@@ -94,7 +171,8 @@ export class TraceView {
     if (!row || y < this.bodyTop) return;
     if (row.kind === 'run') this.select('run'); else if (row.kind === 'span') this.select(row.span.key);
   }
-  private refresh() {
+  /** 读入新追加的记录（运行中每 200ms 最多一次）。原文层渲染前也调用。 */
+  refresh() {
     const live = this.live();
     // 运行中每 200ms 最多读一次新记录；查询本身按 run 与序号有界。
     if (Date.now() - this.lastRead >= 200 || !live) {
@@ -150,10 +228,11 @@ export class TraceView {
   }
   private footer(trace: Trace, width: number, esc: string) {
     const stats = `${trace.counts.models} 次模型请求（重试 ${trace.counts.retries}）· ${trace.counts.tools} 次工具调用（恢复后重试 ${trace.counts.recoveryRetries}）· 只读，查看不调用模型、不新增用量`;
-    const keysWidth = Math.min(width, visibleWidth(`↑↓ span · ${esc}`));
+    const keys = this.host ? ['↑↓ span', 'Enter 原文', 'p 固定为证据'] : ['↑↓ span'];
+    const keysWidth = Math.min(width, visibleWidth(`${keys.join(' · ')} · ${esc}`));
     // 键位在右、Esc 最右；放不下时先截断左侧说明，再按 hintLine 从 Esc 左边去掉键位。
-    if (width - keysWidth < 12) return hintLine(['↑↓ span'], width, { esc });
-    return styledLine([{ text: truncateEnd(stats, width - keysWidth - 2), fg: 'fg.label' }], width - keysWidth) + hintLine(['↑↓ span'], keysWidth, { esc });
+    if (width - keysWidth < 12) return hintLine(keys, width, { esc });
+    return styledLine([{ text: truncateEnd(stats, width - keysWidth - 2), fg: 'fg.label' }], width - keysWidth) + hintLine(keys, keysWidth, { esc });
   }
 
   private buildRows(trace: Trace): Row[] {
@@ -216,7 +295,7 @@ export class TraceView {
       return [tree, { text: 'compaction', fg: 'ac.model' }, { text: ` ${c.trigger === 'automatic' ? '自动' : '手动'}` }, { text: ` · ${requestRange(c.requests)}`, fg: 'fg.faint' }, ...(span.outcome === 'failed' ? [{ text: ' ✗', fg: 'ac.err' as TokenName }] : []), ...spin];
     }
     const tool = span.tool!, suffix: TextSegment[] = [];
-    if (tool.denied) suffix.push({ text: ` ✗ 被拒 · 只读续跑不允许 ${tool.name}`, fg: 'ac.err' });
+    if (tool.denied) suffix.push({ text: ` ✗ ${deniedText(tool)}`, fg: 'ac.err' });
     else if (span.outcome === 'failed') suffix.push({ text: ' ✗', fg: 'ac.err' });
     else if (tool.exit === 0) suffix.push({ text: ' ✓', fg: 'ac.ok' });
     if (tool.recoveryRetry) suffix.push({ text: ' 恢复后重试', fg: 'ac.warn' });
@@ -266,7 +345,7 @@ export class TraceView {
   }
   private exitText(span: TraceSpan) {
     const tool = span.tool!;
-    if (tool.denied) return `✗ 被拒 · 只读续跑不允许 ${tool.name}`;
+    if (tool.denied) return `✗ ${deniedText(tool)}`;
     if (tool.exit !== null && tool.exit !== 0) return `exit ${tool.exit} · ${tool.check ? '预先声明的检查，不计运行故障' : '计入工具失败'}`;
     if (tool.exit === 0) return 'exit 0';
     if (span.running) return '运行中';
@@ -274,6 +353,8 @@ export class TraceView {
     return span.outcome === 'ok' ? '已返回' : '未返回结果';
   }
 
+  /** 选中项的完整详情，渲染成整行（宽度小于 100 时原文层顶部显示）。 */
+  detailRows(width: number): string[] { return this.detail(this.current, width - 2).map(segments => line([{ text: ' ' }, ...segments], width)); }
   private detail(trace: Trace, width: number): TextSegment[][] {
     const lines: TextSegment[][] = [];
     const title = (bold: string, rest = '') => lines.push([{ text: truncateEnd(bold, width), fg: 'fg.primary', bold: true }, { text: truncateEnd(rest ? `  ${rest}` : '', Math.max(0, width - visibleWidth(bold))), fg: 'fg.faint' }]);
@@ -312,9 +393,12 @@ export class TraceView {
       kv('费用', `${formatCostTotals(trace.cost)} · 估算 · 非账单`);
       return lines;
     }
+    const fixed = this.fixedOf(span);
+    const pinned = () => { if (fixed) kv('证据', '已固定', 'ac.ok'); };
     if (span.kind === 'tool') {
       const tool = span.tool!;
       title(`tool · ${tool.name}`, `${tool.call !== null ? this.index.toolCall(trace.runId, tool.call) : 'tc 未记录'} · attempt ${tool.attempt}`);
+      pinned();
       if (tool.target) kv(tool.name === 'bash' ? '命令' : '路径', tool.target, tool.name === 'bash' ? 'ac.warn' : 'ac.path');
       kv('起止', offsets(span));
       kv(tool.denied ? '结果' : '退出', this.exitText(span), span.outcome === 'failed' || tool.denied ? 'ac.err' : 'fg.body');
@@ -331,6 +415,7 @@ export class TraceView {
     if (span.kind === 'compaction') {
       const c = span.compaction!;
       title(`compaction · ${c.trigger === 'automatic' ? '自动' : '手动'}`, c.trigger === 'manual' ? '维护 · 不计入头部' : '');
+      pinned();
       kv('触发', c.trigger === 'automatic' ? '自动（上下文接近上限）' : '手动（/compact）');
       kv('源范围', c.entries === null ? '未记录' : `${c.entries} 条`);
       kv('结果', COMPACTION_STATE[c.state ?? ''] ?? (span.running ? '进行中' : '未记录'));
@@ -343,6 +428,7 @@ export class TraceView {
     }
     const llm = span.llm!;
     title(`llm · #${llm.number}`, `${llm.purpose}${llm.round !== null ? ` · 第 ${llm.round} 轮` : ''}`);
+    pinned();
     llmBlock(span, llm);
     kv('起止', offsets(span));
     raws(span.raws);
@@ -355,3 +441,5 @@ export class TraceView {
     return lines;
   }
 }
+
+function deniedText(tool: NonNullable<TraceSpan['tool']>) { return tool.duplicate ? '已拦截 · 该操作已完成，不重做' : `被拒 · 只读续跑不允许 ${tool.name}`; }

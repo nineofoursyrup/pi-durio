@@ -95,7 +95,7 @@ test('paged unknown tools retain complete decision coverage, original navigation
   const taskDetail = await readRecoveryDetail({...options,snapshotId:first.snapshotId,taskId:ids.at(-1)!,limit:4096});
   assert.match(taskDetail.text,/late-original-/); assert.equal((second.tools.at(-1)!.args as any).reference.taskId,ids.at(-1));
   const transport = scriptedTransport([]);
-  const resolutions = first.tools.map(tool => ({ taskId: tool.taskId, choice: 'skip' as const, reason: 'Controlled decision for visible page' }));
+  const resolutions = first.tools.map(tool => ({ taskId: tool.taskId, choice: 'completed' as const, reason: 'Controlled decision for visible page' }));
   const denied = await recoverRun({ ...options, decision: { id: 'only-visible', snapshotId: first.snapshotId, action: 'continue', acceptAdditionalModelAttempts: true, resolutions }, transport: transport.fetch });
   assert.equal(denied.status, 'needs-decision'); assert.ok('reasons' in denied && denied.reasons.some(reason => reason.includes('8 unresolved'))); assert.equal(transport.calls.length, 0);
   await assert.rejects(inspectRecovery({ ...options, page: { offset: 32, snapshotId: 'stale' } }), /STALE_RECOVERY_SNAPSHOT/);

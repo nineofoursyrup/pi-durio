@@ -10,6 +10,7 @@ import { HardwareCursorEditor } from '../src/tui/cursor.js';
 import { demoTransport, scriptedTransport } from '../src/offline.js';
 import { readRun, readQueue, readAcceptedTasks, runReadTask } from '../src/runtime.js';
 import { resolveDisplayInput, readDisplayIndex } from '../src/display-number.js';
+import { readSessionChains } from '../src/session-chain.js';
 
 class TestTerminal implements Terminal {
   columns = 80; rows = 24; kittyProtocolActive = false; writes: string[] = []; stopped = false;
@@ -63,12 +64,21 @@ test('closing the recovery panel cannot unlock execution; explicit end preserves
   const app=new ReadOnlyTui({workspace,dataRoot,runId:original.runId,draftRoot:join(root,'drafts'),mode:'offline',transport:transport.fetch,terminal,widthCalibration:false});app.start();
   const key=(data:string)=>terminal.input(data),screen=()=>app.screen().map(stripTerminalSequences).join('\n');
   try {
-    await until(()=>screen().includes('恢复核对 ·'));
-    key('\x1b');key('must not run');key('\r');assert.match(screen(),/只读历史\/恢复/);assert.equal(transport.calls.length,0);
-    key('\x03');key('/bottom');key('\r');assert.match(screen(),/恢复限制仍生效/);
-    key('/recover');key('\r');await until(()=>screen().includes('恢复核对 ·'));key('e');await until(()=>screen().includes('恢复决定：ended'));
+    // 0 项未知（退出时中断、清理已确认）：面板直接给出“继续旧工作”确认。
+    await until(()=>screen().includes('继续旧工作'));assert.match(screen(),/续跑可能新增模型请求费用/);
+    key('\x1b');assert.match(screen(),/恢复核对 · 只读/);assert.match(screen(),/2  视为已完成/);assert.match(screen(),/不可选 · 没有结果未提交的操作/);
+    assert.match(screen(),/◈ 恢复核对/,'the status line stays below the panel');
+    key('\x1b');assert.doesNotMatch(screen(),/恢复核对 · 只读/);assert.match(screen(),/◈ 恢复核对/);assert.match(screen(),/Enter 打开恢复核对/);
+    // 输入框禁用：不接受文字与 `/` 命令。
+    key('must not run');key('/stats');assert.doesNotMatch(screen(),/must not run|\/stats/);assert.match(screen(),/恢复核对进行中 · 输入不会提交/);assert.equal(transport.calls.length,0);
+    key('\r');await until(()=>screen().includes('继续旧工作'));key('\x1b');
+    key('4');key('\r');await until(()=>screen().includes('结束旧工作，开新任务'));assert.match(screen(),/新任务开启新会话，不接续旧上下文/);
+    key('\r');await until(()=>screen().includes('旧工作已结束'));
     assert.equal(transport.calls.length,0);assert.equal(((await readRun(dataRoot,original.runId)).result as {status:string}).status,'unknown');
     key('New explicit task');key('\r');await until(()=>screen().includes('✓ 完成'));assert.equal(transport.calls.length,2);
+    const fresh=readAcceptedTasks(dataRoot).tasks.find(task=>task.runId&&task.runId!==original.runId)!;
+    assert.ok(!(await readRun(dataRoot,fresh.runId!)).records.some(r=>r.kind==='context.imported'),'the new task does not continue the old context');
+    assert.notEqual(readSessionChains(dataRoot).sessionOfRun(fresh.runId!)!.id,readSessionChains(dataRoot).sessionOfRun(original.runId)!.id);
   }finally{await app.exit();}
 });
 
@@ -161,9 +171,9 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     assert.match(exitCostSummary(join(f.root,'data'),closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01（估算 · 非账单）$/);
     // Without a live runtime the latest reported total stands in, marked as an estimate.
     const terminal=new TestTerminal(),viewer=new ReadOnlyTui({workspace:f.workspace,dataRoot:join(f.root,'data'),runId,draftRoot:join(f.root,'drafts'),mode:'offline',transport:f.transport.fetch,terminal,widthCalibration:false});viewer.start();
-    // Opening a run starts its recovery check; the panel footer replaces the status line, so read it after Esc.
+    // Opening a run starts its recovery check; a completed run needs no panel.
     const shownViewer=()=>viewer.screen().map(stripTerminalSequences).join('\n');
-    try{await until(()=>shownViewer().includes('恢复核对 ·'));terminal.input('\x1b');await until(()=>shownViewer().includes('ctx ≈14 / 1M'));}finally{await viewer.exit();}
+    try{await until(()=>shownViewer().includes('ctx ≈14 / 1M')&&!shownViewer().includes('恢复核对'));}finally{await viewer.exit();}
   } finally { await f.app.exit(); }
 });
 
@@ -367,19 +377,33 @@ test('improve is reachable with explicit limits; report navigation and ordinary 
  }finally{await f.app.exit();}
 });
 
-test('recovery pages expose all unknown counts and navigate with one snapshot; a partial visible page cannot enable continue', async () => {
+test('several unknowns are resolved one by one and submitted once; paged facts are all collected', async () => {
   const { recoveryFixture, uncertainTools } = await import('./fixtures/recovery-projection.js');
-  const f = await recoveryFixture(true); await uncertainTools(f, 40);
+  const f = await recoveryFixture(true); const ids = await uncertainTools(f, 34);
   const terminal = new TestTerminal(), transport = scriptedTransport([]);
+  terminal.columns = 132; terminal.rows = 38;
   const app = new ReadOnlyTui({ workspace: f.workspace, dataRoot: f.dataRoot, runId: f.result.runId, draftRoot: join(f.root, 'drafts'), mode: 'offline', transport: transport.fetch, terminal, widthCalibration: false });
   app.start(); const key = (value: string) => terminal.input(value), screen = () => app.screen().map(stripTerminalSequences).join('\n');
   try {
-    await until(() => screen().includes('全部工具 40'));
-    assert.match(screen(), /未处置未知 40/); assert.match(screen(), /本页起点 0/);
-    key('n'); await until(() => screen().includes('本页起点 32'));
-    key('c'); await tick(); assert.equal(transport.calls.length, 0); assert.match(screen(), /未处置未知 40/);
-    key('p'); await until(() => screen().includes('本页起点 0'));
+    await until(() => screen().includes('未知 1/34'));
+    assert.match(screen(), /结果未提交 · 可能已产生影响/); assert.match(screen(), /只读操作，重复读取不改变文件/);
+    // 2 视为已完成：附一句说明，选完跳到下一项。
+    key('2'); key('\r'); assert.match(screen(), /说明（可选）/); key('checked by hand'); key('\r');
+    assert.match(screen(), /未知 2\/34/);
+    for (let i = 1; i < 34; i++) { key('3'); key('\r'); }
+    await until(() => screen().includes('确认 34 项处置'));
+    assert.match(screen(), /1\/34 read README\.md · 视为已完成 · “checked by hand”/); assert.match(screen(), /续跑可能新增模型请求费用/);
+    key('\x1b'); assert.match(screen(), /未知 34\/34/, 'Esc returns to the last item to adjust');
+    assert.equal(transport.calls.length, 0);
+    key('3'); key('\r'); await until(() => screen().includes('确认 34 项处置')); key('\r');
+    await until(() => !screen().includes('确认 34 项处置'));
   } finally { await app.exit(); }
+  const decision = (await readRun(f.dataRoot, f.result.runId)).records.filter(r => r.kind === 'recovery.decision');
+  assert.equal(decision.length, 1, 'one submission covers every unknown');
+  const resolutions = (decision[0].data as any).decision.resolutions;
+  assert.deepEqual(resolutions.map((r: any) => r.taskId), ids);
+  assert.deepEqual(resolutions[0], { taskId: ids[0], choice: 'completed', reason: 'checked by hand' });
+  assert.ok(resolutions.slice(1).every((r: any) => r.choice === 'retry'));
 });
 
 test('full-screen views stack: Esc returns layer by layer; in-view Ctrl+C and global keys neither stop the session task nor leak', async () => {
@@ -436,7 +460,7 @@ test('? opens help only on empty input; F2 does nothing; help fits 80x24 and 40x
       key('?');const lines=f.app.screen().map(stripTerminalSequences);
       assert.equal(lines.length,rows);for(const line of lines)assert.ok(line.trimEnd().length<=columns,`${columns}x${rows}: ${line}`);
       const text=lines.join('\n');assert.match(text,/帮助/);assert.match(text,/会话屏键位/);assert.match(text,/Esc 返回会话/);
-      for(let i=0;i<40;i++)key('n');assert.match(f.screen(),/\/decide/,'the command list scrolls to its end');assert.match(f.screen(),/Esc 返回会话/);
+      for(let i=0;i<40;i++)key('n');assert.match(f.screen(),/\/improve-rollback/,'the command list scrolls to its end');assert.match(f.screen(),/Esc 返回会话/);
       key('\x1b');assert.doesNotMatch(f.screen(),/会话屏键位/);
     }
     f.terminal.columns=30;f.terminal.rows=10;f.terminal.resize();assert.match(f.screen(),/窗口过小/);

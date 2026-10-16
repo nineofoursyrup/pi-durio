@@ -64,7 +64,7 @@ export const COMMANDS: readonly CommandSpec[] = [
     options: [date('from'), date('to'), project, { name: 'status', value: '状态', values: ['completed', 'failed', 'aborted', 'recovery'] }],
   },
   { name: 'trace', summary: 'run 的 span 瀑布（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'r-号', kinds: ['run'] }] },
-  { name: 'details', summary: '查看最新原文详情', bare: 'view' },
+  { name: 'details', summary: '打开 2a 原文层（不带号取当前 run 最近一次工具调用）', bare: 'view', withArgs: 'open', positional: [{ label: 'tc-号' }] },
   { name: 'queue', summary: '队列与原目标', bare: 'view' },
   { name: 'withdraw', summary: '撤回待接入的请求', bare: 'view', withArgs: 'direct', positional: [{ label: 'q-号', kinds: ['queue-request'], required: true }] },
   { name: 'reattach', summary: '重新接入冻结的请求', bare: 'view', withArgs: 'confirm', positional: [{ label: 'q-号', kinds: ['queue-request'], required: true }] },
@@ -89,19 +89,17 @@ export const COMMANDS: readonly CommandSpec[] = [
   { name: 'improve-restore', summary: '明确恢复建议', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
   { name: 'improve-continue', summary: '明确继续独立未跑项', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
   { name: 'improve-rollback', summary: '明确回退本批精确产物', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
-  { name: 'recover', summary: '恢复核对当前任务', bare: 'view', withArgs: 'open', raw: '[r-号 [偏移 快照]]' },
-  { name: 'decide', summary: '提交恢复决定', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
 ];
 
 /** 会话屏键位（帮助视图第一段）。键位改了的屏票同时改这里。 */
 export const SESSION_KEYS: readonly (readonly [string, string])[] = [
-  ['Enter', '提交任务；运行中补充当前任务'],
+  ['Enter', '提交任务；运行中补充当前任务；恢复核对时重开面板'],
   ['Ctrl+X Enter', '排到下一任务'],
   ['Shift+Enter / Ctrl+J', '换行；行尾 \\ 后 Enter 也换行'],
   ['Esc', '关闭补全；运行中请求中止'],
   ['Ctrl+C', '运行中中止；空闲时清输入并保留草稿，再按退出'],
   ['Ctrl+D', '非空时向前删除；空输入 800ms 内再按退出'],
-  ['Ctrl+O', '查看最新原文详情'],
+  ['Ctrl+O', '展开或折叠全部工具行'],
   ['Ctrl+R', '打开历史'],
   ['Ctrl+T', '打开当前或最近一次 run 的 trace'],
   ['Ctrl+L', '重绘并重新测量字宽'],

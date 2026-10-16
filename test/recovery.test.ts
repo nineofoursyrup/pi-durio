@@ -223,7 +223,7 @@ test('explicit continuation after a pre-dispatch exit preserves the original unk
   assert.equal(transport.calls.length, calls);
 });
 
-test('a completed effect without its durable commit continues with read-only capabilities even for equivalent new calls', async () => {
+test('a completed effect without its durable commit continues with original authorization; only the identical call is blocked', async () => {
   const paths = await fixture();
   const stop = new AbortController();
   const first = scriptedTransport([{ name: 'bash', args: { command: 'printf effect >> effects.txt' } }]);
@@ -233,15 +233,36 @@ test('a completed effect without its durable commit continues with read-only cap
   const report = await checkRecovery({...paths,runId:result.runId,authorization});
   assert.equal(report.status,'needs-decision',JSON.stringify(report));
   assert.ok(report.tools.some(tool => tool.fact==='completed-uncommitted'));
-  const again = scriptedTransport([{name:'bash',args:{command:'echo -n effect >> ./effects.txt'}},{name:'write',args:{path:'equivalent.txt',content:'must not write'}}]);
+  const again = scriptedTransport([{name:'bash',args:{command:'printf effect >> effects.txt'}},{name:'write',args:{path:'other.txt',content:'new authorized effect'}}]);
   const recovered = await recoverRun({...paths,runId:result.runId,authorization,decision:{id:'no-repeat',snapshotId:report.snapshotId,action:'continue',acceptAdditionalModelAttempts:true},transport:again.fetch});
   assert.equal(recovered.status,'completed',JSON.stringify(recovered));
-  assert.equal(await readFile(join(paths.workspace,'effects.txt'),'utf8'),'effect');
-  await assert.rejects(readFile(join(paths.workspace,'equivalent.txt')),/ENOENT/);
+  assert.equal(await readFile(join(paths.workspace,'effects.txt'),'utf8'),'effect','the identical call is not executed again');
+  assert.equal(await readFile(join(paths.workspace,'other.txt'),'utf8'),'new authorized effect','continuation keeps the original authorization');
   const records = await readRun(paths.dataRoot,result.runId);
   assert.equal((records.result as any).status,'unknown');
-  assert.equal(records.records.filter(r => r.kind==='recovery.capability-denied').length,2);
-  assert.ok(records.records.some(r=>r.kind==='recovery.closed'));
+  const blocked = records.records.filter(r => r.kind==='recovery.capability-denied');
+  assert.equal(blocked.length,1);assert.equal((blocked[0].data as any).duplicate,true);assert.equal((blocked[0].data as any).tool,'bash');
+  assert.deepEqual((records.records.find(r=>r.kind==='recovery.started')!.data as any).capabilities,['read','write','edit','bash']);
+  assert.match(JSON.stringify(again.calls.at(1)),/RECOVERY_ALREADY_COMPLETED/,'the model is told the operation was already completed');
+});
+
+test('an unknown outcome marked completed blocks the identical new call; skip is no longer accepted', async () => {
+  const paths = await fixture();
+  let fail = true;
+  const first = scriptedTransport([{name:'bash',args:{command:'printf effect >> effects.txt'}}]);
+  const result = await runCodingTask({...paths,input:'Append once',mode:'offline',transport:first.fetch,fault:kind=>{if(kind==='tool.result'&&fail){fail=false;throw new Error('first result persistence failure');}}});
+  const authorization = {workspace:paths.workspace,mode:'offline' as const,tools:['read','write','edit','bash'] as const};
+  const report = await checkRecovery({...paths,runId:result.runId,authorization});
+  const uncertain = report.tools.find(tool=>tool.fact==='unknown')!;
+  const again = scriptedTransport([{name:'bash',args:{command:'printf effect >> effects.txt'}}]);
+  await assert.rejects(recoverRun({...paths,runId:result.runId,authorization,decision:{id:'legacy-skip',snapshotId:report.snapshotId,action:'continue',acceptAdditionalModelAttempts:true,resolutions:[{taskId:uncertain.taskId,choice:'skip' as any,reason:'old choice'}]},transport:again.fetch}),/INVALID_RECOVERY_RESOLUTION/);
+  const current = await checkRecovery({...paths,runId:result.runId,authorization});
+  const done = await recoverRun({...paths,runId:result.runId,authorization,decision:{id:'user-completed',snapshotId:current.snapshotId,action:'continue',acceptAdditionalModelAttempts:true,resolutions:[{taskId:uncertain.taskId,choice:'completed',reason:'I checked effects.txt myself'}]},transport:again.fetch});
+  assert.equal(done.status,'completed',JSON.stringify(done));
+  assert.equal(await readFile(join(paths.workspace,'effects.txt'),'utf8'),'effect');
+  const page = await readRun(paths.dataRoot,result.runId);
+  assert.equal(page.records.filter(r=>r.kind==='recovery.capability-denied'&&(r.data as any).duplicate).length,1);
+  assert.equal(page.records.filter(r=>r.kind==='tool.intent').length,1,'the blocked call never reaches tool execution');
 });
 
 test('unknown post-effect outcome needs durable headless input; an explicit retry keeps original failure and its duplicate risk', async () => {
