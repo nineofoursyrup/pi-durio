@@ -34,7 +34,9 @@ import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
 import { readDisplayIndex, resolveDisplayInput, isUserChosenId, type DisplayIndex, type DisplayKind } from '../display-number.js';
 import { readSessionChains } from '../session-chain.js';
-import { estimateSessionRequests, formatCostTotals, COST_ESTIMATE_NOTICE } from '../cost-estimate.js';
+import { formatCostTotals } from '../cost-estimate.js';
+import { exitSummary, ProcessCleanupReceipts, type EvalExitFact } from './exit-summary.js';
+export { exitCostSummary } from './exit-summary.js';
 import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageLine, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
@@ -71,7 +73,7 @@ export interface TuiOptions {
   /** Only deterministic injected-terminal tests may skip native measurement. */
   widthCalibration?:false;
 }
-export interface TuiExit { result?:RunResult; error?:string; draftSaved:boolean; widthCalibration?:ReturnType<TerminalWidthGate['snapshot']>; }
+export interface TuiExit { result?:RunResult; cleanupResult?:RunResult; error?:string; draftSaved:boolean; summary:string[]; eval?:EvalExitFact; widthCalibration?:ReturnType<TerminalWidthGate['snapshot']>; }
 
 /** macOS clipboard adapter: exit code acknowledges the actual clipboard write. No shell or OSC 52 fallback. */
 export async function copyToMacClipboard(text:string):Promise<boolean|string> {
@@ -103,6 +105,13 @@ export class ReadOnlyTui {
   private sessionId?:string;
   private model='deepseek-flash';
   private result?:RunResult;
+  /** 最近实际返回的 runtime 清理事实；独立 improve 分析不更换主会话，但仍须报告其清理结果。 */
+  private cleanupResult?:RunResult;
+  private cleanupAttempted=false;
+  private readonly cleanupReceipts=new ProcessCleanupReceipts();
+  /** #82：仅在本进程请求停止并等待 runner/VM 后填写；不从历史计划推断。 */
+  private evalExit?:EvalExitFact;
+  private readonly startedAt=Date.now();
   private active?:Promise<void>;
   private controller?:AbortController;
   private cancellation:'stop'|'exit'='exit';
@@ -441,6 +450,7 @@ export class ReadOnlyTui {
     const self=this;
     const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe};
     const run=this.options.coding?runCodingTask:runReadTask;
+    this.beginCleanupAttempt();
     this.active=run(options).then(result=>this.applyResult(result)).catch(error=>{this.failure=String(error);this.notice=`未完成：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();
   }
@@ -521,7 +531,7 @@ export class ReadOnlyTui {
     case 'improve-restore':case 'improve-continue':case 'improve-rollback':{
       if(!mayWrite(this.writeAccess))break;
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许新决定';break;}
-      try{const action=parsed.spec.name.slice(8) as 'restore'|'continue'|'rollback',spec=JSON.parse(raw);this.phase='running';this.controller=new AbortController();this.cancellation='exit';const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:root}):action==='rollback'?rollbackImproveDecision({...spec,dataRoot:root,signal:this.controller.signal}):resumeImproveDecision({...spec,dataRoot:root,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
+      try{const action=parsed.spec.name.slice(8) as 'restore'|'continue'|'rollback',spec=JSON.parse(raw);this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.beginCleanupAttempt();const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:root}):action==='rollback'?rollbackImproveDecision({...spec,dataRoot:root,signal:this.controller.signal}):resumeImproveDecision({...spec,dataRoot:root,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
       break;
     }
     case 'improve-select':
@@ -602,9 +612,10 @@ export class ReadOnlyTui {
     const targetRunId=this.runId!;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
     this.analysis={requestId:request.id,queued:false};this.activity={kind:'improve-analysis',report:this.shown('improve-report',request.id)};
     // 主区、runId 与本进程的任务结果都留在当前会话；分析结果只插一行，不自动打开 1d（I1）。
+    this.beginCleanupAttempt();
     this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},
-      onObservation:event=>{if(this.analysis)this.analysis.runId=event.runId;this.pendingRefresh=true;}})
-      .then(result=>this.analysisEnded(request.id,result.improve??null,result.status==='unknown'||result.cleanup==='unknown'?`清理未知 · pi-durio resume ${this.shown('session',result.sessionId)} 核对`:undefined))
+      onObservation:event=>{this.cleanupReceipts.observe(this.options.dataRoot,event);if(this.analysis)this.analysis.runId=event.runId;this.pendingRefresh=true;}})
+      .then(result=>{this.cleanupResult=result;this.analysisEnded(request.id,result.improve??null,result.status==='unknown'||result.cleanup==='unknown'?`清理未知 · pi-durio resume ${this.shown('session',result.sessionId)} 核对`:undefined);})
       .catch(error=>this.analysisEnded(request.id,readReportRecord(this.options.dataRoot,request.id),safe(String(error))))
       .finally(()=>this.finished());
     this.tui.requestRender();
@@ -621,7 +632,8 @@ export class ReadOnlyTui {
    * 任务 run 的观察回调。排队的 improve 分析在任务结束后由 runtime 在同一次执行里开始：它的 run 不进主区，
    * 只设状态行；之后的 follow-up run 照常成为主区的当前 run。
    */
-  private readonly observe=(event:{runId:string})=>{
+  private readonly observe=(event:{kind:string;runId:string})=>{
+    this.cleanupReceipts.observe(this.options.dataRoot,event);
     this.pendingRefresh=true;
     if(event.runId===this.runId||event.runId===this.analysis?.runId)return;
     let accepted:any;
@@ -635,6 +647,7 @@ export class ReadOnlyTui {
     if(!mayWrite(this.writeAccess))throw Error('TUI_READ_ONLY');
     if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery)throw Error('IMPROVE_SELECTION_CURRENT_STATE_BLOCKED');
     this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.activity={kind:'improve-execution',report:this.shown('improve-report',decision.reportId)};
+    this.beginCleanupAttempt();
     const promise=submitImproveDecision({dataRoot:this.options.dataRoot,decision,signal:this.controller.signal});
     this.active=promise.then(value=>{this.event(`${value.state==='completed'?'✓':'✗'} 决定 ${value.id} · ${value.state}；具体写回/启用见结果`);}).catch(error=>{this.event(`✗ 决定未完成：${safe(String(error))}`);}).finally(()=>this.finished());
     return promise;
@@ -648,13 +661,15 @@ export class ReadOnlyTui {
     if(continuation?.state!=='ready'){this.notice='压缩需要已完成且清理确认的活动会话';this.tui.requestRender();return;}
     if(continuation.versionChanged!==false){this.notice=COMPACT_VERSION_CHANGED;this.tui.requestRender();return;}
     const runId=continuation.tailRunId;this.controller=new AbortController();this.cancellation='exit';this.phase='running';this.notice='正在压缩当前上下文；原文保留，摘要生成与接入分别记录';const self=this;
-    this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:()=>{this.pendingRefresh=true;}}).then(result=>{
-      this.result=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；Ctrl+T 在 trace 中查看源范围、摘要与接入事实；磁盘原文保留`;
+    this.beginCleanupAttempt();
+    this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.cleanupReceipts.observe(this.options.dataRoot,event);this.pendingRefresh=true;}}).then(result=>{
+      this.result=result;this.cleanupResult=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；Ctrl+T 在 trace 中查看源范围、摘要与接入事实；磁盘原文保留`;
     }).catch(error=>{this.notice=`压缩未执行：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();await this.active;
   }
+  private beginCleanupAttempt() {this.cleanupAttempted=true;this.cleanupResult=undefined;}
   private applyResult(result:RunResult) {
-    this.result=result;this.sessionId=result.sessionId;this.runId=result.runId;
+    this.result=result;this.cleanupResult=result;this.sessionId=result.sessionId;this.runId=result.runId;
     if(result.improve?.runId!==result.runId)this.continueFrom=result.runId;
     this.viewingRecovery=result.status==='unknown'||result.cleanup==='unknown';
     // 终态在状态行与头部；这里只留需要处理的事。
@@ -704,6 +719,7 @@ export class ReadOnlyTui {
         if(action==='reattach') {
           this.closeViews();this.welcome=undefined;this.phase='running';this.controller=new AbortController();this.cancellation='exit';
           const self=this;
+          this.beginCleanupAttempt();
           this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
           return;
         }
@@ -720,6 +736,7 @@ export class ReadOnlyTui {
     this.welcome=undefined;this.viewingRecovery=true;this.runId=runId;this.recoveryChecking=true;
     const dataRoot=this.options.dataRoot,authorization=this.authorization();
     const load=async()=>{
+      this.beginCleanupAttempt();
       const first=await checkRecovery({dataRoot,runId,authorization});
       const pages=await recoveryPages(first,offset=>inspectRecovery({dataRoot,runId,authorization,page:{offset,snapshotId:first.snapshotId}}));
       this.loadQueue();
@@ -768,6 +785,7 @@ export class ReadOnlyTui {
     if(!mayWrite(this.writeAccess))return;
     if(this.phase!=='idle'||!this.recovery){this.notice='先打开恢复核对获取当前事实';return;}
     const runId=this.recovery.runId;this.closeViews();this.recoveryOpen=false;this.recoveryPanel=undefined;this.viewingRecovery=false;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
+    this.beginCleanupAttempt();
     this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe}).then(result=>{
       if('usage' in result){this.recovery=undefined;this.applyResult(result);}
       else if(result.status==='ended'){this.recovery=result;this.result=undefined;this.notice='旧工作已结束 · 新任务开启新会话，不接续旧上下文';}
@@ -1115,20 +1133,22 @@ export class ReadOnlyTui {
     this.phase='exiting';this.confirmation=undefined;this.notice='退出中；等待 runtime 清理与 storage 关闭';this.tui.requestRender();
     try {this.widths?.beginClose();}catch(error){this.failure=`待处理输入保存失败：${String(error)}`;}
     if(!this.controller?.signal.aborted)this.cancellation='exit';this.controller?.abort();
-    let draftSaved=false;
-    try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
+    let draftSaved=false,draftLines=0,terminalRestored=true;
+    try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;draftLines=draft.split(/\r\n|\r|\n/).length;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
     try {await this.active;} finally {
       this.evalTrial?.close();
       this.stopped=true;if(this.timer)clearInterval(this.timer);this.removeInput?.();for(const remove of this.removeSignals)remove();
       if(this.started) {
-        try {if(this.widths&&!await this.widths.settle())this.failure??='WIDTH_QUERY_BOUNDARY_UNKNOWN: terminal drain is bounded';}catch(error){this.failure??=`字宽清理失败：${String(error)}`;}
-        try {await this.terminal.drainInput(150,30);} catch(error){this.failure??=`终端 drain 失败：${String(error)}`;}
+        try {if(this.widths&&!await this.widths.settle()){terminalRestored=false;this.failure??='WIDTH_QUERY_BOUNDARY_UNKNOWN: terminal drain is bounded';}}catch(error){terminalRestored=false;this.failure??=`字宽清理失败：${String(error)}`;}
+        try {await this.terminal.drainInput(150,30);} catch(error){terminalRestored=false;this.failure??=`终端 drain 失败：${String(error)}`;}
         try {this.terminal.write('\x1b[?1004l');this.tui.stop({preserveScreen:true});}
-        catch(error){this.failure??=`终端清理失败：${String(error)}`;try{this.terminal.stop();}catch{/* Preserve the cleanup failure. */}}
-        finally {try{this.terminal.showCursor();}catch{/* Earlier failure remains visible in the exit result. */}this.widths?.dispose();this.restoreTerminalWrite?.();}
+        catch(error){terminalRestored=false;this.failure??=`终端清理失败：${String(error)}`;try{this.terminal.stop();}catch{/* Preserve the cleanup failure. */}}
+        finally {try{this.terminal.showCursor();}catch(error){terminalRestored=false;this.failure??=`光标恢复失败：${String(error)}`;}this.widths?.dispose();this.restoreTerminalWrite?.();}
       }
     }
-    const result={result:this.result,error:this.failure,draftSaved,widthCalibration:this.widths?.snapshot()};
+    const cleanupResult=this.cleanupReceipts.result(this.cleanupResult);
+    const summary=await exitSummary(this.options.dataRoot,{workspace:this.options.workspace,runId:this.runId??this.options.show?.run??this.options.trace,cleanup:cleanupResult,cleanupAttempted:this.cleanupAttempted,elapsedMs:Date.now()-this.startedAt,draftLines,terminalRestored,eval:this.evalExit,error:this.failure},this.terminal.columns);
+    const result={result:this.result,cleanupResult,error:this.failure,draftSaved,summary,eval:this.evalExit,widthCalibration:this.widths?.snapshot()};
     this.resolveClosed(result);return result;
   }
 }
@@ -1141,13 +1161,6 @@ function analysisReason(reason:string) {
   if(/Analysis stop/.test(reason))return '已停止';
   if(/Analysis exit/.test(reason))return '退出时中止';
   return safe(code??reason.slice(0,120));
-}
-
-/** Exit summary line for "本次会话": every run of the session the summary reports, estimated in CNY. */
-export function exitCostSummary(dataRoot:string,result:RunResult) {
-  // The exit status reflects the run; an unreadable cost source only leaves the amount unknown.
-  let amount:string;try{amount=formatCostTotals(estimateSessionRequests(dataRoot,[result.sessionId]).totals);}catch{amount='unknown';}
-  return `本次会话 ${readDisplayIndex(dataRoot).label('session',result.sessionId)} 费用 ${amount}（${COST_ESTIMATE_NOTICE}）`;
 }
 
 export async function runTui(options:TuiOptions) {

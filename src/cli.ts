@@ -78,14 +78,13 @@ async function main() {
     }
     if (values['tool-env-config'] && !coding) throw Error('USAGE: --tool-env-config requires a coding session');
     const toolEnvironment = values['tool-env-config'] ? JSON.parse(await readFile(values['tool-env-config'], 'utf8')) : undefined;
-    const { runTui, exitCostSummary } = await import('./tui/app.js');
+    const { runTui } = await import('./tui/app.js');
+    const { tuiExitCode } = await import('./tui/exit-summary.js');
     const exit = await runTui({ dataRoot, workspace, mode: values['offline-demo'] ? 'offline' : 'live', transport: values['offline-demo'] ? demoTransport().fetch : undefined, coding, toolEnvironment, resume, sessions, elsewhere });
     const result = exit.result;
-    console.log(JSON.stringify({ tui: 'closed', runId: result?.runId, sessionId: result?.sessionId, status: result?.status ?? 'no-task', cleanup: result?.cleanup, usage: result?.usage.completeness ?? 'unknown', draftSaved: exit.draftSaved, error: exit.error?.slice(0,1024) }));
-    if (result) console.log(exitCostSummary(dataRoot, result));
-    if (result) console.log(`Read back: pi-durio show ${readDisplayIndex(dataRoot).label('run', result.runId)} --format json --data-root '${dataRoot.replaceAll("'", "'\\''")}'`);
-    process.exitCode = exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : result?.controls?.exitCode??0;
-    exitHostIfUnconfirmed(result);
+    console.log(exit.summary.join('\n'));
+    process.exitCode = tuiExitCode(exit);
+    exitHostIfUnconfirmed(exit.cleanupResult??result);
     return;
   }
   if(metricsCommand(command,dataRoot,values))return;
@@ -128,8 +127,9 @@ async function main() {
       if (!process.stdin.isTTY || !process.stdout.isTTY) throw Error('USAGE: show outside a terminal requires --format json');
       const { runTui } = await import('./tui/app.js');
       // 只读查看取 cwd 作工作区；--trace 打开 2a（s- 号取链尾 run）。
-      const exit = await runTui({ dataRoot, workspace: process.cwd(), mode: 'live', ...(values.trace ? { trace: values.run } : { show: { run: values.run, session } }) });
-      if (exit.error) { console.error(exit.error); process.exitCode = 1; }
+      const exit = await runTui({ dataRoot, workspace: process.cwd(), mode: 'live', show: { run: values.run, session }, ...(values.trace ? { trace: values.run } : {}) });
+      console.log(exit.summary.join('\n'));
+      if (exit.error) process.exitCode = 1;
       return;
     }
     // --trace --format json|text 与 history trace 相同。

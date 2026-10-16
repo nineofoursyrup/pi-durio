@@ -9,7 +9,10 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { createHash } from 'node:crypto';
 import { runCodingTask, runReadTask, readRun, waitForRun } from '../dist/src/runtime.js';
 import { writeHeadlessResult, exitHostIfUnconfirmed } from '../dist/src/headless-lifecycle.js';
+import { readSessionChains } from '../dist/src/session-chain.js';
+import { tuiExitCode } from '../dist/src/tui/exit-summary.js';
 import { scriptedTransport } from '../dist/src/offline.js';
+import { visibleWidth } from '@earendil-works/pi-tui';
 
 const quote = value => `'${value.replaceAll("'", "'\\''")}'`;
 const save = (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
@@ -59,14 +62,15 @@ if (process.argv[2] === '--crash-worker') {
   }
   const terminal = new ObservedTerminal();
   setInterval(() => {}, 1000);
-  const app = new ReadOnlyTui({ workspace, dataRoot, draftRoot: `${dataRoot}-drafts`, mode: 'offline', terminal,
+  const app = new ReadOnlyTui({ workspace, dataRoot, draftRoot: `${dataRoot}-drafts`, mode: 'offline', terminal, widthCalibration: false,
     transport: async () => new Promise(() => { process.send({ ready: true }); }) });
   app.start(); terminal.input('Hold until explicit exit'); terminal.input('\r');
-  const exit = await app.closed, result = exit.result;
+  const exit = await app.closed;
   assert.equal(terminal.stopped, true); assert.equal(terminal.cursorShown, true); assert.ok(terminal.writes.join('').includes('\x1b[?1049l'));
   await save(`${dataRoot}-terminal-cleanup.json`, { stopped: terminal.stopped, cursorShown: terminal.cursorShown, alternateBufferDisabled: true, actualMacTerminal: false });
-  console.log(JSON.stringify({ tui: 'closed', runId: result.runId, sessionId: result.sessionId, status: result.status, cleanup: result.cleanup, usage: result.usage.completeness, draftSaved: exit.draftSaved }));
-  exitHostIfUnconfirmed(result);
+  console.log(exit.summary.join('\n'));
+  process.exitCode = tuiExitCode(exit);
+  exitHostIfUnconfirmed(exit.cleanupResult ?? exit.result);
 } else if (process.argv[2] === '--reopen') {
   const [dataRoot, runId] = process.argv.slice(3); const before = await treeHash(dataRoot); const view = await allRecords(dataRoot, runId);
   const after = await treeHash(dataRoot); assert.equal(after, before);
@@ -155,11 +159,19 @@ if (process.argv[2] === '--crash-worker') {
     const paths = await project(root, 'tui-cleanup-timeout');
     const worker = spawn(process.execPath, [process.argv[1], '--tui-timeout-worker', paths.workspace, paths.dataRoot], { stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
     let stdout = '', stderr = ''; worker.stdout.on('data', bytes => { stdout += bytes; }); worker.stderr.on('data', bytes => { stderr += bytes; });
-    await once(worker, 'message'); const exited = once(worker, 'exit'); worker.kill('SIGTERM'); const [code] = await exited;
-    assert.equal(code, 75, stderr); assert.ok(Buffer.byteLength(stdout) < 2048); const summary = JSON.parse(stdout);
-    assert.equal(summary.tui, 'closed'); assert.equal(summary.cleanup, 'unknown');
+    await once(worker, 'message');
+    // Obtain machine identity from the durable read-only index, never from the human exit text.
+    const sessions = readSessionChains(paths.dataRoot).list({ workspace: paths.workspace }).items;
+    assert.equal(sessions.length, 1); const runId = sessions[0].tailRunId;
+    const exited = once(worker, 'exit'); worker.kill('SIGTERM'); const [code] = await exited;
+    assert.equal(code, 75, stderr); assert.ok(Buffer.byteLength(stdout) < 2048);
+    const summary = stdout.trimEnd().split('\n');
+    assert.ok(summary.length > 0 && summary.length <= 8); assert.ok(summary.every(line => visibleWidth(line) <= 80));
+    assert.match(summary[0], /^◆ pi-durio 已退出/); assert.match(stdout, /清理未确认/);
+    assert.match(stdout, /恢复核对  pi-durio resume s-/); assert.match(stdout, /原文  pi-durio show s-/);
+    assert.doesNotMatch(stdout, /[\x1b\x07]|Read back:|"tui"|"runId"/);
     const terminal = JSON.parse(await readFile(`${paths.dataRoot}-terminal-cleanup.json`, 'utf8'));
-    const view = await allRecords(paths.dataRoot, summary.runId); assert.equal(view.result.lifecycle.owner, 'retained');
+    const view = await allRecords(paths.dataRoot, runId); assert.equal(view.result.lifecycle.owner, 'retained');
     await save(join(root, 'tui-cleanup-timeout', 'view.json'), { ...view, summary, terminal, exitCode: code, stderr });
     results.push({ action: 'cleanup-timeout-tui-adapter', summary, terminal, exitCode: code, activeIntervalDidNotHang: true, ownerRetained: true });
   }
