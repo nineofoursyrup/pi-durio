@@ -487,10 +487,10 @@ test('full-screen views stack: Esc returns layer by layer; in-view Ctrl+C and gl
   try {
     key('Run held tool');key('\r');await until(()=>existsSync(join(f.workspace,'started.txt')));
     key('/help');key('\r');assert.match(f.screen(),/帮助/);
-    views.pushView('queue');assert.match(f.screen(),/队列/);
+    views.pushView('queue');assert.match(f.screen(),/◆ queue/);
     for(const k of ['\x03','\x03','\x04','\x0f','\x14','\x12','?'])key(k);
-    assert.match(f.screen(),/队列/,'global keys are inert inside a view');assert.doesNotMatch(f.screen(),/中止中|请求中止/);
-    key('\x1b');assert.match(f.screen(),/帮助/);assert.doesNotMatch(f.screen(),/队列：/,'Esc returns to the previous layer');
+    assert.match(f.screen(),/◆ queue/,'global keys are inert inside a view');assert.doesNotMatch(f.screen(),/中止中|请求中止/);
+    key('\x1b');assert.match(f.screen(),/帮助/);assert.doesNotMatch(f.screen(),/◆ queue/,'Esc returns to the previous layer');
     key('\x1b');assert.doesNotMatch(f.screen(),/Ctrl\+X → Enter 后续请求\nCtrl\+J/,'Esc on the top layer returns to the session');
     // A confirm dialog consumes keys: Esc closes only the dialog, Enter confirms once.
     key('/help');key('\r');let confirmed:number[]|undefined;
@@ -509,13 +509,17 @@ test('full-screen views stack: Esc returns layer by layer; in-view Ctrl+C and gl
 });
 
 test('queue panel names requests by q- number and /withdraw accepts it (v1 fixture copy)', async () => {
-  const root=mkdtempSync(join(tmpdir(),'durio-tui-q-')),workspace=join(root,'project'),dataRoot=join(root,'data');mkdirSync(workspace);
+  const root=mkdtempSync(join(tmpdir(),'durio-tui-q-')),dataRoot=join(root,'data');
   cpSync(new URL('../../test/fixtures/v1-records/data',import.meta.url),dataRoot,{recursive:true});
+  // The queue belongs to its recorded workspace. Only the copied data root is changed below.
+  const item=readQueue(dataRoot).items.find(item=>item.requestId==='frozen-follow')!,workspace=item.target.workspace;
+  mkdirSync(workspace,{recursive:true});
   const q=readDisplayIndex(dataRoot).label('queue-request','frozen-follow'),terminal=new TestTerminal();terminal.columns=120;
   const app=new ReadOnlyTui({workspace,dataRoot,draftRoot:join(root,'drafts'),mode:'offline',transport:demoTransport().fetch,terminal,widthCalibration:false});app.start();
   const key=(data:string)=>terminal.input(data),screen=()=>app.screen().map(stripTerminalSequences).join('\n');
   try {
-    key('/queue');key('\r');await until(()=>/q-[0-9a-f]{4,} · 原 id /.test(screen()));assert.doesNotMatch(screen(),/原 run [0-9a-f]{8}-/);
+    key('/queue');key('\r');await until(()=>screen().includes(q));
+    key('\r');assert.match(screen(),/原 id frozen-follow/);assert.match(screen(),/原目标：s-[0-9a-f]+ · 任务 1 · t-[0-9a-f]+ · r-[0-9a-f]+/);
     key('\x1b');key(`/withdraw ${q}`);key('\r');
     await until(()=>readQueue(dataRoot).items.find(item=>item.requestId==='frozen-follow')!.status==='withdrawn');
   } finally { await app.exit(); }

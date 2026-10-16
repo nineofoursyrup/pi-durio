@@ -748,10 +748,13 @@ export class ReadOnlyTui {
     catch(error){if(!String(error).includes('ENOENT'))this.notice=`队列事实不可取得：${safe(String(error))}`;}
   }
   private sessionQueue(){const session=this.runId&&this.chainOf(this.runId)?.id;return session?this.queueEntries.filter(entry=>entry.sessionId===session):[];}
-  private openQueue(id?:string) {
+  private prepareQueue(id?:string) {
     this.queueView??=new QueueView(this.options.dataRoot,this.options.workspace,{...this.writeAccess,copy:this.copy,changed:()=>this.tui.requestRender(),
       withdraw:requestId=>void this.queueDecision(requestId,'withdraw'),reattach:requestId=>void this.queueDecision(requestId,'reattach')});
-    this.loadQueue();if(id)this.queueView.select(id);if(this.panel?.kind!=='queue')this.openPanel('queue');
+    this.loadQueue();if(id)this.queueView.select(id);
+  }
+  private openQueue(id?:string) {
+    this.prepareQueue(id);if(this.panel?.kind!=='queue')this.openPanel('queue');
   }
   private authorization():RecoveryAuthorization {return {workspace:this.options.workspace,mode:this.options.mode,tools:this.options.coding?['read','write','edit','bash']:['read'],toolEnvironment:this.options.toolEnvironment};}
   private queueBusy() {
@@ -1125,6 +1128,7 @@ export class ReadOnlyTui {
    * 没有打开的视图时等同 openPanel。首版面板都是单层，尚无调用方。
    */
   private pushView(kind:PanelKind) {
+    if(kind==='queue')this.prepareQueue();
     if(!this.viewStack.length){this.openPanel(kind);return;}
     this.viewStack.push({kind,offset:0,line:0});
     this.tui.requestRender();
