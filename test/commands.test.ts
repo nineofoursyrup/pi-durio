@@ -83,7 +83,9 @@ test('arguments: display numbers, --name value options, MM-DD dates as [from,to)
   const launch = parseCommand('/improve new --scope 30d --budget large --source self --source eval --focus "x y"', COMMANDS, now);
   assert.deepEqual([launch.path, launch.options], [['new'], { scope: '30d', budget: 'large', source: 'self,eval', focus: 'x y' }]);
   rejects('/improve new --scope 1d', /不接受 1d/, ['session', '7d', '30d']);
-  rejects('/improve {"purpose":"x"}', /\/improve 不接受参数/, ['new', 'history', 'suppressions']);
+  rejects('/improve {"purpose":"x"}', /这里要 ir-号 或完整 id/);
+  const choices=parseCommand('/improve ir-1234 --execute C-01 C-02 --validate C-03 --defer C-04 --do-not-suggest C-05');
+  assert.deepEqual(choices.options,{execute:'C-01,C-02',validate:'C-03',defer:'C-04','do-not-suggest':'C-05'});
   assert.equal(parseCommand('/acceptance --note "两 个 字"').raw, '--note "两 个 字"');
   rejects('/history --foo 1', /未知选项 --foo/, ['--from', '--to', '--project', '--status']);
   rejects('/history --from 2026/10/01', /日期写 MM-DD 或 YYYY-MM-DD/);

@@ -1,0 +1,77 @@
+132x38 truecolor
+00|◆ improve ir-a35b                                                                                                  1 个候选 · ≈¥0.00   |
+   0-128 ac.improve/bg.base ; 129-131 -/-
+01|▸ C-01@r1 修复加法                                                      [ ] 1 执行声明范围  [ ] 2 仅验证  [ ] 3 暂缓  [ ] 4 不再建议                   |
+   0-67 ac.improve/bg.block ; 68-112 fg.label/bg.block ; 113-131 -/-
+02|证据  2 + 3 返回 -1 · 共 1 条 · 引用 1 段原文 · 无反例：还没有成功反例 · 原因假设未证实 · 缺口 1 项                                                                 |
+   0-99 fg.body/bg.block ; 100-131 -/-
+03|动作  把减法改为加法 · 范围 math.mjs                                                                                                           |
+   0-120 fg.body/bg.block ; 121-131 -/-
+04|验证  真实回归 · 1 次 · ≤ 0 请求 / ≈¥0.00                                                                                                    |
+   0-122 fg.body/bg.block ; 123-131 -/-
+05|回退  恢复所保留的原文件 · 后续任务读取新文件                                                                                                           |
+   0-111 fg.body/bg.block ; 112-131 -/-
+06|事实是分析给出的陈述；宿主只核对了引用的原文确实读过。                                                                                                         |
+   0-104 fg.muted/bg.block ; 105-131 -/-
+07|事实 1  2 + 3 返回 -1                                                                                                                   |
+   0-127 fg.body/bg.block ; 128-131 -/-
+08|引用  xx:x:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                                           |
+   0-129 ac.path/bg.block ; 130-131 -/-
+09|原因假设（未证实）  运算符误写                                                                                                                    |
+   0-117 fg.body/bg.block ; 118-131 -/-
+10|缺口  还没有成功反例                                                                                                                         |
+   0-122 fg.muted/bg.block ; 123-131 -/-
+11|声明步骤 1  把减法改为加法                                                                                                                     |
+   0-120 fg.body/bg.block ; 121-131 -/-
+12|完整范围  /xxxxxxx/xxx/xxxxxxxxxxxxxxxxxxxxxx/project/math.mjs                                                                          |
+   0-127 ac.path/bg.block ; 128-131 -/-
+13|--- math.mjs（基线 577b3f8de17b）                                                                                                       |
+   0-127 ac.path/bg.block ; 128-131 -/-
+14|+++ math.mjs（候选）                                                                                                                    |
+   0-127 ac.path/bg.block ; 128-131 -/-
+15|-export const add=(a,b)=>a-b;                                                                                                       |
+   0-131 ac.err/bg.block
+16|+export const add=(a,b)=>a+b;                                                                                                       |
+   0-131 ac.ok/bg.block
+17|                                                                                                                                    |
+   0-131 fg.body/bg.block
+18|检查 1  regression · ≤ 30000 ms                                                                                                       |
+   0-129 fg.body/bg.block ; 130-131 -/-
+19|console.log("regression")                                                                                                           |
+   0-131 ac.code/bg.block
+20|必要保护  不更改其他文件                                                                                                                       |
+   0-120 fg.body/bg.block ; 121-131 -/-
+21|风险  只覆盖数值输入                                                                                                                         |
+   0-122 fg.body/bg.block ; 123-131 -/-
+22|回退方法  恢复所保留的原文件                                                                                                                     |
+   0-118 fg.body/bg.block ; 119-131 -/-
+23|生效条件  回归通过                                                                                                                          |
+   0-123 fg.body/bg.block ; 124-131 -/-
+24|生效时机  后续任务读取新文件                                                                                                                     |
+   0-118 fg.body/bg.block ; 119-131 -/-
+25|1–4 选择 / 取消 · Tab 切换候选 · ↑↓ 滚动 · Enter 汇总 · Esc 返回第一层                                                                               |
+   0-114 fg.label/bg.base ; 115-131 -/-
+26|                                                                                                                                    |
+   0-131 -/-
+27|                                                                                                                                    |
+   0-131 -/-
+28|                                                                                                                                    |
+   0-131 -/-
+29|                                                                                                                                    |
+   0-131 -/-
+30|                                                                                                                                    |
+   0-131 -/-
+31|                                                                                                                                    |
+   0-131 -/-
+32|                                                                                                                                    |
+   0-131 -/-
+33|                                                                                                                                    |
+   0-131 -/-
+34|                                                                                                                                    |
+   0-131 -/-
+35|                                                                                                                                    |
+   0-131 -/-
+36|                                                                                                                                    |
+   0-131 -/-
+37|                                                                                                                                    |
+   0-131 -/-

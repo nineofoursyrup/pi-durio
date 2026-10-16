@@ -13,6 +13,7 @@ import { listRegisteredSources, registerImproveSource, sourceBytes, verifySelfSo
 import { listImproveReports, priorImprove, type ImproveReport, type ImproveRequest } from './improve.js';
 import { improveFacts, listImproveSuppressions } from './improve-history.js';
 import { upperBoundAmount } from './cost-estimate.js';
+import { improveReportContract } from './improve-contract.js';
 
 // ─── 档位 ──────────────────────────────────────────────────────────────────
 
@@ -149,10 +150,8 @@ export function improveRequest(id: string, choice: LaunchChoice, visible: Visibl
 
 // ─── 第一层 ────────────────────────────────────────────────────────────────
 
-/** 首版报告按格式识别：首版候选没有替换片段和结构化检查（#63 第 4 节）。没有候选的报告也落在这里，它没有可选的内容。 */
-export function isFirstVersionReport(report: Pick<ImproveReport, 'candidates' | 'suppressed'>) {
-  return ![...report.candidates, ...(report.suppressed ?? []).map(s => s.candidate)].some(c => 'replacements' in c || 'structuredChecks' in c);
-}
+/** 首版报告按已知完整格式识别；零候选不能证明报告版本。 */
+export function isFirstVersionReport(report: Pick<ImproveReport, 'candidates' | 'suppressed' | 'selectionContract'>) { return improveReportContract(report)==='legacy'; }
 /** 该报告的 improve.report 记录；分析未结束或没有报告时 null。 */
 export function readReportRecord(root: string, id: string): ImproveReport | null {
   const start = priorImprove(root, id);

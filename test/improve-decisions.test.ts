@@ -101,8 +101,8 @@ test('TUI starts unselected, shows each mode and aggregate, and only submits aft
  const f=await fixture(),template=decision(f);let submits=0;
  const view=new ImproveSelectionView(f.dataRoot,template,async d=>{submits++;return submitImproveDecision({dataRoot:f.dataRoot,decision:d});});
  assert.deepEqual(view.draft().selections,[]);await view.handleInput('thanks, do everything');await view.handleInput('\r');assert.equal(submits,0);
- await view.handleInput('d');assert.equal(view.draft().selections[0].mode,'defer');await view.handleInput('s');await view.handleInput('\r');assert.equal(submits,0,'unrendered summary cannot be submitted');
- const shown=view.render(160,100).join('\n');assert.match(shown,/report-rev-1/);assert.match(shown,/totalBudget/);assert.match(shown,/dependencies/);
+ await view.handleInput('3');assert.equal(view.draft().selections[0].mode,'defer');await view.handleInput('\r');await view.handleInput('\r');assert.equal(submits,0,'unrendered summary cannot be submitted');
+ const shown=view.render(160,100).join('\n');assert.match(shown,/report-rev-1/);assert.match(shown,/本次只记录决定/);assert.match(shown,/选择不包含提交、推送、发布或清理数据/);
  await view.handleInput('\r');assert.equal(submits,1);assert.equal(readImproveDecision(f.dataRoot,template.id).state,'completed');
  await view.handleInput('\r');assert.equal(submits,1);
  const again=new ImproveSelectionView(f.dataRoot,template,async()=>{throw Error('view must not submit')});assert.deepEqual(again.draft().selections,[]);
@@ -177,9 +177,9 @@ test('narrow selection viewport keeps the current candidate title and mode visib
  const f=await fixture();f.report.candidates=Array.from({length:5},(_,i)=>({...f.candidate,id:`candidate:${i}`,revision:`revision:${i}`,display:`R${i+1}`,title:`Choice ${i+1} 中文`,validation:{...f.candidate.validation,checks:['A deliberately long declared necessary check whose wrapped text must not conceal the next selectable choice']}}));
  const e=new Evidence(f.dataRoot,'analysis-1');e.append('improve.report',f.report);e.close();
  const view=new ImproveSelectionView(f.dataRoot,decision(f),async()=>{throw Error('navigation does not submit');});
- for(let i=0;i<5;i++){if(i)await view.handleInput('\x1b[B');await view.handleInput('d');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('[defer]'),screen);}
+ for(let i=0;i<5;i++){if(i)await view.handleInput('\t');await view.handleInput('3');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('暂缓'),screen);}
  const resized=view.render(32,8).join('\n');assert.ok(resized.includes('Choice 5'),resized);
- for(let i=3;i>=0;i--){await view.handleInput('\x1b[A');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('[defer]'),screen);}
+ for(let i=3;i>=0;i--){await view.handleInput('\x1b[Z');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('暂缓'),screen);}
 });
 
 test('diagnostic effects remain visible beside required results and cannot hide missing necessary evidence',()=>{
