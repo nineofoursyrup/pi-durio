@@ -75,7 +75,7 @@ export const COMMANDS: readonly CommandSpec[] = [
   { name: 'storage', summary: '存储占用与显式清理', bare: 'view' },
   {
     name: 'stats', summary: '任务指标（只读）', bare: 'view', withArgs: 'open',
-    options: [date('from'), date('to'), { name: 'as-of', value: '时间' }, project, { name: 'type', value: '任务类型' }, { name: 'version', value: '执行版本' },
+    options: [{ name: 'self' }, date('from'), date('to'), { name: 'as-of', value: '时间' }, project, { name: 'type', value: '任务类型' }, { name: 'version', value: '执行版本' },
       { name: 'source', value: '来源', values: ['ordinary', 'synthetic', 'diagnostic'] }, { name: 'snapshot', value: '序号' }],
   },
   { name: 'eval', summary: '评估报告（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'ep-号', kinds: ['eval-plan'] }] },

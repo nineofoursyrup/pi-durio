@@ -1,0 +1,76 @@
+00| 指标 · 本机实测                                                                                                                          |
+   0-2 fg.label/bg.base ; 3-5 fg.faint/bg.base ; 6-125 fg.primary/bg.base/b ; 126-131 -/-
+01|◆ self ####### · Example CPU · macOS ##.# · Node v##.#.# · Terminal.app · 本进程 #m                        无预设硬阈值 · 只报告实测              |
+   0-117 fg.body/bg.base ; 118-131 -/-
+02| 自有维护代码                                                    │  运行开销                                                                  |
+   0-57 fg.primary/bg.base/b ; 58-60 fg.body/bg.base ; 61-121 fg.primary/bg.base/b ; 122-131 -/-
+03| src/tui/             ━━━━━━━━━━ ### 行                          │  本次启动到首帧       尚未取得首帧                                             |
+   0-21 fg.label/bg.base ; 22-62 ac.info/bg.base ; 63-65 fg.body/bg.base ; 66-80 fg.label/bg.base ; 81-117 fg.body/bg.base ; 118-131 -/-
+04| src/                 ━━━━━ ### 行                               │  冷启动 p##/p##       产品内不测 · 见 A# 报告                                |
+   0-21 fg.label/bg.base ; 22-62 ac.info/bg.base ; 63-65 fg.body/bg.base ; 66-84 fg.label/bg.base ; 85-119 fg.body/bg.base ; 120-131 -/-
+05| src/eval/            ━━━ ### 行                                 │  当前 RSS             ## MB · 空闲                                    |
+   0-21 fg.label/bg.base ; 22-62 ac.info/bg.base ; 63-65 fg.body/bg.base ; 66-85 fg.label/bg.base ; 86-126 fg.body/bg.base ; 127-131 -/-
+06| src/metrics/         ━━ ## 行                                   │  本进程峰值 RSS       ## MB · # 个任务 · # KB 工具输出                        |
+   0-21 fg.label/bg.base ; 22-62 ac.info/bg.base ; 63-65 fg.body/bg.base ; 66-82 fg.label/bg.base ; 83-118 fg.body/bg.base ; 119-131 -/-
+07| 产品源码合计         ## 文件 · ### 行                           │  受控空闲 / 长会话    产品内不测 · 见 A# 报告                                            |
+   0-15 fg.label/bg.base ; 16-57 fg.body/bg.base ; 58-72 fg.label/bg.base ; 73-107 fg.body/bg.base ; 108-131 -/-
+08| 直接依赖             # · 精确固定                               │  按键到重绘           尚无样本                                                    |
+   0-17 fg.label/bg.base ; 18-58 fg.body/bg.base ; 59-75 fg.label/bg.base ; 76-114 ac.info/bg.base ; 115-131 -/-
+09| 随包脚本             ### 行                                     │                       进程内 · 不含终端绘制                                    |
+   0-17 fg.label/bg.base ; 18-61 fg.body/bg.base ; 62-83 fg.label/bg.base ; 84-117 fg.body/bg.base ; 118-131 -/-
+10| pi-tui 宽度补丁      ## 行                                      │                                                                       |
+   0-17 fg.label/bg.base ; 18-61 fg.body/bg.base ; 62-126 -/bg.base ; 127-131 -/-
+11| 测试（不随包）       ### 行                                     │  观测开销                                                                    |
+   0-14 fg.label/bg.base ; 15-58 fg.body/bg.base ; 59-119 fg.primary/bg.base/b ; 120-131 -/-
+12|                                                                 │  记录增长             尚无任务 · 数据根总量 ## KB                             |
+   0-63 -/bg.base ; 64-66 fg.body/bg.base ; 67-84 fg.label/bg.base ; 85-118 fg.body/bg.base ; 119-131 -/-
+13| 体积                                                            │  查询摘要             # ms · # run                                     |
+   0-61 fg.primary/bg.base/b ; 62-64 fg.body/bg.base ; 65-82 fg.label/bg.base ; 83-125 fg.body/bg.base ; 126-131 -/-
+14| 生产安装             ## MB · 含 provider SDK                    │  输出取得写入耗时     产品内不测 · 见 A# 报告                                         |
+   0-17 fg.label/bg.base ; 18-61 fg.body/bg.base ; 62-75 fg.label/bg.base ; 76-110 fg.body/bg.base ; 111-131 -/-
+15| 分发                 产品内不测 · 见 A# 报告                    │  导出队列             外部导出 无 · 观测仅本机                                           |
+   0-19 fg.label/bg.base ; 20-56 fg.body/bg.base ; 57-74 fg.label/bg.base ; 75-107 fg.body/bg.base ; 108-131 -/-
+16|                                                                                                                                    |
+   0-131 -/-
+17| 模型成本 · 近 # 天整日 · 全部项目 · 日常 · 估算非账单                                                                                                 |
+   0-112 fg.primary/bg.base/b ; 113-131 -/-
+18| [####-##-##, ####-##-##) · 按请求发生时间去重                                                                                               |
+   0-122 fg.body/bg.base ; 123-131 -/-
+19| coding               ≈ ¥#.## · # tok · 任务执行与自动压缩         eval                 ≈ ¥#.## · # tok · 两侧 + 评分                            |
+   0-21 fg.label/bg.base ; 22-56 fg.body/bg.base ; 57-78 fg.label/bg.base ; 79-118 fg.body/bg.base ; 119-131 -/-
+20| improve              ≈ ¥#.## · # tok · 分析 + 候选制作            维护                 ≈ ¥#.## · # tok · 空闲手动 /compact                     |
+   0-21 fg.label/bg.base ; 22-59 fg.body/bg.base ; 60-79 fg.label/bg.base ; 80-119 fg.body/bg.base ; 120-131 -/-
+21| 合计                 ≈ ¥#.## · # tok · 去重汇总                                                                                          |
+   0-19 fg.label/bg.base ; 20-59 fg.body/bg.base ; 60-125 -/bg.base ; 126-131 -/-
+22|                                                                                                                                    |
+   0-131 -/-
+23|                                                                                                                                    |
+   0-131 -/-
+24|                                                                                                                                    |
+   0-131 -/-
+25|                                                                                                                                    |
+   0-131 -/-
+26|                                                                                                                                    |
+   0-131 -/-
+27|                                                                                                                                    |
+   0-131 -/-
+28|                                                                                                                                    |
+   0-131 -/-
+29|                                                                                                                                    |
+   0-131 -/-
+30|                                                                                                                                    |
+   0-131 -/-
+31|                                                                                                                                    |
+   0-131 -/-
+32|                                                                                                                                    |
+   0-131 -/-
+33|                                                                                                                                    |
+   0-131 -/-
+34|                                                                                                                                    |
+   0-131 -/-
+35|                                                                                                                                    |
+   0-131 -/-
+36| 本地时间与网络/模型时间分开 · 磁盘增长不等于上下文变短                                                                                                      |
+   0-106 fg.body/bg.base ; 107-131 -/-
+37|b 重新测量 · e 导出 · Tab 页签 · ↑↓ 滚动 · Esc 返回会话                                                                                           |
+   0-117 fg.label/bg.base ; 118-131 -/-
