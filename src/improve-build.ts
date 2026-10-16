@@ -5,6 +5,11 @@ import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {isDeepStrictEqual} from 'node:util';
 import {Evidence,digest,readObject,type BlobRef} from './evidence.js';
+
+/** Compare the actual rebuilt manifest with changed source bytes; legacy manifests stay legacy. */
+export function expectedSourceInputs<T extends {path:string;sha256:string;bytes:number;physicalLines?:number}>(inputs:T[],changes:Map<string,Buffer>) {
+ return inputs.map(file=>{const bytes=changes.get(file.path);return bytes?{...file,sha256:digest(bytes),bytes:bytes.length,...Object.hasOwn(file,'physicalLines')?{physicalLines:bytes.reduce((n,b)=>n+(b===10?1:0),0)+(bytes.length&&bytes.at(-1)!==10?1:0)}:{}}:file;});
+}
 import {sourceBytes,sourceInputPaths,verifySelfSource,type SourceTarget} from './improve-source.js';
 import {regularFiles,materialize,type ContentFile} from './eval/store.js';
 import {verifiedImage} from './eval/plan.js';
@@ -70,7 +75,7 @@ export async function prepareImproveBuild(o:{evidence:Evidence;target:SourceTarg
  const outputRoot=join(o.directory,'execution/work/source'),names=regularFiles(join(outputRoot,'dist')).filter(p=>p.startsWith('src/')||p.startsWith('execution/')).map(p=>`source/dist/${p}`),destination=join(o.directory,'export');
  await engine.exportStopped(execution,names,destination,{maxFiles:2000,maxBytes:16777216});
  const compiledRoot=join(destination,'source'),manifestBytes=sourceBytes(compiledRoot,'dist/execution/source-build.json',8*1024*1024),compiled=JSON.parse(manifestBytes.toString());
- const expectedInputs=original.inputs.map((f:any)=>changes.has(f.path)?{...f,sha256:digest(changes.get(f.path)!),bytes:changes.get(f.path)!.length}:f);
+ const expectedInputs=expectedSourceInputs(original.inputs,changes);
  if(compiled.version!==1||!isDeepStrictEqual(compiled.inputs,expectedInputs)||!isDeepStrictEqual(compiled.compiler,original.compiler))throw Error('IMPROVE_BUILD_SOURCE_CORRESPONDENCE_CHANGED');
  const outputFiles=captureBuildContents(e,compiledRoot,names.map((p:string)=>p.slice('source/'.length)),record,o.groupId);
  if(!isDeepStrictEqual(compiled.outputs.map((f:any)=>f.path).sort(),outputFiles.filter(f=>f.path!=='dist/execution/source-build.json').map(f=>f.path).sort()))throw Error('IMPROVE_BUILD_OUTPUT_SET_CHANGED');

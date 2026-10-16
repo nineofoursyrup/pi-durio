@@ -4,6 +4,7 @@ import { StatsView, readStats, statsCommand, metricRows, type StatsRequest, type
 import { StatsFilter, statsChoices, statsDate, type StatsChoices } from './stats-filter.js';
 import { statsRows, statsMembers, statsExport, type StatsRow, type StatsTarget, type StatsTaskTarget, type StatsMember, type StatsEvidence } from './stats-drilldown.js';
 import { ExportDialog } from './export-dialog.js';
+import { SelfView, type SelfOptions } from './self.js';
 import { EvidenceRawView } from './evidence-raw.js';
 import { COLOR_TIER, styledLine, type ColorTier } from './theme.js';
 import { clean, fixedFrame, hintLine } from './view-stack.js';
@@ -34,19 +35,36 @@ export class StatsBrowser {
   private revision = 0;
   private readonly read: typeof readStats;
   private readonly choices: () => StatsChoices;
+  private activeTab: StatsTab = 'metrics';
+  private selfView?: SelfView;
+  private readonly initialRequest: StatsRequest;
+  private readonly selfOptions: SelfOptions;
+  private tableError?: string;
 
-  constructor(readonly root: string, readonly workspace: string, request: StatsRequest, private readonly host: StatsHost, options: { tab?: StatsTab; read?: typeof readStats; choices?: () => StatsChoices } = {}) {
+  constructor(readonly root: string, readonly workspace: string, request: StatsRequest, private readonly host: StatsHost, options: { tab?: StatsTab; read?: typeof readStats; choices?: () => StatsChoices; self?: SelfOptions } = {}) {
     this.read = options.read ?? readStats;
     this.choices = options.choices ?? (() => statsChoices(root, workspace));
-    this.load(request, true);
-    this.table.tab = options.tab ?? 'metrics';
+    this.initialRequest = request; this.selfOptions = options.self ?? {};
+    if (options.tab !== 'self') this.load(request, true);
+    this.tab = options.tab ?? 'metrics';
   }
-  get request() { return this.table.request; }
+  get request() { return this.table?.request ?? this.initialRequest; }
   get stats() { return this.value; }
-  get limit() { return this.table.limit; }
-  get exportable() { return this.table.exportable && !!this.value; }
-  get tab() { return this.table.tab; }
-  set tab(value: StatsTab) { this.table.tab = value; }
+  get limit() { return this.table?.limit; }
+  get exportable() { return this.tab === 'self' ? !!this.selfView && !this.selfView.inProgress : this.table?.exportable && !!this.value; }
+  get tab() { return this.activeTab; }
+  set tab(value: StatsTab) {
+    if (value === 'metrics' && !this.table) {
+      try { this.load(this.initialRequest, true); }
+      catch (error) { this.tableError = clean(String(error)).split(':')[0]; }
+    }
+    this.activeTab = value;
+    if (this.table) this.table.tab = value;
+    if (value === 'self') this.selfView ??= new SelfView(this.root, { ...this.host, export: value => this.openExport(value) }, this.selfOptions);
+    else { this.selfView?.cancel(); this.selfView = undefined; }
+  }
+  get self() { return this.selfView; }
+  cancel() { this.selfView?.cancel(); }
   get depth() { return 1 + this.levels.length; }
   get layer() { return this.levels.at(-1)?.kind ?? 'table'; }
   /** Only text entry bypasses global view keys; Escape in a filter editor cancels that editor first. */
@@ -76,7 +94,7 @@ export class StatsBrowser {
       request.scope = value.scope; request.command = statsCommand(value.scope);
       return value;
     }, { tab });
-    this.table = table; this.value = value;
+    this.table = table; this.value = value; this.tableError = undefined;
     this.memberCache.clear(); this.evidenceCache.clear();
     if (resetRevisions) { this.revisions = value?.revisions ?? []; this.revision = 0; }
     this.table.selectedRow = Math.min(selected, Math.max(0, value ? statsRows(value).length - 1 : 0));
@@ -96,7 +114,7 @@ export class StatsBrowser {
     this.host.changed();
   }
   back(): boolean {
-    if (!this.levels.length) return false;
+    if (!this.levels.length) { this.cancel(); return false; }
     this.levels.pop(); this.host.changed(); return true;
   }
   handleInput(data: string): boolean {
@@ -124,7 +142,8 @@ export class StatsBrowser {
         } else if (data === 'a' && this.selectedTask && this.host.annotate) this.host.annotate(this.selectedTask, () => this.refresh());
         this.host.changed(); return true;
       }
-      if (this.table.tab === 'self') return this.table.handleInput(data);
+      if (matchesKey(data, 'tab') || matchesKey(data, 'shift+tab')) { this.tab = this.tab === 'metrics' ? 'self' : 'metrics'; this.host.changed(); return true; }
+      if (this.tab === 'self') { void this.selfView?.handleInput(data); this.host.changed(); return true; }
       if (data === '/') { this.levels.push({ kind: 'filter', view: new StatsFilter(this.request, this.workspace, this.choices()), offset: 0 }); }
       else if (data === 'e') {
         if (!this.exportable) this.host.feedback('范围过大 · 缩小范围后再导出');
@@ -140,7 +159,7 @@ export class StatsBrowser {
       else if (matchesKey(data, 'down')) this.scroll(1);
       else if (matchesKey(data, 'pageUp')) this.scroll(-5);
       else if (matchesKey(data, 'pageDown')) this.scroll(5);
-      else { const handled = this.table.handleInput(data); this.host.changed(); return handled; }
+      else { const handled = this.table?.handleInput(data) ?? false; this.host.changed(); return handled; }
       this.host.changed(); return true;
     } catch (error) { this.host.feedback(`统计视图不可读取 · ${clean(String(error))}`); this.host.changed(); return true; }
   }
@@ -148,8 +167,9 @@ export class StatsBrowser {
     if (target.kind === 'run' || target.kind === 'plan') this.host.open(target);
     else this.levels.push({ kind: 'raw', view: new EvidenceRawView(target, this.host) });
   }
-  private openExport() {
-    const level: Extract<Level, { kind: 'export' }> = { kind: 'export', view: new ExportDialog({ title: 'stats', value: statsExport(this.value!), suggestedPath: `./stats-${statsDate(this.request.scope.asOf)}.json`, cwd: this.workspace }, {
+  private openExport(self?: unknown) {
+    const name = self ? 'stats-self' : 'stats', date = self ? statsDate(this.selfView!.snapshot.at) : statsDate(this.request.scope.asOf);
+    const level: Extract<Level, { kind: 'export' }> = { kind: 'export', view: new ExportDialog({ title: name, value: self ?? statsExport(this.value!), suggestedPath: `./${name}-${date}.json`, cwd: this.workspace }, {
       ...this.host, done: () => { if (this.levels.at(-1) === level) this.back(); },
     }) };
     this.levels.push(level);
@@ -161,13 +181,18 @@ export class StatsBrowser {
       const items = level.kind === 'members' ? this.members(level.row) : this.evidence(level.row, level.memberKey);
       level.selected = Math.max(0, Math.min(items.length - 1, level.selected + delta)); level.offset = 0;
     } else if (level?.kind === 'filter') level.offset = Math.max(0, level.offset + delta);
+    else if (!level && this.tab === 'self') this.selfView?.scroll(delta);
     else if (!level && this.value) this.table.selectedRow = Math.max(0, Math.min(statsRows(this.value).length - 1, (this.table.selectedRow ?? 0) + delta));
     this.host.changed();
   }
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
     const level = this.levels.at(-1);
-    if (!level) return this.table.render(width, height, tier);
-    const tabs = styledLine([{ text: ' 指标', fg: 'fg.primary', bold: true }, { text: ' · 本机实测', fg: 'fg.label' }], width, undefined, tier);
+    if (!level && this.tab === 'metrics' && !this.table) return fixedFrame(
+      [styledLine([{ text: ' 指标 · 本机实测', fg: 'fg.primary' }], width, undefined, tier)],
+      [styledLine([{ text: `✗ 统计不可读取 · ${this.tableError ?? '未取得记录'}`, fg: 'ac.warn' }], width, undefined, tier)],
+      [hintLine(['Tab 本机实测'], width, { esc: 'Esc 返回会话', tier })], height, 0).lines;
+    if (!level) return this.tab === 'self' ? this.selfView!.render(width, height, tier) : this.table.render(width, height, tier);
+    const tabs = styledLine([{ text: ' 指标', fg: this.tab === 'metrics' ? 'fg.primary' : 'fg.label', bold: this.tab === 'metrics' }, { text: ' · 本机实测', fg: this.tab === 'self' ? 'fg.primary' : 'fg.label', bold: this.tab === 'self' }], width, undefined, tier);
     if (level.kind === 'raw' || level.kind === 'export') return [tabs, ...level.view.render(width, height - 1, tier)];
     const line = (text: string, selected = false) => styledLine([{ text: clean(text), fg: selected ? 'fg.primary' : 'fg.body' }], width, selected ? 'bg.selected' : undefined, tier);
     if (level.kind === 'filter') {

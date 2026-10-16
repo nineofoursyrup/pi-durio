@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import { type Terminal, visibleWidth } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
 import { demoTransport } from '../src/offline.js';
+import { processMeasurements } from '../src/self-measurement.js';
 
 test('native width query survives split/batched replies and preserves ordinary input and pasted CPR text', async()=>{
   const ordinary:string[]=[],writes:string[]=[];
@@ -73,6 +74,22 @@ function calibratedFixture(transportOverride?:typeof fetch){
   const painted=()=>/\x1b\[\d+;\d+H\x1b\[\?25h\x1b\[\?2026l$/.test(terminal.writes.at(-1)??'');
   return {root,terminal,transport,app,draftRoot,painted};
 }
+
+test('self timing includes input waiting for calibration and ignores blocked frames and width-query replies', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'durio-self-width-'));
+  const terminal = new MeasuringTerminal(); terminal.hold = 'A';
+  const app = new ReadOnlyTui({ workspace: root, dataRoot: join(root, 'data'), draftRoot: join(root, 'drafts'), mode: 'offline', terminal });
+  const before = processMeasurements.snapshot().keys.samples;
+  try {
+    app.start(); terminal.key('x');
+    await until(() => terminal.held.length === 1);
+    app.screen();
+    assert.equal(processMeasurements.snapshot().keys.samples, before, 'neither a blocked frame nor calibration traffic completes a key sample');
+    terminal.release();
+    await until(() => processMeasurements.snapshot().keys.samples === before + 1);
+    assert.equal(processMeasurements.snapshot().keys.samples, before + 1, 'protocol replies are not additional key samples');
+  } finally { terminal.release(); await app.exit(); }
+});
 
 for(const [label,key,draft] of [['Ctrl+D','\x04',''],['Ctrl+C','\x03','keep this draft']] as const) {
   test(`calibration replies between the first two ${label} presses do not cancel exit confirmation`,async()=>{

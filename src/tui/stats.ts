@@ -119,6 +119,16 @@ const tokensOf = (usage: any): number => {
 const spendKind = (kind: string): SpendKind => kind === 'coding' || kind === 'eval' || kind === 'improve' || kind === 'maintenance' ? kind : 'unassigned';
 const sourceOfMode = (mode: unknown) => mode === 'offline' ? 'synthetic' : mode === 'live' ? 'ordinary' : null;
 
+/** The same request identities and currency/unknown rules serve 1e and 2c. */
+export function periodSpend(ops: OperationsMetricsReport): StatsFigures['spend'] {
+  const period = new Set(ops.costs.period.requestIds), requests = ops.costs.requests.filter(r => period.has(r.id));
+  const kinds: SpendKind[] = ['coding', 'eval', 'improve', 'maintenance', 'unassigned'];
+  return {
+    rows: kinds.map(kind => { const items = requests.filter(r => spendKind(r.kind) === kind); return { kind, totals: sumCostEstimates(items), tokens: items.reduce((n, r) => n + tokensOf(r.usage), 0) }; }),
+    total: { totals: ops.costs.period.totals, tokens: requests.reduce((n, r) => n + tokensOf(r.usage), 0) },
+  };
+}
+
 /** 读同一快照下的任务、运维、反馈三份报告与窗口内各 eval 计划的回归计数。只读，不取锁。 */
 export function readStats(root: string, scope: StatsScope): StatsSnapshot {
   const task = queryTaskMetrics(root, scope), fixed = { ...scope, through: task.scope.through };
@@ -159,12 +169,7 @@ export function readStats(root: string, scope: StatsScope): StatsSnapshot {
     return kind === 'unknown' ? (meanMs > 0 ? [{ kind, meanMs }] : []) : recorded.has(kind) ? [{ kind, meanMs }] : [];
   });
 
-  const period = new Set(ops.costs.period.requestIds), periodRequests = ops.costs.requests.filter(r => period.has(r.id));
-  const kinds: SpendKind[] = ['coding', 'eval', 'improve', 'maintenance', 'unassigned'];
-  const spend = {
-    rows: kinds.map(kind => { const items = periodRequests.filter(r => spendKind(r.kind) === kind); return { kind, totals: sumCostEstimates(items), tokens: items.reduce((n, r) => n + tokensOf(r.usage), 0) }; }),
-    total: { totals: ops.costs.period.totals, tokens: periodRequests.reduce((n, r) => n + tokensOf(r.usage), 0) },
-  };
+  const spend = periodSpend(ops);
 
   const i = feedback.intervention.counts, w = feedback.rework.counts, f = ops.faults.tasks.counts;
   const started = task.tasks.filter(t => t.startedSource);
@@ -309,7 +314,7 @@ const SPEND: Record<SpendKind | 'total', { label: string; note: string; fg: Toke
 };
 const spendIsZero = (row: { totals: CostTotals; tokens: number }) => !Object.values(row.totals.amounts).some(Boolean) && !row.totals.unknownRequests && !row.totals.partial && !row.tokens;
 /** 期间开销各行：coding、eval、improve、维护，共同/未归属非零时加一行，最后为合计。 */
-export function spendRows(f: StatsFigures): SpendRow[] {
+export function spendRows(f: Pick<StatsFigures, 'spend'>): SpendRow[] {
   const rows = f.spend.rows.filter(r => r.kind !== 'unassigned' || !spendIsZero(r));
   return [...rows, { kind: 'total' as const, ...f.spend.total }].map(row => ({
     label: SPEND[row.kind].label,
