@@ -1,0 +1,22 @@
+/** An independent management view. It cannot submit work, change execution targets, or compact. */
+export declare class StorageView {
+    private root;
+    private changed;
+    private usage?;
+    private selected;
+    private after;
+    private previous;
+    private line;
+    private busy;
+    private text;
+    private mode;
+    private preview?;
+    private previewShown;
+    readonly ready: Promise<void>;
+    get inProgress(): boolean;
+    constructor(root: string, changed?: () => void);
+    private refresh;
+    handleInput(data: string): Promise<void>;
+    scroll(delta: number): void;
+    render(width: number, height: number): string[];
+}

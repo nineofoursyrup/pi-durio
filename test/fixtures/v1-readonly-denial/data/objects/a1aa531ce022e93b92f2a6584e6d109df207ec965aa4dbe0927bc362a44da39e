@@ -1,0 +1,13 @@
+import type { EvalPlan, EvalTrial } from './plan.js';
+import { PersistentBudget } from '../provider-boundary.js';
+/** Guest JSON cannot choose a provider, URL, key, purpose, attempt identity or settle usage. */
+export declare function evalMediator(plan: EvalPlan, trial: EvalTrial, budget: PersistentBudget, transport?: typeof fetch, assertHeld?: () => void): {
+    readonly lastError: string | null;
+    maxRequests: number;
+    maxOutputTokens: number;
+    request({ input, maxOutputTokens, signal }: {
+        input: string;
+        maxOutputTokens: number;
+        signal: AbortSignal;
+    }): Promise<string>;
+};

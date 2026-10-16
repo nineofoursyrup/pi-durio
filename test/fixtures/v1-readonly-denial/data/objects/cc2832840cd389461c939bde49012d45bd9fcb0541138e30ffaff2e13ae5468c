@@ -1,0 +1,96 @@
+import { type BlobRef } from '../evidence.js';
+import { type ContentFile } from './store.js';
+import { type EvalCase } from './fixtures.js';
+import { type ComparisonPlan } from './comparison.js';
+import type { BudgetLimits } from '../provider-boundary.js';
+export declare const verifiedImage = "pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c";
+export type ControlledScenario = 'pass' | 'necessary-fail' | 'grader-crash' | 'unknown-usage' | 'service-error' | 'original-error' | 'boundary' | 'export-link' | 'timeout' | 'auto-compaction';
+export interface EvalTrial {
+    id: string;
+    caseId: string;
+    version: string;
+    side: string;
+    repeat: number;
+    pair: string | null;
+    scenario?: ControlledScenario;
+    replaces?: string;
+}
+export interface EvalPlan {
+    id: string;
+    purpose: string;
+    mode: 'offline' | 'live';
+    model: {
+        provider: 'deepseek';
+        id: 'deepseek-flash';
+        endpoint: 'https://api.deepseek.com/chat/completions';
+    };
+    image: string;
+    runtime: {
+        id: string;
+        manifest: BlobRef;
+        bytes: number;
+    };
+    cases: EvalCase[];
+    trials: EvalTrial[];
+    budget: BudgetLimits;
+    trialTimeoutMs: number;
+    gradingTimeoutMs: number;
+    maxOutputTokens: number;
+    requestRetryLimit: 0;
+    price: {
+        version: string;
+        source: string;
+        currency: 'USD';
+        perMillionTokens: number;
+    } | null;
+    comparison?: ComparisonPlan;
+    authorization: {
+        scope: 'run-all-listed-trials';
+        paid: boolean;
+    };
+    environment: {
+        node: string;
+        isolation: string;
+        writable: string;
+        cache: string;
+        boundaryFiles?: ContentFile[];
+        hostFiles?: ContentFile[];
+    };
+    mainObjective: string;
+    protection: string[];
+    improvementConclusion: 'not-evaluated';
+}
+export declare function validatePlan(plan: EvalPlan): void;
+export declare function validateGrader(grader: EvalCase['grader']): void;
+export declare function trialVersion(plan: Pick<EvalPlan, 'comparison' | 'runtime' | 'model'>, side: string): string;
+export type PrepareComparison = Omit<ComparisonPlan, 'sides'> & {
+    sides: Record<'baseline' | 'candidate', {
+        installation?: string;
+        instructions: string;
+        effectiveTask?: import('../task-profile.js').EffectiveTask;
+    }>;
+};
+export interface PrepareEvalOptions {
+    dataRoot: string;
+    id?: string;
+    purpose: string;
+    mode?: 'offline' | 'live';
+    image?: string;
+    budget: BudgetLimits;
+    trialTimeoutMs?: number;
+    gradingTimeoutMs?: number;
+    maxOutputTokens?: number;
+    cases?: EvalCase[];
+    trials?: Omit<EvalTrial, 'version'>[];
+    paid?: boolean;
+    price?: EvalPlan['price'];
+    installation?: string;
+    comparison?: PrepareComparison;
+}
+export declare function prepareEval(options: PrepareEvalOptions): Promise<{
+    plan: EvalPlan;
+    source: string;
+    fixed: any;
+}>;
+export declare function loadEvalPlan(root: string, id: string): EvalPlan;
+export declare function runtimeContent(root: string, plan: EvalPlan, side?: string): ContentFile[];

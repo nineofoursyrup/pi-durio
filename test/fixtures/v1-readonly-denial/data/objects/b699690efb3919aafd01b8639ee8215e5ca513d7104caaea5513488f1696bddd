@@ -1,0 +1,517 @@
+import { type EvidenceReference } from '../history.js';
+import { type MetricsScope } from './report.js';
+export interface OperationFact {
+    ref: EvidenceReference;
+    data: any;
+    missing?: string;
+}
+export interface OperationRun {
+    root: string;
+    parentImprove?: {
+        dataRoot: string;
+        decisionId: string;
+        decisionSource: string;
+        linkSource: string;
+    };
+    id: string;
+    facts: OperationFact[];
+    admission?: OperationFact;
+    kind: string;
+    source: string | null;
+    project: string | null;
+}
+/** Read bounded original facts. There is no writable store, execution or classifier. */
+export declare function operationRuns(root: string, through: number): OperationRun[];
+export declare function queryOperationsMetrics(root: string, scope?: MetricsScope): {
+    schema: string;
+    ruleVersion: string;
+    sample: {
+        schema: string;
+        ruleVersion: string;
+        scope: {
+            through: number;
+            from: string;
+            to: string;
+            asOf: string;
+            source: "ordinary" | "synthetic" | "diagnostic";
+            project?: string;
+            taskType?: string;
+            version?: string;
+            revisionOf?: string;
+        };
+        snapshot: {
+            current: number;
+            through: number;
+            blockedAt: string | null;
+            rollback: boolean;
+            policy: string;
+        };
+        counts: {
+            N: number;
+            B: number;
+            C: number;
+            G: number;
+            S: number;
+            terminated: number;
+        };
+        rates: {
+            success: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            completion: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            coverage: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+        };
+        statusCounts: {
+            [k: string]: number;
+        };
+        terminationReasons: {
+            [k: string]: number;
+        };
+        unknown: {
+            taskTypes: number;
+            executionVersions: number;
+            acceptance: number;
+        };
+        clocks: {
+            execution: {
+                unit: string;
+                state: string;
+                total: number;
+                valid: number;
+                missing: number;
+                pending: number;
+                sum: number | null;
+                mean: number | null;
+                p50: number | null;
+                p95: number | null;
+                method: string;
+            };
+            executionByStatus: any;
+            acceptance: {
+                unit: string;
+                state: string;
+                total: number;
+                valid: number;
+                missing: number;
+                pending: number;
+                sum: number | null;
+                mean: number | null;
+                p50: number | null;
+                p95: number | null;
+                method: string;
+            };
+            acceptanceByOutcome: {
+                [k: string]: {
+                    unit: string;
+                    state: string;
+                    total: number;
+                    valid: number;
+                    missing: number;
+                    pending: number;
+                    sum: number | null;
+                    mean: number | null;
+                    p50: number | null;
+                    p95: number | null;
+                    method: string;
+                };
+            };
+        };
+        tasks: {
+            taskId: string;
+            requestId: string;
+            runId: string | null;
+            evidenceRunId: string;
+            project: any;
+            workspace: string;
+            kind: string | null;
+            sourceClass: string | null;
+            taskType: string | null;
+            parentTaskId: string | null;
+            trialId: string | null;
+            version: string | null;
+            expectedVersion: string | null;
+            acceptedAt: string;
+            acceptedSource: string;
+            startedSource: string | null;
+            terminationSource: string | null;
+            status: any;
+            reason: any;
+            normalCompleted: boolean;
+            terminated: boolean;
+            terminationScope: string;
+            acceptance: {
+                history: {
+                    id: string;
+                    type: "result" | "withdraw" | "requirements" | "judgment" | "dispute";
+                    source: string;
+                    occurredAt: string;
+                    receivedAt: string;
+                    withdrawn: boolean;
+                    disputed: boolean;
+                    revisionOf: string | null;
+                    supersedes: string[];
+                    reason: string | null;
+                }[];
+                missingSources: {
+                    source: string;
+                    runId: string;
+                    taskAttribution: "unknown";
+                    scope: string;
+                    reason: string;
+                }[];
+                requirements: {
+                    id: string;
+                    source: string;
+                    ruleVersion: any;
+                }[];
+                results: {
+                    id: string;
+                    source: string;
+                    evidence: any;
+                }[];
+                judgments: import("./acceptance.js").Assessed[];
+                firstValid: import("./acceptance.js").Assessed | null;
+                firstValidOrder: {
+                    method: string;
+                    reliability: string;
+                    reason: string | null;
+                };
+                conflict: boolean;
+                requirementsChanged: boolean;
+                outcome: import("./acceptance.js").Verdict;
+                reasons: string[];
+            };
+            clocks: {
+                execution: import("./clocks.js").Duration;
+                acceptance: import("./clocks.js").Duration;
+                acceptanceOutcome: string;
+                rollback: boolean;
+                segments: import("./clocks.js").Segment[];
+                partition: {
+                    unit: string;
+                    measured: Record<"unknown" | import("./clocks.js").SegmentKind, number | null>;
+                    overlapMs: number;
+                    totalState: string;
+                    scope: string;
+                };
+            };
+            missing: {
+                source: string;
+                reason: any;
+            }[];
+            sources: string[];
+        }[];
+        excluded: {
+            taskId: string;
+            source: string;
+            reasons: string[];
+            kind: string | null;
+            sourceClass: string | null;
+            version: string | null;
+            taskType: string | null;
+        }[];
+        duplicates: {
+            taskId: string;
+            source: string;
+            reason: string;
+        }[];
+        limits: string[];
+        id: string;
+        generatedAt: string;
+        revisionOf: string | null;
+    };
+    costs: {
+        sample: {
+            basis: string;
+            sampleId: string;
+            state: string;
+            perSuccessState: string;
+            currencies: {
+                [k: string]: {
+                    knownAmount: number;
+                    perSuccess: {
+                        state: string;
+                        value: number | null;
+                        knownPartPerSuccess: number | null;
+                        denominator: number | null;
+                        unit: string;
+                        interpretation: string;
+                    };
+                };
+            };
+            requestIds: string[];
+            gaps: {
+                runId: string;
+                source: string | null;
+                reason: string;
+                mayAffectSample: boolean;
+            }[];
+            missingRequests: {
+                id: string;
+                gaps: string[];
+            }[];
+            groups: {
+                [k: string]: string[];
+            };
+        };
+        period: {
+            basis: string;
+            state: string;
+            perSuccessState: string;
+            currencies: {
+                [k: string]: {
+                    knownAmount: number;
+                    perSuccess: {
+                        state: string;
+                        value: number | null;
+                        knownPartPerSuccess: number | null;
+                        denominator: number | null;
+                        unit: string;
+                        interpretation: string;
+                    };
+                };
+            };
+            requestIds: string[];
+            gaps: {
+                runId: string;
+                source: string | null;
+                reason: string;
+                mayAffectSample: boolean;
+            }[];
+            missingRequests: {
+                id: string;
+                gaps: string[];
+            }[];
+            groups: {
+                [k: string]: string[];
+            };
+        };
+        requests: import("./costs.js").CostRequest[];
+        gaps: {
+            runId: string;
+            source: string | null;
+            reason: string;
+            mayAffectSample: boolean;
+        }[];
+        sessionUsage: any[];
+        sessionEstimates: any[];
+        evalStages: {
+            dataRoot: string;
+            planId: string;
+            parentImprove: {
+                dataRoot: string;
+                decisionId: string;
+                decisionSource: string;
+                linkSource: string;
+            } | null;
+            stages: {
+                [k: string]: {
+                    requests: string[];
+                    sources: string[];
+                };
+            };
+            basis: string;
+        }[];
+        rule: string;
+    };
+    faults: {
+        tasks: {
+            counts: {
+                B: number;
+                F: number;
+                Zf: number;
+                Uf: number;
+                faultTerminated: number;
+            };
+            observedFaults: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            faultTermination: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            coverage: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            faultTerminationUnknown: number;
+            completeFaultTerminationRate: string;
+            completeFaultRate: string;
+            logicalRange: {
+                lower: number;
+                upper: number;
+                interpretation: string;
+            } | null;
+            members: {
+                taskId: string;
+                runId: string | null;
+                status: any;
+                category: string;
+                events: string[];
+                faultTerminated: boolean;
+                terminationBasis: string[];
+                terminationRule: string;
+                faultTermination: string;
+                recoveredEvents: number;
+                unresolvedEvents: number;
+                observationComplete: boolean;
+                terminationSource: string | null;
+                scope: string;
+            }[];
+            unstarted: {
+                taskId: string;
+                status: any;
+                events: import("./faults.js").FaultEvent[];
+            }[];
+        };
+        attempts: {
+            model: {
+                started: number;
+                counts: {
+                    [k: string]: number;
+                };
+                observedErrors: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                coverage: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                completeErrorRate: string;
+                rawNonzero: number;
+            };
+            tool: {
+                started: number;
+                counts: {
+                    [k: string]: number;
+                };
+                observedErrors: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                coverage: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                completeErrorRate: string;
+                rawNonzero: number;
+            };
+            items: import("./faults.js").FaultAttempt[];
+            undispatched: any[];
+        };
+        events: import("./faults.js").FaultEvent[];
+        gaps: any[];
+        separate: {
+            attemptSummaries: {
+                dataRoot: string;
+                runId: string;
+                model: {
+                    started: number;
+                    counts: {
+                        [k: string]: number;
+                    };
+                    observedErrors: {
+                        numerator: number;
+                        denominator: number;
+                        value: number | null;
+                        state: string;
+                        unit: string;
+                    };
+                    coverage: {
+                        numerator: number;
+                        denominator: number;
+                        value: number | null;
+                        state: string;
+                        unit: string;
+                    };
+                    completeErrorRate: string;
+                    rawNonzero: number;
+                };
+                tool: {
+                    started: number;
+                    counts: {
+                        [k: string]: number;
+                    };
+                    observedErrors: {
+                        numerator: number;
+                        denominator: number;
+                        value: number | null;
+                        state: string;
+                        unit: string;
+                    };
+                    coverage: {
+                        numerator: number;
+                        denominator: number;
+                        value: number | null;
+                        state: string;
+                        unit: string;
+                    };
+                    completeErrorRate: string;
+                    rawNonzero: number;
+                };
+            }[];
+            grader: import("./faults.js").FaultEvent[];
+            observation: import("./faults.js").FaultEvent[];
+            otherWorkAttempts: import("./faults.js").FaultAttempt[];
+        };
+    };
+    ownedChildren: {
+        snapshots: any[];
+        gaps: {
+            runId: string;
+            source: string;
+            reason: string;
+            mayAffectSample: boolean;
+        }[];
+    };
+    excludedRuns: {
+        runId: string;
+        kind: string;
+        source: string | null;
+        reason: string;
+    }[];
+    limits: string[];
+    id: string;
+    generatedAt: string;
+};
+export type OperationsMetricsReport = ReturnType<typeof queryOperationsMetrics>;
+export declare function formatOperationsMetrics(report: OperationsMetricsReport): string;

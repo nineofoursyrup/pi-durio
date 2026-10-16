@@ -1,0 +1,44 @@
+import { Evidence, type BlobRef } from './evidence.js';
+export interface ImproveSource {
+    id: string;
+    kind: 'project' | 'agent-config' | 'prompt-skill' | 'self-source' | 'eval-asset';
+    paths: string[];
+    root?: string;
+}
+export interface SourceFile {
+    path: string;
+    sha256: string;
+    bytes: number;
+    sourceId: string;
+    content: BlobRef;
+    state: 'available' | 'withheld';
+    reason: string[];
+}
+export interface SourceTarget {
+    id: string;
+    kind: ImproveSource['kind'];
+    workspace: string | null;
+    files: SourceFile[];
+    baseline: string;
+    applicableVersion: string | null;
+    state: 'verified' | 'incomplete';
+    gaps: string[];
+}
+export declare function redactAnalysisText(text: string): {
+    text: string;
+    reasons: string[];
+    coverage: string;
+};
+/** Open only declared ordinary files, with bounded reads and alias checks before/after acquisition.
+ * The model has no filesystem capability: all acquired views are frozen before scheduling. */
+export declare function sourceBytes(root: string, path: string, max?: number, compiler?: boolean): NonSharedBuffer;
+export declare function sourceInputPaths(root: string): string[];
+export declare function verifySelfSource(root: string): string;
+export declare function captureImproveSources(evidence: Evidence, workspace: string, sources: ImproveSource[], version: string | null): {
+    targets: SourceTarget[];
+    texts: Map<string, {
+        text: string;
+        sourceId: string;
+        redaction: ReturnType<typeof redactAnalysisText>;
+    }>;
+};

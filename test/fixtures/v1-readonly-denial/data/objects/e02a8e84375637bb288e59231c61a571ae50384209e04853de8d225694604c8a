@@ -1,0 +1,38 @@
+export interface ImproveRollback {
+    dataRoot: string;
+    id: string;
+    rollbackId: string;
+    decisionSource: string;
+    groupIds: string[];
+    reason: string;
+    fault?: (kind: string) => void;
+    signal?: AbortSignal;
+}
+/** Explicit file compensation only. No process, Git, provider or external
+ * effects are undone; later user bytes/default choices are never overwritten. */
+export declare function rollbackImproveDecision(input: ImproveRollback): Promise<{
+    id: string;
+    decision: any;
+    requestDigest: any;
+    executionVersion: any;
+    sourceId: string;
+    runId: string;
+    state: any;
+    reason: any;
+    groups: any;
+    activation: string;
+    writeback: string;
+    effect: string;
+    facts: {
+        sourceId: string;
+        kind: string;
+        runId: string;
+        state: any;
+        reason: any;
+    }[];
+    reserved: {
+        checks: any;
+        requests: any;
+        tokens: any;
+    };
+}>;

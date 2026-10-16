@@ -1,0 +1,176 @@
+import { type AcceptedTaskFact, type BlobRef } from './evidence.js';
+export type Availability = 'complete' | 'source-not-returned' | 'collection-gap' | 'archived' | 'cleaned' | 'corrupt' | 'temporarily-unreadable';
+export interface EvidenceReference {
+    id: string;
+    runId: string;
+    seq: number;
+    kind: string;
+    at: string;
+    ref: BlobRef;
+}
+export interface HistoryFilter {
+    project?: string;
+    session?: string;
+    from?: string;
+    to?: string;
+    kind?: string;
+    taskType?: string;
+    status?: string;
+    reason?: string;
+    version?: string;
+    provider?: string;
+    model?: string;
+    completeness?: string;
+}
+export interface HistoryCursor {
+    snapshot: number;
+    after: number;
+    filter: string;
+}
+export declare const reference: (row: any) => EvidenceReference;
+export declare function boundedInteger(n: number, min?: number, max?: number): number;
+export declare function watermark(root: string): number;
+export declare function records(root: string, options?: {
+    runId?: string;
+    through?: number;
+    after?: number;
+    kinds?: readonly string[];
+}): Generator<EvidenceReference, void, unknown>;
+export declare function decode(root: string, ref: EvidenceReference): any;
+export declare function resolveEvidence(root: string, id: string): EvidenceReference;
+export declare function readEvidence(root: string, id: string, options?: {
+    offset?: number;
+    limit?: number;
+    decodedOutput?: boolean;
+}): {
+    source: EvidenceReference;
+    state: Availability;
+    display: string;
+    encoding: string;
+    bytes: string;
+    offset: number;
+    total: number;
+    next: number | null;
+    error?: undefined;
+} | {
+    text: string;
+    offset: number;
+    total: number;
+    next: number | null;
+    source: EvidenceReference;
+    state: Availability;
+    display: string;
+    encoding?: undefined;
+    bytes?: undefined;
+    error?: undefined;
+} | {
+    source: EvidenceReference;
+    state: Availability;
+    display: string;
+    error: string;
+    encoding?: undefined;
+    bytes?: undefined;
+    offset?: undefined;
+    total?: undefined;
+    next?: undefined;
+};
+export declare function summarizeRun(root: string, runId: string, through?: number): {
+    runId: string;
+    taskId: any;
+    sessionId: any;
+    project: any;
+    workspace: any;
+    kind: any;
+    taskType: any;
+    at: string | null;
+    seq: number;
+    source: string | null;
+    status: any;
+    reason: any;
+    version: any;
+    provider: any;
+    model: any;
+    completeness: Availability;
+    usage: any;
+    attempts: number;
+    responses: number;
+    recovery: any;
+    updatedThrough: number;
+    missing: string[];
+    missingOmitted: number;
+};
+export type HistorySummary = Omit<ReturnType<typeof summarizeRun>, 'runId'> & {
+    runId: string | null;
+    acceptedTask: AcceptedTaskFact;
+};
+export declare function queryHistory(root: string, filter?: HistoryFilter, options?: {
+    limit?: number;
+    cursor?: HistoryCursor;
+}): {
+    filter: HistoryFilter;
+    items: HistorySummary[];
+    next: {
+        snapshot: number;
+        after: number;
+        filter: string;
+    } | null;
+    coverage: {
+        snapshot: number;
+        current: number;
+        stale: boolean;
+        scanned: number;
+        missing: number;
+        index: string;
+        emptyMeans: string;
+    };
+};
+export declare function queryEvidence(root: string, runId: string, options?: {
+    after?: number;
+    snapshot?: number;
+    limit?: number;
+    kinds?: readonly string[];
+}): {
+    runId: string;
+    snapshot: number;
+    items: EvidenceReference[];
+    next: number | null;
+    current: number;
+};
+/** Attempt projections use acquired source rows, never create another trace or usage ledger. */
+export declare function queryAttempts(root: string, runId: string, options?: {
+    after?: number;
+    snapshot?: number;
+    limit?: number;
+}): {
+    items: {
+        id: any;
+        source: EvidenceReference;
+        kind: string;
+        purpose: any;
+        durableTaskId: any;
+        model: any;
+        tool: any;
+        startedAt: string;
+        endedAt: string | null;
+        terminal: EvidenceReference | null;
+        status: string;
+        observableRequests: number;
+        unverifiedDispatchIntents: number;
+        dispatchState: string;
+        dispatchFailure: {
+            source: EvidenceReference;
+            reason: string;
+        } | null;
+        requests: EvidenceReference[];
+        requestIdentity: string;
+        usage: any;
+        related: EvidenceReference[];
+        omitted: number;
+        gaps: string[];
+        nextRelated: number | null | undefined;
+    }[];
+    runId: string;
+    snapshot: number;
+    next: number | null;
+    current: number;
+};

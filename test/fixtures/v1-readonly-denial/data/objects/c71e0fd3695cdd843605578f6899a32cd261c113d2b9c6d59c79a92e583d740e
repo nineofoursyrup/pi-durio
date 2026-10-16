@@ -1,0 +1,16 @@
+export declare function acquireOwner(path: string, onCompromised: (error: Error) => void): Promise<{
+    path: string;
+    claim: Readonly<{
+        pid: number;
+        host: string;
+        started: string;
+        token: `${string}-${string}-${string}-${string}-${string}`;
+    }>;
+    setOnCompromised: (listener: (error: Error) => void) => void;
+    assertHeld: () => void;
+    release(): Promise<void>;
+}>;
+/** Synchronous host mutation: borrow a verified lease or hold the same lock for
+ * the complete callback, including closing every writable handle. */
+export declare function withOwnerSync<T>(path: string, write: (canonical: string) => T): T;
+export type OwnerLease = Awaited<ReturnType<typeof acquireOwner>>;

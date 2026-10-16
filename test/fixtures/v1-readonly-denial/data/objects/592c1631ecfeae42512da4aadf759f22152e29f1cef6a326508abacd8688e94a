@@ -1,0 +1,40 @@
+import { type BlobRef } from './evidence.js';
+export interface RecordReference {
+    seq: number;
+    kind: string;
+    at: string;
+    ref: BlobRef;
+}
+/** Host schema only; no Harness, writable connection, migration, or original decoding. */
+export declare function readRunRecords(root: string, runId: string, options?: {
+    after?: number;
+    before?: number;
+    limit?: number;
+    tail?: boolean;
+    kinds?: readonly string[];
+}): {
+    runId: string;
+    records: RecordReference[];
+    more: boolean;
+};
+/** Verify all acquired bytes while retaining only one bounded slice from that same read. */
+export declare function readObjectRange(root: string, ref: BlobRef, options?: {
+    offset?: number;
+    limit?: number;
+}): {
+    bytes: Buffer<ArrayBuffer>;
+    offset: number;
+    total: number;
+    next: number | null;
+};
+/** Text pages keep ordinary Unicode graphemes intact without retaining an entire original. */
+export declare function readTextPage(root: string, ref: BlobRef, offset?: number, limit?: number): {
+    text: string;
+    offset: number;
+    total: number;
+    next: number | null;
+};
+export { queryHistory, queryEvidence, queryAttempts, readEvidence, watermark } from './history.js';
+export { queryUsage } from './usage-query.js';
+export { scopedEvidence } from './derived-evidence.js';
+export { fixEvidence, verifyFixed, fixedDependencies, iterateFixedDependencies, estimateUsage } from './fixed-evidence.js';

@@ -1,0 +1,41 @@
+import type { Storage } from '@earendil-works/pi-durable';
+import type { OwnerLease } from './ownership.js';
+/** Caller holds the data-root owner and has no active source connection (before open or after confirmed close).
+ * Copy a quiescent main+WAL pair, verify source/copy bytes, then touch ONLY the copy through SQLite/public storage.
+ * This is not a live-backup API; active/uncertain writers must be blocked before calling it.
+ */
+export declare function inspectSnapshot<T>(path: string, owner: OwnerLease, inspect: (storage: Omit<Storage, 'commit' | 'mintId' | 'close'>) => Promise<T>): Promise<{
+    source: string;
+    method: string;
+    snapshotSha256: string;
+    sourceFiles: {
+        path: string;
+        sha256: string;
+    }[];
+} & Awaited<T>>;
+/** Admission needs every task/submission state, not their history or message bodies.
+ * Pages are discarded immediately; the source-fence checks are shared with full inspection.
+ */
+export declare function inspectAdmission(path: string, owner: OwnerLease): Promise<{
+    source: string;
+    method: string;
+    snapshotSha256: string;
+    sourceFiles: {
+        path: string;
+        sha256: string;
+    }[];
+} & {
+    pending: number;
+    taskCount: number;
+    submissionCount: number;
+}>;
+export declare function preflight(owner: OwnerLease, options?: {
+    runId?: string;
+}): Promise<{
+    sessionCount: number;
+    hostThrough: number;
+    selectedSession: {
+        source: string;
+        pending: number;
+    } | null;
+}>;

@@ -1,0 +1,14 @@
+/** UI text only. A draft is never an accepted task, queue entry, or authority to execute. */
+export declare class Drafts {
+    private readonly root;
+    private readonly prefix;
+    private readonly file;
+    constructor(root: string, workspace: string, dataRoot: string);
+    save(text: string): void;
+    /** Raw input events that never reached the editor. Never restored or replayed as commands. */
+    savePending(inputs: Array<{
+        data: string;
+        context: string;
+    }>, reason: string): void;
+    latest(): string | undefined;
+}

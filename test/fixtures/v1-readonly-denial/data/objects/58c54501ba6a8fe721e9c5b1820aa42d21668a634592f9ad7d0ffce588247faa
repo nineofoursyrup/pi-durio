@@ -1,0 +1,2 @@
+import { type ExecutionEnv } from '@earendil-works/pi-durable/env';
+export declare function readEnvironment(workspace: string, guard: () => void, record: (kind: string, data: unknown) => void): ExecutionEnv;
