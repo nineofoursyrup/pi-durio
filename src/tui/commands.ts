@@ -19,6 +19,8 @@ export interface OptionSpec {
   free?: true;
   /** 可重复给出；各次的值按出现顺序用逗号连接 */
   repeat?: true;
+  /** Several values until the next option, joined with commas for the handler. */
+  many?: true;
   /** 值按 `MM-DD`（默认当年）或 `YYYY-MM-DD` 解析，转成本地零点的 ISO 时间 */
   date?: true;
 }
@@ -79,7 +81,9 @@ export const COMMANDS: readonly CommandSpec[] = [
   { name: 'eval', summary: '评估报告（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'ep-号', kinds: ['eval-plan'] }] },
   { name: 'acceptance', summary: '补记或纠正验收', bare: 'view', withArgs: 'confirm', raw: 'JSON' },
   {
-    name: 'improve', summary: 'improve 视图：进行中、待选择的报告、新建分析、历史与抑制', bare: 'view',
+    name: 'improve', summary: 'improve 视图；报告参数只预填选择与汇总', bare: 'view', withArgs:'confirm',
+    positional:[{label:'ir-号',kinds:['improve-report']}],
+    options:['execute','validate','defer','do-not-suggest'].map(name=>({name,value:'C-号…',many:true as const})),
     subcommands: [
       {
         name: 'new', summary: '新建分析（参数只预填启动框，Enter 确认后开始）', bare: 'view', withArgs: 'confirm',
@@ -194,8 +198,9 @@ export function parseCommand(text: string, table: readonly CommandSpec[] = COMMA
       if (!option) throw new CommandError(`未知选项 ${token}`, (leaf.options ?? []).map(o => `--${o.name}`));
       if (options[option.name] !== undefined && !option.repeat) throw new CommandError(`选项 ${token} 重复`);
       if (!option.value) { options[option.name] = true; continue; }
-      const value = tokens[++i];
+      let value = tokens[++i];
       if (value === undefined || value.startsWith('--')) throw new CommandError(`${token} 缺少${option.value}`, option.values ?? []);
+      if(option.many){const values=[value];while(tokens[i+1]&&!tokens[i+1].startsWith('--'))values.push(tokens[++i]);value=values.join(',');}
       if (option.values && !option.free && !option.values.includes(value)) throw new CommandError(`${token} 不接受 ${value}`, option.values);
       if (option.date) {
         const iso = parseDate(value, now);
@@ -208,6 +213,7 @@ export function parseCommand(text: string, table: readonly CommandSpec[] = COMMA
     if (!slot) throw new CommandError(`多余的参数 ${token}`, (leaf.options ?? []).map(o => `--${o.name}`));
     if (slot.values && !slot.values.includes(token)) throw new CommandError(`不接受 ${token}`, slot.values);
     if (slot.kinds) {
+      if(!/^[-\w.:]{1,128}$/.test(token))throw new CommandError(`这里要 ${slot.label} 或完整 id，收到 ${token}`);
       const prefixed = /^([a-z]+)-[0-9a-f]+$/i.exec(token)?.[1]?.toLowerCase();
       const kind = (Object.keys(DISPLAY_PREFIXES) as DisplayKind[]).find(k => DISPLAY_PREFIXES[k] === prefixed);
       if (kind && !slot.kinds.includes(kind)) throw new CommandError(`这里要 ${slot.label} 或完整 id，收到 ${token}`);
