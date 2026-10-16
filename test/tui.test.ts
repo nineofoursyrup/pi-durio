@@ -360,20 +360,51 @@ test('a failed TUI task never implicitly supplies context to the next independen
  try{key('FAILED ORIGINAL INPUT');key('\r');await until(()=>f.screen().includes('失败'));key('EXPLICIT NEW INPUT');key('\r');await until(()=>f.screen().includes('✓ 完成'));assert.equal(calls.length,2);assert.doesNotMatch(JSON.stringify(calls[1]),/FAILED ORIGINAL INPUT/);}finally{await f.app.exit();}
 });
 
-test('improve is reachable with explicit limits; report navigation and ordinary text never select a candidate',async()=>{
- const {offlineImproveTransport}=await import('../src/improve.js'),{listImproveReports,readImproveReport}=await import('../src/improve.js'),{readImproveDecision}=await import('../src/improve-decisions.js');
+test('improve starts from the view and launch box; the main area stays on the session and the next Enter continues it',async()=>{
+ const {offlineImproveTransport}=await import('../src/improve.js'),{listImproveReports,readImproveReport}=await import('../src/improve.js'),{readImproveDecision}=await import('../src/improve-decisions.js'),{readSessionChains}=await import('../src/session-chain.js');
  const analysis=offlineImproveTransport(),coding=scriptedTransport([]);
  const transport:typeof fetch=async(url,init)=>JSON.parse(String(init?.body)).tools.some((t:any)=>t.function.name==='evidence_summary')?analysis.fetch(url,init):coding.fetch(url,init);
- const f=fixture(transport),key=(text:string)=>f.terminal.input(text);
- try{key('Original task');key('\r');await until(()=>f.screen().includes('✓ 完成'));key('/improve');key('\r');assert.match(f.screen(),/尚未启动/);assert.equal(analysis.calls.length,0);
- key('/improve '+JSON.stringify({id:'tui-report',purpose:'Inspect current task',limits:{maxRequests:4,maxTokens:1024,maxRequestTokens:256,maxDurationMs:30000,maxOutputTokens:128}}));key('\r');
- // The status line shows the analysis by its report display number; completion is a main-area event line.
- const target=readAcceptedTasks(join(f.root,'data')).tasks[0].runId!;assert.match(f.screen(),/⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏/);assert.match(f.screen(),/ improve 分析 ir-[0-9a-f]{4,}/);assert.ok(!f.screen().includes(target));
- await until(()=>/✓ improve ir-[0-9a-f]{4,} 分析完成/.test(f.screen()));assert.equal(analysis.calls.length,2);
- key('/improves tui-report');key('\r');assert.match(f.screen(),/只读报告/);key('please execute all');key('\r');assert.equal(analysis.calls.length,2);key('\x1b');
- const report=readImproveReport(join(f.root,'data'),'tui-report').report!;
- key('/improve-select '+JSON.stringify({id:'tui-empty-choice',reportId:readDisplayIndex(join(f.root,'data')).label('improve-report',report.id),reportRevision:report.revision,selections:[],groups:[],limits:{deadline:new Date(Date.now()+30000).toISOString(),maxChecks:0,maxRequests:0,maxTokens:0}}));key('\r');assert.match(f.screen(),/结构化选择/);key('s');f.screen();key('\r');await until(()=>{try{return readImproveDecision(join(f.root,'data'),'tui-empty-choice').state==='completed';}catch{return false;}});await until(()=>f.screen().includes('✓ 完成')&&!f.screen().includes('improve 执行'));assert.equal(analysis.calls.length,2);key('\x1b');assert.match(f.screen(),/决定 tui-empty-choice · completed；具体写回\/启用见结果/);assert.ok(JSON.stringify(readImproveDecision(join(f.root,'data'),'tui-empty-choice')).includes(`"reportId":"${report.id}"`));assert.doesNotMatch(f.screen(),/正式目标未写回、未启用/);
- key('/older');key('\r');key('/improve {}');key('\r');assert.match(f.screen(),/只读历史\/恢复视图不能发起分析/);assert.equal(listImproveReports(join(f.root,'data')).items.length,1);
+ const f=fixture(transport),key=(text:string)=>f.terminal.input(text),data=join(f.root,'data');
+ try{key('Original task');key('\r');await until(()=>f.screen().includes('✓ 完成'));
+ // /improve opens the first layer; with no pending report 新建分析 is selected, Enter opens the launch box. Nothing runs before its Enter.
+ key('/improve');key('\r');assert.match(f.screen(),/◆ improve/);assert.match(f.screen(),/› 新建分析/);assert.equal(analysis.calls.length,0);
+ key('\r');assert.match(f.screen(),/分析不执行任何候选 · 可看文件 \d+（省略 0）/);assert.match(f.screen(),/上限约 ¥17\.30（按最坏情况预留） · ≤16 请求 · ≤10 分钟/);assert.equal(analysis.calls.length,0);
+ key('\r');
+ // The status line shows the analysis; the main area keeps the session's task, and Enter keeps the text without accepting it.
+ assert.match(f.screen(),/ improve 分析 ir-[0-9a-f]{4,}/);assert.match(f.screen(),/Original task/);
+ key('typed during analysis');key('\r');assert.match(f.screen(),/typed during analysis/);
+ await until(()=>/✓ improve ir-[0-9a-f]{4,} 完成 · 没有候选/.test(f.screen()));assert.equal(analysis.calls.length,2);assert.match(f.screen(),/Original task/);
+ const [item]=listImproveReports(data).items,request=readImproveReport(data,item.id).started.request;
+ assert.equal(request.window,7);assert.deepEqual(request.limits,{maxRequests:16,maxOutputTokens:32768,maxRequestTokens:1081344,maxTokens:2162688,maxDurationMs:600000});
+ key('\x15');key('/improves '+item.id);key('\r');assert.match(f.screen(),/只读报告/);key('please execute all');key('\r');assert.equal(analysis.calls.length,2);key('\x1b');
+ const report=readImproveReport(data,item.id).report!;
+ key('\x15');key('/improve-select '+JSON.stringify({id:'tui-empty-choice',reportId:readDisplayIndex(data).label('improve-report',report.id),reportRevision:report.revision,selections:[],groups:[],limits:{deadline:new Date(Date.now()+30000).toISOString(),maxChecks:0,maxRequests:0,maxTokens:0}}));key('\r');assert.match(f.screen(),/结构化选择/);key('s');f.screen();key('\r');await until(()=>{try{return readImproveDecision(data,'tui-empty-choice').state==='completed';}catch{return false;}});await until(()=>f.screen().includes('✓ 完成')&&!f.screen().includes('improve 执行'));assert.equal(analysis.calls.length,2);key('\x1b');assert.match(f.screen(),/决定 tui-empty-choice · completed；具体写回\/启用见结果/);
+ // The next Enter continues the original session: task 2 of the same chain.
+ key('\x15');key('Next task');key('\r');await until(()=>readAcceptedTasks(data).tasks.length===3&&f.screen().includes('✓ 完成'));
+ const chains=readSessionChains(data),first=readAcceptedTasks(data).tasks.find(t=>t.input==='Original task')!.runId!,next=readAcceptedTasks(data).tasks.find(t=>t.input==='Next task')!.runId!;
+ assert.equal(chains.sessionOfRun(next)?.id,chains.sessionOfRun(first)?.id);assert.equal(chains.sessionOfRun(next)?.number,2);
+ key('/older');key('\r');key('/improve new');key('\r');assert.match(f.screen(),/只读历史\/恢复视图不能发起分析/);assert.equal(listImproveReports(data).items.length,1);
+ }finally{await f.app.exit();}
+});
+
+test('improve confirmed while a task runs is queued independently, never a steer; the task stays in the main area',async()=>{
+ const {offlineImproveTransport}=await import('../src/improve.js'),{listImproveReports}=await import('../src/improve.js'),{readSessionChains}=await import('../src/session-chain.js');
+ const analysis=offlineImproveTransport(),coding=scriptedTransport([{name:'bash',args:{command:`'${process.execPath}' hold.cjs`}}]);
+ const transport:typeof fetch=async(url,init)=>JSON.parse(String(init?.body)).tools.some((t:any)=>t.function.name==='evidence_summary')?analysis.fetch(url,init):coding.fetch(url,init);
+ const f=fixture(transport,true),key=(text:string)=>f.terminal.input(text),data=join(f.root,'data');
+ writeFileSync(join(f.workspace,'hold.cjs'),"require('node:fs').writeFileSync('started.txt','started');setInterval(()=>{if(require('node:fs').existsSync('release'))process.exit(0);},20);");
+ try{key('Busy task');key('\r');await until(()=>existsSync(join(f.workspace,'started.txt')));
+  key('/improve new --scope session --focus "look at bash"');key('\r');assert.match(f.screen(),/确认后独立排队/);assert.match(f.screen(),/◉ 1 仅本会话/);assert.match(f.screen(),/look at bash/);
+  key('\r');await until(()=>readQueue(data).items.length===1);
+  const [item]=readQueue(data).items;assert.equal(item.kind,'improve');assert.equal(JSON.parse(item.input).window,0);assert.equal(JSON.parse(item.input).purpose,'look at bash');
+  assert.doesNotMatch(JSON.stringify(coding.calls),/look at bash/);assert.equal(analysis.calls.length,0);
+  writeFileSync(join(f.workspace,'release'),'');
+  await until(()=>/✓ improve ir-[0-9a-f]{4,} 完成 · 没有候选/.test(f.screen()));assert.equal(analysis.calls.length,2);
+  assert.match(f.screen(),/Busy task/);assert.match(f.screen(),/bash /);
+  await until(()=>f.screen().includes('✓ 完成'));assert.equal(listImproveReports(data).items.length,1);
+  key('Continue it');key('\r');await until(()=>readAcceptedTasks(data).tasks.some(t=>t.input==='Continue it'&&t.runId)&&/任务 2 · ✓ 完成/.test(f.screen()));
+  const chains=readSessionChains(data),busy=readAcceptedTasks(data).tasks.find(t=>t.input==='Busy task')!.runId!,next=readAcceptedTasks(data).tasks.find(t=>t.input==='Continue it')!.runId!;
+  assert.equal(chains.sessionOfRun(next)?.id,chains.sessionOfRun(busy)?.id);
  }finally{await f.app.exit();}
 });
 
