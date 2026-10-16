@@ -11,7 +11,7 @@ import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiA
 import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, inspectRecovery, checkRecovery, recoverRun, estimateTaskPrefix, type ContextUsage, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
 import { readObject, type QueueItemFact } from '../evidence.js';
 import { calculateContextTokens } from '@earendil-works/pi-ai/utils/estimate';
-import { readRunRecords, readObjectRange, readTextPage, type RecordReference } from '../query.js';
+import { readRunRecords, readObjectRange, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
 import { StatsView, readStats, statsRequest } from './stats.js';
 import { recordAcceptance } from '../metrics/index.js';
@@ -19,7 +19,9 @@ import type { HistoryFilter } from '../history.js';
 import { HistoryView } from './history.js';
 import { EvalView } from './eval.js';
 import { StorageView } from './storage.js';
-import { TraceView } from './trace.js';
+import { TraceView, type TraceHost } from './trace.js';
+import { TraceRawView, outputItem } from './trace-raw.js';
+import type { TraceSpan } from '../trace.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
 import { readDisplayIndex, resolveDisplayInput, isUserChosenId, type DisplayIndex, type DisplayKind } from '../display-number.js';
@@ -36,8 +38,8 @@ import { currentExecutionVersion } from '../execution-version.js';
 import { RecoveryPanel, disabledInputLines, readRecoveryFacts, recoveryPages, type RecoveryAction } from './recovery.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
-type PanelKind='help'|'exit'|'detail'|'queue'|'history'|'eval'|'storage'|'trace'|'improve'|'improve-selection'|'metrics';
-type ViewEntry={kind:PanelKind;ref?:RecordReference;offset:number;previous:number[];line:number;raw:string;next:number|null;error?:string};
+type PanelKind='help'|'exit'|'trace-raw'|'queue'|'history'|'eval'|'storage'|'trace'|'improve'|'improve-selection'|'metrics';
+type ViewEntry={kind:PanelKind;offset:number;line:number};
 /** 主区窗口：每次读取当前任务最近的记录条数（查询上限）。 */
 const WINDOW=50;
 const identity=(s:string)=>s;
@@ -121,6 +123,7 @@ export class ReadOnlyTui {
   private improveSelectionView?:ImproveSelectionView;
   private storageView?:StorageView;
   private traceView?:TraceView;
+  private traceRaw?:TraceRawView;
   private hidePanel?:()=>void;
   /** 即时反馈：临时替换底栏键位提示行（全屏视图保留最右边的 Esc），下一次按键后恢复（U12）。 */
   private hintFeedback?:string;
@@ -458,7 +461,22 @@ export class ReadOnlyTui {
       break;
     }
     case 'trace':this.openTrace(positional[0]===undefined?undefined:resolveArgument(root,positional[0],['run']).id);break;
-    case 'details':this.openDetail(this.records.at(-1));break;
+    case 'details':{
+      // 不带号取当前 run 最近一次工具调用；tc-<run>-<序位> 指定调用（同一调用多次 attempt 时取最后一次）。
+      let runId=this.runId,call:number|undefined;
+      if(positional[0]!==undefined){
+        const match=/^tc-([0-9a-f]+)-([0-9]+)$/i.exec(positional[0]);if(!match)throw new CommandError(`这里要 tc-号，收到 ${positional[0]}`);
+        runId=resolveArgument(root,`r-${match[1]}`,['run']).id;call=Number(match[2]);
+      }
+      if(!runId){this.feedback('尚无 run · 完成或开始一个任务后再用 /details');break;}
+      const view=this.traceOf(runId),tools=view.trace.spans.filter(span=>span.kind==='tool'&&!span.tool!.denied);
+      const span=call===undefined?tools.at(-1):tools.findLast(item=>item.tool!.call===call);
+      if(!span){
+        if(call===undefined){this.feedback(`run ${this.shown('run',runId)} 没有工具调用`);break;}
+        const index=readDisplayIndex(root);throw new CommandError(`没有找到 ${positional[0]}`,[...new Set(tools.flatMap(item=>item.tool!.call===null?[]:[index.toolCall(runId!,item.tool!.call)]))]);
+      }
+      this.openDetails(view,span);break;
+    }
     case 'copy':void this.copyOutput();break;
     case 'stop':this.stop();break;
     case 'queue':this.loadQueue();this.openPanel('queue');break;
@@ -713,7 +731,7 @@ export class ReadOnlyTui {
       if(previous&&!(previous==='tool'&&entry.kind==='tool'))block(width=>[styledLine([],width)]);
       previous=entry.kind;
       if(entry.kind==='user'){const text=safe(entry.text);this.displaySources.push(text);block(width=>userLines(text,width,entry.steer));}
-      else if(entry.kind==='assistant'){const text=safe(entry.text)+(entry.limited?' … [显示截断，/details 继续阅读]':'');this.latestText=text;this.displaySources.push(text);block(width=>assistantLines(text,width));}
+      else if(entry.kind==='assistant'){const text=safe(entry.text)+(entry.limited?' … [显示截断，Ctrl+T 在 trace 原文中继续阅读]':'');this.latestText=text;this.displaySources.push(text);block(width=>assistantLines(text,width));}
       else if(entry.kind==='notice'){const text=`${entry.title}\n${safe(entry.text)}`;this.displaySources.push(text);block(width=>plainLines(text,width,'fg.muted'));}
       else {
         const id=entry.attemptId,expanded=()=>this.expandAll!==this.toggled.has(id),frame=()=>Math.floor(Date.now()/SPINNER_INTERVAL_MS);
@@ -721,8 +739,12 @@ export class ReadOnlyTui {
         this.displaySources.push(`${entry.tool} ${entry.args} ${entry.summary}`,...(entry.output?.lines??[]),...(entry.diff??[]));
         const lines=(width:number)=>toolLines(entry,width,expanded(),Date.now(),frame());
         block(width=>{const tool=lines(width);return [tool.row,...tool.body];},()=>{if(!this.toggled.delete(id))this.toggled.add(id);});
-        // “分页查看”进入原文（2a 原文层改版前为首版详情）。
-        block(width=>{const paging=lines(width).paging;return paging?[paging]:[];},()=>this.openDetail(entry.detail));
+        // “分页查看”进入 2a 原文层。
+        block(width=>{const paging=lines(width).paging;return paging?[paging]:[];},()=>{
+          const runId=this.runId;if(!runId)return;
+          const view=this.traceOf(runId),span=view.trace.spans.find(item=>item.key===id);
+          if(span)this.openDetails(view,span);else this.feedback('该工具调用尚未写入 trace');
+        });
       }
     }
     for(const text of this.events){this.displaySources.push(text);block(width=>[styledLine([],width),...plainLines(safe(text),width,'fg.label')]);}
@@ -781,21 +803,32 @@ export class ReadOnlyTui {
   /** 2a：指定 run，或当前会话正在运行 / 最近一次的 run；尚无 run 时只提示（U7）。 */
   private openTrace(runId=this.runId) {
     if(!runId){this.feedback('尚无 run · 完成或开始一个任务后再按 Ctrl+T');return;}
-    try{this.traceView=new TraceView(this.options.dataRoot,runId,()=>this.phase==='running'&&this.runId===runId);this.openPanel('trace');}
+    try{this.traceView=this.traceOf(runId);this.openPanel('trace');}
     catch(error){this.notice=`trace 不可读取：${safe(String(error))}`;this.tui.requestRender();}
   }
-  private openDetail(record?:RecordReference) {
-    if(!record){this.notice='暂无持久记录';return;}
-    this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
-    this.openPanel('detail',record);
+  /** 2a 列表层；Enter 进原文层、`p` 固定为证据经 TraceHost 回到这里。 */
+  private traceOf(runId:string) {
+    const host:TraceHost={busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,run)=>this.openConfirm(config,()=>void run()),changed:()=>this.tui.requestRender(),openRaw:span=>this.openRaw(span)};
+    return new TraceView(this.options.dataRoot,runId,()=>this.phase==='running'&&this.runId===runId,host);
   }
-  private openPanel(kind:PanelKind,ref?:RecordReference) {
+  /** 在 2a 列表层之上压入原文层（Esc 回到列表层，仍选中该 span）。 */
+  private openRaw(span:TraceSpan,item?:string) {
+    if(!this.traceView)return;
+    this.traceRaw=new TraceRawView(this.options.dataRoot,this.traceView,span.key,{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender()},item);
+    this.pushView('trace-raw');
+  }
+  /** `/details` 与“分页查看”：打开 2a 并选中该 span，直接进入原文层（先显示输出）；Esc 先回列表层，再回会话。 */
+  private openDetails(view:TraceView,span:TraceSpan) {
+    this.scroll.scrollTo(this.scroll.scrollTop,{disableFollow:true});
+    this.traceView=view;this.openPanel('trace');view.select(span.key);this.openRaw(span,outputItem(span));
+  }
+  private openPanel(kind:PanelKind) {
     // 从会话屏（或菜单）打开：替换整个视图栈，新视图为最上层。视图内进入下一层用 pushView。
     this.closeViews();this.confirmation=undefined;
-    this.viewStack.push({kind,ref,offset:0,previous:[],line:0,raw:'',next:null});
-    if(kind==='detail')this.loadDetail();
+    this.viewStack.push({kind,offset:0,line:0});
     const component:Component={invalidate(){},render:width=>this.panelLines(width),handleInput:data=>this.panelInput(data),handleMouse:event=>{
       const panel=this.panel;if(!panel)return;
+      if(event.type==='wheel'&&panel.kind==='trace-raw'){this.traceRaw?.scroll(event.wheelDelta??0);return {handled:true};}
       if(event.type==='click'&&panel.kind==='trace'){this.traceView?.click(event.y);this.tui.requestRender();return {handled:true};}
       if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else if(panel.kind==='trace')this.traceView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
     }};
@@ -805,10 +838,9 @@ export class ReadOnlyTui {
    * 在当前视图之上压入下一层：共用同一个全屏浮层，Esc 回到当前层（closePanel）。
    * 没有打开的视图时等同 openPanel。首版面板都是单层，尚无调用方。
    */
-  private pushView(kind:PanelKind,ref?:RecordReference) {
-    if(!this.viewStack.length){this.openPanel(kind,ref);return;}
-    this.viewStack.push({kind,ref,offset:0,previous:[],line:0,raw:'',next:null});
-    if(kind==='detail')this.loadDetail();
+  private pushView(kind:PanelKind) {
+    if(!this.viewStack.length){this.openPanel(kind);return;}
+    this.viewStack.push({kind,offset:0,line:0});
     this.tui.requestRender();
   }
   /** 视图各行；有即时反馈时替换末行（视图的键位提示行），保留最右边的 Esc。 */
@@ -848,16 +880,16 @@ export class ReadOnlyTui {
     if(panel.kind==='metrics') {const lines=this.metricsView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='history') {const lines=this.historyView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='trace') {const lines=this.traceView?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='trace-raw') {const lines=this.traceRaw?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
     let text:string;
     if(panel.kind==='help')return this.helpLines(width);
     if(panel.kind==='queue')text=this.queueText();
-    else if(panel.kind==='exit')text='退出并保留草稿？\nEnter：保存文本，取消在途请求并等待清理\nEsc：返回；不改变任务状态';
-    else text=`原文 #${panel.ref?.seq} ${panel.ref?.kind}\n字节 ${panel.offset} / ${panel.ref?.ref.bytes}；源 JSON，显示有界\n${panel.error??safe(panel.raw)}\n${panel.next===null?'本原文已到末尾':'还有下一片（n）'}`;
+    else text='退出并保留草稿？\nEnter：保存文本，取消在途请求并等待清理\nEsc：返回；不改变任务状态';
     this.widths?.inspect([text]);
     const lines=wrapTextWithAnsi(text,Math.max(1,width-2));
     const height=Math.max(2,Math.floor(this.terminal.rows*0.9)-2);
     const maxLine=Math.max(0,lines.length-height);panel.line=Math.min(panel.line,maxLine);
-    return [...lines.slice(panel.line,panel.line+height),truncateToWidth(panel.kind==='detail'?'↑↓滚动 ←→记录 n/p片 y复制当前片 Esc返回':'↑↓滚动 Esc返回',width)];
+    return [...lines.slice(panel.line,panel.line+height),truncateToWidth('↑↓滚动 Esc返回',width)];
   }
   private panelInput(data:string) {
     const panel=this.panel;if(!panel)return;
@@ -873,6 +905,7 @@ export class ReadOnlyTui {
     if(panel.kind==='eval'){this.evalView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='storage') {void this.storageView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='trace'){this.traceView?.handleInput(data);this.tui.requestRender();return;}
+    if(panel.kind==='trace-raw'){this.traceRaw?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='metrics') {this.metricsView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='history') {this.historyView?.handleInput(data);this.tui.requestRender();return;}
     if(matchesKey(data,'up'))panel.line=Math.max(0,panel.line-1);
@@ -887,22 +920,7 @@ export class ReadOnlyTui {
       if(data==='n'&&this.queueNext!==null){this.queuePrevious.push(this.queueAfter);this.queueAfter=this.queueNext;panel.offset=0;panel.line=0;this.loadQueue();}
       if(data==='p'&&this.queuePrevious.length){this.queueAfter=this.queuePrevious.pop();panel.offset=0;panel.line=0;this.loadQueue();}
     }
-    if(panel.kind==='detail') {
-      if(data==='n'&&panel.next!==null){panel.previous.push(panel.offset);panel.offset=panel.next;panel.line=0;this.loadDetail();}
-      if(data==='p'){panel.offset=panel.previous.pop()??0;panel.line=0;this.loadDetail();}
-      if(matchesKey(data,'left')||matchesKey(data,'right')||matchesKey(data,'tab')){
-        const index=this.records.findIndex(r=>r.seq===panel.ref?.seq),delta=matchesKey(data,'left')?-1:1;
-        const ref=this.records[Math.max(0,Math.min(this.records.length-1,index+delta))];
-        panel.ref=ref;panel.offset=0;panel.previous=[];panel.line=0;this.loadDetail();
-      }
-      if(data==='y')void this.copy(panel.raw).then(result=>{this.notice=result===true?'已复制当前原文片段':String(result);this.tui.requestRender();}).catch(error=>{this.notice=`复制失败：${String(error)}`;});
-    }
     this.tui.requestRender();
-  }
-  private loadDetail() {
-    const panel=this.panel;if(!panel?.ref)return;
-    try {const page=readTextPage(this.options.dataRoot,panel.ref.ref,panel.offset);panel.raw=page.text;panel.next=page.next;panel.error=undefined;}
-    catch(error){panel.raw='';panel.next=null;panel.error=`原文不可取得：${String(error)}`;}
   }
   /** Esc：弹出最上层视图；栈空时关闭浮层、焦点还给输入框（回到会话屏）。 */
   private closePanel() {
