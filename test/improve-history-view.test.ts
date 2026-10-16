@@ -86,14 +86,16 @@ test('legacy command opens history, restore only prefills a reason dialog and co
 });
 test('register and unregister commands only confirm exact inspected sources; drift after preview preserves the old registration',async()=>{
  const f=appFixture(),path=join(f.workspace,'cases.json');writeFileSync(path,'[]\n');
+ const idle=()=>/○ 空闲/.test(f.screen());
  try {
   f.key('/improve register eval cases.json');f.key('\r');assert.match(f.screen(),/登记来源/);assert.match(f.screen(),/cases.json/);
   assert.equal(listRegisteredSources(f.dataRoot).length,0);
-  writeFileSync(path,'[1]\n');f.key('\r');await new Promise(r=>setTimeout(r,30));
+  writeFileSync(path,'[1]\n');f.key('\r');await until(()=>/IMPROVE_SOURCE_PREVIEW_CHANGED/.test(f.screen())&&idle());
   assert.equal(listRegisteredSources(f.dataRoot).length,0,'changed source is not silently re-authorized');
-  f.key('/improve register eval cases.json');f.key('\r');f.key('\r');await until(()=>listRegisteredSources(f.dataRoot).length===1);
+  // Registration becomes visible before its writer lease and host operation finish.
+  f.key('/improve register eval cases.json');f.key('\r');f.key('\r');await until(()=>listRegisteredSources(f.dataRoot).length===1&&idle());
   f.key('/improve unregister eval cases.json');f.key('\r');assert.match(f.screen(),/移除来源/);assert.equal(listRegisteredSources(f.dataRoot).length,1);
-  f.key('\r');await until(()=>listRegisteredSources(f.dataRoot).length===0);assert.equal(f.calls(),0);
+  f.key('\r');await until(()=>listRegisteredSources(f.dataRoot).length===0&&idle());assert.equal(f.calls(),0);
  }finally{await f.app.exit();}
 });
 
