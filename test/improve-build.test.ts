@@ -38,7 +38,7 @@ async function sourceFixture(){
  for(const file of [...manifest.inputs,...manifest.outputs,{path:'dist/execution/source-build.json'}]){const to=join(source,file.path);await mkdir(dirname(to),{recursive:true});await copyFile(join(installation,file.path),to);}
  await cp(join(installation,'node_modules'),join(source,'node_modules'),{recursive:true});
  const e=new Evidence(dataRoot,'analysis-build'),target=captureImproveSources(e,workspace,[{id:'self',kind:'self-source',root:source,paths:['src/cli.ts']}],'fixture').targets[0];assert.equal(target.state,'verified',JSON.stringify(target.gaps));
- const original=await readFile(join(source,'src/cli.ts'),'utf8'),content=original.replace('Improve: improve analyze','Improve new-build: improve analyze');assert.notEqual(content,original);
+ const original=await readFile(join(source,'src/cli.ts'),'utf8'),content=original.replace('Improve: improve analyze','Improve new-build: improve analyze')+'\n// Candidate source adds a physical line as well as changing executable help.\n';assert.notEqual(content,original);
  const c={...candidate('self-source'),target,id:'candidate:cli',revision:'candidate-r1',display:'R1',title:'Clarify CLI help',scope:['src/cli.ts'],steps:['Prepare explicit source bytes','Build and check executable help','Write source and select a future process'],dependencies:[],conflicts:[],suggestionOnly:false};
  const report={id:'source-report',revision:'report-r1',runId:e.runId,target:{workspace,runId:'task-1',taskId:'task-1',sessionId:'session-1'},candidates:[c],targets:[target],state:'complete',evidence:[]};e.append('improve.started',{request:{id:report.id},target:report.target});e.append('improve.report',report);e.close();
  // A new controlled happy-path plan: the preserved 300s first failure took
