@@ -128,7 +128,7 @@ async function main() {
       if (!process.stdin.isTTY || !process.stdout.isTTY) throw Error('USAGE: show outside a terminal requires --format json');
       const { runTui } = await import('./tui/app.js');
       // 只读查看取 cwd 作工作区；--trace 打开 2a（s- 号取链尾 run）。
-      const exit = await runTui({ dataRoot, workspace: process.cwd(), mode: 'live', ...(values.trace ? { trace: values.run } : { show: { run: values.run, session } }) });
+      const exit = await runTui({ dataRoot, workspace: process.cwd(), mode: 'live', show: { run: values.run, session }, ...(values.trace ? { trace: values.run } : {}) });
       if (exit.error) { console.error(exit.error); process.exitCode = 1; }
       return;
     }
