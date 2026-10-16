@@ -2,6 +2,7 @@ import { readdirSync, statSync, accessSync, constants } from 'node:fs';
 import { delimiter, join, relative } from 'node:path';
 import { CombinedAutocompleteProvider, visibleWidth, wrapTextWithAnsi, type AutocompleteItem, type AutocompleteProvider } from '@earendil-works/pi-tui';
 import { DISPLAY_PREFIXES, readDisplayIndex, resolveDisplayInput, DisplayInputError, type DisplayKind } from '../display-number.js';
+import {completePath} from '../improve-entry.js';
 
 /**
  * 命令表（U11、T1）：`/` 补全、帮助视图和参数解析都只从这张表取。
@@ -95,14 +96,12 @@ export const COMMANDS: readonly CommandSpec[] = [
       },
       { name: 'history', summary: '查看 improve 报告（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'ir-号', kinds: ['improve-report'] }] },
       { name: 'suppressions', summary: '查看建议抑制（只读）', bare: 'view' },
+      { name:'continue',summary:'继续未运行的独立项（只预填确认框）',bare:'view',withArgs:'confirm',positional:[{label:'ir-号',kinds:['improve-report'],required:true}] },
+      { name:'rollback',summary:'回退候选所在组合的精确写回（只预填）',bare:'view',withArgs:'confirm',positional:[{label:'ir-号·C-号',required:true}],options:[{name:'reason',value:'原因',values:['effect','regression','unneeded']},{name:'note',value:'文本'}] },
+      { name:'restore',summary:'恢复该问题的建议（只预填）',bare:'view',withArgs:'confirm',positional:[{label:'ir-号·C-号',required:true}],options:[{name:'reason',value:'原因',values:['changed','mistaken','reassess']},{name:'note',value:'文本'}] },
+      ...(['register','unregister'] as const).map(name=>({name,summary:name==='register'?'核对并登记来源（只预填确认框）':'移除来源登记（只预填确认框）',bare:'view' as const,withArgs:'confirm' as const,positional:[{label:'self|eval',values:['self','eval'],required:true as const},{label:'路径',required:true as const}]})),
     ],
   },
-  { name: 'improves', summary: '查看 improve 报告（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'ir-号', kinds: ['improve-report'] }] },
-  { name: 'improve-select', summary: '结构化逐项选择与汇总提交', bare: 'view', withArgs: 'confirm', raw: 'JSON' },
-  { name: 'improve-suppressions', summary: '查看建议抑制', bare: 'view' },
-  { name: 'improve-restore', summary: '明确恢复建议', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
-  { name: 'improve-continue', summary: '明确继续独立未跑项', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
-  { name: 'improve-rollback', summary: '明确回退本批精确产物', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
 ];
 
 /** 会话屏键位（帮助视图第一段）。键位改了的屏票同时改这里。 */
@@ -342,6 +341,11 @@ export function commandCompletion(workspace: string, table: readonly CommandSpec
       }
       const spec = table.find(s => s.name === before.slice(1, space));
       if (!spec) return null;
+      const sourcePath=spec.name==='improve'?/^\/(?:improve)\s+(?:register|unregister)\s+(self|eval)\s+(.*)$/.exec(before):null;
+      if(sourcePath&&!/\s/.test(sourcePath[2])) {
+        const complete=completePath(workspace,`${sourcePath[1]} ${sourcePath[2]}`),value=complete.text.slice(sourcePath[1].length+1);
+        if(complete.matches&&value!==sourcePath[2])return {prefix:sourcePath[2],items:[{value:/\s/.test(value)?`"${value}"`:value,label:value,description:'来源路径 · 确认后才登记或移除'}]};
+      }
       const words = before.slice(space + 1).split(/\s+/), current = words.pop() ?? '';
       const items = argumentItems(spec, words.filter(Boolean), current);
       return items.length ? { prefix: current, items } : null;

@@ -26,7 +26,7 @@ export interface PlanSource {
   /** 固定计划的时间（列表倒序） */
   at: string;
   /** improve 发起：`ir-…·C-01@r1`；手动计划为 null */
-  origin: { label: string; reportId: string; decisionId: string } | null;
+  origin: { label: string; reportId: string; decisionId: string; groupId?: string } | null;
   /** improve 发起且已结束：主数据根中 `improve.check` 保留的报告快照 */
   snapshot: { root: string; ref: BlobRef } | null;
   /** A stats drilldown is pinned to this source-root acquisition sequence. */
@@ -61,7 +61,7 @@ export function listPlanSources(root: string, options: { through?: number; limit
       if (!reports.has(decision.reportId)) { try { reports.set(decision.reportId, readImproveReport(root, decision.reportId).report); } catch { reports.set(decision.reportId, null); } }
       const candidates = (group?.candidateIds ?? []).map((id: string) => reports.get(decision.reportId)?.candidates.find(c => c.id === id)).filter(Boolean);
       const first = candidates[0] ? index.qualifiedCandidate(decision.reportId, candidates[0]) : index.label('improve-report', decision.reportId);
-      origin = { label: `${first}${candidates.length > 1 ? ` +${candidates.length - 1}` : ''}`, reportId: decision.reportId, decisionId: link.parent.decisionId };
+      origin = { label: `${first}${candidates.length > 1 ? ` +${candidates.length - 1}` : ''}`, reportId: decision.reportId, decisionId: link.parent.decisionId, groupId: link.groupId };
     }
     const check = checkFacts.findLast(f => f.planId === link.planId && f.dataRoot === link.dataRoot && f.reportDocument);
     let label = 'ep-?';

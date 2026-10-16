@@ -75,6 +75,12 @@ export class ImproveSelectionView {
   this.decisions=improveCandidateDecisions(this.root,this.report.id);
  }
  showProgress(){this.stage='result';this.line=0;}
+ /** Observe the host's existing continuation promise without submitting again. */
+ observeContinuation(decision:ImproveDecision,done:Promise<unknown>) {
+  if(decision.reportId!==this.report.id||decision.reportRevision!==this.report.revision)throw Error('IMPROVE_REPORT_REVISION_DRIFT');
+  this.prepared=structuredClone(decision);this.problems=[];this.busy=true;this.startedAt=this.now();this.endedAt=0;this.lastRead=0;this.resultSelection=0;this.showProgress();this.readResult();this.changed();
+  void done.then(()=>{},error=>{this.problems=[improveChoiceError(error)];}).finally(()=>{this.busy=false;this.endedAt=this.now();this.readResult();this.decisions=improveCandidateDecisions(this.root,this.report.id);this.changed();});
+ }
  prefill(selections:ImprovePrefill) {
   if(this.busy)throw Error('提交批次进行中，不能覆盖已有选择');
   if(!mayWrite(this.access))return;

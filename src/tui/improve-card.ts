@@ -5,7 +5,7 @@ import type {ImproveCandidate,ImproveReport} from '../improve.js';
 import type {ImproveMode} from '../improve-decisions.js';
 import {readObject} from '../evidence.js';
 import {readDisplayIndex} from '../display-number.js';
-import {candidateExecutable} from '../improve-contract.js';
+import {candidateExecutable,improveReportContract} from '../improve-contract.js';
 import {upperBoundAmount,formatAmount} from '../cost-estimate.js';
 import {clean} from './view-stack.js';
 import {styledLine,type TokenName,type ColorTier,COLOR_TIER} from './theme.js';
@@ -14,7 +14,7 @@ export const IMPROVE_MODES:readonly ImproveMode[]=['execute-declared-scope','val
 export const MODE_LABEL:Record<ImproveMode,string>={'execute-declared-scope':'执行声明范围','validate-only':'仅验证',defer:'暂缓','do-not-suggest':'不再建议'};
 const targetKind:Record<string,string>={'agent-config':'配置','prompt-skill':'prompt·skill','self-source':'自身源码','eval-asset':'eval 资产'};
 export interface CandidateDecisionLabel {mode:string;state:string;canExecute?:boolean;extraDecisions?:number}
-export interface CandidateCardOptions {expanded:boolean;selected?:boolean;mode?:ImproveMode;decision?:CandidateDecisionLabel;readOnly?:boolean;tier?:ColorTier}
+export interface CandidateCardOptions {expanded:boolean;selected?:boolean;mode?:ImproveMode;decision?:CandidateDecisionLabel;readOnly?:boolean;label?:string;tier?:ColorTier}
 export interface CandidateCardRow {text:string;fg?:TokenName}
 export function suggestionReason(c:ImproveCandidate) {
  if(c.target.state!=='verified')return c.target.gaps.join('；')||'目标未经核对';
@@ -47,15 +47,16 @@ function replacementDiff(root:string,c:ImproveCandidate) {
 }
 
 export function improveCandidateRows(root:string,report:ImproveReport,c:ImproveCandidate,options:CandidateCardOptions):CandidateCardRow[] {
- const index=readDisplayIndex(root),name=index.candidate(c),kind=targetKind[c.target.kind],decision=options.decision;
- const chosen=options.mode?` · ${MODE_LABEL[options.mode]}`:decision?` · 已决定：${MODE_LABEL[decision.mode as ImproveMode]??decision.mode} · ${decision.state}${decision.canExecute?' · 验证已通过，可再选执行（重新验证，预算另算）':''}`:'';
- const head=`${options.selected?'▸':' '} ${name} ${c.title}${kind?' · '+kind:''}${!candidateExecutable(c)?' · 仅建议':''}${decision?.extraDecisions?` · 首版另有 ${decision.extraDecisions} 次决定`:''}${chosen}`;
+ const index=readDisplayIndex(root),kind=targetKind[c.target.kind],decision=options.decision,legacy=improveReportContract(report)==='legacy';
+ const label=(candidate:ImproveCandidate)=>legacy?`C-${String([...report.candidates,...(report.suppressed??[]).map(s=>s.candidate)].findIndex(item=>item.id===candidate.id)+1).padStart(2,'0')}@r1`:index.candidate(candidate),name=options.label??label(c);
+ const chosen=options.mode?` · ${MODE_LABEL[options.mode]}`:decision?` · 已决定：${MODE_LABEL[decision.mode as ImproveMode]??decision.mode} · ${decision.state}${decision.canExecute&&!options.readOnly?' · 验证已通过，可再选执行（重新验证，预算另算）':''}`:options.readOnly?` · 未决${legacy?' · 首版报告不能选择':''}`:'';
+ const head=`${options.selected?'▸':' '} ${name} ${c.title}${kind?' · '+kind:''}${!legacy&&!candidateExecutable(c)?' · 仅建议':''}${decision?.extraDecisions?` · 首版另有 ${decision.extraDecisions} 次决定`:''}${chosen}`;
  if(!options.expanded)return [{text:head,fg:'fg.muted'}];
  const references=new Set(c.facts.flatMap(f=>f.evidence)),counter=c.successCounterexamples.length?`反例 ${c.successCounterexamples.length} 条`:`无反例：${c.gaps[0]??'未说明缺口'}`;
- const links=(ids:string[])=>ids.map(id=>{const other=report.candidates.find(c=>c.id===id);return other?index.candidate(other):id;}).join('、');
+ const links=(ids:string[])=>ids.map(id=>{const other=report.candidates.find(c=>c.id===id);return other?label(other):id;}).join('、');
  const rows:CandidateCardRow[]=[{text:head,fg:'ac.improve'},{text:`证据  ${c.facts[0]?.claim??'没有事实陈述'} · 共 ${c.facts.length} 条 · 引用 ${references.size} 段原文 · ${counter}${c.hypotheses.length?' · 原因假设未证实':''}${c.gaps.length?` · 缺口 ${c.gaps.length} 项`:''}`},
   {text:`动作  ${c.steps[0]??'未声明'} · 范围 ${c.scope[0]??'未声明'}${c.scope.length>1?` 等 ${c.scope.length} 个路径`:''}`},
-  {text:`验证  ${candidateValidation(c)}`,fg:candidateExecutable(c)?'fg.body':'fg.muted'},
+  {text:`验证  ${legacy?`${c.validation.method} · ${c.validation.checks.join('；')} · ${c.validation.budget}`:candidateValidation(c)}`,fg:candidateExecutable(c)?'fg.body':'fg.muted'},
   {text:`回退  ${c.rollback} · ${c.activation.timing}`},
   ...(c.dependencies.length||c.conflicts.length?[{text:`依赖 / 冲突  ${c.dependencies.length?'依赖 '+links(c.dependencies):''}${c.dependencies.length&&c.conflicts.length?'；':''}${c.conflicts.length?'冲突 '+links(c.conflicts):''}`}]:[]),
   ...(c.reconsideration?[{text:`重提：${c.reconsideration.reason} · ${c.reconsideration.evidence.join('、')}`}]:[]),
