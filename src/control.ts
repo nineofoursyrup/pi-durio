@@ -44,7 +44,7 @@ export class RunControls {
   private remove:()=>void;
   private closedReason?:string;
   readonly target:ControlTarget;
-  constructor(private readonly options:{root:string;target:ControlTarget;version:ControlAdmission['executionVersion'];authorization:unknown;conversation:Conversation;harness:Harness;guard:()=>void;record:(kind:string,data:unknown)=>number;failure:(error:unknown)=>void;cancelCompaction?:(taskId:number)=>Promise<unknown>}) {
+  constructor(private readonly options:{root:string;target:ControlTarget;version:ControlAdmission['executionVersion'];authorization:unknown;conversation:Conversation;harness:Harness;guard:()=>void;record:(kind:string,data:unknown)=>number;failure:(error:unknown)=>void;cancelCompaction?:(taskId:number)=>Promise<unknown>;withdrawInherited?:(decision:QueueDecision)=>Promise<QueueItemFact>}) {
     this.target=structuredClone(options.target);
     this.remove=options.harness.subscribeCommits(publication=>{
       try {for(const change of publication.changes)if(change.type==='submission'&&change.value.requestId&&this.items.has(change.value.requestId))this.observe(change.value);}
@@ -90,7 +90,11 @@ export class RunControls {
   cancelCompaction(input:CompactionCancellation){return this.serial(async()=>{validControlId(input.id);if(!same(input.target,this.target)||!this.options.cancelCompaction)throw Error('CONTROL_TARGET_CHANGED');this.options.record('compaction.cancel-decision',input);return this.options.cancelCompaction(input.taskId);});}
   withdraw(decision:QueueDecision) {return this.serial(async()=>{
     validControlId(decision.id);
-    if(decision.action!=='withdraw'||!same(decision.target,this.target))throw Error('CONTROL_TARGET_CHANGED');
+    if(decision.action!=='withdraw')throw Error('CONTROL_TARGET_CHANGED');
+    if(!same(decision.target,this.target)){
+      if(this.options.withdrawInherited)return this.options.withdrawInherited(decision);
+      throw Error('CONTROL_TARGET_CHANGED');
+    }
     if(previousQueueDecision(this.options.root,decision))return this.fact(decision.requestId);
     const fact=this.fact(decision.requestId);
     if(fact.receipt.seq!==decision.receiptSeq)throw Error('STALE_CONTROL_DECISION');

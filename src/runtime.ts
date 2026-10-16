@@ -28,6 +28,9 @@ import {applyTaskProfile,validateTaskProfile,type TaskProfile} from './task-prof
 import {readImproveDefaults,type DefaultSnapshot} from './improve-defaults.js';
 import {improveFacts} from './improve-history.js';
 import {assertWorkspaceUnfenced} from './workspace-fence.js';
+import { readSessionChains } from './session-chain.js';
+import { readOpenQueue, readQueueReattachment, queueWithdrawalBlocked, queueWasDispatched, type QueueConfirmation } from './queue.js';
+import { currentExecutionVersion, versionChanged } from './execution-version.js';
 import { callIdentity } from './recovery-projection.js';
 import { prepareRecovery, recoveryRecords, sessionWasEnded, type RecoveryAuthorization, type RecoveryOptions, type RecoveryDecision, type RecoveryPlan, type RecoveryReport } from './recovery.js';
 export { readRun, readObject, readAcceptedTasks, readQueue } from './evidence.js';
@@ -261,9 +264,9 @@ export async function checkQueue(dataRoot:string) {
 }
 
 /** Headless/TUI source-bound queue decision. Reattachment runs the same checked runtime. */
-export async function decideQueue(options:RecoveryOptions & {decision:QueueDecision;transport?:typeof fetch;apiKey?:string;signal?:AbortSignal;cancellation?:'stop'|'exit';control?:TaskControl;onObservation?:ReadTaskOptions['onObservation'];onContextUsage?:ReadTaskOptions['onContextUsage']}) : Promise<QueueItemFact|RunResult> {
+export async function decideQueue(options:RecoveryOptions & {decision:QueueDecision;confirmation?:QueueConfirmation;transport?:typeof fetch;apiKey?:string;signal?:AbortSignal;cancellation?:'stop'|'exit';control?:TaskControl;onObservation?:ReadTaskOptions['onObservation'];onContextUsage?:ReadTaskOptions['onContextUsage']}) : Promise<QueueItemFact|RunResult> {
   const decision=structuredClone(options.decision);validControlId(decision.id);
-  const owner=await acquireOwner(options.dataRoot,()=>{});let dispatch:{item:QueueItemFact;context:ContextSnapshot}|undefined;
+  const owner=await acquireOwner(options.dataRoot,()=>{});let dispatch:{item:QueueItemFact;context:ContextSnapshot;replacement?:QueueReplacement}|undefined;
   try {
     const item=findQueueItem(owner.path,decision.requestId);if(!item)throw Error('CONTROL_NOT_FOUND');
     if(JSON.stringify(item.target)!==JSON.stringify(decision.target)||options.runId!==item.target.runId)throw Error('CONTROL_TARGET_CHANGED');
@@ -272,6 +275,7 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
     const evidence=new Evidence(owner.path,item.target.runId);
     try {
       if(decision.action==='withdraw') {
+        if(queueWithdrawalBlocked(owner.path,item))throw Error('QUEUE_SOURCE_ENDED: old work has ended; its frozen queue is view/copy only');
         if(item.kind==='compact'&&item.status!=='applied'&&item.status!=='withdrawn'){
           const operation=recoveryRecords(owner.path).findLast(r=>r.kind==='compaction.started'&&(r.data as any).requestId===item.requestId)?.data as any;
           if(operation){
@@ -287,47 +291,77 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
         return findQueueItem(owner.path,item.requestId)!;
       }
       if(decision.action!=='reattach'||!['follow-up','compact','improve'].includes(item.kind)||item.status!=='frozen')throw Error('QUEUE_REATTACH_NOT_APPLICABLE: frozen follow-up or unexecuted compact only; old steer text requires explicit new submission');
-      if(item.kind==='improve'){if(priorImprove(owner.path,item.requestId))throw Error('IMPROVE_ALREADY_DISPATCHED: inspect retained report; a new request cannot reset old limits');validateImproveRequest(JSON.parse(item.input),options.authorization?.mode??'live');}
-      if(item.kind==='compact'&&recoveryRecords(owner.path).some(r=>r.kind==='compaction.started'&&(r.data as any).requestId===item.requestId))throw Error('COMPACTION_ALREADY_DISPATCHED: inspect/end or withdraw its actual outcome, then explicitly request a new operation');
-      if(queueItems(owner.path).some(other=>other.acceptedSeq<item.acceptedSeq&&other.target.sessionId===item.target.sessionId&&other.kind!=='steer'&&['pending','dispatching','frozen'].includes(other.status)))throw Error('QUEUE_PREDECESSOR_UNRESOLVED: finish or explicitly withdraw earlier independent/management work');
-      if(!options.authorization)throw Error('CURRENT_AUTHORIZATION_REQUIRED');
-      const source=recoveryRecords(owner.path,item.target.runId);
-      const original=source.findLast(record=>record.kind==='run.closed')?.data as RunResult|undefined;
-      if(original?.status!=='completed'||original.cleanup!=='confirmed')throw Error('QUEUE_SOURCE_NOT_COMPLETED: resolve old work and explicitly submit text as new work; stopped tasks never revive');
-      if(source.some(record=>record.kind==='task.accepted'&&(record.data as any).queueRequestId===item.requestId))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
-      // Search every execution identity: a missing linking receipt never permits duplicate work.
-      if(recoveryRecords(owner.path).some(record=>record.kind==='task.accepted'&&(record.data as any).queueRequestId===item.requestId))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
-      verifyArtifact(owner.path,source.find(record=>record.seq===item.executionVersion.artifactSeq)!.data as ReturnType<typeof captureArtifact>);
-      const accepted=source.find(record=>record.kind==='task.accepted')!.data as any;
-      const auth=options.authorization;
-      if(await realpath(auth.workspace)!==item.target.workspace||auth.mode!==accepted.mode||JSON.stringify([...auth.tools].sort())!==JSON.stringify([...accepted.authorization.tools].sort()))throw Error('QUEUE_AUTHORIZATION_CHANGED');
-      const config=source.find(record=>record.seq===item.executionVersion.configSeq)!.data as any;
-      if(config.providerBoundary)throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED: queued work cannot drop the original dispatch boundary');
-      const expected=retainedExecutionConfig(owner.path,accepted.authorization.execution==='trusted-local-coding',auth.mode,auth.toolEnvironment,config);
-      if(Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('QUEUE_EXECUTION_CONFIGURATION_CHANGED');
-      await preflight(owner);
-      let contextSource=source,contextRunId=item.target.runId;
-      if(item.kind==='compact')for(const previous of queueItems(owner.path).filter(other=>other.kind==='follow-up'&&other.acceptedSeq<item.acceptedSeq&&other.target.sessionId===item.target.sessionId&&other.status==='applied').sort((a,b)=>a.acceptedSeq-b.acceptedSeq)){
-        if(!previous.runId)throw Error('COMPACTION_CONTEXT_LINEAGE_UNPROVEN');
-        const next=recoveryRecords(owner.path,previous.runId),accepted=next.find(r=>r.kind==='task.accepted')?.data as any,imported=next.find(r=>r.kind==='context.imported')?.data as any;
-        if(accepted?.queueRequestId!==previous.requestId||imported?.source?.sourceRunId!==contextRunId)throw Error('COMPACTION_CONTEXT_LINEAGE_UNPROVEN');
-        const closed=(next.findLast(r=>r.kind==='recovery.closed')?.data as any)?.result??next.findLast(r=>r.kind==='run.closed')?.data as RunResult|undefined;
-        if(closed?.status!=='completed'||closed.cleanup!=='confirmed'||next.some(r=>r.kind==='recovery.ended'))throw Error('COMPACTION_CONTEXT_SOURCE_NOT_COMPLETED');
-        contextSource=next;contextRunId=previous.runId;
+      if(options.confirmation){
+        if(!options.authorization)throw Error('CURRENT_AUTHORIZATION_REQUIRED');
+        const plan=readQueueReattachment(owner.path,item,options.authorization);
+        if(plan.state==='blocked')throw Error(`${plan.code}: ${plan.reason}`);
+        if(JSON.stringify(plan.confirmation)!==JSON.stringify(options.confirmation)||JSON.stringify(plan.confirmation.authorization)!==JSON.stringify(options.authorization))throw Error('QUEUE_CONFIRMATION_CHANGED: inspect the current receipt, tail, version and authorization again');
+        if(plan.confirmation.route!=='reattach'){
+          await preflight(owner,{runId:plan.confirmation.tailRunId});
+          const source=recoveryRecords(owner.path,plan.confirmation.tailRunId),snapshot=source.findLast(record=>record.kind==='context.snapshot');
+          if(!snapshot)throw Error('QUEUE_CONTEXT_UNAVAILABLE');
+          const context={...(snapshot.data as Omit<ContextSnapshot,'receiptSeq'>),receiptSeq:snapshot.seq};readObject(owner.path,context.messages);
+          evidence.append('control.decision',{decision,replacement:{route:plan.confirmation.route,tailRunId:plan.confirmation.tailRunId,version:plan.confirmation.version},authorization:{workspace:options.authorization.workspace,mode:options.authorization.mode,tools:options.authorization.tools}});
+          evidence.append('control.receipt',{requestId:item.requestId,status:'withdrawn',reason:'Explicit changed-version confirmation withdraws the original admission; any new work has a new identity and authorization'});
+          if(plan.confirmation.route==='relaunch-improve')return findQueueItem(owner.path,item.requestId)!;
+          dispatch={item,context,replacement:{item,confirmation:plan.confirmation,decision}};
+        }
       }
-      const snapshot=contextSource.findLast(record=>record.kind==='context.snapshot');if(!snapshot)throw Error('QUEUE_CONTEXT_UNAVAILABLE');
-      const context={...(snapshot.data as Omit<ContextSnapshot,'receiptSeq'>),receiptSeq:snapshot.seq};readObject(owner.path,context.messages);
-      evidence.append('control.decision',{decision,authorization:{workspace:auth.workspace,mode:auth.mode,tools:auth.tools}});
-      evidence.append('control.receipt',{requestId:item.requestId,status:'pending',reason:`Explicit compatible reattachment decision ${decision.id}`});
-      dispatch={item:findQueueItem(owner.path,item.requestId)!,context};
+      if(!dispatch){
+        if(item.kind==='improve'){if(priorImprove(owner.path,item.requestId))throw Error('IMPROVE_ALREADY_DISPATCHED: inspect retained report; a new request cannot reset old limits');validateImproveRequest(JSON.parse(item.input),options.authorization?.mode??'live');}
+        if(item.kind==='compact'&&recoveryRecords(owner.path).some(r=>r.kind==='compaction.started'&&(r.data as any).requestId===item.requestId))throw Error('COMPACTION_ALREADY_DISPATCHED: inspect/end or withdraw its actual outcome, then explicitly request a new operation');
+        if(!options.authorization)throw Error('CURRENT_AUTHORIZATION_REQUIRED');
+        const source=recoveryRecords(owner.path,item.target.runId);
+        const original=(source.findLast(record=>record.kind==='recovery.closed')?.data as any)?.result??source.findLast(record=>record.kind==='run.closed')?.data as RunResult|undefined;
+        if(original?.status!=='completed'||original.cleanup!=='confirmed')throw Error('QUEUE_SOURCE_NOT_COMPLETED: resolve old work and explicitly submit text as new work; stopped tasks never revive');
+        if(source.some(record=>record.kind==='recovery.ended'))throw Error('QUEUE_SOURCE_ENDED');
+        const chains=readSessionChains(owner.path),session=chains.sessionOfRun(item.target.runId)?.id;
+        if(readOpenQueue(owner.path,item.target.workspace).some(other=>other.item.acceptedSeq<item.acceptedSeq&&other.sessionId===session))throw Error('QUEUE_PREDECESSOR_UNRESOLVED: finish or explicitly withdraw earlier work in this product session');
+        if(source.some(record=>record.kind==='task.accepted'&&(record.data as any).queueRequestId===item.requestId))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
+        // Search every execution identity: a missing linking receipt never permits duplicate work.
+        if(recoveryRecords(owner.path).some(record=>record.kind==='task.accepted'&&(record.data as any).queueRequestId===item.requestId))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
+        verifyArtifact(owner.path,source.find(record=>record.seq===item.executionVersion.artifactSeq)!.data as ReturnType<typeof captureArtifact>);
+        const accepted=source.find(record=>record.kind==='task.accepted')!.data as any;
+        const auth=options.authorization;
+        if(await realpath(auth.workspace)!==item.target.workspace||auth.mode!==accepted.mode||JSON.stringify([...auth.tools].sort())!==JSON.stringify([...accepted.authorization.tools].sort()))throw Error('QUEUE_AUTHORIZATION_CHANGED');
+        const config=source.find(record=>record.seq===item.executionVersion.configSeq)!.data as any;
+        if(config.providerBoundary)throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED: queued work cannot drop the original dispatch boundary');
+        const expected=retainedExecutionConfig(owner.path,accepted.authorization.execution==='trusted-local-coding',auth.mode,auth.toolEnvironment,config);
+        if(Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('QUEUE_EXECUTION_CONFIGURATION_CHANGED');
+        await preflight(owner);
+        let contextSource=source,contextRunId=item.target.runId;
+        if(item.kind==='compact')for(const previous of queueItems(owner.path).filter(other=>other.kind==='follow-up'&&other.acceptedSeq<item.acceptedSeq&&other.target.sessionId===item.target.sessionId&&other.status==='applied').sort((a,b)=>a.acceptedSeq-b.acceptedSeq)){
+          if(!previous.runId)throw Error('COMPACTION_CONTEXT_LINEAGE_UNPROVEN');
+          const next=recoveryRecords(owner.path,previous.runId),accepted=next.find(r=>r.kind==='task.accepted')?.data as any,imported=next.find(r=>r.kind==='context.imported')?.data as any;
+          if(accepted?.queueRequestId!==previous.requestId||imported?.source?.sourceRunId!==contextRunId)throw Error('COMPACTION_CONTEXT_LINEAGE_UNPROVEN');
+          const closed=(next.findLast(r=>r.kind==='recovery.closed')?.data as any)?.result??next.findLast(r=>r.kind==='run.closed')?.data as RunResult|undefined;
+          if(closed?.status!=='completed'||closed.cleanup!=='confirmed'||next.some(r=>r.kind==='recovery.ended'))throw Error('COMPACTION_CONTEXT_SOURCE_NOT_COMPLETED');
+          contextSource=next;contextRunId=previous.runId;
+        }
+        const snapshot=contextSource.findLast(record=>record.kind==='context.snapshot');if(!snapshot)throw Error('QUEUE_CONTEXT_UNAVAILABLE');
+        const context={...(snapshot.data as Omit<ContextSnapshot,'receiptSeq'>),receiptSeq:snapshot.seq};readObject(owner.path,context.messages);
+        // Headless callers share the UI availability guard; changed execution requires a bound new-work confirmation.
+        if(!options.confirmation){
+          const plan=readQueueReattachment(owner.path,item,{...auth,workspace:await realpath(auth.workspace)});
+          if(plan.state==='blocked')throw Error(`${plan.code}: ${plan.reason}`);
+          if(plan.confirmation.route!=='reattach')throw Error('QUEUE_EXECUTION_VERSION_CHANGED: confirm a new task or analysis under the current execution version');
+        }
+        evidence.append('control.decision',{decision,authorization:{workspace:auth.workspace,mode:auth.mode,tools:auth.tools}});
+        evidence.append('control.receipt',{requestId:item.requestId,status:'pending',reason:`Explicit compatible reattachment decision ${decision.id}`});
+        dispatch={item:findQueueItem(owner.path,item.requestId)!,context};
+      }
     }finally{evidence.close();}
   }finally{await owner.release();}
   const auth=options.authorization!;
+  if(dispatch!.replacement){
+    return executeTask({...options,workspace:auth.workspace,input:dispatch!.item.input,mode:auth.mode,toolEnvironment:auth.toolEnvironment,contextRunId:dispatch!.replacement.confirmation.tailRunId,get cancellation(){return options.cancellation;}},auth.tools.includes('write'),undefined,undefined,undefined,undefined,undefined,dispatch!.replacement);
+  }
   try {if(dispatch!.item.kind==='improve'){const request=validateImproveRequest(JSON.parse(dispatch!.item.input),auth.mode);if(request.id!==dispatch!.item.requestId)throw Error('IMPROVE_ID_CONFLICT');return await executeTask({...options,workspace:auth.workspace,mode:auth.mode,input:request.purpose,control:undefined,get cancellation(){return options.cancellation;}},false,undefined,undefined,undefined,undefined,{request,target:dispatch!.item.target,item:dispatch!.item});}return await executeTask({...options,workspace:auth.workspace,input:dispatch!.item.input,mode:auth.mode,toolEnvironment:auth.toolEnvironment,get cancellation(){return options.cancellation;}},auth.tools.includes('write'),undefined,dispatch!.item.kind==='compact'?undefined:dispatch,{},dispatch!.item.kind==='compact'?{requestId:dispatch!.item.requestId,source:dispatch!.context,item:dispatch!.item}:undefined);}
   catch(error){await freezeQueued(options.dataRoot,[dispatch!.item],`Reattachment blocked: ${String(error)}`);throw error;}
 }
 
-async function executeTask(options: CodingTaskOptions, coding: boolean, recovery?: RecoveryPlan,queued?:{item:QueueItemFact;context:ContextSnapshot},handoff?:RunHandoff,maintenance?:Maintenance,improve?:ImproveExecution): Promise<RunResult> {
+interface QueueReplacement { item:QueueItemFact; confirmation:QueueConfirmation; decision:QueueDecision }
+async function executeTask(options: CodingTaskOptions, coding: boolean, recovery?: RecoveryPlan,queued?:{item:QueueItemFact;context:ContextSnapshot},handoff?:RunHandoff,maintenance?:Maintenance,improve?:ImproveExecution,replacement?:QueueReplacement): Promise<RunResult> {
   if (options.signal?.aborted) throw new Error(`RUN_CANCELLED_BEFORE_ACCEPTANCE: ${options.cancellation ?? 'exit'}`);
   const cleanupTimeoutMs = options.cleanupTimeoutMs ?? 10000;
   if (!Number.isSafeInteger(cleanupTimeoutMs) || cleanupTimeoutMs < 1 || cleanupTimeoutMs > 300000) throw new Error('INVALID_CLEANUP_TIMEOUT: provide 1–300000 milliseconds');
@@ -436,6 +470,13 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     await chmod(dataRoot, 0o700);
     if(!improve)assertWorkspaceUnfenced(workspace);
     const inspected = recovery ? undefined : await preflight(owner, { runId: maintenance?.source.sourceRunId ?? options.contextRunId });
+    if(replacement){
+      const {item,confirmation,decision}=replacement,current=findQueueItem(dataRoot,item.requestId),chains=readSessionChains(dataRoot),session=chains.session(confirmation.sessionId);
+      if(current?.status!=='withdrawn'||!previousQueueDecision(dataRoot,decision))throw Error('QUEUE_REPLACEMENT_NOT_WITHDRAWN');
+      if(session?.tailRunId!==confirmation.tailRunId||options.contextRunId!==confirmation.tailRunId)throw Error('QUEUE_CONFIRMATION_CHANGED: session tail changed');
+      if(queueWasDispatched(dataRoot,item))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
+      if(versionChanged(confirmation.version,currentExecutionVersion({dataRoot,workspace,coding,mode:options.mode,toolEnvironment:options.toolEnvironment}))!==false)throw Error('QUEUE_CONFIRMATION_CHANGED: execution version changed');
+    }
     const savedConfiguration=recovery?.config??(maintenance?maintenanceRecords.find(r=>r.kind==='execution.config')?.data:queued?recoveryRecords(dataRoot,queued.item.target.runId).find(r=>r.seq===queued.item.executionVersion.configSeq)?.data:undefined) as any;
     if(!improve){
       if(savedConfiguration){configuration=retainedExecutionConfig(dataRoot,coding,options.mode,options.toolEnvironment,savedConfiguration);defaults=savedConfiguration.improveDefaults;}
@@ -448,7 +489,8 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       const prior=recoveryRecords(dataRoot,options.contextRunId),accepted=prior.find(r=>r.kind==='task.accepted')?.data as any;
       const closed=(prior.findLast(r=>r.kind==='recovery.closed')?.data as any)?.result??prior.findLast(r=>r.kind==='run.closed')?.data as RunResult|undefined;
       if(!accepted||closed?.status!=='completed'||closed.cleanup!=='confirmed')throw Error('CONTEXT_SOURCE_NOT_COMPLETED');
-      if(queueItems(dataRoot).some(i=>i.target.sessionId===accepted.sessionId&&['pending','dispatching','frozen'].includes(i.status)))throw Error('QUEUE_PREDECESSOR_UNRESOLVED');
+      const session=readSessionChains(dataRoot).sessionOfRun(options.contextRunId)?.id;
+      if(readOpenQueue(dataRoot,workspace).some(entry=>entry.sessionId===session&&(!replacement||entry.item.acceptedSeq<replacement.item.acceptedSeq)))throw Error('QUEUE_PREDECESSOR_UNRESOLVED');
       // 已完成会话的接续不属于旧 pending（R6、#62 Q1）：执行版本不是条件，新任务按当前版本运行；工作区与授权沿用链尾。
       const config=prior.find(r=>r.kind==='execution.config')?.data as any,tools=coding?['read','write','edit','bash']:['read'];
       if(accepted.workspace!==workspace||JSON.stringify([...(accepted.authorization?.tools??[])].sort())!==JSON.stringify([...tools].sort()))throw Error('CONTEXT_EXECUTION_CONFIGURATION_CHANGED: continuation keeps the tail workspace and authorization');
@@ -500,7 +542,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     accepted = true;
     if(improve){analysis=prepareImprove(evidence,improve.request,improve.target,guard);providerBoundary={budget:analysis.budget,purpose:'improve',operationId:`improve:${improve.request.id}`};analysisTimer=setTimeout(()=>fatal(Error('BUDGET_DEADLINE')),Math.max(1,Date.parse(analysis.deadline)-Date.now()));}
     const authorization={ tools: improve ? ['evidence_summary','evidence_read','source_view'] : coding ? ['read', 'write', 'edit', 'bash'] : ['read'], execution: improve ? 'scoped-improve-analysis' : coding ? 'trusted-local-coding' : 'trusted-local-read-only', requestLimit: improve?improve.request.limits.maxRequests:8, fileLimitBytes: 256 * 1024, replay: 'unsafe' };
-    if (!recovery&&!maintenance) record('task.accepted', { taskId, runId, sessionId, ...(improve?{kind:'improve',improveRequestId:improve.request.id,sourceTarget:improve.target}:{}), input: options.input, workspace, mode: options.mode, origin: improve ? {kind:'improve',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'} : options.taskOrigin ?? {kind:'coding',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'}, ...(queued?{queueRequestId:queued.item.requestId,sourceTarget:queued.item.target}:{}), authorization, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } });
+    if (!recovery&&!maintenance) record('task.accepted', { taskId, runId, sessionId, ...(improve?{kind:'improve',improveRequestId:improve.request.id,sourceTarget:improve.target}:{}), input: options.input, workspace, mode: options.mode, origin: improve ? {kind:'improve',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'} : options.taskOrigin ?? {kind:'coding',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'}, ...(queued?{queueRequestId:queued.item.requestId,sourceTarget:queued.item.target}:{}), ...(replacement?{replacesQueueRequestId:replacement.item.requestId,replacementDecisionId:replacement.decision.id,sourceTarget:replacement.item.target}:{}), authorization, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } });
     record('ownership.acquired', { dataRoot: {path:owner.path,claim:owner.claim}, ...(workspaceOwner ? {workspace:{path:workspaceOwner.path,claim:workspaceOwner.claim}}:{}) });
     if (workspaceOwner && !recovery) record('workspace.owner', { root: workspaceOwner.root, workspace, scope: 'protocol participants only; external editors, shared Git metadata and external resources are not isolated' });
     const artifact=maintenance?maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:captureArtifact(evidence,workspace);
@@ -740,7 +782,22 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       try{sourceEvidence.append('control.receipt',{requestId:queued.item.requestId,status:'applied',reason:'New independent run and Pi input submission committed',execution:{runId,sessionId},upstream:{submissionId:submission.id,status:(await submission.status(CTX)).status}});}finally{sourceEvidence.close();}
     }
     if(options.control) {
-      controls=new RunControls({root:dataRoot,target:{workspace,sessionId,taskId,runId},version:{artifactId:artifact.id,artifactSeq,configSeq},authorization,conversation,harness,guard,record,failure:fatal,cancelCompaction:id=>compactions!.cancel(id as TaskId<CompactionResult>)});options.control.attach(controls);
+      controls=new RunControls({root:dataRoot,target:{workspace,sessionId,taskId,runId},version:{artifactId:artifact.id,artifactSeq,configSeq},authorization,conversation,harness,guard,record,failure:fatal,cancelCompaction:id=>compactions!.cancel(id as TaskId<CompactionResult>),
+        // Only the siblings explicitly handed to this run may use its already-held owner to withdraw.
+        // Their original admission targets remain immutable; arbitrary other-session requests are not authorized.
+        withdrawInherited:async decision=>{
+          const inherited=handoff?.inheritedPending?.find(item=>item.requestId===decision.requestId&&JSON.stringify(item.target)===JSON.stringify(decision.target));
+          if(!inherited||inherited.target.workspace!==workspace)throw Error('CONTROL_TARGET_CHANGED');
+          guard();
+          const current=findQueueItem(dataRoot,decision.requestId);if(!current||JSON.stringify(current.target)!==JSON.stringify(inherited.target))throw Error('CONTROL_TARGET_CHANGED');
+          if(previousQueueDecision(dataRoot,decision))return current;
+          if(current.receipt.seq!==decision.receiptSeq)throw Error('STALE_CONTROL_DECISION');
+          if(current.status!=='pending'||queueWasDispatched(dataRoot,current))throw Error('CONTROL_NOT_PENDING');
+          const source=new Evidence(dataRoot,current.target.runId,options.fault);
+          try{source.append('control.decision',{decision});source.append('control.receipt',{requestId:current.requestId,status:'withdrawn',reason:`Explicit withdrawal of inherited pending request during run ${runId}`});}
+          catch(error){fatal(error);throw error;}finally{source.close();}
+          return findQueueItem(dataRoot,current.requestId)!;
+        }});options.control.attach(controls);
       record('control.ready',{target:controls.target,admission:'open'});
     }
     guard(); // wait is an implicit scheduler entry; it cannot bypass the same owner/capability admission.

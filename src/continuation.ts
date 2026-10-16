@@ -36,10 +36,11 @@ function decoded(root: string, runId: string, kinds: string[]) {
  * `sessionId` 是会话身份（会话首任务的 durable sessionId；`s-` 号先解析）。
  * - `workspace`：当前工作区（realpath）；给出时，其他工作区的会话为 blocked + elsewhere。
  * - `busy`：本进程忙或有待处理的恢复核对时的原因，由调用方写好（如 `不能接续 · 当前任务运行中`）。
+ * - `queueBefore`：仅供队列项重新接入，检查该受理序位之前的未结项；普通接续仍检查所有未结项。
  * - `current`：取现在的执行版本（只在 ready 时调用，构建摘要较重）；给出时 ready 带 `versionChanged`，否则为 null。
  * 未知会话返回 null。
  */
-export function readContinuation(root: string, sessionId: string, options: { workspace?: string; busy?: string; current?: () => ExecutionVersion | null; chains?: SessionChains } = {}): Continuation | null {
+export function readContinuation(root: string, sessionId: string, options: { workspace?: string; busy?: string; current?: () => ExecutionVersion | null; chains?: SessionChains; queueBefore?: number } = {}): Continuation | null {
   const chains = options.chains ?? readSessionChains(root), session = chains.session(sessionId);
   if (!session) return null;
   const tail = session.tail, accepted = decoded(root, tail.runId, ['task.accepted'])?.data;
@@ -56,7 +57,7 @@ export function readContinuation(root: string, sessionId: string, options: { wor
   let queued = 0, after: number | undefined, through: number | undefined;
   do {
     const page = readQueue(root, { after, through, limit: 200 });
-    queued += page.items.filter((item: QueueItemFact) => OPEN_QUEUE.has(item.status) && chains.sessionOfRun(item.target.runId)?.id === sessionId).length;
+    queued += page.items.filter((item: QueueItemFact) => OPEN_QUEUE.has(item.status) && (options.queueBefore === undefined || item.acceptedSeq < options.queueBefore) && chains.sessionOfRun(item.target.runId)?.id === sessionId).length;
     after = page.next ?? undefined; through = page.through;
   } while (after);
   if (queued) return blocked(continueQueued(queued));
