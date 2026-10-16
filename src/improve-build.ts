@@ -8,6 +8,7 @@ import {Evidence,digest,readObject,type BlobRef} from './evidence.js';
 import {sourceBytes,sourceInputPaths,verifySelfSource,type SourceTarget} from './improve-source.js';
 import {regularFiles,materialize,type ContentFile} from './eval/store.js';
 import {verifiedImage} from './eval/plan.js';
+import {captureBuildContents,assertBuildContentBudget} from './improve-build-content.js';
 import type {ContentChange} from './improve-validation.js';
 
 const installation=fileURLToPath(new URL('../../',import.meta.url));
@@ -18,12 +19,6 @@ function dependencyPaths(root:string,development:boolean){
  const lock=JSON.parse(readFileSync(join(root,'dist/execution/package-lock.json'),'utf8')),files:string[]=[];
  for(const [path,metadata]of Object.entries(lock.packages)as[string,{dev?:boolean;optional?:boolean}][]){if(!path||!development&&metadata.dev)continue;if(!existsSync(join(root,path))){if(metadata.optional)continue;throw Error(`IMPROVE_BUILD_DEPENDENCY_MISSING:${path}`);}files.push(...regularFiles(join(root,path),'',false).filter(p=>!p.startsWith('node_modules/')).map(p=>`${path}/${p}`));}
  return [...new Set(files)].sort();
-}
-function saveContents(e:Evidence,root:string,paths:string[],record:(kind:string,data:any)=>string,groupId:string){
- const files:ContentFile[]=[];let total=0;
- for(const path of paths){const bytes=sourceBytes(root,path,16*1024*1024,true);total+=bytes.length;if(total>134217728)throw Error('IMPROVE_BUILD_CONTENT_LIMIT');files.push({path,ref:e.blob(bytes),mode:lstatSync(join(root,path)).mode&0o777});}
- for(let i=0;i<files.length;i+=100)record('improve.build-content',{groupId,files:files.slice(i,i+100)});
- return files;
 }
 function retained(e:Evidence,files:ContentFile[],directory:string):ImproveBuildArtifact{
  const manifest=e.blob(JSON.stringify(files)),source=files.find(f=>f.path==='dist/execution/source-build.json');if(!source||!files.some(f=>f.path===entry))throw Error('IMPROVE_BUILD_ENTRY_MISSING');
@@ -60,8 +55,9 @@ export async function prepareImproveBuild(o:{evidence:Evidence;target:SourceTarg
  const dependencies=dependencyPaths(source,true),production=dependencyPaths(installation,false);
  for(const path of production)if(!sourceBytes(source,path,16*1024*1024,true).equals(sourceBytes(installation,path,16*1024*1024,true)))throw Error(`IMPROVE_BUILD_DEPENDENCY_MISMATCH:${path}`);
  const paths=[...new Set([...original.inputs.map((f:any)=>f.path),...original.outputs.map((f:any)=>f.path),'dist/execution/source-build.json',...dependencies])].sort();
- const baselineFiles=saveContents(e,source,paths,record,o.groupId),changes=new Map(o.changes.map(c=>[c.path,Buffer.from(c.content)]));
+ const baselineFiles=captureBuildContents(e,source,paths,record,o.groupId),changes=new Map(o.changes.map(c=>[c.path,Buffer.from(c.content)]));
  const candidateInputs=baselineFiles.filter(f=>!f.path.startsWith('dist/')).map(f=>changes.has(f.path)?{...f,ref:e.blob(changes.get(f.path)!)}:f);
+ assertBuildContentBudget(candidateInputs);
  await mkdir(o.directory,{mode:0o700});materialize(e.root,baselineFiles,join(o.directory,'baseline'));
  const baseline=retained(e,baselineFiles,join(o.directory,'baseline')),input=join(o.directory,'input');await mkdir(input,{mode:0o755});materialize(e.root,candidateInputs,join(input,'source'));
  await writeFile(join(input,'bootstrap.mjs'),"import{cp,chmod,symlink}from'node:fs/promises';import{execFileSync}from'node:child_process';await cp('/input/source','/work/source',{recursive:true,filter:p=>p!=='/input/source/node_modules'});await symlink('/input/source/node_modules','/work/source/node_modules','dir');await chmod('/work/source',0o755);process.chdir('/work/source');console.log(JSON.stringify({buildEnvironment:{node:process.version,nodeOptions:process.env.NODE_OPTIONS,heapLimit:(await import('node:v8')).getHeapStatistics().heap_size_limit}}));execFileSync(process.execPath,['scripts/build-artifact.mjs'],{stdio:'inherit'});",{flag:'wx',mode:0o444});
@@ -76,11 +72,11 @@ export async function prepareImproveBuild(o:{evidence:Evidence;target:SourceTarg
  const compiledRoot=join(destination,'source'),manifestBytes=sourceBytes(compiledRoot,'dist/execution/source-build.json',8*1024*1024),compiled=JSON.parse(manifestBytes.toString());
  const expectedInputs=original.inputs.map((f:any)=>changes.has(f.path)?{...f,sha256:digest(changes.get(f.path)!),bytes:changes.get(f.path)!.length}:f);
  if(compiled.version!==1||!isDeepStrictEqual(compiled.inputs,expectedInputs)||!isDeepStrictEqual(compiled.compiler,original.compiler))throw Error('IMPROVE_BUILD_SOURCE_CORRESPONDENCE_CHANGED');
- const outputFiles=saveContents(e,compiledRoot,names.map((p:string)=>p.slice('source/'.length)),record,o.groupId);
+ const outputFiles=captureBuildContents(e,compiledRoot,names.map((p:string)=>p.slice('source/'.length)),record,o.groupId);
  if(!isDeepStrictEqual(compiled.outputs.map((f:any)=>f.path).sort(),outputFiles.filter(f=>f.path!=='dist/execution/source-build.json').map(f=>f.path).sort()))throw Error('IMPROVE_BUILD_OUTPUT_SET_CHANGED');
  for(const file of compiled.outputs){const actual=outputFiles.find(f=>f.path===file.path)!;if(actual.ref.sha256!==file.sha256||actual.ref.bytes!==file.bytes)throw Error('IMPROVE_BUILD_OUTPUT_CONTENT_CHANGED');}
  // Candidate outputs are inert until a separately recorded explicit launch.
- const candidateFiles=[...candidateInputs,...outputFiles].sort((a,b)=>a.path.localeCompare(b.path));materialize(e.root,candidateFiles,join(o.directory,'candidate'));
+ const candidateFiles=[...candidateInputs,...outputFiles].sort((a,b)=>a.path.localeCompare(b.path));assertBuildContentBudget(candidateFiles);materialize(e.root,candidateFiles,join(o.directory,'candidate'));
  const candidate=retained(e,candidateFiles,join(o.directory,'candidate'));
  const smokeInput=join(o.directory,'startup-input');await mkdir(smokeInput,{mode:0o755});materialize(e.root,candidateFiles,join(smokeInput,'build'));
  const startup=await engine.runRestricted({image:verifiedImage,inputDir:smokeInput,runDir:join(o.directory,'startup'),command:['node','/input/build/dist/src/cli.js','--help'],timeoutMs:o.timeoutMs,deadline:o.deadline,signal:o.signal});guard();
