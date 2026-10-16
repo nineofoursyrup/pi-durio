@@ -1,0 +1,77 @@
+132x38 truecolor
+00|◆ history · 历史 · 只读                                                                                                                 |
+   0-127 fg.primary/bg.base ; 128-131 -/-
+01|/history --project all                                                                                                              |
+   0-131 fg.label/bg.base
+02|› ◇ s-eb92 · Run a fixture task so queue items can be submitted before stop. · 1 个任务 · 2026-10-14 13:27 · 14 tok < ¥0.01 partial    |
+   0-12 fg.muted/line.inner ; 13-75 fg.body/line.inner ; 76-128 fg.label/line.inner ; 129-131 -/-
+03|  ✓ s-a50b · improve · Controlled fixture improve analysis · 1 个任务 · 2026-10-14 13:27 · 42 tok < ¥0.01 partial                      |
+   0-22 ac.ok/bg.base ; 23-57 fg.body/bg.base ; 58-128 fg.label/bg.base ; 129-131 -/-
+04|  ✓ s-bd99 · Read README.md only. · 1 个任务 · 2026-10-14 13:26 · 28 tok < ¥0.01 partial                                               |
+   0-12 ac.ok/bg.base ; 13-32 fg.body/bg.base ; 33-128 fg.label/bg.base ; 129-131 -/-
+05|  ✓ s-25b3 · Fixture run to be interrupted for recovery. · 1 个任务 · 2026-10-14 13:26 · 14 tok < ¥0.01 +1 unknown partial             |
+   0-12 ac.ok/bg.base ; 13-55 fg.body/bg.base ; 56-128 fg.label/bg.base ; 129-131 -/-
+06|  ◇ s-43fd · Should not reach context.imported. · 1 个任务 · 2026-10-14 13:26 · 0 tok ≈ ¥0.00                                          |
+   0-12 fg.muted/bg.base ; 13-46 fg.body/bg.base ; 47-128 fg.label/bg.base ; 129-131 -/-
+07|  ✓ s-fb21 · Alternative continuation of the first coding session. · 1 个任务 · 2026-10-14 13:26 · 14 tok < ¥0.01                      |
+   0-12 ac.ok/bg.base ; 13-65 fg.body/bg.base ; 66-128 fg.label/bg.base ; 129-131 -/-
+08|  ✓ s-3506 · Read README.md and describe the project. · 2 个任务 · 2026-10-14 13:25 · 42 tok < ¥0.01                                   |
+   0-12 ac.ok/bg.base ; 13-52 fg.body/bg.base ; 53-128 fg.label/bg.base ; 129-131 -/-
+09|  ✓ s-7b95 · Summarize the workspace contents. · 1 个任务 · 2026-10-14 13:25 · 14 tok < ¥0.01 partial                                  |
+   0-12 ac.ok/bg.base ; 13-45 fg.body/bg.base ; 46-128 fg.label/bg.base ; 129-131 -/-
+10|                                                                                                                                    |
+   0-131 -/-
+11|                                                                                                                                    |
+   0-131 -/-
+12|                                                                                                                                    |
+   0-131 -/-
+13|                                                                                                                                    |
+   0-131 -/-
+14|                                                                                                                                    |
+   0-131 -/-
+15|                                                                                                                                    |
+   0-131 -/-
+16|                                                                                                                                    |
+   0-131 -/-
+17|                                                                                                                                    |
+   0-131 -/-
+18|                                                                                                                                    |
+   0-131 -/-
+19|                                                                                                                                    |
+   0-131 -/-
+20|                                                                                                                                    |
+   0-131 -/-
+21|                                                                                                                                    |
+   0-131 -/-
+22|                                                                                                                                    |
+   0-131 -/-
+23|                                                                                                                                    |
+   0-131 -/-
+24|                                                                                                                                    |
+   0-131 -/-
+25|                                                                                                                                    |
+   0-131 -/-
+26|                                                                                                                                    |
+   0-131 -/-
+27|                                                                                                                                    |
+   0-131 -/-
+28|                                                                                                                                    |
+   0-131 -/-
+29|                                                                                                                                    |
+   0-131 -/-
+30|                                                                                                                                    |
+   0-131 -/-
+31|                                                                                                                                    |
+   0-131 -/-
+32|                                                                                                                                    |
+   0-131 -/-
+33|                                                                                                                                    |
+   0-131 -/-
+34|                                                                                                                                    |
+   0-131 -/-
+35|                                                                                                                                    |
+   0-131 -/-
+36|                                                                                                                                    |
+   0-131 -/-
+37|↑↓ 选择 · Enter 会话 · c 接续 · t trace · / 筛选 · n/p 翻页 · Esc 返回会话                                                                        |
+   0-117 fg.label/bg.base ; 118-131 -/-

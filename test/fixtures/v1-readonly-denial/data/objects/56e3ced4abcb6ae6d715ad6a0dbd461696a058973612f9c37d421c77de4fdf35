@@ -1,0 +1,71 @@
+import type { ImproveCandidate } from './improve.js';
+export interface ImproveFact {
+    sourceId: string;
+    runId: string;
+    seq: number;
+    kind: string;
+    data: any;
+}
+/** Facts remain in the existing host journal; no separate decision database. */
+export declare function improveFacts(root: string, through?: number): ImproveFact[];
+export declare function problemIdentity(candidate: ImproveCandidate): {
+    target: {
+        workspace: string | null;
+        kind: "project" | "agent-config" | "prompt-skill" | "self-source" | "eval-asset";
+    };
+    paths: string[];
+    key: string;
+    basis: string;
+};
+export declare function conditionIdentity(candidate: ImproveCandidate): string;
+export declare function conditionFiles(candidate: ImproveCandidate): {
+    path: string;
+    sha256: string;
+}[];
+export declare function listImproveSuppressions(root: string, workspace?: string, through?: number): any[];
+export declare function suppressionMatch(root: string, candidate: ImproveCandidate, through?: number): {
+    blocked: boolean;
+    matches: any[];
+};
+export declare function scopedImproveDecisions(root: string, workspace: string, through?: number, limit?: number): {
+    id: any;
+    runId: string;
+    sourceId: string;
+    kind: string;
+    reportId: any;
+    reportRevision: any;
+    decisions: any;
+    results: {
+        sourceId: string;
+        runId: string;
+        kind: string;
+        state: any;
+        reason: any;
+    }[];
+}[];
+export declare function readImproveDecision(root: string, id: string): {
+    id: string;
+    decision: any;
+    requestDigest: any;
+    executionVersion: any;
+    sourceId: string;
+    runId: string;
+    state: any;
+    reason: any;
+    groups: any;
+    activation: string;
+    writeback: string;
+    effect: string;
+    facts: {
+        sourceId: string;
+        kind: string;
+        runId: string;
+        state: any;
+        reason: any;
+    }[];
+    reserved: {
+        checks: any;
+        requests: any;
+        tokens: any;
+    };
+};

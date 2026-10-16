@@ -1,0 +1,22 @@
+export interface StoredFile {
+    path: string;
+    sha256: string;
+    bytes: number;
+}
+export declare const fileLimit = 50000;
+export declare function exists(path: string): Promise<boolean>;
+export declare function safeRelative(path: string): string;
+export declare function regularFile(path: string): Promise<import("fs").Stats>;
+export declare function hashFile(path: string): Promise<Omit<StoredFile, 'path'>>;
+export declare function treeFiles(root: string, options?: {
+    hash?: boolean;
+    exclude?: (path: string) => boolean;
+}): Promise<StoredFile[]>;
+export declare function syncDir(path: string): Promise<void>;
+export declare function saveJson(path: string, value: unknown): Promise<void>;
+export declare function compressFile(source: string, target: string): Promise<void>;
+export declare function expandFile(source: string, target: string, file: StoredFile): Promise<void>;
+/** Destination must be a new sibling/outside tree. Never merge into or overwrite another root. */
+export declare function newDestination(source: string, destination: string): Promise<string>;
+export declare function readJson(path: string, max?: number): Promise<any>;
+export declare function publishDirectory(staging: string, destination: string): Promise<void>;

@@ -11,7 +11,7 @@ import { recoveryRecords, recoverySnapshotId, ownerSnapshotId, type RecoveryReco
 export { recoveryRecords } from './recovery-facts.js';
 import { verifyArtifact } from './artifact.js';
 import { retainedExecutionConfig } from './execution-config.js';
-import { resolveWorkspaceRoot } from './workspace-ownership.js';
+import { probeWorkspaceOwner, resolveWorkspaceRoot } from './workspace-ownership.js';
 import type { ToolEnvironmentConfig } from './coding-environment.js';
 import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context';
 import type { EntryId, TaskId } from '@earendil-works/pi-durable';
@@ -46,6 +46,8 @@ export interface RecoveryReport {
   details?: { tools: DetailSummary; compactions: DetailSummary; unknownModelAttempts: DetailSummary; reasons: DetailSummary; pending: DetailSummary; toolCounts: Record<RecoveryTool['fact'], number>; unresolvedTools: number; navigation: string };
   persistence?: 'saved' | 'not-requested' | 'owner-blocked' | 'saved-separate-owner-report';
   ownerClaims?: OwnerClaim[];
+  /** Read-only host assessment for this snapshot; settlement always checks again. */
+  ownerCleanup?: RecoveryOwnerCleanup;
   needsInput?: { reason:string; options:string[]; risks:string[] };
   decisionId?: string;
 }
@@ -56,14 +58,34 @@ function freezePendingControls(evidence:Evidence,records:RecoveryRecords) {
     if(!state||state.status==='pending'||state.status==='dispatching')evidence.append('control.receipt',{requestId:admission.requestId,status:'frozen',reason:'Recovery check freezes unapplied inputs; closing the panel or continuing old work never reattaches them'});
   }
 }
-interface OwnerClaim { path:string; markerSha256:string; claim:{pid:number;host:string;token?:string}; lock:{ino:number;mtimeMs:number}|null }
+interface OwnerClaim { path:string; markerSha256:string; claim:{pid:number;host:string;started?:string;token?:string}; lock:{ino:number;mtimeMs:number}|null }
+type OwnerLocation = { scope:'workspace'|'session'|'data-root'; path:string };
+export interface RecoveryOwnerCleanup {
+  status:'running'|'releasable'|'blocked'; reason?:string;
+  holders:(OwnerLocation & { pid?:number; host?:string; started?:string; status:'running'|'releasable'|'blocked'; reason?:string })[];
+  locations:OwnerLocation[];
+}
+async function ownerLocations(root:string,records:RecoveryRecords):Promise<OwnerLocation[]> {
+  const acquired=last(records,'ownership.acquired'),session=last(records,'ownership.session'),accepted=last(records,'task.accepted');
+  const locations:OwnerLocation[]=[];
+  if(acquired?.workspace?.path)locations.push({scope:'workspace',path:acquired.workspace.path});
+  if(accepted?.workspace&&(acquired?.workspace||accepted.authorization?.execution==='trusted-local-coding')){
+    try {
+      const {holder}=await probeWorkspaceOwner(accepted.workspace);
+      if(holder&&!locations.some(item=>item.path===holder.path))locations.push({scope:'workspace',path:holder.path});
+    } catch(error) {
+      // A removed workspace does not hide its recorded owner paths. Continuation checks the workspace separately.
+      if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;
+    }
+  }
+  if(session?.path)locations.push({scope:'session',path:session.path});
+  else if(/^[a-f0-9-]{36}$/.test(accepted?.sessionId??''))locations.push({scope:'session',path:join(root,'sessions',accepted.sessionId)});
+  locations.push({scope:'data-root',path:root});
+  return locations;
+}
 async function ownerClaims(root:string,records:RecoveryRecords):Promise<OwnerClaim[]> {
-  const acquired=last(records,'ownership.acquired');
-  const session=last(records,'ownership.session');
-  const known=[acquired?.workspace,session,acquired?.dataRoot].filter(Boolean) as {path:string;claim:OwnerClaim['claim']}[];
-  if (!known.some(item=>item.path===root)) known.push({path:root,claim:{pid:0,host:''}});
   const claims:OwnerClaim[]=[];
-  for(const item of known) {
+  for(const item of await ownerLocations(root,records)) {
     let bytes:Buffer;
     try {bytes=await readFile(join(item.path,'owner.json'));} catch(error) {if((error as NodeJS.ErrnoException).code==='ENOENT')continue;throw error;}
     let lock:OwnerClaim['lock']=null;
@@ -71,6 +93,41 @@ async function ownerClaims(root:string,records:RecoveryRecords):Promise<OwnerCla
     claims.push({path:item.path,markerSha256:digest(bytes),claim:JSON.parse(bytes.toString()),lock});
   }
   return claims;
+}
+function managedCleanup(records:RecoveryRecords) {
+  const closing=records.findLast(r=>r.kind==='lifecycle.storage-closing'),closed=records.findLast(r=>r.kind==='lifecycle.storage-closed');
+  const commands=(closing?.data as any)?.managedCommands;
+  return closing&&closed&&closed.seq>closing.seq&&commands&&commands.started===commands.settled?{closing,closed}:undefined;
+}
+/** The same host checks drive the read-only panel and the actual owner disposition. */
+async function inspectOwnerCleanup(root:string,records:RecoveryRecords,claims:OwnerClaim[],heldPath?:string):Promise<RecoveryOwnerCleanup> {
+  const acquired=last(records,'ownership.acquired');
+  const known=[acquired?.workspace,last(records,'ownership.session'),acquired?.dataRoot].filter(Boolean) as {path:string;claim:OwnerClaim['claim']}[];
+  const locations=await ownerLocations(root,records),cleanup=managedCleanup(records);
+  const holders:RecoveryOwnerCleanup['holders']=[];
+  for(const location of locations) {
+    if(location.path===heldPath)continue;
+    const retained=claims.find(claim=>claim.path===location.path);
+    if(!retained){
+      try {await access(`${location.path}.lock`);holders.push({...location,status:'blocked',reason:'OWNER_IDENTITY_UNVERIFIED'});}
+      catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+      continue;
+    }
+    const {claim}=retained;
+    let status:RecoveryOwnerCleanup['status']='blocked',reason:string|undefined;
+    if(claim.host!==hostname()||!Number.isSafeInteger(claim.pid)||claim.pid<=0)reason='OWNER_HOST_UNVERIFIED';
+    else {
+      try {process.kill(claim.pid,0);status='running';reason='OWNER_STILL_ALIVE';}
+      catch(error){if((error as NodeJS.ErrnoException).code!=='ESRCH')reason='OWNER_PROCESS_UNVERIFIED';}
+      if(!reason&&!known.some(item=>item.path===retained.path&&item.claim.token&&item.claim.token===claim.token))reason='OWNER_IDENTITY_UNVERIFIED';
+      if(!reason&&retained.lock&&(await readdir(`${retained.path}.lock`)).length)reason='OWNER_LOCK_CONTENT_UNKNOWN';
+      if(!reason&&!cleanup)reason='CLEANUP_EVIDENCE_REQUIRED';
+      if(!reason)status='releasable';
+    }
+    holders.push({...location,pid:claim.pid,host:claim.host,started:claim.started,status,...(reason?{reason}:{})});
+  }
+  const blocker=holders.find(holder=>holder.status==='running')??holders.find(holder=>holder.status==='blocked');
+  return {status:blocker?.status??(holders.length?'releasable':'blocked'),...(blocker?.reason?{reason:blocker.reason}:!holders.length?{reason:'NO_RETAINED_OWNER'}:{}),holders,locations};
 }
 async function saveOwnerReport(root:string,report:RecoveryReport) {
   const dir=join(root,'recovery-owner-reports');await mkdir(dir,{recursive:true,mode:0o700});
@@ -95,8 +152,10 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   const accepted = last(records, 'task.accepted');
   if (!accepted || !/^[a-f0-9-]{36}$/.test(accepted.sessionId)) throw new Error('RUN_NOT_FOUND');
   const original = last(records, 'run.closed') ?? { status: 'unknown', reason: 'No original close receipt' };
-  for (const marker of [join(owner.path,'sessions',accepted.sessionId,'owner.json'),join(owner.path,'sessions',`${accepted.sessionId}.lock`)]) {
-    try { await access(marker); throw new Error('OWNER_CONFLICT: unresolved session owner'); } catch(error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+  for (const location of await ownerLocations(owner.path,records)) if(location.path!==owner.path) {
+    for(const marker of [join(location.path,'owner.json'),`${location.path}.lock`]) {
+      try { await access(marker); throw new Error(`OWNER_CONFLICT: unresolved ${location.scope} owner`); } catch(error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+    }
   }
   const started = last(records, 'run.started');
   const allRecords = recoveryRecords(owner.path);
@@ -173,8 +232,9 @@ export async function inspectRecovery(options: RecoveryOptions): Promise<Recover
   try { owner = await acquireOwner(options.dataRoot, () => {}); return (await inspectOwnedRecovery(options,owner)).report; }
   catch (error) {
     if (/STALE_RECOVERY_SNAPSHOT|INVALID_RECOVERY_PAGE|INVALID_DETAIL_PAGE/.test(String(error))) throw error;
-    const claims=(await ownerClaims(await realpath(options.dataRoot),records)).filter(claim=>claim.path!==owner?.path);
-    return { runId:options.runId,snapshotId:ownerSnapshotId(records,claims),status:'blocked',exitCode:75,reasons:[boundedText(String(error))],options:['inspect','confirm-cleanup'],original:{status:last(records,'run.closed')?.status??'unknown',cleanup:last(records,'run.closed')?.cleanup,projection:'original remains in host evidence'},tools:[],unknownModelAttempts:[],remainingModelAttempts:0,persistence:'owner-blocked',ownerClaims:claims,needsInput:{reason:'Ownership or stable snapshot unavailable',options:['inspect','confirm-cleanup'],risks:['No original durable store was opened or scheduled. PID disappearance or user consent alone cannot establish cleanup.']} };
+    const root=await realpath(options.dataRoot),claims=(await ownerClaims(root,records)).filter(claim=>claim.path!==owner?.path);
+    const ownerCleanup=await inspectOwnerCleanup(root,records,claims,owner?.path);
+    return { runId:options.runId,snapshotId:ownerSnapshotId(records,claims),status:'blocked',exitCode:75,reasons:[boundedText(String(error))],options:['inspect','confirm-cleanup'],original:{status:last(records,'run.closed')?.status??'unknown',cleanup:last(records,'run.closed')?.cleanup,projection:'original remains in host evidence'},tools:[],unknownModelAttempts:[],remainingModelAttempts:0,persistence:'owner-blocked',ownerClaims:claims,ownerCleanup,needsInput:{reason:'Ownership or stable snapshot unavailable',options:['inspect','confirm-cleanup'],risks:['No original durable store was opened or scheduled. PID disappearance or user consent alone cannot establish cleanup.']} };
   } finally { await owner?.release(); }
 }
 /** Original entry JSON is retrieved only on demand, in bounded UTF-16 text pages. Revalidate the
@@ -213,7 +273,12 @@ export async function checkRecovery(options: RecoveryOptions): Promise<RecoveryR
     }
     finally { evidence.close(); }
   } catch (error) {
-    if (String(error).includes('OWNER_CONFLICT')) {const report=await inspectRecovery(options);report.persistence='saved-separate-owner-report';await saveOwnerReport(options.dataRoot,report);return report;}
+    if (String(error).includes('OWNER_CONFLICT')) {
+      // Session/workspace conflicts can occur after this check acquired the data root.
+      // Release that temporary lease before inspecting retained owners, or the report would name this inspector as a live blocker.
+      const temporary=owner;owner=undefined;await temporary?.release();
+      const report=await inspectRecovery(options);report.persistence='saved-separate-owner-report';await saveOwnerReport(options.dataRoot,report);return report;
+    }
     throw error;
   } finally { await owner?.release(); }
 }
@@ -228,25 +293,17 @@ export async function settleRecoveryOwners(options:RecoveryOptions & {decision:{
     const report=await inspectRecovery(options);
     if(report.snapshotId!==options.decision.snapshotId)throw new Error('STALE_RECOVERY_DECISION');
     if(options.decision.action!=='confirm-cleanup'||!options.decision.acceptUnknownExternalEffects||!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(options.decision.id))throw new Error('INVALID_OWNER_DECISION');
-    const closing=records.findLast(r=>r.kind==='lifecycle.storage-closing');
-    const closed=records.findLast(r=>r.kind==='lifecycle.storage-closed');
-    const cleanup=(closing?.data as any)?.managedCommands;
-    if(!closing||!closed||closed.seq<closing.seq||!cleanup||cleanup.started!==cleanup.settled) {
+    const cleanup=managedCleanup(records);
+    if(!cleanup) {
       report.reasons.push('CLEANUP_EVIDENCE_REQUIRED: no confirmed storage close with every managed command settled; raw crashes require independent external cleanup and cannot be released by this operation');
       report.persistence='saved-separate-owner-report';await saveOwnerReport(root,report);return report;
     }
-    const acquired=last(records,'ownership.acquired');
-    const known=[acquired?.workspace,last(records,'ownership.session'),acquired?.dataRoot].filter(Boolean) as {path:string;claim:OwnerClaim['claim']}[];
-    for(const claim of report.ownerClaims??[]) {
-      if(!known.some(item=>item.path===claim.path&&item.claim.token&&item.claim.token===claim.claim.token))throw new Error('OWNER_IDENTITY_UNVERIFIED');
-      if(claim.claim.host!==hostname()||!Number.isSafeInteger(claim.claim.pid)||claim.claim.pid<=0)throw new Error('OWNER_HOST_UNVERIFIED');
-      try{process.kill(claim.claim.pid,0);throw new Error('OWNER_STILL_ALIVE');}catch(error){if((error as NodeJS.ErrnoException).code!=='ESRCH')throw error;}
-      if(claim.lock&&(await readdir(`${claim.path}.lock`)).length)throw new Error('OWNER_LOCK_CONTENT_UNKNOWN');
-    }
+    const current=await inspectOwnerCleanup(root,records,report.ownerClaims??[]);
+    if(current.status!=='releasable')throw new Error(current.reason??'OWNER_IDENTITY_UNVERIFIED');
     if(!report.ownerClaims?.length)throw new Error('NO_RETAINED_OWNER');
     if(JSON.stringify(await ownerClaims(root,records))!==JSON.stringify(report.ownerClaims))throw new Error('OWNER_CHANGED');
     const dir=join(root,'recovery-owner-decisions',options.decision.id);await mkdir(dir,{recursive:true,mode:0o700});
-    const receipt={decision:options.decision,claims:report.ownerClaims,cleanupEvidence:[closing.seq,closed.seq],externalProcesses:'unknown',classification:'explicit owner disposition backed by managed cleanup and owner liveness checks; not proof of all external effects stopping'};
+    const receipt={decision:options.decision,claims:report.ownerClaims,cleanupEvidence:[cleanup.closing.seq,cleanup.closed.seq],externalProcesses:'unknown',classification:'explicit owner disposition backed by managed cleanup and owner liveness checks; not proof of all external effects stopping'};
     const fd=openSync(join(dir,'decision.json'),'wx',0o600);try{writeFileSync(fd,JSON.stringify(receipt));fsyncSync(fd);}finally{closeSync(fd);}
     for(const [index,claim] of report.ownerClaims.entries()) {
       if(digest(await readFile(join(claim.path,'owner.json')))!==claim.markerSha256)throw new Error('OWNER_CHANGED');
@@ -254,7 +311,7 @@ export async function settleRecoveryOwners(options:RecoveryOptions & {decision:{
       await rename(join(claim.path,'owner.json'),join(dir,`${index}.owner.json`));
     }
     const owner=await acquireOwner(root,()=>{});
-    try{const evidence=new Evidence(root,options.runId);try{const result={...report,ownerClaims:[],reasons:['Retained protocol owners settled; original external-process and cost uncertainty remains. Recheck before an explicit continuation.'],options:['inspect','check'],decisionId:options.decision.id,persistence:'saved' as const};evidence.append('recovery.owner-settled',{...receipt,report:result});return result;}finally{evidence.close();}}
+    try{const evidence=new Evidence(root,options.runId);try{const {ownerCleanup:_,...settledReport}=report;const result={...settledReport,ownerClaims:[],reasons:['Retained protocol owners settled; original external-process and cost uncertainty remains. Recheck before an explicit continuation.'],options:['inspect','check'],decisionId:options.decision.id,persistence:'saved' as const};evidence.append('recovery.owner-settled',{...receipt,report:result});return result;}finally{evidence.close();}}
     finally{await owner.release();}
   } finally {await gate.release();}
 }

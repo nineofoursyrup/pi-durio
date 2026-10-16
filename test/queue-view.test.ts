@@ -220,7 +220,11 @@ test('show queue retains expansion/copy but blocks every write entry and leaves 
   const f = project(); recordSession(f, 'readonly'); const item = admitted(f, 'readonly', 'readonly-queue', 'follow-up', 'Readonly queue content', 'pending');
   const before = dataDigest(f.dataRoot), t = open(f, { show: { run: 'readonly' } });
   try {
+    t.key('\x1b'); t.key('\x1b'); t.key('\x1b');
     t.key('/queue'); t.key('\r'); t.key('\r'); assert.match(t.screen(), /原目标：/);
+    const full = t.app.screen().map(stripTerminalSequences);
+    assert.match(full[0], /^◆ queue /, 'queue occupies the terminal from its first row');
+    assert.match(full.at(-1)!, /Esc 返回会话/, 'the queue footer stays on the final terminal row');
     t.key('y'); await tick(); assert.equal(t.copied[0], item.input);
     for (const key of ['w', 'r']) { t.key(key); assert.match(t.screen(), /只读查看/); assert.doesNotMatch(t.screen(), /重新接入排队请求/); }
     t.key('\x1b'); t.key('\x7f'); assert.deepEqual(dataDigest(f.dataRoot), before);

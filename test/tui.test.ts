@@ -345,14 +345,16 @@ test('history overlay is reachable and consumes command-like text without changi
     key('Read README');key('\r');await until(()=>f.screen().includes('✓ 完成'));
     const calls=f.transport.calls.length;
     key('/history');key('\r');assert.match(f.screen(),/历史 · 只读/);
-    // A session display number in the /history filter selects the same session; the filter keeps the full identity.
-    const sessionId=(f.app as any).historyView.history.items[0].sessionId as string;key('\x1b');
-    key('/history '+readDisplayIndex(join(f.root,'data')).label('session',sessionId));key('\r');
-    assert.equal((f.app as any).historyView.history.filter.session,sessionId);assert.equal((f.app as any).historyView.history.items.length,1);
-    key('\r');assert.match(f.screen(),/task.accepted/);key('\r');
+    // A session display number opens its tasks; the selected task retains the complete identity.
+    const dataRoot=join(f.root,'data'),session=readSessionChains(dataRoot).list().items[0];key('\x1b');
+    key('/history '+readDisplayIndex(dataRoot).label('session',session.id));key('\r');
+    assert.equal((f.app as any).historyView.selectedTask.sessionId,session.id);assert.equal((f.app as any).historyView.selectedTask.runId,session.tailRunId);
+    assert.match(f.screen(),/任务 1/);assert.equal(readAcceptedTasks(dataRoot).tasks.length,1);
+    key('\r');assert.match(f.screen(),/只读 · 不能提交/);assert.match(f.screen(),/Read README/);assert.doesNotMatch(f.screen(),/task.accepted/);
     key('/compact');key('\r');key('/exit');key('\r');assert.equal(f.terminal.stopped,false);assert.equal(f.transport.calls.length,calls);
-    key('\x03');key('\x04');assert.equal(f.terminal.stopped,false);key('\x1b');
-    assert.match(f.screen(),/✓ 完成/);assert.equal(f.transport.calls.length,calls);
+    key('\x03');key('\x04');assert.equal(f.terminal.stopped,false);key('\x1b');assert.match(f.screen(),/任务 1/);
+    key('\x1b');assert.match(f.screen(),/历史 · 只读/);key('\x1b');
+    assert.match(f.screen(),/✓ 完成/);assert.equal(f.transport.calls.length,calls);assert.equal((f.app as any).runId,session.tailRunId);assert.equal(readAcceptedTasks(dataRoot).tasks.length,1);
   } finally {await f.app.exit();}
 });
 

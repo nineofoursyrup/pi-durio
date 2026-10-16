@@ -1,0 +1,64 @@
+import type { FactClock } from '../fact-clock.js';
+import type { EvidenceReference } from '../history.js';
+export interface MetricFact {
+    ref: EvidenceReference;
+    data: any;
+    missing?: string;
+}
+export interface TimePoint {
+    at: string;
+    clock: FactClock | null;
+    source: string;
+}
+export interface Duration {
+    state: 'measured' | 'unknown' | 'pending';
+    milliseconds: number | null;
+    wallEstimateMs: number | null;
+    reason: string | null;
+    from: TimePoint;
+    to: TimePoint | null;
+}
+export declare function point(fact: MetricFact): TimePoint;
+/** Raw wall time is retained as an estimate; only same-incarnation monotonic spans are exact. */
+export declare function duration(from: TimePoint, to: TimePoint | null, asOf: string, rollback?: boolean): Duration;
+export type SegmentKind = 'queue' | 'user-wait' | 'active' | 'recovery-offline';
+export interface Segment {
+    kind: SegmentKind;
+    start: TimePoint;
+    end: TimePoint | null;
+    duration: Duration;
+}
+export declare function taskClocks(admission: MetricFact, facts: MetricFact[], started: MetricFact | undefined, ended: MetricFact | undefined, acceptance: {
+    firstValid: {
+        source: string;
+        occurredAt: string;
+        clock: FactClock | null;
+        outcome: string;
+    } | null;
+}, asOf: string): {
+    execution: Duration;
+    acceptance: Duration;
+    acceptanceOutcome: string;
+    rollback: boolean;
+    segments: Segment[];
+    partition: {
+        unit: string;
+        measured: Record<"unknown" | SegmentKind, number | null>;
+        overlapMs: number;
+        totalState: string;
+        scope: string;
+    };
+};
+export declare function durationSummary(values: Duration[]): {
+    unit: string;
+    state: string;
+    total: number;
+    valid: number;
+    missing: number;
+    pending: number;
+    sum: number | null;
+    mean: number | null;
+    p50: number | null;
+    p95: number | null;
+    method: string;
+};

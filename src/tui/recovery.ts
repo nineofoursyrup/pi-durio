@@ -1,8 +1,6 @@
 /**
  * 1c 恢复核对面板（U3）：取数与纯渲染、按项处置的状态机。宿主（app.ts）负责打开时的只读核对、
  * 确认框与提交；本文件不取锁、不写记录。
- *
- * “所有者”一节（`confirm-cleanup`）归 #76：现在只显示检查行，只能重新核对。
  */
 import { matchesKey, visibleWidth } from '@earendil-works/pi-tui';
 import { recoveryRecords } from '../recovery-facts.js';
@@ -11,7 +9,7 @@ import type { QueueItemFact } from '../evidence.js';
 import { readSessionChains } from '../session-chain.js';
 import { readDisplayIndex } from '../display-number.js';
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { clean, hintLine, truncateEnd, wrapSegments } from './view-stack.js';
+import { clean, fixedFrame, hintLine, truncateEnd, wrapSegments } from './view-stack.js';
 
 /** 原因码中文对照（#59 第 4 节）；表外原因码原样显示。 */
 export const REASON_TEXT: Record<string, string> = {
@@ -62,6 +60,8 @@ export interface RecoveryFacts {
   /** `OTHER_SESSION_PENDING` 指向的会话 s- 号。 */
   otherSessions: string[];
   unknownModelAttempts: number;
+  /** Only the host assesses owner cleanup; the panel never infers it from a PID or timestamp. */
+  ownerCleanup?: RecoveryReport['ownerCleanup'];
 }
 
 /** 首页之后的分页（同一快照）：工具与原因都按同一偏移翻页，直到各列表都取完。 */
@@ -126,6 +126,7 @@ export function readRecoveryFacts(root: string, pages: RecoveryReport[], context
     items, prior: tools.filter(tool => tool.resolution).map(tool => ({ tool: tool.tool, target: targetOf(tool), choice: tool.resolution!.choice, reason: tool.resolution!.reason })),
     checks: recoveryChecks(reasons), frozen: { count: frozen.length, ...(frozen[0] ? { first: { kind: frozen[0].kind, text: firstLine(frozen[0].input) } } : {}) },
     otherSessions: [...new Set(otherSessions)], unknownModelAttempts: report.details?.unknownModelAttempts.count ?? report.unknownModelAttempts.length,
+    ...(report.ownerCleanup ? { ownerCleanup: report.ownerCleanup } : {}),
   };
 }
 /** 持久会话目录 → 派生会话的 s- 号（经该会话首个受理的 run）。 */
@@ -161,11 +162,23 @@ export const DISPOSITIONS = [
   { name: '从中断处继续', text: '允许重新运行该操作，可能重复已发生的影响' },
   { name: '结束旧工作，开新任务', text: '旧 run 标记已结束；新任务不接续旧上下文；冻结项需重新提交' },
 ] as const;
+const OWNER_DISPOSITIONS = [DISPOSITIONS[0], { name: '释放上次进程留下的写入者锁', text: '先确认，再由宿主重新核实清理条件；释放后自动重新核对' }] as const;
+export const OWNER_RELEASE_RISK = '释放后，外部进程与费用的不确定性仍然保留';
+const OWNER_REASONS: Record<string, string> = {
+  OWNER_STILL_ALIVE: '进程仍在运行，等它结束后重新核对',
+  CLEANUP_EVIDENCE_REQUIRED: '没有清理记录（崩溃或强杀），不能在此释放',
+  OWNER_HOST_UNVERIFIED: '主机无法核实，不能在此释放',
+  OWNER_PROCESS_UNVERIFIED: '进程状态无法核实，不能在此释放',
+  OWNER_IDENTITY_UNVERIFIED: '持有者身份无法核实，不能在此释放',
+  OWNER_LOCK_CONTENT_UNKNOWN: '锁目录内容无法核实，不能在此释放',
+  NO_RETAINED_OWNER: '没有可核实的残留持有者，不能在此释放',
+};
 export const DEFAULT_REASON = { completed: '用户确认该操作已完成（未填写说明）', retry: '用户选择从中断处继续，接受可能重复的影响' } as const;
 const CHOICE_TEXT: Record<string, string> = { completed: '视为已完成', retry: '从中断处继续', skip: '跳过（首版处置）' };
 
 export type RecoveryAction =
   | { type: 'none' } | { type: 'close' } | { type: 'recheck' } | { type: 'end' }
+  | { type: 'release-owner' }
   /** 0 项未知时的“继续旧工作”。 */
   | { type: 'continue' }
   /** 最后一项选完：汇总确认后提交。 */
@@ -173,26 +186,31 @@ export type RecoveryAction =
 
 /** 1c 面板：光标、逐项处置与“视为已完成”的一句说明；渲染按给定高度收起（U3）。 */
 export class RecoveryPanel {
-  /** 光标所在处置（0–3）。 */
+  /** 光标所在处置（所有者阶段 0–1，其余 0–3）。 */
   cursor = 0;
   /** 当前处置的未知项。 */
   index = 0;
   /** 正在为“视为已完成”填写说明。 */
   note?: string;
   readonly choices = new Map<number, { choice: 'completed' | 'retry'; reason: string; note?: string }>();
+  private ownerOffset = 0;
+  private ownerPageSize = 1;
   constructor(readonly facts: RecoveryFacts) {}
+  get ownerStage() { return this.facts.options.includes('confirm-cleanup'); }
+  private get dispositions() { return this.ownerStage ? OWNER_DISPOSITIONS : DISPOSITIONS; }
 
   /** 处置不可选的原因；可选时 undefined。 */
   disabled(option: number): string | undefined {
     const options = this.facts.options, first = this.facts.checks.find(check => !check.ok)?.text ?? '需先处理检查项';
+    if (option < 0 || option >= this.dispositions.length) return '没有这项处置';
     if (option === 0) return undefined;
-    if (options.includes('confirm-cleanup')) return '上次进程未释放写入者锁';
+    if (this.ownerStage) return this.facts.ownerCleanup?.status === 'releasable' ? undefined : OWNER_REASONS[this.facts.ownerCleanup?.reason ?? 'OWNER_IDENTITY_UNVERIFIED'] ?? '所有者条件无法核实，不能在此释放';
     if (options.includes('external-verification')) return first;
     if (!options.includes('continue')) return option === 3 ? (options.includes('end') ? undefined : first) : first;
     if (option === 1 && !this.facts.items.length) return '没有结果未提交的操作';
     return undefined;
   }
-  get zeroUnknown() { return !this.facts.items.length && this.facts.options.includes('continue'); }
+  get zeroUnknown() { return !this.ownerStage && !this.facts.items.length && this.facts.options.includes('continue'); }
 
   handleInput(data: string): RecoveryAction {
     if (this.note !== undefined) {
@@ -204,11 +222,16 @@ export class RecoveryPanel {
       return { type: 'none' };
     }
     if (matchesKey(data, 'escape')) return { type: 'close' };
+    if (this.ownerStage && (matchesKey(data, 'pageUp') || matchesKey(data, 'pageDown'))) {
+      this.ownerOffset = Math.max(0, this.ownerOffset + (matchesKey(data, 'pageUp') ? -1 : 1) * this.ownerPageSize);
+      return { type: 'none' };
+    }
     const step = matchesKey(data, 'up') ? -1 : matchesKey(data, 'down') ? 1 : 0;
-    if (step) { for (let next = this.cursor + step; next >= 0 && next < 4; next += step) if (!this.disabled(next)) { this.cursor = next; break; } return { type: 'none' }; }
+    if (step) { for (let next = this.cursor + step; next >= 0 && next < this.dispositions.length; next += step) if (!this.disabled(next)) { this.cursor = next; break; } return { type: 'none' }; }
     if (/^[1-4]$/.test(data)) { const option = Number(data) - 1; if (!this.disabled(option)) this.cursor = option; return { type: 'none' }; }
     if (!matchesKey(data, 'enter') || this.disabled(this.cursor)) return { type: 'none' };
     if (this.cursor === 0) return { type: 'recheck' };
+    if (this.ownerStage) return { type: 'release-owner' };
     if (this.cursor === 3) return { type: 'end' };
     if (!this.facts.items.length) return { type: 'continue' };
     if (this.cursor === 1) { this.note = ''; return { type: 'none' }; }
@@ -234,11 +257,19 @@ export class RecoveryPanel {
   }
 
   /** 完整高度（不收起）。 */
-  fullHeight(width: number) { return this.lines(width, 0).length; }
+  fullHeight(width: number) { return this.ownerStage ? this.ownerLines(width).length + this.dispositionLines(width, 0).length : this.lines(width, 0).length; }
   /** 收起后的最小高度：工作、未知、检查、四项名称、选中项说明与面板底栏。 */
-  minHeight(width: number) { return this.lines(width, 4).length; }
+  minHeight(width: number) { return this.ownerStage ? this.dispositionLines(width, 4).length + 4 : this.lines(width, 4).length; }
 
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
+    if (this.ownerStage) {
+      const body = this.ownerLines(width, tier), full = this.dispositionLines(width, 0, tier);
+      const footer = body.length + full.length <= height ? full : this.dispositionLines(width, 4, tier);
+      this.ownerPageSize = Math.max(1, height - footer.length);
+      const frame = fixedFrame([], body, footer, Math.min(height, body.length + footer.length), this.ownerOffset);
+      this.ownerOffset = frame.offset;
+      return frame.lines;
+    }
     for (let level = 0; level <= 4; level++) {
       const lines = this.lines(width, level, tier);
       if (lines.length <= height) return lines;
@@ -253,7 +284,7 @@ export class RecoveryPanel {
    * 3 收起最后确认点、证据行与已冻结行；4 再收起标题、影响、你的决定、处置标题与“需先处理”行。
    */
   private lines(width: number, level: number, tier: ColorTier = COLOR_TIER): string[] {
-    const facts = this.facts, wide = width >= 100, labelWidth = width >= 60 ? 12 : 11, valueWidth = Math.max(1, width - labelWidth);
+    const facts = this.facts, labelWidth = width >= 60 ? 12 : 11, valueWidth = Math.max(1, width - labelWidth);
     const out: string[] = [];
     const row = (label: string, segments: TextSegment[]) => out.push(styledLine([{ text: pad(label, labelWidth), fg: 'fg.label' }, ...fit(segments, valueWidth)], width, undefined, tier));
     const more = (segments: TextSegment[]) => out.push(styledLine([{ text: ' '.repeat(labelWidth) }, ...fit(segments, valueWidth)], width, undefined, tier));
@@ -294,12 +325,47 @@ export class RecoveryPanel {
         { text: `此前 · ${prior.tool} ${prior.target} · `, fg: 'fg.faint' }, { text: CHOICE_TEXT[prior.choice] ?? prior.choice, fg: 'fg.body' }, ...(prior.reason ? [{ text: ` · ${prior.reason}`, fg: 'fg.muted' as TokenName }] : [])]));
       out.push(styledLine([{ text: '处置', fg: 'fg.label' }, { text: ' · 原 interrupted/unknown 记录不会被改写', fg: 'fg.faint' }], width, undefined, tier));
     }
-    const nameWidth = 28;
-    DISPOSITIONS.forEach((option, i) => {
+    out.push(...this.dispositionLines(width, level, tier));
+    return out;
+  }
+
+  /** Long owner identities and recovery paths remain available in full via PgUp/PgDn. Actions stay fixed. */
+  private ownerLines(width: number, tier: ColorTier = COLOR_TIER): string[] {
+    const out: string[] = [], labelWidth = width < 60 ? 0 : 12;
+    const row = (label: string, text: string, fg: TokenName = 'fg.body') => {
+      if (!labelWidth) out.push(styledLine([{ text: label, fg: 'fg.label' }], width, undefined, tier));
+      wrapSegments([{ text: clean(text), fg }], Math.max(1, width - labelWidth)).forEach((segments, i) => out.push(styledLine([
+        ...(labelWidth ? [{ text: i ? ' '.repeat(labelWidth) : pad(label, labelWidth), fg: 'fg.label' as TokenName }] : []), ...segments,
+      ], width, undefined, tier)));
+    };
+    const owners = this.facts.ownerCleanup;
+    const holders = [...new Map((owners?.holders ?? []).map(holder => [JSON.stringify([holder.pid, holder.host, holder.started, holder.status, holder.reason]), holder])).values()];
+    if (!holders.length) row('所有者', '持有者信息无法核实 · 不能在此释放', 'ac.err');
+    for (const holder of holders) {
+      const pid = holder.pid === undefined ? '未记录' : holder.pid;
+      row('所有者', `pid ${pid} · ${holder.host || '主机未记录'} · ${holder.started || '起始时间未记录'}`);
+      if (holder.status === 'running') row('检查', `${GLYPHS.warn} pid ${pid} 仍在运行 · 等它结束后重新核对`, 'ac.warn');
+      else if (holder.status === 'releasable') row('检查', `${GLYPHS.warn} pid ${pid} 已结束 · 存储已关闭，受管命令已结束 · 可释放`, 'ac.warn');
+      else row('检查', `${GLYPHS.err} pid ${pid} ${holder.reason === 'CLEANUP_EVIDENCE_REQUIRED' ? '已结束 · 没有清理记录（崩溃或强杀）· 不能在此释放' : OWNER_REASONS[holder.reason ?? ''] ?? '所有者条件无法核实，不能在此释放'} · ${holder.reason ?? 'OWNER_IDENTITY_UNVERIFIED'}`, 'ac.err');
+    }
+    if (owners?.status === 'blocked') {
+      row('恢复方法', `${owners.holders.some(holder => holder.reason === 'OWNER_HOST_UNVERIFIED') ? '先到列出的持有者主机，' : '先独立'}确认该进程及其启动的命令都已结束，完成外部清理，再手动删除下列残留锁和 owner 记录，最后重新核对。不能凭 PID 消失或超时接管锁。`);
+      for (const location of owners.locations) {
+        const scope = { workspace: '工作区', session: '会话存储', 'data-root': '数据根' }[location.scope];
+        row(`${scope}锁`, `${location.path}.lock`, 'ac.code');
+        row('owner 记录', `${location.path}/owner.json`, 'ac.code');
+      }
+    }
+    return out;
+  }
+
+  private dispositionLines(width: number, level: number, tier: ColorTier = COLOR_TIER): string[] {
+    const out: string[] = [], wide = width >= 100, nameWidth = this.ownerStage ? 40 : 28;
+    this.dispositions.forEach((option, i) => {
       const selected = i === this.cursor, off = this.disabled(i), bg: TokenName | undefined = selected ? 'bg.selected' : undefined;
       const name = `${i + 1}  ${option.name}`, description = off ? `不可选 · ${off}` : option.text;
       const head: TextSegment[] = [{ text: selected ? '▏ ' : '  ', fg: 'ac.brand' }, { text: wide ? pad(name, nameWidth) : name, fg: off ? 'fg.gutter' : selected ? 'fg.primary' : 'fg.body', bold: selected && !off }];
-      const showText = level < 2 || selected;
+      const showText = level < 2 || selected || (this.ownerStage && !!off);
       const note = selected && this.note !== undefined;
       const descSegments: TextSegment[] = note ? [{ text: `说明（可选）：${this.note}▏`, fg: 'fg.primary' }, { text: '  Enter 确认 · Esc 取消', fg: 'fg.label' }] : [{ text: description, fg: off ? 'fg.gutter' : 'fg.muted' }];
       if (wide && showText && !note) out.push(styledLine([...head, ...fit(descSegments, Math.max(1, width - 2 - nameWidth))], width, bg, tier));
@@ -308,7 +374,7 @@ export class RecoveryPanel {
         if (showText) out.push(styledLine([{ text: '     ' }, ...fit(descSegments, Math.max(1, width - 5))], width, bg, tier));
       }
     });
-    out.push(hintLine(['↑↓ 选择', 'Enter 确认'], width, { esc: 'Esc 返回查看', tier }));
+    out.push(hintLine(this.ownerStage ? width < 60 ? ['↑↓选', 'PgUp/Dn', 'Enter'] : ['↑↓ 选择', 'Enter 确认', 'PgUp/PgDn 详情'] : ['↑↓ 选择', 'Enter 确认'], width, { esc: 'Esc 返回查看', tier }));
     return out;
   }
 }

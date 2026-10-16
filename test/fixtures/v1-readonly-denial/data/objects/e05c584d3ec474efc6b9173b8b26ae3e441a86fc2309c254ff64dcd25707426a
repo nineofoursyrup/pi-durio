@@ -1,0 +1,726 @@
+import { type BlobRef } from '../evidence.js';
+import { type EvalPlan, type EvalTrial } from './plan.js';
+import { type ContentFile } from './store.js';
+import { type EvalCase } from './fixtures.js';
+export type TrialStatus = 'completed' | 'preparation-error' | 'error' | 'timeout' | 'cancelled' | 'budget-stopped' | 'service-error' | 'original-error' | 'invalid' | 'not-run' | 'unknown';
+export interface TrialOutcome {
+    trialId: string;
+    status: TrialStatus;
+    started: boolean;
+    valid: boolean;
+    reason: string | null;
+    runtimeResult: BlobRef | null;
+    artifacts: ContentFile[];
+    isolation: BlobRef | null;
+    timing: {
+        preparationMs: number;
+        taskMs: number;
+        gradingMs: number;
+    };
+    source?: string;
+}
+export interface Grade {
+    id: string;
+    trialId: string;
+    outcome: string;
+    graderVersion: string;
+    judgment: 'PASS' | 'FAIL' | 'unknown';
+    reason: string;
+    checks: {
+        name: string;
+        passed: boolean;
+    }[];
+    execution: BlobRef | null;
+    at: string;
+    source?: string;
+}
+export interface RunEvalOptions {
+    dataRoot: string;
+    id: string;
+    directory: string;
+    signal?: AbortSignal;
+    transportForTrial?: (trial: EvalTrial) => typeof fetch | undefined;
+    fault?: (kind: string) => void;
+}
+/** No runtime, task, or outcome is resumed. Reopening an interrupted plan is report-only. */
+export declare function runEval(options: RunEvalOptions): Promise<{
+    planId: string;
+    regrading: any;
+    purpose: string;
+    mode: "live" | "offline";
+    asOf: number;
+    plan: EvalPlan;
+    scope: string;
+    counts: {
+        planned: number;
+        started: number;
+        completed: number;
+        gradable: number;
+        passed: number;
+        passRate: number | null;
+        completionRate: number | null;
+        coverageRate: number | null;
+    };
+    sides: {
+        [k: string]: {
+            planned: number;
+            started: number;
+            completed: number;
+            gradable: number;
+            passed: number;
+            passRate: number | null;
+            completionRate: number | null;
+            coverageRate: number | null;
+        };
+    };
+    trials: {
+        outcome: any;
+        grade: any;
+        gradingMs: number | null;
+        gradingStages: any[];
+        gradeHistory: any[];
+        metrics: {
+            requests: number | null;
+            tokens: any;
+            cost: number | null;
+            taskMs: any;
+        };
+        metricReasons: Partial<Record<import("./comparison.js").Metric, string>>;
+        usage: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        requests: any[];
+        modelIdentity: {
+            requested: {
+                provider: "deepseek";
+                id: "deepseek-flash";
+                endpoint: "https://api.deepseek.com/chat/completions";
+            };
+            returned: any[];
+            missing: number;
+            weights: string;
+        };
+        id: string;
+        caseId: string;
+        version: string;
+        side: string;
+        repeat: number;
+        pair: string | null;
+        scenario?: import("./plan.js").ControlledScenario;
+        replaces?: string;
+    }[];
+    budget: {
+        deadline: string;
+        limits: import("../provider-boundary.js").BudgetLimits;
+        trialLimits: {
+            maxRequests: number;
+            maxTokens: number;
+        } | null;
+        boundsExceeded: number;
+        requests: number;
+        dispatches: number;
+        knownTokens: any;
+        knownValue: number | null;
+        totalValue: number | null;
+        missing: number;
+        priceMissing: boolean;
+        completeness: string;
+    };
+    cost: {
+        bySide: {
+            [k: string]: {
+                boundsExceeded: number;
+                requests: number;
+                dispatches: number;
+                knownTokens: any;
+                knownValue: number | null;
+                totalValue: number | null;
+                missing: number;
+                priceMissing: boolean;
+                completeness: string;
+            };
+        };
+        unattributed: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        failed: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        scope: string;
+        boundsExceeded: number;
+        requests: number;
+        dispatches: number;
+        knownTokens: any;
+        knownValue: number | null;
+        totalValue: number | null;
+        missing: number;
+        priceMissing: boolean;
+        completeness: string;
+        kind: string;
+        price: {
+            version: string;
+            source: string;
+            currency: "USD";
+            perMillionTokens: number;
+        } | null;
+    };
+    timing: {
+        preparationMs: number;
+        knownTaskMs: number;
+        taskMs: number | null;
+        gradingMs: number;
+        missing: number;
+        clock: string;
+        externalSetup: string;
+    };
+    improvement: string;
+    comparison: {
+        conclusion: "改善" | "退化" | "无明显差异" | "证据不足";
+        reason: string;
+        scope: string;
+        allComplete: boolean;
+        metricsComplete: boolean;
+        evidenceGaps: string[];
+        thresholdValid: boolean;
+        repetitionValid: boolean;
+        validPairs: number;
+        pairs: {
+            caseId: string;
+            role: "objective" | "protection";
+            repeat: number;
+            id: string;
+            baseline: string;
+            candidate: string;
+            valid: boolean;
+            before: number | null;
+            after: number | null;
+            delta: number | null;
+            exclusion: string | null;
+            metricGaps: string[];
+        }[];
+        candidateFailures: {
+            trial: string;
+            judgment: string;
+            evidenceValid: boolean;
+        }[];
+        hardRegressions: string[];
+        softRegressions: string[];
+        regression: {
+            counts: {
+                planned: number;
+                valid: number;
+                regressed: number;
+                regressionRate: number | null;
+                coverageRate: number | null;
+            };
+            pairs: {
+                requirement: string;
+                caseId: string;
+                repeat: number;
+                kind: "hard" | "soft";
+                before: number | boolean | null;
+                after: number | boolean | null;
+                delta: number | null;
+                valid: boolean;
+                regressed: boolean;
+                candidatePassed: boolean;
+                reason: string | null;
+            }[];
+        };
+    } | null;
+    ruleImpact: {
+        revision: any;
+        source: string;
+        cases: string[];
+        status: string;
+    }[];
+    gradingRevisions: any[];
+    planSource: string;
+    planAvailability: string;
+    outcomeAvailability: string;
+}>;
+export declare function evalReport(root: string, id: string, options?: {
+    asOf?: number;
+}): {
+    planId: string;
+    regrading: any;
+    purpose: string;
+    mode: "live" | "offline";
+    asOf: number;
+    plan: EvalPlan;
+    scope: string;
+    counts: {
+        planned: number;
+        started: number;
+        completed: number;
+        gradable: number;
+        passed: number;
+        passRate: number | null;
+        completionRate: number | null;
+        coverageRate: number | null;
+    };
+    sides: {
+        [k: string]: {
+            planned: number;
+            started: number;
+            completed: number;
+            gradable: number;
+            passed: number;
+            passRate: number | null;
+            completionRate: number | null;
+            coverageRate: number | null;
+        };
+    };
+    trials: {
+        outcome: any;
+        grade: any;
+        gradingMs: number | null;
+        gradingStages: any[];
+        gradeHistory: any[];
+        metrics: {
+            requests: number | null;
+            tokens: any;
+            cost: number | null;
+            taskMs: any;
+        };
+        metricReasons: Partial<Record<import("./comparison.js").Metric, string>>;
+        usage: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        requests: any[];
+        modelIdentity: {
+            requested: {
+                provider: "deepseek";
+                id: "deepseek-flash";
+                endpoint: "https://api.deepseek.com/chat/completions";
+            };
+            returned: any[];
+            missing: number;
+            weights: string;
+        };
+        id: string;
+        caseId: string;
+        version: string;
+        side: string;
+        repeat: number;
+        pair: string | null;
+        scenario?: import("./plan.js").ControlledScenario;
+        replaces?: string;
+    }[];
+    budget: {
+        deadline: string;
+        limits: import("../provider-boundary.js").BudgetLimits;
+        trialLimits: {
+            maxRequests: number;
+            maxTokens: number;
+        } | null;
+        boundsExceeded: number;
+        requests: number;
+        dispatches: number;
+        knownTokens: any;
+        knownValue: number | null;
+        totalValue: number | null;
+        missing: number;
+        priceMissing: boolean;
+        completeness: string;
+    };
+    cost: {
+        bySide: {
+            [k: string]: {
+                boundsExceeded: number;
+                requests: number;
+                dispatches: number;
+                knownTokens: any;
+                knownValue: number | null;
+                totalValue: number | null;
+                missing: number;
+                priceMissing: boolean;
+                completeness: string;
+            };
+        };
+        unattributed: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        failed: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        scope: string;
+        boundsExceeded: number;
+        requests: number;
+        dispatches: number;
+        knownTokens: any;
+        knownValue: number | null;
+        totalValue: number | null;
+        missing: number;
+        priceMissing: boolean;
+        completeness: string;
+        kind: string;
+        price: {
+            version: string;
+            source: string;
+            currency: "USD";
+            perMillionTokens: number;
+        } | null;
+    };
+    timing: {
+        preparationMs: number;
+        knownTaskMs: number;
+        taskMs: number | null;
+        gradingMs: number;
+        missing: number;
+        clock: string;
+        externalSetup: string;
+    };
+    improvement: string;
+    comparison: {
+        conclusion: "改善" | "退化" | "无明显差异" | "证据不足";
+        reason: string;
+        scope: string;
+        allComplete: boolean;
+        metricsComplete: boolean;
+        evidenceGaps: string[];
+        thresholdValid: boolean;
+        repetitionValid: boolean;
+        validPairs: number;
+        pairs: {
+            caseId: string;
+            role: "objective" | "protection";
+            repeat: number;
+            id: string;
+            baseline: string;
+            candidate: string;
+            valid: boolean;
+            before: number | null;
+            after: number | null;
+            delta: number | null;
+            exclusion: string | null;
+            metricGaps: string[];
+        }[];
+        candidateFailures: {
+            trial: string;
+            judgment: string;
+            evidenceValid: boolean;
+        }[];
+        hardRegressions: string[];
+        softRegressions: string[];
+        regression: {
+            counts: {
+                planned: number;
+                valid: number;
+                regressed: number;
+                regressionRate: number | null;
+                coverageRate: number | null;
+            };
+            pairs: {
+                requirement: string;
+                caseId: string;
+                repeat: number;
+                kind: "hard" | "soft";
+                before: number | boolean | null;
+                after: number | boolean | null;
+                delta: number | null;
+                valid: boolean;
+                regressed: boolean;
+                candidatePassed: boolean;
+                reason: string | null;
+            }[];
+        };
+    } | null;
+    ruleImpact: {
+        revision: any;
+        source: string;
+        cases: string[];
+        status: string;
+    }[];
+    gradingRevisions: any[];
+    planSource: string;
+    planAvailability: string;
+    outcomeAvailability: string;
+};
+export declare function formatEvalReport(report: ReturnType<typeof evalReport>): string;
+/** Explicit append-only rescoring; a new grader never rewrites an outcome or the first failure. */
+export declare function regradeEval(options: {
+    dataRoot: string;
+    id: string;
+    directory: string;
+    revisionId: string;
+    graders: Record<string, EvalCase['grader']>;
+    signal?: AbortSignal;
+}): Promise<{
+    planId: string;
+    regrading: any;
+    purpose: string;
+    mode: "live" | "offline";
+    asOf: number;
+    plan: EvalPlan;
+    scope: string;
+    counts: {
+        planned: number;
+        started: number;
+        completed: number;
+        gradable: number;
+        passed: number;
+        passRate: number | null;
+        completionRate: number | null;
+        coverageRate: number | null;
+    };
+    sides: {
+        [k: string]: {
+            planned: number;
+            started: number;
+            completed: number;
+            gradable: number;
+            passed: number;
+            passRate: number | null;
+            completionRate: number | null;
+            coverageRate: number | null;
+        };
+    };
+    trials: {
+        outcome: any;
+        grade: any;
+        gradingMs: number | null;
+        gradingStages: any[];
+        gradeHistory: any[];
+        metrics: {
+            requests: number | null;
+            tokens: any;
+            cost: number | null;
+            taskMs: any;
+        };
+        metricReasons: Partial<Record<import("./comparison.js").Metric, string>>;
+        usage: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        requests: any[];
+        modelIdentity: {
+            requested: {
+                provider: "deepseek";
+                id: "deepseek-flash";
+                endpoint: "https://api.deepseek.com/chat/completions";
+            };
+            returned: any[];
+            missing: number;
+            weights: string;
+        };
+        id: string;
+        caseId: string;
+        version: string;
+        side: string;
+        repeat: number;
+        pair: string | null;
+        scenario?: import("./plan.js").ControlledScenario;
+        replaces?: string;
+    }[];
+    budget: {
+        deadline: string;
+        limits: import("../provider-boundary.js").BudgetLimits;
+        trialLimits: {
+            maxRequests: number;
+            maxTokens: number;
+        } | null;
+        boundsExceeded: number;
+        requests: number;
+        dispatches: number;
+        knownTokens: any;
+        knownValue: number | null;
+        totalValue: number | null;
+        missing: number;
+        priceMissing: boolean;
+        completeness: string;
+    };
+    cost: {
+        bySide: {
+            [k: string]: {
+                boundsExceeded: number;
+                requests: number;
+                dispatches: number;
+                knownTokens: any;
+                knownValue: number | null;
+                totalValue: number | null;
+                missing: number;
+                priceMissing: boolean;
+                completeness: string;
+            };
+        };
+        unattributed: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        failed: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        scope: string;
+        boundsExceeded: number;
+        requests: number;
+        dispatches: number;
+        knownTokens: any;
+        knownValue: number | null;
+        totalValue: number | null;
+        missing: number;
+        priceMissing: boolean;
+        completeness: string;
+        kind: string;
+        price: {
+            version: string;
+            source: string;
+            currency: "USD";
+            perMillionTokens: number;
+        } | null;
+    };
+    timing: {
+        preparationMs: number;
+        knownTaskMs: number;
+        taskMs: number | null;
+        gradingMs: number;
+        missing: number;
+        clock: string;
+        externalSetup: string;
+    };
+    improvement: string;
+    comparison: {
+        conclusion: "改善" | "退化" | "无明显差异" | "证据不足";
+        reason: string;
+        scope: string;
+        allComplete: boolean;
+        metricsComplete: boolean;
+        evidenceGaps: string[];
+        thresholdValid: boolean;
+        repetitionValid: boolean;
+        validPairs: number;
+        pairs: {
+            caseId: string;
+            role: "objective" | "protection";
+            repeat: number;
+            id: string;
+            baseline: string;
+            candidate: string;
+            valid: boolean;
+            before: number | null;
+            after: number | null;
+            delta: number | null;
+            exclusion: string | null;
+            metricGaps: string[];
+        }[];
+        candidateFailures: {
+            trial: string;
+            judgment: string;
+            evidenceValid: boolean;
+        }[];
+        hardRegressions: string[];
+        softRegressions: string[];
+        regression: {
+            counts: {
+                planned: number;
+                valid: number;
+                regressed: number;
+                regressionRate: number | null;
+                coverageRate: number | null;
+            };
+            pairs: {
+                requirement: string;
+                caseId: string;
+                repeat: number;
+                kind: "hard" | "soft";
+                before: number | boolean | null;
+                after: number | boolean | null;
+                delta: number | null;
+                valid: boolean;
+                regressed: boolean;
+                candidatePassed: boolean;
+                reason: string | null;
+            }[];
+        };
+    } | null;
+    ruleImpact: {
+        revision: any;
+        source: string;
+        cases: string[];
+        status: string;
+    }[];
+    gradingRevisions: any[];
+    planSource: string;
+    planAvailability: string;
+    outcomeAvailability: string;
+}>;
+export declare function listEvalPlans(root: string): {
+    id: string;
+    at: string;
+    purpose: string;
+    mode: "live" | "offline";
+}[];
+export { prepareEval, validatePlan, verifiedImage } from './plan.js';
+export { pairedTrials } from './comparison.js';
+export type { ComparisonPlan, ComparisonTrial } from './comparison.js';
+export type { EvalPlan, EvalTrial, PrepareEvalOptions, PrepareComparison } from './plan.js';

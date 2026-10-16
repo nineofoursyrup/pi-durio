@@ -1,0 +1,58 @@
+import { type BlobRef } from './evidence.js';
+import type { OwnerLease } from './ownership.js';
+import { type StoredFile } from './storage-files.js';
+export interface StorageUnit {
+    id: string;
+    kind: 'session' | 'object';
+    bytes: number;
+    files: StoredFile[];
+    runIds: string[];
+    sources: string[];
+    protectedBy: string[];
+    inspection?: {
+        conversations: number[];
+        tasks: number;
+        submissions: number;
+        pending: number;
+        sourceFiles: {
+            path: string;
+            sha256: string;
+        }[];
+    };
+}
+export interface RetentionState {
+    units: StorageUnit[];
+    blockers: string[];
+    recordBodies: Set<string>;
+    runSessions: Map<string, string>;
+}
+export declare function validateHostFormat(root: string): void;
+export declare function blobReferences(value: unknown): BlobRef[];
+/** Strict fail-closed protection projection. Host bodies are facts, never a disposable index.
+ * Limits fail explicitly; an incomplete projection never authorizes deletion. */
+export declare function retentionState(root: string, owner: OwnerLease, options?: {
+    skipSessions?: Set<string>;
+}): Promise<RetentionState>;
+export declare function appendManagement(root: string, id: string, kind: string, data: unknown): number;
+export declare function verifyFiles(root: string, files: StoredFile[]): Promise<void>;
+/** Usage never claims an active tree is a stable snapshot. Deep protection inspection is preview's job. */
+export declare function storageUsage(root: string, options?: {
+    after?: number;
+    limit?: number;
+}): Promise<{
+    root: string;
+    totals: Record<string, {
+        files: number;
+        bytes: number;
+    }>;
+    units: {
+        id: string;
+        bytes: number;
+        projects?: string[];
+    }[];
+    next: number | null;
+    totalUnits: number;
+    consistency: string;
+    retention: string;
+    limits: string;
+}>;

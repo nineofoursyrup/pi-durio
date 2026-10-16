@@ -1,0 +1,1 @@
+{"decisionId":"v1-readonly-denial","durableTaskId":17,"tool":"write","reason":"completed or skipped uncertain effect; this continuation permits scoped reads only"}

@@ -1,0 +1,18 @@
+export interface FactClock {
+    processId: string;
+    monotonicMs: number;
+    wallTime: string;
+}
+export declare function factClock(): FactClock;
+/** Only host fact kinds receive acquisition clocks; supplied clock fields cannot spoof them. */
+export declare function stampFact(kind: string, data: unknown): {
+    data: unknown;
+    acquiredAt: string;
+};
+export interface TaskOrigin {
+    kind: 'coding' | 'eval' | 'improve' | 'maintenance';
+    source: 'ordinary' | 'synthetic' | 'diagnostic' | 'eval';
+    taskType?: string;
+    parentTaskId?: string;
+    trialId?: string;
+}

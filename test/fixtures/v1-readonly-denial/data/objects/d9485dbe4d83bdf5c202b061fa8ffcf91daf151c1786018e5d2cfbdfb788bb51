@@ -1,0 +1,35 @@
+import { type BlobRef } from './evidence.js';
+import { type TaskProfile } from './task-profile.js';
+import type { ImproveSelection } from './improve-decisions.js';
+import type { ValidationGroup } from './improve-validation.js';
+export type TaskType = 'read' | 'coding';
+export interface DefaultScope {
+    scope: 'project-default';
+    workspace: string;
+    taskTypes: TaskType[];
+    baseline: Partial<Record<TaskType, string>>;
+}
+export declare function validateDefaultScope(a: DefaultScope, workspace: string): void;
+export interface DefaultFile {
+    targetId: string;
+    root: string;
+    path: string;
+    kind: 'agent-config' | 'prompt-skill';
+    content: BlobRef;
+}
+export interface DefaultSnapshot {
+    workspace: string;
+    taskType: TaskType;
+    revision: string;
+    files: DefaultFile[];
+    profile: TaskProfile;
+    profileId: string;
+}
+export declare function defaultSnapshot(root: string, workspace: string, taskType: TaskType, files: DefaultFile[], lookup?: (ref: BlobRef) => Buffer<ArrayBufferLike>): DefaultSnapshot;
+export declare function readImproveDefaults(root: string, workspace: string, taskType: TaskType): DefaultSnapshot;
+export interface DefaultChange {
+    previous: DefaultSnapshot;
+    current: DefaultSnapshot;
+}
+export declare function plannedDefaults(root: string, selections: ImproveSelection[], group: ValidationGroup, retain?: (bytes: string) => BlobRef): DefaultChange[];
+export declare function assertDefaultBaseline(root: string, changes: DefaultChange[]): void;

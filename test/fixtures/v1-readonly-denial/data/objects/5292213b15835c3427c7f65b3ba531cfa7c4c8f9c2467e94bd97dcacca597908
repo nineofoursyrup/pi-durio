@@ -1,0 +1,1 @@
+export declare function evalCommand(action: string | undefined, root: string, values: Record<string, string | boolean | undefined>): Promise<void>;

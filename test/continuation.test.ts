@@ -106,10 +106,10 @@ test('resume: a tail executed by another process shows the lock holder and canno
   const resumed = open({ ...f, resume: doneSession, coding: true }), shown = open({ ...f, show: { run: done.runId, session: doneSession } });
   try {
     await until(() => resumed.screen().includes('✓ 完成'), 'resumed');
-    await until(() => shown.screen().includes('历史'), 'show session layer');
+    await until(() => shown.screen().includes('◆ history'), 'show session layer');
     const other = await runCodingTask({ ...f, input: 'Another instance', mode: 'offline', transport: demoTransport().fetch });
     assert.equal(other.status, 'completed');
-    shown.key('\x1b'); shown.key('Read-only view'); shown.key('\r');
+    shown.key('\x1b'); shown.key('\x1b'); shown.key('Read-only view'); shown.key('\r');
     assert.match(shown.screen(), /只读查看 · 不能提交/);assert.equal(shown.transport.calls.length, 0);
     assert.match(shown.screen(), /只读/);
   } finally { await resumed.app.exit(); await shown.app.exit(); }
