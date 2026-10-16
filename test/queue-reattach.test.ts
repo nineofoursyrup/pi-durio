@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, realpathSync, cpSync, rmSync, readFileSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, realpathSync, cpSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { runReadTask, decideQueue } from '../src/runtime.js';
@@ -134,30 +134,33 @@ test('changed-version improve confirmation withdraws the old request only; it ne
   assert.equal(readRunRecords(f.dataRoot, original.runId, { kinds: ['improve.started'] }).records.length, 0);
 });
 
-test('the immutable v1 aborted queue source refuses reattachment; explicit withdrawal and a new independent task do not revive it', async t => {
+test('the immutable v1 aborted queue refuses reattachment; withdrawal and a new task in an independent workspace never revive it', async () => {
   const sourceFixture = fileURLToPath(new URL('../../test/fixtures/v1-records', import.meta.url)), source = join(sourceFixture, 'data');
   const names = JSON.parse(readFileSync(join(sourceFixture, 'fixture-identity.json'), 'utf8')).names as Record<string, string>;
-  const runId = names['run.frozen-source'], sessionId = names['session.frozen-source'], workspace = readSessionChains(source).session(sessionId)!.workspace!;
-  let created = false;
-  if (!existsSync(workspace)) { try { mkdirSync(workspace, { recursive: true }); cpSync(join(sourceFixture, 'workspace'), workspace, { recursive: true }); created = true; } catch { t.skip('recorded v1 workspace path cannot be created on this machine'); return; } }
-  const root = mkdtempSync(join(tmpdir(), 'durio-queue-v1-')), dataRoot = join(root, 'data'), originalBytes = readFileSync(join(source, 'host.sqlite'));
+  const runId = names['run.frozen-source'], sessionId = names['session.frozen-source'], recordedWorkspace = readSessionChains(source).session(sessionId)!.workspace!;
+  const root = mkdtempSync(join(tmpdir(), 'durio-queue-v1-')), workspace = join(root, 'project'), dataRoot = join(root, 'data'), originalBytes = readFileSync(join(source, 'host.sqlite'));
+  cpSync(join(sourceFixture, 'workspace'), workspace, { recursive: true });
   mkdirSync(join(dataRoot, 'sessions'), { recursive: true });
   cpSync(join(source, 'objects'), join(dataRoot, 'objects'), { recursive: true }); cpSync(join(source, 'host.sqlite'), join(dataRoot, 'host.sqlite'));
   cpSync(join(source, 'sessions', sessionId), join(dataRoot, 'sessions', sessionId), { recursive: true });
   const db = new DatabaseSync(join(dataRoot, 'host.sqlite')); db.prepare('DELETE FROM records WHERE run_id<>?').run(runId); db.close();
-  try {
-    const items = readOpenQueue(dataRoot, workspace); assert.ok(items.some(entry => entry.item.kind === 'follow-up')); assert.ok(items.some(entry => entry.item.kind === 'compact'));
-    for (const { item } of items) {
-      const plan = readQueueReattachment(dataRoot, item, { workspace, mode: 'offline' });
-      assert.equal(plan.state, 'blocked'); assert.match(plan.state === 'blocked' ? plan.reason : '', /源任务未完成/);
-      await assert.rejects(decideQueue({ dataRoot, runId, authorization: { workspace, mode: 'offline', tools: ['read', 'write', 'edit', 'bash'] },
-        decision: { id: `refuse-${item.requestId}`, requestId: item.requestId, target: item.target, receiptSeq: item.receipt.seq, action: 'reattach' }, transport: scriptedTransport([]).fetch }), /QUEUE_SOURCE_NOT_COMPLETED/);
-      await decideQueue({ dataRoot, runId, decision: { id: `withdraw-${item.requestId}`, requestId: item.requestId, target: item.target, receiptSeq: item.receipt.seq, action: 'withdraw' } });
-    }
-    const transport = scriptedTransport([]), next = await runReadTask({ dataRoot, workspace, input: 'Explicit independent task after reviewing the aborted v1 queue', mode: 'offline', transport: transport.fetch });
-    assert.equal(next.status, 'completed'); assert.notEqual(readSessionChains(dataRoot).sessionOfRun(next.runId)?.id, sessionId);
-    assert.equal(readRunRecords(dataRoot, next.runId, { kinds: ['context.imported'] }).records.length, 0);
-    assert.equal(readOpenQueue(dataRoot, workspace).length, 0); assert.equal(transport.calls.length, 1);
-    assert.deepEqual(readFileSync(join(source, 'host.sqlite')), originalBytes);
-  } finally { if (created) rmSync(workspace, { recursive: true, force: true }); }
+  const admissions = () => readRunRecords(dataRoot, runId, { kinds: ['task.accepted', 'control.accepted'] }).records.map(record => ({ ref: record.ref, bytes: readObject(dataRoot, record.ref) }));
+  const originalAdmissions = admissions();
+  // Refusal and withdrawal inspect original facts; neither needs the old workspace to exist.
+  const items = readOpenQueue(dataRoot, recordedWorkspace); assert.ok(items.some(entry => entry.item.kind === 'follow-up')); assert.ok(items.some(entry => entry.item.kind === 'compact'));
+  for (const { item } of items) {
+    const plan = readQueueReattachment(dataRoot, item, { workspace: recordedWorkspace, mode: 'offline' });
+    assert.equal(plan.state, 'blocked'); assert.match(plan.state === 'blocked' ? plan.reason : '', /源任务未完成/);
+    await assert.rejects(decideQueue({ dataRoot, runId, authorization: { workspace: recordedWorkspace, mode: 'offline', tools: ['read', 'write', 'edit', 'bash'] },
+      decision: { id: `refuse-${item.requestId}`, requestId: item.requestId, target: item.target, receiptSeq: item.receipt.seq, action: 'reattach' }, transport: scriptedTransport([]).fetch }), /QUEUE_SOURCE_NOT_COMPLETED/);
+    await decideQueue({ dataRoot, runId, decision: { id: `withdraw-${item.requestId}`, requestId: item.requestId, target: item.target, receiptSeq: item.receipt.seq, action: 'withdraw' } });
+  }
+  // New authorization belongs to this test's independent workspace, never the recorded one.
+  const transport = scriptedTransport([]), next = await runReadTask({ dataRoot, workspace, input: 'Explicit task in an independent workspace after reviewing the aborted v1 queue', mode: 'offline', transport: transport.fetch });
+  assert.equal(next.status, 'completed'); assert.notEqual(readSessionChains(dataRoot).sessionOfRun(next.runId)?.id, sessionId);
+  assert.equal(readSessionChains(dataRoot).sessionOfRun(next.runId)?.workspace, realpathSync(workspace));
+  assert.equal(readRunRecords(dataRoot, next.runId, { kinds: ['context.imported'] }).records.length, 0);
+  assert.equal(readOpenQueue(dataRoot, recordedWorkspace).length, 0); assert.equal(transport.calls.length, 1);
+  assert.deepEqual(admissions(), originalAdmissions);
+  assert.deepEqual(readFileSync(join(source, 'host.sqlite')), originalBytes);
 });
