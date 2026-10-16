@@ -9,7 +9,8 @@ import {appendFact,evalFacts} from '../src/eval/store.js';
 import {representativeCases} from '../src/eval/fixtures.js';
 import {verifiedImage,trialVersion,validatePlan,type EvalPlan} from '../src/eval/plan.js';
 import {evalReport,formatEvalReport,regradeEval} from '../src/eval/runner.js';
-import {EvalView} from '../src/tui/eval.js';
+import {EvalPlanView} from '../src/tui/eval.js';
+import {ownPlanSource} from '../src/eval/overview.js';
 import {compareTrials,pairedTrials,validateComparison,type ComparisonPlan,type ComparisonTrial} from '../src/eval/comparison.js';
 import {hostPlanPrice} from '../src/cost-estimate.js';
 
@@ -113,12 +114,12 @@ test('machine/text/TUI use host costs, keep both sides and reopen without writes
  const {root,plan}=await syntheticReport(),before=readFileSync(join(root,'host.sqlite')),original=evalReport(root,plan.id);
  assert.equal(original.improvement,'改善');assert.equal(original.cost.totalValue,0.12);assert.equal(original.cost.bySide.baseline.knownTokens,80);assert.equal(original.cost.bySide.candidate.knownTokens,40);
  assert.deepEqual(original.comparison!.pairs.map(p=>p.delta),[2,2]);assert.match(formatEvalReport(original,root),/改善/);
- const view=new EvalView(root,plan.id);assert.match(view.render(200,200).join('\n'),/改善/);assert.deepEqual(readFileSync(join(root,'host.sqlite')),before);
+ const view=new EvalPlanView(ownPlanSource(root,plan.id),{openTrial(){}});assert.match(view.render(200,200).join('\n'),/改善/);assert.deepEqual(readFileSync(join(root,'host.sqlite')),before);
  const e=new Evidence(root,plan.id),revision=appendFact(e,'eval.grader-revision',{id:'corrected-rule',graders:{'local-fix':{...plan.cases[0].grader,version:'v2'}},previousReport:e.blob(JSON.stringify(original))});
  const t=original.trials[0];const last=appendFact(e,'eval.grade',{...t.grade,source:undefined,graderVersion:'v2',revision});e.close();await fixEvidence(root,{id:'eval-grade:paired:partial',sources:[last],purpose:'preserve interrupted revision'});
  const report=evalReport(root,plan.id);assert.equal(report.improvement,'证据不足');assert.equal(report.counts.gradable,1);assert.equal(report.trials[1].grade,null);assert.equal(report.trials[1].gradeHistory.length,1);
  const prior=JSON.parse(readObject(root,report.gradingRevisions[0].previousReport).toString());assert.equal(prior.improvement,'改善');assert.equal(evalReport(root,plan.id,{asOf:original.asOf}).improvement,'改善');assert.equal(evalReport(root,plan.id,{asOf:original.asOf}).ruleImpact[0].revision,'corrected-rule');
- const revisedBytes=readFileSync(join(root,'host.sqlite')),revisedView=new EvalView(root,plan.id);assert.match(revisedView.render(200,200).join('\n'),/证据不足/);revisedView.handleInput('r');assert.match(revisedView.render(200,200).join('\n'),/效果：改善/);assert.deepEqual(readFileSync(join(root,'host.sqlite')),revisedBytes);
+ const revisedBytes=readFileSync(join(root,'host.sqlite')),revisedView=new EvalPlanView(ownPlanSource(root,plan.id),{openTrial(){}});assert.match(revisedView.render(200,200).join('\n'),/证据不足/);revisedView.handleInput('v');assert.match(revisedView.render(200,200).join('\n'),/报告修订 #\d+/);assert.match(revisedView.render(200,200).join('\n'),/改善/);assert.deepEqual(readFileSync(join(root,'host.sqlite')),revisedBytes);
  assert.deepEqual(report.trials.map(t=>t.outcome.source),original.trials.map(t=>t.outcome.source));
  await assert.rejects(regradeEval({dataRoot:root,id:plan.id,directory:join(root,'bad-regrade'),revisionId:'bad-version-reuse',graders:{'local-fix':{...plan.cases[0].grader,expectedStdout:'changed rule'}}}),/GRADER_VERSION_CONTENT_CHANGED/);
  assert.equal(evalFacts(root,plan.id).filter(f=>f.kind==='eval.outcome').length,4);

@@ -96,10 +96,11 @@ export class TraceView {
   /** 未解除的固定记录（来源记录集合）；核对结果按固定记录缓存。 */
   private readonly fixations: { source: string; selected: Set<string> }[] = [];
   private readonly verified = new Map<string, boolean>();
-  constructor(private readonly root: string, readonly runId: string, private readonly live: () => boolean = () => false, private readonly host?: TraceHost) {
+  /** `host` 接入原文与固定操作；`adjust` 让 eval trial 使用宿主中介记录的用量与金额。 */
+  constructor(private readonly root: string, readonly runId: string, private readonly live: () => boolean = () => false, private readonly host?: TraceHost, private readonly adjust: (trace: Trace) => Trace = trace => trace) {
     this.reader = new TraceReader(root, runId);
     this.index = readDisplayIndex(root);
-    this.current = this.reader.trace(live());
+    this.current = adjust(this.reader.trace(live()));
     for (const ref of records(root, { kinds: ['evidence.fixed'] })) {
       try { this.fixations.push({ source: ref.id, selected: new Set(decode(root, ref).selected ?? []) }); } catch { /* 不可读的固定记录不算已固定。 */ }
     }
@@ -179,7 +180,7 @@ export class TraceView {
       this.lastRead = Date.now();
       if (this.reader.update()) { const fresh = readDisplayIndex(this.root); if (fresh.has('run', this.runId)) this.index = fresh; }
     }
-    this.current = this.reader.trace(live);
+    this.current = this.adjust(this.reader.trace(live));
   }
 
   render(width: number, height: number, esc: string): string[] {
