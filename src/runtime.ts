@@ -28,6 +28,7 @@ import {applyTaskProfile,validateTaskProfile,type TaskProfile} from './task-prof
 import {readImproveDefaults,type DefaultSnapshot} from './improve-defaults.js';
 import {improveFacts} from './improve-history.js';
 import {assertWorkspaceUnfenced} from './workspace-fence.js';
+import { callIdentity } from './recovery-projection.js';
 import { prepareRecovery, recoveryRecords, sessionWasEnded, type RecoveryAuthorization, type RecoveryOptions, type RecoveryDecision, type RecoveryPlan, type RecoveryReport } from './recovery.js';
 export { readRun, readObject, readAcceptedTasks, readQueue } from './evidence.js';
 export { TaskControl } from './control.js';
@@ -125,6 +126,8 @@ export function waitForRun(run: Promise<RunResult>, signal?: AbortSignal): Promi
   return awaitWithContext(run, signal ? withAbortSignal(signal, CTX) : CTX);
 }
 
+/** 拦截完全相同调用时交给模型的说明与记录原因。 */
+export const RECOVERY_ALREADY_COMPLETED = 'RECOVERY_ALREADY_COMPLETED: this exact operation (same tool and arguments) was already completed before recovery, confirmed by the user or by a host result';
 /** Explicit recovery is a checked reopening of the same run, not a new scheduler or task loop. */
 export async function recoverRun(options: RecoveryOptions & { decision: RecoveryDecision; transport?: typeof fetch; apiKey?: string; signal?: AbortSignal; cancellation?: 'stop' | 'exit'; onObservation?: ReadTaskOptions['onObservation']; onContextUsage?: ReadTaskOptions['onContextUsage']; fault?: FaultInjector; control?:TaskControl }): Promise<RunResult | RecoveryReport> {
   if(options.decision.action==='continue'&&recoveryRecords(options.dataRoot,options.runId).some(record=>record.kind==='execution.config'&&(record.data as any).providerBoundary))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED: original dispatch capability cannot be reconstructed by this recovery entry; inspect or end old work, never resume with an unbudgeted provider');
@@ -431,7 +434,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       if (workspaceOwner.root !== workspaceRoot) throw new Error('WORKSPACE_IDENTITY_CHANGED: project root changed before acceptance');
     }
     await chmod(dataRoot, 0o700);
-    if(!recovery?.readOnly&&!improve)assertWorkspaceUnfenced(workspace);
+    if(!improve)assertWorkspaceUnfenced(workspace);
     const inspected = recovery ? undefined : await preflight(owner, { runId: maintenance?.source.sourceRunId ?? options.contextRunId });
     const savedConfiguration=recovery?.config??(maintenance?maintenanceRecords.find(r=>r.kind==='execution.config')?.data:queued?recoveryRecords(dataRoot,queued.item.target.runId).find(r=>r.seq===queued.item.executionVersion.configSeq)?.data:undefined) as any;
     if(!improve){
@@ -492,7 +495,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     guard();
     evidence = new Evidence(dataRoot, runId, options.fault);
     if (!recovery) record('preflight', inspected);
-    else record('recovery.started', { decisionId: recovery.decision.id, snapshotId: recovery.report.snapshotId, capabilities: recovery.readOnly ? ['read'] : recovery.accepted.authorization.tools, previousRequests: requests, previousUsageUnknown: recovery.previousUsageUnknown, originalStatus: (recovery.report.original as {status:string}).status });
+    else record('recovery.started', { decisionId: recovery.decision.id, snapshotId: recovery.report.snapshotId, capabilities: recovery.accepted.authorization.tools, previousRequests: requests, previousUsageUnknown: recovery.previousUsageUnknown, originalStatus: (recovery.report.original as {status:string}).status });
     guard();
     accepted = true;
     if(improve){analysis=prepareImprove(evidence,improve.request,improve.target,guard);providerBoundary={budget:analysis.budget,purpose:'improve',operationId:`improve:${improve.request.id}`};analysisTimer=setTimeout(()=>fatal(Error('BUDGET_DEADLINE')),Math.max(1,Date.parse(analysis.deadline)-Date.now()));}
@@ -600,7 +603,8 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     const registry = createRegistry();
     const capturedTools = tools.map(tool => ({ ...tool, async execute(args, api, context) {
       guard();
-      if (recovery?.readOnly && tool.name !== 'read') { record('recovery.capability-denied', { decisionId: recovery.decision.id, durableTaskId: api.taskId, tool: tool.name, reason: 'completed or skipped uncertain effect; this continuation permits scoped reads only' }); throw new Error('CAPABILITY_DENIED: recovery continuation allows read only; end old work and explicitly start a new task for further effects'); }
+      // 恢复续跑按原授权进行；与已完成调用（用户视为已完成 / 宿主已有结果）工具和参数完全相同的新调用被拦截（R5）。
+      if (recovery?.completedCalls.has(callIdentity(tool.name, args))) { record('recovery.capability-denied', { decisionId: recovery.decision.id, durableTaskId: api.taskId, tool: tool.name, duplicate: true, reason: RECOVERY_ALREADY_COMPLETED }); throw new Error(`${RECOVERY_ALREADY_COMPLETED}; do not redo it`); }
       const attemptId = randomUUID();
       record('tool.intent', { attemptId, durableTaskId: api.taskId, conversationId: api.conversationId, callId: api.callId, tool: tool.name, args });
       const diagnostics: ToolDiagnostic[] = [];
@@ -657,7 +661,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     harness = await Harness.open(storage, { models: capturedModels, registry, settings, env: () => {
       const capture = (kind: string, acquired: unknown) => record(kind, { toolAttempt: toolContext.getStore(), acquired });
       if(improve)return undefined; // No ExecutionEnv exists for restricted evidence/source closures.
-      return coding && !recovery?.readOnly ? codingEnvironment(workspace, shellEnvironment!, guard, capture, state => { if (state === 'started') shellsStarted++; else shellsSettled++; }, observedFiles) : readEnvironment(workspace, guard, capture);
+      return coding ? codingEnvironment(workspace, shellEnvironment!, guard, capture, state => { if (state === 'started') shellsStarted++; else shellsSettled++; }, observedFiles) : readEnvironment(workspace, guard, capture);
     } }, CTX);
     compactions.attach(harness);
     if(recovery)for(const requestId of recovery.frozenRequests??[]) {
@@ -725,7 +729,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     } else {
     if (recovery) {
       // Public passive commit does not enable scheduling. Preserve upstream interrupted entries; append host facts separately.
-      const summary = JSON.stringify({ decision: recovery.decision, toolFacts: {snapshotId:recovery.report.snapshotId,sourceFiles:recovery.report.session?.sourceFiles,counts:recovery.report.details?.toolCounts}, visibleTools: recovery.report.tools, capabilities: recovery.readOnly ? ['read'] : recovery.accepted.authorization.tools, warning: 'Original unknown and usage remain unknown. Committed/completed operations must not be redone. Only explicitly retry-selected or proven not-dispatched operations may be attempted again.' });
+      const summary = JSON.stringify({ decision: recovery.decision, toolFacts: {snapshotId:recovery.report.snapshotId,sourceFiles:recovery.report.session?.sourceFiles,counts:recovery.report.details?.toolCounts}, visibleTools: recovery.report.tools, capabilities: recovery.accepted.authorization.tools, warning: 'Original unknown and usage remain unknown. Committed operations, operations the user confirmed completed, and operations with a host result must not be redone; the host blocks an identical new call. Only explicitly retry-selected or proven not-dispatched operations may be attempted again.' });
       await conversation.commit(tx => tx.appendEntry(conversation!.id,{kind:'durio.recovery',model:[{role:'user',content:summary,timestamp:Date.now()}]}),CTX);
     } else record('submission.intent', { requestId: taskId, conversationId: conversation.id, input: options.input });
     const submission = recovery ? await harness.submission(recovery.submissionId,CTX) : await conversation.submit({ type: 'input', content: options.input, requestId: taskId }, CTX);

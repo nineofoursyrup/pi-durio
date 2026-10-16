@@ -28,12 +28,14 @@ export interface RecoveryTool {
   taskId: number; callId: string; tool: string; args: unknown;
   fact: 'committed' | 'completed-uncommitted' | 'not-dispatched' | 'unknown'; evidence: number[];
   evidenceSummary?: DetailSummary; assistantEntryId?: number;
+  /** 记录中的处置；`skip` 只出现在首版记录里（显示为“跳过（首版处置）”）。 */
   resolution?: {decisionId:string;choice:'retry'|'skip'|'completed';reason:string};
 }
 export interface RecoveryDecision {
   id: string; snapshotId: string; action: 'continue' | 'end';
   acceptAdditionalModelAttempts?: boolean;
-  resolutions?: { taskId: number; choice: 'retry' | 'skip' | 'completed'; reason: string }[];
+  /** 按项处置：`completed` 视为已完成、`retry` 从中断处继续。改版不再接受 `skip`。 */
+  resolutions?: { taskId: number; choice: 'retry' | 'completed'; reason: string }[];
 }
 export interface RecoveryReport {
   runId: string; snapshotId: string; status: 'completed' | 'needs-decision' | 'blocked' | 'ended'; exitCode: 0 | 75;
@@ -159,7 +161,7 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   };
   if (externalBlock) report.options = ['inspect', 'external-verification'];
   if (report.exitCode === 75) report.needsInput = { reason: reasons.count ? `${reasons.count} blocking reasons; this page shows ${reasons.items.length}. ${reasons.items.join('; ')}` : 'Explicit continuation or ending is required', options: report.options,
-    risks: [...(session.unknownTools ? [`${session.unknownTools} tools have unknown outcomes; ${session.unresolvedTools} lack a retained or proposed resolution. Inspect all pages and resolve each with retry, skip, completed, or end; retry may duplicate effects.`] : []), ...(session.unknownModelAttempts.count ? [`${session.unknownModelAttempts.count} model attempts have unknown/partial usage. A new model request may add fees; earlier uncertainty remains.`] : [])] };
+    risks: [...(session.unknownTools ? [`${session.unknownTools} tools have unknown outcomes; ${session.unresolvedTools} lack a retained or proposed resolution. Inspect all pages and resolve each with retry or completed, or end the old work; retry may duplicate effects.`] : []), ...(session.unknownModelAttempts.count ? [`${session.unknownModelAttempts.count} model attempts have unknown/partial usage. A new model request may add fees; earlier uncertainty remains.`] : [])] };
   return { report, records, session, accepted, started, submission, config, coding, externalBlock };
 }
 
@@ -258,7 +260,10 @@ export async function settleRecoveryOwners(options:RecoveryOptions & {decision:{
 }
 export interface RecoveryPlan {
   owner: OwnerLease; report: RecoveryReport; records: RecoveryRecords; accepted: any; started: any; config: any; coding: boolean;
-  submissionId: SubmissionId; decision: RecoveryDecision; readOnly: boolean; previousRequests: number; previousUsageUnknown: boolean;
+  submissionId: SubmissionId; decision: RecoveryDecision;
+  /** 视为已完成与宿主已有结果的调用（`callIdentity`）；续跑按原授权进行，只拦截完全相同的新调用。 */
+  completedCalls: ReadonlySet<string>;
+  previousRequests: number; previousUsageUnknown: boolean;
   adopted?:boolean;
   frozenRequests?:Iterable<string>;
 }
@@ -288,7 +293,7 @@ export async function prepareRecovery(options: RecoveryOptions & {decision:Recov
       report.persistence='saved';evidence.append('recovery.report',report);
       if (report.status === 'completed' || report.status === 'ended') return report;
       const resolutions = options.decision.resolutions ?? [];
-      if (new Set(resolutions.map(r => r.taskId)).size !== resolutions.length || session.matchedResolutions !== resolutions.length || resolutions.some(r => !['retry','skip','completed'].includes(r.choice) || !r.reason?.trim())) throw new Error('INVALID_RECOVERY_RESOLUTION');
+      if (new Set(resolutions.map(r => r.taskId)).size !== resolutions.length || session.matchedResolutions !== resolutions.length || resolutions.some(r => !['retry','completed'].includes(r.choice) || !r.reason?.trim())) throw new Error('INVALID_RECOVERY_RESOLUTION');
       if (options.decision.action === 'end') {
         // Host quarantine never opens the old store or starts an unrelated pending task.
         // Unknown ownership/extra work cannot be silently ended on behalf of a different run.
@@ -302,13 +307,12 @@ export async function prepareRecovery(options: RecoveryOptions & {decision:Recov
       if (options.decision.action !== 'continue') throw new Error('INVALID_RECOVERY_ACTION');
       if (report.status === 'blocked') return report;
       if (!options.decision.acceptAdditionalModelAttempts) report.reasons.push('ADDITIONAL_MODEL_ATTEMPTS_REQUIRE_EXPLICIT_ACCEPTANCE: retries may incur new costs; previous unknown usage remains unknown');
-      if (session.unresolvedTools) report.reasons.push(`TOOL_OUTCOME_UNKNOWN:${session.unresolvedTools} unresolved tools across the complete snapshot; inspect all pages and choose retry, skip, completed, or end`);
+      if (session.unresolvedTools) report.reasons.push(`TOOL_OUTCOME_UNKNOWN:${session.unresolvedTools} unresolved tools across the complete snapshot; inspect all pages and choose retry or completed, or end`);
       if (report.reasons.length) { report.persistence='saved'; evidence.append('recovery.report',report); return report; }
       freezePendingControls(evidence,inspected.records);
       evidence.append('recovery.decision',{decision:options.decision,authorization:authorizationIdentity(options.authorization),originalStatus:(report.original as any).status,classification:'user-choice; does not establish past success or cleanup'});
-      const readOnly = session.readOnly || resolutions.some(r => r.choice !== 'retry');
       transfer=true;
-      return {owner,report,records:inspected.records,accepted,started,submissionId:(session.placed??submission)!.id,config,coding,decision:options.decision,readOnly,previousRequests:8-report.remainingModelAttempts,previousUsageUnknown:session.unknownModelAttempts.count>0,
+      return {owner,report,records:inspected.records,accepted,started,submissionId:(session.placed??submission)!.id,config,coding,decision:options.decision,completedCalls:session.completedCalls,previousRequests:8-report.remainingModelAttempts,previousUsageUnknown:session.unknownModelAttempts.count>0,
         frozenRequests:recoverySteerRequests(inspected.records,accepted,options.runId)};
     } finally { evidence.close(); }
   } finally { if (!transfer) await owner.release(); }
