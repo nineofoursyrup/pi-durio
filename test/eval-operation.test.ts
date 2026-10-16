@@ -42,7 +42,7 @@ test('eval commands only prefill confirmed scope and refuse expired, busy, read-
   assert.match(evalBlocked(f.source,'run',{busy:true})!,/有任务运行中/);assert.equal(evalBlocked(f.source,'run',{writeBlocked:'只读'}),'只读');
   const owner=await acquireOwner(f.root,()=>{});try{assert.match(evalBlocked(f.source,'run')!,/写入者锁被占用/);}finally{await owner.release();}
   const child:PlanSource={...f.source,origin:{reportId:'ir',decisionId:'d',label:'ir-1234·C-01@r1'}};assert.match(evalBlocked(child,'grade')!,/improve 发起/);
-  assert.equal(samePlan(f.source,{...f.source,root:join(f.base,'other')}),false);assert.equal(samePlan(child,{...child,origin:{...child.origin!,decisionId:'another'}}),false);
+  assert.equal(samePlan(f.source,{...f.source,root:join(f.base,'other')}),false);assert.equal(samePlan(child,{...child,origin:{...child.origin!,decisionId:'another'}}),false);assert.equal(samePlan({...child,origin:{...child.origin!,groupId:'g1'}},{...child,origin:{...child.origin!,groupId:'g2'}}),false);
  }finally{await app.exit();}
 });
 
