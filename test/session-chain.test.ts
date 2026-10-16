@@ -68,6 +68,28 @@ test('v1 fixture: a run aborted before context.imported is its own session; the 
   assert.equal(chains.session(names['session.coding'])!.tail.status, 'completed');
 });
 
+test('recover CLI selects the derived original or branch session tail; a run target keeps that exact run', () => {
+  const root = mkdtempSync(join(tmpdir(), 'durio-chain-recover-')), copy = join(root, 'data');
+  cpSync(dataRoot, copy, { recursive: true });
+  const index = readDisplayIndex(copy), before = treeState(copy);
+  const cases: [string[], string][] = [
+    [[index.label('session', names['session.coding'])], names['run.fork-1']],
+    [[names['session.coding']], names['run.fork-1']],
+    [[index.label('session', names['session.fork-2'])], names['run.fork-2']],
+    [[index.label('run', names['run.coding'])], names['run.coding']],
+    [[names['run.coding']], names['run.coding']],
+    [['--run', names['run.coding']], names['run.coding']],
+  ];
+  for (const [target, runId] of cases) {
+    const child = spawnSync(process.execPath, ['dist/src/cli.js', 'recover', ...target, '--inspect', '--data-root', copy], { encoding: 'utf8' });
+    assert.ok(child.status === 0 || child.status === 75, child.stderr);
+    const report = JSON.parse(child.stdout);
+    assert.equal(report.runId, runId, target.join(' '));
+    assert.equal(child.status, report.exitCode);
+  }
+  assert.deepEqual(treeState(copy), before, 'inspection keeps all source files unchanged');
+});
+
 test('v1 fixture: sessions list newest activity first per workspace, bounded by limit and cursor', () => {
   const chains = readSessionChains(dataRoot), all = chains.list({ limit: 50 });
   assert.equal(all.next, null);
