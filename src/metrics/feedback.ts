@@ -4,7 +4,9 @@ import {factClock} from '../fact-clock.js';
 import {decode,records,resolveEvidence,watermark,type EvidenceReference} from '../history.js';
 export interface FeedbackSource {kind:'human'|'action'|'unverified';actor:string;statement:string;refs:string[]}
 export interface FeedbackBase {id:string;taskId:string;source:FeedbackSource;reason?:string}
-export type FeedbackInput=FeedbackBase&({type:'observation';dimension:'intervention'|'rework';meaning:'correction'|'none'|'normal-authorization'|'clarification'|'new-requirement'|'improve-choice'|'complaint'|'unknown';occurredAt:string|null;requirements:string[];originalRequirement?:'unmet'|'unknown';correction?:'requested'|'started'|'completed'|'unknown';coverage?:{from:string;to:string};delivery?:string;repairTaskId?:string;repairSources?:string[];resultSources?:string[];revisionOf?:string}|{type:'withdraw';targets:string[];reason:string});
+/** Explicit human declaration of a bounded occurrence, never an inferred timestamp. */
+export interface OccurrenceInterval {from:string;to:string;bounds:'[]'|'[)'}
+export type FeedbackInput=FeedbackBase&({type:'observation';dimension:'intervention'|'rework';meaning:'correction'|'none'|'normal-authorization'|'clarification'|'new-requirement'|'improve-choice'|'complaint'|'unknown';occurredAt:string|null;occurredDuring?:OccurrenceInterval;requirements:string[];originalRequirement?:'unmet'|'unknown';correction?:'requested'|'started'|'completed'|'unknown';coverage?:{from:string;to:string};delivery?:string;repairTaskId?:string;repairSources?:string[];resultSources?:string[];revisionOf?:string}|{type:'withdraw';targets:string[];reason:string});
 export interface FeedbackFact {ref:EvidenceReference;data:FeedbackInput&{requestIdentity:string;receivedAt:string;ruleVersion:string;basisThrough:number}}
 export const feedbackKinds=['feedback.observation','feedback.withdraw'];
 const canonical=(value:any):any=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
@@ -31,6 +33,7 @@ function recordFeedbackOwned(root:string,input:FeedbackInput) {
   else{
    ensure(['intervention','rework'].includes(input.dimension)&&['correction','none','normal-authorization','clarification','new-requirement','improve-choice','complaint','unknown'].includes(input.meaning),'explicit dimension and meaning required');
    ensure(input.occurredAt===null||text(input.occurredAt)&&Number.isFinite(Date.parse(input.occurredAt)),'occurrence must be a reliable declared time or null');
+   if(input.occurredDuring){const range=input.occurredDuring;ensure(input.source.kind==='human'&&input.meaning==='correction'&&input.occurredAt===null&&text(range.from)&&text(range.to)&&Number.isFinite(Date.parse(range.from))&&Number.isFinite(Date.parse(range.to))&&['[]','[)'].includes(range.bounds)&&Date.parse(range.from)<=Date.parse(range.to)&&(range.bounds==='[]'||Date.parse(range.from)<Date.parse(range.to)),'invalid explicit occurrence interval');}
    ensure(Array.isArray(input.requirements)&&input.requirements.every(id=>text(id)),'original requirements references required');ids.push(...input.requirements,...input.repairSources??[],...input.resultSources??[]);
    for(const id of input.requirements){const ref=resolveEvidence(root,id),data=decode(root,ref);ensure(['task.accepted','control.accepted','acceptance.requirements'].includes(ref.kind)&&data.taskId===input.taskId,'original requirements must belong to this task');}
    if(input.delivery)ids.push(input.delivery);
@@ -43,7 +46,7 @@ function recordFeedbackOwned(root:string,input:FeedbackInput) {
   }
   for(const id of ids)decode(root,resolveEvidence(root,id));
   const clock=factClock();
-  if(input.type==='observation'){ensure(input.occurredAt===null||Date.parse(input.occurredAt)<=Date.parse(clock.wallTime),'future occurrence is not evidence');ensure(!input.coverage||Date.parse(input.coverage.to)<=Date.parse(clock.wallTime),'future coverage is not evidence');}
-  const seq=e.append(`feedback.${input.type}`,{...input,submitted:input,requestIdentity:identity,receivedAt:clock.wallTime,ruleVersion:'explicit-feedback-v1',basisThrough:through});e.db.exec('COMMIT');return{source:[...records(root,{after:seq-1,through:seq})][0].id,repeated:false};
+  if(input.type==='observation'){ensure(input.occurredAt===null||Date.parse(input.occurredAt)<=Date.parse(clock.wallTime),'future occurrence is not evidence');ensure(!input.occurredDuring||Date.parse(input.occurredDuring.to)<=Date.parse(clock.wallTime),'future occurrence interval is not evidence');ensure(!input.coverage||Date.parse(input.coverage.to)<=Date.parse(clock.wallTime),'future coverage is not evidence');}
+  const seq=e.append(`feedback.${input.type}`,{...input,submitted:input,requestIdentity:identity,receivedAt:clock.wallTime,ruleVersion:input.type==='observation'&&input.occurredDuring?'explicit-feedback-v1/occurrence-interval-v1':'explicit-feedback-v1',basisThrough:through});e.db.exec('COMMIT');return{source:[...records(root,{after:seq-1,through:seq})][0].id,repeated:false};
  }catch(error){e.db.exec('ROLLBACK');throw error;}finally{e.close();}
 }

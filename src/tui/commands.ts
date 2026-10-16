@@ -79,7 +79,8 @@ export const COMMANDS: readonly CommandSpec[] = [
       { name: 'source', value: '来源', values: ['ordinary', 'synthetic', 'diagnostic'] }, { name: 'snapshot', value: '序号' }],
   },
   { name: 'eval', summary: '评估报告（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'ep-号', kinds: ['eval-plan'] }] },
-  { name: 'acceptance', summary: '补记或纠正验收', bare: 'view', withArgs: 'confirm', raw: 'JSON' },
+  { name: 'acceptance', summary: '补记验收、介入或返工；参数只预填', bare: 'view', withArgs: 'confirm', positional: [{ label: 't-号', kinds: ['task'] }],
+    options: [{ name: 'verdict', value: '验收', values: ['pass', 'fail', 'unknown'] }, { name: 'intervention', value: '介入', values: ['none', 'yes', 'unknown'] }, { name: 'rework', value: '返工', values: ['none', 'yes', 'unknown'] }, { name: 'note', value: '文本' }] },
   {
     name: 'improve', summary: 'improve 视图；报告参数只预填选择与汇总', bare: 'view', withArgs:'confirm',
     positional:[{label:'ir-号',kinds:['improve-report']}],
