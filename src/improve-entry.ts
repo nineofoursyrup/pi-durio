@@ -13,6 +13,7 @@ import { listRegisteredSources, registerImproveSource, sourceBytes, verifySelfSo
 import { listImproveReports, priorImprove, type ImproveReport, type ImproveRequest } from './improve.js';
 import { improveFacts, listImproveSuppressions } from './improve-history.js';
 import { upperBoundAmount } from './cost-estimate.js';
+import { digest } from './evidence.js';
 import { improveReportContract } from './improve-contract.js';
 
 // ─── 档位 ──────────────────────────────────────────────────────────────────
@@ -96,6 +97,12 @@ export const REGISTER_HINT = 'self|eval <路径>';
  * 只凭名称或目录名不登记。已有相同登记时返回原登记。
  */
 export function registerFromInput(dataRoot: string, workspace: string, input: string): SourceRegistration {
+  const {kind,root,paths}=previewRegisterFromInput(workspace,input);
+  const existing = listRegisteredSources(dataRoot, realpathSync(workspace)).find(r => r.kind === kind && r.root === root && JSON.stringify(r.paths) === JSON.stringify(paths));
+  return existing ?? registerImproveSource(dataRoot, workspace, { kind, root, paths });
+}
+/** Read-only confirmation input. Recompute and compare it before registration. */
+export function previewRegisterFromInput(workspace:string,input:string) {
   const match = /^(self|eval)\s+(.+)$/.exec(input.trim());
   if (!match) throw Error(`IMPROVE_REGISTER_INPUT: 写 ${REGISTER_HINT}`);
   const kind = match[1] === 'self' ? 'self-source' as const : 'eval-asset' as const;
@@ -109,8 +116,8 @@ export function registerFromInput(dataRoot: string, workspace: string, input: st
   const paths = statSync(target).isDirectory() ? listFiles(target).map(p => relative(root, join(target, p)).split(sep).join('/')) : [relative(root, target).split(sep).join('/')];
   if (!paths.length) throw Error('IMPROVE_REGISTER_EMPTY');
   if (paths.length > MAX_PATHS) throw Error(`IMPROVE_REGISTER_PATH_LIMIT: ${paths.length} 个文件，至多 ${MAX_PATHS}`);
-  const existing = listRegisteredSources(dataRoot, realpathSync(workspace)).find(r => r.kind === kind && r.root === root && JSON.stringify(r.paths) === JSON.stringify(paths));
-  return existing ?? registerImproveSource(dataRoot, workspace, { kind, root, paths });
+  const fingerprints=paths.map(path=>{const bytes=sourceBytes(root,path);return {path,sha256:digest(bytes),bytes:bytes.length};});
+  return {kind,root,paths,fingerprints};
 }
 export function expandPath(workspace: string, input: string) {
   return input === '~' || input.startsWith('~/') ? join(homedir(), input.slice(1)) : resolve(workspace, input);

@@ -12,6 +12,28 @@ import {readImproveBuildDefault,type BuildDefaultChange} from './improve-process
 import {verifyImproveBuild,verifyBuildSource,type ImproveBuildPair} from './improve-build.js';
 
 export interface ImproveRollback {dataRoot:string;id:string;rollbackId:string;decisionSource:string;groupIds:string[];reason:string;fault?:(kind:string)=>void;signal?:AbortSignal}
+
+function rollbackGroups(root:string,state:ReturnType<typeof readImproveDecision>,groupIds:string[]) {
+ const facts=improveFacts(root);
+ return groupIds.map(id=>{const start=facts.find(f=>f.data.id===state.id&&f.kind==='improve.formal-started'&&f.data.groupId===id);if(!start)throw Error('IMPROVE_ROLLBACK_NO_FORMAL_WORK');return {id,files:start.data.files as FormalFile[],fences:start.data.fences as WorkspaceFence[],defaults:start.data.defaults as DefaultChange[],build:state.groups.find((g:any)=>g.id===id)?.build as ImproveBuildPair|undefined,buildChange:start.data.buildChange as BuildDefaultChange|null,activated:facts.some(f=>f.data.id===state.id&&f.kind==='improve.activation'&&f.data.groupId===id&&f.data.state==='new-default')};});
+}
+function verifyRollbackTargets(dataRoot:string,groups:ReturnType<typeof rollbackGroups>,groupIds:string[]) {
+  for(const g of groups){for(const fence of g.fences)for(const found of workspaceFences(fence.workspace))if(found.dataRoot!==fence.dataRoot||found.decisionSource!==fence.decisionSource||!groupIds.includes(found.groupId))throw Error('IMPROVE_FOREIGN_RECOVERY_FENCE');
+   for(const f of g.files){assertFileIdentity(f.identity);const now=sourceBytes(f.root,f.path);if(!now.equals(readObject(dataRoot,f.after))&&!now.equals(readObject(dataRoot,f.before)))throw Error(`IMPROVE_ROLLBACK_USER_EDIT: ${f.root}/${f.path}; preserve later content`);}
+   if(g.build){verifyImproveBuild(dataRoot,g.build.baseline);verifyImproveBuild(dataRoot,g.build.candidate);verifyBuildSource(dataRoot,g.build,'either');}
+   if(g.buildChange){const current=readImproveBuildDefault(dataRoot,g.buildChange.current.workspace);if(current.revision!==g.buildChange.current.revision&&current.revision!==g.buildChange.previous.revision)throw Error('IMPROVE_ROLLBACK_BUILD_DEFAULT_CHANGED');}
+   if(g.activated)for(const d of g.defaults){const current=readImproveDefaults(dataRoot,d.current.workspace,d.current.taskType);if(current.revision!==d.current.revision&&current.revision!==d.previous.revision)throw Error('IMPROVE_ROLLBACK_DEFAULT_CHANGED');}
+  }
+}
+/** Read-only exact-file preflight. Ownership is acquired and checks repeat at execution. */
+export function previewImproveRollback(dataRoot:string,id:string,decisionSource:string,groupIds:string[]) {
+ const state=readImproveDecision(dataRoot,id);
+ if(state.sourceId!==decisionSource)throw Error('IMPROVE_ROLLBACK_DECISION_CHANGED');
+ if(!groupIds.length||new Set(groupIds).size!==groupIds.length)throw Error('IMPROVE_ROLLBACK_INVALID');
+ const groups=rollbackGroups(dataRoot,state,groupIds);
+ verifyRollbackTargets(dataRoot,groups,groupIds);
+ return groups.map(g=>({id:g.id,files:g.files,defaults:g.defaults,buildChange:g.buildChange}));
+}
 /** Explicit file compensation only. No process, Git, provider or external
  * effects are undone; later user bytes/default choices are never overwritten. */
 export async function rollbackImproveDecision(input:ImproveRollback){
@@ -24,15 +46,10 @@ export async function rollbackImproveDecision(input:ImproveRollback){
   const facts=improveFacts(o.dataRoot),state=readImproveDecision(o.dataRoot,o.id);
   if(state.sourceId!==o.decisionSource)throw Error('IMPROVE_ROLLBACK_DECISION_CHANGED');
   const raced=facts.find(f=>f.kind==='improve.rollback-request'&&f.data.rollbackId===o.rollbackId);if(raced){if(raced.data.requestDigest!==requestDigest)throw Error('IMPROVE_ROLLBACK_ID_REUSED');return state;}
-  const groups=o.groupIds.map(id=>{const start=facts.find(f=>f.data.id===o.id&&f.kind==='improve.formal-started'&&f.data.groupId===id);if(!start)throw Error('IMPROVE_ROLLBACK_NO_FORMAL_WORK');return {id,files:start.data.files as FormalFile[],fences:start.data.fences as WorkspaceFence[],defaults:start.data.defaults as DefaultChange[],build:state.groups.find((g:any)=>g.id===id)?.build as ImproveBuildPair|undefined,buildChange:start.data.buildChange as BuildDefaultChange|null,activated:facts.some(f=>f.data.id===o.id&&f.kind==='improve.activation'&&f.data.groupId===id&&f.data.state==='new-default')};});
+  const groups=rollbackGroups(o.dataRoot,state,o.groupIds);
   for(const root of [...new Set(groups.flatMap(g=>g.fences.map(f=>f.workspace)))].sort())leases.push(await acquireWorkspaceOwner(root,()=>{}));
   const guard=()=>{owner.assertHeld();for(const l of leases)l.assertHeld();if(o.signal?.aborted)throw Error('IMPROVE_ROLLBACK_CANCELLED');};
-  for(const g of groups){for(const fence of g.fences)for(const found of workspaceFences(fence.workspace))if(found.dataRoot!==fence.dataRoot||found.decisionSource!==fence.decisionSource||!o.groupIds.includes(found.groupId))throw Error('IMPROVE_FOREIGN_RECOVERY_FENCE');
-   for(const f of g.files){assertFileIdentity(f.identity);const now=sourceBytes(f.root,f.path);if(!now.equals(readObject(o.dataRoot,f.after))&&!now.equals(readObject(o.dataRoot,f.before)))throw Error(`IMPROVE_ROLLBACK_USER_EDIT: ${f.root}/${f.path}; preserve later content`);}
-   if(g.build){verifyImproveBuild(o.dataRoot,g.build.baseline);verifyImproveBuild(o.dataRoot,g.build.candidate);verifyBuildSource(o.dataRoot,g.build,'either');}
-   if(g.buildChange){const current=readImproveBuildDefault(o.dataRoot,g.buildChange.current.workspace);if(current.revision!==g.buildChange.current.revision&&current.revision!==g.buildChange.previous.revision)throw Error('IMPROVE_ROLLBACK_BUILD_DEFAULT_CHANGED');}
-   if(g.activated)for(const d of g.defaults){const current=readImproveDefaults(o.dataRoot,d.current.workspace,d.current.taskType);if(current.revision!==d.current.revision&&current.revision!==d.previous.revision)throw Error('IMPROVE_ROLLBACK_DEFAULT_CHANGED');}
-  }
+  verifyRollbackTargets(o.dataRoot,groups,o.groupIds);
   e=new Evidence(o.dataRoot,state.runId,kind=>{guard();o.fault?.(kind);});const record=(kind:string,data:any)=>appendFact(e!,kind,{id:o.id,rollbackId:o.rollbackId,...data});
   record('improve.rollback-request',{...request,requestDigest,scope:'Restore exact retained file bytes/default snapshot only; no external effect rollback'});
   for(const g of groups){

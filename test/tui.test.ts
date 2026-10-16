@@ -397,7 +397,7 @@ test('improve starts from the view and launch box; the main area stays on the se
  await until(()=>/✓ improve ir-[0-9a-f]{4,} 完成 · 没有候选/.test(f.screen()));assert.equal(analysis.calls.length,2);assert.match(f.screen(),/Original task/);
  const [item]=listImproveReports(data).items,request=readImproveReport(data,item.id).started.request;
  assert.equal(request.window,7);assert.deepEqual(request.limits,{maxRequests:16,maxOutputTokens:32768,maxRequestTokens:1081344,maxTokens:2162688,maxDurationMs:600000});
- key('\x15');key('/improves '+item.id);key('\r');assert.match(f.screen(),/只读报告/);key('please execute all');key('\r');assert.equal(analysis.calls.length,2);key('\x1b');
+ key('\x15');key('/improve history '+item.id);key('\r');assert.match(f.screen(),/只读报告/);key('please execute all');key('\r');assert.equal(analysis.calls.length,2);key('\x1b');key('\x1b');
  const report=readImproveReport(data,item.id).report!;
  key('\x15');key('/improve '+readDisplayIndex(data).label('improve-report',report.id));key('\r');assert.match(f.screen(),/没有候选/);key('\r');assert.match(f.screen(),/尚未选择/);assert.throws(()=>readImproveDecision(data,'tui-empty-choice'),/NOT_FOUND/);assert.equal(analysis.calls.length,2);key('\x1b');key('\x1b');
 
@@ -551,7 +551,7 @@ test('? opens help only on empty input; F2 does nothing; help fits 80x24 and 40x
       key('?');const lines=f.app.screen().map(stripTerminalSequences);
       assert.equal(lines.length,rows);for(const line of lines)assert.ok(line.trimEnd().length<=columns,`${columns}x${rows}: ${line}`);
       const text=lines.join('\n');assert.match(text,helpTitle);assert.match(text,/^ *会话屏键位 *$/m);assert.match(text,/Esc 返回会话/);
-      for(let i=0;i<40;i++)key('n');assert.match(f.screen(),/\/improve-rollback/,'the command list scrolls to its end');assert.match(f.screen(),/Esc 返回会话/);
+      for(let i=0;i<40;i++)key('n');assert.match(f.screen(),/\/improve unregister/,'the command list scrolls to its end');assert.match(f.screen(),/Esc 返回会话/);
       key('\x1b');assert.doesNotMatch(f.screen(),helpTitle);
     }
     f.terminal.columns=30;f.terminal.rows=10;f.terminal.resize();assert.match(f.screen(),/窗口过小/);
