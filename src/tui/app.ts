@@ -12,7 +12,7 @@ import { realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiAltScreen, VStack, matchesKey, isKeyRelease, isKeyRepeat, stripTerminalSequences, truncateToWidth, wrapTextWithAnsi, type Component, type Terminal } from '@earendil-works/pi-tui';
-import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, inspectRecovery, checkRecovery, recoverRun, estimateTaskPrefix, type ContextUsage, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
+import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, readQueue, decideQueue, inspectRecovery, checkRecovery, recoverRun, settleRecoveryOwners, estimateTaskPrefix, type ContextUsage, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
 import { readObject, type QueueItemFact } from '../evidence.js';
 import { calculateContextTokens } from '@earendil-works/pi-ai/utils/estimate';
 import { readRunRecords, readObjectRange, type RecordReference } from '../query.js';
@@ -41,7 +41,7 @@ import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgumen
 import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatus } from './welcome.js';
 import { COMPACT_VERSION_CHANGED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
 import { currentExecutionVersion } from '../execution-version.js';
-import { RecoveryPanel, disabledInputLines, readRecoveryFacts, recoveryPages, type RecoveryAction } from './recovery.js';
+import { RecoveryPanel, OWNER_RELEASE_RISK, disabledInputLines, readRecoveryFacts, recoveryPages, type RecoveryAction } from './recovery.js';
 import { mayWrite, SHOW_READ_ONLY, type WriteAccess } from './write-access.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
@@ -285,6 +285,12 @@ export class ReadOnlyTui {
       ready:()=>{if(this.pendingRefresh)this.refresh();},
       retain:(inputs,reason)=>{this.drafts.savePending(inputs,reason);this.notice='显示更新期间的部分输入未应用，已保留；请确认当前画面后重新操作';}
     });
+    // Route owner detail pages after the width gate, before pi-tui consumes page keys for its primary transcript.
+    const gatedStart=this.terminal.start.bind(this.terminal);
+    this.terminal.start=(input,resize)=>gatedStart(data=>{
+      if(this.phase==='idle'&&this.viewingRecovery&&this.recoveryOpen&&this.recoveryPanel?.ownerStage&&!this.dialog&&!this.panel&&(matchesKey(data,'pageUp')||matchesKey(data,'pageDown'))&&this.input(data)?.consume)return;
+      input(data);
+    },resize);
     this.tui.start();
     // Claim the query hold before the first calibration can start. Recovery verifies
     // installed bytes synchronously; a valid terminal reply must not queue behind it.
@@ -738,9 +744,9 @@ export class ReadOnlyTui {
   /** 恢复期间的按键（U3）：面板打开时交给面板；关闭时输入框禁用，只有 Enter 重开与少数全局键。返回 true 表示已消费。 */
   private recoveryInput(data:string) {
     const global=(['ctrl+c','ctrl+d','ctrl+r','ctrl+t','ctrl+o','ctrl+l'] as const).some(key=>matchesKey(data,key));
-    // 鼠标与翻页留给主区滚动。
-    if(data.startsWith('\x1b[<')||data.startsWith('\x1b[M')||matchesKey(data,'pageUp')||matchesKey(data,'pageDown'))return false;
     const panel=this.recoveryOpen?this.recoveryPanel:undefined;
+    // 所有者的完整锁路径在面板内翻页；其他情况下鼠标与翻页留给主区。
+    if(data.startsWith('\x1b[<')||data.startsWith('\x1b[M')||(!panel?.ownerStage&&(matchesKey(data,'pageUp')||matchesKey(data,'pageDown'))))return false;
     if(global&&!(panel?.note!==undefined&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+l')))return false;
     if(data==='?'&&panel?.note===undefined){this.openPanel('help');return true;}
     if(panel){this.recoveryAction(panel.handleInput(data));this.tui.requestRender();return true;}
@@ -753,6 +759,11 @@ export class ReadOnlyTui {
     const cost=['续跑按原授权进行；视为已完成的操作不重做，宿主拦截工具与参数完全相同的新调用',`续跑可能新增模型请求费用${unknown?`；此前 ${unknown} 次模型请求的用量未知，仍记为未知`:''}`,'原 interrupted/unknown 记录不会被改写'];
     if(action.type==='close'){this.recoveryOpen=false;this.tui.requestRender();}
     else if(action.type==='recheck')void this.openRecovery(report.runId);
+    else if(action.type==='release-owner'){
+      if(!mayWrite(this.writeAccess)||this.recoveryChecking||panel.disabled(1))return;
+      const holders=[...new Set((panel.facts.ownerCleanup?.holders??[]).map(holder=>`pid ${holder.pid??'未记录'} · ${holder.host||'主机未记录'} · ${holder.started||'起始时间未记录'}`))];
+      this.openConfirm({title:'释放上次进程留下的写入者锁',action:'释放写入者锁',body:holders,fixed:[OWNER_RELEASE_RISK,'宿主将再次核实持有者与清理记录；成功后自动重新核对']},()=>void this.releaseRecoveryOwners(report.runId,snapshotId));
+    }
     else if(action.type==='continue')this.openConfirm({title:'继续旧工作',action:'继续',body:['没有结果未提交的操作；从中断处继续旧工作'],fixed:cost},()=>void this.recoveryDecision({id:randomUUID(),snapshotId,action:'continue',acceptAdditionalModelAttempts:true}));
     else if(action.type==='summary'){
       const resolutions=action.resolutions;
@@ -761,6 +772,19 @@ export class ReadOnlyTui {
       panel.adjust();
     }
     else if(action.type==='end')this.openConfirm({title:'结束旧工作，开新任务',action:'结束旧工作',fixed:['旧 run 标记已结束，原事实保留；不回滚，不表示外部影响未发生','此后新任务开启新会话，不接续旧上下文',`冻结项只能查看和复制，需重新提交${panel.facts.frozen.count?`（${panel.facts.frozen.count} 项）`:''}`]},()=>void this.recoveryDecision({id:randomUUID(),snapshotId,action:'end'}));
+  }
+  private async releaseRecoveryOwners(runId:string,snapshotId:string) {
+    if(!mayWrite(this.writeAccess))return;
+    if(this.phase!=='idle'||this.recoveryChecking)return;
+    this.recoveryChecking=true;this.recoveryOpen=false;this.recoveryPanel=undefined;
+    const decision={id:randomUUID(),snapshotId,action:'confirm-cleanup' as const,acceptUnknownExternalEffects:true};
+    this.active=settleRecoveryOwners({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision}).then(async report=>{
+      if(report.decisionId!==decision.id){this.notice=`未释放写入者锁 · ${safe(report.reasons.at(-1)??'清理条件不满足')} · Enter 重新核对`;return;}
+      this.notice=`写入者锁已释放 · ${OWNER_RELEASE_RISK}`;
+      this.recoveryChecking=false;
+      if(!this.stopped&&!this.exiting)await this.openRecovery(runId);
+    }).catch(error=>{this.notice=`释放受阻：${safe(String(error))} · Enter 重新核对`;}).finally(()=>{this.recoveryChecking=false;this.tui.requestRender();});
+    await this.active;
   }
   private async recoveryDecision(decision:RecoveryDecision) {
     if(!mayWrite(this.writeAccess))return;
