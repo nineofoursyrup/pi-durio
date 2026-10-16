@@ -83,35 +83,20 @@ test('same candidate in same report cannot be decided twice; defer and do-not-su
  await assert.rejects(async()=>submitImproveDecision({dataRoot:f.dataRoot,decision:{...baseDecision(f,'do-not-suggest','choice-3')}}),/CANDIDATE_ALREADY_DECIDED/);
 });
 
-test('validate-only is exploratory: multiple runs allowed; execute after validate-only is naturally available; defer blocks re-execution',async()=>{
- const f=await fixture();
- // Submit validate-only decision (with groups, runs actual check)
- const validateDecision={
-  ...baseDecision(f,'validate-only'),id:'validate-choice',
-  directory:join(f.directory,'validation'),
-  groups:[{id:'math',candidateIds:[f.candidate.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',program:"import assert from 'node:assert/strict';const {add}=await import('/work/targets/project/math.mjs');assert.equal(add(2,3),5);assert.equal(add(2,-3),-1);console.log('ok');",timeoutMs:30000}]}],
-  limits:{...baseDecision(f).limits,maxChecks:1}};
- const outcome=await submitImproveDecision({dataRoot:f.dataRoot,decision:validateDecision as any});
- assert.equal(outcome.state,'completed',JSON.stringify(outcome));
- assert.equal(outcome.groups[0].state,'completed');
- assert.equal(outcome.groups[0].result?.conclusion?.allChecksPassed,true);
- // validate-only is exploratory: a second validate-only for the same candidate is NOT rejected
- const validate2Decision={
-  ...baseDecision(f,'validate-only'),id:'validate-choice-2',
-  directory:join(f.directory,'validation2'),
-  groups:[{id:'math2',candidateIds:[f.candidate.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',program:"import assert from 'node:assert/strict';const {add}=await import('/work/targets/project/math.mjs');assert.equal(add(2,3),5);console.log('ok');",timeoutMs:30000}]}],
-  limits:{...baseDecision(f).limits,maxChecks:1}};
- const outcome2=await submitImproveDecision({dataRoot:f.dataRoot,decision:validate2Decision as any});
- assert.equal(outcome2.state,'completed','second validate-only run is allowed (exploratory)');
- // execute-declared-scope after validate-only is naturally available (validate-only is not final)
- // It would fail for other reasons (IMPROVE_VALIDATION_PLAN_REQUIRED) but NOT CANDIDATE_ALREADY_DECIDED
- const executeDecision={...baseDecision(f,'execute-declared-scope','execute-choice'),
-  selections:[{candidateId:f.candidate.id,candidateRevision:f.candidate.revision,target:f.candidate.target,mode:'execute-declared-scope' as const,steps:f.candidate.steps,formal:{writeback:true,failureCompensation:'none',activate:null}}]};
- try{previewImproveDecision(f.dataRoot,executeDecision as any);}
- catch(err){assert.doesNotMatch(String(err),/CANDIDATE_ALREADY_DECIDED/,'execute after validate-only must not be blocked by AC3');}
- // But defer IS a final decision: after defer, re-deferral is rejected
- await submitImproveDecision({dataRoot:f.dataRoot,decision:baseDecision(f,'defer','defer-choice')});
- await assert.rejects(async()=>submitImproveDecision({dataRoot:f.dataRoot,decision:baseDecision(f,'defer','defer-choice-2')}),/CANDIDATE_ALREADY_DECIDED/,'re-defer after defer must be rejected');
+test('modern validate-only is decided once; only a passed check permits later execute, which revalidates',async()=>{
+ const f=await fixture(),derive=(mode:ImproveMode,id:string)=>deriveImproveDecision(f.dataRoot,f.report.id,[{candidateId:f.candidate.id,mode}],{id,directory:join(f.directory,id),deadline:new Date(Date.now()+60000).toISOString()});
+ const first=derive('validate-only','validate-choice'),outcome=await submitImproveDecision({dataRoot:f.dataRoot,decision:first});
+ assert.equal(outcome.state,'completed',JSON.stringify(outcome));assert.equal(outcome.groups[0].result?.conclusion?.allChecksPassed,true);
+ assert.throws(()=>previewImproveDecision(f.dataRoot,derive('validate-only','second-validation')),/CANDIDATE_ALREADY_DECIDED/);
+ assert.throws(()=>previewImproveDecision(f.dataRoot,derive('defer','after-validation')),/CANDIDATE_ALREADY_DECIDED/);
+ const execute=derive('execute-declared-scope','execute-after-pass');assert.doesNotThrow(()=>previewImproveDecision(f.dataRoot,execute));
+ assert.equal(execute.groups[0].checks.length,1);assert.equal(execute.limits.maxChecks,1,'execute reserves a new validation');
+ const executed=await submitImproveDecision({dataRoot:f.dataRoot,decision:execute});assert.equal(executed.writeback,'written');
+ const failed=await fixture();failed.candidate.structuredChecks[0].program='throw Error("regression did not pass")';
+ const e=new Evidence(failed.dataRoot,failed.report.runId);e.append('improve.report',failed.report);e.close();
+ const failedDecision=deriveImproveDecision(failed.dataRoot,failed.report.id,[{candidateId:failed.candidate.id,mode:'validate-only'}],{id:'failed-validation',directory:join(failed.directory,'failed-validation'),deadline:new Date(Date.now()+60000).toISOString()});
+ assert.equal((await submitImproveDecision({dataRoot:failed.dataRoot,decision:failedDecision})).groups[0].state,'failed');
+ assert.throws(()=>previewImproveDecision(failed.dataRoot,deriveImproveDecision(failed.dataRoot,failed.report.id,[{candidateId:failed.candidate.id,mode:'execute-declared-scope'}],{id:'cannot-execute',directory:join(failed.directory,'cannot-execute')})),/CANDIDATE_ALREADY_DECIDED/);
 });
 
 // AC4: host derives groups, order (topological sort then candidate number), and budget from candidates.

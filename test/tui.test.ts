@@ -379,7 +379,8 @@ test('improve starts from the view and launch box; the main area stays on the se
  assert.equal(request.window,7);assert.deepEqual(request.limits,{maxRequests:16,maxOutputTokens:32768,maxRequestTokens:1081344,maxTokens:2162688,maxDurationMs:600000});
  key('\x15');key('/improves '+item.id);key('\r');assert.match(f.screen(),/只读报告/);key('please execute all');key('\r');assert.equal(analysis.calls.length,2);key('\x1b');
  const report=readImproveReport(data,item.id).report!;
- key('\x15');key('/improve-select '+JSON.stringify({id:'tui-empty-choice',reportId:readDisplayIndex(data).label('improve-report',report.id),reportRevision:report.revision,selections:[],groups:[],limits:{deadline:new Date(Date.now()+30000).toISOString(),maxChecks:0,maxRequests:0,maxTokens:0}}));key('\r');assert.match(f.screen(),/结构化选择/);key('s');f.screen();key('\r');await until(()=>{try{return readImproveDecision(data,'tui-empty-choice').state==='completed';}catch{return false;}});await until(()=>f.screen().includes('✓ 完成')&&!f.screen().includes('improve 执行'));assert.equal(analysis.calls.length,2);key('\x1b');assert.match(f.screen(),/决定 tui-empty-choice · completed；具体写回\/启用见结果/);
+ key('\x15');key('/improve '+readDisplayIndex(data).label('improve-report',report.id));key('\r');assert.match(f.screen(),/没有候选/);key('\r');assert.match(f.screen(),/尚未选择/);assert.throws(()=>readImproveDecision(data,'tui-empty-choice'),/NOT_FOUND/);assert.equal(analysis.calls.length,2);key('\x1b');key('\x1b');
+
  // The next Enter continues the original session: task 2 of the same chain.
  key('\x15');key('Next task');key('\r');await until(()=>readAcceptedTasks(data).tasks.length===3&&f.screen().includes('✓ 完成'));
  const chains=readSessionChains(data),first=readAcceptedTasks(data).tasks.find(t=>t.input==='Original task')!.runId!,next=readAcceptedTasks(data).tasks.find(t=>t.input==='Next task')!.runId!;
