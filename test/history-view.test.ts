@@ -63,6 +63,16 @@ test('three presets replay as the same /history scope and project names reject a
   assert.throws(() => historyScope({ project: 'shared' }, workspace, projects), (error: unknown) => error instanceof CommandError && /\/one\/shared/.test(error.line) && /\/two\/shared/.test(error.line));
 });
 
+test('one-sided date scopes stay unchanged when the preset filter opens and applies without editing', () => {
+  const now = new Date(2026, 9, 17, 12);
+  for (const options of [{ from: '2026-10-01' }, { to: '2026-10-20' }]) {
+    const scope = historyScope(options, '/project', [], now), filter = new HistoryFilter(scope, '/project', [], now);
+    assert.equal(filter.preset.handleInput('\r'), 'apply'); assert.deepEqual(filter.scope, scope);
+    const parsed = parseCommand(historyCommand(filter.scope!), undefined, now);
+    assert.deepEqual(historyScope(parsed.options, '/project', [], now), scope);
+  }
+});
+
 test('session pages preserve selection and n/p windows and never overflow at 132x38, 80x24 or 40x12', () => {
   const root = mkdtempSync(join(tmpdir(), 'durio-history-pages-'));
   for (let n = 0; n < 12; n++) { const e = new Evidence(root, `run-${n}`); e.append('task.accepted', { taskId: `t-${n}`, sessionId: `s-${n}`, workspace: '/project', input: `task-${n} 中文输入` }); e.append('run.closed', { status: 'completed', cleanup: 'confirmed' }); e.close(); }

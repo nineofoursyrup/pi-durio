@@ -25,12 +25,12 @@ export class HistoryFilter {
   constructor(private readonly initial: HistoryScope, private readonly workspace: string, private readonly projects: string[], private readonly now = new Date()) {
     const days = [7, 30, 90], match = days.findIndex(n => initial.from === day(now, 1 - n) && initial.to === day(now, 1));
     const values: FilterValues = {
-      time: !initial.from && !initial.to ? { option: 3 } : match >= 0 ? { option: match } : { option: 4, value: `${initial.from ? date(initial.from) : '1970-01-01'} ${initial.to ? date(initial.to) : date(day(now, 1))}` },
+      time: !initial.from && !initial.to ? { option: 3 } : match >= 0 ? { option: match } : { option: 4, value: `${initial.from ? date(initial.from) : '-'} ${initial.to ? date(initial.to) : '-'}` },
       project: { option: initial.project === undefined ? 1 : initial.project === resolveProjectFilter(undefined, workspace) ? 0 : 2, ...(initial.project ? { value: initial.project } : {}) },
       status: { option: Math.max(0, states.indexOf(initial.status)) },
     };
     this.preset = new PresetFilter([
-      { key: 'time', label: '时间', options: [...days.map(n => ({ label: `近 ${n} 天` })), { label: '全部' }, { label: '自定义', custom: { kind: 'input', placeholder: 'YYYY-MM-DD YYYY-MM-DD', validate: text => { try { this.dates(text); } catch (error) { return (error as Error).message; } } } }] },
+      { key: 'time', label: '时间', options: [...days.map(n => ({ label: `近 ${n} 天` })), { label: '全部' }, { label: '自定义', custom: { kind: 'input', placeholder: '开始 结束（YYYY-MM-DD；- 不限）', validate: text => { try { this.dates(text); } catch (error) { return (error as Error).message; } } } }] },
       { key: 'project', label: '项目', options: [{ label: '当前' }, { label: '全部' }, { label: '列表', custom: { kind: 'list', items: [...new Set([workspace, ...projects, ...initial.project ? [initial.project] : []])] } }] },
       { key: 'status', label: '状态', options: ['全部', '完成', '失败', '已中止', '待恢复核对'].map(label => ({ label })) },
     ], values);
@@ -38,7 +38,7 @@ export class HistoryFilter {
   private dates(text: string) {
     const [from, to, extra] = text.trim().split(/\s+/);
     if (!from || !to || extra) throw new CommandError('输入开始和结束日期，用空格分隔');
-    return historyScope({ from, to, project: 'all' }, this.workspace, this.projects, this.now);
+    return historyScope({ from: from === '-' ? undefined : from, to: to === '-' ? undefined : to, project: 'all' }, this.workspace, this.projects, this.now);
   }
   get scope(): HistoryScope | undefined {
     const v = this.preset.result;

@@ -62,6 +62,7 @@ export class HistoryView {
   private hits = new Map<number, () => void>();
   private workspace: string;
   private scope: HistoryScope;
+  private navigationRevision = 0;
   constructor(readonly root: string, target: HistoryTarget = {}, private readonly host: HistoryHost = {}) {
     this.workspace = host.workspace ?? target.project ?? process.cwd();
     this.scope = { project: target.project, from: target.from, to: target.to, status: target.status };
@@ -79,6 +80,8 @@ export class HistoryView {
   get depth() { return this.body ? 3 : this.tasks ? 2 : this.filter ? 2 : 1; }
   get isBody() { return !!this.body; }
   get acceptsInput() { return !!this.filter?.preset.isEditing; }
+  /** A late host probe must not override a user's later layer or selection action. */
+  get revision() { return this.navigationRevision; }
   get selectedTask(): HistoryTaskTarget | undefined {
     const row = this.tasks && this.tasks.rows[this.tasks.page * pageSize + this.tasks.selected];
     if (!row || !this.tasks) return undefined;
@@ -88,6 +91,7 @@ export class HistoryView {
   }
   /** Internal layers keep their own selection/window; the app pops its outer stack only when false. */
   back() {
+    this.navigationRevision++;
     if (this.filter) { if (this.filter.preset.isEditing) this.filter.preset.handleInput('\x1b'); else this.filter = undefined; }
     else if (this.body) this.body = undefined;
     else if (this.tasks) this.tasks = undefined;
@@ -155,6 +159,7 @@ export class HistoryView {
   private view(id: string) { if (!this.views.has(id)) this.views.set(id, new RunView(this.root, id)); return this.views.get(id)!; }
   private feedback(text: string) { this.host.feedback?.(text); }
   handleInput(data: string) {
+    this.navigationRevision++;
     if (this.filter) {
       const result = this.filter.preset.handleInput(data);
       if (result === 'cancel') this.filter = undefined;
@@ -195,8 +200,8 @@ export class HistoryView {
     this.host.changed?.();
   }
   private move(data: string, position: { offset: number }) { const delta = matchesKey(data, 'up') ? -1 : matchesKey(data, 'down') ? 1 : matchesKey(data, 'pageUp') ? -5 : matchesKey(data, 'pageDown') ? 5 : 0; position.offset = Math.max(0, position.offset + delta); }
-  scroll(delta: number) { const p = this.body ?? this.tasks ?? this.list; p.offset = Math.max(0, p.offset + delta); if ('follow' in p) p.follow = false; }
-  click(y: number) { this.hits.get(y)?.(); this.host.changed?.(); }
+  scroll(delta: number) { this.navigationRevision++; const p = this.body ?? this.tasks ?? this.list; p.offset = Math.max(0, p.offset + delta); if ('follow' in p) p.follow = false; }
+  click(y: number) { this.navigationRevision++; this.hits.get(y)?.(); this.host.changed?.(); }
   private metric(task: SessionTask) {
     if (!this.metrics.has(task.runId)) {
       try {

@@ -60,6 +60,9 @@ test('real app navigates three history layers and trace/raw without losing posit
     t.press(key.esc, key.esc); assert.equal(t.screen(), body);
     t.press(key.esc); assert.equal(t.screen(), session);
     t.press(key.esc); assert.equal(t.screen(), list);
+    t.press('c', key.up); await new Promise(resolve => setImmediate(resolve));
+    assert.match(t.screen(), /^◆ history/, 'changing the selection must invalidate a pending continuation probe');
+    assert.match(t.screen().split('\n').find(line => line.startsWith('›'))!, /Other session/);
     assert.equal(t.calls(), 0); assert.equal(watermark(f.dataRoot), through); assert.deepEqual(readFileSync(join(f.dataRoot, 'host.sqlite')), before);
   } finally { await t.app.exit(); }
 });
@@ -171,7 +174,10 @@ test('c on an original v1 session selects its tail without dispatch, then the ne
   const db = new DatabaseSync(join(dataRoot, 'host.sqlite')); db.prepare('DELETE FROM records WHERE run_id<>?').run(oldRun); db.close();
   const originalDb = readFileSync(join(source, 'host.sqlite')), index = readDisplayIndex(dataRoot), transport = demoTransport(), t = open({ root, workspace, dataRoot }, { transport: transport.fetch });
   try {
-    t.press(`/history ${index.label('session', sessionId)}`, key.enter, 'c');
+    t.press(`/history ${index.label('session', sessionId)}`, key.enter, 'c', key.esc);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.match(t.screen(), /^◆ history/, 'Esc back to the list must invalidate the session-layer continuation probe');
+    t.press(key.enter, 'c');
     await until(() => t.screen().includes(VERSION_CHANGED_HINT), t.screen);
     assert.equal(transport.calls.length, 0); assert.equal(readSessionChains(dataRoot).session(sessionId)!.tasks, 1);
     t.press('Continue from the original v1 task', key.enter);

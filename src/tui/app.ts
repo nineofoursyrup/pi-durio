@@ -1006,14 +1006,14 @@ export class ReadOnlyTui {
   /** c only selects a continuable tail. Probe and recheck before changing the active session; never submit. */
   private async continueHistory(id:string) {
     if(!mayWrite(this.writeAccess))return;
-    const view=this.historyView;
+    const view=this.historyView,revision=view?.revision;
     const read=()=>readContinuation(this.options.dataRoot,id,{workspace:this.options.workspace,busy:this.phase!=='idle'?'不能接续 · 当前任务运行中':this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'?'不能接续 · 有待处理的恢复核对':undefined});
     try{
       let target=read();if(!target){this.feedback('会话没有记录');return;}
       if(target.state==='blocked'){this.feedback(target.reason);return;}
       const lock=await probeWelcomeLock(this.options.workspace,target.coding);
       // Esc, another view, new runtime activity or show capability must win over an outstanding probe.
-      if(this.panel?.kind!=='history'||this.historyView!==view||!mayWrite(this.writeAccess))return;
+      if(this.panel?.kind!=='history'||this.historyView!==view||view?.revision!==revision||!mayWrite(this.writeAccess))return;
       target=read();if(!target){this.feedback('会话没有记录');return;}
       if(target.state==='blocked'){this.feedback(target.reason);return;}
       if(lock.state==='held'){this.feedback('不能接续 · 工作区被其他进程占用');return;}
