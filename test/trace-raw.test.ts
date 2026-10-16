@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { stripTerminalSequences, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
@@ -57,8 +57,8 @@ function fixture() {
 }
 
 function host(busy = false) {
-  const state = { feedback: [] as string[], confirms: [] as { config: ConfirmConfig; run: () => Promise<void> }[], raw: [] as string[], copied: [] as string[], busy };
-  const traceHost: TraceHost = { busy: () => state.busy, feedback: text => state.feedback.push(text), confirm: (config, run) => state.confirms.push({ config, run }), changed() {}, openRaw: span => state.raw.push(span.key) };
+  const state = { feedback: [] as string[], confirms: [] as { config: ConfirmConfig; run: () => Promise<void> }[], raw: [] as string[], copied: [] as string[], busy, blocked: undefined as string | undefined };
+  const traceHost: TraceHost = { writeBlocked: () => state.blocked, busy: () => state.busy, feedback: text => state.feedback.push(text), confirm: (config, run) => state.confirms.push({ config, run }), changed() {}, openRaw: span => state.raw.push(span.key) };
   const rawHost = { copy: async (text: string) => { state.copied.push(text); return true as const; }, feedback: (text: string) => state.feedback.push(text), changed() {} };
   return { state, traceHost, rawHost };
 }
@@ -174,6 +174,25 @@ test('p pins the selected span: busy or a held writer lock only hints; confirm w
   assert.match(plain(withTier('none', () => again.render(220, 38, 'Esc 返回会话'))).join('\n'), /证据 +已固定/);
   again.select(view.trace.spans.find(span => span.tool?.name === 'read')!.key);
   assert.doesNotMatch(plain(withTier('none', () => again.render(220, 38, 'Esc 返回会话'))).join('\n'), /已固定/);
+});
+
+test('trace host checks write access before the dialog and again when a retained confirmation is invoked', async () => {
+  const root = fixture(), before = readFileSync(join(root, 'host.sqlite')), { state, traceHost } = host();
+  const view = new TraceView(root, runId, () => false, traceHost);
+  view.handleInput('\x1b[B');
+  state.blocked = '只读查看 · 不能固定证据';
+  view.handleInput('p');
+  assert.equal(state.confirms.length, 0);
+  assert.equal(state.feedback.at(-1), state.blocked);
+  view.handleInput('\r');
+  assert.equal(state.raw.length, 1, 'read access is independent of write access');
+  state.blocked = undefined;
+  view.handleInput('p');
+  assert.equal(state.confirms.length, 1);
+  state.blocked = '只读查看 · 不能固定证据';
+  await state.confirms[0].run();
+  assert.equal(state.feedback.at(-1), state.blocked);
+  assert.deepEqual(readFileSync(join(root, 'host.sqlite')), before, 'a previously obtained callback cannot bypass current host access');
 });
 
 class TestTerminal implements Terminal {

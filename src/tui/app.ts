@@ -42,6 +42,7 @@ import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatus 
 import { COMPACT_VERSION_CHANGED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
 import { currentExecutionVersion } from '../execution-version.js';
 import { RecoveryPanel, disabledInputLines, readRecoveryFacts, recoveryPages, type RecoveryAction } from './recovery.js';
+import { mayWrite, SHOW_READ_ONLY, type WriteAccess } from './write-access.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
 type PanelKind='help'|'exit'|'trace-raw'|'queue'|'history'|'eval'|'eval-plan'|'eval-trial'|'storage'|'trace'|'improve-home'|'improve'|'improve-selection'|'metrics';
@@ -83,6 +84,8 @@ export async function copyToMacClipboard(text:string):Promise<boolean|string> {
 
 /** Product UI owns presentation/drafts. Execution and decisions use the shared checked host boundary. */
 export class ReadOnlyTui {
+  /** show is an entry-point capability, independent of coding tool authorization or busy state. */
+  private readonly writeAccess:WriteAccess={writeBlocked:()=>this.options.show?SHOW_READ_ONLY:undefined,feedback:text=>{this.notice=text;this.feedback(text);}};
   readonly closed:Promise<TuiExit>;
   private resolveClosed!:(result:TuiExit)=>void;
   private readonly terminal:Terminal;
@@ -128,7 +131,7 @@ export class ReadOnlyTui {
   private evalPlan?:EvalPlanView;
   private evalTrial?:TrialTraceView;
   /** 2b 计划层的宿主：Enter 在其上压入 trial trace 层。 */
-  private readonly evalHost:PlanViewHost={openTrial:(source,report,trialId)=>{this.evalTrial=new TrialTraceView(source,report,trialId,()=>this.tui.requestRender());this.pushView('eval-trial');}};
+  private readonly evalHost:PlanViewHost={openTrial:(source,report,trialId)=>{this.evalTrial=new TrialTraceView(source,report,trialId,()=>this.tui.requestRender(),this.copy);this.pushView('eval-trial');}};
   private improveView?:ImproveView;
   private improveHome?:ImproveHome;
   /** 进行中的 improve 分析：空闲时发起（主区与 runId 留在当前会话），或排队后在任务结束时开始（queued）。 */
@@ -418,7 +421,8 @@ export class ReadOnlyTui {
       this.tui.requestRender(); return;
     }
     if(!text.trim())return;
-    if(this.options.show||this.occupied){this.editor.setText(text);this.lastText=text;this.notice=this.options.show?'只读查看 · 不能提交 · 接续用 pi-durio resume s-…':'工作区被其他进程占用 · 不能提交';this.tui.requestRender();return;}
+    if(!mayWrite(this.writeAccess)){this.editor.setText(text);this.lastText=text;return;}
+    if(this.occupied){this.editor.setText(text);this.lastText=text;this.notice='工作区被其他进程占用 · 不能提交';this.tui.requestRender();return;}
     if(this.historyWindow||this.viewingRecovery){this.editor.setText(text);this.lastText=text;this.notice='只读历史/恢复视图不能提交；/bottom 返回活动会话，恢复限制仍需显式处置';this.tui.requestRender();return;}
     // improve 分析期间 Enter 保留文字、不受理，也不作为 steer；结束后下一次 Enter 接续当前会话（T3）。
     if(this.analysis){this.editor.setText(text);this.lastText=text;this.notice='improve 分析进行中 · 文字保留，未受理；分析结束后 Enter 接续当前会话';this.tui.requestRender();return;}
@@ -442,8 +446,7 @@ export class ReadOnlyTui {
   private command(parsed:ParsedCommand) {
     const root=this.options.dataRoot,{positional,options,raw}=parsed;
     const fail=(prefix:string,error:unknown)=>{if(error instanceof CommandError)throw error;this.notice=`${prefix}${safe(String(error))}`;this.tui.requestRender();};
-    // show 只读查看：写记录或可能调度的命令不可用（R3）。
-    if(this.options.show&&/^(acceptance|compact|improve$|improve-|follow-up|withdraw|reattach|decide|recover|stop)/.test(parsed.spec.name)){this.notice='只读查看 · 该命令不可用';this.tui.requestRender();return;}
+    // 只读能力在各宿主动作入口核对；纯查看命令不依赖命令名黑名单。
     switch(parsed.path.length?`${parsed.spec.name} ${parsed.path.join(' ')}`:parsed.spec.name){
     case 'help':this.openPanel('help');break;
     case 'exit':this.requestExit();break;
@@ -455,6 +458,7 @@ export class ReadOnlyTui {
       try{this.metricsView=new StatsView(statsRequest(options,this.options.workspace),scope=>readStats(root,scope));this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
       break;
     case 'acceptance':
+      if(!mayWrite(this.writeAccess))break;
       try{const input=JSON.parse(raw);if(typeof input?.taskId==='string')input.taskId=resolveDisplayInput(root,'task',input.taskId);const receipt=recordAcceptance(root,input);this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();break;
     case 'eval':{
       const id=positional[0]===undefined?undefined:resolveArgument(root,positional[0],['eval-plan']).id;
@@ -464,7 +468,7 @@ export class ReadOnlyTui {
       }catch(error){fail('Eval记录不可读取：',error);}
       break;
     }
-    case 'storage':this.storageView=new StorageView(root,{changed:()=>this.tui.requestRender(),busy:()=>this.phase!=='idle'||!!this.options.show,feedback:text=>this.feedback(text),confirm:(config,confirm)=>this.openConfirm(config,()=>void confirm())});this.openPanel('storage');break;
+    case 'storage':this.storageView=new StorageView(root,{writeBlocked:this.writeAccess.writeBlocked,changed:()=>this.tui.requestRender(),busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,confirm)=>this.openConfirm(config,()=>void confirm())});this.openPanel('storage');break;
     case 'history':{
       const filter:HistoryFilter={};
       if(positional[0]!==undefined){
@@ -500,7 +504,7 @@ export class ReadOnlyTui {
     case 'copy':void this.copyOutput();break;
     case 'stop':this.stop();break;
     case 'queue':this.loadQueue();this.openPanel('queue');break;
-    case 'follow-up':{const draft=this.editor.getExpandedText();if(draft)this.submit(draft,true);else this.notice='输入后按 Ctrl+X → Enter，明确排到下一任务';break;}
+    case 'follow-up':{if(!mayWrite(this.writeAccess))break;const draft=this.editor.getExpandedText();if(draft)this.submit(draft,true);else this.notice='输入后按 Ctrl+X → Enter，明确排到下一任务';break;}
     case 'withdraw':case 'reattach':
       // 不带参数打开队列视图（T1）；带 q- 号时 /withdraw 直接撤回。/reattach 的确认框由 #77 接入。
       if(!positional.length){this.loadQueue();this.openPanel('queue');break;}
@@ -513,16 +517,19 @@ export class ReadOnlyTui {
     }
     case 'improve-suppressions':case 'improve suppressions':try{this.improveView=new ImproveView(root,undefined,true);this.openPanel('improve');}catch(error){fail('',error);}break;
     case 'improve-restore':case 'improve-continue':case 'improve-rollback':{
+      if(!mayWrite(this.writeAccess))break;
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许新决定';break;}
       try{const action=parsed.spec.name.slice(8) as 'restore'|'continue'|'rollback',spec=JSON.parse(raw);this.phase='running';this.controller=new AbortController();this.cancellation='exit';const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:root}):action==='rollback'?rollbackImproveDecision({...spec,dataRoot:root,signal:this.controller.signal}):resumeImproveDecision({...spec,dataRoot:root,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
       break;
     }
     case 'improve-select':
+      if(!mayWrite(this.writeAccess))break;
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';break;}
       try{const template=JSON.parse(raw) as ImproveDecision;if(typeof template?.reportId==='string')template.reportId=resolveDisplayInput(root,'improve-report',template.reportId);this.improveSelectionView=new ImproveSelectionView(root,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
       break;
     case 'improve':this.openImproveHome();break;
     case 'improve new':{
+      if(!mayWrite(this.writeAccess))break;
       const sources=typeof options.source==='string'?options.source.split(',') as ('self'|'eval')[]:undefined;
       for(const kind of sources??[])if(!listRegisteredSources(root,this.options.workspace).some(r=>r.kind===(kind==='self'?'self-source':'eval-asset')))throw new CommandError(`--source ${kind} 没有已登记的${kind==='self'?'自身源码':' eval 资产'}`,['/improve new 后在“附加来源”登记新路径']);
       this.openLaunch({scope:options.scope as LaunchPrefill['scope'],budget:options.budget as LaunchPrefill['budget'],sources,focus:typeof options.focus==='string'?options.focus:undefined});
@@ -552,6 +559,7 @@ export class ReadOnlyTui {
   }
   /** 不能发起分析的原因（只读历史、恢复核对、清理中、已有分析、尚无任务）；可以时 undefined。 */
   private launchBlocked() {
+    const readOnly=this.writeAccess.writeBlocked();if(readOnly)return readOnly;
     if(this.historyWindow||this.viewingRecovery)return '只读历史/恢复视图不能发起分析 · /bottom 返回活动会话并完成核对';
     if(this.analysis)return '已有 improve 分析进行中 · 结束后再新建';
     if(this.activity)return '当前有后台工作进行中 · 结束后再新建分析';
@@ -571,7 +579,7 @@ export class ReadOnlyTui {
     const root=this.options.dataRoot,workspace=this.options.workspace,target=this.phase==='running'?this.control.target()!.runId:this.runId!;
     let dialog:ImproveLaunchDialog;
     try{dialog=new ImproveLaunchDialog({visible:improveVisibleFiles(root,workspace,target),registrations:listRegisteredSources(root,workspace),queued:this.phase==='running',
-      register:input=>registerFromInput(root,workspace,input),complete:input=>completePath(workspace,input)},prefill);}
+      register:input=>{if(!mayWrite(this.writeAccess))throw Error('TUI_READ_ONLY');return registerFromInput(root,workspace,input);},complete:input=>completePath(workspace,input)},prefill);}
     catch(error){this.notice=`improve 启动框不可打开：${safe(String(error))}`;this.tui.requestRender();return;}
     this.openDialog(dialog,()=>{
       const blocked=this.launchBlocked();if(blocked){this.notice=blocked;this.tui.requestRender();return;}
@@ -582,6 +590,7 @@ export class ReadOnlyTui {
     });
   }
   private async startImprove(request:ImproveRequest) {
+    if(!mayWrite(this.writeAccess))return;
     if(this.phase==='running'){
       const target=this.control.target();if(!target){this.notice='当前任务仍在受理或收尾；分析未排队';this.tui.requestRender();return;}
       try{const item=await this.control.submit({id:request.id,kind:'improve',input:JSON.stringify(request),target});this.loadQueue();this.notice=`improve ${this.shown('improve-report',item.requestId)} 已排队 · 当前任务结束后开始 · ${this.shown('queue-request',item.requestId)} · /queue`;}
@@ -621,6 +630,7 @@ export class ReadOnlyTui {
     this.runId=event.runId;
   };
   private async submitImproveChoice(decision:ImproveDecision){
+    if(!mayWrite(this.writeAccess))throw Error('TUI_READ_ONLY');
     if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery)throw Error('IMPROVE_SELECTION_CURRENT_STATE_BLOCKED');
     this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.activity={kind:'improve-execution',report:this.shown('improve-report',decision.reportId)};
     const promise=submitImproveDecision({dataRoot:this.options.dataRoot,decision,signal:this.controller.signal});
@@ -628,6 +638,7 @@ export class ReadOnlyTui {
     return promise;
   }
   private async compact() {
+    if(!mayWrite(this.writeAccess))return;
     if(this.historyWindow||this.viewingRecovery){this.notice='只读历史/恢复视图不能压缩；先返回活动会话并完成恢复核对';this.tui.requestRender();return;}
     if(this.phase==='running'){this.enqueue('compact','compact');return;}
     // 空闲手动压缩针对可接续的链尾；链尾执行版本与当前不同时不可用（E8）。
@@ -654,6 +665,7 @@ export class ReadOnlyTui {
     this.analysis=undefined;this.activity=undefined;this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting'){this.phase='idle';void this.welcome?.refresh().catch(error=>{this.notice=`欢迎屏事实不可读取：${safe(String(error))}`;});}this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
   }
   private enqueue(text:string,kind:'steer'|'follow-up'|'compact'|'improve') {
+    if(!mayWrite(this.writeAccess))return;
     const target=this.control.target();
     if(!target){this.editor.setText(text);this.lastText=text;this.notice='当前仍在受理或收尾；文字保留，未受理';this.tui.requestRender();return;}
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
@@ -676,7 +688,7 @@ export class ReadOnlyTui {
   }
   private authorization():RecoveryAuthorization {return {workspace:this.options.workspace,mode:this.options.mode,tools:this.options.coding?['read','write','edit','bash']:['read'],toolEnvironment:this.options.toolEnvironment};}
   private async queueDecision(input:string,action:'withdraw'|'reattach') {
-    if(this.options.show){this.notice='只读查看 · 不能撤回或重新接入';this.tui.requestRender();return;}
+    if(!mayWrite(this.writeAccess))return;
     let requestId:string;try{requestId=resolveDisplayInput(this.options.dataRoot,'queue-request',input);}catch(error){this.notice=`队列决定未执行：${safe(String(error))}`;this.tui.requestRender();return;}
     this.loadQueue();const item=this.queue.find(item=>item.requestId===requestId);
     if(!item){this.notice='当前窗口没有该请求；/queue 核对 q- 号';return;}
@@ -700,6 +712,7 @@ export class ReadOnlyTui {
   }
   /** 打开 1c：每次打开先只读核对一次（全部分页、同一快照），再显示面板（U3）。 */
   private async openRecovery(runId:string) {
+    if(!mayWrite(this.writeAccess))return;
     if(this.phase!=='idle'){const running=this.control.target()?.runId??this.runId;this.notice=`正在执行 ${running?this.shown('run',running):'受理中'}；先停止或退出后核对`;this.tui.requestRender();return;}
     if(this.recoveryChecking)return;
     this.welcome=undefined;this.viewingRecovery=true;this.runId=runId;this.recoveryChecking=true;
@@ -750,6 +763,7 @@ export class ReadOnlyTui {
     else if(action.type==='end')this.openConfirm({title:'结束旧工作，开新任务',action:'结束旧工作',fixed:['旧 run 标记已结束，原事实保留；不回滚，不表示外部影响未发生','此后新任务开启新会话，不接续旧上下文',`冻结项只能查看和复制，需重新提交${panel.facts.frozen.count?`（${panel.facts.frozen.count} 项）`:''}`]},()=>void this.recoveryDecision({id:randomUUID(),snapshotId,action:'end'}));
   }
   private async recoveryDecision(decision:RecoveryDecision) {
+    if(!mayWrite(this.writeAccess))return;
     if(this.phase!=='idle'||!this.recovery){this.notice='先打开恢复核对获取当前事实';return;}
     const runId=this.recovery.runId;this.closeViews();this.recoveryOpen=false;this.recoveryPanel=undefined;this.viewingRecovery=false;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
     this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe}).then(result=>{
@@ -773,6 +787,7 @@ export class ReadOnlyTui {
     return {main:false,input:false,usage:false,hints:false,panel:rows};
   }
   private stop() {
+    if(!mayWrite(this.writeAccess))return;
     this.confirmation=undefined;
     if(this.phase!=='running')return;
     this.widths?.retainPending('stop-preserve-unapplied-input');
@@ -873,6 +888,7 @@ export class ReadOnlyTui {
    * 不能接续时在前序任务行的位置写原因。不取锁、不调度。
    */
   private async resumeSession(id:string) {
+    if(!mayWrite(this.writeAccess))return;
     let continuation:Continuation|null;
     try{continuation=readContinuation(this.options.dataRoot,id,{workspace:this.options.workspace});}
     catch(error){this.notice=`会话不可读取：${safe(String(error))}`;this.tui.requestRender();return;}
@@ -914,7 +930,7 @@ export class ReadOnlyTui {
   }
   /** 2a 列表层；Enter 进原文层、`p` 固定为证据经 TraceHost 回到这里。 */
   private traceOf(runId:string) {
-    const host:TraceHost={busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,run)=>this.openConfirm(config,()=>void run()),changed:()=>this.tui.requestRender(),openRaw:span=>this.openRaw(span)};
+    const host:TraceHost={writeBlocked:this.writeAccess.writeBlocked,busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,run)=>this.openConfirm(config,()=>void run()),changed:()=>this.tui.requestRender(),openRaw:span=>this.openRaw(span)};
     return new TraceView(this.options.dataRoot,runId,()=>this.phase==='running'&&this.runId===runId,host);
   }
   /** 在 2a 列表层之上压入原文层（Esc 回到列表层，仍选中该 span）。 */
@@ -1008,7 +1024,7 @@ export class ReadOnlyTui {
     this.confirmation=undefined;
     // 全屏视图层的全局键（T6）：Esc 返回上一层；Ctrl+C 只停本视图的操作，不传给会话屏；Ctrl+D/O/T/R、? 不起作用。
     const key=viewKey(data);
-    if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='eval-trial')this.evalTrial?.close();if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
+    if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='eval-trial'){if(this.evalTrial?.back())return;this.evalTrial?.close();}if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
     if(key==='redraw'){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
     if(key==='stop'){if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
     if(key==='inert')return;
@@ -1048,6 +1064,7 @@ export class ReadOnlyTui {
   /** 离开全部视图回到会话屏（开始执行、退出、从菜单换到另一视图）。 */
   private closeViews() {
     this.closeConfirm();
+    if(this.viewStack.some(view=>view.kind==='eval-trial'))this.evalTrial?.close();
     this.viewStack.length=0;this.hidePanel?.();this.hidePanel=undefined;this.tui.setFocus(this.editor);
     this.confirmation=undefined;this.tui.requestRender();
   }
@@ -1097,6 +1114,7 @@ export class ReadOnlyTui {
     let draftSaved=false;
     try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
     try {await this.active;} finally {
+      this.evalTrial?.close();
       this.stopped=true;if(this.timer)clearInterval(this.timer);this.removeInput?.();for(const remove of this.removeSignals)remove();
       if(this.started) {
         try {if(this.widths&&!await this.widths.settle())this.failure??='WIDTH_QUERY_BOUNDARY_UNKNOWN: terminal drain is bounded';}catch(error){this.failure??=`字宽清理失败：${String(error)}`;}

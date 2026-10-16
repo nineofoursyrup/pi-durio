@@ -135,7 +135,7 @@ test('released installation bytes retain manifest provenance and are eligible on
 });
 
 test('TUI management requires a rendered preview and CLI readback uses the same durable operation',async()=>{
-  const f=await fixture(),confirms:(()=>Promise<void>)[]=[],view=new StorageView(f.root,{changed(){},busy:()=>false,feedback(){},confirm:(_config,confirm)=>{confirms.push(confirm);}});await view.ready;
+  const f=await fixture(),confirms:(()=>Promise<void>)[]=[],view=new StorageView(f.root,{writeBlocked:()=>undefined,changed(){},busy:()=>false,feedback(){},confirm:(_config,confirm)=>{confirms.push(confirm);}});await view.ready;
   assert.match(view.render(80,8).join('\n'),/storage/);
   await view.handleInput('\r');assert.equal(confirms.length,1);assert.equal(await exists(join(f.root,'sessions',f.sessionId)),true,'preview alone deletes nothing');
   await confirms[0]();assert.equal(await exists(join(f.root,'sessions',f.sessionId)),false);
