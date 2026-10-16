@@ -71,11 +71,18 @@ test('confirm dialog disables Enter with the reason on the last line when fixed 
   // Growing the window re-enables Enter.
   small.render(80, 24); assert.equal(small.handleInput('\r').type, 'confirm');
 
-  const conflict = new ConfirmDialog({ title: '启动 eval', action: '启动', fixed: ['≤ 24 请求 · ≈¥0.40'], disabled: '截止时间已过' });
-  const conflictLines = conflict.render(80, 24);
-  assert.match(plain(conflictLines).at(-2)!, /Enter 截止时间已过 · Esc 取消/);
-  assert.match(conflictLines.at(-2)!, /38;2;65;65;65mEnter /, 'Enter is greyed with fg.gutter');
-  assert.equal(conflict.handleInput('\r').type, 'noop');
+  // Bind the style contract to explicit tiers instead of the shell's color environment.
+  for (const [tier, enterStyle] of [
+    ['truecolor', /\x1b\[38;2;65;65;65mEnter /],
+    ['256color', /\x1b\[38;5;238mEnter /],
+    ['none', /\x1b\[2mEnter /],
+  ] as const) {
+    const conflict = new ConfirmDialog({ title: '启动 eval', action: '启动', fixed: ['≤ 24 请求 · ≈¥0.40'], disabled: '截止时间已过' });
+    const conflictLines = conflict.render(80, 24, tier);
+    assert.match(plain(conflictLines).at(-2)!, /Enter 截止时间已过 · Esc 取消/);
+    assert.match(conflictLines.at(-2)!, enterStyle, `${tier}: disabled Enter uses fg.gutter`);
+    assert.equal(conflict.handleInput('\r').type, 'noop');
+  }
 });
 
 test('single choice uses digits and ◉/○; multi choice uses space, ↑↓ and [✓]/[ ], skipping disabled options', () => {
