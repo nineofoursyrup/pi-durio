@@ -8,6 +8,8 @@ import {captureImproveSources,registerImproveSource,unregisterImproveSource} fro
 import {deriveImproveDecision,previewImproveDecision,submitImproveDecision,type ImproveDecision} from '../src/improve-decisions.js';
 import type {ImproveCandidate,ImproveReport} from '../src/improve.js';
 import {ImproveSelectionView,improveSelectionPrefill} from '../src/tui/improve-selection.js';
+import {ImproveView} from '../src/tui/improve.js';
+import type {PlanSource} from '../src/eval/overview.js';
 import {ImproveCheckOriginal} from '../src/tui/improve-result.js';
 import {ImproveBatchController} from '../src/improve-batch.js';
 import {improveReportContract} from '../src/improve-contract.js';
@@ -171,8 +173,11 @@ test('check originals show retained full stdout bytes and route fresh by child r
  const before=digest(readFileSync(join(f.dataRoot,'host.sqlite'))),original=new ImproveCheckOriginal(f.dataRoot,decision,'g1',()=>{throw Error('direct check never routes to eval')});
  const shown=plain(original.render(80,400)).replace(/\s+/g,'');assert.ok(shown.includes('retained-START'));assert.ok(shown.includes('retained-END'));assert.ok(!shown.includes('previewonly'));
  const child=join(f.root,'nested-eval'),fresh={...decision,groups:[{...decision.groups[0],checks:[{kind:'fresh'} as never]}]};let routed:{root:string;id:string}|undefined;
- const facts=new Evidence(f.dataRoot,f.report.runId);facts.append('eval.plan',{id:'shared-id'});facts.append('improve.decision',{id:fresh.id,decision:fresh,decisions:[]});facts.append('improve.eval',{id:fresh.id,groupId:'g1',index:0,dataRoot:child,planId:'shared-id',parent:{decisionId:fresh.id}});facts.close();
+ const facts=new Evidence(f.dataRoot,f.report.runId);facts.append('eval.plan',{id:'shared-id'});facts.append('improve.decision',{id:fresh.id,decision:fresh,decisions:[]});facts.append('improve.eval',{id:fresh.id,groupId:'g1',index:0,dataRoot:child,planId:'shared-id',parent:{decisionId:fresh.id}});facts.append('improve.eval',{id:fresh.id,groupId:'other-group',index:0,dataRoot:child,planId:'shared-id',parent:{decisionId:fresh.id}});facts.close();
  const readonlyBefore=digest(readFileSync(join(f.dataRoot,'host.sqlite'))),freshOriginal=new ImproveCheckOriginal(f.dataRoot,fresh,'g1',source=>{routed=source;});assert.equal(freshOriginal.openSingleFresh(),true);assert.deepEqual([routed?.root,routed?.id],[child,'shared-id']);assert.equal(digest(readFileSync(join(f.dataRoot,'host.sqlite'))),readonlyBefore);assert.notEqual(before,readonlyBefore);
+ let historySource:PlanSource|undefined;
+ const history=new ImproveView(f.dataRoot,f.report.id,false,{openEval:source=>{historySource=source;}});history.handleInput('\t');history.handleInput('\r');assert.equal(history.depth,3);history.handleInput('\r');
+ assert.deepEqual([historySource?.root,historySource?.id,historySource?.origin?.reportId,historySource?.origin?.decisionId,historySource?.origin?.groupId],[child,'shared-id',f.report.id,fresh.id,'g1']);assert.equal(history.back(),true);assert.equal(history.depth,2);assert.equal(digest(readFileSync(join(f.dataRoot,'host.sqlite'))),readonlyBefore);
 });
 
 // Actual isolated process, no model/network: proves stop waits for VM cleanup and

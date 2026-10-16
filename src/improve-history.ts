@@ -2,12 +2,12 @@ import {openHostReadonly,readObject,digest} from './evidence.js';
 import type {ImproveCandidate} from './improve.js';
 import {formatAmount} from './cost-estimate.js';
 
-export interface ImproveFact {sourceId:string;runId:string;seq:number;kind:string;data:any}
+export interface ImproveFact {sourceId:string;runId:string;seq:number;at:string;kind:string;data:any}
 /** Facts remain in the existing host journal; no separate decision database. */
 export function improveFacts(root:string,through=Number.MAX_SAFE_INTEGER):ImproveFact[]{
  const db=openHostReadonly(root);
  try{return db.prepare("SELECT * FROM records WHERE kind IN ('improve.decision','improve.group-started','improve.validation','improve.batch','improve.resume','improve.restore','improve.prepared','improve.check','improve.check-started','improve.eval','improve.batch-started','improve.formal-started','improve.formal','improve.write-intent','improve.write-result','improve.activation','improve.rollback','improve.rollback-request','improve.rollback-intent','improve.rollback-result','improve.default-observed','improve.build-started','improve.build-execution','improve.build-startup','improve.build','improve.build-activation','improve.process-request','improve.process-started','improve.process-result','improve.eval-asset') AND seq<=? ORDER BY seq").all(through).map(row=>{
-  const ref=JSON.parse(String(row.body));return {sourceId:`e1:${row.seq}:${ref.sha256}`,runId:String(row.run_id),seq:Number(row.seq),kind:String(row.kind),data:JSON.parse(readObject(root,ref).toString())};
+  const ref=JSON.parse(String(row.body));return {sourceId:`e1:${row.seq}:${ref.sha256}`,runId:String(row.run_id),seq:Number(row.seq),at:String(row.at),kind:String(row.kind),data:JSON.parse(readObject(root,ref).toString())};
  });}finally{db.close();}
 }
 export function problemIdentity(candidate:ImproveCandidate){
@@ -25,7 +25,7 @@ export function listImproveSuppressions(root:string,workspace?:string,through=Nu
  const facts=improveFacts(root,through),restored=new Set(facts.filter(f=>f.kind==='improve.restore').map(f=>f.data.suppressionId));
  return facts.filter(f=>f.kind==='improve.decision').flatMap(f=>(f.data.decisions??[]).filter((item:any)=>['defer','do-not-suggest'].includes(item.mode)&&(!workspace||item.problem.target.workspace===workspace)).map((item:any)=>{
   const id=`${f.sourceId}:${digest(JSON.stringify(item.problem))}`;
-  return {id,sourceId:f.sourceId,runId:f.runId,decisionId:f.data.id,...item,active:!restored.has(id)};
+  return {id,sourceId:f.sourceId,runId:f.runId,decisionId:f.data.id,reportId:f.data.decision.reportId,at:f.at,...item,active:!restored.has(id)};
  }));
 }
 function sameTarget(a:ReturnType<typeof problemIdentity>,b:ReturnType<typeof problemIdentity>){return a.target.workspace===b.target.workspace&&a.target.kind===b.target.kind;}

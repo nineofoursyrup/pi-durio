@@ -1,4 +1,4 @@
-import {submitImproveDecision,type ImproveDecision} from './improve-decisions.js';
+import {submitImproveDecision,resumeImproveDecision,type ImproveDecision,type ImproveResume} from './improve-decisions.js';
 import {readImproveDecision,improveFacts} from './improve-history.js';
 
 export type ImproveBatchOrigin={reportId:string;decisionId:string};
@@ -19,6 +19,16 @@ export class ImproveBatchController {
   this.lastProgress=undefined;
   const abort=new AbortController(),origin={reportId:decision.reportId,decisionId:decision.id};
   const done=submitImproveDecision({dataRoot:this.dataRoot,decision,signal:signal?AbortSignal.any([abort.signal,signal]):abort.signal}).finally(()=>{if(this.active?.origin===origin)this.active=undefined;});
+  this.active={origin,abort,done,decision:structuredClone(decision),startedAt:Date.now()};
+  return done;
+ }
+ /** Continuation stays in the same process-wide batch cancellation boundary. */
+ resume(input:ImproveResume,signal?:AbortSignal):Promise<ImproveDecisionState> {
+  if(this.active)throw Error('IMPROVE_BATCH_ALREADY_RUNNING');
+  const decision=readImproveDecision(this.dataRoot,input.id).decision as ImproveDecision;
+  this.lastProgress=undefined;
+  const abort=new AbortController(),origin={reportId:decision.reportId,decisionId:decision.id};
+  const done=resumeImproveDecision({...input,dataRoot:this.dataRoot,signal:signal?AbortSignal.any([abort.signal,signal]):abort.signal}).finally(()=>{if(this.active?.origin===origin)this.active=undefined;});
   this.active={origin,abort,done,decision:structuredClone(decision),startedAt:Date.now()};
   return done;
  }

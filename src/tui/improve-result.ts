@@ -45,7 +45,7 @@ export class ImproveCheckOriginal {
  private get checks(){return this.decision.groups.find(g=>g.id===this.groupId)!.checks;}
  private source(index:number) {
   const link=this.facts.find(f=>f.kind==='improve.eval'&&f.data.index===index);
-  return link&&listPlanSources(this.root).find(s=>s.id===link.data.planId&&s.root===link.data.dataRoot&&s.origin?.decisionId===this.decision.id);
+  return link&&listPlanSources(this.root).find(s=>s.id===link.data.planId&&s.root===link.data.dataRoot&&s.origin?.decisionId===this.decision.id&&s.origin.reportId===this.decision.reportId&&s.origin.groupId===this.groupId);
  }
  openSingleFresh(){if(this.checks.length===1&&this.checks[0].kind==='fresh'){const source=this.source(0);if(source){this.openEval(source);return true;}}return false;}
  handleInput(data:string) {
