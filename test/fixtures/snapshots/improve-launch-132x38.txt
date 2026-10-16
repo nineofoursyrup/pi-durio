@@ -1,0 +1,77 @@
+132x38 truecolor
+00|◆ pi-durio  ~/project  · 会话 s-xxxx · run r-xxxx                                                             只读 · 任务 1 · ✓ 完成        |
+   0-0 ac.brand/bg.base ; 1-11 fg.primary/bg.base/b ; 12-20 ac.path/bg.base/b ; 21-107 fg.faint/bg.base/b ; 108-109 fg.label/bg.base/b ; 110-119 fg.faint/bg.base/b ; 120-120 ac.ok/bg.base/b ; 121-123 fg.faint/bg.base/b ; 124-131 -/-
+01|┃ 看一下 a.ts                                                                                                                          |
+   0-1 fg.muted/bg.block ; 2-128 fg.primary/bg.block ; 129-131 -/-
+02|   ◆ improve  ~/project                                                                                            分析不执行候选          |
+   0-2 -/bg.base ; 3-4 ac.brand/bg.base ; 5-11 fg.primary/bg.base/b ; 12-114 fg.body/bg.base/b ; 115-121 fg.muted/bg.base/b ; 122-124 -/bg.base ; 125-131 -/-
+03|✓ r                                                                                                                                 |
+   0-0 ac.ok/bg.base ; 1-2 fg.muted/bg.base ; 3-128 -/bg.base ; 129-131 fg.faint/bg.base
+04|     ir-xxxx · 00-00 00:00 · 来自 s-xxxx · 候选 3 · 未决 2                                                                                |
+   0-2 -/bg.base ; 3-122 fg.body/bg.base ; 123-125 -/bg.base ; 126-131 -/-
+05|Con                                                                                                                                 |
+   0-2 fg.body/bg.base ; 3-128 -/bg.base ; 129-131 fg.body/bg.base
+06|   › 新建分析                                                                                                                           |
+   0-2 -/- ; 3-124 fg.primary/line.inner ; 125-131 -/-
+07|     历史报告 · 2 份                                                                                                                     |
+   0-2 -/- ; 3-123 fg.body/bg.base ; 124-131 -/-
+08|     建议抑制 · 1 项                                                                                                                     |
+   0-2 -/- ; 3-123 fg.body/bg.base ; 124-131 -/-
+09|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+10|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+11|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+12|                      ╭──────────────────────────────────────────────────────────────────────────────────────╮                      |
+   0-2 -/- ; 3-21 -/bg.base ; 22-109 border.input/bg.block ; 110-128 -/bg.base ; 129-131 -/-
+13|                      │ 新建 improve 分析                                                                    │                          |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-103 fg.primary/bg.block/b ; 104-105 border.input/bg.block ; 106-124 -/bg.base ; 125-131 -/-
+14|                      │ 分析不执行任何候选 · 可看文件 1（省略 0）                                            │                                       |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-90 fg.body/bg.block ; 91-92 border.input/bg.block ; 93-111 -/bg.base ; 112-131 -/-
+15|                      │                                                                                      │                      |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-107 -/bg.block ; 108-109 border.input/bg.block ; 110-128 -/bg.base ; 129-131 -/-
+16|                      │ › 取证范围  ○ 1 仅本会话  ◉ 2 本会话 + 近 7 天同类  ○ 3 本会话 + 近 30 天同类        │                                            |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-31 fg.primary/line.inner ; 32-39 fg.body/line.inner ; 40-58 fg.primary/line.inner ; 59-85 fg.body/line.inner ; 86-87 border.input/bg.block ; 88-106 -/bg.base ; 107-131 -/-
+17|                      │   预算上限  ◉ 1 标准  ○ 2 加大                                                       │                              |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-31 fg.label/bg.block ; 32-37 fg.primary/bg.block ; 38-99 fg.body/bg.block ; 100-101 border.input/bg.block ; 102-120 -/bg.base ; 121-131 -/-
+18|                      │   附加来源  + 登记新路径                                                             │                               |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-31 fg.label/bg.block ; 32-98 fg.body/bg.block ; 99-100 border.input/bg.block ; 101-119 -/bg.base ; 120-131 -/-
+19|                      │   分析重点  找出本会话中可改进之处（选填）                                           │                                         |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-31 fg.label/bg.block ; 32-88 fg.faint/bg.block ; 89-90 border.input/bg.block ; 91-109 -/bg.base ; 110-131 -/-
+20|                      │                                                                                      │                      |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-107 -/bg.block ; 108-109 border.input/bg.block ; 110-128 -/bg.base ; 129-131 -/-
+21|                      │ ↑↓ 换行 · 数字键选择 · 空格勾选来源                                                  │                                   |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-94 fg.muted/bg.block ; 95-96 border.input/bg.block ; 97-115 -/bg.base ; 116-131 -/-
+22|                      │ 上限约 ¥17.30（按最坏情况预留） · ≤16 请求 · ≤10 分钟                                │                                      |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-91 fg.label/bg.block ; 92-93 border.input/bg.block ; 94-112 -/bg.base ; 113-131 -/-
+23|                      │ Enter 开始分析 · Esc 取消                                                            │                            |
+   0-2 -/- ; 3-21 -/bg.base ; 22-23 border.input/bg.block ; 24-33 fg.body/bg.block ; 34-101 fg.label/bg.block ; 102-103 border.input/bg.block ; 104-122 -/bg.base ; 123-131 -/-
+24|                      ╰──────────────────────────────────────────────────────────────────────────────────────╯                      |
+   0-2 -/- ; 3-21 -/bg.base ; 22-109 border.input/bg.block ; 110-128 -/bg.base ; 129-131 -/-
+25|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+26|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+27|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+28|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+29|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+30|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+31|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+32|✓                                                                                                                                   |
+   0-0 ac.ok/bg.base ; 1-2 fg.body/bg.base ; 3-128 -/bg.base ; 129-131 fg.body/bg.base
+33|───                                                                                                                              ───|
+   0-2 border.input/- ; 3-128 -/bg.base ; 129-131 border.input/-
+34|描 ↑↓ 选择 · Enter 打开 · Esc 返回会话                                                                                                       |
+   0-1 fg.faint/- ; 2-119 fg.label/bg.base ; 120-131 -/-
+35|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
+   0-131 border.input/-
+36|deepseek-flash · offline · ctx 99 / 1M · 本会话 28 tok < ¥0.01 partial                                                                 |
+   0-23 ac.model/bg.base ; 24-59 fg.label/bg.base ; 60-128 ac.warn/bg.base ; 129-131 -/-
+37|Enter 提交 · / 命令 · Ctrl+R 历史 · ? 帮助                                                                                                  |
+   0-123 fg.label/bg.base ; 124-131 -/-

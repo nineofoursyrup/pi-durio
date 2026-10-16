@@ -79,8 +79,11 @@ test('arguments: display numbers, --name value options, MM-DD dates as [from,to)
   assert.equal(parseDate('2025-02-28', now), new Date(2025, 1, 28).toISOString());
   const sub = parseCommand('/improve history ir-12ab', COMMANDS, now);
   assert.deepEqual([sub.leaf.name, sub.path, sub.positional], ['history', ['history'], ['ir-12ab']]);
-  // A first-version JSON argument stays raw until its screen ticket replaces it.
-  assert.equal(parseCommand('/improve {"purpose":"x y"}').raw, '{"purpose":"x y"}');
+  // /improve new only prefills the launch box; --source repeats.
+  const launch = parseCommand('/improve new --scope 30d --budget large --source self --source eval --focus "x y"', COMMANDS, now);
+  assert.deepEqual([launch.path, launch.options], [['new'], { scope: '30d', budget: 'large', source: 'self,eval', focus: 'x y' }]);
+  rejects('/improve new --scope 1d', /不接受 1d/, ['session', '7d', '30d']);
+  rejects('/improve {"purpose":"x"}', /\/improve 不接受参数/, ['new', 'history', 'suppressions']);
   assert.equal(parseCommand('/acceptance --note "两 个 字"').raw, '--note "两 个 字"');
   rejects('/history --foo 1', /未知选项 --foo/, ['--from', '--to', '--project', '--status']);
   rejects('/history --from 2026/10/01', /日期写 MM-DD 或 YYYY-MM-DD/);

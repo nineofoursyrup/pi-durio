@@ -1,0 +1,77 @@
+132x38 truecolor
+00|◆ pi-durio  ~/project  · 会话 s-xxxx · run r-xxxx                                                             只读 · 任务 1 · ✓ 完成        |
+   0-0 ac.brand/bg.base ; 1-11 fg.primary/bg.base/b ; 12-20 ac.path/bg.base/b ; 21-107 fg.faint/bg.base/b ; 108-109 fg.label/bg.base/b ; 110-119 fg.faint/bg.base/b ; 120-120 ac.ok/bg.base/b ; 121-123 fg.faint/bg.base/b ; 124-131 -/-
+01|┃ 看一下 a.ts                                                                                                                          |
+   0-1 fg.muted/bg.block ; 2-128 fg.primary/bg.block ; 129-131 -/-
+02|   ◆ improve  ~/project                                                                                            分析不执行候选          |
+   0-2 -/bg.base ; 3-4 ac.brand/bg.base ; 5-11 fg.primary/bg.base/b ; 12-114 fg.body/bg.base/b ; 115-121 fg.muted/bg.base/b ; 122-124 -/bg.base ; 125-131 -/-
+03|✓ r                                                                                                                                 |
+   0-0 ac.ok/bg.base ; 1-2 fg.muted/bg.base ; 3-128 -/bg.base ; 129-131 fg.faint/bg.base
+04|   › ir-xxxx · 00-00 00:00 · 来自 s-xxxx · 候选 3 · 未决 2                                                                                |
+   0-2 -/bg.base ; 3-122 fg.body/line.inner ; 123-125 -/bg.base ; 126-131 -/-
+05|Con                                                                                                                                 |
+   0-2 fg.body/bg.base ; 3-128 -/bg.base ; 129-131 fg.body/bg.base
+06|     新建分析                                                                                                                           |
+   0-2 -/- ; 3-124 fg.primary/bg.base ; 125-131 -/-
+07|     历史报告 · 2 份                                                                                                                     |
+   0-2 -/- ; 3-123 fg.body/bg.base ; 124-131 -/-
+08|     建议抑制 · 1 项                                                                                                                     |
+   0-2 -/- ; 3-123 fg.body/bg.base ; 124-131 -/-
+09|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+10|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+11|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+12|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+13|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+14|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+15|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+16|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+17|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+18|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+19|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+20|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+21|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+22|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+23|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+24|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+25|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+26|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+27|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+28|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+29|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+30|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+31|                                                                                                                                    |
+   0-2 -/- ; 3-128 -/bg.base ; 129-131 -/-
+32|✓                                                                                                                                   |
+   0-0 ac.ok/bg.base ; 1-2 fg.body/bg.base ; 3-128 -/bg.base ; 129-131 fg.body/bg.base
+33|───                                                                                                                              ───|
+   0-2 border.input/- ; 3-128 -/bg.base ; 129-131 border.input/-
+34|描 ↑↓ 选择 · Enter 打开 · Esc 返回会话                                                                                                       |
+   0-1 fg.faint/- ; 2-119 fg.label/bg.base ; 120-131 -/-
+35|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
+   0-131 border.input/-
+36|deepseek-flash · offline · ctx 99 / 1M · 本会话 28 tok < ¥0.01 partial                                                                 |
+   0-23 ac.model/bg.base ; 24-59 fg.label/bg.base ; 60-128 ac.warn/bg.base ; 129-131 -/-
+37|Enter 提交 · / 命令 · Ctrl+R 历史 · ? 帮助                                                                                                  |
+   0-123 fg.label/bg.base ; 124-131 -/-

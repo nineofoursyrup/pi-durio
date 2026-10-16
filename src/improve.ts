@@ -11,7 +11,8 @@ import {readSessionChains} from './session-chain.js';
 import {scopedImproveDecisions,listImproveSuppressions,suppressionMatch,conditionIdentity,readImproveDecision,improveFacts} from './improve-history.js';
 
 export interface ImproveLimits {maxRequests:number;maxTokens:number;maxRequestTokens:number;maxDurationMs:number;maxOutputTokens:number}
-export interface ImproveRequest {id:string;purpose:string;limits:ImproveLimits;sources?:ImproveSource[];query?:{maxRuns:number;maxRecords:number;maxEvidenceBytes:number;maxSourceBytes:number}}
+/** `window` (I1 取证范围): every run of the target's context chain, plus at most ten same-project same-type runs accepted in the last 7 or 30 days (0 = chain only). Without it the first-version scope applies (target run, plus `query.maxRuns` comparison runs). */
+export interface ImproveRequest {id:string;purpose:string;limits:ImproveLimits;sources?:ImproveSource[];query?:{maxRuns:number;maxRecords:number;maxEvidenceBytes:number;maxSourceBytes:number};window?:0|7|30}
 export interface ImproveReport {
  id:string;revision:string;kind:'improve';runId:string;target:ControlTarget;request:ImproveRequest;
  state:'complete'|'incomplete';startedAt:string;cutoff:number;deadline:string;
@@ -33,9 +34,9 @@ export const IMPROVE_INSTRUCTIONS=`You are the explicitly invoked pi-durio impro
 const DECISION_INSTRUCTIONS='Each candidate should declare problemKey: a stable explicit identifier for the concrete problem/mechanism in its target/file scope (for example math.add.operator), preserving earlier keys for the same problem. Titles, report IDs, wording, ordinary upgrades and same-kind new observations do not make a new problem. Inspect previousDecisions and applicableSuppressions. Do not repeat active suppressed advice. A changed key in overlapping scope is unresolved identity, not proof of a new problem. A deferred candidate requires both relevant changed file content and reconsideration:{sourceId:original decision evidence ID,reason:explanation of the substantive change,evidence:[new acquired source IDs]}. Byte changes alone do not prove a meaningful condition change. No decision or report text authorizes execution.';
 export function validateImproveRequest(value:unknown,mode:'live'|'offline'):ImproveRequest {
  const r=value as ImproveRequest;
- if(!r||typeof r!=='object'||!Object.keys(r).every(k=>['id','purpose','limits','sources','query'].includes(k))||!/^[-\w.]{1,128}$/.test(r.id)||typeof r.purpose!=='string'||!r.purpose.trim()||Buffer.byteLength(r.purpose)>4096)throw Error('IMPROVE_REQUEST_INVALID');
+ if(!r||typeof r!=='object'||!Object.keys(r).every(k=>['id','purpose','limits','sources','query','window'].includes(k))||r.window!==undefined&&![0,7,30].includes(r.window)||!/^[-\w.]{1,128}$/.test(r.id)||typeof r.purpose!=='string'||!r.purpose.trim()||Buffer.byteLength(r.purpose)>4096)throw Error('IMPROVE_REQUEST_INVALID');
  const l=r.limits;
- if(!l||!['maxRequests','maxTokens','maxRequestTokens','maxDurationMs','maxOutputTokens'].every(k=>Number.isSafeInteger((l as any)[k])&&(l as any)[k]>0)||l.maxRequests>64||l.maxRequestTokens>l.maxTokens||l.maxDurationMs>3600000||l.maxOutputTokens>8192)throw Error('IMPROVE_LIMITS_REQUIRED: set effective request, token, output and time limits before starting');
+ if(!l||!['maxRequests','maxTokens','maxRequestTokens','maxDurationMs','maxOutputTokens'].every(k=>Number.isSafeInteger((l as any)[k])&&(l as any)[k]>0)||l.maxRequests>64||l.maxRequestTokens>l.maxTokens||l.maxDurationMs>3600000||l.maxOutputTokens>65536)throw Error('IMPROVE_LIMITS_REQUIRED: set effective request, token, output and time limits before starting');
  if(mode==='live'&&l.maxRequestTokens<1048576+l.maxOutputTokens)throw Error('IMPROVE_TOKEN_BOUND_REQUIRED: live requests reserve the provider context upper bound plus fixed output maximum');
  if(r.sources){if(!Array.isArray(r.sources)||r.sources.length>12||new Set(r.sources.map(s=>s.id)).size!==r.sources.length)throw Error('IMPROVE_SOURCE_DECLARATION_INVALID');for(const source of r.sources){if(!source||!/^[-\w.]{1,64}$/.test(source.id)||!['project','agent-config','prompt-skill','self-source','eval-asset'].includes(source.kind)||!Array.isArray(source.paths)||source.paths.length>40||source.paths.some(p=>typeof p!=='string'||p.length>1024)||source.root!==undefined&&(typeof source.root!=='string'||!source.root.startsWith('/'))||!Object.keys(source).every(k=>['id','kind','paths','root'].includes(k)))throw Error('IMPROVE_SOURCE_DECLARATION_INVALID');}}
  if(r.query){const bounds={maxRuns:10,maxRecords:200,maxEvidenceBytes:32768,maxSourceBytes:32768};if(Object.keys(r.query).length!==4||Object.entries(bounds).some(([k,max])=>!Number.isSafeInteger((r.query as any)[k])||(r.query as any)[k]<1||(r.query as any)[k]>max))throw Error('IMPROVE_QUERY_LIMIT_INVALID');}
@@ -87,7 +88,15 @@ export function prepareImprove(evidence:Evidence,request:ImproveRequest,target:C
  const allowed=[target.runId],history:{id:string;runId:string;revision:string;state:string;sourceId:string}[]=[];
  // Only explicitly requested recent comparison summaries, same project and known task type.
  const db=openHostReadonly(evidence.root);
- try {if(queryBounds.maxRuns>1)for(const row of db.prepare("SELECT run_id FROM records WHERE kind='task.accepted' AND seq<=? ORDER BY seq DESC LIMIT 200").iterate(cutoff)) {const id=String(row.run_id);if(allowed.includes(id))continue;const candidate=summarizeRun(evidence.root,id,cutoff);if(candidate.workspace===target.workspace&&candidate.kind===original.kind&&candidate.taskType===original.taskType){allowed.push(id);if(allowed.length===queryBounds.maxRuns)break;}}}
+ const similar=(id:string)=>{const candidate=summarizeRun(evidence.root,id,cutoff);return candidate.workspace===target.workspace&&candidate.kind===original.kind&&candidate.taskType===original.taskType;};
+ try {
+  if(request.window!==undefined){
+   // 本会话 = the whole context chain, newest first after the target; 同类 = same project and task type within the window, at most ten.
+   for(const id of readSessionChains(evidence.root,{through:cutoff}).contextRunIds(target.runId).reverse())if(!allowed.includes(id))allowed.push(id);
+   const since=Date.parse(startedAt)-request.window*86400000;let count=0;
+   if(request.window)for(const row of db.prepare("SELECT run_id,at FROM records WHERE kind='task.accepted' AND seq<=? ORDER BY seq DESC LIMIT 500").iterate(cutoff)){if(Date.parse(String(row.at))<since)break;const id=String(row.run_id);if(allowed.includes(id)||!similar(id))continue;allowed.push(id);if(++count===10)break;}
+  }
+  else if(queryBounds.maxRuns>1)for(const row of db.prepare("SELECT run_id FROM records WHERE kind='task.accepted' AND seq<=? ORDER BY seq DESC LIMIT 200").iterate(cutoff)) {const id=String(row.run_id);if(allowed.includes(id))continue;if(similar(id)){allowed.push(id);if(allowed.length===queryBounds.maxRuns)break;}}}
  finally{db.close();}
  const historyDb=openHostReadonly(evidence.root);try{for(const row of historyDb.prepare("SELECT * FROM records WHERE kind='improve.report' AND seq<=? ORDER BY seq DESC LIMIT 200").iterate(cutoff)){const ref=reference(row),old=decode(evidence.root,ref);if(old.target?.workspace===target.workspace){history.push({id:old.id,runId:ref.runId,revision:old.revision,state:old.state,sourceId:ref.id});if(history.length===10)break;}}}finally{historyDb.close();}
  const decisions=scopedImproveDecisions(evidence.root,target.workspace,cutoff),decisionRefs=decisions.flatMap(d=>[{sourceId:d.sourceId,runId:d.runId},...d.results]);

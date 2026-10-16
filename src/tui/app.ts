@@ -1,7 +1,11 @@
 import {ImproveView} from './improve.js';
 import {ImproveSelectionView} from './improve-selection.js';
 import {submitImproveDecision,resumeImproveDecision,restoreImproveSuggestion,rollbackImproveDecision,type ImproveDecision} from '../improve-decisions.js';
-import {validateImproveRequest,type ImproveRequest} from '../improve.js';
+import type {ImproveRequest} from '../improve.js';
+import {ImproveHome,type HomeItem} from './improve-home.js';
+import {ImproveLaunchDialog,type LaunchPrefill} from './improve-launch.js';
+import {completePath,improveRequest,improveVisibleFiles,readReportRecord,registerFromInput} from '../improve-entry.js';
+import {listRegisteredSources} from '../improve-source.js';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { realpathSync } from 'node:fs';
@@ -32,7 +36,7 @@ import { estimateSessionRequests, formatCostTotals, COST_ESTIMATE_NOTICE } from 
 import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageLine, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
-import { ConfirmDialog, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig } from './view-stack.js';
+import { ConfirmDialog, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
 import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatus } from './welcome.js';
 import { COMPACT_VERSION_CHANGED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
@@ -41,7 +45,7 @@ import { RecoveryPanel, disabledInputLines, readRecoveryFacts, recoveryPages, ty
 import { mayWrite, SHOW_READ_ONLY, type WriteAccess } from './write-access.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
-type PanelKind='help'|'exit'|'trace-raw'|'queue'|'history'|'eval'|'eval-plan'|'eval-trial'|'storage'|'trace'|'improve'|'improve-selection'|'metrics';
+type PanelKind='help'|'exit'|'trace-raw'|'queue'|'history'|'eval'|'eval-plan'|'eval-trial'|'storage'|'trace'|'improve-home'|'improve'|'improve-selection'|'metrics';
 type ViewEntry={kind:PanelKind;offset:number;line:number};
 /** 主区窗口：每次读取当前任务最近的记录条数（查询上限）。 */
 const WINDOW=50;
@@ -129,6 +133,9 @@ export class ReadOnlyTui {
   /** 2b 计划层的宿主：Enter 在其上压入 trial trace 层。 */
   private readonly evalHost:PlanViewHost={openTrial:(source,report,trialId)=>{this.evalTrial=new TrialTraceView(source,report,trialId,()=>this.tui.requestRender());this.pushView('eval-trial');}};
   private improveView?:ImproveView;
+  private improveHome?:ImproveHome;
+  /** 进行中的 improve 分析：空闲时发起（主区与 runId 留在当前会话），或排队后在任务结束时开始（queued）。 */
+  private analysis?:{requestId:string;runId?:string;queued:boolean};
   private improveSelectionView?:ImproveSelectionView;
   private storageView?:StorageView;
   private traceView?:TraceView;
@@ -137,7 +144,7 @@ export class ReadOnlyTui {
   /** 即时反馈：临时替换底栏键位提示行（全屏视图保留最右边的 Esc），下一次按键后恢复（U12）。 */
   private hintFeedback?:string;
   /** 视图或会话屏之上的确认框；打开时消费全部按键。 */
-  private dialog?:{box:ConfirmDialog;hide:()=>void;confirm:(selected:number[])=>void};
+  private dialog?:{box:{render(columns:number,rows:number):string[];handleInput(data:string):ConfirmResult};hide:()=>void;confirm:(selected:number[])=>void};
   private pendingRefresh=false;
   private timer?:ReturnType<typeof setInterval>;
   private started=false;
@@ -329,10 +336,11 @@ export class ReadOnlyTui {
     const round=this.runId?this.views.get(this.runId)?.progress.round:undefined;
     return {workspace:safe(workspace.startsWith(`${home}/`)?`~${workspace.slice(home.length)}`:workspace),readOnly:!this.options.coding||!!this.options.show,elsewhere:this.options.elsewhere,
       session:chain?this.shown('session',chain.id):undefined,run:this.runId?this.shown('run',this.runId):undefined,task:chain?.number,
-      ...(this.phase==='running'?{round:round||undefined}:{status:this.runStatus()})};
+      ...(this.phase==='running'&&!this.analysis?{round:round||undefined}:{status:this.runStatus()})};
   }
   private statusParts() {
-    const progress=this.runId?this.views.get(this.runId)?.progress:undefined,start=progress?.segmentStart;
+    // improve 分析期间：第 M 轮与计时取分析 run（#59 第 5 节）。
+    const run=this.analysis?this.analysis.runId:this.runId,progress=run?this.views.get(run)?.progress:undefined,start=progress?.segmentStart;
     // 计时从当前执行段开始（run.started，恢复后为 recovery.started），不计中断时间（T2）。
     return statusParts({phase:this.phase,recovery:this.viewingRecovery,status:this.runStatus(),activity:this.activity,round:progress?.round??0,retry:progress?.retry??false,
       elapsedMs:this.phase==='running'&&start?Date.now()-Date.parse(start):undefined,frame:Math.floor(Date.now()/SPINNER_INTERVAL_MS)});
@@ -344,7 +352,7 @@ export class ReadOnlyTui {
    * 每次刷新或状态变化后重算一次；只是显示，读取失败只让金额未知。
    */
   private usageText() {
-    const scope=this.phase==='running'?'本任务' as const:'本会话' as const,key=`${scope}:${this.runId}:${this.refreshes}`;
+    const scope=this.phase==='running'&&!this.analysis?'本任务' as const:'本会话' as const,key=`${scope}:${this.runId}:${this.refreshes}`;
     if(this.usageMemo?.key!==key){
       let tokens=0,cost:string;
       try{
@@ -378,7 +386,8 @@ export class ReadOnlyTui {
     if(data==='?'&&this.editor.focused&&!this.editor.getExpandedText()) {this.openPanel('help');return {consume:true};}
     // Ctrl+O 展开或折叠全部工具行（T1、#41）；单行由点击切换。
     if(matchesKey(data,'ctrl+o')) {this.expandAll=!this.expandAll;this.toggled.clear();this.tui.requestRender();return {consume:true};}
-    if(matchesKey(data,'ctrl+t')) {this.openTrace();return {consume:true};}
+    // improve 分析期间 Ctrl+T 打开分析 run 的 trace（#59 第 5 节）。
+    if(matchesKey(data,'ctrl+t')) {this.openTrace(this.analysis?.runId??this.runId);return {consume:true};}
     if(matchesKey(data,'ctrl+x')) {this.followChord=this.editor.focused;this.feedback('按 Enter 明确排到下一任务；普通 Enter 默认补充当前任务');return {consume:true};}
     if(matchesKey(data,'escape')) {if(this.phase==='running')this.stop();return {consume:true};}
     if(ctrlC||ctrlD) {
@@ -414,6 +423,8 @@ export class ReadOnlyTui {
     if(!text.trim())return;
     if(this.options.show||this.occupied){this.editor.setText(text);this.lastText=text;this.notice=this.options.show?'只读查看 · 不能提交 · 接续用 pi-durio resume s-…':'工作区被其他进程占用 · 不能提交';this.tui.requestRender();return;}
     if(this.historyWindow||this.viewingRecovery){this.editor.setText(text);this.lastText=text;this.notice='只读历史/恢复视图不能提交；/bottom 返回活动会话，恢复限制仍需显式处置';this.tui.requestRender();return;}
+    // improve 分析期间 Enter 保留文字、不受理，也不作为 steer；结束后下一次 Enter 接续当前会话（T3）。
+    if(this.analysis){this.editor.setText(text);this.lastText=text;this.notice='improve 分析进行中 · 文字保留，未受理；分析结束后 Enter 接续当前会话';this.tui.requestRender();return;}
     if(this.phase==='running') {this.enqueue(text,followUp?'follow-up':'steer');return;}
     if(this.phase!=='idle') {this.editor.setText(text);this.lastText=text;this.notice='当前正在清理；草稿保留，未受理';this.tui.requestRender();return;}
     if(followUp){this.editor.setText(text);this.lastText=text;this.notice='当前没有运行任务；文本保留，按普通 Enter 明确提交新任务';this.tui.requestRender();return;}
@@ -425,7 +436,7 @@ export class ReadOnlyTui {
     this.welcome=undefined;this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.toggled.clear();this.events=[];this.historyWindow=false;this.scroll.scrollToEnd();
     this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.rebuild();
     const self=this;
-    const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}};
+    const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe};
     const run=this.options.coding?runCodingTask:runReadTask;
     this.active=run(options).then(result=>this.applyResult(result)).catch(error=>{this.failure=String(error);this.notice=`未完成：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();
@@ -513,20 +524,105 @@ export class ReadOnlyTui {
       if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';break;}
       try{const template=JSON.parse(raw) as ImproveDecision;if(typeof template?.reportId==='string')template.reportId=resolveDisplayInput(root,'improve-report',template.reportId);this.improveSelectionView=new ImproveSelectionView(root,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
       break;
-    case 'improve':void this.improve(raw);break;
+    case 'improve':this.openImproveHome();break;
+    case 'improve new':{
+      const sources=typeof options.source==='string'?options.source.split(',') as ('self'|'eval')[]:undefined;
+      for(const kind of sources??[])if(!listRegisteredSources(root,this.options.workspace).some(r=>r.kind===(kind==='self'?'self-source':'eval-asset')))throw new CommandError(`--source ${kind} 没有已登记的${kind==='self'?'自身源码':' eval 资产'}`,['/improve new 后在“附加来源”登记新路径']);
+      this.openLaunch({scope:options.scope as LaunchPrefill['scope'],budget:options.budget as LaunchPrefill['budget'],sources,focus:typeof options.focus==='string'?options.focus:undefined});
+      break;
+    }
     }
   }
-  private async improve(input:string) {
-    if(this.historyWindow||this.viewingRecovery){this.notice='只读历史/恢复视图不能发起分析；返回活动目标并完成核对';this.tui.requestRender();return;}
-    if(!input){this.notice='尚未启动。使用 /improve JSON 明确 purpose、limits（maxRequests/maxTokens/maxRequestTokens/maxDurationMs/maxOutputTokens）及 sources；/improves 只读查看报告';this.tui.requestRender();return;}
-    let request:ImproveRequest;try{const parsed=JSON.parse(input);request=validateImproveRequest({...parsed,id:parsed.id??randomUUID()},this.options.mode);}catch(error){this.notice=`尚未启动：${String(error)}`;this.tui.requestRender();return;}
-    if(this.phase==='running'){const target=this.control.target();if(!target){this.notice='当前在收尾或分析中；未受理新的管理请求';this.tui.requestRender();return;}try{const item=await this.control.submit({id:request.id,kind:'improve',input:JSON.stringify(request),target});this.notice=`improve ${item.status} · ${this.shown('improve-report',item.requestId)} → 原 run ${this.shown('run',target.runId)}`;this.loadQueue();}catch(error){this.notice=`未接入：${String(error)}`;}this.tui.requestRender();return;}
-    if(this.phase!=='idle'||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前仍在清理或结果未知；尚未启动分析，先完成恢复核对';this.tui.requestRender();return;}
-    if(!this.runId){this.notice='尚无活动任务；先完成一项工作再针对其证据分析';this.tui.requestRender();return;}
-    const targetRunId=this.result?.improve?.runId===this.runId?this.result.improve.target.runId:this.runId;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
-    this.activity={kind:'improve-analysis',report:this.shown('improve-report',request.id)};
-    this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{this.applyResult(result);const state=result.improve?.state??result.status;this.event(`${state==='complete'?'✓':'✗'} improve ${this.shown('improve-report',request.id)} 分析${state==='complete'?'完成':`未完成 · ${state}`} · /improves 查看；没有执行候选`);}).catch(error=>{this.event(`✗ improve 分析未完成 · ${safe(String(error))}`);}).finally(()=>this.finished());this.tui.requestRender();
+  /** improve 视图第一层（U13）：从会话屏打开，替换整个视图栈。 */
+  private openImproveHome() {
+    try{this.improveHome=new ImproveHome(this.options.dataRoot,{workspace:this.options.workspace,current:()=>this.improveCurrent()});this.openPanel('improve-home');}
+    catch(error){this.notice=`improve 记录不可读取：${safe(String(error))}`;this.tui.requestRender();}
   }
+  /** 第一层“进行中”一行：分析写轮次与计时，提交批次写 /improve 1d 的进度。 */
+  private improveCurrent() {
+    const activity=this.activity;
+    if(activity?.kind!=='improve-analysis'&&activity?.kind!=='improve-execution')return undefined;
+    return this.statusParts().left.map(s=>s.text).join('').replace(/ improve (分析|执行)/,' $1').replace(/ · \/improve 查看$/,'');
+    return undefined;
+  }
+  private openImproveItem(item:HomeItem) {
+    const root=this.options.dataRoot;
+    if(item.kind==='new'){this.openLaunch();return;}
+    if(item.kind==='current'){if(this.activity?.kind==='improve-execution'&&this.improveSelectionView)this.pushView('improve-selection');else this.feedback('分析进行中 · 结束后在会话主区插一行，报告出现在“待选择”');return;}
+    // 待选择的报告进入 1d（#90）；1d 改版前只读打开该报告。历史报告与建议抑制的改版由 #91 实现。
+    try{this.improveView=item.kind==='report'?new ImproveView(root,item.id):new ImproveView(root,undefined,item.kind==='suppressions');this.pushView('improve');}
+    catch(error){this.feedback(`improve 报告不可读取：${safe(String(error))}`);}
+  }
+  /** 不能发起分析的原因（只读历史、恢复核对、清理中、已有分析、尚无任务）；可以时 undefined。 */
+  private launchBlocked() {
+    if(this.historyWindow||this.viewingRecovery)return '只读历史/恢复视图不能发起分析 · /bottom 返回活动会话并完成核对';
+    if(this.analysis)return '已有 improve 分析进行中 · 结束后再新建';
+    if(this.activity)return '当前有后台工作进行中 · 结束后再新建分析';
+    if(this.phase==='stopping'||this.phase==='exiting')return '正在清理 · 结束后再新建分析';
+    if(this.phase==='running'&&!this.control.target())return '当前任务仍在受理或收尾 · 稍后再新建分析';
+    if(this.phase==='idle'&&(this.result?.status==='unknown'||this.result?.cleanup==='unknown'))return '结果未知 · 先完成恢复核对';
+    if(!this.runId)return '尚无任务 · 先完成一个任务，再分析本会话';
+    return undefined;
+  }
+  /**
+   * 启动确认框（U4、U12）。“本会话”是当前任务所在的上下文链；忙时确认后独立排队（不作为 steer），
+   * 绑定原会话与项目，取证截止点在分析开始时固定。
+   */
+  private openLaunch(prefill?:LaunchPrefill) {
+    const blocked=this.launchBlocked();
+    if(blocked){if(this.panel)this.feedback(blocked);else{this.notice=blocked;this.tui.requestRender();}return;}
+    const root=this.options.dataRoot,workspace=this.options.workspace,target=this.phase==='running'?this.control.target()!.runId:this.runId!;
+    let dialog:ImproveLaunchDialog;
+    try{dialog=new ImproveLaunchDialog({visible:improveVisibleFiles(root,workspace,target),registrations:listRegisteredSources(root,workspace),queued:this.phase==='running',
+      register:input=>registerFromInput(root,workspace,input),complete:input=>completePath(workspace,input)},prefill);}
+    catch(error){this.notice=`improve 启动框不可打开：${safe(String(error))}`;this.tui.requestRender();return;}
+    this.openDialog(dialog,()=>{
+      const blocked=this.launchBlocked();if(blocked){this.notice=blocked;this.tui.requestRender();return;}
+      // 确认时重新取默认可看的文件：分析绑定确认这一刻的会话。
+      const run=this.phase==='running'?this.control.target()!.runId:this.runId!;
+      let request:ImproveRequest;try{request=improveRequest(randomUUID(),dialog.choice,improveVisibleFiles(root,workspace,run));}catch(error){this.notice=`尚未启动：${safe(String(error))}`;this.tui.requestRender();return;}
+      this.closeViews();void this.startImprove(request);
+    });
+  }
+  private async startImprove(request:ImproveRequest) {
+    if(this.phase==='running'){
+      const target=this.control.target();if(!target){this.notice='当前任务仍在受理或收尾；分析未排队';this.tui.requestRender();return;}
+      try{const item=await this.control.submit({id:request.id,kind:'improve',input:JSON.stringify(request),target});this.loadQueue();this.notice=`improve ${this.shown('improve-report',item.requestId)} 已排队 · 当前任务结束后开始 · ${this.shown('queue-request',item.requestId)} · /queue`;}
+      catch(error){this.notice=`分析未排队：${safe(String(error))}`;}
+      this.tui.requestRender();return;
+    }
+    const targetRunId=this.runId!;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
+    this.analysis={requestId:request.id,queued:false};this.activity={kind:'improve-analysis',report:this.shown('improve-report',request.id)};
+    // 主区、runId 与本进程的任务结果都留在当前会话；分析结果只插一行，不自动打开 1d（I1）。
+    this.active=analyzeImprove({dataRoot:this.options.dataRoot,workspace:this.options.workspace,targetRunId,request,mode:this.options.mode,transport:this.options.transport,signal:this.controller.signal,get cancellation(){return self.cancellation;},
+      onObservation:event=>{if(this.analysis)this.analysis.runId=event.runId;this.pendingRefresh=true;}})
+      .then(result=>this.analysisEnded(request.id,result.improve??null,result.status==='unknown'||result.cleanup==='unknown'?`清理未知 · pi-durio resume ${this.shown('session',result.sessionId)} 核对`:undefined))
+      .catch(error=>this.analysisEnded(request.id,readReportRecord(this.options.dataRoot,request.id),safe(String(error))))
+      .finally(()=>this.finished());
+    this.tui.requestRender();
+  }
+  /** 分析结束：主区插一行（完成写候选数，失败或达到上限写原因并说明不完整报告已保留）。 */
+  private analysisEnded(requestId:string,report:{state:string;candidates:unknown[];reason:string|null}|null,problem?:string) {
+    this.analysis=undefined;this.activity=undefined;
+    const label=this.shown('improve-report',requestId);
+    if(report?.state==='complete')this.event(`${report.candidates.length?`✓ improve ${label} 完成 · ${report.candidates.length} 个候选 · /improve 打开`:`✓ improve ${label} 完成 · 没有候选`}${problem?` · ${problem}`:''}`);
+    else if(report)this.event(`✗ improve ${label} 未完成 · ${analysisReason(report.reason??problem??'未知')} · 不完整报告已保留`);
+    else this.event(`✗ improve ${label} 未完成 · ${analysisReason(problem??'未知')}`);
+  }
+  /**
+   * 任务 run 的观察回调。排队的 improve 分析在任务结束后由 runtime 在同一次执行里开始：它的 run 不进主区，
+   * 只设状态行；之后的 follow-up run 照常成为主区的当前 run。
+   */
+  private readonly observe=(event:{runId:string})=>{
+    this.pendingRefresh=true;
+    if(event.runId===this.runId||event.runId===this.analysis?.runId)return;
+    let accepted:any;
+    try{const ref=readRunRecords(this.options.dataRoot,event.runId,{limit:1,kinds:['task.accepted']}).records[0];accepted=ref&&JSON.parse(readObject(this.options.dataRoot,ref.ref).toString());}catch{/* Decided on a later observation. */}
+    if(accepted?.kind==='improve'){this.analysis={requestId:accepted.improveRequestId,runId:event.runId,queued:true};this.activity={kind:'improve-analysis',report:this.shown('improve-report',accepted.improveRequestId)};return;}
+    if(!accepted&&this.runId)return;
+    if(this.analysis?.queued)this.analysisEnded(this.analysis.requestId,readReportRecord(this.options.dataRoot,this.analysis.requestId));
+    this.runId=event.runId;
+  };
   private async submitImproveChoice(decision:ImproveDecision){
     if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery)throw Error('IMPROVE_SELECTION_CURRENT_STATE_BLOCKED');
     this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.activity={kind:'improve-execution',report:this.shown('improve-report',decision.reportId)};
@@ -557,7 +653,8 @@ export class ReadOnlyTui {
   /** 后台完成事件：在主区末尾插一行。 */
   private event(text:string) {this.events.push(text);this.rebuild();}
   private finished() {
-    this.activity=undefined;this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting'){this.phase='idle';void this.welcome?.refresh().catch(error=>{this.notice=`欢迎屏事实不可读取：${safe(String(error))}`;});}this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
+    if(this.analysis?.queued)this.analysisEnded(this.analysis.requestId,readReportRecord(this.options.dataRoot,this.analysis.requestId));
+    this.analysis=undefined;this.activity=undefined;this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting'){this.phase='idle';void this.welcome?.refresh().catch(error=>{this.notice=`欢迎屏事实不可读取：${safe(String(error))}`;});}this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
   }
   private enqueue(text:string,kind:'steer'|'follow-up'|'compact'|'improve') {
     const target=this.control.target();
@@ -596,7 +693,7 @@ export class ReadOnlyTui {
         if(action==='reattach') {
           this.closeViews();this.welcome=undefined;this.phase='running';this.controller=new AbortController();this.cancellation='exit';
           const self=this;
-          this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
+          this.active=decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision,authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe}).then(result=>{if('usage' in result)this.applyResult(result);else this.notice=`已保存状态 ${result.status}`;}).catch(error=>{this.notice=`重新接入受阻：${safe(String(error))}`;}).finally(()=>this.finished());
           return;
         }
         const result=await decideQueue({dataRoot:this.options.dataRoot,runId:item.target.runId,decision});this.notice=result.status==='withdrawn'?'撤回已提交':`未撤回：${result.status}`;
@@ -658,7 +755,7 @@ export class ReadOnlyTui {
   private async recoveryDecision(decision:RecoveryDecision) {
     if(this.phase!=='idle'||!this.recovery){this.notice='先打开恢复核对获取当前事实';return;}
     const runId=this.recovery.runId;this.closeViews();this.recoveryOpen=false;this.recoveryPanel=undefined;this.viewingRecovery=false;this.phase='running';this.controller=new AbortController();this.cancellation='exit';const self=this;
-    this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:event=>{this.runId=event.runId;this.pendingRefresh=true;}}).then(result=>{
+    this.active=recoverRun({dataRoot:this.options.dataRoot,runId,authorization:this.authorization(),decision,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe}).then(result=>{
       if('usage' in result){this.recovery=undefined;this.applyResult(result);}
       else if(result.status==='ended'){this.recovery=result;this.result=undefined;this.notice='旧工作已结束 · 新任务开启新会话，不接续旧上下文';}
       else if(result.status==='completed'){this.recovery=result;this.result=undefined;}
@@ -682,7 +779,7 @@ export class ReadOnlyTui {
     this.confirmation=undefined;
     if(this.phase!=='running')return;
     this.widths?.retainPending('stop-preserve-unapplied-input');
-    this.cancellation='stop';this.phase='stopping';this.notice=`请求中止 run ${this.runId?this.shown('run',this.runId):'受理中'}；等待 runtime 确认`;this.controller?.abort();this.tui.requestRender();
+    this.cancellation='stop';this.phase='stopping';this.notice=this.analysis?`请求停止 improve 分析 ${this.shown('improve-report',this.analysis.requestId)}；等待 runtime 确认`:`请求中止 run ${this.runId?this.shown('run',this.runId):'受理中'}；等待 runtime 确认`;this.controller?.abort();this.tui.requestRender();
   }
   private refresh() {
     if(this.widths?.blocked){this.pendingRefresh=true;return;}
@@ -709,7 +806,7 @@ export class ReadOnlyTui {
         const reported=readRunRecords(this.options.dataRoot,this.runId,{tail:true,limit:8,kinds:['model.response']}).records.map(record=>JSON.parse(readObject(this.options.dataRoot,record.ref).toString())).findLast(data=>data.usage==='reported'&&calculateContextTokens(data.message.usage)>0);
         this.context=reported?{runId:this.runId,tokens:calculateContextTokens(reported.message.usage),estimated:true,contextWindow:contextWindow??this.context.contextWindow}:{...this.prefix(),runId:this.runId};
       }
-      this.view(this.runId).updateProgress();this.refreshes++;
+      this.view(this.runId).updateProgress();if(this.analysis?.runId)this.view(this.analysis.runId).updateProgress();this.refreshes++;
       // 上滚或打开视图时保留阅读位置；“↓ 回到底部”提示由滚动区给出。
       if(!this.historyWindow&&this.scroll.isFollowingEnd&&!this.panel) {this.records=current.records;this.rebuild();}
       this.tui.requestRender();
@@ -736,7 +833,7 @@ export class ReadOnlyTui {
       this.displaySources.push(text);block(width=>plainLines(text,width,'fg.muted'));
     }
     if(this.records.length&&this.records[0].kind!=='task.accepted')block(width=>plainLines('当前内容窗口 · /older 查看更早内容',width,'fg.faint'));
-    const entries=this.runId?this.view(this.runId).project(this.records,{active:this.phase!=='idle',answer:this.result?.answer&&!this.historyWindow?this.result.answer:undefined}):[];
+    const entries=this.runId?this.view(this.runId).project(this.records,{active:this.phase!=='idle'&&!this.analysis,answer:this.result?.answer&&!this.historyWindow?this.result.answer:undefined}):[];
     let previous:string|undefined;
     for(const entry of entries) {
       // 区块之间空一行；相邻工具行连成一组。
@@ -843,7 +940,7 @@ export class ReadOnlyTui {
       if(event.type==='wheel'&&panel.kind==='trace-raw'){this.traceRaw?.scroll(event.wheelDelta??0);return {handled:true};}
       if(event.type==='click'&&panel.kind==='eval-trial'){this.evalTrial?.click(event.y);this.tui.requestRender();return {handled:true};}
       if(event.type==='click'&&panel.kind==='trace'){this.traceView?.click(event.y);this.tui.requestRender();return {handled:true};}
-      if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalList?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-plan')this.evalPlan?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-trial')this.evalTrial?.scroll(event.wheelDelta??0);else if(panel.kind==='trace')this.traceView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
+      if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve-home')this.improveHome?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalList?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-plan')this.evalPlan?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-trial')this.evalTrial?.scroll(event.wheelDelta??0);else if(panel.kind==='trace')this.traceView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
     }};
     const overlay=this.tui.showOverlay(component,{width:'96%',maxHeight:'90%',anchor:'center'});this.hidePanel=()=>overlay.hide();this.tui.requestRender();
   }
@@ -874,6 +971,7 @@ export class ReadOnlyTui {
   private sessionHints():string[] {
     if(this.phase==='stopping'||this.phase==='exiting')return [];
     if(this.viewingRecovery)return this.recoveryOpen?['Ctrl+R 历史','Ctrl+T trace','? 帮助']:['Enter 打开恢复核对','Ctrl+C 退出（保留可恢复工作）'];
+    if(this.analysis)return ['Ctrl+C 停止分析','Ctrl+T 分析 trace','/improve 查看','? 帮助'];
     if(this.phase==='running')return ['Enter steer','Ctrl+X Enter follow-up','Ctrl+C 中止','Ctrl+O 展开'];
     return ['Enter 提交','/ 命令','Ctrl+R 历史','? 帮助'];
   }
@@ -881,6 +979,7 @@ export class ReadOnlyTui {
   private placeholder() {
     if(this.phase==='stopping'||this.phase==='exiting')return '正在清理 · 输入保留为草稿，不会受理';
     if(this.viewingRecovery)return '恢复核对进行中 · 输入不会提交';
+    if(this.analysis)return 'improve 分析进行中 · 输入照常编辑，结束后 Enter 接续当前会话';
     if(this.phase==='running')return '补充当前任务…   Ctrl+X Enter 排到下一任务';
     return `${this.options.coding?'描述要完成的修改…':'描述要查看或分析的内容…'}   / 命令  @ 文件  Shift+Enter 换行`;
   }
@@ -888,6 +987,7 @@ export class ReadOnlyTui {
     const panel=this.panel;if(!panel)return[];
     if(panel.kind==='improve-selection'){const lines=this.improveSelectionView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='improve'){const lines=this.improveView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='improve-home'){const lines=this.improveHome?.render(width,this.overlayHeight(),this.viewStack.length)??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval'){const lines=this.evalList?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval-plan'){const lines=this.evalPlan?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval-trial'){const lines=this.evalTrial?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
@@ -917,6 +1017,7 @@ export class ReadOnlyTui {
     if(key==='inert')return;
     if(panel.kind==='improve-selection'){void this.improveSelectionView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='improve'){this.improveView?.handleInput(data);this.tui.requestRender();return;}
+    if(panel.kind==='improve-home'){const item=this.improveHome?.handleInput(data);if(item)this.openImproveItem(item);this.tui.requestRender();return;}
     if(panel.kind==='eval'){this.evalList?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='eval-plan'){this.evalPlan?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='eval-trial'){this.evalTrial?.handleInput(data);this.tui.requestRender();return;}
@@ -942,6 +1043,8 @@ export class ReadOnlyTui {
   /** Esc：弹出最上层视图；栈空时关闭浮层、焦点还给输入框（回到会话屏）。 */
   private closePanel() {
     this.viewStack.pop();
+    // 回到第一层时重新读取：分析或决定可能已经结束。
+    if(this.panel?.kind==='improve-home')this.improveHome?.refresh();
     if(!this.viewStack.length){this.hidePanel?.();this.hidePanel=undefined;this.tui.setFocus(this.editor);}
     this.confirmation=undefined;this.tui.requestRender();
   }
@@ -957,9 +1060,11 @@ export class ReadOnlyTui {
    * 在当前层（视图或会话屏）之上打开确认框（U12 版式）。Enter 可用时调用 confirm 并关闭；Esc 只关闭。
    * 打开期间消费全部按键，不穿透到视图或会话屏。
    */
-  private openConfirm(config:ConfirmConfig,confirm:(selected:number[])=>void) {
+  private openConfirm(config:ConfirmConfig,confirm:(selected:number[])=>void) {this.openDialog(new ConfirmDialog(config),confirm);}
+  /** 任意确认框组件（U12 版式；如 improve 启动框）居中打开。 */
+  private openDialog(box:NonNullable<typeof this.dialog>['box'],confirm:(selected:number[])=>void) {
     this.closeConfirm();
-    const box=new ConfirmDialog(config),terminal=this.terminal;
+    const terminal=this.terminal;
     const component:Component={invalidate(){},render:()=>box.render(terminal.columns,terminal.rows),handleInput:data=>this.dialogInput(data)};
     const overlay=this.tui.showOverlay(component,{get width(){return ConfirmDialog.width(terminal.columns);},anchor:'center'});
     this.dialog={box,confirm,hide:()=>overlay.hide()};this.tui.requestRender();
@@ -1007,6 +1112,16 @@ export class ReadOnlyTui {
     const result={result:this.result,error:this.failure,draftSaved,widthCalibration:this.widths?.snapshot()};
     this.resolveClosed(result);return result;
   }
+}
+
+/** improve 分析未完成的原因：达到预算或时限、停止，其余写原因码。 */
+function analysisReason(reason:string) {
+  const code=/[A-Z][A-Z0-9_]{3,}/.exec(reason)?.[0];
+  if(code==='BUDGET_DEADLINE')return `达到时限 · ${code}`;
+  if(code&&/^BUDGET_(REQUEST|TOKEN)_LIMIT|^BUDGET_PROVIDER_BOUND/.test(code))return `达到预算上限 · ${code}`;
+  if(/Analysis stop/.test(reason))return '已停止';
+  if(/Analysis exit/.test(reason))return '退出时中止';
+  return safe(code??reason.slice(0,120));
 }
 
 /** Exit summary line for "本次会话": every run of the session the summary reports, estimated in CNY. */
