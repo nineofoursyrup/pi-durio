@@ -17,14 +17,22 @@ export function redactAnalysisText(text:string) {
  return {text:reasons.length?'[WITHHELD]':text,reasons,coverage:'conservative known patterns; not universal secret detection'};
 }
 function inside(root:string,path:string){const rel=relative(root,path);return rel!==''&&!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith(`..${sep}`);}
-/** Open only declared ordinary files, with bounded reads and alias checks before/after acquisition.
- * The model has no filesystem capability: all acquired views are frozen before scheduling. */
-export function sourceBytes(root:string,path:string,max=262144,compiler=false) {
+function openSourceFile(root:string,path:string,compiler:boolean) {
  if(isAbsolute(path)||!path||path.split(/[\\/]/).some(p=>p==='..'||p==='.'||!p)||/(^|\/)\.git(?:\/|$)/.test(path)||!compiler&&/(^|\/)node_modules(?:\/|$)/.test(path))throw Error('IMPROVE_SOURCE_PATH_DENIED');
  const absolute=join(root,path);if(!inside(root,absolute))throw Error('IMPROVE_SOURCE_PATH_DENIED');
  let part=root;for(const segment of path.split('/')){part=join(part,segment);if(lstatSync(part).isSymbolicLink())throw Error('IMPROVE_SOURCE_ALIAS_DENIED');}
  if(realpathSync(absolute)!==absolute)throw Error('IMPROVE_SOURCE_ALIAS_DENIED');
- const fd=openSync(absolute,constants.O_RDONLY|constants.O_NOFOLLOW);
+ return {absolute,fd:openSync(absolute,constants.O_RDONLY|constants.O_NOFOLLOW)};
+}
+/** A bounded ordinary-file metadata preflight. Later reads must recheck actual bytes. */
+export function sourceFileSize(root:string,path:string,max=262144,compiler=false) {
+ const {absolute,fd}=openSourceFile(root,path,compiler);
+ try {const info=fstatSync(fd),named=lstatSync(absolute);if(!info.isFile()||info.size>max)throw Error('IMPROVE_SOURCE_SIZE_OR_TYPE_DENIED');if(info.dev!==named.dev||info.ino!==named.ino||realpathSync(absolute)!==absolute)throw Error('IMPROVE_SOURCE_CHANGED');return info.size;}finally{closeSync(fd);}
+}
+/** Open only declared ordinary files, with bounded reads and alias checks before/after acquisition.
+ * The model has no filesystem capability: all acquired views are frozen before scheduling. */
+export function sourceBytes(root:string,path:string,max=262144,compiler=false) {
+ const {absolute,fd}=openSourceFile(root,path,compiler);
  try {const before=fstatSync(fd);if(!before.isFile()||before.size>max)throw Error('IMPROVE_SOURCE_SIZE_OR_TYPE_DENIED');const bytes=readFileSync(fd),after=fstatSync(fd),named=lstatSync(absolute);if(bytes.length>max||before.size!==after.size||before.mtimeMs!==after.mtimeMs||named.dev!==after.dev||named.ino!==after.ino||realpathSync(absolute)!==absolute)throw Error('IMPROVE_SOURCE_CHANGED');return bytes;}finally{closeSync(fd);}
 }
 export function sourceInputPaths(root:string):string[]{
