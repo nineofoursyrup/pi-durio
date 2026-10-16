@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import fs, { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stripTerminalSequences, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
 import { Evidence, digest } from '../src/evidence.js';
@@ -241,7 +242,7 @@ test('v1 fixture: list and plan layers read the first-version plan without write
 
 // ─── trial trace（V7） ───────────────────────────────────────────────────────
 
-test('trial trace: restricted-side raw beside host-mediated usage; fallback lists host records only', async () => {
+test('trial trace: restricted-side raw beside host-mediated usage; fallback lists host records only', async t => {
   // 受限侧：一次离线 coding 任务写出的数据根，按导出格式（data/…）保留为 trial 产物。
   const base = mkdtempSync(join(tmpdir(), 'durio-2b-trial-')), workspace = join(base, 'project'), guest = join(base, 'guest-data');
   mkdirSync(workspace); writeFileSync(join(workspace, 'README.md'), 'Trial fixture\n');
@@ -300,10 +301,38 @@ test('trial trace: restricted-side raw beside host-mediated usage; fallback list
   const terminal = new TestTerminal(), app = new ReadOnlyTui({ workspace, dataRoot: root, draftRoot: join(base, 'drafts'), mode: 'offline', show: { run: run.runId }, terminal, widthCalibration: false,
     transport: async () => { throw Error('viewing trial originals cannot call a provider'); }, copy: async text => { copied.push(text); return true; } });
   const screen = () => plain(app.screen()).join('\n'), key = (data: string) => terminal.input(data);
+  let releaseCopy!: () => void, enteredCopy!: () => void;
+  const copyGate = new Promise<void>(resolve => { releaseCopy = resolve; });
+  const copyPaused = new Promise<void>(resolve => { enteredCopy = resolve; });
+  let heldCopy = false, openingSettled = false;
+  let renderedTrial: { trialId: string; opened: Promise<void> } | undefined;
+  const originalRender = TrialTraceView.prototype.render, originalWrite = fs.promises.writeFile;
   try {
+    // Observe the real view's public lifecycle without replacing its rendering or copy.
+    t.mock.method(TrialTraceView.prototype, 'render', function (this: TrialTraceView, ...args: Parameters<TrialTraceView['render']>) {
+      renderedTrial ??= { trialId: this.trialId, opened: this.opened };
+      return originalRender.apply(this, args);
+    });
+    t.mock.method(fs.promises, 'writeFile', async (...args: Parameters<typeof originalWrite>) => {
+      const path = String(args[0]);
+      if (!heldCopy && basename(path) === 'host.sqlite' && basename(dirname(path)).startsWith('pi-durio-trial-')) {
+        heldCopy = true; enteredCopy(); await copyGate;
+      }
+      return originalWrite(...args);
+    });
+    syncBuiltinESMExports();
     app.start(); key(`/eval ${source.label}`); key('\r'); key('\r');
-    for (let i = 0; i < 200 && !screen().includes('◆ trace'); i++) await new Promise(resolve => setTimeout(resolve, 10));
     assert.match(screen(), /◆ trial/);
+    assert.ok(renderedTrial, 'the app rendered a real trial view');
+    assert.equal(renderedTrial.trialId, baseline);
+    void renderedTrial.opened.then(() => { openingSettled = true; }, () => { openingSettled = true; });
+    await Promise.race([copyPaused, renderedTrial.opened]);
+    assert.equal(heldCopy, true, 'the real copy reached the controlled host.sqlite write');
+    assert.equal(openingSettled, false, 'the public lifecycle remains pending while its copy is held');
+    assert.match(screen(), /◆ trial/);
+    assert.doesNotMatch(screen(), /◆ trace/, 'the trial banner can render before its copy is ready');
+    releaseCopy();
+    await renderedTrial.opened;
     assert.match(screen(), /◆ trace/, 'wait for the copied trace, not the show run label behind the loading view');
     assert.match(screen(), /run r-/);
     for (let i = 0; i < 10 && !/tool · read/.test(screen()); i++) key('\x1b[B');
@@ -314,7 +343,11 @@ test('trial trace: restricted-side raw beside host-mediated usage; fallback list
     assert.match(copied.at(-1)!, /Trial fixture/);
     key('\x1b'); assert.match(screen(), /◆ trial/); assert.doesNotMatch(screen(), /◆ trace 原文/);
     key('\x1b'); assert.doesNotMatch(screen(), /◆ trial/);
-  } finally { await app.exit(); }
+  } finally {
+    releaseCopy();
+    t.mock.restoreAll(); syncBuiltinESMExports();
+    try { await renderedTrial?.opened; } finally { await app.exit(); }
+  }
   assert.equal(transport.calls.length, providerCalls);
   assert.deepEqual(regularFiles(root).map(path => [path, digest(readFileSync(join(root, path)))]), before);
   assert.deepEqual(regularFiles(guest).map(path => [path, digest(readFileSync(join(guest, path)))]), beforeGuest);
