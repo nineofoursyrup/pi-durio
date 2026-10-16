@@ -1,3 +1,4 @@
+import type {EvalCleanupReceipt} from './eval/cleanup.js';
 import {planEvalAssets} from './improve-eval-assets.js';
 import {readFileSync,realpathSync,existsSync} from 'node:fs';
 import {mkdir} from 'node:fs/promises';
@@ -35,11 +36,12 @@ export function decisionDigest(value:unknown):string {
  const canonical=(x:any):any=>Array.isArray(x)?x.map(canonical):x&&typeof x==='object'?Object.fromEntries(Object.keys(x).sort().map(k=>[k,canonical(x[k])])):x;
  return digest(JSON.stringify(canonical(value)));
 }
-function currentVersion(){
+export function currentImproveVersion(){
  const bytes=readFileSync(new URL('../execution/source-build.json',import.meta.url)),manifest=JSON.parse(bytes.toString());
  for(const file of manifest.outputs)if(digest(readFileSync(new URL('../../'+file.path,import.meta.url)))!==file.sha256)throw Error('IMPROVE_EXECUTION_VERSION_DRIFT');
  return digest(JSON.stringify({node:process.version,platform:process.platform,arch:process.arch,build:digest(bytes)}));
 }
+const currentVersion=currentImproveVersion;
 const contains=(parent:string,child:string)=>{const p=relative(parent,child);return !p||!isAbsolute(p)&&p!=='..'&&!p.startsWith('../');};
 function checkTemporaryDirectory(path:string|undefined,targets:SourceTarget[]){
  if(!path||!isAbsolute(path)||resolve(path)!==path||realpathSync(dirname(path))!==dirname(path)||existsSync(path)&&realpathSync(path)!==path||targets.some(t=>t.workspace&&contains(t.workspace,path)))throw Error('IMPROVE_TEMPORARY_SCOPE_REQUIRED: an explicit new directory outside every formal target');
@@ -186,7 +188,8 @@ export function deriveImproveDecision(root:string,reportId:string,selections:{ca
  const limits={deadline,maxChecks:opts.maxChecks??total.checks,maxRequests:total.requests,maxTokens:total.tokens};
  return {id:opts.id,reportId,reportRevision:report.revision,selections:deriveSelections,groups,limits,...(opts.directory?{directory:opts.directory}:{})};
 }
-type SubmitOptions={dataRoot:string;decision:ImproveDecision;fault?:(kind:string)=>void;signal?:AbortSignal};
+export interface ImproveCleanupReceipt {storage:'not-opened'|'closed'|'unknown';owner:'released'|'unknown';workspaces:{root:string;released:boolean}[]}
+type SubmitOptions={dataRoot:string;decision:ImproveDecision;fault?:(kind:string)=>void;signal?:AbortSignal;onEvalCleanup?:(receipt:EvalCleanupReceipt)=>void;onCleanup?:(receipt:ImproveCleanupReceipt)=>void};
 async function workspaceLeases(decision:ImproveDecision,onCompromised:(error:Error)=>void){
  const roots=[...new Set(await Promise.all(decision.selections.filter(s=>['validate-only','execute-declared-scope'].includes(s.mode)).flatMap(s=>[s.target.workspace!,...(s.formal?.activate?[s.formal.activate.workspace]:[]),...(s.formal?.newProcess?[s.formal.newProcess.workspace]:[])]).map(root=>resolveWorkspaceRoot(root))))].sort((a,b)=>a.length-b.length),leases:Awaited<ReturnType<typeof acquireWorkspaceOwner>>[]=[];
  try{for(const root of roots)if(!leases.some(l=>contains(l.root,root)))leases.push(await acquireWorkspaceOwner(root,onCompromised));return leases;}catch(error){for(const lease of leases.reverse())await lease.release();throw error;}
@@ -212,7 +215,7 @@ async function executeGroups(options:SubmitOptions,evidence:Evidence,sourceId:st
    const reserved=groupReservation(group),spent=readImproveDecision(options.dataRoot,d.id).reserved;
    if(spent.checks+reserved.checks>d.limits.maxChecks||spent.requests+reserved.requests>d.limits.maxRequests||spent.tokens+reserved.tokens>d.limits.maxTokens)throw Error('IMPROVE_TOTAL_BUDGET_EXCEEDED');
    record('improve.group-started',{groupId:group.id,reserved,directory:join(d.directory!,group.id)});
-   let result=await validateImproveGroup({evidence,decisionSource:sourceId,decisionId:d.id,group,candidates,defaults,directory:join(d.directory!,group.id),deadline:d.limits.deadline,signal:options.signal??new AbortController().signal,record,guard});
+   let result=await validateImproveGroup({evidence,decisionSource:sourceId,decisionId:d.id,group,candidates,defaults,directory:join(d.directory!,group.id),deadline:d.limits.deadline,signal:options.signal??new AbortController().signal,record,guard,onEvalCleanup:options.onEvalCleanup});
    try{for(const c of candidates)checkImproveBaseline(c.target);}catch(error){result={...result,state:'failed',reason:String(error),effect:'证据不足',conclusion:{...result.conclusion,effect:'证据不足',allChecksPassed:false,allDeclaredBenefitsMet:false}};}
    record('improve.validation',{groupId:group.id,state:result.state,reason:result.reason,result});
    if(result.state!=='completed'){stopped=result.reason??result.state;break;}
@@ -230,7 +233,7 @@ export async function submitImproveDecision(options:SubmitOptions){
  if(prior){if(prior.data.requestDigest!==requestDigest)throw Error('IMPROVE_DECISION_ID_REUSED');return readImproveDecision(dataRoot,decision.id);}
  previewImproveDecision(dataRoot,decision);
  const abort=new AbortController(),signal=options.signal?AbortSignal.any([options.signal,abort.signal]):abort.signal;
- const owner=await acquireOwner(dataRoot,error=>abort.abort(error));let evidence:Evidence|undefined,leases:Awaited<ReturnType<typeof workspaceLeases>>=[];
+ const owner=await acquireOwner(dataRoot,error=>abort.abort(error));let evidence:Evidence|undefined,leases:Awaited<ReturnType<typeof workspaceLeases>>=[],storage:ImproveCleanupReceipt['storage']='not-opened';
  try{
   owner.assertHeld();const raced=improveFacts(dataRoot).find(f=>f.kind==='improve.decision'&&f.data.id===decision.id);
   if(raced){if(raced.data.requestDigest!==requestDigest)throw Error('IMPROVE_DECISION_ID_REUSED');return readImproveDecision(dataRoot,decision.id);}
@@ -238,35 +241,49 @@ export async function submitImproveDecision(options:SubmitOptions){
   leases=await workspaceLeases(decision,error=>abort.abort(error));
   const report=readImproveReport(dataRoot,decision.reportId).report!;
   const guard=()=>{owner.assertHeld();for(const lease of leases)lease.assertHeld();};
-  evidence=new Evidence(dataRoot,report.runId,kind=>{guard();options.fault?.(kind);});
+  storage='unknown';evidence=new Evidence(dataRoot,report.runId,kind=>{guard();options.fault?.(kind);});
   const executionVersion=currentVersion();
   // The host fixes the selection's budget price when the decision is saved; the request digest stays the user's structured data.
   const sourceId=appendFact(evidence,'improve.decision',{id:decision.id,workspace:report.target.workspace,requestDigest,executionVersion,price:hostPlanPrice('deepseek','deepseek-flash'),decision,decisions:decision.selections.map(s=>{const c=report.candidates.find(c=>c.id===s.candidateId)!;return {candidateId:c.id,mode:s.mode,problem:problemIdentity(c),condition:conditionIdentity(c),conditionFiles:conditionFiles(c)};})});
   await executeGroups({...options,signal},evidence,sourceId,decision.groups,executionVersion,guard,leases.map(l=>l.root));
- }finally{evidence?.close();for(const lease of leases.reverse())await lease.release();await owner.release();}
+ }finally{
+  const cleanup:ImproveCleanupReceipt={storage,owner:'unknown',workspaces:leases.map(l=>({root:l.root,released:false}))};
+  try{try{if(evidence){evidence.close();cleanup.storage='closed';}}finally{for(const lease of leases.reverse()){await lease.release();cleanup.workspaces.find(w=>w.root===lease.root)!.released=true;}await owner.release();cleanup.owner='released';}}finally{options.onCleanup?.(cleanup);}
+ }
  return readImproveDecision(dataRoot,decision.id);
 }
 
+export interface ImproveResume {id:string;resumeId:string;decisionSource:string;groupIds:string[]}
+/** The confirmation and actual resume share these original-authority checks. */
+export function previewImproveResume(dataRoot:string,options:Omit<ImproveResume,'resumeId'>) {
+ const state=readImproveDecision(dataRoot,options.id),decision=state.decision as ImproveDecision;
+ if(state.sourceId!==options.decisionSource||state.state!=='frozen'||state.groups.some((g:any)=>g.state==='unknown'||['unknown','frozen'].includes(g.formal?.state))||state.executionVersion!==currentVersion())throw Error('IMPROVE_RESUME_PRECONDITIONS_CHANGED');
+ const groups=decision.groups.filter(g=>options.groupIds.includes(g.id));
+ if(!groups.length||groups.length!==options.groupIds.length||!isDeepStrictEqual(groups.map(g=>g.id),options.groupIds)||groups.some(g=>state.groups.find((item:any)=>item.id===g.id)?.state!=='not-run'))throw Error('IMPROVE_RESUME_ONLY_INDEPENDENT_NOT_RUN');
+ const pendingDecision={...decision,groups,selections:decision.selections.filter(s=>groups.some(g=>g.candidateIds.includes(s.candidateId)))};
+ const preview=previewImproveDecision(dataRoot,pendingDecision),reserved=preview.summary.plannedReservation;
+ if((['checks','requests','tokens'] as const).some(key=>state.reserved[key]+reserved[key]>({checks:decision.limits.maxChecks,requests:decision.limits.maxRequests,tokens:decision.limits.maxTokens})[key]))throw Error('IMPROVE_TOTAL_BUDGET_EXCEEDED');
+ return {state,decision,groups,pendingDecision,reserved};
+}
 /** Explicit continuation can spend only previously authorized, untouched groups. */
-export async function resumeImproveDecision(options:{dataRoot:string;id:string;resumeId:string;decisionSource:string;groupIds:string[];signal?:AbortSignal;fault?:(kind:string)=>void}){
+export async function resumeImproveDecision(options:ImproveResume&{dataRoot:string;signal?:AbortSignal;fault?:(kind:string)=>void;onEvalCleanup?:(receipt:EvalCleanupReceipt)=>void;onCleanup?:(receipt:ImproveCleanupReceipt)=>void}){
  options={...options,groupIds:structuredClone(options.groupIds)};
  const {dataRoot,id}=options;if(!identifier(options.resumeId)||!Array.isArray(options.groupIds)||!options.groupIds.length||new Set(options.groupIds).size!==options.groupIds.length)throw Error('IMPROVE_RESUME_INVALID');
  const hash=decisionDigest({resumeId:options.resumeId,decisionSource:options.decisionSource,groupIds:options.groupIds});
  const old=improveFacts(dataRoot).find(f=>f.kind==='improve.resume'&&f.data.id===id&&f.data.resumeId===options.resumeId);
  if(old){if(old.data.requestDigest!==hash)throw Error('IMPROVE_RESUME_ID_REUSED');return readImproveDecision(dataRoot,id);}
- const abort=new AbortController(),signal=options.signal?AbortSignal.any([options.signal,abort.signal]):abort.signal,owner=await acquireOwner(dataRoot,error=>abort.abort(error));let evidence:Evidence|undefined,leases:Awaited<ReturnType<typeof workspaceLeases>>=[];
+ const abort=new AbortController(),signal=options.signal?AbortSignal.any([options.signal,abort.signal]):abort.signal,owner=await acquireOwner(dataRoot,error=>abort.abort(error));let evidence:Evidence|undefined,leases:Awaited<ReturnType<typeof workspaceLeases>>=[],storage:ImproveCleanupReceipt['storage']='not-opened';
  try{
-  const state=readImproveDecision(dataRoot,id),decision=state.decision as ImproveDecision;
-  if(state.sourceId!==options.decisionSource||state.state!=='frozen'||state.groups.some((g:any)=>g.state==='unknown'||['unknown','frozen'].includes(g.formal?.state))||state.executionVersion!==currentVersion())throw Error('IMPROVE_RESUME_PRECONDITIONS_CHANGED');
-  const groups=decision.groups.filter(g=>options.groupIds.includes(g.id));
-  if(groups.length!==options.groupIds.length||!isDeepStrictEqual(groups.map(g=>g.id),options.groupIds)||groups.some(g=>state.groups.find((item:any)=>item.id===g.id)?.state!=='not-run'))throw Error('IMPROVE_RESUME_ONLY_INDEPENDENT_NOT_RUN');
-  const pendingDecision={...decision,groups,selections:decision.selections.filter(s=>groups.some(g=>g.candidateIds.includes(s.candidateId)))};
-  previewImproveDecision(dataRoot,pendingDecision);leases=await workspaceLeases(pendingDecision,error=>abort.abort(error));
+  const {state,decision,groups,pendingDecision}=previewImproveResume(dataRoot,options);
+  leases=await workspaceLeases(pendingDecision,error=>abort.abort(error));
   const guard=()=>{owner.assertHeld();for(const lease of leases)lease.assertHeld();};
-  evidence=new Evidence(dataRoot,state.runId,kind=>{guard();options.fault?.(kind);});
+  storage='unknown';evidence=new Evidence(dataRoot,state.runId,kind=>{guard();options.fault?.(kind);});
   appendFact(evidence,'improve.resume',{id,resumeId:options.resumeId,requestDigest:hash,decisionSource:state.sourceId,groupIds:options.groupIds});
-  await executeGroups({dataRoot,decision,signal,fault:options.fault},evidence,state.sourceId,groups,state.executionVersion,guard,leases.map(l=>l.root),true);
- }finally{evidence?.close();for(const lease of leases.reverse())await lease.release();await owner.release();}
+  await executeGroups({dataRoot,decision,signal,fault:options.fault,onEvalCleanup:options.onEvalCleanup},evidence,state.sourceId,groups,state.executionVersion,guard,leases.map(l=>l.root),true);
+ }finally{
+  const cleanup:ImproveCleanupReceipt={storage,owner:'unknown',workspaces:leases.map(l=>({root:l.root,released:false}))};
+  try{try{if(evidence){evidence.close();cleanup.storage='closed';}}finally{for(const lease of leases.reverse()){await lease.release();cleanup.workspaces.find(w=>w.root===lease.root)!.released=true;}await owner.release();cleanup.owner='released';}}finally{options.onCleanup?.(cleanup);}
+ }
  return readImproveDecision(dataRoot,id);
 }
 
@@ -279,6 +296,7 @@ export async function restoreImproveSuggestion(options:{dataRoot:string;id:strin
  try{
   owner.assertHeld();const suppression=listImproveSuppressions(options.dataRoot).find(s=>s.id===options.suppressionId);if(!suppression)throw Error('IMPROVE_SUPPRESSION_NOT_FOUND');
   const raced=improveFacts(options.dataRoot).find(f=>f.kind==='improve.restore'&&f.data.id===options.id);if(raced){if(raced.data.requestDigest!==hash)throw Error('IMPROVE_RESTORE_ID_REUSED');return raced;}
+  if(!suppression.active)throw Error('IMPROVE_SUPPRESSION_ALREADY_RESTORED');
   e=new Evidence(options.dataRoot,suppression.runId,()=>owner.assertHeld());appendFact(e,'improve.restore',{...request,requestDigest:hash,workspace:suppression.problem.target.workspace,problem:suppression.problem,suppressionSource:suppression.sourceId});
  }finally{e?.close();await owner.release();}
  return improveFacts(options.dataRoot).find(f=>f.kind==='improve.restore'&&f.data.id===options.id)!;

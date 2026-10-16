@@ -1,6 +1,8 @@
 import {ImproveView} from './improve.js';
 import {ImproveSelectionView,improveSelectionPrefill,improveChoiceError,type ImprovePrefill} from './improve-selection.js';
-import {resumeImproveDecision,restoreImproveSuggestion,rollbackImproveDecision,type ImproveDecision} from '../improve-decisions.js';
+import type {ImproveDecision,ImproveResume,ImproveCleanupReceipt} from '../improve-decisions.js';
+import {readImproveDecision} from '../improve-history.js';
+import {ImproveManagement} from './improve-management.js';
 import {ImproveBatchController} from '../improve-batch.js';
 import {improveReportContract} from '../improve-contract.js';
 import type {ImproveRequest} from '../improve.js';
@@ -27,7 +29,10 @@ import { AcceptanceDialog, AnnotationWriteError, ANNOTATION_RUNNING, annotationT
 import { HistoryView, historyScope, historyProjects, type HistoryTarget } from './history.js';
 import { EvalListView, EvalPlanView, type PlanViewHost } from './eval.js';
 import { TrialTraceView } from './eval-trial.js';
-import { ownPlanSource } from '../eval/overview.js';
+import { evalBlocked,evalRunConfirmation,evalGradeConfirmation,executeEval,evalStoppedFact,samePlan,type EvalAction } from './eval-operation.js';
+import type {EvalCleanupReceipt} from '../eval/cleanup.js';
+import {evalReport} from '../eval/runner.js';
+import { ownPlanSource,readPlanReport,planState,listPlanSources,type PlanSource,type EvalReport } from '../eval/overview.js';
 import { StorageView } from './storage.js';
 import { TraceView, type TraceHost } from './trace.js';
 import { TraceRawView, outputItem } from './trace-raw.js';
@@ -42,7 +47,7 @@ export { exitCostSummary } from './exit-summary.js';
 import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageLine, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
-import { ConfirmDialog, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
+import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
 import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatus } from './welcome.js';
 import { COMPACT_VERSION_CHANGED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
@@ -80,7 +85,7 @@ export interface TuiOptions {
   /** Host-prepared Linux eval runtime; default dataRoot/eval-runtime. No implicit install. */
   improveRuntime?:string;
 }
-export interface TuiExit { result?:RunResult; cleanupResult?:RunResult; error?:string; draftSaved:boolean; summary:string[]; eval?:EvalExitFact; widthCalibration?:ReturnType<TerminalWidthGate['snapshot']>; }
+export interface TuiExit { result?:RunResult; cleanupResult?:RunResult; error?:string; draftSaved:boolean; summary:string[]; eval?:EvalExitFact;evalCleanup?:EvalCleanupReceipt;batchCleanup?:ImproveCleanupReceipt; widthCalibration?:ReturnType<TerminalWidthGate['snapshot']>; }
 
 /** macOS clipboard adapter: exit code acknowledges the actual clipboard write. No shell or OSC 52 fallback. */
 export async function copyToMacClipboard(text:string):Promise<boolean|string> {
@@ -96,7 +101,7 @@ export async function copyToMacClipboard(text:string):Promise<boolean|string> {
 /** Product UI owns presentation/drafts. Execution and decisions use the shared checked host boundary. */
 export class ReadOnlyTui {
   /** show is an entry-point capability, independent of coding tool authorization or busy state. */
-  private readonly writeAccess:WriteAccess={writeBlocked:()=>this.options.show?SHOW_READ_ONLY:undefined,feedback:text=>{this.notice=text;this.feedback(text);}};
+  private readonly writeAccess:WriteAccess={writeBlocked:()=>this.options.show?SHOW_READ_ONLY:this.evalCleanupUnknown?'批次清理未确认 · 停止新工作，先核对资源':undefined,feedback:text=>{this.notice=text;this.feedback(text);}};
   readonly closed:Promise<TuiExit>;
   private resolveClosed!:(result:TuiExit)=>void;
   private readonly terminal:Terminal;
@@ -118,6 +123,11 @@ export class ReadOnlyTui {
   private readonly cleanupReceipts=new ProcessCleanupReceipts();
   /** #82：仅在本进程请求停止并等待 runner/VM 后填写；不从历史计划推断。 */
   private evalExit?:EvalExitFact;
+  private evalCleanupUnknown=false;
+  private evalCleanup?:EvalCleanupReceipt;
+  private evaluation?:{source:PlanSource;action:EvalAction;stopRequested:boolean;receipt?:EvalCleanupReceipt;startedAt:number;preparing:boolean;loading?:LoadingState};
+  private stoppingEval?:Promise<void>;
+  private readonly trialClosures=new Set<Promise<void>>();
   private readonly startedAt=Date.now();
   private active?:Promise<void>;
   private controller?:AbortController;
@@ -381,6 +391,7 @@ export class ReadOnlyTui {
   }
   private statusParts() {
     if(this.activity?.kind==='improve-execution')this.activity.progress=this.improveBatch.progress();
+    if(this.activity?.kind==='eval'&&this.evaluation)try{const r=evalReport(this.evaluation.source.root,this.evaluation.source.id);this.activity.trial=[r.counts.started,r.counts.planned];}catch{/* Keep last acquired progress. */}
     // improve 分析期间：第 M 轮与计时取分析 run（#59 第 5 节）。
     const run=this.analysis?this.analysis.runId:this.runId,progress=run?this.views.get(run)?.progress:undefined,start=progress?.segmentStart;
     // 计时从当前执行段开始（run.started，恢复后为 recovery.started），不计中断时间（T2）。
@@ -475,6 +486,7 @@ export class ReadOnlyTui {
     if(this.historyWindow||this.viewingRecovery){this.editor.setText(text);this.lastText=text;this.notice='只读历史/恢复视图不能提交；/bottom 返回活动会话，恢复限制仍需显式处置';this.tui.requestRender();return;}
     // improve 分析期间 Enter 保留文字、不受理，也不作为 steer；结束后下一次 Enter 接续当前会话（T3）。
     if(this.analysis){this.editor.setText(text);this.lastText=text;this.notice='improve 分析进行中 · 文字保留，未受理；分析结束后 Enter 接续当前会话';this.tui.requestRender();return;}
+    if(this.evaluation){this.editor.setText(text);this.lastText=text;this.notice='eval 批次运行中 · 文字保留，未受理';this.tui.requestRender();return;}
     if(this.improveBatch.running){this.editor.setText(text);this.lastText=text;this.notice='improve 执行进行中 · 文字保留，未受理；结束后 Enter 接续当前会话';this.tui.requestRender();return;}
     if(this.phase==='running') {this.enqueue(text,followUp?'follow-up':'steer');return;}
     if(this.phase!=='idle') {this.editor.setText(text);this.lastText=text;this.notice='当前正在清理；草稿保留，未受理';this.tui.requestRender();return;}
@@ -506,7 +518,7 @@ export class ReadOnlyTui {
     case 'older':this.window('older');break;
     case 'newer':this.window('newer');break;
     case 'stats':
-      try{if(options.self&&Object.keys(options).some(key=>key!=='self'))throw new CommandError('--self 固定近 7 天、全部项目、日常来源，不接受其他筛选');this.metricsView?.cancel();this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),options.self?[]:statsChoices(root,this.options.workspace).projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),annotate:(task,saved)=>this.annotateTask(task,saved),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.evalPlan=new EvalPlanView(target.source,this.evalHost);this.pushView('eval-plan');}}},{tab:options.self?'self':'metrics',self:{dimensions:()=>({columns:this.terminal.columns,rows:this.terminal.rows}),busy:()=>this.phase!=='idle'}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
+      try{if(options.self&&Object.keys(options).some(key=>key!=='self'))throw new CommandError('--self 固定近 7 天、全部项目、日常来源，不接受其他筛选');this.metricsView?.cancel();this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),options.self?[]:statsChoices(root,this.options.workspace).projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),annotate:(task,saved)=>this.annotateTask(task,saved),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.openEvalPlan(target.source);}}},{tab:options.self?'self':'metrics',self:{dimensions:()=>({columns:this.terminal.columns,rows:this.terminal.rows}),busy:()=>this.phase!=='idle'}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
       break;
     case 'acceptance':
       if(!mayWrite(this.writeAccess))break;
@@ -515,10 +527,15 @@ export class ReadOnlyTui {
     case 'eval':{
       const id=positional[0]===undefined?undefined:resolveArgument(root,positional[0],['eval-plan']).id;
       try{
-        if(id){this.evalPlan=new EvalPlanView(ownPlanSource(root,id),this.evalHost,{depth:1});this.openPanel('eval-plan');}
-        else{this.evalList=new EvalListView(root,{openPlan:source=>{this.evalPlan=new EvalPlanView(source,this.evalHost);this.pushView('eval-plan');}});this.openPanel('eval');}
+        if(id){this.openEvalPlan(ownPlanSource(root,id),true);}
+        else{this.evalList=new EvalListView(root,{openPlan:source=>{this.openEvalPlan(source);if(planState(readPlanReport(source).report)==='not-started')this.confirmEval(source,'run');}});this.openPanel('eval');}
       }catch(error){fail('Eval记录不可读取：',error);}
       break;
+    }
+    case 'eval run':case 'eval grade':{
+      const source=ownPlanSource(root,resolveArgument(root,positional[0],['eval-plan']).id),action=parsed.path[0] as EvalAction;
+      const cases=options.case===undefined?undefined:String(options.case).split(',');
+      try{if(cases?.some(id=>!readPlanReport(source).report.plan.cases.some(c=>c.id===id)))throw new CommandError('未知 eval 案例',['--case 使用计划内案例 id']);this.confirmEval(source,action,cases,true);}catch(error){fail('eval 未启动：',error);}break;
     }
     case 'storage':this.storageView=new StorageView(root,{writeBlocked:this.writeAccess.writeBlocked,changed:()=>this.tui.requestRender(),busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,confirm)=>this.openConfirm(config,()=>void confirm())});this.openPanel('storage');break;
     case 'history':{
@@ -555,23 +572,17 @@ export class ReadOnlyTui {
       if(!positional.length){this.openQueue();break;}
       void this.queueDecision(resolveArgument(root,positional[0],['queue-request']).id,parsed.spec.name as 'withdraw'|'reattach');break;
     case 'compact':void this.compact();break;
-    case 'improves':case 'improve history':{
+    case 'improve history':{
       const id=positional[0]===undefined?undefined:resolveArgument(root,positional[0],['improve-report']).id;
-      try{this.improveView=new ImproveView(root,id);this.openPanel('improve');}catch(error){fail('improve 报告不可读取：',error);}
+      try{this.openImproveHistory(id);}catch(error){fail('improve 报告不可读取：',error);}
       break;
     }
-    case 'improve-suppressions':case 'improve suppressions':try{this.improveView=new ImproveView(root,undefined,true);this.openPanel('improve');}catch(error){fail('',error);}break;
-    case 'improve-restore':case 'improve-continue':case 'improve-rollback':{
+    case 'improve suppressions':try{this.openImproveHistory(undefined,false,true);}catch(error){fail('',error);}break;
+    case 'improve continue':case 'improve rollback':case 'improve restore':
       if(!mayWrite(this.writeAccess))break;
-      if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许新决定';break;}
-      try{const action=parsed.spec.name.slice(8) as 'restore'|'continue'|'rollback',spec=JSON.parse(raw);this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.beginCleanupAttempt();const operation=action==='restore'?restoreImproveSuggestion({...spec,dataRoot:root}):action==='rollback'?rollbackImproveDecision({...spec,dataRoot:root,signal:this.controller.signal}):resumeImproveDecision({...spec,dataRoot:root,signal:this.controller.signal});this.active=operation.then(value=>{this.notice=`improve ${action}: ${JSON.stringify(value)}`;}).catch(error=>{this.notice=String(error);}).finally(()=>this.finished());}catch(error){this.notice=String(error);}
-      break;
-    }
-    case 'improve-select':
-      if(!mayWrite(this.writeAccess))break;
-      if(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'){this.notice='当前执行/恢复状态不允许选择；只读报告仍可查看';break;}
-      try{const template=JSON.parse(raw) as ImproveDecision;if(typeof template?.reportId==='string')template.reportId=resolveDisplayInput(root,'improve-report',template.reportId);this.improveSelectionView=new ImproveSelectionView(root,template,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender());this.openPanel('improve-selection');}catch(error){this.notice=`尚未选择：/improve-select JSON 需要报告身份及声明的候选内容/验证计划；${String(error)}`;}
-      break;
+      this.improveManagement().command(parsed.path[0] as 'continue'|'rollback'|'restore',positional[0],{reason:options.reason as string|undefined,note:options.note as string|undefined});break;
+    case 'improve register':case 'improve unregister':
+      this.improveManagement().source(parsed.path[0] as 'register'|'unregister',positional[0],positional[1]);break;
     case 'improve':{
       if(!positional[0]){if(Object.keys(options).length)throw new CommandError('选择参数需要先写报告号',['/improve ir-号 --execute C-01']);this.openImproveHome();break;}
       const id=resolveArgument(root,positional[0],['improve-report']).id,report=readReportRecord(root,id);if(!report)throw new CommandError('报告不可读取');
@@ -601,26 +612,52 @@ export class ReadOnlyTui {
   private openImproveItem(item:HomeItem) {
     const root=this.options.dataRoot;
     if(item.kind==='new'){this.openLaunch();return;}
-    if(item.kind==='current'){const current=this.improveBatch.origin&&this.improveSelections.get(this.improveBatch.origin.reportId);if(current){this.improveSelectionView=current;current.showProgress();this.pushView('improve-selection');}else this.feedback('分析进行中 · 结束后在会话主区插一行，报告出现在“待选择”');return;}
+    if(item.kind==='current'){const current=this.improveBatch.origin&&this.improveSelections.get(this.improveBatch.origin.reportId);if(current){this.improveSelectionView=current;current.showProgress();this.pushView('improve-selection');}else if(this.improveBatch.origin)this.openImproveHistory(this.improveBatch.origin.reportId,true);else this.feedback('分析进行中 · 结束后在会话主区插一行，报告出现在“待选择”');return;}
     if(item.kind==='report'){try{this.openImproveSelection(item.id);}catch(error){this.feedback(`improve 报告不可读取：${safe(String(error))}`);}return;}
-    // 历史报告与建议抑制的改版由 #91 实现。
-    try{this.improveView=new ImproveView(root,undefined,item.kind==='suppressions');this.pushView('improve');}
+    try{this.openImproveHistory(undefined,true,item.kind==='suppressions');}
     catch(error){this.feedback(`improve 报告不可读取：${safe(String(error))}`);}
   }
   private improveSubmitBlocked() {
-    return this.writeAccess.writeBlocked()??(this.phase!=='idle'||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'?'当前执行/恢复状态不允许新决定':undefined);
+    return this.writeAccess.writeBlocked()??(this.occupied?'工作区被其他进程占用':this.phase!=='idle'||this.activity||this.historyWindow||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'?'当前执行/恢复状态不允许新决定':undefined);
+  }
+  private improveManagement() {
+    return new ImproveManagement(this.options.dataRoot,this.options.workspace,{...this.writeAccess,blocked:()=>this.improveSubmitBlocked(),
+      confirm:(box,run)=>this.openDialog(box,run),run:(label,report,work)=>this.runImproveManagement(label,report,work),
+      resume:(input,signal)=>this.resumeImproveBatch(input,signal),changed:()=>{this.improveView?.refresh();this.improveHome?.refresh();this.tui.requestRender();}});
+  }
+  private openImproveHistory(id?:string,nested=false,suppressions=false) {
+    const management=this.improveManagement();
+    const view=new ImproveView(this.options.dataRoot,id,suppressions,{workspace:this.options.workspace,action:a=>management.action(a),restore:id=>management.restore(id),feedback:text=>this.feedback(text),
+      openEval:source=>this.openEvalPlan(source)});
+    this.improveView=view;if(nested)this.pushView('improve');else this.openPanel('improve');
+  }
+  private async runImproveManagement(label:string,reportId:string|undefined,work:(signal:AbortSignal)=>Promise<unknown>) {
+    if(!mayWrite(this.writeAccess))return;
+    const blocked=this.improveSubmitBlocked();if(blocked){this.feedback(blocked);return;}
+    this.phase='running';this.controller=new AbortController();this.cancellation='exit';
+    if(label==='继续'){this.activity={kind:'improve-execution',report:this.shown('improve-report',reportId!)};this.improveBatch.resetCleanup();if(this.evalCleanup?.cleanup!=='unknown')this.evalCleanup=undefined;}
+    this.active=work(this.controller.signal).then(()=>{this.notice=`✓ improve ${label}已结束 · /improve 查看`;this.event(this.notice);this.feedback(this.notice);})
+      .catch(error=>{this.notice=`✗ improve ${label}未执行或未完成 · ${safe(String(error))}`;this.feedback(this.notice);})
+      .finally(()=>this.finished());
+    this.tui.requestRender();await this.active;
+  }
+  private resumeImproveBatch(input:ImproveResume,signal:AbortSignal) {
+    const decision=readImproveDecision(this.options.dataRoot,input.id).decision as ImproveDecision;
+    this.openImproveSelection(decision.reportId);
+    if(this.improveSelectionView?.report.id!==decision.reportId||this.improveSelectionView.report.revision!==decision.reportRevision)throw Error('IMPROVE_REPORT_REVISION_DRIFT');
+    const done=this.improveBatch.resume(input,signal);this.improveSelectionView.observeContinuation(decision,done);return done;
   }
   private openImproveSelection(id:string,prefill:ImprovePrefill=[],fromCommand=false) {
     const root=this.options.dataRoot,report=readReportRecord(root,id);if(!report)throw Error('IMPROVE_REPORT_NOT_FOUND');
     const contract=improveReportContract(report);
     if(contract==='legacy'||contract==='unknown'&&report.candidates.length>0){
       if(prefill.length)throw new CommandError('此报告只读，不能预填执行；请重新分析');
-      const view=new ImproveView(root,id);if(fromCommand)this.openImproveHome();this.improveView=view;this.pushView('improve');return;
+      if(fromCommand)this.openImproveHome();this.openImproveHistory(id,true);return;
     }
     let view=this.improveSelections.get(id);
     if(!view){view=new ImproveSelectionView(root,id,decision=>this.submitImproveChoice(decision),()=>this.tui.requestRender(),{
       access:this.writeAccess,installation:this.options.improveRuntime,submitBlocked:()=>this.improveSubmitBlocked(),
-      openEval:source=>{this.evalPlan=new EvalPlanView(source,this.evalHost,{runningHere:()=>this.improveBatch.canStop(source.origin)});this.pushView('eval-plan');},
+      openEval:source=>this.openEvalPlan(source),
     });this.improveSelections.set(id,view);}else view.refresh();
     if(prefill.length)view.prefill(prefill);
     if(fromCommand)this.openImproveHome();this.improveSelectionView=view;this.pushView('improve-selection');
@@ -701,11 +738,54 @@ export class ReadOnlyTui {
     if(this.analysis?.queued)this.analysisEnded(this.analysis.requestId,readReportRecord(this.options.dataRoot,this.analysis.requestId));
     this.runId=event.runId;
   };
+  private openEvalPlan(source:PlanSource,direct=false) {
+    this.evalPlan=new EvalPlanView(source,this.evalHost,{runningHere:()=>!!this.evaluation&&samePlan(source,this.evaluation.source)||this.improveBatch.canStop(source.origin),stoppingHere:()=>this.phase==='stopping'&&(!!this.evaluation&&samePlan(source,this.evaluation.source)||this.improveBatch.canStop(source.origin)),depth:direct?1:undefined});
+    if(direct)this.openPanel('eval-plan');else this.pushView('eval-plan');
+  }
+  private confirmEval(source:PlanSource,action:EvalAction,cases?:string[],direct=false) {
+    const blocked=()=>evalBlocked(source,action,{writeBlocked:this.writeAccess.writeBlocked(),busy:this.phase!=='idle'||this.viewingRecovery||this.historyWindow});
+    const reason=blocked();if(reason){this.feedback(reason);return;}
+    const config=action==='run'?evalRunConfirmation(source,blocked):evalGradeConfirmation(source,cases,blocked);
+    if(direct)this.openEvalPlan(source,true);
+    this.openConfirm(config,selected=>{const reason=blocked();if(reason){this.feedback(reason);return;}const chosen=action==='grade'?readPlanReport(source).report.plan.cases.filter((_c,i)=>selected.includes(i)).map(c=>c.id):undefined;this.startEval(source,action,chosen);});
+  }
+  private startEval(source:PlanSource,action:EvalAction,cases?:string[]) {
+    const reason=evalBlocked(source,action,{writeBlocked:this.writeAccess.writeBlocked(),busy:this.phase!=='idle'});if(reason){this.feedback(reason);return;}
+    this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.welcome=undefined;
+    const operation={source,action,stopRequested:false,startedAt:Date.now(),preparing:action==='run'} as NonNullable<typeof this.evaluation>;this.evaluation=operation;
+    if(operation.preparing)operation.loading=new LoadingState('核对内容',source.label,()=>this.tui.requestRender());
+    this.activity={kind:'eval',plan:source.label};
+    this.active=executeEval(source,action,cases,this.controller.signal,receipt=>{operation.receipt=receipt;if(this.evalCleanup?.cleanup!=='unknown'||receipt.cleanup==='unknown')this.evalCleanup=receipt;},()=>{operation.preparing=false;operation.loading?.complete();this.tui.requestRender();}).then(report=>{
+      this.evalCleanupUnknown ||= operation.receipt?.cleanup==='unknown';
+      if(operation.stopRequested)this.evalExit=evalStoppedFact(source,report,operation.receipt);
+      this.event(`${planState(report)==='stopped'?'◇':'✓'} eval ${source.label} ${action==='grade'?'评分修订已追加':planState(report)==='stopped'?'已停止':'已结束'} · ${report.plan.comparison?report.improvement:'不判改善'} · /eval ${source.label} 查看`);
+    }).catch(error=>{if(operation.stopRequested){let report:EvalReport|undefined;try{report=evalReport(source.root,source.id);}catch{}this.evalExit=evalStoppedFact(source,report,operation.receipt);}this.evalCleanupUnknown ||= operation.receipt?.cleanup==='unknown'||this.evalExit?.cleanup==='unknown';this.event(`✗ eval ${source.label} ${operation.preparing?'未启动':'未完成'}：${safe(String(error))}`);}).finally(()=>{operation.loading?.complete();this.evaluation=undefined;this.evalPlan?.refresh();this.finished();});
+    this.tui.requestRender();
+  }
+  private stopEval(source?:PlanSource):Promise<void> {
+    if(this.stoppingEval)return this.stoppingEval;
+    const own=this.evaluation;
+    if(own&&(!source||samePlan(source,own.source))){own.stopRequested=true;this.controller?.abort();if(this.phase!=='exiting')this.phase='stopping';this.feedback(`请求停止 eval ${own.source.label} · 等待 VM 和写入者清理`);return this.active??Promise.resolve();}
+    const origin=source?.origin??this.improveBatch.origin;
+    if(!origin||!this.improveBatch.canStop(origin))return Promise.resolve();
+    const sources=listPlanSources(this.options.dataRoot).filter(s=>this.improveBatch.canStop(s.origin));
+    if(!sources.length)return Promise.resolve();
+    if(this.phase!=='exiting')this.phase='stopping';this.feedback('请求停止整个 improve 提交批次 · 等待 VM 和清理，剩余项不启动');
+    return this.stoppingEval=(async()=>{
+      await this.improveBatch.stop(origin);await this.active;
+      for(const item of sources){let report:EvalReport|undefined;try{report=evalReport(item.root,item.id);}catch{}const receipt=this.improveBatch.evalCleanup.findLast(r=>r.dataRoot===item.root&&r.planId===item.id);if(receipt&&(this.evalCleanup?.cleanup!=='unknown'||receipt.cleanup==='unknown'))this.evalCleanup=receipt;const fact=evalStoppedFact(item,report,receipt);if(!this.evalExit||fact.cleanup==='unknown'||this.evalExit.cleanup!=='unknown')this.evalExit=fact;this.evalCleanupUnknown ||= fact.cleanup==='unknown';}
+      const cleanup=this.improveBatch.cleanup;if(!cleanup||cleanup.owner!=='released'||cleanup.storage==='unknown'||cleanup.workspaces.some(w=>!w.released))this.evalCleanupUnknown=true;
+      this.evalPlan?.refresh();this.tui.requestRender();
+    })().finally(()=>{this.stoppingEval=undefined;});
+  }
+  private closeTrial() {
+    if(!this.evalTrial)return;const closing=this.evalTrial.close();this.trialClosures.add(closing);void closing.then(()=>this.trialClosures.delete(closing),error=>{this.failure??=`trial 原文副本清理失败：${String(error)}`;});
+  }
   private async submitImproveChoice(decision:ImproveDecision){
     if(!mayWrite(this.writeAccess))throw Error('TUI_READ_ONLY');
     const blocked=this.improveSubmitBlocked();if(blocked)throw Error(blocked);
     this.phase='running';this.controller=new AbortController();this.cancellation='exit';this.activity={kind:'improve-execution',report:this.shown('improve-report',decision.reportId)};
-    this.beginCleanupAttempt();
+    if(this.evalCleanup?.cleanup!=='unknown')this.evalCleanup=undefined;
     const promise=this.improveBatch.start(decision,this.controller.signal);
     this.active=promise.then(value=>{const passed=value.groups.filter((g:any)=>g.state==='completed').length,total=value.groups.length;this.event(`${value.state==='completed'?'✓':'✗'} improve ${this.shown('improve-report',decision.reportId)} ${value.state==='completed'?'已结束':'已停止'} · ${total?`${passed}/${total} 组通过`:`${decision.selections.length} 项决定已记录`}${value.reason?' · '+safe(value.reason):''} · /improve 查看`);}).catch(error=>{this.event(`✗ improve ${this.shown('improve-report',decision.reportId)} 未完成：${safe(String(error))}`);}).finally(()=>this.finished());
     return promise;
@@ -737,6 +817,8 @@ export class ReadOnlyTui {
   private event(text:string) {this.events.push(text);this.rebuild();}
   private finished() {
     if(this.analysis?.queued)this.analysisEnded(this.analysis.requestId,readReportRecord(this.options.dataRoot,this.analysis.requestId));
+    for(const receipt of this.improveBatch.evalCleanup){if(this.evalCleanup?.cleanup!=='unknown'||receipt.cleanup==='unknown')this.evalCleanup=receipt;this.evalCleanupUnknown ||= receipt.cleanup==='unknown';}
+    const batchCleanup=this.improveBatch.cleanup;this.evalCleanupUnknown ||= !!batchCleanup&&(batchCleanup.owner!=='released'||batchCleanup.storage==='unknown'||batchCleanup.workspaces.some(w=>!w.released));
     this.analysis=undefined;this.activity=undefined;this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting'){this.phase='idle';void this.welcome?.refresh().catch(error=>{this.notice=`欢迎屏事实不可读取：${safe(String(error))}`;});}this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
   }
   private enqueue(text:string,kind:'steer'|'follow-up'|'compact'|'improve') {
@@ -927,6 +1009,8 @@ export class ReadOnlyTui {
     if(!mayWrite(this.writeAccess))return;
     this.confirmation=undefined;
     if(this.phase!=='running')return;
+    if(this.evaluation){void this.stopEval();return;}
+    if(this.improveBatch.running&&listPlanSources(this.options.dataRoot).some(s=>this.improveBatch.canStop(s.origin))){void this.stopEval();return;}
     this.widths?.retainPending('stop-preserve-unapplied-input');
     this.cancellation='stop';this.phase='stopping';this.notice=this.analysis?`请求停止 improve 分析 ${this.shown('improve-report',this.analysis.requestId)}；等待 runtime 确认`:this.improveBatch.origin?`请求停止 improve 提交批次 ${this.shown('improve-report',this.improveBatch.origin.reportId)}；等待清理，剩余项不启动`:`请求中止 run ${this.runId?this.shown('run',this.runId):'受理中'}；等待 runtime 确认`;this.controller?.abort();this.tui.requestRender();
   }
@@ -1178,6 +1262,7 @@ export class ReadOnlyTui {
     if(this.phase==='stopping'||this.phase==='exiting')return [];
     if(this.viewingRecovery)return this.recoveryOpen?['Ctrl+R 历史','Ctrl+T trace','? 帮助']:['Enter 打开恢复核对','Ctrl+C 退出（保留可恢复工作）'];
     if(this.analysis)return ['Ctrl+C 停止分析','Ctrl+T 分析 trace','/improve 查看','? 帮助'];
+    if(this.evaluation)return ['Ctrl+C 停止批次','/eval 查看','? 帮助'];
     if(this.improveBatch.running)return ['Ctrl+C 停止执行','/improve 查看','? 帮助'];
     if(this.phase==='running')return ['Enter steer','Ctrl+X Enter follow-up','Ctrl+C 中止','Ctrl+O 展开'];
     return ['Enter 提交','/ 命令','Ctrl+R 历史','? 帮助'];
@@ -1187,6 +1272,7 @@ export class ReadOnlyTui {
     if(this.phase==='stopping'||this.phase==='exiting')return '正在清理 · 输入保留为草稿，不会受理';
     if(this.viewingRecovery)return '恢复核对进行中 · 输入不会提交';
     if(this.analysis)return 'improve 分析进行中 · 输入照常编辑，结束后 Enter 接续当前会话';
+    if(this.evaluation)return 'eval 批次运行中 · 输入保留，结束后 Enter 接续当前会话';
     if(this.improveBatch.running)return 'improve 执行进行中 · 输入保留，结束后 Enter 接续当前会话';
     if(this.phase==='running')return '补充当前任务…   Ctrl+X Enter 排到下一任务';
     return `${this.options.coding?'描述要完成的修改…':'描述要查看或分析的内容…'}   / 命令  @ 文件  Shift+Enter 换行`;
@@ -1197,7 +1283,7 @@ export class ReadOnlyTui {
     if(panel.kind==='improve'){const lines=this.improveView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='improve-home'){const lines=this.improveHome?.render(width,this.overlayHeight(),this.viewStack.length)??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval'){const lines=this.evalList?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
-    if(panel.kind==='eval-plan'){const lines=this.evalPlan?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='eval-plan'){const loading=this.evaluation?.preparing&&this.evalPlan&&samePlan(this.evalPlan.source,this.evaluation.source)?this.evaluation.loading:undefined;const lines=loading?.isShowing?fixedFrame([` ◆ eval ${this.evaluation!.source.label}`],[loading.renderLine(width)],[hintLine([],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),0).lines:this.evalPlan?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval-trial'){const lines=this.evalTrial?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='storage') {const lines=this.storageView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='metrics') {const lines=this.metricsView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
@@ -1221,17 +1307,18 @@ export class ReadOnlyTui {
     if(panel.kind==='history'&&(this.historyView?.acceptsInput||this.historyView?.isBody&&matchesKey(data,'ctrl+o'))){this.historyView.handleInput(data);this.tui.requestRender();return;}
     const key=viewKey(data);
     if(key==='back'&&panel.kind==='history'&&this.historyView?.back())return;
+    if(key==='back'&&panel.kind==='improve'&&this.improveView?.back()){this.tui.requestRender();return;}
     if(panel.kind==='metrics'&&this.metricsView?.acceptsInput&&(key===undefined||key==='back'||data==='?')){this.metricsView.handleInput(data);this.tui.requestRender();return;}
     if(key==='back'&&panel.kind==='metrics'&&this.metricsView?.back())return;
-    if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='eval-trial'){if(this.evalTrial?.back())return;this.evalTrial?.close();}if(panel.kind==='improve-selection'&&this.improveSelectionView?.back()){this.tui.requestRender();return;}this.closePanel();return;}
+    if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='eval-plan'&&this.evaluation?.preparing&&this.evalPlan&&samePlan(this.evalPlan.source,this.evaluation.source)){this.evaluation.loading?.cancel();this.controller?.abort();}if(panel.kind==='eval-trial'){if(this.evalTrial?.back())return;this.closeTrial();}if(panel.kind==='improve-selection'&&this.improveSelectionView?.back()){this.tui.requestRender();return;}this.closePanel();return;}
     if(key==='redraw'){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
-    if(key==='stop'){if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
+    if(key==='stop'){if(panel.kind==='eval-plan'&&this.evalPlan){void this.stopEval(this.evalPlan.source);return;}if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress||panel.kind==='improve'&&this.improveBatch.running)this.stop();return;}
     if(key==='inert')return;
     if(panel.kind==='improve-selection'){void this.improveSelectionView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='improve'){this.improveView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='improve-home'){const item=this.improveHome?.handleInput(data);if(item)this.openImproveItem(item);this.tui.requestRender();return;}
     if(panel.kind==='eval'){this.evalList?.handleInput(data);this.tui.requestRender();return;}
-    if(panel.kind==='eval-plan'){this.evalPlan?.handleInput(data);this.tui.requestRender();return;}
+    if(panel.kind==='eval-plan'){if(data==='r'&&this.evalPlan){this.confirmEval(this.evalPlan.source,'grade');return;}this.evalPlan?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='eval-trial'){this.evalTrial?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='storage') {void this.storageView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='trace'){this.traceView?.handleInput(data);this.tui.requestRender();return;}
@@ -1256,7 +1343,7 @@ export class ReadOnlyTui {
   /** 离开全部视图回到会话屏（开始执行、退出、从菜单换到另一视图）。 */
   private closeViews() {
     this.closeConfirm();
-    if(this.viewStack.some(view=>view.kind==='eval-trial'))this.evalTrial?.close();
+    if(this.viewStack.some(view=>view.kind==='eval-trial'))this.closeTrial();
     this.viewStack.length=0;this.hidePanel?.();this.hidePanel=undefined;this.tui.setFocus(this.editor);
     this.confirmation=undefined;this.tui.requestRender();
   }
@@ -1302,11 +1389,12 @@ export class ReadOnlyTui {
   private async finishExit():Promise<TuiExit> {
     this.phase='exiting';this.confirmation=undefined;this.notice='退出中；等待 runtime 清理与 storage 关闭';this.tui.requestRender();
     try {this.widths?.beginClose();}catch(error){this.failure=`待处理输入保存失败：${String(error)}`;}
+    const evalStopping=this.evaluation||this.improveBatch.running?this.stopEval():undefined;
     if(!this.controller?.signal.aborted)this.cancellation='exit';this.controller?.abort();
     let draftSaved=false,draftLines=0,terminalRestored=true;
     try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;draftLines=draft.split(/\r\n|\r|\n/).length;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
-    try {await this.active;} finally {
-      this.evalTrial?.close();this.metricsView?.cancel();
+    try {await evalStopping;await this.active;} finally {
+      this.closeTrial();this.metricsView?.cancel();await Promise.allSettled(this.trialClosures);
       this.stopped=true;if(this.timer)clearInterval(this.timer);this.removeInput?.();for(const remove of this.removeSignals)remove();
       if(this.started) {
         try {if(this.widths&&!await this.widths.settle()){terminalRestored=false;this.failure??='WIDTH_QUERY_BOUNDARY_UNKNOWN: terminal drain is bounded';}}catch(error){terminalRestored=false;this.failure??=`字宽清理失败：${String(error)}`;}
@@ -1317,8 +1405,8 @@ export class ReadOnlyTui {
       }
     }
     const cleanupResult=this.cleanupReceipts.result(this.cleanupResult);
-    const summary=await exitSummary(this.options.dataRoot,{workspace:this.options.workspace,runId:this.runId??this.options.show?.run??this.options.trace,cleanup:cleanupResult,cleanupAttempted:this.cleanupAttempted,elapsedMs:Date.now()-this.startedAt,draftLines,terminalRestored,eval:this.evalExit,error:this.failure},this.terminal.columns);
-    const result={result:this.result,cleanupResult,error:this.failure,draftSaved,summary,eval:this.evalExit,widthCalibration:this.widths?.snapshot()};
+    const summary=await exitSummary(this.options.dataRoot,{workspace:this.options.workspace,runId:this.runId??this.options.show?.run??this.options.trace,cleanup:cleanupResult,cleanupAttempted:this.cleanupAttempted,elapsedMs:Date.now()-this.startedAt,draftLines,terminalRestored,eval:this.evalExit,evalCleanup:this.evalCleanup,batchCleanup:this.improveBatch.cleanup,error:this.failure},this.terminal.columns);
+    const result={result:this.result,cleanupResult,error:this.failure,draftSaved,summary,eval:this.evalExit,evalCleanup:this.evalCleanup,batchCleanup:this.improveBatch.cleanup,widthCalibration:this.widths?.snapshot()};
     this.resolveClosed(result);return result;
   }
 }

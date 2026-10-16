@@ -361,5 +361,17 @@ test('trial trace: restricted-side raw beside host-mediated usage; fallback list
   const fallback = plain(withTier('none', () => missing.render(120, 30, 'Esc 返回上层'))).join('\n');
   assert.match(fallback, /✗ 未导出受限侧记录 · RESTRICTED_RAW_MISSING/);
   assert.match(fallback, /只列宿主记录/); assert.match(fallback, /#1 · 已派发 · 10 tok/); assert.match(fallback, /#2 · 已派发 · 10 tok/);
-  missing.close();
+  await missing.close();
+  await t.test('exit waits for a late trial copy and removes the actual copy before restoring terminal',async late=>{
+    const terminal=new TestTerminal();let restored=false;terminal.stop=()=>{restored=true;};
+    const closingApp=new ReadOnlyTui({workspace,dataRoot:root,draftRoot:join(base,'late-drafts'),mode:'offline',terminal,widthCalibration:false});
+    let release!:()=>void,entered!:()=>void,copyRoot='';const held=new Promise<void>(resolve=>{release=resolve;}),started=new Promise<void>(resolve=>{entered=resolve;});
+    const original=fs.promises.writeFile;let closing:Promise<unknown>|undefined;
+    try{
+      late.mock.method(fs.promises,'writeFile',async(...args:Parameters<typeof original>)=>{const path=String(args[0]);if(!copyRoot&&basename(path)==='host.sqlite'&&basename(dirname(path)).startsWith('pi-durio-trial-')){copyRoot=dirname(path);entered();await held;}return original(...args);});syncBuiltinESMExports();
+      closingApp.start();terminal.input(`/eval ${source.label}`);terminal.input('\r');terminal.input('\r');await started;
+      closing=closingApp.exit();let settled=false;void closing.then(()=>{settled=true;});await new Promise(resolve=>setImmediate(resolve));assert.equal(settled,false);assert.equal(restored,false);assert.equal(existsSync(copyRoot),true);
+      release();await closing;assert.equal(existsSync(copyRoot),false);assert.equal(restored,true);
+    }finally{release();late.mock.restoreAll();syncBuiltinESMExports();await (closing??closingApp.exit());}
+  });
 });

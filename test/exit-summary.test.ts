@@ -149,3 +149,8 @@ test('process cleanup follows committed receipt order within each run and keeps 
   assert.equal(receipts.result(otherResult),undefined,'unavailable process receipt cannot be turned into clean');
   other.close();f.evidence.close();
 });
+
+test('eval cleanup unknown controls exit 75 independently of coding result', () => {
+  const evaluation = { planId:'child-plan', trial:1, total:2, cost:{amounts:{CNY:0},unknownRequests:0,partial:false}, state:'unconfirmed' as const,cleanup:'unknown' as const };
+  assert.equal(tuiExitCode({eval:evaluation} as Parameters<typeof tuiExitCode>[0]),75);
+});

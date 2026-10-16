@@ -11,9 +11,12 @@ import { RunView, sumUsage } from './run-view.js';
 import { tokenCount } from './session-screen.js';
 import { probeWelcomeLock } from './welcome.js';
 import type { RunResult } from '../runtime.js';
+import type { PlanSource } from '../eval/overview.js';
+import type {ImproveCleanupReceipt} from '../improve-decisions.js';
+import type { EvalCleanupReceipt } from '../eval/cleanup.js';
 
 /** #82 在本进程确实请求停止、等待 runner/VM 清理后提供；仅查看旧批次不能填写。 */
-export type EvalExitFact = { planId: string; trial: number; total: number; cost: CostTotals } & (
+export type EvalExitFact = { planId: string; source?: Pick<PlanSource,'root'|'id'|'label'|'origin'>; receipt?:EvalCleanupReceipt; trial: number; total: number; cost: CostTotals } & (
   | { state: 'stopped'; cleanup: 'confirmed' }
   | { state: 'unconfirmed'; cleanup: 'unknown' }
 );
@@ -30,6 +33,8 @@ export interface ExitSummaryFacts {
   terminalRestored: boolean;
   /** 本进程最近一次停止批次的事实；没有发生时省略。 */
   eval?: EvalExitFact;
+  evalCleanup?:EvalCleanupReceipt;
+  batchCleanup?:ImproveCleanupReceipt;
   error?: string;
 }
 
@@ -74,9 +79,10 @@ function cleanupLine(facts: ExitSummaryFacts, session?: string) {
     const owner = lifecycle?.owner === 'release-after-host-close' ? '已释放' : '状态未记录';
     const storage = lifecycle?.storage === 'closed' ? '已关闭' : lifecycle?.storage === 'not-opened' ? '未打开' : '状态未记录';
     line = `◇ 写入者锁${owner} · storage ${storage}`;
-  } else if (facts.cleanupAttempted) line = '✗ 清理结果未取得 · 写入者锁 / storage 状态未知';
+  } else if(facts.batchCleanup){const b=facts.batchCleanup;line=`◇ improve 写入者锁${b.owner==='released'?'已释放':'状态未知'} · storage ${b.storage==='closed'?'已关闭':b.storage==='not-opened'?'未打开':'状态未知'} · 工作区锁${b.workspaces.every(w=>w.released)?'已释放':'状态未知'}`;} else if(facts.evalCleanup){const r=facts.evalCleanup;line=`◇ eval 写入者锁${r.owner==='released'?'已释放':r.owner==='not-acquired'?'未取得':'状态未知'} · storage ${r.storage==='closed'?'已关闭':r.storage==='not-opened'?'未打开':'状态未知'}`;} else if (facts.cleanupAttempted) line = '✗ 清理结果未取得 · 写入者锁 / storage 状态未知';
   else line = '◇ 写入者锁未取得 · storage 未打开';
-  if (facts.eval?.cleanup === 'unknown') line = `✗ 清理未确认 · eval VM 状态未知 · ${line.slice(2)}`;
+  if(facts.batchCleanup&&(facts.batchCleanup.owner!=='released'||facts.batchCleanup.storage==='unknown'||facts.batchCleanup.workspaces.some(w=>!w.released)))line=`✗ improve 清理未确认 · ${line.slice(2)}`;
+  if (facts.eval?.cleanup === 'unknown'||facts.evalCleanup?.cleanup==='unknown') line = `✗ 清理未确认 · eval VM 状态未知 · ${line.slice(2)}`;
   line = facts.terminalRestored ? `${line} · 终端已恢复` : `✗ 终端恢复未确认 · 请运行 reset · ${line.slice(2)}`;
   return facts.error ? `${line} · 退出异常：${firstLine(facts.error)}` : line;
 }
@@ -165,9 +171,9 @@ async function summaryLines(dataRoot: string, facts: ExitSummaryFacts): Promise<
   if (frozen) lines.push(frozen);
   if (facts.draftLines) lines.push(`◇ 草稿已保存 · ${facts.draftLines} 行 · 下次 /restore 恢复`);
   if (facts.eval) {
-    const evaluation = facts.eval, plan = readDisplayIndex(dataRoot).label('eval-plan', evaluation.planId);
+    const evaluation = facts.eval, source=evaluation.source, plan = source?.label??readDisplayIndex(dataRoot).label('eval-plan', evaluation.planId);
     const state = evaluation.state === 'stopped' ? '已停止于' : '停止未确认于';
-    lines.push(`eval ${plan} ${state} trial ${evaluation.trial}/${evaluation.total} · ${formatCostTotals(evaluation.cost)}`);
+    lines.push(`eval ${plan}${source?.origin?` · ${source.origin.label}`:''} ${state} trial ${evaluation.trial}/${evaluation.total} · ${formatCostTotals(evaluation.cost)}`);
   }
   if (session) {
     try {
@@ -181,7 +187,7 @@ async function summaryLines(dataRoot: string, facts: ExitSummaryFacts): Promise<
   if (session) {
     const continuation = readContinuation(dataRoot, session.id, { chains });
     let next = '';
-    if (continuation?.state === 'ready' && (!facts.cleanupAttempted || facts.cleanup) && facts.cleanup?.cleanup !== 'unknown' && facts.eval?.cleanup !== 'unknown') {
+    if (continuation?.state === 'ready' && (!facts.cleanupAttempted || facts.cleanup) && tuiCleanupStatus({cleanupResult:facts.cleanup,eval:facts.eval,evalCleanup:facts.evalCleanup,batchCleanup:facts.batchCleanup}).cleanup==='confirmed') {
       const lock = session.workspace ? await probeWelcomeLock(session.workspace, continuation.coding) : undefined;
       if (lock?.state === 'free' || lock?.state === 'readonly') next = `继续  pi-durio resume ${label}     `;
     } else if (continuation?.state === 'recovery') next = `恢复核对  pi-durio resume ${label}     `;
@@ -204,8 +210,12 @@ export async function exitSummary(dataRoot: string, facts: ExitSummaryFacts, col
 }
 
 /** 首版 TUI 退出码映射；未确认清理仍由 exitHostIfUnconfirmed 负责有界退出。 */
-export function tuiExitCode(exit: { result?: RunResult; error?: string }) {
+export function tuiCleanupStatus(exit:{result?:RunResult;cleanupResult?:RunResult;eval?:EvalExitFact;evalCleanup?:EvalCleanupReceipt;batchCleanup?:ImproveCleanupReceipt}) {
+  const b=exit.batchCleanup;return {cleanup:exit.eval?.cleanup==='unknown'||exit.evalCleanup?.cleanup==='unknown'||(exit.cleanupResult??exit.result)?.cleanup==='unknown'||!!b&&(b.owner!=='released'||b.storage==='unknown'||b.workspaces.some(w=>!w.released))?'unknown' as const:'confirmed' as const};
+}
+export function tuiExitCode(exit: { result?: RunResult;cleanupResult?:RunResult; error?: string; eval?:EvalExitFact;evalCleanup?:EvalCleanupReceipt;batchCleanup?:ImproveCleanupReceipt }) {
   const result = exit.result;
+  if(tuiCleanupStatus(exit).cleanup==='unknown')return 75;
   return exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : result?.controls?.exitCode ?? 0;
 }
 
