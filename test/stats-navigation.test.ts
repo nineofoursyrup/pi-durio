@@ -156,7 +156,7 @@ test('show-mode stats returns from trace/raw and eval to the same evidence, memb
   const app = new ReadOnlyTui({ dataRoot: root, workspace, draftRoot: join(root, 'drafts'), mode: 'offline', show: { run: 'first' }, terminal, widthCalibration: false, transport: async () => { calls++; throw Error('no provider'); }, copy: async data => { copied.push(data); return true; } });
   const screen = () => text(app.screen()), press = (...data: string[]) => data.forEach(value => terminal.input(value));
   try {
-    app.start(); press(all().command, key.enter); const table = screen(); assert.match(table, /◆ stats/);
+    app.start(); press(key.esc, key.esc, key.esc, all().command, key.enter); const table = screen(); assert.match(table, /◆ stats/);
     press(key.enter, key.down); const member = screen(); assert.match(member, /成员 2\//);
     press(key.enter); const evidence = screen(); press(key.enter); assert.match(screen(), /◆ trace/);
     press(key.down, 'p'); assert.match(screen(), /只读查看/); assert.doesNotMatch(screen(), /写入一条固定记录/);

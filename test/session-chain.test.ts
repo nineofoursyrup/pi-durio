@@ -182,3 +182,22 @@ test('derivation is readonly: no record, file or lock changes in the data root',
   readDisplayIndex(dataRoot);queryHistory(dataRoot, { taskType: 'coding' });
   assert.deepEqual(treeState(dataRoot), before);
 });
+
+test('last activity belongs only to own session runs and stays fixed at the read cutoff', () => {
+  const root = mkdtempSync(join(tmpdir(), 'durio-session-activity-'));
+  const a = new Evidence(root, 'a');
+  a.append('task.accepted', { taskId: 'ta', sessionId: 'sa', workspace: '/p', input: 'source' });
+  a.append('run.closed', { status: 'completed', cleanup: 'confirmed' });
+  const b = new Evidence(root, 'b'); b.append('task.accepted', { taskId: 'tb', sessionId: 'sb', workspace: '/p', input: 'first continuation' }); b.append('context.imported', { source: { sourceRunId: 'a' } });
+  const c = new Evidence(root, 'c'); c.append('task.accepted', { taskId: 'tc', sessionId: 'sc', workspace: '/p', input: 'branch' }); const cutoff = c.append('context.imported', { source: { sourceRunId: 'a' } });
+  const before = readSessionChains(root, { through: cutoff });
+  assert.equal(before.list().items[0].id, 'sc');
+  const seq = a.append('model.response', { message: { content: [] } });
+  a.db.prepare('UPDATE records SET at=? WHERE seq=?').run('2026-10-17T10:00:00.000Z', seq);
+  a.close(); b.close(); c.close();
+  const latest = readSessionChains(root);
+  assert.equal(latest.list().items[0].id, 'sa');
+  assert.equal(latest.session('sa')!.lastAt, '2026-10-17T10:00:00.000Z');
+  assert.equal(latest.session('sc')!.lastSeq, cutoff, 'ancestor activity must not move its branch');
+  assert.equal(readSessionChains(root, { through: cutoff }).list().items[0].id, 'sc');
+});

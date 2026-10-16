@@ -66,7 +66,7 @@ async function until(predicate: () => boolean) {
 test('show trace keeps raw navigation and copy, but p cannot offer or execute a fixed-evidence write', async () => {
   const f = fixture(), before = contents(f.dataRoot), t = open(f);
   try {
-    t.key('\x14'); t.key('\x1b[B');
+    t.key('t'); t.key('\x1b[B');
     assert.match(t.screen(), /tool · read/);
     t.key('p');
     assert.match(t.screen(), /只读查看/);
@@ -78,6 +78,7 @@ test('show trace keeps raw navigation and copy, but p cannot offer or execute a 
     await new Promise(resolve => setImmediate(resolve));
     assert.match(t.copied[0], /original fixture text/);
     t.key('\x1b'); t.key('\x1b');
+    t.key('\x1b'); t.key('\x1b'); t.key('\x1b');
     t.key('must remain a draft'); t.key('\r');
     assert.match(t.screen(), /只读查看 · 不能提交/);
     assert.equal(t.calls(), 0);
@@ -90,6 +91,7 @@ test('show trace keeps raw navigation and copy, but p cannot offer or execute a 
 test('show blocks the improve new subcommand and the home-screen launch while retaining report navigation', async () => {
   const f = fixture(), before = contents(f.dataRoot), t = open(f);
   try {
+    t.key('\x1b'); t.key('\x1b'); t.key('\x1b');
     t.key('/improve new --scope session --budget standard'); t.key('\r');
     assert.doesNotMatch(t.screen(), /新建 improve 分析|分析不执行任何候选 · 可看文件/);
     assert.match(t.screen(), /只读查看/);
@@ -113,7 +115,7 @@ test('show blocks the improve new subcommand and the home-screen launch while re
 test('show session keeps command and storage actions read-only after returning from history', async () => {
   const f = fixture(), before = contents(f.dataRoot), t = open(f, { run: runId, session: sessionId });
   try {
-    t.key('\x1b');
+    t.key('\x1b'); t.key('\x1b');
     for (const command of ['/acceptance {}', '/compact', '/follow-up', '/stop', '/improve-select {}', '/improve-restore {}', '/improve-continue {}', '/improve-rollback {}']) {
       t.key(command); t.key('\r');
       assert.match(t.screen(), /只读查看/, command);
