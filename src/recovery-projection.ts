@@ -24,6 +24,11 @@ export function* recoverySteerRequests(records: RecoveryRecords, accepted: any, 
     if (data.kind === 'steer' && data.target?.runId === runId && data.taskId === accepted.taskId) yield data.requestId as string;
   }
 }
+/** 工具名与参数的规范化摘要（键排序），用于识别“完全相同”的新调用。 */
+export function callIdentity(tool: string, args: unknown) {
+  const canonical = (value: unknown): unknown => Array.isArray(value) ? value.map(canonical) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical((value as any)[key])])) : value;
+  return digest(JSON.stringify([tool, canonical(args ?? null)]));
+}
 type CompactionDetail = { taskId: number; reason: string; status: string; submissionId?: number; submissionStatus?: string; entryId?: number };
 /** All decision booleans/counts come from the complete scan. Display pages cannot grant authority. */
 export async function projectRecovery(storage: StorageReader, records: RecoveryRecords, accepted: any, started: any, runId: string, page: RecoveryPage, resolutions: NonNullable<RecoveryDecision['resolutions']>, reason: (value: string) => void) {
@@ -89,7 +94,9 @@ export async function projectRecovery(storage: StorageReader, records: RecoveryR
     const protocol = records.findLast(r => r.kind === 'execution.config')?.data as any;
     const gap = records.some(r => r.kind === 'evidence.gap');
     const currentResolutions = new Map(resolutions.map(resolution => [resolution.taskId, resolution]));
-    let matchedResolutions = 0, unresolvedTools = 0, unknownTools = 0, readOnly = false;
+    let matchedResolutions = 0, unresolvedTools = 0, unknownTools = 0;
+    // 视为已完成（含首版 skip）与宿主已有结果、durable 未提交的调用：续跑时拦截工具与参数完全相同的新调用（R5）。
+    const completedCalls = new Set<string>();
     let unsupported = false, outside = false, aborted = false, checkpoint = false;
     const toolCounts = { committed: 0, 'completed-uncommitted': 0, 'not-dispatched': 0, unknown: 0 };
     for await (const task of scanTasks(storage)) {
@@ -126,7 +133,9 @@ export async function projectRecovery(storage: StorageReader, records: RecoveryR
       const resolution = previous ? JSON.parse(String(previous.body)) : undefined;
       toolCounts[fact]++;
       if (fact === 'unknown') { unknownTools++; if (currentResolutions.has(task.id)) matchedResolutions++; if (!resolution && !currentResolutions.has(task.id)) unresolvedTools++; }
-      if (fact === 'completed-uncommitted' || resolution && resolution.choice !== 'retry') readOnly = true;
+      const current = currentResolutions.get(task.id);
+      if (fact === 'completed-uncommitted' || fact === 'unknown' && (current ? current.choice !== 'retry' : resolution && resolution.choice !== 'retry'))
+        completedCalls.add(callIdentity(toolCall?.name ?? '', state?.phase === 'execute' ? state.arguments : toolCall?.arguments));
       const evidence = new DetailPage<number>();
       for (const record of index.prepare('SELECT seq FROM facts WHERE task=? ORDER BY seq').iterate(task.id)) evidence.add(Number(record.seq));
       tools.add({ taskId: task.id, callId: boundedText(String(input.callId),256), tool: boundedText(toolCall?.name ?? '<identity-missing>',256), args: toolArguments(state?.phase === 'execute' ? state.arguments : toolCall?.arguments, input.assistant, input.callId, task.id, state?.phase === 'execute'), fact, evidence: evidence.items, evidenceSummary: evidence.summary(), assistantEntryId: input.assistant, ...(resolution ? { resolution } : {}) });
@@ -139,6 +148,6 @@ export async function projectRecovery(storage: StorageReader, records: RecoveryR
     if (outside) reason('OTHER_PENDING_TASK_OUTSIDE_ACCEPTED_RUN');
     if (aborted) reason('DURABLE_ABORT_INTENT_PRESERVED');
     if (checkpoint) reason('UNSUPPORTED_EXECUTION_CHECKPOINT');
-    return { tools, compactions, unknownModelAttempts, pending, taskCount, submissionCount, main, placed, modelAttempts, toolCounts, unknownTools, unresolvedTools, matchedResolutions, readOnly, agent: conversationId === undefined ? undefined : (await conversationDocument(storage, conversationId, 'pi.agent'))?.value };
+    return { tools, compactions, unknownModelAttempts, pending, taskCount, submissionCount, main, placed, modelAttempts, toolCounts, unknownTools, unresolvedTools, matchedResolutions, completedCalls, agent: conversationId === undefined ? undefined : (await conversationDocument(storage, conversationId, 'pi.agent'))?.value };
   });
 }

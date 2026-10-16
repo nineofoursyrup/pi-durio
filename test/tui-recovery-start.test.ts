@@ -41,12 +41,19 @@ class ReplyTerminal implements Terminal {
 
 async function until(predicate:()=>boolean){for(let i=0;i<600;i++){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,10));}throw Error('condition timed out');}
 
-for(const entry of ['startup','command'])test(`recovery ${entry} waits for slow execution-material checks before starting timed width queries`,async t=>{
+for(const entry of ['startup','reopen'])test(`recovery ${entry} waits for slow execution-material checks before starting timed width queries`,async t=>{
   const root=mkdtempSync(join(tmpdir(),'durio-recovery-width-')),workspace=join(root,'project'),dataRoot=join(root,'data');mkdirSync(workspace);writeFileSync(join(workspace,'README.md'),'Recovery width fixture');
   const controller=new AbortController();
   const original=await runReadTask({workspace,dataRoot,input:'Interrupted task',mode:'offline',signal:controller.signal,cancellation:'exit',transport:async(_url,init)=>new Promise((_resolve,reject)=>{init!.signal!.addEventListener('abort',()=>reject(Error('interrupted')));controller.abort();})});
   const terminal=new ReplyTerminal();await terminal.ready;
-  const app=new ReadOnlyTui({workspace,dataRoot,runId:entry==='startup'?original.runId:undefined,draftRoot:join(root,'drafts'),mode:'offline',terminal});
+  const app=new ReadOnlyTui({workspace,dataRoot,runId:original.runId,draftRoot:join(root,'drafts'),mode:'offline',terminal});
+  if(entry==='reopen'){
+    // Reopening the closed panel (Enter) runs the same read-only check again.
+    app.start();await until(()=>terminal.writes.some(value=>value.includes('继续旧工作')));
+    const shown=()=>app.screen().join('');
+    terminal.key('\x1b');await until(()=>!shown().includes('继续旧工作'));
+    terminal.key('\x1b');await until(()=>!shown().includes('未打开可写存储'));terminal.writes.length=0;
+  }
   const realRead=fs.readFileSync;let checks=0,delayMs=0,queriesDuringCheck=0;
   const slowRead=t.mock.method(fs,'readFileSync',(...args:Parameters<typeof fs.readFileSync>)=>{
     if(!checks&&String(args[0]).includes('/node_modules/')){
@@ -56,26 +63,23 @@ for(const entry of ['startup','command'])test(`recovery ${entry} waits for slow 
     return Reflect.apply(realRead,fs,args);
   });syncBuiltinESMExports();
   try {
-    app.start();
-    if(entry==='command'){
-      await until(()=>/\x1b\[\d+;\d+H\x1b\[\?25h\x1b\[\?2026l$/.test(terminal.writes.at(-1)??''));
-      terminal.key(`/recover ${original.runId}`);terminal.key('\r');
-    }
-    await until(()=>terminal.writes.some(value=>value.includes('Display unverified:'))||terminal.writes.some(value=>value.includes('恢复核对 ·')));
+    if(entry==='startup')app.start();
+    else terminal.key('\r');
+    await until(()=>terminal.writes.some(value=>value.includes('Display unverified:'))||terminal.writes.some(value=>value.includes('继续旧工作')));
     t.diagnostic(JSON.stringify({checks,delayMs,queriesDuringCheck,unverified:terminal.writes.filter(value=>value.includes('Display unverified:'))}));
     assert.equal(checks,1,'the real recovery path verified original execution bytes');
     assert.ok(delayMs>=1400,'the real check exceeded the unchanged 1200ms probe deadline');
     assert.equal(queriesDuringCheck,0,'execution verification and timed CPR exchanges never overlap');
     assert.doesNotMatch(terminal.writes.join(''),/WIDTH_CPR_TIMEOUT/,'valid pipe replies must not time out behind startup recovery work');
-    assert.ok(terminal.writes.some(value=>value.includes('恢复核对 ·')),'the measured recovery panel is painted without Ctrl+L');
-    if(entry==='command'){
+    assert.ok(terminal.writes.some(value=>value.includes('继续旧工作')),'the measured recovery panel (with its continue confirmation) is painted without Ctrl+L');
+    if(entry==='reopen'){
       // A truly missing reply must still fail, and retry must await its late DA1.
       terminal.hold=true;terminal.key('\x0c');
       await until(()=>terminal.writes.some(value=>value.includes('WIDTH_CPR_TIMEOUT')));
       terminal.key('\x0c');assert.match(terminal.writes.at(-1)!,/Prior terminal reply incomplete/);
       terminal.release();await until(()=>terminal.pending===0);
       const before=terminal.writes.length;terminal.key('\x0c');
-      await until(()=>terminal.writes.slice(before).some(value=>value.includes('恢复核对 ·')));
+      await until(()=>terminal.writes.slice(before).some(value=>value.includes('继续旧工作')));
       assert.doesNotMatch(terminal.writes.slice(before).join(''),/Display unverified:/,'a fresh retry succeeds after the late response boundary');
     }
     const exit=await app.exit();assert.equal(exit.widthCalibration?.status,'measured');

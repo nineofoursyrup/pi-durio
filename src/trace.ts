@@ -47,6 +47,8 @@ export interface TraceTool {
   /** 首版恢复决定 `skip`。 */
   skipped: { reason: string } | null;
   denied: boolean;
+  /** 恢复续跑中被拦截的完全相同调用（该操作已完成，不重做）；否则为首版只读续跑的拒绝。 */
+  duplicate?: boolean;
 }
 export interface TraceCompaction { trigger: 'automatic' | 'manual'; entries: number | null; state: string | null; requests: TraceLlm[]; tokens: number | null; cost: CostTotals }
 export type SpanOutcome = 'ok' | 'failed' | 'cancelled' | 'unknown' | 'denied';
@@ -348,7 +350,7 @@ function buildTrace(runId: string, facts: readonly Fact[], costs: readonly Model
   for (const fact of facts.filter(f => f.ref.kind === 'recovery.capability-denied' && segOf.has(f.ref.seq))) {
     const task: number | null = typeof fact.data.durableTaskId === 'number' ? fact.data.durableTaskId : null;
     spans.push({ key: `denied:${fact.ref.seq}`, kind: 'tool', segment: segOf.get(fact.ref.seq)!.info.index, start: at(fact), end: at(fact), running: false, outcome: 'denied', sources: [fact.ref.id], raws: [],
-      tool: { name: String(fact.data.tool ?? '未记录'), target: null, call: null, attempt: 1, attemptId: null, durableTaskId: task, exit: null, check: false, error: String(fact.data.reason ?? ''), env: null, recoveryRetry: null, skipped: null, denied: true } });
+      tool: { name: String(fact.data.tool ?? '未记录'), target: null, call: null, attempt: 1, attemptId: null, durableTaskId: task, exit: null, check: false, error: String(fact.data.reason ?? ''), env: null, recoveryRetry: null, skipped: null, denied: true, duplicate: fact.data.duplicate === true } });
   }
   spans.sort((a, b) => a.start - b.start || Number(a.sources[0]?.split(':')[1]) - Number(b.sources[0]?.split(':')[1]));
 

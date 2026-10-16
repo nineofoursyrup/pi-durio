@@ -216,7 +216,7 @@ export class TraceView {
       return [tree, { text: 'compaction', fg: 'ac.model' }, { text: ` ${c.trigger === 'automatic' ? '自动' : '手动'}` }, { text: ` · ${requestRange(c.requests)}`, fg: 'fg.faint' }, ...(span.outcome === 'failed' ? [{ text: ' ✗', fg: 'ac.err' as TokenName }] : []), ...spin];
     }
     const tool = span.tool!, suffix: TextSegment[] = [];
-    if (tool.denied) suffix.push({ text: ` ✗ 被拒 · 只读续跑不允许 ${tool.name}`, fg: 'ac.err' });
+    if (tool.denied) suffix.push({ text: ` ✗ ${deniedText(tool)}`, fg: 'ac.err' });
     else if (span.outcome === 'failed') suffix.push({ text: ' ✗', fg: 'ac.err' });
     else if (tool.exit === 0) suffix.push({ text: ' ✓', fg: 'ac.ok' });
     if (tool.recoveryRetry) suffix.push({ text: ' 恢复后重试', fg: 'ac.warn' });
@@ -266,7 +266,7 @@ export class TraceView {
   }
   private exitText(span: TraceSpan) {
     const tool = span.tool!;
-    if (tool.denied) return `✗ 被拒 · 只读续跑不允许 ${tool.name}`;
+    if (tool.denied) return `✗ ${deniedText(tool)}`;
     if (tool.exit !== null && tool.exit !== 0) return `exit ${tool.exit} · ${tool.check ? '预先声明的检查，不计运行故障' : '计入工具失败'}`;
     if (tool.exit === 0) return 'exit 0';
     if (span.running) return '运行中';
@@ -355,3 +355,5 @@ export class TraceView {
     return lines;
   }
 }
+
+function deniedText(tool: NonNullable<TraceSpan['tool']>) { return tool.duplicate ? '已拦截 · 该操作已完成，不重做' : `被拒 · 只读续跑不允许 ${tool.name}`; }

@@ -147,13 +147,13 @@ test('bash exit 1: predeclared check vs tool failure; environment names checked 
   });
 });
 
-test('recovery segment with denied writes and later manual compaction: request numbers never collide, maintenance excluded', async () => {
+test('recovery segment with a blocked identical call and later manual compaction: request numbers never collide, maintenance excluded', async () => {
   const paths = await workspace(), stop = new AbortController();
   const first = scriptedTransport([{ name: 'bash', args: { command: 'printf effect >> effects.txt' } }]);
   const result = await runCodingTask({ ...paths, input: 'Append once', mode: 'offline', transport: first.fetch, signal: stop.signal, cancellation: 'exit', onObservation: event => { if (event.kind === 'tool.result') stop.abort(); } });
   const authorization = { workspace: paths.workspace, mode: 'offline' as const, tools: ['read', 'write', 'edit', 'bash'] as const };
   const report = await checkRecovery({ ...paths, runId: result.runId, authorization });
-  const again = scriptedTransport([{ name: 'write', args: { path: 'equivalent.txt', content: 'must not write' } }]);
+  const again = scriptedTransport([{ name: 'bash', args: { command: 'printf effect >> effects.txt' } }]);
   const long: typeof fetch = async (url, init) => { const response = await again.fetch(url, init); return new Response((await response.text()).replace('Controlled response: inspect actual tool evidence for acceptance.', 'FINAL ' + 'x'.repeat(90000)), { headers: { 'content-type': 'text/event-stream' } }); };
   const recovered = await recoverRun({ ...paths, runId: result.runId, authorization, decision: { id: 'no-repeat', snapshotId: report.snapshotId, action: 'continue', acceptAdditionalModelAttempts: true }, transport: long });
   assert.equal(recovered.status, 'completed', JSON.stringify(recovered));
@@ -162,7 +162,7 @@ test('recovery segment with denied writes and later manual compaction: request n
 
   const trace = readTrace(paths.dataRoot, result.runId);
   assert.deepEqual(trace.segments.map(s => s.kind), ['run', 'recovery', 'maintenance']);
-  assert.equal(trace.segments[1].readOnly, true);
+  assert.equal(trace.segments[1].readOnly, false, 'continuation keeps the original authorization');
   const numbers = trace.spans.flatMap(s => s.llm ? [s.llm.number] : s.compaction ? s.compaction.requests.map(r => r.number) : []);
   assert.equal(new Set(numbers).size, numbers.length, 'request numbers do not collide');
   assert.deepEqual([...numbers].sort((a, b) => a - b), numbers.map((_, i) => i + 1), 'numbered in record order across segments');
@@ -175,15 +175,15 @@ test('recovery segment with denied writes and later manual compaction: request n
   assert.equal(trace.duration, main.reduce((sum, s) => sum + s.end - s.start, 0), 'maintenance is not in the header duration');
   assert.equal(trace.counts.models, numbers.length - maintenance[0].compaction!.requests.length);
   const denied = trace.spans.filter(s => s.tool?.denied);
-  assert.ok(denied.length >= 1); assert.ok(denied.every(s => s.tool!.name === 'write' || s.tool!.name === 'bash'));
+  assert.equal(denied.length, 1); assert.equal(denied[0].tool!.name, 'bash'); assert.equal(denied[0].tool!.duplicate, true);
   const view = new TraceView(paths.dataRoot, result.runId);
   const text = plain(withTier('none', () => view.render(132, 38, 'Esc 返回会话'))).join('\n');
   for (const line of text.split('\n')) assert.ok(visibleWidth(line) <= 132, line);
-  assert.match(text, /tool write ✗ 被拒/);
+  assert.match(text, /tool bash ✗ 已拦截/);
   view.select(denied[0].key);
-  assert.match(view.summaryLine(), /^tool write · ✗ 被拒 · 只读续跑不允许 write · /);
-  assert.match(plain(withTier('none', () => view.render(220, 38, 'Esc 返回会话'))).join('\n'), /结果 +✗ 被拒 · 只读续跑不允许 write/);
-  assert.match(text, /只读续跑（首版）/);
+  assert.match(view.summaryLine(), /^tool bash · ✗ 已拦截 · 该操作已完成，不重做 · /);
+  assert.match(plain(withTier('none', () => view.render(220, 38, 'Esc 返回会话'))).join('\n'), /结果 +✗ 已拦截 · 该操作已完成，不重做/);
+  assert.doesNotMatch(text, /只读续跑（首版）/);
   assert.match(text, /┄ 维护 · run 结束后追加，不计入头部耗时与 tok ┄/);
   assert.match(text, /compaction 手动 · llm #\d+/);
   assert.match(text, /另有维护 1 项/);

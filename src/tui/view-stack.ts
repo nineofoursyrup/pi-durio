@@ -336,7 +336,7 @@ export class ConfirmDialog {
 }
 
 /** 把一串带样式的片段按显示宽度折成多行（逐字符，保留各片段样式）。 */
-function wrapSegments(segments: TextSegment[], width: number): TextSegment[][] {
+export function wrapSegments(segments: TextSegment[], width: number): TextSegment[][] {
   const rows: TextSegment[][] = [[]];
   let used = 0;
   for (const segment of segments) for (const char of Array.from(segment.text)) {

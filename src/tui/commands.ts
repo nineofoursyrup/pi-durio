@@ -89,13 +89,11 @@ export const COMMANDS: readonly CommandSpec[] = [
   { name: 'improve-restore', summary: '明确恢复建议', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
   { name: 'improve-continue', summary: '明确继续独立未跑项', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
   { name: 'improve-rollback', summary: '明确回退本批精确产物', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
-  { name: 'recover', summary: '恢复核对当前任务', bare: 'view', withArgs: 'open', raw: '[r-号 [偏移 快照]]' },
-  { name: 'decide', summary: '提交恢复决定', bare: 'action', withArgs: 'confirm', raw: 'JSON' },
 ];
 
 /** 会话屏键位（帮助视图第一段）。键位改了的屏票同时改这里。 */
 export const SESSION_KEYS: readonly (readonly [string, string])[] = [
-  ['Enter', '提交任务；运行中补充当前任务'],
+  ['Enter', '提交任务；运行中补充当前任务；恢复核对时重开面板'],
   ['Ctrl+X Enter', '排到下一任务'],
   ['Shift+Enter / Ctrl+J', '换行；行尾 \\ 后 Enter 也换行'],
   ['Esc', '关闭补全；运行中请求中止'],
