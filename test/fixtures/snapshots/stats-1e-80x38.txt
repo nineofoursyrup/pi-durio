@@ -69,8 +69,8 @@
    0-79 -/-
 34|                                                                                |
    0-79 -/-
-35| ❯ /stats --from 09-16 --to 10-16                                               |
-   0-2 ac.brand/bg.base ; 3-79 fg.body/bg.base
+35| ❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z -… |
+   0-2 ac.brand/bg.base ; 3-77 fg.body/bg.base ; 78-78 -/- ; 79-79 -/bg.base
 36| 零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈旧不写成「没有发生」                              |
    0-56 fg.label/bg.base ; 57-79 -/-
 37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                                                     |

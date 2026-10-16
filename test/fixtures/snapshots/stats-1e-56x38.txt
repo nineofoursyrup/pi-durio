@@ -69,8 +69,8 @@
    0-55 -/-
 34|                                                        |
    0-55 -/-
-35| ❯ /stats --from 09-16 --to 10-16                       |
-   0-2 ac.brand/bg.base ; 3-55 fg.body/bg.base
+35| ❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 20… |
+   0-2 ac.brand/bg.base ; 3-53 fg.body/bg.base ; 54-54 -/- ; 55-55 -/bg.base
 36| 零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈…               |
    0-39 fg.label/bg.base ; 40-40 -/- ; 41-42 -/bg.base ; 43-55 -/-
 37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                             |

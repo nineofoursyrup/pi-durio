@@ -1,12 +1,13 @@
 import { basename } from 'node:path';
+import { realpathSync } from 'node:fs';
 import { matchesKey, truncateToWidth, visibleWidth } from '@earendil-works/pi-tui';
-import { queryFeedbackMetrics, queryOperationsMetrics, queryTaskMetrics, type MetricsScope } from '../metrics/index.js';
+import { queryFeedbackMetrics, queryOperationsMetrics, queryTaskMetrics, type MetricsScope, type TaskMetricsReport, type OperationsMetricsReport, type FeedbackMetricsReport } from '../metrics/index.js';
 import { records, decode } from '../history.js';
-import { evalReport } from '../eval/runner.js';
-import { readDisplayIndex } from '../display-number.js';
+import { listPlanSources, readPlanReport, type PlanSource, type EvalReport } from '../eval/overview.js';
 import { formatAmount, sumCostEstimates, type CostTotals } from '../cost-estimate.js';
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
 import { CommandError } from './commands.js';
+import { resolveProjectFilter } from './project-filter.js';
 import { clean, escHint, fixedFrame, hintLine, statusError, truncateEnd, widthTier } from './view-stack.js';
 
 // ─── 范围（M0、U5） ───────────────────────────────────────────────────────────
@@ -25,7 +26,7 @@ const minute = (iso: string) => { const d = new Date(iso); return `${monthDay(is
  * `/stats` 选项 → 范围。默认近 30 天整日（本机时区 `[as_of 当天−29, 次日)`）、当前工作区所属项目、日常来源，
  * as_of 为打开时刻。`--from`/`--to` 已由命令表转成本地零点 ISO；只给一端时另一端按 30 天补齐。
  */
-export function statsRequest(options: Record<string, string | boolean | undefined>, workspace: string, now = new Date()): StatsRequest {
+export function statsRequest(options: Record<string, string | boolean | undefined>, workspace: string, now = new Date(), projects: readonly string[] = []): StatsRequest {
   const text = (name: string) => typeof options[name] === 'string' ? options[name] as string : undefined;
   const asOfInput = text('as-of'), snapshot = text('snapshot');
   if (asOfInput !== undefined && !Number.isFinite(Date.parse(asOfInput))) throw new CommandError(`--as-of 不是可识别的时间：${asOfInput}`);
@@ -35,16 +36,24 @@ export function statsRequest(options: Record<string, string | boolean | undefine
   const from = text('from') ?? localDay(to, -30);
   const projectInput = text('project'), source = (text('source') ?? 'ordinary') as StatsSource;
   const scope: StatsScope = { from, to, asOf, source };
-  if (projectInput !== 'all') scope.project = projectInput ?? workspace;
+  const project = resolveProjectFilter(projectInput, workspace, projects);
+  if (project !== undefined) scope.project = project;
   if (text('type') !== undefined) scope.taskType = text('type');
   if (text('version') !== undefined) scope.version = text('version');
   if (snapshot !== undefined) scope.through = Number(snapshot);
-  const year = (iso: string) => new Date(iso).getFullYear() === now.getFullYear() ? monthDay(iso) : `${new Date(iso).getFullYear()}-${monthDay(iso)}`;
-  const parts = ['/stats', '--from', year(from), '--to', year(to)];
-  if (asOfInput !== undefined) parts.push('--as-of', asOfInput);
-  if (projectInput !== undefined) parts.push('--project', projectInput);
-  for (const name of ['type', 'version', 'source', 'snapshot']) if (text(name) !== undefined && !(name === 'source' && source === 'ordinary')) parts.push(`--${name}`, text(name)!);
-  return { scope, command: parts.join(' ') };
+  return { scope, command: statsCommand(scope) };
+}
+
+/** A replayable command includes the frozen wall-clock cutoff and exact project identity. */
+export function statsCommand(scope: StatsScope): string {
+  const date = (iso: string) => { const d = new Date(iso); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+  const quote = (value: string) => /[\s"\\]/.test(value) ? `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"` : value;
+  const parts = ['/stats', '--from', date(scope.from), '--to', date(scope.to), '--as-of', scope.asOf, '--project', quote(scope.project ?? 'all')];
+  if (scope.taskType) parts.push('--type', quote(scope.taskType));
+  if (scope.version) parts.push('--version', quote(scope.version));
+  if (scope.source !== 'ordinary') parts.push('--source', scope.source);
+  if (scope.through !== undefined) parts.push('--snapshot', String(scope.through));
+  return parts.join(' ');
 }
 
 // ─── 取数（只读：不调用模型、不写记录） ─────────────────────────────────────────
@@ -76,6 +85,24 @@ export interface StatsData {
   versions: { ids: string[]; unknown: number };
   figures: StatsFigures;
 }
+/** Full immutable input for drilldown/export; the figures-only interface stays usable for render oracles. */
+export interface StatsPlan {
+  source: PlanSource;
+  report: EvalReport;
+  label: string;
+  at: string;
+  P: number;
+  V: number;
+  R: number;
+}
+export interface StatsSnapshot extends StatsData {
+  root: string;
+  reports: { task: TaskMetricsReport; operations: OperationsMetricsReport; feedback: FeedbackMetricsReport };
+  plans: StatsPlan[];
+  planSources: PlanSource[];
+  /** Parent-root cutoffs immediately before retained judgments/feedback/price/report revisions. */
+  revisions: number[];
+}
 /** 超过查询上限：整屏报错，不显示部分结果（M0、U5）。 */
 export const SCOPE_LIMITS: Record<string, string> = {
   METRICS_SCOPE_TOO_LARGE: '范围过大 · 受理任务超过 10000 个',
@@ -93,25 +120,35 @@ const spendKind = (kind: string): SpendKind => kind === 'coding' || kind === 'ev
 const sourceOfMode = (mode: unknown) => mode === 'offline' ? 'synthetic' : mode === 'live' ? 'ordinary' : null;
 
 /** 读同一快照下的任务、运维、反馈三份报告与窗口内各 eval 计划的回归计数。只读，不取锁。 */
-export function readStats(root: string, scope: StatsScope): StatsData {
+export function readStats(root: string, scope: StatsScope): StatsSnapshot {
   const task = queryTaskMetrics(root, scope), fixed = { ...scope, through: task.scope.through };
   const ops = queryOperationsMetrics(root, fixed), feedback = queryFeedbackMetrics(root, fixed);
   const inWindow = (at: string) => Date.parse(at) >= Date.parse(scope.from) && Date.parse(at) < Date.parse(scope.to);
 
-  // 回归：本数据根与 improve 子数据根中固定于窗口内、来源相符、带比较的计划，逐个计算（M5）。
-  const plans: { root: string; id: string; at: string; asOf?: number }[] = [];
-  for (const ref of records(root, { through: task.scope.through, kinds: ['eval.plan'] })) {
-    if (!inWindow(ref.at)) continue;
-    try { if (sourceOfMode(decode(root, ref).mode) === scope.source) plans.push({ root, id: ref.runId, at: ref.at, asOf: task.scope.through }); } catch { /* 计划原文不可读：不进入回归行 */ }
-  }
+  // A display number is local to its root. Retain the complete source and the same acquisition cutoff for 2b.
+  const sources = listPlanSources(root, { through: task.scope.through, limit: null });
+  const candidates: PlanSource[] = sources.filter(s => s.root === root).map(s => ({ ...s, through: task.scope.through }));
+  const canonical = (path: string) => { try { return realpathSync(path); } catch { return path; } };
   for (const child of ops.ownedChildren.snapshots as { dataRoot: string; planId: string; through: number }[]) {
     const ref = [...records(child.dataRoot, { through: child.through, kinds: ['eval.plan'] })].find(r => r.runId === child.planId);
-    if (ref && inWindow(ref.at) && sourceOfMode(decode(child.dataRoot, ref).mode) === scope.source) plans.push({ root: child.dataRoot, id: child.planId, at: ref.at, asOf: child.through });
+    const source = sources.find(s => canonical(s.root) === child.dataRoot && s.id === child.planId);
+    if (source && ref) candidates.push({ ...source, root: child.dataRoot, at: ref.at, through: child.through });
   }
-  const regression = plans.flatMap(plan => {
-    const counts = evalReport(plan.root, plan.id, { asOf: plan.asOf }).comparison?.regression.counts;
-    return counts ? [{ label: readDisplayIndex(plan.root).label('eval-plan', plan.id), at: plan.at, P: counts.planned, V: counts.valid, R: counts.regressed }] : [];
+  const plans: StatsPlan[] = candidates.filter(source => inWindow(source.at)).flatMap(source => {
+    const { report } = readPlanReport(source), counts = report.comparison?.regression.counts;
+    if (!counts || sourceOfMode(report.plan.mode) !== scope.source) return [];
+    const label = [source.label, source.origin?.label ?? (source.root !== root ? source.root : '')].filter(Boolean).join(' · ');
+    return [{ source, report, label, at: source.at, P: counts.planned, V: counts.valid, R: counts.regressed }];
   }).sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+  const regression = plans.map(({ label, at, P, V, R }) => ({ label, at, P, V, R }));
+  const previous = [
+    ...task.tasks.flatMap(t => t.acceptance.history.map(h => h.source)),
+    ...[...feedback.intervention.tasks, ...feedback.rework.tasks].flatMap(t => t.feedback.history.map(h => h.source)),
+    ...ops.costs.requests.filter(r => r.dataRoot === root).flatMap(r => r.history.filter(h => h.id).map(h => h.source as string)),
+    ...plans.filter(p => p.source.root === root).flatMap(p => p.report.gradingRevisions.map(r => String(r.source))),
+    ...ops.ownedChildren.snapshots.flatMap(c => c.parentCheckSource ? [String(c.parentCheckSource)] : []),
+  ].map(id => Number(id.split(':')[1]) - 1).filter(n => Number.isSafeInteger(n) && n >= 0 && n < task.scope.through);
+  const revisions = [task.scope.through, ...new Set(previous.sort((a, b) => b - a))];
 
   // 双时钟分段：只列宿主有记录的；均值按已测出执行历时的任务计，各分段均值相加等于执行均值（M3）。
   const measured = task.tasks.filter(t => t.clocks.execution.state === 'measured');
@@ -132,7 +169,7 @@ export function readStats(root: string, scope: StatsScope): StatsData {
   const i = feedback.intervention.counts, w = feedback.rework.counts, f = ops.faults.tasks.counts;
   const started = task.tasks.filter(t => t.startedSource);
   return {
-    scope,
+    scope: fixed, root, reports: { task, operations: ops, feedback }, plans, planSources: candidates, revisions,
     sample: { N: task.counts.N, excluded: task.excluded.length },
     versions: { ids: [...new Set(started.flatMap(t => t.version ? [t.version] : []))], unknown: started.filter(t => !t.version).length },
     figures: {
@@ -310,6 +347,10 @@ function fit(segments: TextSegment[], w: number): TextSegment[] {
  */
 export class StatsView {
   tab: StatsTab;
+  /** Set by the interactive browser; omitted by standalone render oracles. */
+  selectedRow?: number;
+  hints?: string[];
+  revisionLabel?: string;
   /** 表格滚动偏移（高度不够时） */
   private offset = 0;
   private data?: StatsData;
@@ -339,7 +380,7 @@ export class StatsView {
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
     const line = (segments: TextSegment[], bg?: TokenName) => styledLine(segments, width, bg, tier);
     const tabs = line([{ text: ' ' }, { text: '指标', fg: this.tab === 'metrics' ? 'fg.primary' : 'fg.label', bold: this.tab === 'metrics' }, { text: ' · ', fg: 'fg.faint' }, { text: '本机实测', fg: this.tab === 'self' ? 'fg.primary' : 'fg.label', bold: this.tab === 'self' }]);
-    const hints = this.tab === 'metrics' ? ['Tab 切换页签', '↑↓ 滚动'] : ['Tab 切换页签'];
+    const hints = this.tab === 'metrics' ? this.hints ?? ['Tab 切换页签', '↑↓ 滚动'] : ['Tab 切换页签'];
     const hint = hintLine(hints, width, { esc: escHint(1), tier });
     if (this.tab === 'self') {
       const frame = fixedFrame([tabs, line([{ text: ' ◆ ', fg: 'ac.model' }, { text: 'self', fg: 'fg.primary', bold: true }])], ['', line([{ text: ' 本机实测页签尚未提供 · Tab 回到指标', fg: 'fg.muted' }])], [hint], height, 0);
@@ -367,15 +408,18 @@ export class StatsView {
       return [{ text: '█'.repeat(filled), fg: 'ac.info' }, { text: (tier === 'none' ? '░' : '█').repeat(10 - filled), fg: 'line.track' }];
     };
     const coverage = (row: MetricRow): TextSegment[] => [...bar(row.bar), ...row.coverage.map(s => ({ ...s, fg: s.fg ?? (row.bar === null ? 'fg.faint' : 'fg.muted') as TokenName }))];
+    const starts: number[] = [];
     rows.forEach((row, index) => {
-      const bg: TokenName | undefined = index % 2 === 0 ? 'bg.zebra' : undefined;
+      starts.push(table.length);
+      const selected = this.selectedRow === index;
+      const bg: TokenName | undefined = selected ? 'bg.selected' : index % 2 === 0 ? 'bg.zebra' : undefined;
       const value: TextSegment[] = [{ text: row.value.text, fg: TONE[row.value.tone], bold: row.value.tone !== 'na' }, ...row.value.unit ? [{ text: row.value.unit, fg: 'fg.faint' as TokenName }] : []];
       const scopeSegs = row.scope.map(s => ({ ...s, fg: s.fg ?? 'fg.body' as TokenName }));
       const label = fit([{ text: row.label, fg: 'fg.primary' }], LABEL_W);
-      if (tierW === 'wide') table.push(line([{ text: '  ' }, ...label, { text: GAP }, ...fit(value, VALUE_W), { text: GAP }, ...fit(scopeSegs, scopeW), { text: GAP }, ...fit(coverage(row), COVER_W)], bg));
+      if (tierW === 'wide') table.push(line([{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fit(value, VALUE_W), { text: GAP }, ...fit(scopeSegs, scopeW), { text: GAP }, ...fit(coverage(row), COVER_W)], bg));
       else {
         // 宽度小于 100：指标、值、覆盖一行，口径缩进一行，共用斑马底色；小于 60 去掉覆盖列。
-        const first: TextSegment[] = [{ text: '  ' }, ...label, { text: GAP }, ...fit(value, VALUE_W)];
+        const first: TextSegment[] = [{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fit(value, VALUE_W)];
         if (covW > 0) first.push({ text: GAP }, ...fit(coverage(row), covW));
         table.push(line(first, bg), line([{ text: '    ' }, ...fit(scopeSegs, Math.max(1, width - 4))], bg));
       }
@@ -385,14 +429,15 @@ export class StatsView {
     const barW = tierW === 'wide' ? 24 : tierW === 'medium' ? 12 : 0;
     const max = Math.max(0, ...spend.map(r => r.known));
     const spendLine = (row: SpendRow) => {
-      const segs: TextSegment[] = [{ text: '  ' }, ...fit([{ text: row.label, fg: row.kind === 'total' ? 'fg.primary' : 'fg.body' }], LABEL_W), { text: GAP }];
+      const selected = this.selectedRow === 7 + spend.findIndex(r => r.kind === row.kind);
+      const segs: TextSegment[] = [{ text: selected ? '› ' : '  ' }, ...fit([{ text: row.label, fg: row.kind === 'total' ? 'fg.primary' : 'fg.body' }], LABEL_W), { text: GAP }];
       if (barW) {
         const cells = max ? row.known / max * barW : 0, whole = Math.floor(cells);
         const glyphs = '█'.repeat(whole) + (cells - whole >= 0.5 || (row.known > 0 && whole === 0) ? '▌' : '');
         segs.push(...fit([{ text: glyphs, fg: SPEND[row.kind].fg }], barW), { text: GAP });
       }
       segs.push(...row.text.map(s => ({ ...s, fg: s.fg ?? 'fg.muted' as TokenName })));
-      return line(fit(segs, width));
+      return line(fit(segs, width), selected ? 'bg.selected' : undefined);
     };
     const spendLines = spend.map(spendLine), totalOnly = [spendLine(spend.at(-1)!)];
 
@@ -402,7 +447,13 @@ export class StatsView {
     let body = bodyOf(spendLines), foot = [command, note, hint];
     if (!fits(body.length, foot.length)) foot = [command, hint];
     if (!fits(body.length, foot.length)) foot = [hint];
-    if (!fits(body.length, foot.length)) body = bodyOf(totalOnly);
+    if (!fits(body.length, foot.length) && (this.selectedRow === undefined || this.selectedRow < 7)) body = bodyOf(totalOnly);
+    if (this.selectedRow !== undefined) {
+      const selected = this.selectedRow < 7 ? starts[this.selectedRow] : table.length + 2 + this.selectedRow - 7;
+      const available = Math.max(1, height - head.length - foot.length);
+      if (selected < this.offset) this.offset = selected;
+      else if (selected >= this.offset + available) this.offset = selected - available + 1;
+    }
     const frame = fixedFrame(head, body, foot, height, this.offset);
     this.offset = frame.offset;
     return frame.lines;
@@ -419,6 +470,7 @@ export class StatsView {
       const version = [ids.length === 1 ? ids[0].slice(0, 7) : ids.length ? `${ids.length} 个执行版本` : '', unknown ? `未知 ${unknown}` : ''].filter(Boolean).join(' ');
       if (version) second.push(version);
     }
+    if (this.revisionLabel) second.push(this.revisionLabel);
     const sample = data ? [`样本 ${data.sample.N}（筛除 ${data.sample.excluded}）`] : [];
     const brand: TextSegment[] = [{ text: ' ◆ ', fg: 'ac.model' }, { text: 'stats', fg: 'fg.primary', bold: true }, { text: '  ' }];
     const room = (segs: TextSegment[]) => width - segs.reduce((n, s) => n + visibleWidth(s.text), 0);

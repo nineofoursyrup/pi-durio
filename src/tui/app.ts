@@ -17,7 +17,9 @@ import { readObject, type QueueItemFact } from '../evidence.js';
 import { calculateContextTokens } from '@earendil-works/pi-ai/utils/estimate';
 import { readRunRecords, readObjectRange, type RecordReference } from '../query.js';
 import { Drafts } from './drafts.js';
-import { StatsView, readStats, statsRequest } from './stats.js';
+import { statsRequest } from './stats.js';
+import { StatsBrowser } from './stats-browser.js';
+import { statsChoices } from './stats-filter.js';
 import { recordAcceptance } from '../metrics/index.js';
 import type { HistoryFilter } from '../history.js';
 import { HistoryView } from './history.js';
@@ -126,7 +128,7 @@ export class ReadOnlyTui {
   private viewStack:ViewEntry[]=[];
   private get panel(){return this.viewStack.at(-1);}
   private historyView?:HistoryView;
-  private metricsView?:StatsView;
+  private metricsView?:StatsBrowser;
   private evalList?:EvalListView;
   private evalPlan?:EvalPlanView;
   private evalTrial?:TrialTraceView;
@@ -455,7 +457,7 @@ export class ReadOnlyTui {
     case 'older':this.window('older');break;
     case 'newer':this.window('newer');break;
     case 'stats':
-      try{this.metricsView=new StatsView(statsRequest(options,this.options.workspace),scope=>readStats(root,scope));this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
+      try{this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),statsChoices(root,this.options.workspace).projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.evalPlan=new EvalPlanView(target.source,this.evalHost);this.pushView('eval-plan');}}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
       break;
     case 'acceptance':
       if(!mayWrite(this.writeAccess))break;
@@ -929,14 +931,14 @@ export class ReadOnlyTui {
     catch(error){this.notice=`trace 不可读取：${safe(String(error))}`;this.tui.requestRender();}
   }
   /** 2a 列表层；Enter 进原文层、`p` 固定为证据经 TraceHost 回到这里。 */
-  private traceOf(runId:string) {
+  private traceOf(runId:string,root=this.options.dataRoot) {
     const host:TraceHost={writeBlocked:this.writeAccess.writeBlocked,busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,run)=>this.openConfirm(config,()=>void run()),changed:()=>this.tui.requestRender(),openRaw:span=>this.openRaw(span)};
-    return new TraceView(this.options.dataRoot,runId,()=>this.phase==='running'&&this.runId===runId,host);
+    return new TraceView(root,runId,()=>root===this.options.dataRoot&&this.phase==='running'&&this.runId===runId,host);
   }
   /** 在 2a 列表层之上压入原文层（Esc 回到列表层，仍选中该 span）。 */
   private openRaw(span:TraceSpan,item?:string) {
     if(!this.traceView)return;
-    this.traceRaw=new TraceRawView(this.options.dataRoot,this.traceView,span.key,{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender()},item);
+    this.traceRaw=new TraceRawView(this.traceView.root,this.traceView,span.key,{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender()},item);
     this.pushView('trace-raw');
   }
   /** `/details` 与“分页查看”：打开 2a 并选中该 span，直接进入原文层（先显示输出）；Esc 先回列表层，再回会话。 */
@@ -969,7 +971,7 @@ export class ReadOnlyTui {
   /** 视图各行；有即时反馈时替换末行（视图的键位提示行），保留最右边的 Esc。 */
   private panelLines(width:number) {
     const lines=this.panelBody(width);
-    if(this.hintFeedback!==undefined&&lines.length)lines[lines.length-1]=hintLine([],width,{feedback:this.hintFeedback,esc:escHint(this.viewStack.length)});
+    if(this.hintFeedback!==undefined&&lines.length)lines[lines.length-1]=hintLine([],width,{feedback:this.hintFeedback,esc:escHint(this.panel?.kind==='metrics'?this.metricsView?.depth??1:this.viewStack.length)});
     return lines;
   }
   private overlayHeight(){return Math.max(3,Math.floor(this.terminal.rows*0.9)-1);}
@@ -1024,6 +1026,8 @@ export class ReadOnlyTui {
     this.confirmation=undefined;
     // 全屏视图层的全局键（T6）：Esc 返回上一层；Ctrl+C 只停本视图的操作，不传给会话屏；Ctrl+D/O/T/R、? 不起作用。
     const key=viewKey(data);
+    if(panel.kind==='metrics'&&this.metricsView?.acceptsInput&&(key===undefined||key==='back'||data==='?')){this.metricsView.handleInput(data);this.tui.requestRender();return;}
+    if(key==='back'&&panel.kind==='metrics'&&this.metricsView?.back())return;
     if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='eval-trial'){if(this.evalTrial?.back())return;this.evalTrial?.close();}if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
     if(key==='redraw'){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
     if(key==='stop'){if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
