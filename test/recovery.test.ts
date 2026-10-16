@@ -134,6 +134,8 @@ test('a retained owner needs observed managed cleanup as well as explicit dispos
     const options={...paths,runId:output.runId,authorization:{workspace:paths.workspace,mode:'offline' as const,tools:['read'] as const}};
     const blocked=await checkRecovery(options);
     assert.equal(blocked.status,'blocked');assert.equal(blocked.persistence,'saved-separate-owner-report');
+    assert.equal(blocked.ownerCleanup?.status,mode==='late-close'?'releasable':'blocked','the host reports the same cleanup eligibility that settlement enforces');
+    if(mode==='crash')assert.equal(blocked.ownerCleanup?.reason,'CLEANUP_EVIDENCE_REQUIRED');
     const markers=blocked.ownerClaims!;assert.ok(markers.length);
     const decision={id:'dispose-owner',snapshotId:blocked.snapshotId,action:'confirm-cleanup' as const,acceptUnknownExternalEffects:true};
     const settled=await settleRecoveryOwners({...options,decision});
@@ -155,6 +157,7 @@ test('a retained owner needs observed managed cleanup as well as explicit dispos
   const owner=await acquireOwner(active.paths.dataRoot,()=>{});
   try {
     const report=await inspectRecovery({...active.paths,runId:active.result.runId});
+    assert.equal(report.ownerCleanup?.status,'running');
     await assert.rejects(settleRecoveryOwners({...active.paths,runId:active.result.runId,decision:{id:'cannot-steal',snapshotId:report.snapshotId,action:'confirm-cleanup',acceptUnknownExternalEffects:true}}),/OWNER_IDENTITY_UNVERIFIED|OWNER_STILL_ALIVE/);
     owner.assertHeld();
   } finally {await owner.release();}
