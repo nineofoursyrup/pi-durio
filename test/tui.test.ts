@@ -31,10 +31,10 @@ function fixture(override?: typeof fetch,coding=false) {
 }
 
 test('non-terminal CLI rejection does not emit terminal modes into a pipeline', () => {
-  const child=spawnSync(process.execPath,['dist/src/cli.js','tui','--workspace','test/fixtures/project','--offline-demo'],{encoding:'utf8'});
+  const child=spawnSync(process.execPath,['dist/src/cli.js','--workspace','test/fixtures/project','--offline-demo'],{encoding:'utf8'});
   assert.equal(child.status,1);assert.match(child.stderr,/TUI_REQUIRES_TERMINAL/);assert.equal(child.stdout,'');
-  const coding=spawnSync(process.execPath,['dist/src/cli.js','tui','--workspace','test/fixtures/project','--offline-demo','--coding'],{encoding:'utf8'});
-  assert.equal(coding.status,1);assert.match(coding.stderr,/TUI_REQUIRES_TERMINAL/);assert.equal(coding.stdout,'');
+  const readOnly=spawnSync(process.execPath,[join(process.cwd(),'dist/src/cli.js'),'--offline-demo','--read-only'],{cwd:'test/fixtures/project',encoding:'utf8'});
+  assert.equal(readOnly.status,1);assert.match(readOnly.stderr,/TUI_REQUIRES_TERMINAL/);assert.equal(readOnly.stdout,'');
 });
 
 test('coding UI delivers busy Enter and Ctrl+X Enter to authoritative queue facts, supports withdrawal and keeps history readonly',async()=>{

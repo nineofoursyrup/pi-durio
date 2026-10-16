@@ -67,13 +67,13 @@ test('CLI --run accepts display numbers and full UUIDs; ambiguity exits nonzero 
   assert.match(display, /^r-[0-9a-f]{4,}$/);
 
   // Read-only command: display number and full UUID read the same run.
-  const byDisplay = cli('show', '--run', display), byUuid = cli('show', '--run', result.runId);
+  const byDisplay = cli('show', display, '--format', 'json'), byUuid = cli('show', result.runId, '--format', 'json');
   assert.equal(byDisplay.status, 0, byDisplay.stderr); assert.equal(byUuid.status, 0, byUuid.stderr);
   assert.deepEqual(JSON.parse(byDisplay.stdout), JSON.parse(byUuid.stdout));
   assert.ok(JSON.parse(byDisplay.stdout).records.length > 0);
 
   const sqlite = join(dataRoot, 'host.sqlite');
-  for (const args of [['show', '--run', 'r-abcd'], ['recover', '--run', 'r-abcd']]) {
+  for (const args of [['show', 'r-abcd', '--format', 'json'], ['recover', '--run', 'r-abcd']]) {
     const before = readFileSync(sqlite), seq = watermark(dataRoot);
     const child = cli(...args);
     assert.notEqual(child.status, 0, args.join(' '));

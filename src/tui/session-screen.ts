@@ -40,6 +40,8 @@ export interface HeaderState {
   session?: string; run?: string;
   /** 任务 N（会话链深度）与运行时的第 M 轮，或空闲时的终态。 */
   task?: number; round?: number; status?: RunStatus;
+  /** 工作区取自会话记录、与当前目录不同（`resume`）。 */
+  elsewhere?: boolean;
 }
 export function headerRight(state: HeaderState): TextSegment[] {
   const parts: TextSegment[] = [];
@@ -53,7 +55,7 @@ export function headerRight(state: HeaderState): TextSegment[] {
 }
 function headerLeft(state: HeaderState, workspace: string): TextSegment[] {
   const ids = [state.session ? `会话 ${state.session}` : '', state.run ? `run ${state.run}` : ''].filter(Boolean).join(' · ');
-  return [{ text: GLYPHS.brand, fg: 'ac.brand' }, { text: ' pi-durio', fg: 'fg.primary', bold: true }, { text: '  ' }, { text: workspace, fg: 'ac.path' }, ...(ids ? [{ text: `  · ${ids}`, fg: 'fg.faint' as TokenName }] : [])];
+  return [{ text: GLYPHS.brand, fg: 'ac.brand' }, { text: ' pi-durio', fg: 'fg.primary', bold: true }, { text: '  ' }, { text: workspace, fg: 'ac.path' }, ...(state.elsewhere ? [{ text: ' · 非当前目录', fg: 'ac.warn' as TokenName }] : []), ...(ids ? [{ text: `  · ${ids}`, fg: 'fg.faint' as TokenName }] : [])];
 }
 /** `◆ pi-durio <工作区> · 会话 s-… · run r-…`，右侧 `任务 N · 第 M 轮`；放不下时工作区从中间省略。 */
 export function headerLine(state: HeaderState, width: number, showRight: boolean, tier: ColorTier = COLOR_TIER) {

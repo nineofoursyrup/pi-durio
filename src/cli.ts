@@ -4,6 +4,7 @@ import { parseArgs } from 'node:util';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { realpathSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { runReadTask, runCodingTask, compactContext, readRun, readQueue, checkQueue, decideQueue, TaskControl, readRecoveryDetail, inspectRecovery, checkRecovery, recoverRun, settleRecoveryOwners, type ToolEnvironmentConfig, type RecoveryAuthorization } from './runtime.js';
 import { writeHeadlessResult, exitHostIfUnconfirmed } from './headless-lifecycle.js';
@@ -15,6 +16,7 @@ import { metricsCommand } from './metrics/cli.js';
 import { storageCommand } from './storage-cli.js';
 import { resolveDisplayInput, readDisplayIndex, DisplayInputError } from './display-number.js';
 import { readSessionChains } from './session-chain.js';
+import { readContinuation } from './continuation.js';
 import { estimateRunRequests, costTotalsView } from './cost-estimate.js';
 
 function lifecycleSignals() {
@@ -29,7 +31,7 @@ async function main() {
     spec: { type: 'string' }, directory: { type: 'string' }, workspace: { type: 'string' }, 'data-root': { type: 'string' }, prompt: { type: 'string' },
     run: { type: 'string' }, trace: { type: 'boolean' }, 'context-run':{type:'string'}, 'offline-demo': { type: 'boolean' }, originals: { type: 'boolean' },
     after: { type: 'string' }, limit: { type: 'string' }, help: { type: 'boolean' },
-    coding: { type: 'boolean' }, 'tool-env-config': { type: 'string' }, 'cleanup-timeout-ms': { type: 'string' },
+    coding: { type: 'boolean' }, 'read-only': { type: 'boolean' }, 'tool-env-config': { type: 'string' }, 'cleanup-timeout-ms': { type: 'string' },
     filter: { type: 'string' }, cursor: { type: 'string' }, snapshot: { type: 'string' }, evidence: { type: 'string' },
     offset: { type: 'string' }, format: { type: 'string' }, decoded: { type: 'boolean' }, id: { type: 'string' },
     purpose: { type: 'string' }, dependencies: { type: 'string' }, destination: { type: 'string' }, price: { type: 'string' }, 'max-bytes': { type: 'string' },
@@ -37,10 +39,10 @@ async function main() {
     units: {type:'string'}, reason:{type:'string'}, confirm:{type:'string'}, scope:{type:'string'}, objects:{type:'string'}, archive:{type:'string'}, backup:{type:'string'}
   } });
   const command = positionals[0];
-  if (values.help || !command) {
-    console.log('pi-durio run --workspace PATH --prompt TEXT [--data-root PATH] [--offline-demo] [--coding] [--tool-env-config PATH] [--cleanup-timeout-ms N]\npi-durio tui --workspace PATH [--data-root PATH] [--offline-demo] [--coding] [--run UUID]\npi-durio show <r-号|s-号>|--run UUID [--trace] [--format json|text] [--data-root PATH] [--originals] [--after SEQ] [--limit N]\n--run and --context-run accept a full run UUID or its display number (r-xxxx); eval run/report/grade --id accepts ep-xxxx, improve report --id accepts ir-xxxx and queue/control decision requestId accepts q-xxxx; an ambiguous display number is rejected with its candidates.\nrun defaults to DeepSeek/deepseek-flash at https://api.deepseek.com; DEEPSEEK_API_KEY is required.\n--offline-demo uses a deterministic README.md fixture transport, with no network or model inference.\nDefault run grants read only; --coding explicitly grants read/write/edit/bash for the stated task. Trusted local bash is not an OS sandbox. File tools support files up to 256 KiB; at most 8 provider attempts.\n--tool-env-config supplies JSON {version,variables} for coding only; values are not added to configuration records. Model API keys are not inherited. Old pending work blocks new execution.\nSIGINT persists stop intent; SIGTERM exits and preserves unfinished work. The first intent is retained. Both show processing and await cleanup (default 10000 ms); timeout leaves unknown and owner evidence for recovery. Cancellation does not undo changes or refund costs.');
-    console.log('pi-durio recover --run UUID [--data-root PATH] [--inspect] [--authorization FILE] [--decision FILE] [--offline-demo]\n--inspect reads facts without changing source databases. Detail pages: --after OFFSET --limit N (max 32) --snapshot ID. Original entry JSON: --inspect --snapshot ID --evidence ENTRY_ID|task:TASK_ID [--offset N --limit N] (max 4096 UTF-16 code units). Default recover saves a separate report and exits 75 when input is needed. Authorization JSON declares {workspace,mode,tools,toolEnvironment?}; decision JSON binds {id,snapshotId,action,acceptAdditionalModelAttempts?,resolutions?}. Actions: continue, end, confirm-cleanup. A decision never changes the original unknown facts.\npi-durio control --workspace PATH --prompt TEXT [--coding] [--offline-demo]: NDJSON stdin controls; ready event supplies immutable target. Inputs {action:steer|follow-up|compact|improve,id,input,target}; withdrawal {action:withdraw,decision:{id,requestId,action:withdraw,target,receiptSeq}}; {action:stop|exit}.\npi-durio queue [--inspect] [--data-root PATH] [--run SOURCE_UUID --decision FILE --authorization FILE --offline-demo]: readonly inspect or saved recovery/queue decisions; unresolved queue exits 75.\npi-durio tui --workspace PATH [--coding] [--run UUID]: coding uses the same runtime; --run opens recovery facts without auto continuation.');
-    console.log('pi-durio compact --run UUID --id REQUEST_ID --authorization FILE [--data-root PATH] [--offline-demo]; compact --inspect --run UUID is read-only. Compaction retains originals and records generation separately from application. run --context-run UUID imports a verified completed context into a new independent task.');
+  if (values.help) {
+    console.log('pi-durio [--workspace PATH] [--read-only] [--data-root PATH] [--offline-demo] [--tool-env-config PATH]\nWithout a command, opens the TUI in the current directory (or --workspace). The interactive entry grants coding (read/write/edit/bash); --read-only narrows it to read. The writer lock is taken only when a task or recovery decision is accepted.\npi-durio resume [<s-号|session UUID>] [--data-root PATH] [--offline-demo] [--tool-env-config PATH]: opens the TUI at the session tail. A tail awaiting recovery opens the recovery panel without continuing; a completed tail continues on the next Enter (any execution version); otherwise the tail is shown read-only with the reason. The workspace comes from the session record and the authorization from the tail run (no --coding/--read-only). r- numbers are rejected with their session number. Without a number, lists the sessions of the current workspace. No lock is taken at startup.\npi-durio show <s-号|r-号> [--trace] [--format json|text] [--data-root PATH] [--originals] [--after SEQ] [--limit N]: without --format opens a read-only TUI (no lock, no scheduling; s- opens the session, r- the task); outside a terminal --format is required. --format prints the recorded run (s- takes the tail run); --trace --format equals history trace.\npi-durio run --workspace PATH --prompt TEXT [--data-root PATH] [--offline-demo] [--coding] [--tool-env-config PATH] [--cleanup-timeout-ms N]\n--run and --context-run accept a full run UUID or its display number (r-xxxx); eval run/report/grade --id accepts ep-xxxx, improve report --id accepts ir-xxxx and queue/control decision requestId accepts q-xxxx; an ambiguous display number is rejected with its candidates.\nrun defaults to DeepSeek/deepseek-flash at https://api.deepseek.com; DEEPSEEK_API_KEY is required.\n--offline-demo uses a deterministic README.md fixture transport, with no network or model inference.\nHeadless run grants read only by default; --coding explicitly grants read/write/edit/bash for the stated task. Trusted local bash is not an OS sandbox. File tools support files up to 256 KiB; at most 8 provider attempts.\n--tool-env-config supplies JSON {version,variables} for coding only; values are not added to configuration records. Model API keys are not inherited. Old pending work blocks new execution.\nSIGINT persists stop intent; SIGTERM exits and preserves unfinished work. The first intent is retained. Both show processing and await cleanup (default 10000 ms); timeout leaves unknown and owner evidence for recovery. Cancellation does not undo changes or refund costs.');
+    console.log('pi-durio recover --run UUID [--data-root PATH] [--inspect] [--authorization FILE] [--decision FILE] [--offline-demo]\n--inspect reads facts without changing source databases. Detail pages: --after OFFSET --limit N (max 32) --snapshot ID. Original entry JSON: --inspect --snapshot ID --evidence ENTRY_ID|task:TASK_ID [--offset N --limit N] (max 4096 UTF-16 code units). Default recover saves a separate report and exits 75 when input is needed. Authorization JSON declares {workspace,mode,tools,toolEnvironment?}; decision JSON binds {id,snapshotId,action,acceptAdditionalModelAttempts?,resolutions?}. Actions: continue, end, confirm-cleanup. A decision never changes the original unknown facts.\npi-durio control --workspace PATH --prompt TEXT [--coding] [--offline-demo]: NDJSON stdin controls; ready event supplies immutable target. Inputs {action:steer|follow-up|compact|improve,id,input,target}; withdrawal {action:withdraw,decision:{id,requestId,action:withdraw,target,receiptSeq}}; {action:stop|exit}.\npi-durio queue [--inspect] [--data-root PATH] [--run SOURCE_UUID --decision FILE --authorization FILE --offline-demo]: readonly inspect or saved recovery/queue decisions; unresolved queue exits 75.');
+    console.log('pi-durio compact --run UUID --id REQUEST_ID --authorization FILE [--data-root PATH] [--offline-demo]; compact --inspect --run UUID is read-only. Compaction retains originals and records generation separately from application. run --context-run UUID imports a completed context into a new independent task; the new task runs on the current execution version.');
     console.log('Improve: improve analyze --spec FILE [--offline-demo]; improve list; improve report --id ID [--format text]. Spec explicitly declares workspace, targetRunId, mode and request {id,purpose,limits:{maxRequests,maxTokens,maxRequestTokens,maxDurationMs,maxOutputTokens},sources?}. Analysis only; no candidates selected or executed. Missing limits block before dispatch. Reports and lists are read-only. TUI /improve JSON uses the same request; /improves opens reports. Selection: improve preview|submit --spec FILE; improve decision --id ID; improve continue --spec FILE; improve suppressions; improve restore-suggestion --spec FILE. TUI /improve-select JSON starts unselected and requires aggregate submission. Execute-declared-scope requires explicit formal writeback/activation scope; project/config/prompt/skill, registered self-source builds and independent eval assets are supported. improve defaults --workspace PATH reads current project defaults; improve rollback --spec FILE explicitly restores unchanged batch bytes and subsequent defaults. improve build-default --workspace PATH reads the selected future entry; improve launch --spec FILE explicitly starts a new build process. improve assets --id ID reads independent asset revisions; improve regrade --spec FILE applies a selected grader to saved outcomes on both sides.');
     console.log('Eval: eval plan --spec FILE; eval run --id PLAN --directory NEW_DIR; eval report --id PLAN [--format text|json]; eval grade --id PLAN --spec REVISION --directory NEW_DIR; eval list. All accept --data-root. Plans fix runtime/fixtures/graders, ordering, deadline, request/token budgets and price before execution. Offline controlled provider is explicit; live plans require a paid authorization and proven request token bound.');
     console.log('History: history --filter JSON [--cursor JSON]; evidence --run ID or --evidence ID [--offset N --limit N --decoded]; trace --run ID; usage --run IDs; derive --run IDs --evidence IDs --purpose TEXT; export adds --destination FILE; fix --id ID --evidence IDs --purpose TEXT [--dependencies IDs]; fixed --evidence ID; estimate --id ID --run IDs --price JSON. All accept --data-root and --format json|text. Only fix/estimate write management facts; export requires an explicit new destination. Queries never execute.');
@@ -53,25 +55,44 @@ async function main() {
   for (const key of ['run', 'context-run'] as const) if (values[key]) values[key] = values[key].split(',').map(input => resolveDisplayInput(dataRoot, 'run', input)).join(',');
   const idKind = command === 'eval' && ['run', 'report', 'grade'].includes(positionals[1]) ? 'eval-plan' : command === 'improve' && positionals[1] === 'report' ? 'improve-report' : undefined;
   if (idKind && values.id) values.id = resolveDisplayInput(dataRoot, idKind, values.id);
+  if (!command || command === 'resume') {
+    // 交互入口（S3、U6）：无参数在当前目录（或 --workspace）打开 TUI，默认 coding，--read-only 收窄。
+    // resume：工作区取会话记录、授权沿用链尾 run；启动时不取锁、不调度（R3）。
+    if (values.prompt) throw Error('USAGE: enter requests in the TUI input area');
+    let workspace = values.workspace ?? process.cwd(), coding = !values['read-only'], resume: string | undefined, sessions = false, elsewhere = false;
+    if (command === 'resume') {
+      if (values.coding || values['read-only']) throw Error('USAGE: resume keeps the tail run authorization; --coding/--read-only are not accepted');
+      if (values.workspace) throw Error('USAGE: resume takes the workspace from the session record');
+      const input = positionals[1], chains = readSessionChains(dataRoot);
+      if (input === undefined) sessions = true;
+      else {
+        const runOf = (id: string) => { const session = chains.sessionOfRun(id); return Error(`USAGE: resume takes a session number; ${input} is a run${session ? ` of session ${readDisplayIndex(dataRoot).label('session', session.id)}` : ''}`); };
+        if (/^r-/i.test(input)) throw runOf(resolveDisplayInput(dataRoot, 'run', input));
+        const id = resolveDisplayInput(dataRoot, 'session', input), session = chains.session(id);
+        if (!session) { if (chains.sessionOfRun(id)) throw runOf(id); throw Error(`DISPLAY_NOT_FOUND: no session matches ${input}`); }
+        const continuation = readContinuation(dataRoot, id, { chains })!;
+        if (!session.workspace) throw Error('SESSION_WORKSPACE_UNRECORDED: the session record has no workspace');
+        workspace = session.workspace; coding = continuation.coding; resume = id;
+        try { elsewhere = realpathSync(process.cwd()) !== workspace; } catch { elsewhere = true; }
+      }
+    }
+    if (values['tool-env-config'] && !coding) throw Error('USAGE: --tool-env-config requires a coding session');
+    const toolEnvironment = values['tool-env-config'] ? JSON.parse(await readFile(values['tool-env-config'], 'utf8')) : undefined;
+    const { runTui, exitCostSummary } = await import('./tui/app.js');
+    const exit = await runTui({ dataRoot, workspace, mode: values['offline-demo'] ? 'offline' : 'live', transport: values['offline-demo'] ? demoTransport().fetch : undefined, coding, toolEnvironment, resume, sessions, elsewhere });
+    const result = exit.result;
+    console.log(JSON.stringify({ tui: 'closed', runId: result?.runId, sessionId: result?.sessionId, status: result?.status ?? 'no-task', cleanup: result?.cleanup, usage: result?.usage.completeness ?? 'unknown', draftSaved: exit.draftSaved, error: exit.error?.slice(0,1024) }));
+    if (result) console.log(exitCostSummary(dataRoot, result));
+    if (result) console.log(`Read back: pi-durio show ${readDisplayIndex(dataRoot).label('run', result.runId)} --format json --data-root '${dataRoot.replaceAll("'", "'\\''")}'`);
+    process.exitCode = exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : result?.controls?.exitCode??0;
+    exitHostIfUnconfirmed(result);
+    return;
+  }
   if(metricsCommand(command,dataRoot,values))return;
   if(command==='improve'){await improveCommand(positionals[1],dataRoot,values);return;}
   if(command==='eval'){await evalCommand(positionals[1],dataRoot,values);return;}
   if (await storageCommand(command,positionals[1],dataRoot,values)) return;
   if (await historyCommand(command, dataRoot, values)) return;
-  if (command === 'tui') {
-    if (!values.workspace || values.prompt) throw new Error('USAGE: tui requires --workspace; enter requests in the input area');
-    if(values['tool-env-config']&&!values.coding)throw Error('USAGE: --tool-env-config requires --coding');
-    const toolEnvironment=values['tool-env-config']?JSON.parse(await readFile(values['tool-env-config'],'utf8')):undefined;
-    const { runTui, exitCostSummary } = await import('./tui/app.js');
-    const exit = await runTui({ dataRoot, workspace: values.workspace, mode: values['offline-demo'] ? 'offline' : 'live', transport: values['offline-demo'] ? demoTransport().fetch : undefined,coding:values.coding,toolEnvironment,runId:values.run });
-    const result = exit.result;
-    console.log(JSON.stringify({ tui: 'closed', runId: result?.runId, sessionId: result?.sessionId, status: result?.status ?? 'no-task', cleanup: result?.cleanup, usage: result?.usage.completeness ?? 'unknown', draftSaved: exit.draftSaved, error: exit.error?.slice(0,1024) }));
-    if (result) console.log(exitCostSummary(dataRoot, result));
-    if (result) console.log(`Read back: pi-durio show --data-root '${dataRoot.replaceAll("'", "'\\''")}' --run ${readDisplayIndex(dataRoot).label('run', result.runId)}`);
-    process.exitCode = exit.error ? 1 : result?.status === 'unknown' ? 75 : result?.status === 'aborted' ? 130 : result?.status === 'failed' ? 1 : result?.controls?.exitCode??0;
-    exitHostIfUnconfirmed(result);
-    return;
-  }
   if(command==='compact'){
     if(!values.run)throw Error('USAGE: compact requires --run');
     if(values.inspect){console.log(JSON.stringify(readCompactions(dataRoot,values.run,{after:values.after?Number(values.after):undefined,limit:values.limit?Number(values.limit):undefined}),null,2));return;}
@@ -93,26 +114,31 @@ async function main() {
     return;
   }
   if (command === 'show') {
-    // `show <r-号|s-号>` 与 `show --run`；s- 号取会话链尾 run。
-    if (!values.run && positionals[1]) {
-      const input = positionals[1];
-      if (/^s-/i.test(input)) { const id = resolveDisplayInput(dataRoot, 'session', input), session = readSessionChains(dataRoot).session(id); if (!session) throw Error(`DISPLAY_NOT_FOUND: no session matches ${input}`); values.run = session.tailRunId; }
-      else values.run = resolveDisplayInput(dataRoot, 'run', input);
-    }
-    if (!values.run) throw new Error('USAGE: show requires <r-号|s-号> or --run');
-    if (values.trace) {
-      // --trace --format json|text 与 history trace 相同；不带 --format 时打开 TUI 的 2a（只读查看）。
-      if (values.format) { await historyCommand('trace', dataRoot, values); return; }
-      if (!process.stdin.isTTY || !process.stdout.isTTY) throw Error('USAGE: show --trace outside a terminal requires --format json');
+    // `show <s-号|r-号>`（U6）：不带 --format 打开只读 TUI（不取锁、不调度）；带 --format 照首版打印，s- 号取链尾 run。
+    const input = positionals[1];
+    if (!input || values.run) throw Error('USAGE: show takes <s-号|r-号>');
+    if (values.format !== undefined && values.format !== 'json' && values.format !== 'text') throw Error('USAGE: format is json or text');
+    const chains = readSessionChains(dataRoot);
+    let session: string | undefined;
+    if (/^s-/i.test(input)) session = resolveDisplayInput(dataRoot, 'session', input);
+    else if (!/^r-/i.test(input) && chains.session(input)) session = input;
+    if (session) { const summary = chains.session(session); if (!summary) throw Error(`DISPLAY_NOT_FOUND: no session matches ${input}`); values.run = summary.tailRunId; }
+    else values.run = resolveDisplayInput(dataRoot, 'run', input);
+    if (!values.format) {
+      if (!process.stdin.isTTY || !process.stdout.isTTY) throw Error('USAGE: show outside a terminal requires --format json');
       const { runTui } = await import('./tui/app.js');
-      const exit = await runTui({ dataRoot, workspace: process.cwd(), mode: 'live', trace: values.run });
+      // 只读查看取 cwd 作工作区；--trace 打开 2a（s- 号取链尾 run）。
+      const exit = await runTui({ dataRoot, workspace: process.cwd(), mode: 'live', ...(values.trace ? { trace: values.run } : { show: { run: values.run, session } }) });
       if (exit.error) { console.error(exit.error); process.exitCode = 1; }
       return;
     }
+    // --trace --format json|text 与 history trace 相同。
+    if (values.trace) { await historyCommand('trace', dataRoot, values); return; }
     const page = await readRun(dataRoot, values.run, { after: values.after ? Number(values.after) : undefined, limit: values.limit ? Number(values.limit) : undefined });
     // The estimate is a sibling of the recorded RunResult, which stays exactly as runtime returned it.
     const costEstimate = { scope: `run:${values.run}`, ...costTotalsView(estimateRunRequests(dataRoot, values.run).totals) };
-    console.log(JSON.stringify(values.originals ? { ...page, costEstimate } : { ...page, records: page.records.map(({ seq, kind, at }) => ({ seq, kind, at })), costEstimate }, null, 2));
+    const output = JSON.stringify(values.originals ? { ...page, costEstimate } : { ...page, records: page.records.map(({ seq, kind, at }) => ({ seq, kind, at })), costEstimate }, null, 2);
+    console.log(values.format === 'text' ? `pi-durio show\n${output}` : output);
     return;
   }
   if (command === 'recover') {
