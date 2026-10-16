@@ -21,6 +21,7 @@ import { readRunRecords, readObjectRange, type RecordReference } from '../query.
 import { Drafts } from './drafts.js';
 import { statsRequest } from './stats.js';
 import { StatsBrowser } from './stats-browser.js';
+import { processMeasurements } from '../self-measurement.js';
 import { statsChoices } from './stats-filter.js';
 import { recordAcceptance } from '../metrics/index.js';
 import { HistoryView, historyScope, historyProjects, type HistoryTarget } from './history.js';
@@ -184,6 +185,7 @@ export class ReadOnlyTui {
   private historyWindow=false;
   private removeInput?:()=>void;
   private restoreTerminalWrite?:()=>void;
+  private restoreMeasurementWrite?:()=>void;
   private removeSignals:Array<()=>void>=[];
   private widths?:TerminalWidthGate;
   private displaySources:string[]=[];
@@ -287,6 +289,7 @@ export class ReadOnlyTui {
     this.terminal.start=(input,resize)=>originalStart(data=>{
       // Query replies are not user actions and must not revoke the confirmation they helped paint.
       if(this.widths?.consumeTerminalReply(data))return;
+      processMeasurements.input(data);
       // Runs before pi-tui's own viewport listener, which consumes mouse/focus/page keys.
       if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+d')) this.confirmation=undefined;
       if(!isKeyRelease(data)&&!matchesKey(data,'ctrl+x')&&!matchesKey(data,'enter'))this.followChord=false;
@@ -310,6 +313,10 @@ export class ReadOnlyTui {
     const rejection=(reason:unknown)=>fault(reason instanceof Error?reason:new Error(String(reason)));
     process.on('unhandledRejection',rejection); this.removeSignals.push(()=>process.off('unhandledRejection',rejection));
     this.restoreTerminalWrite=hideCursorDuringPaint(this.terminal);
+    // Observe the real write underneath the width gate: a blocked frame is not a written frame.
+    const measuredWrite=this.terminal.write;
+    this.terminal.write=data=>{measuredWrite.call(this.terminal,data);processMeasurements.paint(data);};
+    this.restoreMeasurementWrite=()=>{this.terminal.write=measuredWrite;};
     if(this.options.widthCalibration!==false)this.widths=new TerminalWidthGate({terminal:this.terminal,tui:this.tui,
       sources:()=>[this.editor.getExpandedText(),this.options.workspace,this.model,this.notice,this.contextUsage(),this.usageText().cost,...this.displaySources],
       priorityInput:data=>{
@@ -509,7 +516,7 @@ export class ReadOnlyTui {
     case 'older':this.window('older');break;
     case 'newer':this.window('newer');break;
     case 'stats':
-      try{this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),statsChoices(root,this.options.workspace).projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.openEvalPlan(target.source);}}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
+      try{if(options.self&&Object.keys(options).some(key=>key!=='self'))throw new CommandError('--self 固定近 7 天、全部项目、日常来源，不接受其他筛选');this.metricsView?.cancel();this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),options.self?[]:statsChoices(root,this.options.workspace).projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.openEvalPlan(target.source);}}},{tab:options.self?'self':'metrics',self:{dimensions:()=>({columns:this.terminal.columns,rows:this.terminal.rows}),busy:()=>this.phase!=='idle'}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
       break;
     case 'acceptance':
       if(!mayWrite(this.writeAccess))break;
@@ -1344,14 +1351,14 @@ export class ReadOnlyTui {
     let draftSaved=false,draftLines=0,terminalRestored=true;
     try {const draft=this.editor.getExpandedText()||this.savedDraft;if(draft){this.drafts.save(draft);draftSaved=true;draftLines=draft.split(/\r\n|\r|\n/).length;}}catch(error){this.failure=`草稿保存失败：${String(error)}`;}
     try {await evalStopping;await this.active;} finally {
-      this.closeTrial();await Promise.allSettled(this.trialClosures);
+      this.closeTrial();await Promise.allSettled(this.trialClosures);this.metricsView?.cancel();
       this.stopped=true;if(this.timer)clearInterval(this.timer);this.removeInput?.();for(const remove of this.removeSignals)remove();
       if(this.started) {
         try {if(this.widths&&!await this.widths.settle()){terminalRestored=false;this.failure??='WIDTH_QUERY_BOUNDARY_UNKNOWN: terminal drain is bounded';}}catch(error){terminalRestored=false;this.failure??=`字宽清理失败：${String(error)}`;}
         try {await this.terminal.drainInput(150,30);} catch(error){terminalRestored=false;this.failure??=`终端 drain 失败：${String(error)}`;}
         try {this.terminal.write('\x1b[?1004l');this.tui.stop({preserveScreen:true});}
         catch(error){terminalRestored=false;this.failure??=`终端清理失败：${String(error)}`;try{this.terminal.stop();}catch{/* Preserve the cleanup failure. */}}
-        finally {try{this.terminal.showCursor();}catch(error){terminalRestored=false;this.failure??=`光标恢复失败：${String(error)}`;}this.widths?.dispose();this.restoreTerminalWrite?.();}
+        finally {try{this.terminal.showCursor();}catch(error){terminalRestored=false;this.failure??=`光标恢复失败：${String(error)}`;}this.widths?.dispose();this.restoreMeasurementWrite?.();this.restoreTerminalWrite?.();}
       }
     }
     const cleanupResult=this.cleanupReceipts.result(this.cleanupResult);
