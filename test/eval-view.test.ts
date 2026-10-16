@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { stripTerminalSequences, visibleWidth } from '@earendil-works/pi-tui';
+import { stripTerminalSequences, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
 import { Evidence, digest } from '../src/evidence.js';
 import { fixEvidence } from '../src/fixed-evidence.js';
 import { appendFact, regularFiles } from '../src/eval/store.js';
@@ -20,6 +20,7 @@ import { captureSnapshot, snapshotText, type SnapshotGrid } from '../src/tui/sna
 import { runCodingTask } from '../src/runtime.js';
 import { scriptedTransport } from '../src/offline.js';
 import { readTrace } from '../src/trace.js';
+import { ReadOnlyTui } from '../src/tui/app.js';
 
 const fixtureData = fileURLToPath(new URL('../../test/fixtures/v1-records/data', import.meta.url));
 const plain = (lines: string[]) => lines.map(line => stripTerminalSequences(line));
@@ -255,7 +256,10 @@ test('trial trace: restricted-side raw beside host-mediated usage; fallback list
   const { root, id } = await planRoot({ cases: { 'local-fix': 'objective' }, reps: 1, scale: 'relative', stopReason: null, outcome: t => t.side === 'baseline' ? { status: 'completed', judgment: 'PASS', requests: 2, artifacts: captured } : { status: 'completed', judgment: 'PASS', requests: 2 } }, evalRoot);
   const source = ownPlanSource(root, id), { report } = readPlanReport(source);
   const baseline = report.trials.find(t => t.side === 'baseline')!.id;
-  const view = new TrialTraceView(source, report, baseline);
+  const before = regularFiles(root).map(path => [path, digest(readFileSync(join(root, path)))]);
+  const beforeGuest = regularFiles(guest).map(path => [path, digest(readFileSync(join(guest, path)))]);
+  const providerCalls = transport.calls.length, copied: string[] = [];
+  const view = new TrialTraceView(source, report, baseline, undefined, async text => { copied.push(text); return true; });
   await view.opened;
   assert.deepEqual(view.timing, { preparationMs: 1200, taskMs: 3400, gradingMs: 800 });
   const text = plain(withTier('none', () => view.render(160, 38, 'Esc 返回上层'))).join('\n');
@@ -265,11 +269,59 @@ test('trial trace: restricted-side raw beside host-mediated usage; fallback list
   if (restricted.some(t => t !== 10)) assert.match(text, /不一致 · #1 宿主 10 \/ 受限侧自报 \S+ tok/);
   assert.match(text, /run r-/);
   assert.match(text, /llm/);
+  for (let i = 0; i < 10 && view.selectedSpan?.kind !== 'tool'; i++) view.handleInput('\x1b[B');
+  assert.equal(view.selectedSpan?.tool?.name, 'read');
+  const selected = view.selectedSpan!.key;
+  view.handleInput('p');
+  assert.match(plain(view.render(160, 38, 'Esc 返回上层')).join('\n'), /只读查看 · trial 原文副本不能固定为证据/);
+  view.handleInput('\r');
+  assert.match(plain(view.render(160, 38, 'Esc 返回上层')).join('\n'), /◆ trace 原文/);
+  view.handleInput('\t'); view.handleInput('y');
+  await new Promise(resolve => setImmediate(resolve));
+  assert.match(copied[0], /Trial fixture/, 'raw bytes come from the restricted copy, whose record ids do not exist in the host eval root');
+  for (const [width, height] of [[132, 38], [80, 24], [40, 12]]) {
+    const lines = view.render(width, height, 'Esc 返回上层');
+    assert.equal(lines.length, height);
+    assert.ok(lines.every(line => visibleWidth(line) <= width));
+    assert.match(plain(lines).at(-1)!, /Esc 返回上层/);
+  }
+  view.handleInput('\x1b');
+  assert.doesNotMatch(plain(view.render(160, 38, 'Esc 返回上层')).join('\n'), /◆ trace 原文/);
+  assert.equal(view.selectedSpan?.key, selected, 'Esc returns to the same span without closing the copy');
   view.close();
+
+  // The app must give Esc to the nested raw layer before popping the trial view.
+  class TestTerminal implements Terminal {
+    columns = 160; rows = 40; kittyProtocolActive = false; input: (s: string) => void = () => {};
+    start(input: (s: string) => void) { this.input = input; }
+    stop() {} async drainInput() {} write() {} moveBy() {} hideCursor() {} showCursor() {}
+    clearLine() {} clearFromCursor() {} clearScreen() {} setTitle() {} setProgress() {} setProgramStatus() {}
+  }
+  const terminal = new TestTerminal(), app = new ReadOnlyTui({ workspace, dataRoot: root, draftRoot: join(base, 'drafts'), mode: 'offline', show: { run: run.runId }, terminal, widthCalibration: false,
+    transport: async () => { throw Error('viewing trial originals cannot call a provider'); }, copy: async text => { copied.push(text); return true; } });
+  const screen = () => plain(app.screen()).join('\n'), key = (data: string) => terminal.input(data);
+  try {
+    app.start(); key(`/eval ${source.label}`); key('\r'); key('\r');
+    for (let i = 0; i < 200 && !/run r-/.test(screen()); i++) await new Promise(resolve => setTimeout(resolve, 10));
+    assert.match(screen(), /◆ trial/);
+    assert.match(screen(), /run r-/);
+    for (let i = 0; i < 10 && !/tool · read/.test(screen()); i++) key('\x1b[B');
+    assert.match(screen(), /tool · read/);
+    key('p'); assert.match(screen(), /trial 原文副本不能固定为证据/);
+    key('\r'); assert.match(screen(), /◆ trace 原文/);
+    key('\t'); key('y'); await new Promise(resolve => setImmediate(resolve));
+    assert.match(copied.at(-1)!, /Trial fixture/);
+    key('\x1b'); assert.match(screen(), /◆ trial/); assert.doesNotMatch(screen(), /◆ trace 原文/);
+    key('\x1b'); assert.doesNotMatch(screen(), /◆ trial/);
+  } finally { await app.exit(); }
+  assert.equal(transport.calls.length, providerCalls);
+  assert.deepEqual(regularFiles(root).map(path => [path, digest(readFileSync(join(root, path)))]), before);
+  assert.deepEqual(regularFiles(guest).map(path => [path, digest(readFileSync(join(guest, path)))]), beforeGuest);
 
   const missing = new TrialTraceView(source, report, report.trials.find(t => t.side === 'candidate')!.id);
   await missing.opened;
   const fallback = plain(withTier('none', () => missing.render(120, 30, 'Esc 返回上层'))).join('\n');
   assert.match(fallback, /✗ 未导出受限侧记录 · RESTRICTED_RAW_MISSING/);
   assert.match(fallback, /只列宿主记录/); assert.match(fallback, /#1 · 已派发 · 10 tok/); assert.match(fallback, /#2 · 已派发 · 10 tok/);
+  missing.close();
 });

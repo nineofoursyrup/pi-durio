@@ -232,7 +232,7 @@ export class TraceView {
   }
   private footer(trace: Trace, width: number, esc: string) {
     const stats = `${trace.counts.models} 次模型请求（重试 ${trace.counts.retries}）· ${trace.counts.tools} 次工具调用（恢复后重试 ${trace.counts.recoveryRetries}）· 只读，查看不调用模型、不新增用量`;
-    const keys = this.host ? ['↑↓ span', 'Enter 原文', 'p 固定为证据'] : ['↑↓ span'];
+    const keys = this.host ? ['↑↓ span', 'Enter 原文', ...(this.host.writeBlocked() ? [] : ['p 固定为证据'])] : ['↑↓ span'];
     const keysWidth = Math.min(width, visibleWidth(`${keys.join(' · ')} · ${esc}`));
     // 键位在右、Esc 最右；放不下时先截断左侧说明，再按 hintLine 从 Esc 左边去掉键位。
     if (width - keysWidth < 12) return hintLine(keys, width, { esc });

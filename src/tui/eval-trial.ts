@@ -3,15 +3,17 @@
  * llm 的用量与金额换成宿主中介记录（按请求序位对应，对不上时并列并标明），另加准备、任务、评分三段宿主计时。
  * 原文打不开时只列宿主记录并注明原因。
  */
-import { visibleWidth } from '@earendil-works/pi-tui';
+import { matchesKey, visibleWidth } from '@earendil-works/pi-tui';
 import { formatAmount, sumCostEstimates } from '../cost-estimate.js';
 import type { Trace } from '../trace.js';
 import { hostRequests, hostTiming, openRestrictedCopy, type EvalReport, type HostRequest, type HostTiming, type PlanSource, type RestrictedCopy } from '../eval/overview.js';
 import { COLOR_TIER, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { TraceView, formatDuration, formatTokens } from './trace.js';
+import { TraceView, formatDuration, formatTokens, type TraceHost } from './trace.js';
+import { TraceRawView, type TraceRawHost } from './trace-raw.js';
 import { clean, fixedFrame, hintLine, LoadingState, statusError, truncateEnd } from './view-stack.js';
 
 export const SELF_REPORTED = '受限侧自报 · 仅供诊断';
+const TRIAL_READ_ONLY = '只读查看 · trial 原文副本不能固定为证据';
 /** 一个请求序位上宿主与受限侧不一致之处。 */
 export interface RequestMismatch { ordinal: number; host: number | null; restricted: number | null; reason: 'usage' | 'host-only' | 'restricted-only' }
 
@@ -21,6 +23,8 @@ export class TrialTraceView {
   /** 打开副本完成（成功或失败）；测试等待它 */
   readonly opened: Promise<void>;
   private trace?: TraceView;
+  private raw?: TraceRawView;
+  private feedback?: string;
   private copy?: RestrictedCopy;
   private failure?: { message: string; code: string };
   private loading: LoadingState;
@@ -28,7 +32,7 @@ export class TrialTraceView {
   private mismatches: RequestMismatch[] = [];
   private readonly title: string;
 
-  constructor(private readonly source: PlanSource, private readonly report: EvalReport, readonly trialId: string, private readonly changed: () => void = () => {}) {
+  constructor(private readonly source: PlanSource, private readonly report: EvalReport, readonly trialId: string, private readonly changed: () => void = () => {}, private readonly copyText: TraceRawHost['copy'] = async () => '复制不可用 · 宿主未提供剪贴板') {
     const trial = report.trials.find(t => t.id === trialId)!;
     this.requests = hostRequests(source, report, trialId);
     this.timing = hostTiming(trial);
@@ -43,7 +47,18 @@ export class TrialTraceView {
       if (!copy) return;
       if (this.closed) { await copy.close(); return; }
       this.copy = copy;
-      this.trace = new TraceView(copy.root, copy.runId, () => false, undefined, t => this.adjust(t));
+      const host: TraceHost = {
+        writeBlocked: () => TRIAL_READ_ONLY, busy: () => false,
+        feedback: text => this.say(text), changed: this.changed,
+        // Trial originals are diagnostic copies: no confirmation callback can write either data root.
+        confirm: () => this.say(TRIAL_READ_ONLY),
+        openRaw: span => {
+          if (!this.trace) return;
+          this.raw = new TraceRawView(copy.root, this.trace, span.key, { copy: this.copyText, feedback: text => this.say(text), changed: this.changed });
+          this.changed();
+        },
+      };
+      this.trace = new TraceView(copy.root, copy.runId, () => false, host, t => this.adjust(t));
     } catch (error) {
       const text = clean(String((error as Error)?.message ?? error)).replace(/^Error:\s*/, '');
       const [code, ...rest] = text.split(': ');
@@ -52,7 +67,14 @@ export class TrialTraceView {
     this.changed();
   }
   /** Esc 离开：丢弃仍在复制的结果，删除副本。 */
-  close() { this.closed = true; this.loading.cancel(); void this.copy?.close(); }
+  close() { this.closed = true; this.raw = undefined; this.loading.cancel(); void this.copy?.close(); }
+  /** Raw layer Esc returns to the same selected span; only the next Esc closes the copy. */
+  back() {
+    if (!this.raw) return false;
+    this.raw = undefined; this.feedback = undefined; this.changed();
+    return true;
+  }
+  private say(text: string) { this.feedback = text; this.changed(); }
   get mismatch() { return this.mismatches; }
   get selectedSpan() { return this.trace?.selectedSpan; }
 
@@ -78,9 +100,13 @@ export class TrialTraceView {
     };
   }
 
-  handleInput(data: string) { this.trace?.handleInput(data); }
-  scroll(delta: number) { this.trace?.scroll(delta); }
-  click(y: number) { this.trace?.click(y - this.bannerHeight); }
+  handleInput(data: string) {
+    this.feedback = undefined;
+    if (matchesKey(data, 'escape') && this.back()) return;
+    if (this.raw) this.raw.handleInput(data); else this.trace?.handleInput(data);
+  }
+  scroll(delta: number) { if (this.raw) this.raw.scroll(delta); else this.trace?.scroll(delta); }
+  click(y: number) { if (!this.raw) this.trace?.click(y - this.bannerHeight); }
   private bannerHeight = 3;
 
   render(width: number, height: number, esc: string, tier: ColorTier = COLOR_TIER): string[] {
@@ -106,7 +132,9 @@ export class TrialTraceView {
       const body = this.loading.isShowing ? [this.loading.renderLine(width, tier)] : [];
       return fixedFrame([title, timing, line([{ text: '─'.repeat(width), fg: 'line.subtle' }])], body, [hintLine([], width, { esc, tier })], height, 0).lines;
     }
-    const lines = this.trace.render(width, Math.max(4, height - 3), esc);
+    const back = this.raw ? 'Esc 返回上层' : esc;
+    const lines = this.raw ? this.raw.render(width, Math.max(4, height - 3), back) : this.trace.render(width, Math.max(4, height - 3), back);
+    if (this.feedback && lines.length) lines[lines.length - 1] = hintLine([], width, { feedback: this.feedback, esc: back, tier });
     const m = this.mismatches;
     const text = m.length
       ? `不一致 · ${m.map(x => x.reason === 'host-only' ? `宿主 #${x.ordinal} 无对应受限侧请求` : x.reason === 'restricted-only' ? `受限侧 #${x.ordinal} 无宿主记录` : `#${x.ordinal} 宿主 ${x.host === null ? 'unknown' : formatTokens(x.host)} / 受限侧自报 ${x.restricted === null ? 'unknown' : formatTokens(x.restricted)} tok`).join(' · ')}`

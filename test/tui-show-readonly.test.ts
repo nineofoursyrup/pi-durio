@@ -55,6 +55,14 @@ function open(f: ReturnType<typeof fixture>, show: TuiOptions['show'] = { run: r
   return { app, key, screen, copied, calls: () => providerCalls };
 }
 
+async function until(predicate: () => boolean) {
+  for (let i = 0; i < 200; i++) {
+    if (predicate()) return;
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+  throw Error('view did not become ready');
+}
+
 test('show trace keeps raw navigation and copy, but p cannot offer or execute a fixed-evidence write', async () => {
   const f = fixture(), before = contents(f.dataRoot), t = open(f);
   try {
@@ -77,4 +85,47 @@ test('show trace keeps raw navigation and copy, but p cannot offer or execute a 
     assert.equal(existsSync(`${f.dataRoot}.lock`), false);
   } finally { await t.app.exit(); }
   assert.deepEqual(contents(f.dataRoot), before, 'exit must not write product records either');
+});
+
+test('show blocks the improve new subcommand and the home-screen launch while retaining report navigation', async () => {
+  const f = fixture(), before = contents(f.dataRoot), t = open(f);
+  try {
+    t.key('/improve new --scope session --budget standard'); t.key('\r');
+    assert.doesNotMatch(t.screen(), /新建 improve 分析|分析不执行任何候选 · 可看文件/);
+    assert.match(t.screen(), /只读查看/);
+    t.key('/improve'); t.key('\r');
+    assert.match(t.screen(), /◆ improve/);
+    assert.match(t.screen(), /新建分析/);
+    t.key('\r');
+    assert.match(t.screen(), /只读查看/);
+    assert.doesNotMatch(t.screen(), /新建 improve 分析|分析不执行任何候选 · 可看文件/);
+    // The next rows are read-only history and suppressions, still reachable in show.
+    t.key('\x1b[B'); t.key('\r');
+    assert.doesNotMatch(t.screen(), /新建分析/);
+    t.key('\x1b'); t.key('\x1b[B'); t.key('\r');
+    assert.doesNotMatch(t.screen(), /新建分析/);
+    assert.equal(t.calls(), 0);
+    assert.deepEqual(contents(f.dataRoot), before);
+  } finally { await t.app.exit(); }
+  assert.deepEqual(contents(f.dataRoot), before);
+});
+
+test('show session keeps command and storage actions read-only after returning from history', async () => {
+  const f = fixture(), before = contents(f.dataRoot), t = open(f, { run: runId, session: sessionId });
+  try {
+    t.key('\x1b');
+    for (const command of ['/acceptance {}', '/compact', '/follow-up', '/stop', '/improve-select {}', '/improve-restore {}', '/improve-continue {}', '/improve-rollback {}']) {
+      t.key(command); t.key('\r');
+      assert.match(t.screen(), /只读查看/, command);
+      assert.equal(t.calls(), 0, command);
+      assert.deepEqual(contents(f.dataRoot), before, command);
+    }
+    t.key('/storage'); t.key('\r');
+    await until(() => t.screen().includes('宿主记录'));
+    t.key('\r');
+    assert.match(t.screen(), /只读查看/);
+    assert.doesNotMatch(t.screen(), /有任务运行中|清理预览/);
+    assert.deepEqual(contents(f.dataRoot), before, 'storage preview itself must not write management records');
+  } finally { await t.app.exit(); }
+  assert.deepEqual(contents(f.dataRoot), before);
 });
