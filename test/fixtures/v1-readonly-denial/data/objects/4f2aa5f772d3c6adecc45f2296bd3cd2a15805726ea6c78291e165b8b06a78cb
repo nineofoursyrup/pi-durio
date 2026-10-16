@@ -1,0 +1,194 @@
+import { stampFact } from './fact-clock.js';
+import { DatabaseSync } from 'node:sqlite';
+import { createHash, randomUUID } from 'node:crypto';
+import { mkdirSync, chmodSync, openSync, closeSync, writeFileSync, fsyncSync, renameSync, existsSync, readFileSync, readSync } from 'node:fs';
+import { join } from 'node:path';
+export const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
+function decodeRecord(root, row) {
+    return { seq: Number(row.seq), kind: String(row.kind), at: String(row.at), runId: String(row.run_id), data: JSON.parse(readObject(root, JSON.parse(String(row.body))).toString()) };
+}
+function factPage(db, options) {
+    const through = options.through ?? Number(db.prepare('SELECT COALESCE(MAX(seq),0) AS seq FROM records').get().seq);
+    const after = options.after ?? 0, limit = options.limit ?? 50;
+    if (!Number.isSafeInteger(after) || after < 0 || !Number.isSafeInteger(through) || through < after || !Number.isSafeInteger(limit) || limit < 1 || limit > 200)
+        throw Error('INVALID_FACT_PAGE');
+    return { through, after, limit };
+}
+function queueFact(root, db, record, through) {
+    const admission = record.data;
+    let last = record, status = 'pending', reason = 'Accepted; not yet applied';
+    let execution = admission.kind === 'steer' ? { runId: admission.target.runId, sessionId: admission.target.sessionId } : null;
+    let upstream = null;
+    // Content-addressed originals remain authoritative; this scan holds one receipt at a time.
+    for (const row of db.prepare("SELECT * FROM records WHERE run_id=? AND kind='control.receipt' AND seq>? AND seq<=? ORDER BY seq").iterate(admission.target.runId, record.seq, through)) {
+        const fact = decodeRecord(root, row), value = fact.data;
+        if (value.requestId !== admission.requestId)
+            continue;
+        last = fact;
+        status = value.status;
+        reason = value.reason;
+        if (value.execution !== undefined)
+            execution = value.execution;
+        if (value.upstream !== undefined)
+            upstream = value.upstream;
+    }
+    return { ...admission, execution, runId: execution?.runId ?? null, acceptedAt: record.at, acceptedSeq: record.seq, updatedAt: last.at, status, reason, receipt: { seq: last.seq, kind: last.kind, at: last.at }, upstream };
+}
+/** Strictly readonly. `through` bounds admissions AND all status/link/decision facts on every page. */
+export function readQueue(root, options = {}) {
+    const db = openHostReadonly(root);
+    try {
+        const { through, after, limit } = factPage(db, options);
+        const rows = db.prepare(`SELECT * FROM records WHERE kind='control.accepted' AND seq>? AND seq<=? ${options.targetRunId ? 'AND run_id=?' : ''} ORDER BY seq LIMIT ?`).all(after, through, ...(options.targetRunId ? [options.targetRunId] : []), limit + 1);
+        const items = rows.slice(0, limit).map(row => queueFact(root, db, decodeRecord(root, row), through));
+        return { items, through, next: rows.length > limit ? items.at(-1).acceptedSeq : null };
+    }
+    finally {
+        db.close();
+    }
+}
+/** One member per independent acceptance; steer is never a member and a linked follow-up is never counted twice. */
+export function readAcceptedTasks(root, options = {}) {
+    const db = openHostReadonly(root);
+    try {
+        const { through, after, limit } = factPage(db, options), tasks = [];
+        const statement = db.prepare("SELECT * FROM records WHERE kind IN ('task.accepted','control.accepted') AND seq>? AND seq<=? ORDER BY seq");
+        for (const row of statement.iterate(after, through)) {
+            const record = decodeRecord(root, row), data = record.data;
+            if (record.kind === 'control.accepted' && data.kind !== 'follow-up')
+                continue;
+            if (record.kind === 'task.accepted' && data.queueRequestId)
+                continue;
+            let fact;
+            if (record.kind === 'control.accepted') {
+                const item = queueFact(root, db, record, through);
+                fact = { taskId: item.taskId, requestId: item.requestId, kind: 'follow-up', input: item.input, workspace: item.target.workspace, target: item.target, execution: item.execution, runId: item.runId, acceptedAt: item.acceptedAt, acceptedSeq: item.acceptedSeq, updatedAt: item.updatedAt, status: item.status, reason: item.reason, executionVersion: item.executionVersion, authorization: item.authorization, receipt: item.receipt };
+            }
+            else {
+                const get = (kind) => { const found = db.prepare('SELECT * FROM records WHERE run_id=? AND kind=? AND seq<=? ORDER BY seq DESC LIMIT 1').get(record.runId, kind, through); return found ? decodeRecord(root, found) : null; };
+                const started = get('run.started'), artifact = get('execution.artifact'), config = get('execution.config');
+                const execution = started ? { runId: record.runId, sessionId: data.sessionId } : null;
+                fact = { taskId: data.taskId, requestId: data.requestId ?? data.taskId, kind: 'task', input: data.input, workspace: data.workspace, target: null, execution, runId: execution?.runId ?? null, acceptedAt: record.at, acceptedSeq: record.seq, updatedAt: record.at, status: started ? 'running' : 'accepted', reason: null, executionVersion: artifact && config ? { artifactId: artifact.data.id, artifactSeq: artifact.seq, configSeq: config.seq } : null, authorization: data.authorization ?? null, receipt: { seq: record.seq, kind: record.kind, at: record.at } };
+            }
+            const outcomeRunId = fact.runId ?? (record.kind === 'task.accepted' ? record.runId : null);
+            if (outcomeRunId) {
+                const closed = db.prepare("SELECT * FROM records WHERE run_id=? AND kind IN ('run.closed','recovery.closed','recovery.ended') AND seq<=? ORDER BY seq DESC LIMIT 1").get(outcomeRunId, through);
+                if (closed) {
+                    const receipt = decodeRecord(root, closed), result = receipt.data.result ?? receipt.data;
+                    fact.status = receipt.kind === 'recovery.ended' ? 'ended' : result.status;
+                    fact.reason = result.reason ?? null;
+                    fact.updatedAt = receipt.at;
+                    fact.receipt = { seq: receipt.seq, kind: receipt.kind, at: receipt.at };
+                }
+            }
+            tasks.push(fact);
+            if (tasks.length > limit)
+                break;
+        }
+        const hasMore = tasks.length > limit;
+        tasks.splice(limit);
+        return { tasks, through, next: hasMore ? tasks.at(-1).acceptedSeq : null };
+    }
+    finally {
+        db.close();
+    }
+}
+/** Host-owned facts, separate from upstream durable state. Appends and blobs are synchronous backpressure. */
+export class Evidence {
+    root;
+    runId;
+    fault;
+    db;
+    constructor(root, runId, fault) {
+        this.root = root;
+        this.runId = runId;
+        this.fault = fault;
+        mkdirSync(join(root, 'objects'), { recursive: true, mode: 0o700 });
+        this.db = new DatabaseSync(join(root, 'host.sqlite'));
+        chmodSync(join(root, 'host.sqlite'), 0o600);
+        // Public readonly viewers can briefly hold a shared lock. Wait only for that
+        // SQLite lock; this never retries a tool/model or masks a lasting write failure.
+        this.db.exec('PRAGMA busy_timeout=1000; PRAGMA journal_mode=DELETE; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS records (seq INTEGER PRIMARY KEY, run_id TEXT NOT NULL, kind TEXT NOT NULL, at TEXT NOT NULL, body TEXT NOT NULL); CREATE INDEX IF NOT EXISTS records_run ON records(run_id, seq)');
+    }
+    blob(bytes) {
+        const value = Buffer.from(bytes);
+        const sha256 = digest(value);
+        const path = join(this.root, 'objects', sha256);
+        if (!existsSync(path)) {
+            const temporary = `${path}.${randomUUID()}`;
+            const fd = openSync(temporary, 'wx', 0o600);
+            try {
+                writeFileSync(fd, value);
+                fsyncSync(fd);
+            }
+            finally {
+                closeSync(fd);
+            }
+            renameSync(temporary, path);
+            const dir = openSync(join(this.root, 'objects'), 'r');
+            try {
+                fsyncSync(dir);
+            }
+            finally {
+                closeSync(dir);
+            }
+        }
+        else if (digest(readFileSync(path)) !== sha256) {
+            throw new Error('EVIDENCE_CORRUPT');
+        }
+        return { sha256, bytes: value.byteLength };
+    }
+    append(kind, data) {
+        this.fault?.(kind);
+        const stamped = stampFact(kind, data);
+        const body = JSON.stringify(stamped.data);
+        if (Buffer.byteLength(body) > 2 * 1024 * 1024)
+            throw new Error('EVIDENCE_RECORD_LIMIT');
+        const ref = this.blob(body);
+        const row = this.db.prepare('INSERT INTO records(run_id,kind,at,body) VALUES(?,?,?,?)').run(this.runId, kind, stamped.acquiredAt, JSON.stringify(ref));
+        return Number(row.lastInsertRowid);
+    }
+    close() { this.db.close(); }
+}
+export function readObject(root, ref) {
+    if (!/^[a-f0-9]{64}$/.test(ref.sha256))
+        throw new Error('INVALID_EVIDENCE_REFERENCE');
+    const value = readFileSync(join(root, 'objects', ref.sha256));
+    if (value.length !== ref.bytes || digest(value) !== ref.sha256)
+        throw new Error('EVIDENCE_CORRUPT');
+    return value;
+}
+/** No Harness or writable storage is opened. Paginated host facts reference durable content-addressed originals. */
+export function openHostReadonly(root) {
+    const path = join(root, 'host.sqlite');
+    const fd = openSync(path, 'r');
+    const bytes = Buffer.alloc(20);
+    try {
+        readSync(fd, bytes, 0, bytes.length, 0);
+    }
+    finally {
+        closeSync(fd);
+    }
+    if (bytes[18] !== 1 || bytes[19] !== 1)
+        throw new Error('RECOVERY_REQUIRED: unsupported host journal; no read-side migration');
+    return new DatabaseSync(path, { readOnly: true });
+}
+export async function readRun(root, runId, options = {}) {
+    const db = openHostReadonly(root);
+    try {
+        const limit = Math.max(1, Math.min(200, options.limit ?? 200));
+        const rows = db.prepare('SELECT seq,kind,at,body FROM records WHERE run_id=? AND seq>? ORDER BY seq LIMIT ?').all(runId, options.after ?? 0, limit + 1);
+        const decode = (row) => ({ seq: Number(row.seq), kind: String(row.kind), at: String(row.at), data: JSON.parse(readObject(root, JSON.parse(String(row.body))).toString()) });
+        const resultRow = db.prepare("SELECT seq,kind,at,body FROM records WHERE run_id=? AND kind='run.closed' ORDER BY seq DESC LIMIT 1").get(runId);
+        const recoveryRow = db.prepare("SELECT seq,kind,at,body FROM records WHERE run_id=? AND kind IN ('recovery.closed','recovery.ended','recovery.report') ORDER BY seq DESC LIMIT 1").get(runId);
+        const original = resultRow ? decode(resultRow).data : null;
+        // Acquisition metadata belongs to the fact, not the public RunResult value.
+        // Raw records retain it; the result projection preserves runtime/readback parity.
+        const { clock: resultClock, ...result } = original ?? { status: 'unknown', reason: 'No confirmed close receipt; recovery check required' };
+        return { runId, result, ...(resultClock ? { resultClock } : {}), ...(recoveryRow ? { recovery: decode(recoveryRow) } : {}), records: rows.slice(0, limit).map(decode), next: rows.length > limit ? Number(rows[limit - 1].seq) : null };
+    }
+    finally {
+        db.close();
+    }
+}
+//# sourceMappingURL=evidence.js.map

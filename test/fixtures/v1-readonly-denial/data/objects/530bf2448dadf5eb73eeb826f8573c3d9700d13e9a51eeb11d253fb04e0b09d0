@@ -1,0 +1,153 @@
+import { type SourceTarget } from './improve-source.js';
+import { type ValidationGroup } from './improve-validation.js';
+import { type FormalSelection } from './improve-formal.js';
+import { type EffectiveProfileChange } from './improve-profile-validation.js';
+export { readImproveBuildDefault, launchImproveBuild, type ImproveBuildLaunch } from './improve-process.js';
+export { readImproveDefaults } from './improve-defaults.js';
+export { readImproveEffectiveConfig, type EffectiveConfig, type EffectiveProfileChange } from './improve-profile-validation.js';
+export { rollbackImproveDecision, type ImproveRollback } from './improve-rollback.js';
+export { readImproveDecision, scopedImproveDecisions, suppressionMatch, listImproveSuppressions } from './improve-history.js';
+export type ImproveMode = 'validate-only' | 'defer' | 'do-not-suggest' | 'execute-declared-scope';
+export interface ImproveSelection {
+    candidateId: string;
+    candidateRevision: string;
+    target: SourceTarget;
+    mode: ImproveMode;
+    steps: string[];
+    formal?: FormalSelection;
+}
+export interface ImproveDecision {
+    id: string;
+    reportId: string;
+    reportRevision: string;
+    selections: ImproveSelection[];
+    groups: ValidationGroup[];
+    limits: {
+        deadline: string;
+        maxChecks: number;
+        maxRequests: number;
+        maxTokens: number;
+    };
+    directory?: string;
+}
+export declare function decisionDigest(value: unknown): string;
+export declare function checkImproveBaseline(target: SourceTarget): void;
+/** Preview and submission accept exactly the same structured data; no text parser. */
+export declare function previewImproveDecision(root: string, value: ImproveDecision): {
+    summary: {
+        order: string[];
+        executionOrder: {
+            group: string;
+            candidates: string[];
+        }[];
+        targets: (string | null)[];
+        dependencies: {
+            candidateId: string;
+            dependencies: string[];
+            conflicts: string[];
+        }[];
+        totalBudget: {
+            deadline: string;
+            maxChecks: number;
+            maxRequests: number;
+            maxTokens: number;
+        };
+        plannedReservation: {
+            checks: number;
+            requests: number;
+            tokens: number;
+        };
+        effectiveProfiles: {
+            groupId: string;
+            profiles: EffectiveProfileChange[];
+        }[];
+        writeback: string;
+        activation: string;
+    };
+    id: string;
+    reportId: string;
+    reportRevision: string;
+    selections: ImproveSelection[];
+    groups: ValidationGroup[];
+    limits: {
+        deadline: string;
+        maxChecks: number;
+        maxRequests: number;
+        maxTokens: number;
+    };
+    directory?: string;
+};
+type SubmitOptions = {
+    dataRoot: string;
+    decision: ImproveDecision;
+    fault?: (kind: string) => void;
+    signal?: AbortSignal;
+};
+export declare function submitImproveDecision(options: SubmitOptions): Promise<{
+    id: string;
+    decision: any;
+    requestDigest: any;
+    executionVersion: any;
+    sourceId: string;
+    runId: string;
+    state: any;
+    reason: any;
+    groups: any;
+    activation: string;
+    writeback: string;
+    effect: string;
+    facts: {
+        sourceId: string;
+        kind: string;
+        runId: string;
+        state: any;
+        reason: any;
+    }[];
+    reserved: {
+        checks: any;
+        requests: any;
+        tokens: any;
+    };
+}>;
+/** Explicit continuation can spend only previously authorized, untouched groups. */
+export declare function resumeImproveDecision(options: {
+    dataRoot: string;
+    id: string;
+    resumeId: string;
+    decisionSource: string;
+    groupIds: string[];
+    signal?: AbortSignal;
+    fault?: (kind: string) => void;
+}): Promise<{
+    id: string;
+    decision: any;
+    requestDigest: any;
+    executionVersion: any;
+    sourceId: string;
+    runId: string;
+    state: any;
+    reason: any;
+    groups: any;
+    activation: string;
+    writeback: string;
+    effect: string;
+    facts: {
+        sourceId: string;
+        kind: string;
+        runId: string;
+        state: any;
+        reason: any;
+    }[];
+    reserved: {
+        checks: any;
+        requests: any;
+        tokens: any;
+    };
+}>;
+export declare function restoreImproveSuggestion(options: {
+    dataRoot: string;
+    id: string;
+    suppressionId: string;
+    reason: string;
+}): Promise<import("./improve-history.js").ImproveFact>;
+export { readImproveEvalAssets, regradeImproveAsset } from './improve-eval-assets.js';

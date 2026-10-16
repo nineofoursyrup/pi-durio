@@ -1,0 +1,196 @@
+import { type TaskMetricsReport } from './report.js';
+import type { OperationRun } from './operations.js';
+export type AttemptOutcome = 'error' | 'normal' | 'cancelled' | 'planned-stop' | 'open' | 'unknown';
+export interface FaultAttempt {
+    id: string;
+    dataRoot: string;
+    runId: string;
+    taskId: string | null;
+    kind: 'model' | 'tool';
+    intentSource: string;
+    source: string;
+    outcome: AttemptOutcome;
+    reason: string;
+    terminal: string | null;
+    raw: any;
+    nonzero: boolean;
+    classificationRule: string;
+    sources: string[];
+    purpose: string | null;
+    operationIdentity: string | null;
+}
+export interface FaultEvent {
+    id: string;
+    dataRoot: string;
+    runId: string;
+    taskId: string | null;
+    category: 'model' | 'tool' | 'execution' | 'grader' | 'observation';
+    source: string;
+    reason: string;
+    recovered: boolean;
+    resolutionSource: string | null;
+}
+export declare function faultReport(parentRoot: string, sample: TaskMetricsReport, runs: OperationRun[]): {
+    tasks: {
+        counts: {
+            B: number;
+            F: number;
+            Zf: number;
+            Uf: number;
+            faultTerminated: number;
+        };
+        observedFaults: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+        faultTermination: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+        coverage: {
+            numerator: number;
+            denominator: number;
+            value: number | null;
+            state: string;
+            unit: string;
+        };
+        faultTerminationUnknown: number;
+        completeFaultTerminationRate: string;
+        completeFaultRate: string;
+        logicalRange: {
+            lower: number;
+            upper: number;
+            interpretation: string;
+        } | null;
+        members: {
+            taskId: string;
+            runId: string | null;
+            status: any;
+            category: string;
+            events: string[];
+            faultTerminated: boolean;
+            terminationBasis: string[];
+            terminationRule: string;
+            faultTermination: string;
+            recoveredEvents: number;
+            unresolvedEvents: number;
+            observationComplete: boolean;
+            terminationSource: string | null;
+            scope: string;
+        }[];
+        unstarted: {
+            taskId: string;
+            status: any;
+            events: FaultEvent[];
+        }[];
+    };
+    attempts: {
+        model: {
+            started: number;
+            counts: {
+                [k: string]: number;
+            };
+            observedErrors: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            coverage: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            completeErrorRate: string;
+            rawNonzero: number;
+        };
+        tool: {
+            started: number;
+            counts: {
+                [k: string]: number;
+            };
+            observedErrors: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            coverage: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            completeErrorRate: string;
+            rawNonzero: number;
+        };
+        items: FaultAttempt[];
+        undispatched: any[];
+    };
+    events: FaultEvent[];
+    gaps: any[];
+    separate: {
+        attemptSummaries: {
+            dataRoot: string;
+            runId: string;
+            model: {
+                started: number;
+                counts: {
+                    [k: string]: number;
+                };
+                observedErrors: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                coverage: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                completeErrorRate: string;
+                rawNonzero: number;
+            };
+            tool: {
+                started: number;
+                counts: {
+                    [k: string]: number;
+                };
+                observedErrors: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                coverage: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                completeErrorRate: string;
+                rawNonzero: number;
+            };
+        }[];
+        grader: FaultEvent[];
+        observation: FaultEvent[];
+        otherWorkAttempts: FaultAttempt[];
+    };
+};

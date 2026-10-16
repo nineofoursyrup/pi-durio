@@ -1,0 +1,56 @@
+import { type ChildProcess } from 'node:child_process';
+import { type ImproveBuildPair } from './improve-build.js';
+import type { ImproveSelection } from './improve-decisions.js';
+/** Observe the already-authorized child; no build selection or spawn authority.
+ * After stop, unread pipe bytes are not claimed as acquired. */
+export declare function observeImproveProcess(child: ChildProcess, options: {
+    timeoutMs: number;
+    signal?: AbortSignal;
+    recordStarted: () => Promise<string | null>;
+}): Promise<any>;
+export interface BuildEntry {
+    decisionId: string;
+    groupId: string;
+    buildId: string;
+    directory: string;
+    entry: string;
+}
+export interface BuildDefault {
+    workspace: string;
+    revision: string;
+    current: BuildEntry | null;
+}
+export interface BuildDefaultChange {
+    previous: BuildDefault;
+    current: BuildDefault;
+}
+export declare function readImproveBuildDefault(root: string, workspace: string): BuildDefault;
+export declare function assertBuildDefault(root: string, change: BuildDefaultChange): void;
+export declare function planBuildDefault(root: string, decisionId: string, groupId: string, selections: ImproveSelection[], build?: ImproveBuildPair): BuildDefaultChange | null;
+export interface ImproveBuildLaunch {
+    dataRoot: string;
+    id: string;
+    decisionId: string;
+    decisionSource: string;
+    groupId: string;
+    buildId: string;
+    side: 'baseline' | 'candidate';
+    authorization: {
+        workspace: string;
+        mode: 'offline' | 'live';
+        tools: readonly string[];
+    };
+    operation: {
+        kind: 'help';
+    } | {
+        kind: 'run';
+        taskType: 'read' | 'coding';
+        input: string;
+        dataRoot: string;
+    };
+    timeoutMs: number;
+    signal?: AbortSignal;
+}
+/** A separate human launch starts only a NEW task or help process. Existing
+ * pending work is never opened, migrated, or supplied to the selected build. */
+export declare function launchImproveBuild(input: ImproveBuildLaunch): Promise<any>;

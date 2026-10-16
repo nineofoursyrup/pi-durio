@@ -1,0 +1,1 @@
+{"attemptId":"c45634c7-75be-4eaa-8179-f9ae79e7a7d4","purpose":"generation","event":{"id":"coding-2","model":"deepseek-flash-offline-fixture","choices":[],"usage":{"prompt_tokens":10,"completion_tokens":4,"total_tokens":14}},"boundary":"parsed provider event before Pi normalization"}

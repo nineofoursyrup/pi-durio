@@ -1,0 +1,13 @@
+export interface WorkspaceFence {
+    dataRoot: string;
+    decisionId: string;
+    decisionSource: string;
+    groupId: string;
+    workspace: string;
+}
+/** A durable admission marker pointing at the existing host journal. It is not
+ * a second outcome store. It survives process/owner release after partial work. */
+export declare function workspaceFences(workspace: string): WorkspaceFence[];
+export declare function assertWorkspaceUnfenced(workspace: string): void;
+export declare function setWorkspaceFence(fence: WorkspaceFence): void;
+export declare function clearWorkspaceFence(fence: WorkspaceFence): void;

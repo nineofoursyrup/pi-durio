@@ -1,0 +1,1197 @@
+import { type MetricsScope } from '../metrics/index.js';
+/** Presentation only: report revisions and immutable sources never open execution. */
+export declare class MetricsView {
+    private root;
+    private scope;
+    private value;
+    private operations?;
+    private operationsVisible;
+    private feedback?;
+    private feedbackVisible;
+    private line;
+    private selected;
+    private mode;
+    private sources;
+    private content;
+    private offset;
+    private offsets;
+    private next;
+    private revisions;
+    private revisionIndex;
+    constructor(root: string, scope?: MetricsScope);
+    get report(): {
+        schema: string;
+        ruleVersion: string;
+        scope: {
+            through: number;
+            from: string;
+            to: string;
+            asOf: string;
+            source: "ordinary" | "synthetic" | "diagnostic";
+            project?: string;
+            taskType?: string;
+            version?: string;
+            revisionOf?: string;
+        };
+        snapshot: {
+            current: number;
+            through: number;
+            blockedAt: string | null;
+            rollback: boolean;
+            policy: string;
+        };
+        counts: {
+            N: number;
+            B: number;
+            C: number;
+            G: number;
+            S: number;
+            terminated: number;
+        };
+        rates: {
+            success: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            completion: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            coverage: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+        };
+        statusCounts: {
+            [k: string]: number;
+        };
+        terminationReasons: {
+            [k: string]: number;
+        };
+        unknown: {
+            taskTypes: number;
+            executionVersions: number;
+            acceptance: number;
+        };
+        clocks: {
+            execution: {
+                unit: string;
+                state: string;
+                total: number;
+                valid: number;
+                missing: number;
+                pending: number;
+                sum: number | null;
+                mean: number | null;
+                p50: number | null;
+                p95: number | null;
+                method: string;
+            };
+            executionByStatus: any;
+            acceptance: {
+                unit: string;
+                state: string;
+                total: number;
+                valid: number;
+                missing: number;
+                pending: number;
+                sum: number | null;
+                mean: number | null;
+                p50: number | null;
+                p95: number | null;
+                method: string;
+            };
+            acceptanceByOutcome: {
+                [k: string]: {
+                    unit: string;
+                    state: string;
+                    total: number;
+                    valid: number;
+                    missing: number;
+                    pending: number;
+                    sum: number | null;
+                    mean: number | null;
+                    p50: number | null;
+                    p95: number | null;
+                    method: string;
+                };
+            };
+        };
+        tasks: {
+            taskId: string;
+            requestId: string;
+            runId: string | null;
+            evidenceRunId: string;
+            project: any;
+            workspace: string;
+            kind: string | null;
+            sourceClass: string | null;
+            taskType: string | null;
+            parentTaskId: string | null;
+            trialId: string | null;
+            version: string | null;
+            expectedVersion: string | null;
+            acceptedAt: string;
+            acceptedSource: string;
+            startedSource: string | null;
+            terminationSource: string | null;
+            status: any;
+            reason: any;
+            normalCompleted: boolean;
+            terminated: boolean;
+            terminationScope: string;
+            acceptance: {
+                history: {
+                    id: string;
+                    type: "result" | "withdraw" | "requirements" | "judgment" | "dispute";
+                    source: string;
+                    occurredAt: string;
+                    receivedAt: string;
+                    withdrawn: boolean;
+                    disputed: boolean;
+                    revisionOf: string | null;
+                    supersedes: string[];
+                    reason: string | null;
+                }[];
+                missingSources: {
+                    source: string;
+                    runId: string;
+                    taskAttribution: "unknown";
+                    scope: string;
+                    reason: string;
+                }[];
+                requirements: {
+                    id: string;
+                    source: string;
+                    ruleVersion: any;
+                }[];
+                results: {
+                    id: string;
+                    source: string;
+                    evidence: any;
+                }[];
+                judgments: import("../metrics/acceptance.js").Assessed[];
+                firstValid: import("../metrics/acceptance.js").Assessed | null;
+                firstValidOrder: {
+                    method: string;
+                    reliability: string;
+                    reason: string | null;
+                };
+                conflict: boolean;
+                requirementsChanged: boolean;
+                outcome: import("../metrics/acceptance.js").Verdict;
+                reasons: string[];
+            };
+            clocks: {
+                execution: import("../metrics/clocks.js").Duration;
+                acceptance: import("../metrics/clocks.js").Duration;
+                acceptanceOutcome: string;
+                rollback: boolean;
+                segments: import("../metrics/clocks.js").Segment[];
+                partition: {
+                    unit: string;
+                    measured: Record<"unknown" | import("../metrics/clocks.js").SegmentKind, number | null>;
+                    overlapMs: number;
+                    totalState: string;
+                    scope: string;
+                };
+            };
+            missing: {
+                source: string;
+                reason: any;
+            }[];
+            sources: string[];
+        }[];
+        excluded: {
+            taskId: string;
+            source: string;
+            reasons: string[];
+            kind: string | null;
+            sourceClass: string | null;
+            version: string | null;
+            taskType: string | null;
+        }[];
+        duplicates: {
+            taskId: string;
+            source: string;
+            reason: string;
+        }[];
+        limits: string[];
+        id: string;
+        generatedAt: string;
+        revisionOf: string | null;
+    };
+    get operationsReport(): {
+        schema: string;
+        ruleVersion: string;
+        sample: {
+            schema: string;
+            ruleVersion: string;
+            scope: {
+                through: number;
+                from: string;
+                to: string;
+                asOf: string;
+                source: "ordinary" | "synthetic" | "diagnostic";
+                project?: string;
+                taskType?: string;
+                version?: string;
+                revisionOf?: string;
+            };
+            snapshot: {
+                current: number;
+                through: number;
+                blockedAt: string | null;
+                rollback: boolean;
+                policy: string;
+            };
+            counts: {
+                N: number;
+                B: number;
+                C: number;
+                G: number;
+                S: number;
+                terminated: number;
+            };
+            rates: {
+                success: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                completion: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                coverage: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+            };
+            statusCounts: {
+                [k: string]: number;
+            };
+            terminationReasons: {
+                [k: string]: number;
+            };
+            unknown: {
+                taskTypes: number;
+                executionVersions: number;
+                acceptance: number;
+            };
+            clocks: {
+                execution: {
+                    unit: string;
+                    state: string;
+                    total: number;
+                    valid: number;
+                    missing: number;
+                    pending: number;
+                    sum: number | null;
+                    mean: number | null;
+                    p50: number | null;
+                    p95: number | null;
+                    method: string;
+                };
+                executionByStatus: any;
+                acceptance: {
+                    unit: string;
+                    state: string;
+                    total: number;
+                    valid: number;
+                    missing: number;
+                    pending: number;
+                    sum: number | null;
+                    mean: number | null;
+                    p50: number | null;
+                    p95: number | null;
+                    method: string;
+                };
+                acceptanceByOutcome: {
+                    [k: string]: {
+                        unit: string;
+                        state: string;
+                        total: number;
+                        valid: number;
+                        missing: number;
+                        pending: number;
+                        sum: number | null;
+                        mean: number | null;
+                        p50: number | null;
+                        p95: number | null;
+                        method: string;
+                    };
+                };
+            };
+            tasks: {
+                taskId: string;
+                requestId: string;
+                runId: string | null;
+                evidenceRunId: string;
+                project: any;
+                workspace: string;
+                kind: string | null;
+                sourceClass: string | null;
+                taskType: string | null;
+                parentTaskId: string | null;
+                trialId: string | null;
+                version: string | null;
+                expectedVersion: string | null;
+                acceptedAt: string;
+                acceptedSource: string;
+                startedSource: string | null;
+                terminationSource: string | null;
+                status: any;
+                reason: any;
+                normalCompleted: boolean;
+                terminated: boolean;
+                terminationScope: string;
+                acceptance: {
+                    history: {
+                        id: string;
+                        type: "result" | "withdraw" | "requirements" | "judgment" | "dispute";
+                        source: string;
+                        occurredAt: string;
+                        receivedAt: string;
+                        withdrawn: boolean;
+                        disputed: boolean;
+                        revisionOf: string | null;
+                        supersedes: string[];
+                        reason: string | null;
+                    }[];
+                    missingSources: {
+                        source: string;
+                        runId: string;
+                        taskAttribution: "unknown";
+                        scope: string;
+                        reason: string;
+                    }[];
+                    requirements: {
+                        id: string;
+                        source: string;
+                        ruleVersion: any;
+                    }[];
+                    results: {
+                        id: string;
+                        source: string;
+                        evidence: any;
+                    }[];
+                    judgments: import("../metrics/acceptance.js").Assessed[];
+                    firstValid: import("../metrics/acceptance.js").Assessed | null;
+                    firstValidOrder: {
+                        method: string;
+                        reliability: string;
+                        reason: string | null;
+                    };
+                    conflict: boolean;
+                    requirementsChanged: boolean;
+                    outcome: import("../metrics/acceptance.js").Verdict;
+                    reasons: string[];
+                };
+                clocks: {
+                    execution: import("../metrics/clocks.js").Duration;
+                    acceptance: import("../metrics/clocks.js").Duration;
+                    acceptanceOutcome: string;
+                    rollback: boolean;
+                    segments: import("../metrics/clocks.js").Segment[];
+                    partition: {
+                        unit: string;
+                        measured: Record<"unknown" | import("../metrics/clocks.js").SegmentKind, number | null>;
+                        overlapMs: number;
+                        totalState: string;
+                        scope: string;
+                    };
+                };
+                missing: {
+                    source: string;
+                    reason: any;
+                }[];
+                sources: string[];
+            }[];
+            excluded: {
+                taskId: string;
+                source: string;
+                reasons: string[];
+                kind: string | null;
+                sourceClass: string | null;
+                version: string | null;
+                taskType: string | null;
+            }[];
+            duplicates: {
+                taskId: string;
+                source: string;
+                reason: string;
+            }[];
+            limits: string[];
+            id: string;
+            generatedAt: string;
+            revisionOf: string | null;
+        };
+        costs: {
+            sample: {
+                basis: string;
+                sampleId: string;
+                state: string;
+                perSuccessState: string;
+                currencies: {
+                    [k: string]: {
+                        knownAmount: number;
+                        perSuccess: {
+                            state: string;
+                            value: number | null;
+                            knownPartPerSuccess: number | null;
+                            denominator: number | null;
+                            unit: string;
+                            interpretation: string;
+                        };
+                    };
+                };
+                requestIds: string[];
+                gaps: {
+                    runId: string;
+                    source: string | null;
+                    reason: string;
+                    mayAffectSample: boolean;
+                }[];
+                missingRequests: {
+                    id: string;
+                    gaps: string[];
+                }[];
+                groups: {
+                    [k: string]: string[];
+                };
+            };
+            period: {
+                basis: string;
+                state: string;
+                perSuccessState: string;
+                currencies: {
+                    [k: string]: {
+                        knownAmount: number;
+                        perSuccess: {
+                            state: string;
+                            value: number | null;
+                            knownPartPerSuccess: number | null;
+                            denominator: number | null;
+                            unit: string;
+                            interpretation: string;
+                        };
+                    };
+                };
+                requestIds: string[];
+                gaps: {
+                    runId: string;
+                    source: string | null;
+                    reason: string;
+                    mayAffectSample: boolean;
+                }[];
+                missingRequests: {
+                    id: string;
+                    gaps: string[];
+                }[];
+                groups: {
+                    [k: string]: string[];
+                };
+            };
+            requests: import("../metrics/costs.js").CostRequest[];
+            gaps: {
+                runId: string;
+                source: string | null;
+                reason: string;
+                mayAffectSample: boolean;
+            }[];
+            sessionUsage: any[];
+            sessionEstimates: any[];
+            evalStages: {
+                dataRoot: string;
+                planId: string;
+                parentImprove: {
+                    dataRoot: string;
+                    decisionId: string;
+                    decisionSource: string;
+                    linkSource: string;
+                } | null;
+                stages: {
+                    [k: string]: {
+                        requests: string[];
+                        sources: string[];
+                    };
+                };
+                basis: string;
+            }[];
+            rule: string;
+        };
+        faults: {
+            tasks: {
+                counts: {
+                    B: number;
+                    F: number;
+                    Zf: number;
+                    Uf: number;
+                    faultTerminated: number;
+                };
+                observedFaults: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                faultTermination: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                coverage: {
+                    numerator: number;
+                    denominator: number;
+                    value: number | null;
+                    state: string;
+                    unit: string;
+                };
+                faultTerminationUnknown: number;
+                completeFaultTerminationRate: string;
+                completeFaultRate: string;
+                logicalRange: {
+                    lower: number;
+                    upper: number;
+                    interpretation: string;
+                } | null;
+                members: {
+                    taskId: string;
+                    runId: string | null;
+                    status: any;
+                    category: string;
+                    events: string[];
+                    faultTerminated: boolean;
+                    terminationBasis: string[];
+                    terminationRule: string;
+                    faultTermination: string;
+                    recoveredEvents: number;
+                    unresolvedEvents: number;
+                    observationComplete: boolean;
+                    terminationSource: string | null;
+                    scope: string;
+                }[];
+                unstarted: {
+                    taskId: string;
+                    status: any;
+                    events: import("../metrics/faults.js").FaultEvent[];
+                }[];
+            };
+            attempts: {
+                model: {
+                    started: number;
+                    counts: {
+                        [k: string]: number;
+                    };
+                    observedErrors: {
+                        numerator: number;
+                        denominator: number;
+                        value: number | null;
+                        state: string;
+                        unit: string;
+                    };
+                    coverage: {
+                        numerator: number;
+                        denominator: number;
+                        value: number | null;
+                        state: string;
+                        unit: string;
+                    };
+                    completeErrorRate: string;
+                    rawNonzero: number;
+                };
+                tool: {
+                    started: number;
+                    counts: {
+                        [k: string]: number;
+                    };
+                    observedErrors: {
+                        numerator: number;
+                        denominator: number;
+                        value: number | null;
+                        state: string;
+                        unit: string;
+                    };
+                    coverage: {
+                        numerator: number;
+                        denominator: number;
+                        value: number | null;
+                        state: string;
+                        unit: string;
+                    };
+                    completeErrorRate: string;
+                    rawNonzero: number;
+                };
+                items: import("../metrics/faults.js").FaultAttempt[];
+                undispatched: any[];
+            };
+            events: import("../metrics/faults.js").FaultEvent[];
+            gaps: any[];
+            separate: {
+                attemptSummaries: {
+                    dataRoot: string;
+                    runId: string;
+                    model: {
+                        started: number;
+                        counts: {
+                            [k: string]: number;
+                        };
+                        observedErrors: {
+                            numerator: number;
+                            denominator: number;
+                            value: number | null;
+                            state: string;
+                            unit: string;
+                        };
+                        coverage: {
+                            numerator: number;
+                            denominator: number;
+                            value: number | null;
+                            state: string;
+                            unit: string;
+                        };
+                        completeErrorRate: string;
+                        rawNonzero: number;
+                    };
+                    tool: {
+                        started: number;
+                        counts: {
+                            [k: string]: number;
+                        };
+                        observedErrors: {
+                            numerator: number;
+                            denominator: number;
+                            value: number | null;
+                            state: string;
+                            unit: string;
+                        };
+                        coverage: {
+                            numerator: number;
+                            denominator: number;
+                            value: number | null;
+                            state: string;
+                            unit: string;
+                        };
+                        completeErrorRate: string;
+                        rawNonzero: number;
+                    };
+                }[];
+                grader: import("../metrics/faults.js").FaultEvent[];
+                observation: import("../metrics/faults.js").FaultEvent[];
+                otherWorkAttempts: import("../metrics/faults.js").FaultAttempt[];
+            };
+        };
+        ownedChildren: {
+            snapshots: any[];
+            gaps: {
+                runId: string;
+                source: string;
+                reason: string;
+                mayAffectSample: boolean;
+            }[];
+        };
+        excludedRuns: {
+            runId: string;
+            kind: string;
+            source: string | null;
+            reason: string;
+        }[];
+        limits: string[];
+        id: string;
+        generatedAt: string;
+    } | undefined;
+    get feedbackReport(): {
+        schema: string;
+        ruleVersion: string;
+        scope: {
+            through: number;
+            from: string;
+            to: string;
+            asOf: string;
+            source: "ordinary" | "synthetic" | "diagnostic";
+            project?: string;
+            taskType?: string;
+            version?: string;
+            revisionOf?: string;
+        };
+        snapshot: {
+            current: number;
+            through: number;
+            blockedAt: string | null;
+            rollback: boolean;
+            policy: string;
+        };
+        intervention: {
+            tasks: {
+                events: {
+                    position: string;
+                    linked: boolean;
+                    observedPositive: boolean;
+                    positive: boolean;
+                    negative: boolean;
+                    id: string;
+                    source: string;
+                    seq: number;
+                    active: boolean;
+                    conflict: boolean;
+                    classification: "unknown" | "excluded" | "positive" | "negative";
+                    reasons: string[];
+                    missing: string[];
+                    input: import("../metrics/feedback.js").FeedbackBase & {
+                        type: "observation";
+                        dimension: "intervention" | "rework";
+                        meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                        occurredAt: string | null;
+                        requirements: string[];
+                        originalRequirement?: "unmet" | "unknown";
+                        correction?: "requested" | "started" | "completed" | "unknown";
+                        coverage?: {
+                            from: string;
+                            to: string;
+                        };
+                        delivery?: string;
+                        repairTaskId?: string;
+                        repairSources?: string[];
+                        resultSources?: string[];
+                        revisionOf?: string;
+                    } & {
+                        requestIdentity: string;
+                        receivedAt: string;
+                        ruleVersion: string;
+                        basisThrough: number;
+                    };
+                    occurredAt: string | null;
+                    receivedAt: string;
+                    sourceRefs: string[];
+                }[];
+                state: string;
+                positive: boolean;
+                feedback: {
+                    items: {
+                        id: string;
+                        source: string;
+                        seq: number;
+                        active: boolean;
+                        conflict: boolean;
+                        classification: "unknown" | "excluded" | "positive" | "negative";
+                        reasons: string[];
+                        missing: string[];
+                        input: import("../metrics/feedback.js").FeedbackBase & {
+                            type: "observation";
+                            dimension: "intervention" | "rework";
+                            meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                            occurredAt: string | null;
+                            requirements: string[];
+                            originalRequirement?: "unmet" | "unknown";
+                            correction?: "requested" | "started" | "completed" | "unknown";
+                            coverage?: {
+                                from: string;
+                                to: string;
+                            };
+                            delivery?: string;
+                            repairTaskId?: string;
+                            repairSources?: string[];
+                            resultSources?: string[];
+                            revisionOf?: string;
+                        } & {
+                            requestIdentity: string;
+                            receivedAt: string;
+                            ruleVersion: string;
+                            basisThrough: number;
+                        };
+                        occurredAt: string | null;
+                        receivedAt: string;
+                        sourceRefs: string[];
+                    }[];
+                    history: {
+                        id: string;
+                        type: "withdraw" | "observation";
+                        source: string;
+                        receivedAt: string;
+                        input: import("../metrics/feedback.js").FeedbackInput & {
+                            requestIdentity: string;
+                            receivedAt: string;
+                            ruleVersion: string;
+                            basisThrough: number;
+                        };
+                        withdrawn: boolean;
+                        superseded: boolean;
+                    }[];
+                    missing: {
+                        source: string;
+                        reason: string;
+                    }[];
+                };
+                delivery: {
+                    source: string;
+                    at: string;
+                    answerSource: string;
+                    clock: any;
+                    definition: string;
+                } | null;
+                redeliveries: {
+                    source: string;
+                    at: string;
+                }[];
+                start: {
+                    source: string;
+                    at: string;
+                } | null;
+                end: {
+                    source: string;
+                    at: string;
+                } | null;
+                missing: {
+                    source: string;
+                    reason: string;
+                }[];
+                uncertain: boolean;
+                taskId: string;
+                runId: string | null;
+                version: string | null;
+                project: any;
+                acceptedSource: string;
+                acceptedAt: string;
+                acceptance: import("../metrics/acceptance.js").Verdict;
+                requirementsChanged: boolean;
+                requirements: {
+                    id: string;
+                    source: string;
+                    ruleVersion: any;
+                }[];
+                results: {
+                    id: string;
+                    source: string;
+                    evidence: any;
+                }[];
+            }[];
+            excluded: {
+                taskId: string;
+                source: string;
+                reasons: string[];
+                kind: string | null;
+                sourceClass: string | null;
+                version: string | null;
+                taskType: string | null;
+            }[];
+            rate: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            coverage: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            completeRate: string;
+            logicalRange: number[] | null;
+            rangeMeaning: string;
+            selection: string;
+            counts: {
+                Ni: number;
+                I: number;
+                Z: number;
+                U: number;
+                events: number;
+                unstarted: number;
+                open: number;
+                openPositive: number;
+            };
+        };
+        rework: {
+            tasks: {
+                window: {
+                    from: string;
+                    to: string;
+                    unit: string;
+                    duration: number;
+                    bounds: string;
+                };
+                mature: boolean;
+                positive: boolean;
+                events: {
+                    position: string;
+                    linked: boolean;
+                    observedPositive: boolean;
+                    positive: boolean;
+                    negative: boolean;
+                    id: string;
+                    source: string;
+                    seq: number;
+                    active: boolean;
+                    conflict: boolean;
+                    classification: "unknown" | "excluded" | "positive" | "negative";
+                    reasons: string[];
+                    missing: string[];
+                    input: import("../metrics/feedback.js").FeedbackBase & {
+                        type: "observation";
+                        dimension: "intervention" | "rework";
+                        meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                        occurredAt: string | null;
+                        requirements: string[];
+                        originalRequirement?: "unmet" | "unknown";
+                        correction?: "requested" | "started" | "completed" | "unknown";
+                        coverage?: {
+                            from: string;
+                            to: string;
+                        };
+                        delivery?: string;
+                        repairTaskId?: string;
+                        repairSources?: string[];
+                        resultSources?: string[];
+                        revisionOf?: string;
+                    } & {
+                        requestIdentity: string;
+                        receivedAt: string;
+                        ruleVersion: string;
+                        basisThrough: number;
+                    };
+                    occurredAt: string | null;
+                    receivedAt: string;
+                    sourceRefs: string[];
+                }[];
+                state: string;
+                feedback: {
+                    items: {
+                        id: string;
+                        source: string;
+                        seq: number;
+                        active: boolean;
+                        conflict: boolean;
+                        classification: "unknown" | "excluded" | "positive" | "negative";
+                        reasons: string[];
+                        missing: string[];
+                        input: import("../metrics/feedback.js").FeedbackBase & {
+                            type: "observation";
+                            dimension: "intervention" | "rework";
+                            meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                            occurredAt: string | null;
+                            requirements: string[];
+                            originalRequirement?: "unmet" | "unknown";
+                            correction?: "requested" | "started" | "completed" | "unknown";
+                            coverage?: {
+                                from: string;
+                                to: string;
+                            };
+                            delivery?: string;
+                            repairTaskId?: string;
+                            repairSources?: string[];
+                            resultSources?: string[];
+                            revisionOf?: string;
+                        } & {
+                            requestIdentity: string;
+                            receivedAt: string;
+                            ruleVersion: string;
+                            basisThrough: number;
+                        };
+                        occurredAt: string | null;
+                        receivedAt: string;
+                        sourceRefs: string[];
+                    }[];
+                    history: {
+                        id: string;
+                        type: "withdraw" | "observation";
+                        source: string;
+                        receivedAt: string;
+                        input: import("../metrics/feedback.js").FeedbackInput & {
+                            requestIdentity: string;
+                            receivedAt: string;
+                            ruleVersion: string;
+                            basisThrough: number;
+                        };
+                        withdrawn: boolean;
+                        superseded: boolean;
+                    }[];
+                    missing: {
+                        source: string;
+                        reason: string;
+                    }[];
+                };
+                delivery: {
+                    source: string;
+                    at: string;
+                    answerSource: string;
+                    clock: any;
+                    definition: string;
+                } | null;
+                redeliveries: {
+                    source: string;
+                    at: string;
+                }[];
+                start: {
+                    source: string;
+                    at: string;
+                } | null;
+                end: {
+                    source: string;
+                    at: string;
+                } | null;
+                missing: {
+                    source: string;
+                    reason: string;
+                }[];
+                uncertain: boolean;
+                taskId: string;
+                runId: string | null;
+                version: string | null;
+                project: any;
+                acceptedSource: string;
+                acceptedAt: string;
+                acceptance: import("../metrics/acceptance.js").Verdict;
+                requirementsChanged: boolean;
+                requirements: {
+                    id: string;
+                    source: string;
+                    ruleVersion: any;
+                }[];
+                results: {
+                    id: string;
+                    source: string;
+                    evidence: any;
+                }[];
+            }[];
+            excluded: ({
+                taskId: string;
+                source: string;
+                reasons: string[];
+                kind: string | null;
+                sourceClass: string | null;
+                version: string | null;
+                taskType: string | null;
+            } | {
+                taskId: string;
+                source: string;
+                reasons: string[];
+                delivery: {
+                    source: string;
+                    at: string;
+                    answerSource: string;
+                    clock: any;
+                    definition: string;
+                } | null;
+                feedback: {
+                    items: {
+                        id: string;
+                        source: string;
+                        seq: number;
+                        active: boolean;
+                        conflict: boolean;
+                        classification: "unknown" | "excluded" | "positive" | "negative";
+                        reasons: string[];
+                        missing: string[];
+                        input: import("../metrics/feedback.js").FeedbackBase & {
+                            type: "observation";
+                            dimension: "intervention" | "rework";
+                            meaning: "correction" | "none" | "normal-authorization" | "clarification" | "new-requirement" | "improve-choice" | "complaint" | "unknown";
+                            occurredAt: string | null;
+                            requirements: string[];
+                            originalRequirement?: "unmet" | "unknown";
+                            correction?: "requested" | "started" | "completed" | "unknown";
+                            coverage?: {
+                                from: string;
+                                to: string;
+                            };
+                            delivery?: string;
+                            repairTaskId?: string;
+                            repairSources?: string[];
+                            resultSources?: string[];
+                            revisionOf?: string;
+                        } & {
+                            requestIdentity: string;
+                            receivedAt: string;
+                            ruleVersion: string;
+                            basisThrough: number;
+                        };
+                        occurredAt: string | null;
+                        receivedAt: string;
+                        sourceRefs: string[];
+                    }[];
+                    history: {
+                        id: string;
+                        type: "withdraw" | "observation";
+                        source: string;
+                        receivedAt: string;
+                        input: import("../metrics/feedback.js").FeedbackInput & {
+                            requestIdentity: string;
+                            receivedAt: string;
+                            ruleVersion: string;
+                            basisThrough: number;
+                        };
+                        withdrawn: boolean;
+                        superseded: boolean;
+                    }[];
+                    missing: {
+                        source: string;
+                        reason: string;
+                    }[];
+                };
+                missing: {
+                    source: string;
+                    reason: string;
+                }[];
+            })[];
+            rate: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            coverage: {
+                numerator: number;
+                denominator: number;
+                value: number | null;
+                state: string;
+                unit: string;
+            };
+            completeRate: string;
+            logicalRange: number[] | null;
+            rangeMeaning: string;
+            selection: string;
+            counts: {
+                Nr: number;
+                Rr: number;
+                Zr: number;
+                Ur: number;
+                events: number;
+                immature: number;
+                immaturePositive: number;
+            };
+        };
+        limits: string[];
+        id: string;
+        generatedAt: string;
+        revisionOf: string | null;
+    } | undefined;
+    private loadReport;
+    private loadDetail;
+    handleInput(data: string): void;
+    scroll(delta: number): void;
+    render(width: number, height: number): string[];
+}

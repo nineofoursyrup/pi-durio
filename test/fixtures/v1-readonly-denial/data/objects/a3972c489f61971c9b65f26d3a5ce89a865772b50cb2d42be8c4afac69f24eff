@@ -1,0 +1,13 @@
+import { type ExecutionEnv } from '@earendil-works/pi-durable/env';
+export interface ToolEnvironmentConfig {
+    version: string;
+    variables: Readonly<Record<string, string>>;
+}
+export interface ObservedFile {
+    size: number;
+    mtimeMs: number;
+    sha256?: string;
+}
+export declare function toolEnvironment(config?: ToolEnvironmentConfig): Readonly<Record<string, string>>;
+/** Public environment adapter; trusted shell has current-user access, not an OS sandbox. */
+export declare function codingEnvironment(workspace: string, env: Readonly<Record<string, string>>, guard: () => void, record: (kind: string, data: unknown) => void, shellState: (state: 'started' | 'settled') => void, observed: Map<string, ObservedFile>): ExecutionEnv;

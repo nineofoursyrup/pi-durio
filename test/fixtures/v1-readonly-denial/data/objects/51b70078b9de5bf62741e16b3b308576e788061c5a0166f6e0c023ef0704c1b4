@@ -1,0 +1,7 @@
+import { Editor, type Terminal } from '@earendil-works/pi-tui';
+/** pi-tui 1.1.0 paints a software caret even when hardware cursor display is on. */
+export declare class HardwareCursorEditor extends Editor {
+    render(width: number): string[];
+}
+/** Keep a visible hardware caret out of intermediate paint positions. */
+export declare function hideCursorDuringPaint(terminal: Terminal): () => void;

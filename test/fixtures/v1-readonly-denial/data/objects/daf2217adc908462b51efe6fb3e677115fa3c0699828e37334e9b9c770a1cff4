@@ -1,0 +1,5 @@
+import type { RunResult } from './runtime.js';
+/** Flush the machine-readable receipt before a bounded, unconfirmed host exit. */
+export declare function writeHeadlessResult(result: RunResult): void;
+/** Call only after the entry adapter (including any terminal UI) has finished cleanup. */
+export declare function exitHostIfUnconfirmed(result?: RunResult): void;

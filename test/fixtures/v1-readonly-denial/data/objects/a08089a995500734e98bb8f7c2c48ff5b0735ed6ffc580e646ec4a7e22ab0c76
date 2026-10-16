@@ -1,0 +1,5 @@
+/** Admission-only evidence for a completed whole-session cleanup. It cannot authorize recovery.
+ * The immutable preview, explicit commit, whole-session inspection, and final result must agree.
+ * Scan only the needed facts, retaining at most the existing bounded cleanup plan.
+ */
+export declare function sessionRemovalVerified(root: string, sessionId: string, through?: number): any;

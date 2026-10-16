@@ -1,0 +1,143 @@
+import { type FactClock } from '../fact-clock.js';
+import { type EvidenceReference } from '../history.js';
+export type Verdict = 'PASS' | 'FAIL' | 'unknown';
+export interface JudgmentSource {
+    kind: 'human' | 'checks' | 'unverified';
+    actor: string;
+    statement: string;
+    refs: string[];
+}
+interface Base {
+    id: string;
+    taskId: string;
+    occurredAt?: string;
+    source: JudgmentSource;
+    reason?: string;
+}
+export interface Requirement {
+    id: string;
+    description: string;
+    check?: {
+        command: string;
+        passExitCodes: number[];
+        failExitCodes: number[];
+    };
+}
+export type AcceptanceInput = Base & {
+    type: 'requirements';
+    ruleVersion: string;
+    necessary: Requirement[];
+    revisionOf?: string;
+} | Base & {
+    type: 'result';
+    requirementsId: string;
+    evidence: string[];
+    revisionOf?: string;
+} | Base & {
+    type: 'judgment';
+    requirementsId: string;
+    resultId: string;
+    findings: {
+        requirementId: string;
+        outcome: Verdict;
+        evidence: string[];
+    }[];
+    validity: 'valid' | 'faulty' | 'contaminated' | 'insufficient';
+    supersedes?: string[];
+} | Base & {
+    type: 'withdraw' | 'dispute';
+    targets: string[];
+    reason: string;
+};
+export interface AcceptanceFact {
+    ref: EvidenceReference;
+    data: AcceptanceInput & {
+        requestIdentity: string;
+        occurredAt: string;
+        receivedAt: string;
+        clock: FactClock;
+        timeSource: 'host-receipt' | 'reported-occurrence';
+        assessment?: {
+            method: string;
+            ruleVersion: string;
+            requirementsSource: string;
+            resultSource: string;
+            basisThrough: number;
+            sourceRefs: string[];
+            outcome: Verdict;
+            findings: Assessed['findings'];
+            reasons: string[];
+            reliableFailures: string[];
+        };
+    };
+}
+export declare const acceptanceKinds: readonly ["acceptance.requirements", "acceptance.result", "acceptance.judgment", "acceptance.withdraw", "acceptance.dispute"];
+export declare function readAcceptance(root: string, taskId: string, through?: number): AcceptanceFact[];
+/** Explicit host/user management input, never registered as a candidate tool.
+ * Acquires or verifies the data-root owner before opening Evidence; the short
+ * SQLite transaction also keeps duplicate IDs/revisions atomic. */
+export declare function recordAcceptance(root: string, input: AcceptanceInput): {
+    source: string;
+    repeated: boolean;
+};
+export interface Assessed {
+    id: string;
+    source: string;
+    sourceRefs: string[];
+    outcome: Verdict;
+    reasons: string[];
+    reliableFailures: string[];
+    occurredAt: string;
+    receivedAt: string;
+    clock: FactClock | null;
+    findings: {
+        requirementId: string;
+        outcome: Verdict;
+        evidence: string[];
+        reason: string | null;
+    }[];
+}
+/** Recompute from retained revisions; never select a favorable judgment. */
+export declare function selectAcceptance(root: string, taskId: string, runId: string | null, through: number, asOf: string, admissionRunId?: string): {
+    history: {
+        id: string;
+        type: "result" | "withdraw" | "requirements" | "judgment" | "dispute";
+        source: string;
+        occurredAt: string;
+        receivedAt: string;
+        withdrawn: boolean;
+        disputed: boolean;
+        revisionOf: string | null;
+        supersedes: string[];
+        reason: string | null;
+    }[];
+    missingSources: {
+        source: string;
+        runId: string;
+        taskAttribution: "unknown";
+        scope: string;
+        reason: string;
+    }[];
+    requirements: {
+        id: string;
+        source: string;
+        ruleVersion: any;
+    }[];
+    results: {
+        id: string;
+        source: string;
+        evidence: any;
+    }[];
+    judgments: Assessed[];
+    firstValid: Assessed | null;
+    firstValidOrder: {
+        method: string;
+        reliability: string;
+        reason: string | null;
+    };
+    conflict: boolean;
+    requirementsChanged: boolean;
+    outcome: Verdict;
+    reasons: string[];
+};
+export {};

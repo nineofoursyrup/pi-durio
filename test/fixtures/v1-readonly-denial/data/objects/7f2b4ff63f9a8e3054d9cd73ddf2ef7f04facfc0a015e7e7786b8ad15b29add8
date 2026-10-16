@@ -1,0 +1,267 @@
+import { type BlobRef } from './evidence.js';
+import type { EvalCase } from './eval/fixtures.js';
+import type { ImproveCandidate } from './improve.js';
+import type { ValidationGroup } from './improve-validation.js';
+export type EvalAsset = {
+    schema: 1;
+    id: string;
+    version: string;
+    kind: 'grader';
+    value: EvalCase['grader'];
+} | {
+    schema: 1;
+    id: string;
+    version: string;
+    kind: 'cases';
+    value: EvalCase[];
+};
+export declare function parseEvalAsset(bytes: Buffer | string): EvalAsset;
+export interface EvalAssetRevision {
+    targetId: string;
+    path: string;
+    before: EvalAsset;
+    after: EvalAsset;
+    beforeContent: BlobRef;
+    afterContent: BlobRef;
+}
+/** Revisions are independent decisions, with checks fixed before the write.
+ * Cases configure future eval plans; they never relabel saved outcomes. */
+export declare function planEvalAssets(root: string, group: ValidationGroup, candidates: ImproveCandidate[]): EvalAssetRevision[];
+export declare function readImproveEvalAssets(root: string, id: string): any[];
+export interface ImproveRegrade {
+    dataRoot: string;
+    decisionId: string;
+    decisionSource: string;
+    groupId: string;
+    targetId: string;
+    path: string;
+    assetVersion: string;
+    assetDigest: string;
+    evalDataRoot: string;
+    planId: string;
+    revisionId: string;
+    caseIds: string[];
+    directory: string;
+    signal?: AbortSignal;
+}
+/** Reuse the existing append-only grader engine for every affected saved side. */
+export declare function regradeImproveAsset(o: ImproveRegrade): Promise<{
+    planId: string;
+    regrading: any;
+    purpose: string;
+    mode: "live" | "offline";
+    asOf: number;
+    plan: import("./eval/plan.js").EvalPlan;
+    scope: string;
+    counts: {
+        planned: number;
+        started: number;
+        completed: number;
+        gradable: number;
+        passed: number;
+        passRate: number | null;
+        completionRate: number | null;
+        coverageRate: number | null;
+    };
+    sides: {
+        [k: string]: {
+            planned: number;
+            started: number;
+            completed: number;
+            gradable: number;
+            passed: number;
+            passRate: number | null;
+            completionRate: number | null;
+            coverageRate: number | null;
+        };
+    };
+    trials: {
+        outcome: any;
+        grade: any;
+        gradingMs: number | null;
+        gradingStages: any[];
+        gradeHistory: any[];
+        metrics: {
+            requests: number | null;
+            tokens: any;
+            cost: number | null;
+            taskMs: any;
+        };
+        metricReasons: Partial<Record<import("./eval/comparison.js").Metric, string>>;
+        usage: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        requests: any[];
+        modelIdentity: {
+            requested: {
+                provider: "deepseek";
+                id: "deepseek-flash";
+                endpoint: "https://api.deepseek.com/chat/completions";
+            };
+            returned: any[];
+            missing: number;
+            weights: string;
+        };
+        id: string;
+        caseId: string;
+        version: string;
+        side: string;
+        repeat: number;
+        pair: string | null;
+        scenario?: import("./eval/plan.js").ControlledScenario;
+        replaces?: string;
+    }[];
+    budget: {
+        deadline: string;
+        limits: import("./provider-boundary.js").BudgetLimits;
+        trialLimits: {
+            maxRequests: number;
+            maxTokens: number;
+        } | null;
+        boundsExceeded: number;
+        requests: number;
+        dispatches: number;
+        knownTokens: any;
+        knownValue: number | null;
+        totalValue: number | null;
+        missing: number;
+        priceMissing: boolean;
+        completeness: string;
+    };
+    cost: {
+        bySide: {
+            [k: string]: {
+                boundsExceeded: number;
+                requests: number;
+                dispatches: number;
+                knownTokens: any;
+                knownValue: number | null;
+                totalValue: number | null;
+                missing: number;
+                priceMissing: boolean;
+                completeness: string;
+            };
+        };
+        unattributed: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        failed: {
+            boundsExceeded: number;
+            requests: number;
+            dispatches: number;
+            knownTokens: any;
+            knownValue: number | null;
+            totalValue: number | null;
+            missing: number;
+            priceMissing: boolean;
+            completeness: string;
+        };
+        scope: string;
+        boundsExceeded: number;
+        requests: number;
+        dispatches: number;
+        knownTokens: any;
+        knownValue: number | null;
+        totalValue: number | null;
+        missing: number;
+        priceMissing: boolean;
+        completeness: string;
+        kind: string;
+        price: {
+            version: string;
+            source: string;
+            currency: "USD";
+            perMillionTokens: number;
+        } | null;
+    };
+    timing: {
+        preparationMs: number;
+        knownTaskMs: number;
+        taskMs: number | null;
+        gradingMs: number;
+        missing: number;
+        clock: string;
+        externalSetup: string;
+    };
+    improvement: string;
+    comparison: {
+        conclusion: "改善" | "退化" | "无明显差异" | "证据不足";
+        reason: string;
+        scope: string;
+        allComplete: boolean;
+        metricsComplete: boolean;
+        evidenceGaps: string[];
+        thresholdValid: boolean;
+        repetitionValid: boolean;
+        validPairs: number;
+        pairs: {
+            caseId: string;
+            role: "objective" | "protection";
+            repeat: number;
+            id: string;
+            baseline: string;
+            candidate: string;
+            valid: boolean;
+            before: number | null;
+            after: number | null;
+            delta: number | null;
+            exclusion: string | null;
+            metricGaps: string[];
+        }[];
+        candidateFailures: {
+            trial: string;
+            judgment: string;
+            evidenceValid: boolean;
+        }[];
+        hardRegressions: string[];
+        softRegressions: string[];
+        regression: {
+            counts: {
+                planned: number;
+                valid: number;
+                regressed: number;
+                regressionRate: number | null;
+                coverageRate: number | null;
+            };
+            pairs: {
+                requirement: string;
+                caseId: string;
+                repeat: number;
+                kind: "hard" | "soft";
+                before: number | boolean | null;
+                after: number | boolean | null;
+                delta: number | null;
+                valid: boolean;
+                regressed: boolean;
+                candidatePassed: boolean;
+                reason: string | null;
+            }[];
+        };
+    } | null;
+    ruleImpact: {
+        revision: any;
+        source: string;
+        cases: string[];
+        status: string;
+    }[];
+    gradingRevisions: any[];
+    planSource: string;
+    planAvailability: string;
+    outcomeAvailability: string;
+}>;
