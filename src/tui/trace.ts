@@ -70,10 +70,11 @@ export class TraceView {
   private rows: Row[] = [];
   private bodyTop = 0;
   private lastRead = 0;
-  constructor(private readonly root: string, readonly runId: string, private readonly live: () => boolean = () => false) {
+  /** `adjust`：eval trial trace（#81）用宿主中介记录替换受限侧自报的 llm 用量与金额。 */
+  constructor(private readonly root: string, readonly runId: string, private readonly live: () => boolean = () => false, private readonly adjust: (trace: Trace) => Trace = trace => trace) {
     this.reader = new TraceReader(root, runId);
     this.index = readDisplayIndex(root);
-    this.current = this.reader.trace(live());
+    this.current = adjust(this.reader.trace(live()));
   }
   get trace() { return this.current; }
   /** 当前选中的 span；选中 run 行时为 undefined。#79 的原文层与 `p` 从这里取。 */
@@ -101,7 +102,7 @@ export class TraceView {
       this.lastRead = Date.now();
       if (this.reader.update()) { const fresh = readDisplayIndex(this.root); if (fresh.has('run', this.runId)) this.index = fresh; }
     }
-    this.current = this.reader.trace(live);
+    this.current = this.adjust(this.reader.trace(live));
   }
 
   render(width: number, height: number, esc: string): string[] {

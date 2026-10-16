@@ -12,7 +12,9 @@ import {evalReport,formatEvalReport} from '../src/eval/runner.js';
 import {appendFact,evalFacts,installedRuntimeFiles,captureFiles,materialize} from '../src/eval/store.js';
 import {PersistentBudget} from '../src/provider-boundary.js';
 import {evalMediator} from '../src/eval/mediator.js';
-import {EvalView} from '../src/tui/eval.js';
+import {stripTerminalSequences} from '@earendil-works/pi-tui';
+import {EvalListView,EvalPlanView} from '../src/tui/eval.js';
+import {ownPlanSource} from '../src/eval/overview.js';
 import {pairedTrials} from '../src/eval/comparison.js';
 import {readDisplayIndex} from '../src/display-number.js';
 function plan(e:Evidence):EvalPlan{return{id:'plan',purpose:'test fixed reporting',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:{id:'content-v1',manifest:e.blob('[]'),bytes:2},cases:representativeCases,trials:['good','failure','grader-error','not-run'].map(id=>({id,caseId:'local-fix',version:'content-v1',side:'candidate',repeat:1,pair:null})),budget:{maxRequests:8,maxTokens:1000,maxRequestTokens:100,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null},trialTimeoutMs:1000,gradingTimeoutMs:1000,maxOutputTokens:32,requestRetryLimit:0,price:{version:'test',source:'controlled',currency:'USD',perMillionTokens:0},authorization:{scope:'run-all-listed-trials',paid:false},environment:{node:'v24.8.0',isolation:'fixture only',writable:'new',cache:'empty'},mainObjective:'requirements',protection:['originals'],improvementConclusion:'not-evaluated'};}
@@ -36,7 +38,7 @@ test('report preserves all planned identities, grader errors and first failure; 
  const facts=new Evidence(root,'plan');
  for(const [trialId,status,judgment]of [['good','completed','PASS'],['failure','error','FAIL'],['grader-error','completed','unknown']]){const outcome=appendFact(facts,'eval.outcome',{trialId,status,started:true,valid:true,artifacts:[{path:'project/a.ts',ref:artifact}],isolation:null,timing:{preparationMs:1,taskMs:2}});appendFact(facts,'eval.grade',{id:trialId,trialId,outcome,graderVersion:'v1',judgment,reason:judgment==='unknown'?'grader crashed':'fixed rule',checks:[],at:new Date().toISOString()});}
  const last=evalFacts(root,'plan').at(-1)!.source;facts.close();assert.equal(evalReport(root,'plan').counts.gradable,0);await fixEvidence(root,{id:'eval-outcomes:plan',sources:[last],purpose:'protect report inputs'});const report=evalReport(root,'plan');assert.deepEqual(report.counts,{planned:4,started:3,completed:2,gradable:2,passed:1,passRate:0.5,completionRate:0.5,coverageRate:0.5});assert.equal(report.trials[3].outcome.status,'not-run');assert.equal(report.trials[2].grade.judgment,'unknown');assert.match(formatEvalReport(report,root),/grader crashed/);
- const before=readFileSync(join(root,'host.sqlite'));const view=new EvalView(root,'plan');assert.ok(view.render(80,24).join('\n').includes('Eval'));view.handleInput('e');view.handleInput('\r');assert.match(view.render(80,24).join('\n'),/e1:/);view.handleInput('n');view.handleInput('p');view.handleInput('b');assert.deepEqual(readFileSync(join(root,'host.sqlite')),before);
+ const before=readFileSync(join(root,'host.sqlite'));let opened='';const view=new EvalPlanView(ownPlanSource(root,'plan'),{openTrial:(_s,_r,id)=>{opened=id;}});assert.ok(view.render(80,24).join('\n').includes('eval'));view.handleInput('\r');assert.equal(opened,'good');view.handleInput('\x1b[B');view.render(80,24);assert.deepEqual(readFileSync(join(root,'host.sqlite')),before);
  unlinkSync(join(root,'objects',artifact.sha256));const missing=evalReport(root,'plan');assert.equal(missing.counts.gradable,0);assert.equal(missing.trials[0].grade.judgment,'PASS');assert.equal(missing.trials[0].outcome.valid,false);assert.equal(missing.trials[1].gradeHistory[0].judgment,'FAIL');
 });
 test('mediator denies guest endpoint/model/structure changes before any provider dispatch and unknown usage blocks new trial requests',async()=>{
@@ -75,7 +77,7 @@ test('same per-trial limit blocks a noisy side without consuming the next side a
  test('wrapped eval plan selection remains visible in a narrow viewport',()=>{
  const root=mkdtempSync(join(tmpdir(),'durio-eval-view-'));
  for(let index=0;index<8;index++){const e=new Evidence(root,`plan-${index}`),p=plan(e);p.id=`plan-${index}`;p.purpose='长目的说明 '.repeat(50);appendFact(e,'eval.plan',p);e.close();}
- const view=new EvalView(root);view.render(40,12);for(let index=0;index<7;index++){view.handleInput('\x1b[B');view.render(40,12);}assert.ok(view.render(40,12).join('\n').includes(`› ${readDisplayIndex(root).label('eval-plan','plan-0')} · `));
+ const view=new EvalListView(root,{openPlan(){}});view.render(40,12);for(let index=0;index<7;index++){view.handleInput('\x1b[B');view.render(40,12);}assert.ok(stripTerminalSequences(view.render(40,12).join('\n')).includes(`› ${readDisplayIndex(root).label('eval-plan','plan-0')} · `));
  });
 
 test('plan prices are fixed in CNY or USD; live plans need a non-zero fixed price',()=>{
