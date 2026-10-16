@@ -79,17 +79,17 @@ async function main() {
     if (values['tool-env-config'] && !coding) throw Error('USAGE: --tool-env-config requires a coding session');
     const toolEnvironment = values['tool-env-config'] ? JSON.parse(await readFile(values['tool-env-config'], 'utf8')) : undefined;
     const { runTui } = await import('./tui/app.js');
-    const { tuiExitCode } = await import('./tui/exit-summary.js');
+    const { tuiExitCode,tuiCleanupStatus } = await import('./tui/exit-summary.js');
     const exit = await runTui({ dataRoot, workspace, mode: values['offline-demo'] ? 'offline' : 'live', transport: values['offline-demo'] ? demoTransport().fetch : undefined, coding, toolEnvironment, resume, sessions, elsewhere });
     const result = exit.result;
     console.log(exit.summary.join('\n'));
     process.exitCode = tuiExitCode(exit);
-    exitHostIfUnconfirmed(exit.cleanupResult??result);
+    exitHostIfUnconfirmed(tuiCleanupStatus(exit));
     return;
   }
   if(metricsCommand(command,dataRoot,values))return;
   if(command==='improve'){await improveCommand(positionals[1],dataRoot,values);return;}
-  if(command==='eval'){await evalCommand(positionals[1],dataRoot,values);return;}
+  if(command==='eval'){await evalCommand(positionals[1],dataRoot,{...values,id:values.id??positionals[2]});return;}
   if (await storageCommand(command,positionals[1],dataRoot,values)) return;
   if (await historyCommand(command, dataRoot, values)) return;
   if(command==='compact'){

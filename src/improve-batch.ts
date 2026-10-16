@@ -1,4 +1,5 @@
-import {submitImproveDecision,type ImproveDecision} from './improve-decisions.js';
+import type {EvalCleanupReceipt} from './eval/cleanup.js';
+import {submitImproveDecision,type ImproveDecision,type ImproveCleanupReceipt} from './improve-decisions.js';
 import {readImproveDecision,improveFacts} from './improve-history.js';
 
 export type ImproveBatchOrigin={reportId:string;decisionId:string};
@@ -8,6 +9,8 @@ export type ImproveDecisionState=ReturnType<typeof readImproveDecision>;
  * and the running restricted operation has finished its cleanup. */
 export class ImproveBatchController {
  private active?:{origin:ImproveBatchOrigin;abort:AbortController;done:Promise<ImproveDecisionState>;decision:ImproveDecision;startedAt:number};
+ readonly evalCleanup:EvalCleanupReceipt[]=[];
+ cleanup?:ImproveCleanupReceipt;
  private lastProgress?:{at:number;value:[number,number]};
  constructor(readonly dataRoot:string){}
  get elapsedMs(){return this.active?Date.now()-this.active.startedAt:undefined;}
@@ -16,9 +19,9 @@ export class ImproveBatchController {
  canStop(origin:ImproveBatchOrigin|null|undefined){return !!origin&&!!this.active&&origin.reportId===this.active.origin.reportId&&origin.decisionId===this.active.origin.decisionId;}
  start(decision:ImproveDecision,signal?:AbortSignal):Promise<ImproveDecisionState> {
   if(this.active)throw Error('IMPROVE_BATCH_ALREADY_RUNNING');
-  this.lastProgress=undefined;
+  this.lastProgress=undefined;this.evalCleanup.length=0;this.cleanup=undefined;
   const abort=new AbortController(),origin={reportId:decision.reportId,decisionId:decision.id};
-  const done=submitImproveDecision({dataRoot:this.dataRoot,decision,signal:signal?AbortSignal.any([abort.signal,signal]):abort.signal}).finally(()=>{if(this.active?.origin===origin)this.active=undefined;});
+  const done=submitImproveDecision({dataRoot:this.dataRoot,decision,onEvalCleanup:receipt=>this.evalCleanup.push(receipt),onCleanup:receipt=>{this.cleanup=receipt;},signal:signal?AbortSignal.any([abort.signal,signal]):abort.signal}).finally(()=>{if(this.active?.origin===origin)this.active=undefined;});
   this.active={origin,abort,done,decision:structuredClone(decision),startedAt:Date.now()};
   return done;
  }

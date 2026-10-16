@@ -17,6 +17,8 @@ import {controlledSteps,type EvalCase} from './fixtures.js';
 import {evalMediator} from './mediator.js';
 import {prepareProbe} from './probes.js';
 import {COST_ESTIMATE_NOTICE,formatAmount,formatCostTotals} from '../cost-estimate.js';
+import {EvalCleanupTracker,type EvalCleanupReceipt} from './cleanup.js';
+import {verifyEvalBeforeStart} from './preflight.js';
 import {readDisplayIndex} from '../display-number.js';
 // Fixed single isolation implementation, also shipped with the installed artifact.
 const boundaryPath=new URL('../../execution/isolation/boundary.mjs',import.meta.url);
@@ -52,24 +54,29 @@ function controlled(plan:EvalPlan,trial:EvalTrial){
   return response;
  })as typeof fetch;
 }
-export interface RunEvalOptions {dataRoot:string;id:string;directory:string;signal?:AbortSignal;transportForTrial?:(trial:EvalTrial)=>typeof fetch|undefined;fault?:(kind:string)=>void}
+/** Worker entry: only acquired immutable bytes and host content are read. */
+export function verifyEvalRunContent(root:string,id:string){const plan=loadEvalPlan(root,id);planFix(root,plan.id);verifyBoundaryContent(root,plan);return plan;}
+export interface RunEvalOptions {dataRoot:string;id:string;directory:string;signal?:AbortSignal;transportForTrial?:(trial:EvalTrial)=>typeof fetch|undefined;fault?:(kind:string)=>void;onCleanup?:(receipt:EvalCleanupReceipt)=>void;onPrepared?:()=>void}
 /** No runtime, task, or outcome is resumed. Reopening an interrupted plan is report-only. */
 export async function runEval(options:RunEvalOptions){
- const preparationAt=performance.now();
- const plan=loadEvalPlan(options.dataRoot,options.id);planFix(options.dataRoot,plan.id);
- verifyBoundaryContent(options.dataRoot,plan);
+ const cleanup=new EvalCleanupTracker(options.dataRoot,options.id,'run');
+ try{return await runEvalOwned(options,cleanup);}finally{options.onCleanup?.(cleanup.finish());}
+}
+async function runEvalOwned(options:RunEvalOptions,cleanup:EvalCleanupTracker){
+ const preparationAt=performance.now(),plan=await verifyEvalBeforeStart(options.dataRoot,options.id,options.signal);
+ if(options.signal?.aborted)throw Error('EVAL_CONTENT_CHECK_CANCELLED');options.onPrepared?.();
  if(plan.mode==='live'&&!process.env.DEEPSEEK_API_KEY?.trim())throw Error('AUTH_MISSING');
  if(plan.mode==='live'&&options.transportForTrial)throw Error('LIVE_TRANSPORT_OVERRIDE_DENIED');
  if(plan.comparison&&options.transportForTrial)throw Error('COMPARISON_UNFIXED_TRANSPORT_OVERRIDE');
  if(evalFacts(options.dataRoot,plan.id).some(f=>f.kind==='eval.started'))throw Error('EVAL_ALREADY_STARTED: inspect preserved facts; a supplementary run requires a new plan/trial identity');
  await mkdir(options.directory,{recursive:false,mode:0o700});
  const abort=new AbortController(),signal=options.signal?AbortSignal.any([options.signal,abort.signal]):abort.signal;
- const owner=await acquireOwner(options.dataRoot,error=>abort.abort(error));let evidence:Evidence|undefined,finalSource:string|undefined;
+ const owner=await acquireOwner(options.dataRoot,error=>abort.abort(error));cleanup.receipt.owner='unknown';let evidence:Evidence|undefined,finalSource:string|undefined;
  try{
-  owner.assertHeld();evidence=new Evidence(options.dataRoot,plan.id,kind=>{owner.assertHeld();options.fault?.(kind);});const e=evidence;
+  owner.assertHeld();cleanup.receipt.storage='unknown';evidence=new Evidence(options.dataRoot,plan.id,kind=>{owner.assertHeld();options.fault?.(kind);});const e=evidence;
   if(evalFacts(options.dataRoot,plan.id).some(f=>f.kind==='eval.started'))throw Error('EVAL_ALREADY_STARTED');
   appendFact(e,'eval.started',{planId:plan.id,directory:options.directory,at:new Date().toISOString()});
-  const budget=new PersistentBudget(e,plan.id,plan.budget),engine=await boundary();
+  const budget=new PersistentBudget(e,plan.id,plan.budget),rawEngine=await boundary(),engine:Boundary={...rawEngine,runRestricted:options=>cleanup.execute(()=>rawEngine.runRestricted(options))};
   const dependencies=new Map<string,string>();
   for(const side of plan.comparison?['baseline','candidate']:['candidate']){const deps=join(options.directory,`dependencies-${side}`);materialize(options.dataRoot,runtimeContent(options.dataRoot,plan,side),deps);dependencies.set(side,deps);}
   appendFact(e,'eval.preparation',{phase:'fixed plan verification and dependency staging',elapsedMs:performance.now()-preparationAt});
@@ -118,8 +125,8 @@ export async function runEval(options:RunEvalOptions){
    if(outcome.valid){const gradeAt=performance.now();const grade=await gradeOutcome(e,plan,trial,fixture,{...outcome,source:outcomeSource},engine,options.directory,signal,plan.budget.deadline);outcome.timing.gradingMs=performance.now()-gradeAt;appendFact(e,'eval.grade',grade);appendFact(e,'eval.timing',{trialId:trial.id,gradingMs:outcome.timing.gradingMs});if(grade.reason.startsWith('isolation:'))stopReason=grade.reason;}
   }
   finalSource=appendFact(e,'eval.closed',{at:new Date().toISOString(),budget:budget.snapshot(),stopReason});
- }finally{evidence?.close();await owner.release();}
- if(finalSource)await fixEvidence(options.dataRoot,{id:`eval-outcomes:${plan.id}`,sources:[finalSource],purpose:'retain every trial outcome, provider original, grade and dependency; no outcome overwrite'});
+  if(finalSource)await fixEvidence(options.dataRoot,{id:`eval-outcomes:${plan.id}`,sources:[finalSource],purpose:'retain every trial outcome, provider original, grade and dependency; no outcome overwrite'},owner);
+ }finally{try{if(evidence){evidence.close();cleanup.receipt.storage='closed';}}finally{await owner.release();cleanup.receipt.owner='released';}}
  return evalReport(options.dataRoot,plan.id);
 }
 async function gradeOutcome(e:Evidence,plan:EvalPlan,trial:EvalTrial,fixture:EvalCase,outcome:TrialOutcome,engine:Boundary,directory:string,signal?:AbortSignal,deadline?:string):Promise<Grade>{
@@ -221,26 +228,31 @@ export function formatEvalReport(report:ReturnType<typeof evalReport>,root:strin
 }
 
 /** Explicit append-only rescoring; a new grader never rewrites an outcome or the first failure. */
-export async function regradeEval(options:{dataRoot:string;id:string;directory:string;revisionId:string;graders:Record<string,EvalCase['grader']>;signal?:AbortSignal}){
+type RegradeEvalOptions={dataRoot:string;id:string;directory:string;revisionId:string;graders:Record<string,EvalCase['grader']>;signal?:AbortSignal;onCleanup?:(receipt:EvalCleanupReceipt)=>void};
+export async function regradeEval(options:RegradeEvalOptions){
+ const cleanup=new EvalCleanupTracker(options.dataRoot,options.id,'grade');
+ try{return await regradeEvalOwned(options,cleanup);}finally{options.onCleanup?.(cleanup.finish());}
+}
+async function regradeEvalOwned(options:RegradeEvalOptions,cleanup:EvalCleanupTracker){
  if(options.signal?.aborted)throw Error('EVAL_REGRADE_CANCELLED_BEFORE_START');
  const plan=loadEvalPlan(options.dataRoot,options.id);planFix(options.dataRoot,plan.id);
  if(!/^[a-zA-Z0-9_-]{1,80}$/.test(options.revisionId)||!Object.keys(options.graders).length)throw Error('INVALID_GRADER_REVISION');
- const previous=evalFacts(options.dataRoot,plan.id);if(previous.some(f=>f.kind==='eval.grader-revision'&&f.data.id===options.revisionId))throw Error('GRADER_REVISION_EXISTS');
+ const previous=evalFacts(options.dataRoot,plan.id);if(!previous.some(f=>f.kind==='eval.closed'))throw Error('EVAL_BATCH_NOT_ENDED');if(previous.some(f=>f.kind==='eval.grader-revision'&&f.data.id===options.revisionId))throw Error('GRADER_REVISION_EXISTS');
  for(const [caseId,grader]of Object.entries(options.graders)){
   if(!plan.cases.some(c=>c.id===caseId))throw Error('INVALID_GRADER_REVISION');validateGrader(grader);
   const priorGraders=[plan.cases.find(c=>c.id===caseId)!.grader,...previous.filter(f=>f.kind==='eval.grader-revision').map(f=>f.data.graders[caseId]).filter(Boolean)];
   if(priorGraders.some(old=>old.version===grader.version&&!isDeepStrictEqual(old,grader)))throw Error('GRADER_VERSION_CONTENT_CHANGED');
  }
- await mkdir(options.directory,{recursive:false,mode:0o700});const abort=new AbortController(),cancel=()=>abort.abort('user-cancelled');const owner=await acquireOwner(options.dataRoot,error=>abort.abort(error));options.signal?.addEventListener('abort',cancel,{once:true});if(options.signal?.aborted)cancel();let evidence:Evidence|undefined,source:string|undefined;
- try{owner.assertHeld();if(evalFacts(options.dataRoot,plan.id).some(f=>f.kind==='eval.grader-revision'&&f.data.id===options.revisionId))throw Error('GRADER_REVISION_EXISTS');const previousReport=evalReport(options.dataRoot,plan.id);evidence=new Evidence(options.dataRoot,plan.id,()=>owner.assertHeld());const hostDirectory=fileURLToPath(new URL('../',import.meta.url)),hostFiles=captureFiles(evidence,hostDirectory,regularFiles(hostDirectory)).files;const boundaryFiles=captureFiles(evidence,fileURLToPath(new URL('../../execution/isolation/',import.meta.url)),['boundary.mjs','export.mjs','restrict.py']).files;const revision=appendFact(evidence,'eval.grader-revision',{id:options.revisionId,graders:options.graders,previousReport:evidence.blob(JSON.stringify(previousReport)),affectedRules:Object.entries(options.graders).map(([caseId,grader])=>({caseId,version:grader.version,requirements:grader.required,observations:grader.observations?.map(o=>o.name)??[],previousConclusion:previousReport.improvement})),boundaryFiles,hostFiles,at:new Date().toISOString(),scope:'same immutable outcomes; new deterministic grading only'});const engine=await boundary();
+ await mkdir(options.directory,{recursive:false,mode:0o700});const abort=new AbortController(),cancel=()=>abort.abort('user-cancelled');const owner=await acquireOwner(options.dataRoot,error=>abort.abort(error));cleanup.receipt.owner='unknown';options.signal?.addEventListener('abort',cancel,{once:true});if(options.signal?.aborted)cancel();let evidence:Evidence|undefined,source:string|undefined;
+ try{owner.assertHeld();if(evalFacts(options.dataRoot,plan.id).some(f=>f.kind==='eval.grader-revision'&&f.data.id===options.revisionId))throw Error('GRADER_REVISION_EXISTS');const previousReport=evalReport(options.dataRoot,plan.id);cleanup.receipt.storage='unknown';evidence=new Evidence(options.dataRoot,plan.id,()=>owner.assertHeld());const hostDirectory=fileURLToPath(new URL('../',import.meta.url)),hostFiles=captureFiles(evidence,hostDirectory,regularFiles(hostDirectory)).files;const boundaryFiles=captureFiles(evidence,fileURLToPath(new URL('../../execution/isolation/',import.meta.url)),['boundary.mjs','export.mjs','restrict.py']).files;const revision=appendFact(evidence,'eval.grader-revision',{id:options.revisionId,graders:options.graders,previousReport:evidence.blob(JSON.stringify(previousReport)),affectedRules:Object.entries(options.graders).map(([caseId,grader])=>({caseId,version:grader.version,requirements:grader.required,observations:grader.observations?.map(o=>o.name)??[],previousConclusion:previousReport.improvement})),boundaryFiles,hostFiles,at:new Date().toISOString(),scope:'same immutable outcomes; new deterministic grading only'});const rawEngine=await boundary(),engine:Boundary={...rawEngine,runRestricted:options=>cleanup.execute(()=>rawEngine.runRestricted(options))};
   const affected=plan.trials.filter(t=>options.graders[t.caseId]).map(t=>t.id),attempted:string[]=[],gradeSources:string[]=[];let unknown=false;
   for(const trial of plan.trials){if(abort.signal.aborted)break;if(!options.graders[trial.caseId])continue;const original=previous.find(f=>f.kind==='eval.outcome'&&f.data.trialId===trial.id);if(!original?.data.valid||!previousReport.trials.find(t=>t.id===trial.id)?.outcome.valid)continue;
    const fixture={...plan.cases.find(c=>c.id===trial.caseId)!,grader:options.graders[trial.caseId]};const gradeAt=performance.now(),grade=await gradeOutcome(evidence,plan,{...trial,scenario:undefined},fixture,{...original.data,source:original.source},engine,options.directory,abort.signal);attempted.push(trial.id);unknown ||= grade.judgment==='unknown';gradeSources.push(appendFact(evidence,'eval.grade',{...grade,revision}));source=appendFact(evidence,'eval.timing',{trialId:trial.id,gradingMs:performance.now()-gradeAt,revision});if(abort.signal.aborted||grade.reason.startsWith('isolation:'))break;
   }
   const remaining=affected.filter(id=>!attempted.includes(id));source=appendFact(evidence,'eval.regrade-closed',{revisionId:options.revisionId,revision,state:abort.signal.aborted?'cancelled':remaining.length||unknown?'incomplete':'completed',affected,attempted,remaining,gradeSources,reason:abort.signal.aborted?'Cancellation stopped the in-flight VM and prevented later grading; no old grades fill the new revision':remaining.length||unknown?'Some affected saved outcomes remain unavailable, ungraded or unknown':null});
   source??=revision;
- }finally{options.signal?.removeEventListener('abort',cancel);evidence?.close();await owner.release();}
- await fixEvidence(options.dataRoot,{id:`eval-grade:${plan.id}:${options.revisionId}`,sources:[source!],purpose:'retain new grader content and additive judgment over unchanged outcomes'});
+  await fixEvidence(options.dataRoot,{id:`eval-grade:${plan.id}:${options.revisionId}`,sources:[source!],purpose:'retain new grader content and additive judgment over unchanged outcomes'},owner);
+ }finally{options.signal?.removeEventListener('abort',cancel);try{if(evidence){evidence.close();cleanup.receipt.storage='closed';}}finally{await owner.release();cleanup.receipt.owner='released';}}
  return evalReport(options.dataRoot,plan.id);
 }
 export function listEvalPlans(root:string){const db=openHostReadonly(root);try{return db.prepare("SELECT run_id,at,body FROM records WHERE kind='eval.plan' ORDER BY seq DESC LIMIT 50").all().map(row=>{const plan=JSON.parse(readObject(root,JSON.parse(String(row.body))).toString())as EvalPlan;return{id:String(row.run_id),at:String(row.at),purpose:plan.purpose,mode:plan.mode};});}finally{db.close();}}

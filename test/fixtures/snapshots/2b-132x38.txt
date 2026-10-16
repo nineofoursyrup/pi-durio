@@ -73,5 +73,5 @@
    0-0 -/bg.base ; 1-131 border.input/bg.base
 36| ◇ 已停止于 trial 12/12 · ≈ $0.18 · 不续跑                                                              eval 费用单列，不计入 /stats               |
    0-0 -/bg.base ; 1-18 fg.muted/bg.base ; 19-96 fg.body/bg.base ; 97-116 fg.faint/bg.base ; 117-131 -/-
-37|↑↓ 案例 · ←→ trial · Enter trial trace · Esc 返回上层                                                                                     |
-   0-125 fg.label/bg.base ; 126-131 -/-
+37|↑↓ 案例 · ←→ trial · Enter trial trace · r 重评分 · Esc 返回上层                                                                             |
+   0-122 fg.label/bg.base ; 123-131 -/-

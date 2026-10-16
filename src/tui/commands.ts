@@ -78,7 +78,10 @@ export const COMMANDS: readonly CommandSpec[] = [
     options: [{ name: 'self' }, date('from'), date('to'), { name: 'as-of', value: '时间' }, project, { name: 'type', value: '任务类型' }, { name: 'version', value: '执行版本' },
       { name: 'source', value: '来源', values: ['ordinary', 'synthetic', 'diagnostic'] }, { name: 'snapshot', value: '序号' }],
   },
-  { name: 'eval', summary: '评估报告（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'ep-号', kinds: ['eval-plan'] }] },
+  { name: 'eval', summary: '评估报告；run/grade 仅预填确认', bare: 'view', withArgs: 'open', positional: [{ label: 'ep-号', kinds: ['eval-plan'] }], subcommands:[
+    {name:'run',summary:'启动固定计划（只预填确认）',bare:'view',withArgs:'confirm',positional:[{label:'ep-号',kinds:['eval-plan'],required:true}]},
+    {name:'grade',summary:'同版本重评分（只预填确认）',bare:'view',withArgs:'confirm',positional:[{label:'ep-号',kinds:['eval-plan'],required:true}],options:[{name:'case',value:'id',repeat:true}]},
+  ] },
   { name: 'acceptance', summary: '补记或纠正验收', bare: 'view', withArgs: 'confirm', raw: 'JSON' },
   {
     name: 'improve', summary: 'improve 视图；报告参数只预填选择与汇总', bare: 'view', withArgs:'confirm',

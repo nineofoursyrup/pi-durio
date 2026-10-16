@@ -8,7 +8,7 @@ export function writeHeadlessResult(result: RunResult) {
 }
 
 /** Call only after the entry adapter (including any terminal UI) has finished cleanup. */
-export function exitHostIfUnconfirmed(result?: RunResult) {
+export function exitHostIfUnconfirmed(result?: {cleanup:'confirmed'|'unknown'}) {
   // Active handles may ignore cancellation. This ends this host only; its owner
   // markers and unknown receipt remain, with no claim about residual/remote work.
   if (result?.cleanup === 'unknown') process.stdout.write('', () => process.exit(75));

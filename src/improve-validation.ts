@@ -1,3 +1,4 @@
+import type {EvalCleanupReceipt} from './eval/cleanup.js';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {retainExecutionOutput,executionPreview} from './execution-output.js';
 import {readFileSync,lstatSync,existsSync} from 'node:fs';
@@ -82,7 +83,7 @@ export function validateGroup(group:ValidationGroup,candidates:ImproveCandidate[
 
 /** Host constructs only declared bytes; all candidate/check code runs in the
  * existing single VM boundary. Formal paths are never mounted into that VM. */
-export async function validateImproveGroup(options:{evidence:Evidence;decisionSource:string;decisionId:string;group:ValidationGroup;candidates:ImproveCandidate[];defaults?:DefaultChange[];directory:string;deadline:string;signal:AbortSignal;record:(kind:string,data:unknown)=>string;guard:()=>void}){
+export async function validateImproveGroup(options:{evidence:Evidence;decisionSource:string;decisionId:string;group:ValidationGroup;candidates:ImproveCandidate[];defaults?:DefaultChange[];directory:string;deadline:string;signal:AbortSignal;record:(kind:string,data:unknown)=>string;guard:()=>void;onEvalCleanup?:(receipt:EvalCleanupReceipt)=>void}){
  const {evidence:e,group,directory,record,guard}=options,root=e.root;
  await mkdir(directory,{recursive:false,mode:0o700});
  const candidates=options.candidates.filter(c=>group.candidateIds.includes(c.id)),targets=[...new Map(candidates.map(c=>[c.target.id,c.target])).values()];
@@ -115,11 +116,11 @@ export async function validateImproveGroup(options:{evidence:Evidence;decisionSo
     const prepared=await prepareEval({...check.options,dataRoot,id,installation:check.installation,image:verifiedImage,comparison:{...check.comparison,sides:{baseline:side('baseline'),candidate:side('candidate')}}});
     if(prepared.plan.runtime.id!==check.runtimeIdentity)throw Error('IMPROVE_RUNTIME_CONTENT_DRIFT');
     const link=record('improve.eval',{groupId:group.id,index,kind:'eval',dataRoot,planId:id,planSource:scopedImproveSource(dataRoot,prepared.source),parent:{dataRoot:root,decisionSource:options.decisionSource,decisionId:options.decisionId},attribution:'improve validation; nested eval facts keep original kind/run/trial/attempt IDs; do not count as daily coding'});
-    const report=await runEval({dataRoot,id,directory:join(checkDirectory,'execution'),signal:options.signal});
+    const report=await runEval({dataRoot,id,directory:join(checkDirectory,'execution'),signal:options.signal,onCleanup:options.onEvalCleanup});
     guard();effect=report.improvement;
     const certain=report.trials.length===prepared.plan.trials.length&&report.trials.every(t=>t.outcome.valid&&['PASS','FAIL'].includes(t.grade?.judgment??''));
     const passed=certain&&report.trials.filter(t=>t.side==='candidate').every(t=>t.grade?.judgment==='PASS')&&report.comparison?.regression.pairs.every(p=>p.candidatePassed)!==false;
-    state=!certain||effect==='证据不足'?'unknown':passed?'completed':'failed';reason=state==='completed'?null:'Fresh comparison incomplete, invalid, failed or missing evidence; original trials retained.';
+    state=options.signal.aborted?'cancelled':!certain||effect==='证据不足'?'unknown':passed?'completed':'failed';reason=options.signal.aborted?'cancelled':state==='completed'?null:'Fresh comparison incomplete, invalid, failed or missing evidence; original trials retained.';
     checks.push({index,kind:check.kind,state,reason,effect,kindSource:'eval',dataRoot,planId:id,sourceId:link,reportDocument:e.blob(JSON.stringify(report)),reportOrigin:{dataRoot,planId:id,asOf:report.asOf,scope:'Child evidence references inside this opaque document belong only to dataRoot; parent fixing retains the snapshot, not child attachments.'},requests:report.cost.requests,tokens:report.cost.knownTokens});
    }else{
     const input=join(checkDirectory,'input');await mkdir(input);
