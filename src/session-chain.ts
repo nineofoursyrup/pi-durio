@@ -24,8 +24,8 @@ export interface SessionSummary {
   /** Tasks of this session only; a branch does not count the original session's tasks before the fork. */
   tasks: number; first: SessionTask; tail: SessionTask;
   forkedFrom: { sessionId: string; runId: string; number: number } | null;
-  /** Acceptance seq of the newest task; sessions list newest activity first by it. */
-  lastSeq: number;
+  /** Latest host activity of this session's own runs; snapshot-bounded. */
+  lastSeq: number; lastAt: string;
 }
 interface Node { runId: string; seq: number; at: string; parent: string | null; children: string[]; depth: number; head: string; next: string | null }
 
@@ -35,12 +35,15 @@ export class SessionChains {
   private readonly accepted = new Map<string, any>();
   private readonly byId = new Map<string, string>();
   private readonly members = new Map<string, string[]>();
-  /** Heads in acceptance order of their newest task, newest first. */
+  private readonly last = new Map<string, { seq: number; at: string }>();
+  /** Heads in last-activity order, newest first. */
   private readonly recent: string[];
-  constructor(private readonly root: string, readonly through: number, private readonly nodes: Map<string, Node>) {
-    const last = new Map<string, number>();
-    for (const node of nodes.values()) last.set(node.head, Math.max(last.get(node.head) ?? 0, node.seq));
-    this.recent = [...last.keys()].sort((a, b) => last.get(b)! - last.get(a)!);
+  constructor(private readonly root: string, readonly through: number, private readonly nodes: Map<string, Node>, activity = new Map<string, { seq: number; at: string }>()) {
+    for (const node of nodes.values()) {
+      const value = activity.get(node.runId) ?? { seq: node.seq, at: node.at };
+      if (value.seq > (this.last.get(node.head)?.seq ?? 0)) this.last.set(node.head, value);
+    }
+    this.recent = [...this.last.keys()].sort((a, b) => this.last.get(b)!.seq - this.last.get(a)!.seq);
   }
   isHead(runId: string) { return this.nodes.get(runId)?.head === runId; }
   /** The session a run belongs to and its task number, or null for an unknown run. */
@@ -76,7 +79,7 @@ export class SessionChains {
     const limit = boundedInteger(options.limit ?? 20, 1, 50), before = options.before === undefined ? Infinity : boundedInteger(options.before);
     const items: SessionSummary[] = [];let scanned = 0, stop: number | null = null;
     for (const head of this.recent) {
-      const lastSeq = this.nodes.get(this.chain(head).at(-1)!)!.seq;
+      const lastSeq = this.last.get(head)!.seq;
       if (lastSeq >= before) continue;
       if (items.length === limit || scanned === MAX_SCANNED_HEADS) { stop = items.at(-1)?.lastSeq ?? lastSeq + 1; break; }
       scanned++;
@@ -109,7 +112,7 @@ export class SessionChains {
     const forked = parent ? this.sessionOfRun(parent) : null;
     return {
       id: this.sessionIdOf(head), headRunId: head, tailRunId: tail.runId, kind: first.kind, workspace: first.workspace, project: first.project,
-      tasks: chain.length, first, tail, forkedFrom: forked && parent ? { sessionId: forked.id, runId: parent, number: forked.number } : null, lastSeq: tail.seq,
+      tasks: chain.length, first, tail, forkedFrom: forked && parent ? { sessionId: forked.id, runId: parent, number: forked.number } : null, lastSeq: this.last.get(head)!.seq, lastAt: this.last.get(head)!.at,
     };
   }
   private task(runId: string): SessionTask {
@@ -152,8 +155,10 @@ export function readSessionChains(root: string, options: { through?: number } = 
   try { db = openHostReadonly(root); }
   catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return new SessionChains(root, 0, nodes); throw error; }
   let rows: Record<string, unknown>[], through: number;
+  const activity = new Map<string, { seq: number; at: string }>();
   try {
     through = options.through ?? Number((db.prepare('SELECT COALESCE(MAX(seq),0) AS n FROM records').get() as { n: number }).n);
+    for (const row of db.prepare("SELECT run_id, MAX(seq) AS seq, at FROM records WHERE seq<=? GROUP BY run_id").all(through)) activity.set(String(row.run_id), { seq: Number(row.seq), at: String(row.at) });
     rows = db.prepare("SELECT seq,run_id,kind,at,body FROM records WHERE kind IN ('task.accepted','context.imported') AND seq<=? ORDER BY seq").all(through) as Record<string, unknown>[];
   } finally { db.close(); }
   for (const row of rows) {
@@ -171,5 +176,5 @@ export function readSessionChains(root: string, options: { through?: number } = 
     node.depth = parent.depth + 1;
     if (parent.children[0] === node.runId) { node.head = parent.head; parent.next = node.runId; }
   }
-  return new SessionChains(root, through, nodes);
+  return new SessionChains(root, through, nodes, activity);
 }

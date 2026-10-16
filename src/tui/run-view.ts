@@ -7,7 +7,7 @@ import { readObject } from '../evidence.js';
 import { estimateRunRequests, sumCostEstimates, type CostTotals, type ModelRequestCost } from '../cost-estimate.js';
 
 /** 主区窗口读取的记录种类；工具输出块（tool.output）与写入意图按工具调用另读。 */
-export const VISIBLE_KINDS = ['task.accepted','tool.intent','tool.result','tool.error','tool.summary','recovery.capability-denied','control.receipt','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed','compaction.generated','compaction.finished'];
+export const VISIBLE_KINDS = ['task.accepted','tool.intent','tool.result','tool.error','tool.summary','recovery.decision','recovery.started','recovery.capability-denied','control.receipt','model.provider-event','model.response','run.abort-intent','run.exit-intent','run.closed','compaction.generated','compaction.finished'];
 
 export type ToolState = 'running' | 'ok' | 'error' | 'unknown' | 'denied';
 /** 工具输出的保留片段：read/write 取开头，bash 与错误取末尾；`total` 是全部行数。 */
@@ -123,8 +123,23 @@ export class RunView {
       else if (ref.kind === 'tool.intent' || ref.kind === 'tool.result' || ref.kind === 'tool.error' || ref.kind === 'tool.summary') {
         const attempt = value?.attemptId ?? headAttempt(this.root, ref);
         if (!attempt || seen.has(attempt)) continue;
-        const entry = this.tool(ref, attempt, options.active);
-        if (entry) { seen.add(attempt); entries.push(entry); }
+        try {
+          const entry = this.tool(ref, attempt, options.active);
+          if (entry) { seen.add(attempt); entries.push(entry); }
+        } catch (error) { seen.add(attempt); entries.push({ kind: 'notice', ref, title: '原文暂不可取得', text: String(error) }); }
+      } else if (ref.kind === 'recovery.decision') {
+        for (const resolution of (value?.decision ?? decode(this.root, ref).decision)?.resolutions ?? []) {
+          if (resolution.choice === 'skip') entries.push({ kind: 'notice', ref, title: '跳过（首版处置）', text: String(resolution.reason ?? '说明未记录') });
+        }
+      } else if (ref.kind === 'recovery.started') {
+        const started = value ?? decode(this.root, ref), capabilities: string[] = started.capabilities ?? [];
+        if (capabilities.length === 1 && capabilities[0] === 'read') {
+          const accepted = [...pages(this.root, this.runId, { kinds: ['task.accepted'] })][0];
+          const tools: string[] = accepted ? decode(this.root, accepted).authorization?.tools ?? [] : [];
+          const decision = [...pages(this.root, this.runId, { before: ref.seq, kinds: ['recovery.decision'] })].map(item => decode(this.root, item).decision).find(item => item?.id === started.decisionId);
+          // The same historical distinction used by trace: a normal read-only retry is not a capability restriction.
+          if (tools.some(tool => tool !== 'read') || decision?.resolutions?.some((resolution: { choice: string }) => resolution.choice !== 'retry')) entries.push({ kind: 'notice', ref, title: '只读续跑', text: '按当时记录的权限继续；旧处置与原文保留。' });
+        }
       } else if (ref.kind === 'recovery.capability-denied') {
         const tool = String(value?.tool ?? '工具');
         entries.push({ kind: 'tool', ref, attemptId: `denied:${ref.seq}`, tool, args: '', argKind: 'text', state: 'denied', startedAt: ref.at, summary: value?.duplicate ? '已拦截 · 该操作已完成，不重做' : `被拒 · 只读续跑不允许 ${tool}`, detail: ref });
