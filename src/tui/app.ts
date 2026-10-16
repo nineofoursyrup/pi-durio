@@ -25,7 +25,7 @@ import { statsRequest } from './stats.js';
 import { StatsBrowser } from './stats-browser.js';
 import { processMeasurements } from '../self-measurement.js';
 import { statsChoices } from './stats-filter.js';
-import { recordAcceptance } from '../metrics/index.js';
+import { AcceptanceDialog, AnnotationWriteError, ANNOTATION_RUNNING, annotationTarget, readAnnotation, saveAnnotation, type AnnotationTarget, type AnnotationPrefill } from './acceptance.js';
 import { HistoryView, historyScope, historyProjects, type HistoryTarget } from './history.js';
 import { EvalListView, EvalPlanView, type PlanViewHost } from './eval.js';
 import { TrialTraceView } from './eval-trial.js';
@@ -518,11 +518,12 @@ export class ReadOnlyTui {
     case 'older':this.window('older');break;
     case 'newer':this.window('newer');break;
     case 'stats':
-      try{if(options.self&&Object.keys(options).some(key=>key!=='self'))throw new CommandError('--self 固定近 7 天、全部项目、日常来源，不接受其他筛选');this.metricsView?.cancel();this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),options.self?[]:statsChoices(root,this.options.workspace).projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.openEvalPlan(target.source);}}},{tab:options.self?'self':'metrics',self:{dimensions:()=>({columns:this.terminal.columns,rows:this.terminal.rows}),busy:()=>this.phase!=='idle'}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
+      try{if(options.self&&Object.keys(options).some(key=>key!=='self'))throw new CommandError('--self 固定近 7 天、全部项目、日常来源，不接受其他筛选');this.metricsView?.cancel();this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),options.self?[]:statsChoices(root,this.options.workspace).projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),annotate:(task,saved)=>this.annotateTask(task,saved),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.openEvalPlan(target.source);}}},{tab:options.self?'self':'metrics',self:{dimensions:()=>({columns:this.terminal.columns,rows:this.terminal.rows}),busy:()=>this.phase!=='idle'}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
       break;
     case 'acceptance':
       if(!mayWrite(this.writeAccess))break;
-      try{const input=JSON.parse(raw);if(typeof input?.taskId==='string')input.taskId=resolveDisplayInput(root,'task',input.taskId);const receipt=recordAcceptance(root,input);this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();break;
+      if(typeof options.note==='string'&&options.note.length>1000)throw new CommandError('补记说明最多 1000 字符');
+      this.annotateTask(undefined,undefined,options as AnnotationPrefill,positional[0]?resolveArgument(root,positional[0],['task']).id:undefined);break;
     case 'eval':{
       const id=positional[0]===undefined?undefined:resolveArgument(root,positional[0],['eval-plan']).id;
       try{
@@ -1142,10 +1143,28 @@ export class ReadOnlyTui {
     try{
       this.historyView=new HistoryView(this.options.dataRoot,filter,{workspace:this.options.workspace,changed:()=>this.tui.requestRender(),feedback:text=>this.feedback(text),
         continue:id=>void this.continueHistory(id),
+        annotate:(task,saved)=>this.annotateTask(task,saved),
         trace:runId=>this.historyTrace(runId),
         details:(runId,attemptId)=>this.historyTrace(runId,attemptId),
       });this.openPanel('history');
     }catch(error){this.notice=`历史查询失败（当前工作未改变）：${safe(String(error))}`;this.tui.requestRender();}
+  }
+  private annotationBlocked() {
+    return this.writeAccess.writeBlocked()??(this.stopped||this.exiting?'当前界面正在退出，不能补记':this.phase!=='idle'||this.analysis||this.improveBatch.running?ANNOTATION_RUNNING:this.recoveryChecking||this.viewingRecovery||this.result?.status==='unknown'||this.result?.cleanup==='unknown'?'先完成恢复核对，再补记':undefined);
+  }
+  private annotateTask(target?:AnnotationTarget,saved?:()=>void,prefill:AnnotationPrefill={},taskId?:string) {
+    const feedback=(message:string)=>{this.notice=message;this.feedback(message);};
+    const blocked=this.annotationBlocked();if(blocked){feedback(blocked);return;}
+    try{
+      const snapshot=readAnnotation(target??annotationTarget(this.options.dataRoot,taskId,this.runId??this.continueFrom)),box=new AcceptanceDialog(snapshot,prefill);
+      this.openDialog(box,()=>{
+        let written=0;
+        try{written=saveAnnotation(snapshot,box.submission,()=>this.annotationBlocked()).sources.length;}
+        catch(error){if(error instanceof AnnotationWriteError&&error.sources.length){try{saved?.();}catch{}feedback(`补记已追加部分记录，请核对后重开：${safe(String(error))}`);}else feedback(`补记未写入：${safe(String(error))}`);return;}
+        if(written){try{saved?.();}catch(error){feedback(`补记已写入，视图刷新失败：${safe(String(error))}`);return;}}
+        feedback(written?'补记已追加 · 原记录保留':'没有需要写入的改动');
+      });
+    }catch(error){feedback(`不能补记：${safe(String(error))}`);}
   }
   private historyTrace(runId:string,attemptId?:string) {
     try{

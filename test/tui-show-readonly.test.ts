@@ -116,7 +116,7 @@ test('show session keeps command and storage actions read-only after returning f
   const f = fixture(), before = contents(f.dataRoot), t = open(f, { run: runId, session: sessionId });
   try {
     t.key('\x1b'); t.key('\x1b');
-    for (const command of ['/acceptance {}', '/compact', '/follow-up', '/stop', '/improve restore report·C-01', '/improve continue report', '/improve rollback report·C-01', '/improve register eval cases.json', '/improve unregister self ./src']) {
+    for (const command of ['/acceptance --verdict pass', '/compact', '/follow-up', '/stop', '/improve restore report·C-01', '/improve continue report', '/improve rollback report·C-01', '/improve register eval cases.json', '/improve unregister self ./src']) {
       t.key(command); t.key('\r');
       assert.match(t.screen(), /只读查看/, command);
       assert.equal(t.calls(), 0, command);

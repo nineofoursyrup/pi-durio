@@ -4,9 +4,10 @@ import { readDisplayIndex, readRunOrdinals, type DisplayKind } from '../display-
 import { type CostRequest } from '../metrics/costs.js';
 import { type PlanSource } from '../eval/overview.js';
 import { type StatsSnapshot, type SpendKind, metricRows, spendRows } from './stats.js';
+import { readSessionChains } from '../session-chain.js';
 
 export type StatsRow = 'acceptance' | 'cost' | 'clocks' | 'intervention' | 'regression' | 'rework' | 'faults' | SpendKind | 'total';
-export interface StatsTaskTarget { root: string; taskId: string; runId: string | null; acceptedSource: string }
+export interface StatsTaskTarget { root: string; taskId: string; runId: string | null; acceptedSource: string; sessionId?: string | null }
 export type StatsTarget =
   | { kind: 'run'; root: string; runId: string }
   | { kind: 'plan'; source: PlanSource }
@@ -47,7 +48,13 @@ export function statsMembers(stats: StatsSnapshot, row: StatsRow): StatsMember[]
   });
   const report = (title: string, value: unknown): StatsEvidence => ({ key: `report:${title}`, label: title, detail: '派生报告 · 不替代原始事实', target: { kind: 'report', title, value } });
   const run = (runId: string | null, dataRoot = root): StatsEvidence[] => runId ? [{ key: `${dataRoot}#run:${runId}`, label: `run ${label('run', runId, dataRoot)}`, detail: '打开 trace · 查看运行原文', target: { kind: 'run', root: dataRoot, runId } }] : [];
-  const target = (t: { taskId: string; runId: string | null; acceptedSource: string }): StatsTaskTarget => ({ root, taskId: t.taskId, runId: t.runId, acceptedSource: t.acceptedSource });
+  let chains: ReturnType<typeof readSessionChains> | undefined;
+  const target = (t: { taskId: string; runId: string | null; acceptedSource: string }): StatsTaskTarget => {
+    chains ??= readSessionChains(root, { through: stats.scope.through });
+    let sessionId = t.runId ? chains.sessionOfRun(t.runId)?.id : undefined;
+    if (!sessionId) { try { const ref = resolveEvidence(root, t.acceptedSource), data = decode(root, ref); sessionId = chains.sessionOfRun(data.target?.runId ?? ref.runId)?.id; } catch {} }
+    return { root, taskId: t.taskId, runId: t.runId, acceptedSource: t.acceptedSource, sessionId: sessionId ?? null };
+  };
   const taskReasons = (t: typeof task.tasks[number]) => [t.reason, !t.taskType ? '任务类型 unknown' : `类型 ${t.taskType}`, !t.version ? '实际执行版本 unknown' : `执行版本 ${t.version}`].filter((r): r is string => !!r);
 
   if (row === 'regression') return stats.plans.map(plan => ({

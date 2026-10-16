@@ -33,3 +33,32 @@ test('unknown scope, duplicate receipt of the same original feedback and unavail
 test('delivery and admission exactly at asOf are visible when the selection includes that instant',t=>{const root=clockFixture(t,[0]);const report=queryFeedbackMetrics(root,{from:at(0),to:at(1),asOf:at(0),source:'synthetic'});assert.equal(report.rework.counts.immature,1);assert.equal(report.intervention.counts.Ni,1);});
 
 test('legal recovery reopens the intervention phase after failed close and includes rescue before first delivery',t=>{const root=clockFixture(t,[1],['failed']);t.mock.timers.setTime(epoch+2*DAY);let e=new Evidence(root,'r0');e.append('recovery.started',{});e.close();t.mock.timers.setTime(epoch+2.5*DAY);const r=refs(root,0);recordFeedback(root,{type:'observation',id:'recovery-rescue',taskId:'t0',dimension:'intervention',meaning:'correction',source:{...source,statement:'During legal recovery I corrected the unmet original requirement'},requirements:[r[0].id],originalRequirement:'unmet',correction:'started',occurredAt:at(2.5)});let report=queryFeedbackMetrics(root,{...scope,asOf:at(2.5)});assert.equal(report.intervention.counts.Ni,0);assert.equal(report.intervention.counts.openPositive,1);t.mock.timers.setTime(epoch+3*DAY);e=new Evidence(root,'r0');e.append('recovery.closed',{result:{status:'completed',cleanup:'confirmed',answer:'First final delivery after rescue'}});e.close();report=queryFeedbackMetrics(root,{...scope,asOf:at(3)});assert.equal(report.intervention.counts.Ni,1);assert.equal(report.intervention.counts.I,1);assert.equal(report.intervention.tasks[0].end?.at,at(3));assert.equal(report.rework.tasks[0].delivery?.at,at(3));});
+
+test('explicit occurrence intervals count only wholly contained stages, preserving half-open rework and unknown legacy times',t=>{
+ const root=clockFixture(t,[1,1,1,1,1,1]);t.mock.timers.setTime(epoch+10*DAY);
+ const add=(i:number,dimension:'intervention'|'rework',from:number,to:number,bounds:'[]'|'[)'='[]')=>{
+  const input={type:'observation' as const,id:`range-${i}`,taskId:`t${i}`,dimension,meaning:'correction' as const,source:{...source,statement:'I confirm a correction of the original requirement within the displayed interval; the exact instant is unknown'},requirements:[refs(root,i)[0].id],originalRequirement:'unmet' as const,correction:'requested' as const,occurredAt:null,occurredDuring:{from:at(from),to:at(to),bounds}};
+  return recordFeedback(root,input);
+ };
+ add(0,'intervention',0,1);add(1,'rework',1,8,'[)');add(2,'rework',1,8);add(3,'rework',.5,2);rework(root,4,'legacy-no-time',null);add(5,'rework',8,9);
+ const report=queryFeedbackMetrics(root,{...scope,asOf:at(10)});
+ assert.equal(report.intervention.counts.I,1,'intervention end is included');
+ assert.equal(report.rework.counts.Rr,1,'only the whole half-open interval belongs to the seven-day window');
+ assert.deepEqual(report.rework.tasks.slice(1).map(t=>t.events[0].position),['inside-window','overlaps-window','overlaps-window','unknown-time','outside-window']);
+ assert.equal(report.rework.tasks[1].events[0].occurredAt,null,'a scoped declaration must not fabricate an exact instant');
+ assert.equal(queryFeedbackMetrics(root,{...scope,asOf:at(9)}).rework.counts.Rr,0,'later receipt must not enter an earlier as_of');
+ const original=[...records(root,{kinds:['feedback.observation']})].find(r=>r.runId==='r1')!;
+ unlinkSync(join(root,'objects',original.ref.sha256));
+ const unavailable=queryFeedbackMetrics(root,{...scope,asOf:at(10)});
+ assert.equal(unavailable.rework.counts.Rr,0);assert.equal(unavailable.rework.tasks[1].feedback.missing.length,1);
+});
+
+test('occurrence intervals cannot claim future endpoints, missing bounds, an exact instant or an unobserved whole-window absence',t=>{
+ const root=clockFixture(t,[1]);t.mock.timers.setTime(epoch+3*DAY);
+ const input={type:'observation' as const,id:'future-range',taskId:'t0',dimension:'rework' as const,meaning:'correction' as const,source,requirements:[refs(root,0)[0].id],originalRequirement:'unmet' as const,correction:'requested' as const,occurredAt:null,occurredDuring:{from:at(1),to:at(8),bounds:'[)' as const}};
+ assert.throws(()=>recordFeedback(root,input),/future occurrence interval/);
+ assert.throws(()=>recordFeedback(root,JSON.parse(JSON.stringify({...input,occurredDuring:{from:at(1),to:at(2)}}))),/occurrence interval/);
+ assert.throws(()=>recordFeedback(root,{...input,occurredAt:at(2),occurredDuring:{from:at(1),to:at(2),bounds:'[]'}}),/occurrence interval/);
+ assert.throws(()=>recordFeedback(root,{...input,meaning:'none',occurredDuring:{from:at(1),to:at(2),bounds:'[]'}}),/occurrence interval/);
+ assert.equal([...records(root,{kinds:['feedback.observation']})].length,0);
+});

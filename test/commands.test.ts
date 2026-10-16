@@ -86,7 +86,13 @@ test('arguments: display numbers, --name value options, MM-DD dates as [from,to)
   rejects('/improve {"purpose":"x"}', /这里要 ir-号 或完整 id/);
   const choices=parseCommand('/improve ir-1234 --execute C-01 C-02 --validate C-03 --defer C-04 --do-not-suggest C-05');
   assert.deepEqual(choices.options,{execute:'C-01,C-02',validate:'C-03',defer:'C-04','do-not-suggest':'C-05'});
-  assert.equal(parseCommand('/acceptance --note "两 个 字"').raw, '--note "两 个 字"');
+  const annotation = parseCommand('/acceptance t-ab12 --verdict pass --intervention none --rework unknown --note "两 个 字"');
+  assert.deepEqual(annotation.positional, ['t-ab12']);
+  assert.deepEqual(annotation.options, { verdict: 'pass', intervention: 'none', rework: 'unknown', note: '两 个 字' });
+  assert.equal(annotation.leaf.withArgs, 'confirm');
+  rejects('/acceptance --verdict yes', /不接受 yes/, ['pass', 'fail', 'unknown']);
+  rejects('/acceptance --rework pass', /不接受 pass/, ['none', 'yes', 'unknown']);
+  rejects('/acceptance r-ab12', /这里要 t-号/);
   rejects('/history --foo 1', /未知选项 --foo/, ['--from', '--to', '--project', '--status']);
   rejects('/history --from 2026/10/01', /日期写 MM-DD 或 YYYY-MM-DD/);
   rejects('/history --status done', /不接受 done/, ['completed', 'failed', 'aborted', 'recovery']);
