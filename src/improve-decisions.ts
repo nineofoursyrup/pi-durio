@@ -266,21 +266,24 @@ export function previewImproveResume(dataRoot:string,options:Omit<ImproveResume,
  return {state,decision,groups,pendingDecision,reserved};
 }
 /** Explicit continuation can spend only previously authorized, untouched groups. */
-export async function resumeImproveDecision(options:{dataRoot:string;id:string;resumeId:string;decisionSource:string;groupIds:string[];signal?:AbortSignal;fault?:(kind:string)=>void}){
+export async function resumeImproveDecision(options:ImproveResume&{dataRoot:string;signal?:AbortSignal;fault?:(kind:string)=>void;onEvalCleanup?:(receipt:EvalCleanupReceipt)=>void;onCleanup?:(receipt:ImproveCleanupReceipt)=>void}){
  options={...options,groupIds:structuredClone(options.groupIds)};
  const {dataRoot,id}=options;if(!identifier(options.resumeId)||!Array.isArray(options.groupIds)||!options.groupIds.length||new Set(options.groupIds).size!==options.groupIds.length)throw Error('IMPROVE_RESUME_INVALID');
  const hash=decisionDigest({resumeId:options.resumeId,decisionSource:options.decisionSource,groupIds:options.groupIds});
  const old=improveFacts(dataRoot).find(f=>f.kind==='improve.resume'&&f.data.id===id&&f.data.resumeId===options.resumeId);
  if(old){if(old.data.requestDigest!==hash)throw Error('IMPROVE_RESUME_ID_REUSED');return readImproveDecision(dataRoot,id);}
- const abort=new AbortController(),signal=options.signal?AbortSignal.any([options.signal,abort.signal]):abort.signal,owner=await acquireOwner(dataRoot,error=>abort.abort(error));let evidence:Evidence|undefined,leases:Awaited<ReturnType<typeof workspaceLeases>>=[];
+ const abort=new AbortController(),signal=options.signal?AbortSignal.any([options.signal,abort.signal]):abort.signal,owner=await acquireOwner(dataRoot,error=>abort.abort(error));let evidence:Evidence|undefined,leases:Awaited<ReturnType<typeof workspaceLeases>>=[],storage:ImproveCleanupReceipt['storage']='not-opened';
  try{
   const {state,decision,groups,pendingDecision}=previewImproveResume(dataRoot,options);
   leases=await workspaceLeases(pendingDecision,error=>abort.abort(error));
   const guard=()=>{owner.assertHeld();for(const lease of leases)lease.assertHeld();};
-  evidence=new Evidence(dataRoot,state.runId,kind=>{guard();options.fault?.(kind);});
+  storage='unknown';evidence=new Evidence(dataRoot,state.runId,kind=>{guard();options.fault?.(kind);});
   appendFact(evidence,'improve.resume',{id,resumeId:options.resumeId,requestDigest:hash,decisionSource:state.sourceId,groupIds:options.groupIds});
-  await executeGroups({dataRoot,decision,signal,fault:options.fault},evidence,state.sourceId,groups,state.executionVersion,guard,leases.map(l=>l.root),true);
- }finally{evidence?.close();for(const lease of leases.reverse())await lease.release();await owner.release();}
+  await executeGroups({dataRoot,decision,signal,fault:options.fault,onEvalCleanup:options.onEvalCleanup},evidence,state.sourceId,groups,state.executionVersion,guard,leases.map(l=>l.root),true);
+ }finally{
+  const cleanup:ImproveCleanupReceipt={storage,owner:'unknown',workspaces:leases.map(l=>({root:l.root,released:false}))};
+  try{try{if(evidence){evidence.close();cleanup.storage='closed';}}finally{for(const lease of leases.reverse()){await lease.release();cleanup.workspaces.find(w=>w.root===lease.root)!.released=true;}await owner.release();cleanup.owner='released';}}finally{options.onCleanup?.(cleanup);}
+ }
  return readImproveDecision(dataRoot,id);
 }
 

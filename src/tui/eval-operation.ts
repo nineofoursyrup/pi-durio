@@ -13,7 +13,7 @@ import type {ConfirmConfig} from './view-stack.js';
 import type {EvalExitFact} from './exit-summary.js';
 
 export type EvalAction='run'|'grade';
-export const samePlan=(a:PlanSource,b:PlanSource)=>a.root===b.root&&a.id===b.id&&a.origin?.reportId===b.origin?.reportId&&a.origin?.decisionId===b.origin?.decisionId;
+export const samePlan=(a:PlanSource,b:PlanSource)=>a.root===b.root&&a.id===b.id&&a.origin?.reportId===b.origin?.reportId&&a.origin?.decisionId===b.origin?.decisionId&&a.origin?.groupId===b.origin?.groupId;
 export function evalBlocked(source:PlanSource,action:EvalAction,host:{writeBlocked?:string;busy?:boolean;now?:number}={}) {
   if(host.writeBlocked)return host.writeBlocked;
   if(host.busy)return '有任务运行中，结束后再启动';

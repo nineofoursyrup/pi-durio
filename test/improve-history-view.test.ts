@@ -16,6 +16,8 @@ import {submitImproveDecision,type ImproveDecision} from '../src/improve-decisio
 import {readImproveHistory,continuationBlocked} from '../src/improve-report-history.js';
 import {ImproveManagement,type ImproveManagementHost} from '../src/tui/improve-management.js';
 import {ImproveBatchController} from '../src/improve-batch.js';
+import {acquireOwner} from '../src/ownership.js';
+import {tuiCleanupStatus,tuiExitCode} from '../src/tui/exit-summary.js';
 
 const fixture=resolve('test/fixtures/v1-records/data'),id='fixture-improve-1';
 const plain=(lines:string[])=>lines.map(stripTerminalSequences).join('\n');
@@ -112,7 +114,7 @@ function management(f:ReturnType<typeof ownReport>) {
  let box:Parameters<ImproveManagementHost['confirm']>[0]|undefined,confirm:()=>void=()=>{},pending=Promise.resolve(),error:unknown,blocked:string|undefined;
  const messages:string[]=[],batch=new ImproveBatchController(f.dataRoot);
  const host:ImproveManagementHost={writeBlocked:()=>blocked,feedback:s=>messages.push(s),blocked:()=>blocked,confirm:(b,fn)=>{box=b;confirm=fn;},run:async(_label,_id,work)=>{pending=work(new AbortController().signal).then(()=>{},e=>{error=e;});await pending;},resume:(input,signal)=>batch.resume(input,signal),changed:()=>{}};
- return {host,manager:new ImproveManagement(f.dataRoot,f.workspace,host),messages,dialog:()=>box,error:()=>error,pending:()=>pending,block:(reason?:string)=>{blocked=reason;},reset:()=>{box=undefined;error=undefined;},enter:()=>{if(box?.handleInput('\r').type==='confirm')confirm();}};
+ return {host,batch,manager:new ImproveManagement(f.dataRoot,f.workspace,host),messages,dialog:()=>box,error:()=>error,pending:()=>pending,block:(reason?:string)=>{blocked=reason;},reset:()=>{box=undefined;error=undefined;},enter:()=>{if(box?.handleInput('\r').type==='confirm')confirm();}};
 }
 test('synthetic legacy rollback confirms exact files, rechecks capabilities and preserves later edits before any rollback fact',async()=>{
  const f=ownReport(false),state=await submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision});assert.equal(state.writeback,'written');
@@ -143,4 +145,19 @@ test('continuation confirms only original untouched work, rejects changed baseli
  m.host.resume=(input,signal)=>{const done=resume(input,signal);follow.observeContinuation(f.decision,done);return done;};
  writeFileSync(join(f.workspace,'math.mjs'),'export const add=(a,b)=>a-b;\n');m.reset();m.manager.command('continue',f.report.id);m.dialog()!.render(132,38);m.enter();assert.equal(follow.inProgress,true);assert.match(plain(follow.render(132,38)),/improve 执行进度/);await m.pending();assert.equal(m.error(),undefined);assert.equal(follow.inProgress,false);assert.match(plain(follow.render(132,38)),/已结束/);
  const result=readImproveDecision(f.dataRoot,f.decision.id);assert.equal(result.state,'completed');assert.equal(result.sourceId,state.sourceId);assert.equal(result.groups[0].state,'completed');assert.equal(result.reserved.checks,1);assert.equal(result.writeback,'not-written');
+ assert.equal(m.batch.cleanup?.storage,'closed');assert.equal(m.batch.cleanup?.owner,'released');assert.ok(m.batch.cleanup?.workspaces.length);assert.ok(m.batch.cleanup?.workspaces.every(w=>w.released));
+ const owner=await acquireOwner(f.dataRoot,()=>{});await owner.release();
+});
+
+test('late continuation refusal clears the prior batch receipt before preflight and does not invent cleanup work',async()=>{
+ const f=ownReport(true),terminal=new TestTerminal(),app=new ReadOnlyTui({dataRoot:f.dataRoot,workspace:f.workspace,draftRoot:join(f.root,'drafts'),mode:'offline',terminal,widthCalibration:false});
+ const first=await app.improveBatch.start(f.decision,AbortSignal.abort());assert.equal(first.state,'frozen');assert.equal(app.improveBatch.cleanup?.owner,'released');
+ try{
+  app.start();terminal.input(`/improve continue ${f.report.id}`);terminal.input('\r');assert.match(plain(app.screen()),/继续未运行的独立项/);
+  writeFileSync(join(f.workspace,'math.mjs'),'user edit after confirmation opened\n');terminal.input('\r');await until(()=>/BASELINE_DRIFT/.test(plain(app.screen())));
+  assert.equal(improveFacts(f.dataRoot).filter(f=>f.kind==='improve.resume'||f.kind==='improve.group-started').length,0);assert.equal(app.improveBatch.running,false);
+  assert.equal(app.improveBatch.cleanup,undefined,'the earlier submission receipt cannot describe a refused continuation');assert.deepEqual(app.improveBatch.evalCleanup,[]);
+  const exit=await app.exit();assert.equal(exit.batchCleanup,undefined);assert.equal(exit.evalCleanup,undefined);assert.equal(exit.eval,undefined);assert.equal(tuiCleanupStatus(exit)?.cleanup,'confirmed');assert.equal(tuiExitCode(exit),0);assert.doesNotMatch(exit.summary.join('\n'),/状态未知|写入者锁保留/);
+  const owner=await acquireOwner(f.dataRoot,()=>{});await owner.release();
+ }finally{await app.exit();}
 });
