@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, mkdirSync, existsSync, cpSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, existsSync, cpSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -12,6 +12,8 @@ import { demoTransport, scriptedTransport } from '../src/offline.js';
 import { readRun, readQueue, readAcceptedTasks, runReadTask } from '../src/runtime.js';
 import { resolveDisplayInput, readDisplayIndex } from '../src/display-number.js';
 import { readSessionChains } from '../src/session-chain.js';
+import { readOpenQueue } from '../src/queue.js';
+import { QueueView } from '../src/tui/queue.js';
 
 class TestTerminal implements Terminal {
   columns = 80; rows = 24; kittyProtocolActive = false; writes: string[] = []; stopped = false;
@@ -487,10 +489,10 @@ test('full-screen views stack: Esc returns layer by layer; in-view Ctrl+C and gl
   try {
     key('Run held tool');key('\r');await until(()=>existsSync(join(f.workspace,'started.txt')));
     key('/help');key('\r');assert.match(f.screen(),/帮助/);
-    views.pushView('queue');assert.match(f.screen(),/队列/);
+    views.pushView('queue');assert.match(f.screen(),/◆ queue/);
     for(const k of ['\x03','\x03','\x04','\x0f','\x14','\x12','?'])key(k);
-    assert.match(f.screen(),/队列/,'global keys are inert inside a view');assert.doesNotMatch(f.screen(),/中止中|请求中止/);
-    key('\x1b');assert.match(f.screen(),/帮助/);assert.doesNotMatch(f.screen(),/队列：/,'Esc returns to the previous layer');
+    assert.match(f.screen(),/◆ queue/,'global keys are inert inside a view');assert.doesNotMatch(f.screen(),/中止中|请求中止/);
+    key('\x1b');assert.match(f.screen(),/帮助/);assert.doesNotMatch(f.screen(),/◆ queue/,'Esc returns to the previous layer');
     key('\x1b');assert.doesNotMatch(f.screen(),/Ctrl\+X → Enter 后续请求\nCtrl\+J/,'Esc on the top layer returns to the session');
     // A confirm dialog consumes keys: Esc closes only the dialog, Enter confirms once.
     key('/help');key('\r');let confirmed:number[]|undefined;
@@ -508,17 +510,26 @@ test('full-screen views stack: Esc returns layer by layer; in-view Ctrl+C and gl
   }finally{await f.app.exit();}
 });
 
-test('queue panel names requests by q- number and /withdraw accepts it (v1 fixture copy)', async () => {
+test('queue panel preserves v1 q identities without opening the recorded workspace, and /withdraw accepts the number', async () => {
   const root=mkdtempSync(join(tmpdir(),'durio-tui-q-')),workspace=join(root,'project'),dataRoot=join(root,'data');mkdirSync(workspace);
+  const original=new URL('../../test/fixtures/v1-records/data/host.sqlite',import.meta.url),originalBytes=readFileSync(original);
   cpSync(new URL('../../test/fixtures/v1-records/data',import.meta.url),dataRoot,{recursive:true});
+  // Historical queue projection never opens or creates the recorded workspace.
+  const item=readQueue(dataRoot).items.find(item=>item.requestId==='frozen-follow')!;
   const q=readDisplayIndex(dataRoot).label('queue-request','frozen-follow'),terminal=new TestTerminal();terminal.columns=120;
+  const view=new QueueView(dataRoot,item.target.workspace,{writeBlocked:()=> '只读夹具投影',feedback:()=>{},changed:()=>{},copy:async()=>true,withdraw:()=>assert.fail('projection must not write'),reattach:()=>assert.fail('projection must not dispatch')});
+  view.setEntries(readOpenQueue(dataRoot,item.target.workspace));
+  assert.ok(view.render(120,24).map(stripTerminalSequences).join('\n').includes(q));
+  view.handleInput('\r');const detail=view.render(120,24).map(stripTerminalSequences).join('\n');
+  assert.match(detail,/原 id frozen-follow/);assert.match(detail,/原目标：s-[0-9a-f]+ · 任务 1 · t-[0-9a-f]+ · r-[0-9a-f]+/);
   const app=new ReadOnlyTui({workspace,dataRoot,draftRoot:join(root,'drafts'),mode:'offline',transport:demoTransport().fetch,terminal,widthCalibration:false});app.start();
   const key=(data:string)=>terminal.input(data),screen=()=>app.screen().map(stripTerminalSequences).join('\n');
   try {
-    key('/queue');key('\r');await until(()=>/q-[0-9a-f]{4,} · 原 id /.test(screen()));assert.doesNotMatch(screen(),/原 run [0-9a-f]{8}-/);
+    key('/queue');key('\r');assert.match(screen(),/◆ queue/);assert.ok(!screen().includes(q),'another workspace is not listed as the current queue');
     key('\x1b');key(`/withdraw ${q}`);key('\r');
     await until(()=>readQueue(dataRoot).items.find(item=>item.requestId==='frozen-follow')!.status==='withdrawn');
   } finally { await app.exit(); }
+  assert.deepEqual(readFileSync(original),originalBytes);
 });
 
 test('? opens help only on empty input; F2 does nothing; help fits 80x24 and 40x12', async t => {

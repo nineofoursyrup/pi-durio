@@ -222,6 +222,8 @@ export interface ConfirmConfig {
   action: string;
   /** 正文：高度不够时在框内滚动（逐行截断） */
   body?: string[];
+  /** Authorization-bearing body text must wrap completely, including after a resize. */
+  wrapBody?: boolean;
   /** 单选（数字键）或多选（空格切换、↑↓ 换行）；排在正文之后，与正文一起滚动 */
   choice?: { mode: 'single' | 'multi'; options: ConfirmOption[]; selected?: number[] };
   /** 影响与费用行：固定显示、不随框内滚动，只换行不截断 */
@@ -322,7 +324,7 @@ export class ConfirmDialog {
 
   private scrollable(inner: number): Array<{ segments: TextSegment[]; cursor?: boolean }> {
     const lines: Array<{ segments: TextSegment[]; cursor?: boolean }> = (this.config.body ?? [])
-      .flatMap(text => clean(text.replace(/\r/g, '')).split('\n'))
+      .flatMap(text => this.config.wrapBody ? wrapAuthorized(text, inner) : clean(text.replace(/\r/g, '')).split('\n'))
       .map(text => ({ segments: [{ text: truncateEnd(text, inner), fg: 'fg.body' as TokenName }] }));
     const choice = this.config.choice;
     choice?.options.forEach((option, index) => {

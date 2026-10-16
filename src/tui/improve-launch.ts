@@ -15,6 +15,8 @@ export interface LaunchHost {
   registrations: SourceRegistration[];
   /** 本进程有任务在运行：确认后独立排队，任务结束后开始。 */
   queued: boolean;
+  /** A replacement analysis keeps the withdrawn request's original session/workspace. */
+  binding?: string[];
   register(input: string): SourceRegistration;
   complete(input: string): { text: string; matches: number };
 }
@@ -135,6 +137,7 @@ export class ImproveLaunchDialog {
     const out: Array<{ segments: TextSegment[]; cursor?: boolean }> = [];
     const plain = (text: string, fg: TokenName = 'fg.body') => out.push({ segments: [{ text: truncateEnd(text, inner), fg }] });
     plain(`分析不执行任何候选 · 可看文件 ${this.files}（省略 ${this.host.visible.omitted}）`);
+    for (const text of this.host.binding ?? []) for (const line of wrapAuthorized(text, inner)) plain(line, 'fg.label');
     if (this.host.queued) plain('当前任务运行中 · 确认后独立排队，任务结束后开始 · 取证截止点在开始时固定', 'fg.muted');
     plain('');
     const pad = ' '.repeat(LABEL), head = (label: string, at: number) => `${at === this.cursor ? '›' : ' '} ${label}${' '.repeat(Math.max(0, LABEL - 2 - visibleWidth(label)))}`;
