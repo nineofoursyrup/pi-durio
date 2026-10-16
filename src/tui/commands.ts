@@ -17,6 +17,8 @@ export interface OptionSpec {
   /** 可选值；`free` 时它们只是补全建议，其他值也接受 */
   values?: readonly string[];
   free?: true;
+  /** 可重复给出；各次的值按出现顺序用逗号连接 */
+  repeat?: true;
   /** 值按 `MM-DD`（默认当年）或 `YYYY-MM-DD` 解析，转成本地零点的 ISO 时间 */
   date?: true;
 }
@@ -77,8 +79,13 @@ export const COMMANDS: readonly CommandSpec[] = [
   { name: 'eval', summary: '评估报告（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'ep-号', kinds: ['eval-plan'] }] },
   { name: 'acceptance', summary: '补记或纠正验收', bare: 'view', withArgs: 'confirm', raw: 'JSON' },
   {
-    name: 'improve', summary: '受限分析（声明范围与预算）', bare: 'view', withArgs: 'confirm', raw: 'JSON',
+    name: 'improve', summary: 'improve 视图：进行中、待选择的报告、新建分析、历史与抑制', bare: 'view',
     subcommands: [
+      {
+        name: 'new', summary: '新建分析（参数只预填启动框，Enter 确认后开始）', bare: 'view', withArgs: 'confirm',
+        options: [{ name: 'scope', value: '范围', values: ['session', '7d', '30d'] }, { name: 'budget', value: '档位', values: ['standard', 'large'] },
+          { name: 'source', value: '来源', values: ['self', 'eval'], repeat: true }, { name: 'focus', value: '文本' }],
+      },
       { name: 'history', summary: '查看 improve 报告（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'ir-号', kinds: ['improve-report'] }] },
       { name: 'suppressions', summary: '查看建议抑制（只读）', bare: 'view' },
     ],
@@ -121,7 +128,7 @@ export function usage(spec: CommandSpec): string {
   for (const p of spec.positional ?? []) parts.push(p.required ? p.label : `[${p.label}]`);
   for (const o of spec.options ?? []) {
     const value = o.values ? (o.free ? [o.value, ...o.values] : o.values).join('|') : o.value;
-    parts.push(`[--${o.name}${value ? ` ${value}` : ''}]`);
+    parts.push(`[--${o.name}${value ? ` ${value}` : ''}]${o.repeat ? '…' : ''}`);
   }
   return parts.join(' ');
 }
@@ -180,14 +187,14 @@ export function parseCommand(text: string, table: readonly CommandSpec[] = COMMA
   const sub = spec.subcommands?.find(s => s.name === tokens[0]);
   if (sub) { leaf = sub; path.push(sub.name); tokens.shift(); }
   else if (spec.raw) return { spec, leaf, path, positional: [], options: {}, raw: rest };
-  if (tokens.length && !leaf.withArgs) throw new CommandError(`/${[spec.name, ...path].join(' ')} 不接受参数`);
+  if (tokens.length && !leaf.withArgs) throw new CommandError(`/${[spec.name, ...path].join(' ')} 不接受参数`, path.length ? [] : (spec.subcommands ?? []).map(s => s.name));
   const positional: string[] = [], options: Record<string, string | true> = {};
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     if (token.startsWith('--')) {
       const option = leaf.options?.find(o => o.name === token.slice(2));
       if (!option) throw new CommandError(`未知选项 ${token}`, (leaf.options ?? []).map(o => `--${o.name}`));
-      if (options[option.name] !== undefined) throw new CommandError(`选项 ${token} 重复`);
+      if (options[option.name] !== undefined && !option.repeat) throw new CommandError(`选项 ${token} 重复`);
       if (!option.value) { options[option.name] = true; continue; }
       const value = tokens[++i];
       if (value === undefined || value.startsWith('--')) throw new CommandError(`${token} 缺少${option.value}`, option.values ?? []);
@@ -196,7 +203,7 @@ export function parseCommand(text: string, table: readonly CommandSpec[] = COMMA
         const iso = parseDate(value, now);
         if (!iso) throw new CommandError(`${token} 日期写 MM-DD 或 YYYY-MM-DD，收到 ${value}`);
         options[option.name] = iso;
-      } else options[option.name] = value;
+      } else options[option.name] = option.repeat && options[option.name] !== undefined ? `${options[option.name]},${value}` : value;
       continue;
     }
     const slot = leaf.positional?.[positional.length];
@@ -295,7 +302,7 @@ function argumentItems(spec: CommandSpec, before: string[], current: string): Au
   if (option?.value) items = (option.values ?? []).map(v => ({ value: v, label: v, description: `--${option.name}` }));
   else {
     const used = new Set(before.filter(t => t.startsWith('--')));
-    const options = (leaf.options ?? []).filter(o => !used.has(`--${o.name}`)).map(o => ({ value: `--${o.name}`, label: `--${o.name}`, description: o.values && !o.free ? o.values.join('|') : o.value ?? '开关' }));
+    const options = (leaf.options ?? []).filter(o => o.repeat || !used.has(`--${o.name}`)).map(o => ({ value: `--${o.name}`, label: `--${o.name}`, description: o.values && !o.free ? o.values.join('|') : o.value ?? '开关' }));
     const takesValue = (t?: string) => !!t?.startsWith('--') && !!leaf.options?.find(o => o.name === t.slice(2))?.value;
     const slot = leaf.positional?.[before.filter((t, i) => !t.startsWith('--') && !takesValue(before[i - 1])).length];
     const subs = !sub && !before.length ? (spec.subcommands ?? []).map(s => ({ value: s.name, label: s.name, description: s.summary })) : [];
