@@ -158,7 +158,8 @@ test('the immutable v1 aborted queue refuses reattachment; withdrawal and a new 
   // New authorization belongs to this test's independent workspace, never the recorded one.
   const transport = scriptedTransport([]), next = await runReadTask({ dataRoot, workspace, input: 'Explicit task in an independent workspace after reviewing the aborted v1 queue', mode: 'offline', transport: transport.fetch });
   assert.equal(next.status, 'completed'); assert.notEqual(readSessionChains(dataRoot).sessionOfRun(next.runId)?.id, sessionId);
-  assert.equal(readSessionChains(dataRoot).sessionOfRun(next.runId)?.workspace, realpathSync(workspace));
+  const chains = readSessionChains(dataRoot), nextSession = chains.sessionOfRun(next.runId)!;
+  assert.equal(chains.session(nextSession.id)?.workspace, realpathSync(workspace));
   assert.equal(readRunRecords(dataRoot, next.runId, { kinds: ['context.imported'] }).records.length, 0);
   assert.equal(readOpenQueue(dataRoot, recordedWorkspace).length, 0); assert.equal(transport.calls.length, 1);
   assert.deepEqual(admissions(), originalAdmissions);
