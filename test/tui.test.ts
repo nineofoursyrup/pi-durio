@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { CURSOR_MARKER, TuiAltScreen, stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui, exitCostSummary } from '../src/tui/app.js';
+import { TIPS } from '../src/tui/welcome.js';
 import { HardwareCursorEditor } from '../src/tui/cursor.js';
 import { demoTransport, scriptedTransport } from '../src/offline.js';
 import { readRun, readQueue, readAcceptedTasks, runReadTask } from '../src/runtime.js';
@@ -479,24 +480,31 @@ test('queue panel names requests by q- number and /withdraw accepts it (v1 fixtu
   } finally { await app.exit(); }
 });
 
-test('? opens help only on empty input; F2 does nothing; help fits 80x24 and 40x12', async () => {
+test('? opens help only on empty input; F2 does nothing; help fits 80x24 and 40x12', async t => {
+  // Exercise the welcome Tip whose wording also appears inside the help view.
+  const helpTip=TIPS.findIndex(tip=>tip.includes('会话屏键位'));
+  assert.ok(helpTip>=0,'the collision Tip is present');
+  const random=t.mock.method(Math,'random',()=>(helpTip+0.5)/TIPS.length);
   const f=fixture(),key=(data:string)=>f.terminal.input(data);
+  random.mock.restore();
+  const helpTitle=/^ *帮助 *$/m; // A dedicated view header, never the welcome Tip's prose.
   try {
+    assert.match(f.screen(),/^ *Tip: .*会话屏键位/m,'the welcome screen contains the collision Tip');
     assert.match(f.screen(),/描述要查看或分析的内容… {3}\/ 命令  @ 文件  Shift\+Enter 换行/,'read-only placeholder on empty input');
     assert.match(f.screen(),/Enter 提交 · \/ 命令 · Ctrl\+R 历史 · \? 帮助/);
-    key('a?');assert.doesNotMatch(f.screen(),/会话屏键位/);assert.match(f.screen(),/a\?/);
-    key('\x7f');key('\x7f');key('\x1bOQ');assert.doesNotMatch(f.screen(),/操作菜单|会话屏键位/,'F2 is inert');
+    key('a');key('?');assert.doesNotMatch(f.screen(),helpTitle);assert.match(f.screen(),/a\?/);
+    key('\x7f');key('\x7f');key('\x1bOQ');assert.doesNotMatch(f.screen(),/操作菜单/,'F2 opens no menu');assert.doesNotMatch(f.screen(),helpTitle,'F2 opens no help');
     for(const [columns,rows] of [[80,24],[40,12]] as const) {
       f.terminal.columns=columns;f.terminal.rows=rows;f.terminal.resize();
       key('?');const lines=f.app.screen().map(stripTerminalSequences);
       assert.equal(lines.length,rows);for(const line of lines)assert.ok(line.trimEnd().length<=columns,`${columns}x${rows}: ${line}`);
-      const text=lines.join('\n');assert.match(text,/帮助/);assert.match(text,/会话屏键位/);assert.match(text,/Esc 返回会话/);
+      const text=lines.join('\n');assert.match(text,helpTitle);assert.match(text,/^ *会话屏键位 *$/m);assert.match(text,/Esc 返回会话/);
       for(let i=0;i<40;i++)key('n');assert.match(f.screen(),/\/improve-rollback/,'the command list scrolls to its end');assert.match(f.screen(),/Esc 返回会话/);
-      key('\x1b');assert.doesNotMatch(f.screen(),/会话屏键位/);
+      key('\x1b');assert.doesNotMatch(f.screen(),helpTitle);
     }
     f.terminal.columns=30;f.terminal.rows=10;f.terminal.resize();assert.match(f.screen(),/窗口过小/);
     f.terminal.columns=80;f.terminal.rows=24;f.terminal.resize();
-    key('/help');key('\r');assert.match(f.screen(),/会话屏键位/);key('\x1b');
+    key('/help');key('\r');assert.match(f.screen(),helpTitle);assert.match(f.screen(),/^ *会话屏键位 *$/m);key('\x1b');
     // Narrow footers drop hints from the right; `? 帮助` goes last.
     const hints=(f.app as unknown as {sessionHints():string[]}).sessionHints();assert.deepEqual(hints,['Enter 提交','/ 命令','Ctrl+R 历史','? 帮助']);
   } finally { await f.app.exit(); }
