@@ -321,7 +321,11 @@ test('trial trace: restricted-side raw beside host-mediated usage; fallback list
       return originalWrite(...args);
     });
     syncBuiltinESMExports();
-    app.start(); key(`/eval ${source.label}`); key('\r'); key('\r');
+    app.start();
+    assert.match(screen(), /◆ history.*只读/);
+    // show opens HistoryView; T6 consumes command text until Esc returns to the session.
+    key('\x1b'); assert.doesNotMatch(screen(), /◆ history/);
+    key(`/eval ${source.label}`); key('\r'); key('\r');
     assert.match(screen(), /◆ trial/);
     assert.ok(renderedTrial, 'the app rendered a real trial view');
     assert.equal(renderedTrial.trialId, baseline);
