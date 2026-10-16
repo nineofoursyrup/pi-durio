@@ -20,7 +20,7 @@ import {captureSnapshot} from '../src/tui/snapshot.js';
 import {acquireOwner} from '../src/ownership.js';
 import {ReadOnlyTui} from '../src/tui/app.js';
 import {scriptedTransport} from '../src/offline.js';
-import {readAcceptedTasks,readQueue} from '../src/runtime.js';
+import {readAcceptedTasks,readQueue,runReadTask} from '../src/runtime.js';
 import {stripTerminalSequences,visibleWidth,type Terminal} from '@earendil-works/pi-tui';
 const plain=(lines:string[])=>lines.map(stripTerminalSequences).join('\n');
 function allPages(view:{render:(w:number,h:number)=>string[];scroll:(n:number)=>void},width:number,height=24) {
@@ -238,9 +238,12 @@ async function untilSelection(predicate:()=>boolean){const deadline=Date.now()+1
 test('app commands validate before opening, preserve draft on reopen, and background execution keeps session input while reporting completion',async()=>{
  const f=fixture(),terminal=new SelectionTerminal(),transport=scriptedTransport([{name:'read',args:{path:'math.mjs'}}]);
  f.candidate.structuredChecks=[{kind:'regression',program:'setInterval(()=>{},1000)',timeoutMs:30000}];f.save();
- const app=new ReadOnlyTui({workspace:f.workspace,dataRoot:f.dataRoot,draftRoot:join(f.root,'drafts'),mode:'offline',transport:transport.fetch,terminal,widthCalibration:false}),screen=()=>plain(app.screen()),key=(text:string)=>terminal.input(text);
+ // Wait for the public runtime lifecycle to prepare the completed session before exercising improve navigation.
+ const original=await runReadTask({workspace:f.workspace,dataRoot:f.dataRoot,input:'原会话任务',mode:'offline',transport:transport.fetch});
+ assert.equal(original.status,'completed');assert.equal(original.cleanup,'confirmed');
+ const app=new ReadOnlyTui({workspace:f.workspace,dataRoot:f.dataRoot,draftRoot:join(f.root,'drafts'),mode:'offline',transport:transport.fetch,resume:original.sessionId,terminal,widthCalibration:false}),screen=()=>plain(app.screen()),key=(text:string)=>terminal.input(text);
  app.start();try {
-  key('原会话任务');key('\r');await untilSelection(()=>screen().includes('✓ 完成'));
+  assert.match(screen(),/✓ 完成/);assert.match(screen(),/原会话任务/);
   const accepted=readAcceptedTasks(f.dataRoot).tasks.length;
   key('/improve selection-report --execute C-99');assert.doesNotThrow(()=>key('\r'));assert.match(screen(),/候选号无效/);assert.doesNotMatch(screen(),/提交汇总/);assert.equal(app.improveBatch.running,false);
   key('\x15');key('/improve selection-report --validate C-01');key('\r');assert.match(screen(),/提交汇总/);assert.equal(improveFacts(f.dataRoot).filter(f=>f.kind==='improve.decision').length,0);
