@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { runReadTask, runCodingTask, readRun, inspectRecovery, checkRecovery, recoverRun, settleRecoveryOwners } from '../src/runtime.js';
 import { scriptedTransport } from '../src/offline.js';
 import { digest, Evidence } from '../src/evidence.js';
+import { readDisplayIndex } from '../src/display-number.js';
 
 async function fixture() {
   const root = await mkdtemp(join(tmpdir(), 'durio-recovery-'));
@@ -163,18 +164,21 @@ test('headless recovery saves a machine-readable input request and true readonly
   const {spawnSync}=await import('node:child_process');
   const {paths,result,authorization}=await interruptedRead();
   const auth=join(paths.root,'authorization.json');await writeFile(auth,JSON.stringify(authorization));
-  const cli=['dist/src/cli.js','recover','--run',result.runId,'--data-root',paths.dataRoot,'--authorization',auth];
+  const index=readDisplayIndex(paths.dataRoot),session=index.label('session',result.sessionId),run=index.label('run',result.runId);
+  const cli=(target:string[],...args:string[])=>spawnSync(process.execPath,['dist/src/cli.js','recover',...target,'--data-root',paths.dataRoot,'--authorization',auth,...args],{encoding:'utf8'});
   const before=await contents(paths.dataRoot);
-  const inspect=spawnSync(process.execPath,[...cli,'--inspect'],{encoding:'utf8'});
-  assert.equal(inspect.status,75,inspect.stderr);assert.equal(JSON.parse(inspect.stdout).status,'needs-decision');
+  const inspect=cli([session],'--inspect');
+  assert.equal(inspect.status,75,inspect.stderr);assert.equal(JSON.parse(inspect.stdout).status,'needs-decision');assert.equal(JSON.parse(inspect.stdout).runId,result.runId);
+  const legacy=cli(['--run',result.runId],'--inspect');
+  assert.equal(legacy.status,75,legacy.stderr);assert.deepEqual(JSON.parse(legacy.stdout),JSON.parse(inspect.stdout));
   assert.deepEqual(await contents(paths.dataRoot),before);
-  const check=spawnSync(process.execPath,cli,{encoding:'utf8'});
+  const check=cli([session]);
   assert.equal(check.status,75,check.stderr);const report=JSON.parse(check.stdout);assert.equal(report.persistence,'saved');
   const saved=(await readRun(paths.dataRoot,result.runId)).records.filter(r=>r.kind==='recovery.report');
   assert.ok(saved.some(r=>(r.data as any).snapshotId===report.snapshotId));
   const decision=join(paths.root,'decision.json');await writeFile(decision,JSON.stringify({id:'cli-continue',snapshotId:report.snapshotId,action:'continue',acceptAdditionalModelAttempts:true}));
-  const continued=spawnSync(process.execPath,[...cli,'--decision',decision,'--offline-demo'],{encoding:'utf8'});
-  assert.equal(continued.status,0,continued.stderr);assert.equal(JSON.parse(continued.stdout).status,'completed');
+  const continued=cli([run],'--decision',decision,'--offline-demo');
+  assert.equal(continued.status,0,continued.stderr);assert.equal(JSON.parse(continued.stdout).status,'completed');assert.equal(JSON.parse(continued.stdout).runId,result.runId);
 });
 
 test('cross-store admission gaps use the committed request identity and never blindly submit it again',async()=>{
