@@ -481,6 +481,7 @@ test('bad command arguments open no view and list the valid values in the status
     key('\x15');key('/metrics');key('\r');assert.match(f.screen(),/未知命令 \/metrics/);
     key('\x15');key('/stats');key('\r');assert.doesNotMatch(f.screen(),/参数有误/);key('\x1b');
     key('\x12');assert.match(f.screen(),/历史 · 只读/,'Ctrl+R opens history');key('\x1b');
+    key('\x15');key('/eval');key('\r');assert.match(f.screen(),/还没有 eval 计划 · 新建用 pi-durio eval plan/,'2b list layer, empty');key('\x1b');assert.doesNotMatch(f.screen(),/还没有 eval 计划/);
     assert.equal(f.transport.calls.length,0);
   } finally { await f.app.exit(); }
 });

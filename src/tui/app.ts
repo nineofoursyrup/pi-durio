@@ -17,7 +17,9 @@ import { StatsView, readStats, statsRequest } from './stats.js';
 import { recordAcceptance } from '../metrics/index.js';
 import type { HistoryFilter } from '../history.js';
 import { HistoryView } from './history.js';
-import { EvalView } from './eval.js';
+import { EvalListView, EvalPlanView, type PlanViewHost } from './eval.js';
+import { TrialTraceView } from './eval-trial.js';
+import { ownPlanSource } from '../eval/overview.js';
 import { StorageView } from './storage.js';
 import { TraceView, type TraceHost } from './trace.js';
 import { TraceRawView, outputItem } from './trace-raw.js';
@@ -38,7 +40,7 @@ import { currentExecutionVersion } from '../execution-version.js';
 import { RecoveryPanel, disabledInputLines, readRecoveryFacts, recoveryPages, type RecoveryAction } from './recovery.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
-type PanelKind='help'|'exit'|'trace-raw'|'queue'|'history'|'eval'|'storage'|'trace'|'improve'|'improve-selection'|'metrics';
+type PanelKind='help'|'exit'|'trace-raw'|'queue'|'history'|'eval'|'eval-plan'|'eval-trial'|'storage'|'trace'|'improve'|'improve-selection'|'metrics';
 type ViewEntry={kind:PanelKind;offset:number;line:number};
 /** 主区窗口：每次读取当前任务最近的记录条数（查询上限）。 */
 const WINDOW=50;
@@ -118,7 +120,11 @@ export class ReadOnlyTui {
   private get panel(){return this.viewStack.at(-1);}
   private historyView?:HistoryView;
   private metricsView?:StatsView;
-  private evalView?:EvalView;
+  private evalList?:EvalListView;
+  private evalPlan?:EvalPlanView;
+  private evalTrial?:TrialTraceView;
+  /** 2b 计划层的宿主：Enter 在其上压入 trial trace 层。 */
+  private readonly evalHost:PlanViewHost={openTrial:(source,report,trialId)=>{this.evalTrial=new TrialTraceView(source,report,trialId,()=>this.tui.requestRender());this.pushView('eval-trial');}};
   private improveView?:ImproveView;
   private improveSelectionView?:ImproveSelectionView;
   private storageView?:StorageView;
@@ -279,7 +285,7 @@ export class ReadOnlyTui {
     else if(this.options.sessions)this.openHistory({project:this.options.workspace});
     this.widths?.inspect();
     this.terminal.write('\x1b[?1004h'); // Focus reports invalidate any pending exit confirmation.
-    this.timer=setInterval(()=>{if(this.pendingRefresh)this.refresh();else if(this.phase!=='idle')this.tui.requestRender();},SPINNER_INTERVAL_MS);
+    this.timer=setInterval(()=>{if(this.pendingRefresh)this.refresh();else if(this.phase!=='idle'||this.panel?.kind==='eval-plan'&&this.evalPlan?.live)this.tui.requestRender();},SPINNER_INTERVAL_MS);
     this.loadQueue();
     void this.welcome?.probeLock();
     this.tui.requestRender();
@@ -441,7 +447,10 @@ export class ReadOnlyTui {
       try{const input=JSON.parse(raw);if(typeof input?.taskId==='string')input.taskId=resolveDisplayInput(root,'task',input.taskId);const receipt=recordAcceptance(root,input);this.notice=`验收记录已追加：${receipt.source}`;}catch(error){this.notice=`验收输入未记录：${String(error)}`;}this.tui.requestRender();break;
     case 'eval':{
       const id=positional[0]===undefined?undefined:resolveArgument(root,positional[0],['eval-plan']).id;
-      try{this.evalView=new EvalView(root,id);this.openPanel('eval');}catch(error){fail('Eval记录不可读取：',error);}
+      try{
+        if(id){this.evalPlan=new EvalPlanView(ownPlanSource(root,id),this.evalHost,{depth:1});this.openPanel('eval-plan');}
+        else{this.evalList=new EvalListView(root,{openPlan:source=>{this.evalPlan=new EvalPlanView(source,this.evalHost);this.pushView('eval-plan');}});this.openPanel('eval');}
+      }catch(error){fail('Eval记录不可读取：',error);}
       break;
     }
     case 'storage':this.storageView=new StorageView(root,{changed:()=>this.tui.requestRender(),busy:()=>this.phase!=='idle'||!!this.options.show,feedback:text=>this.feedback(text),confirm:(config,confirm)=>this.openConfirm(config,()=>void confirm())});this.openPanel('storage');break;
@@ -829,8 +838,9 @@ export class ReadOnlyTui {
     const component:Component={invalidate(){},render:width=>this.panelLines(width),handleInput:data=>this.panelInput(data),handleMouse:event=>{
       const panel=this.panel;if(!panel)return;
       if(event.type==='wheel'&&panel.kind==='trace-raw'){this.traceRaw?.scroll(event.wheelDelta??0);return {handled:true};}
+      if(event.type==='click'&&panel.kind==='eval-trial'){this.evalTrial?.click(event.y);this.tui.requestRender();return {handled:true};}
       if(event.type==='click'&&panel.kind==='trace'){this.traceView?.click(event.y);this.tui.requestRender();return {handled:true};}
-      if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalView?.scroll(event.wheelDelta??0);else if(panel.kind==='trace')this.traceView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
+      if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalList?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-plan')this.evalPlan?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-trial')this.evalTrial?.scroll(event.wheelDelta??0);else if(panel.kind==='trace')this.traceView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
     }};
     const overlay=this.tui.showOverlay(component,{width:'96%',maxHeight:'90%',anchor:'center'});this.hidePanel=()=>overlay.hide();this.tui.requestRender();
   }
@@ -875,7 +885,9 @@ export class ReadOnlyTui {
     const panel=this.panel;if(!panel)return[];
     if(panel.kind==='improve-selection'){const lines=this.improveSelectionView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='improve'){const lines=this.improveView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
-    if(panel.kind==='eval'){const lines=this.evalView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='eval'){const lines=this.evalList?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='eval-plan'){const lines=this.evalPlan?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='eval-trial'){const lines=this.evalTrial?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='storage') {const lines=this.storageView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='metrics') {const lines=this.metricsView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='history') {const lines=this.historyView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
@@ -896,13 +908,15 @@ export class ReadOnlyTui {
     this.confirmation=undefined;
     // 全屏视图层的全局键（T6）：Esc 返回上一层；Ctrl+C 只停本视图的操作，不传给会话屏；Ctrl+D/O/T/R、? 不起作用。
     const key=viewKey(data);
-    if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
+    if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='eval-trial')this.evalTrial?.close();if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress){this.stop();return;}this.closePanel();return;}
     if(key==='redraw'){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
     if(key==='stop'){if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
     if(key==='inert')return;
     if(panel.kind==='improve-selection'){void this.improveSelectionView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='improve'){this.improveView?.handleInput(data);this.tui.requestRender();return;}
-    if(panel.kind==='eval'){this.evalView?.handleInput(data);this.tui.requestRender();return;}
+    if(panel.kind==='eval'){this.evalList?.handleInput(data);this.tui.requestRender();return;}
+    if(panel.kind==='eval-plan'){this.evalPlan?.handleInput(data);this.tui.requestRender();return;}
+    if(panel.kind==='eval-trial'){this.evalTrial?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='storage') {void this.storageView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='trace'){this.traceView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='trace-raw'){this.traceRaw?.handleInput(data);this.tui.requestRender();return;}
