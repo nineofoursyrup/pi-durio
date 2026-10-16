@@ -247,6 +247,7 @@ export interface PlanViewHost {
 export interface PlanViewOptions {
   /** 本 TUI 正在运行该批次（#82）：未取得结果的 trial 显示 ⠹，状态行显示进度 */
   runningHere?: () => boolean;
+  stoppingHere?: () => boolean;
   /** 视图栈深度（Esc 文案）；默认 2（从列表层进入） */
   depth?: number;
   /** 渲染时刻（golden 固定用） */
@@ -271,6 +272,7 @@ export class EvalPlanView {
     if (this.current) this.revisions = [source.through, ...this.current.gradingRevisions.toReversed().map(r => Number(String(r.source).split(':')[1]) - 1)];
   }
   get report() { return this.current; }
+  refresh(){this.read();if(this.current)this.revisions=[this.source.through,...this.current.gradingRevisions.toReversed().map(r=>Number(String(r.source).split(':')[1])-1)];}
   private now() { return this.options.now?.() ?? Date.now(); }
   private runningHere() { return !!this.options.runningHere?.(); }
   /** 批次未结束（运行中）且看的是最新报告：宿主定时重绘，render 每秒最多重读一次。 */
@@ -300,11 +302,11 @@ export class EvalPlanView {
   }
 
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
-    if (this.live && Date.now() - this.lastRead >= 1000) this.read();
+    if ((this.live||this.runningHere()) && Date.now() - this.lastRead >= 1000) this.read();
     const line = (segments: TextSegment[], bg?: TokenName) => styledLine(segments, width, bg, tier);
     const rule = line([{ text: '─'.repeat(width), fg: 'line.subtle' }]);
     const esc = escHint(this.options.depth ?? 2);
-    const hints = ['↑↓ 案例', '←→ trial', 'Enter trial trace', ...this.revisions.length > 1 ? ['v 旧报告修订'] : []];
+    const hints = ['↑↓ 案例', '←→ trial', 'Enter trial trace', 'r 重评分',...this.runningHere()?['Ctrl+C 停止批次']:[],...this.revisions.length > 1 ? ['v 旧报告修订'] : []];
     const hint = hintLine(hints, width, { esc, tier });
     if (!this.current) {
       const head = [line([{ text: ' ◆ ', fg: 'ac.info' }, { text: 'eval', fg: 'fg.primary', bold: true }, { text: `  计划 ${this.source.label}`, fg: 'fg.faint' }]), rule];
@@ -483,7 +485,8 @@ export class EvalPlanView {
     const state = planState(report), n = report.trials.length, started = report.trials.filter(t => t.outcome.started).length;
     const batch = (report as Partial<EvalReport>).batch;
     let left: TextSegment[];
-    if (state === 'not-started') left = [{ text: `○ 未开始 · ${n} trial`, fg: 'fg.muted' }];
+    if(this.options.stoppingHere?.())left=[{text:`${spinner()} 停止中 · ${this.source.origin?'结束整个 improve 提交批次，剩余项不启动':'等待 VM 和写入者清理'}`,fg:'ac.warn'}];
+    else if (state === 'not-started') left = [{ text: `○ 未开始 · ${n} trial`, fg: 'fg.muted' }];
     else if (state === 'running' && this.runningHere()) left = [{ text: `${spinner()} 运行`, fg: 'ac.brand' }, { text: ` · trial ${started}/${n}${batch?.startedAt ? ` · ${clock(this.now() - Date.parse(batch.startedAt))}` : ''}`, fg: 'fg.body' }];
     else if (state === 'running') left = [{ text: '未结束 · 不在本 TUI 运行', fg: 'ac.warn' }, { text: ` · 已启动 ${started}/${n} trial`, fg: 'fg.muted' }];
     else if (state === 'ended') {

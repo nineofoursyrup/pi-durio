@@ -29,6 +29,7 @@ export class TrialTraceView {
   private failure?: { message: string; code: string };
   private loading: LoadingState;
   private closed = false;
+  private closing?:Promise<void>;
   private mismatches: RequestMismatch[] = [];
   private readonly title: string;
 
@@ -43,10 +44,12 @@ export class TrialTraceView {
   }
   private async open(trial: EvalReport['trials'][number]) {
     try {
-      const copy = await this.loading.track(openRestrictedCopy(this.source, trial));
-      if (!copy) return;
-      if (this.closed) { await copy.close(); return; }
+      // Keep the handle even after LoadingState is cancelled: discarded results
+      // still own a real directory and must be closed before exit settles.
+      const copy = await openRestrictedCopy(this.source, trial);
+      this.loading.complete();
       this.copy = copy;
+      if (this.closed) return;
       const host: TraceHost = {
         writeBlocked: () => TRIAL_READ_ONLY, busy: () => false,
         feedback: text => this.say(text), changed: this.changed,
@@ -60,6 +63,7 @@ export class TrialTraceView {
       };
       this.trace = new TraceView(copy.root, copy.runId, () => false, host, t => this.adjust(t));
     } catch (error) {
+      this.loading.complete();
       const text = clean(String((error as Error)?.message ?? error)).replace(/^Error:\s*/, '');
       const [code, ...rest] = text.split(': ');
       this.failure = { message: rest.join(': ') || '原文不可取得', code: code.split(/\s/)[0] || 'RESTRICTED_RAW_UNAVAILABLE' };
@@ -67,7 +71,7 @@ export class TrialTraceView {
     this.changed();
   }
   /** Esc 离开：丢弃仍在复制的结果，删除副本。 */
-  close() { this.closed = true; this.raw = undefined; this.loading.cancel(); void this.copy?.close(); }
+  close():Promise<void> { this.closed = true; this.raw = undefined; this.loading.cancel(); return this.closing??=this.opened.then(async()=>{await this.copy?.close();this.copy=undefined;}); }
   /** Raw layer Esc returns to the same selected span; only the next Esc closes the copy. */
   back() {
     if (!this.raw) return false;

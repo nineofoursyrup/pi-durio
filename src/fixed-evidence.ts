@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { join, resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Evidence, readObject, type BlobRef, digest } from './evidence.js';
-import { acquireOwner } from './ownership.js';
+import { acquireOwner, type OwnerLease } from './ownership.js';
 import { records, decode, watermark, resolveEvidence } from './history.js';
 import { readObjectRange } from './query.js';
 import { queryUsage } from './usage-query.js';
@@ -33,10 +33,10 @@ async function retainFile(root:string,path:string,expected:BlobRef) {
 }
 export interface FixRequest { id:string; sources:readonly string[]; dependencies?:readonly string[]; purpose:string; }
 /** Fixed facts protect verified content, not just a link. No runtime/session is opened. */
-export async function fixEvidence(root:string,request:FixRequest) {
+export async function fixEvidence(root:string,request:FixRequest,heldOwner?:OwnerLease) {
   if(!request.id.trim()||request.id.length>128||!request.purpose.trim()||!request.sources.length||request.sources.length+(request.dependencies?.length??0)>50)throw Error('FIX_SCOPE_REQUIRED');
   // Existence checked before acquireOwner can create a directory.
-  watermark(root);const owner=await acquireOwner(root,()=>{});let evidence:Evidence|undefined;
+  watermark(root);if(heldOwner&&heldOwner.path!==realpathSync(root))throw Error('FIX_OWNER_ROOT_MISMATCH');const owner=heldOwner??await acquireOwner(root,()=>{});owner.assertHeld();let evidence:Evidence|undefined;
   try {
     const requestIdentity=digest(JSON.stringify(request));
     for(const ref of records(root,{kinds:['evidence.fixed']})){const data=decode(root,ref);if(data.id===request.id){if(data.requestIdentity!==requestIdentity)throw Error('FIX_ID_CONFLICT');const check=verifyFixed(root,ref.id);if(check.state!=='protected')throw Error(`FIXED_CONTENT_${check.state.toUpperCase()}`);return {source:ref.id,...data,repeated:true};}}
@@ -65,7 +65,7 @@ export async function fixEvidence(root:string,request:FixRequest) {
       const fact={id:request.id,requestIdentity,purpose:request.purpose,selected:[...request.sources],declaredDependencies:[...request.dependencies??[]],snapshot,manifest,objects:dependencies.size,bytes:[...dependencies.values()].reduce((n,r)=>n+r.bytes,0),state:'protected'};
       owner.assertHeld();const seq=evidence.append('evidence.fixed',fact);evidence.db.exec('COMMIT');return {source:`e1:${seq}:${digest(JSON.stringify(fact))}`,...fact,repeated:false};
     }catch(error){evidence.db.exec('ROLLBACK');throw error;}
-  } finally {evidence?.close();await owner.release();}
+  } finally {evidence?.close();if(!heldOwner)await owner.release();}
 }
 export function verifyFixed(root:string,id:string) {
   const source=resolveEvidence(root,id);if(source.kind!=='evidence.fixed')throw Error('NOT_FIXED_EVIDENCE');

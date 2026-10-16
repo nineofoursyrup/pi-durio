@@ -1,3 +1,4 @@
+import type {EvalCleanupReceipt} from './eval/cleanup.js';
 import {planEvalAssets} from './improve-eval-assets.js';
 import {readFileSync,realpathSync,existsSync} from 'node:fs';
 import {mkdir} from 'node:fs/promises';
@@ -186,7 +187,8 @@ export function deriveImproveDecision(root:string,reportId:string,selections:{ca
  const limits={deadline,maxChecks:opts.maxChecks??total.checks,maxRequests:total.requests,maxTokens:total.tokens};
  return {id:opts.id,reportId,reportRevision:report.revision,selections:deriveSelections,groups,limits,...(opts.directory?{directory:opts.directory}:{})};
 }
-type SubmitOptions={dataRoot:string;decision:ImproveDecision;fault?:(kind:string)=>void;signal?:AbortSignal};
+export interface ImproveCleanupReceipt {storage:'not-opened'|'closed'|'unknown';owner:'released'|'unknown';workspaces:{root:string;released:boolean}[]}
+type SubmitOptions={dataRoot:string;decision:ImproveDecision;fault?:(kind:string)=>void;signal?:AbortSignal;onEvalCleanup?:(receipt:EvalCleanupReceipt)=>void;onCleanup?:(receipt:ImproveCleanupReceipt)=>void};
 async function workspaceLeases(decision:ImproveDecision,onCompromised:(error:Error)=>void){
  const roots=[...new Set(await Promise.all(decision.selections.filter(s=>['validate-only','execute-declared-scope'].includes(s.mode)).flatMap(s=>[s.target.workspace!,...(s.formal?.activate?[s.formal.activate.workspace]:[]),...(s.formal?.newProcess?[s.formal.newProcess.workspace]:[])]).map(root=>resolveWorkspaceRoot(root))))].sort((a,b)=>a.length-b.length),leases:Awaited<ReturnType<typeof acquireWorkspaceOwner>>[]=[];
  try{for(const root of roots)if(!leases.some(l=>contains(l.root,root)))leases.push(await acquireWorkspaceOwner(root,onCompromised));return leases;}catch(error){for(const lease of leases.reverse())await lease.release();throw error;}
@@ -212,7 +214,7 @@ async function executeGroups(options:SubmitOptions,evidence:Evidence,sourceId:st
    const reserved=groupReservation(group),spent=readImproveDecision(options.dataRoot,d.id).reserved;
    if(spent.checks+reserved.checks>d.limits.maxChecks||spent.requests+reserved.requests>d.limits.maxRequests||spent.tokens+reserved.tokens>d.limits.maxTokens)throw Error('IMPROVE_TOTAL_BUDGET_EXCEEDED');
    record('improve.group-started',{groupId:group.id,reserved,directory:join(d.directory!,group.id)});
-   let result=await validateImproveGroup({evidence,decisionSource:sourceId,decisionId:d.id,group,candidates,defaults,directory:join(d.directory!,group.id),deadline:d.limits.deadline,signal:options.signal??new AbortController().signal,record,guard});
+   let result=await validateImproveGroup({evidence,decisionSource:sourceId,decisionId:d.id,group,candidates,defaults,directory:join(d.directory!,group.id),deadline:d.limits.deadline,signal:options.signal??new AbortController().signal,record,guard,onEvalCleanup:options.onEvalCleanup});
    try{for(const c of candidates)checkImproveBaseline(c.target);}catch(error){result={...result,state:'failed',reason:String(error),effect:'证据不足',conclusion:{...result.conclusion,effect:'证据不足',allChecksPassed:false,allDeclaredBenefitsMet:false}};}
    record('improve.validation',{groupId:group.id,state:result.state,reason:result.reason,result});
    if(result.state!=='completed'){stopped=result.reason??result.state;break;}
@@ -230,7 +232,7 @@ export async function submitImproveDecision(options:SubmitOptions){
  if(prior){if(prior.data.requestDigest!==requestDigest)throw Error('IMPROVE_DECISION_ID_REUSED');return readImproveDecision(dataRoot,decision.id);}
  previewImproveDecision(dataRoot,decision);
  const abort=new AbortController(),signal=options.signal?AbortSignal.any([options.signal,abort.signal]):abort.signal;
- const owner=await acquireOwner(dataRoot,error=>abort.abort(error));let evidence:Evidence|undefined,leases:Awaited<ReturnType<typeof workspaceLeases>>=[];
+ const owner=await acquireOwner(dataRoot,error=>abort.abort(error));let evidence:Evidence|undefined,leases:Awaited<ReturnType<typeof workspaceLeases>>=[],storage:ImproveCleanupReceipt['storage']='not-opened';
  try{
   owner.assertHeld();const raced=improveFacts(dataRoot).find(f=>f.kind==='improve.decision'&&f.data.id===decision.id);
   if(raced){if(raced.data.requestDigest!==requestDigest)throw Error('IMPROVE_DECISION_ID_REUSED');return readImproveDecision(dataRoot,decision.id);}
@@ -238,12 +240,15 @@ export async function submitImproveDecision(options:SubmitOptions){
   leases=await workspaceLeases(decision,error=>abort.abort(error));
   const report=readImproveReport(dataRoot,decision.reportId).report!;
   const guard=()=>{owner.assertHeld();for(const lease of leases)lease.assertHeld();};
-  evidence=new Evidence(dataRoot,report.runId,kind=>{guard();options.fault?.(kind);});
+  storage='unknown';evidence=new Evidence(dataRoot,report.runId,kind=>{guard();options.fault?.(kind);});
   const executionVersion=currentVersion();
   // The host fixes the selection's budget price when the decision is saved; the request digest stays the user's structured data.
   const sourceId=appendFact(evidence,'improve.decision',{id:decision.id,workspace:report.target.workspace,requestDigest,executionVersion,price:hostPlanPrice('deepseek','deepseek-flash'),decision,decisions:decision.selections.map(s=>{const c=report.candidates.find(c=>c.id===s.candidateId)!;return {candidateId:c.id,mode:s.mode,problem:problemIdentity(c),condition:conditionIdentity(c),conditionFiles:conditionFiles(c)};})});
   await executeGroups({...options,signal},evidence,sourceId,decision.groups,executionVersion,guard,leases.map(l=>l.root));
- }finally{evidence?.close();for(const lease of leases.reverse())await lease.release();await owner.release();}
+ }finally{
+  const cleanup:ImproveCleanupReceipt={storage,owner:'unknown',workspaces:leases.map(l=>({root:l.root,released:false}))};
+  try{try{if(evidence){evidence.close();cleanup.storage='closed';}}finally{for(const lease of leases.reverse()){await lease.release();cleanup.workspaces.find(w=>w.root===lease.root)!.released=true;}await owner.release();cleanup.owner='released';}}finally{options.onCleanup?.(cleanup);}
+ }
  return readImproveDecision(dataRoot,decision.id);
 }
 
