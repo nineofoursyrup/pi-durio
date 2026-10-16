@@ -5,9 +5,10 @@ import { storageGroups, type StorageGroup, type StorageTotals, type GroupedUnit 
 import { readDisplayIndex, type DisplayIndex } from '../display-number.js';
 import { GLYPHS, styledLine, type TextSegment } from './theme.js';
 import { LoadingState, clean, escHint, fixedFrame, hintLine, statusEmpty, statusError, truncateEnd, truncateMiddle, widthTier, type ConfirmConfig } from './view-stack.js';
+import { mayWrite, type WriteAccess } from './write-access.js';
 
 /** What the storage view needs from its host (app.ts): render, the busy state, feedback and the confirm box. */
-export interface StorageHost {
+export interface StorageHost extends WriteAccess {
   changed(): void;
   /** A task of this process is running: preview is not offered (E9). */
   busy(): boolean;
@@ -131,6 +132,7 @@ export class StorageView {
 
   /** Enter: the chosen rows, or the row under the cursor when none is chosen. */
   private async preview() {
+    if (!mayWrite(this.host)) return;
     const groups = this.chosen.size ? this.groups.filter(group => this.chosen.has(group.key)) : this.groups.slice(this.cursor, this.cursor + 1);
     if (!groups.length) return;
     if (this.host.busy()) { this.host.feedback('有任务运行中，结束后再清理'); return; }
@@ -150,7 +152,7 @@ export class StorageView {
       this.error = { message: '清理预览失败', code, action: 'Enter 重新预览' };
       return;
     }
-    if (!previews) return;
+    if (!previews || !mayWrite(this.host)) return;
     this.error = undefined;
     const ready = previews;
     this.host.confirm(this.previewBox(groups, ready.map(p => p.plan)), () => this.commit(ready));
@@ -184,6 +186,7 @@ export class StorageView {
   }
 
   private async commit(previews: Preview[]) {
+    if (!mayWrite(this.host)) return;
     const pending = previews.filter(p => p.plan.units.length), count = pending.reduce((n, p) => n + p.plan.units.length, 0);
     const outcome = await this.run('删除', `${count} 个单元`, async () => {
       const results = new Map<string, UnitResult>();

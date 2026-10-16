@@ -10,6 +10,7 @@ import { readDisplayIndex, type DisplayIndex } from '../display-number.js';
 import { formatCostTotals, requestCostView } from '../cost-estimate.js';
 import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, resetSgr, type TextSegment, type TokenName } from './theme.js';
 import { clean, hintLine, statusEmpty, truncateEnd, truncateMiddle, type ConfirmConfig } from './view-stack.js';
+import { mayWrite, type WriteAccess } from './write-access.js';
 
 /** 秒级耗时：0.04s、8.7s、1m02s、3h12m。 */
 export function formatDuration(ms: number) {
@@ -41,7 +42,7 @@ function line(segments: TextSegment[], width: number): string {
 }
 
 /** 列表层的 Enter 与 `p` 需要宿主（app.ts）提供的；不传时这两个键不起作用。 */
-export interface TraceHost {
+export interface TraceHost extends WriteAccess {
   /** 本进程有任务运行（持有写入者锁）。 */
   busy(): boolean;
   feedback(text: string): void;
@@ -125,6 +126,7 @@ export class TraceView {
   }
   /** 列表层 `p`：以所选 span 的记录为来源固定为证据（依赖闭包沿用 fixEvidence，覆盖整个 run）。 */
   private pin(host: TraceHost) {
+    if (!mayWrite(host)) return;
     const span = this.selectedSpan;
     if (!span) { host.feedback('选中一个 span 后按 p 固定为证据'); return; }
     if (this.fixedOf(span)) { host.feedback('已固定为证据 · 不重复固定'); return; }
@@ -136,6 +138,7 @@ export class TraceView {
       body: [`来源 ${this.spanName(span)} 的 ${sources.length} 条记录`, `用途 ${purpose}`, 'id 自动生成 · 自定义用途用 CLI pi-durio fix'],
       fixed: [`范围：整个 run ${this.runLabel} 截至此刻的全部原文与执行版本安装文件（依赖闭包）`, '写入一条固定记录 · 不调用模型 · 固定的内容不会被存储清理删除，解除用 pi-durio storage unfix'],
     }, async () => {
+      if (!mayWrite(host)) return;
       try {
         const result = await fixEvidence(this.root, { id: `tui-fix-${randomUUID()}`, sources, purpose });
         this.fixations.push({ source: result.source, selected: new Set(result.selected) });

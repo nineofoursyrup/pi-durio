@@ -38,6 +38,7 @@ import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatus 
 import { COMPACT_VERSION_CHANGED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
 import { currentExecutionVersion } from '../execution-version.js';
 import { RecoveryPanel, disabledInputLines, readRecoveryFacts, recoveryPages, type RecoveryAction } from './recovery.js';
+import { mayWrite, SHOW_READ_ONLY, type WriteAccess } from './write-access.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
 type PanelKind='help'|'exit'|'trace-raw'|'queue'|'history'|'eval'|'eval-plan'|'eval-trial'|'storage'|'trace'|'improve'|'improve-selection'|'metrics';
@@ -79,6 +80,8 @@ export async function copyToMacClipboard(text:string):Promise<boolean|string> {
 
 /** Product UI owns presentation/drafts. Execution and decisions use the shared checked host boundary. */
 export class ReadOnlyTui {
+  /** show is an entry-point capability, independent of coding tool authorization or busy state. */
+  private readonly writeAccess:WriteAccess={writeBlocked:()=>this.options.show?SHOW_READ_ONLY:undefined,feedback:text=>{this.notice=text;this.feedback(text);}};
   readonly closed:Promise<TuiExit>;
   private resolveClosed!:(result:TuiExit)=>void;
   private readonly terminal:Terminal;
@@ -453,7 +456,7 @@ export class ReadOnlyTui {
       }catch(error){fail('Eval记录不可读取：',error);}
       break;
     }
-    case 'storage':this.storageView=new StorageView(root,{changed:()=>this.tui.requestRender(),busy:()=>this.phase!=='idle'||!!this.options.show,feedback:text=>this.feedback(text),confirm:(config,confirm)=>this.openConfirm(config,()=>void confirm())});this.openPanel('storage');break;
+    case 'storage':this.storageView=new StorageView(root,{writeBlocked:this.writeAccess.writeBlocked,changed:()=>this.tui.requestRender(),busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,confirm)=>this.openConfirm(config,()=>void confirm())});this.openPanel('storage');break;
     case 'history':{
       const filter:HistoryFilter={};
       if(positional[0]!==undefined){
@@ -817,7 +820,7 @@ export class ReadOnlyTui {
   }
   /** 2a 列表层；Enter 进原文层、`p` 固定为证据经 TraceHost 回到这里。 */
   private traceOf(runId:string) {
-    const host:TraceHost={busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,run)=>this.openConfirm(config,()=>void run()),changed:()=>this.tui.requestRender(),openRaw:span=>this.openRaw(span)};
+    const host:TraceHost={writeBlocked:this.writeAccess.writeBlocked,busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,run)=>this.openConfirm(config,()=>void run()),changed:()=>this.tui.requestRender(),openRaw:span=>this.openRaw(span)};
     return new TraceView(this.options.dataRoot,runId,()=>this.phase==='running'&&this.runId===runId,host);
   }
   /** 在 2a 列表层之上压入原文层（Esc 回到列表层，仍选中该 span）。 */

@@ -19,8 +19,8 @@ const names = (JSON.parse(readFileSync(join(fixtureDir, 'fixture-identity.json')
 /** Cleanup writes management facts and deletes files, so every test works on its own copy of the #66 data root. */
 function copy() { const root = join(realpathSync(mkdtempSync(join(tmpdir(), 'durio-storage-view-'))), 'data'); cpSync(join(fixtureDir, 'data'), root, { recursive: true }); return root; }
 function host(busy = false) {
-  const state = { confirms: [] as { config: ConfirmConfig; confirm: () => Promise<void> }[], feedback: [] as string[] };
-  return { state, host: { changed() {}, busy: () => busy, feedback: (text: string) => { state.feedback.push(text); }, confirm: (config: ConfirmConfig, confirm: () => Promise<void>) => { state.confirms.push({ config, confirm }); } } };
+  const state = { confirms: [] as { config: ConfirmConfig; confirm: () => Promise<void> }[], feedback: [] as string[], blocked: undefined as string | undefined };
+  return { state, host: { writeBlocked: () => state.blocked, changed() {}, busy: () => busy, feedback: (text: string) => { state.feedback.push(text); }, confirm: (config: ConfirmConfig, confirm: () => Promise<void>) => { state.confirms.push({ config, confirm }); } } };
 }
 const plain = (lines: string[]) => lines.map(line => stripTerminalSequences(line).trimEnd());
 /** Moves the cursor to the row of group `key` (rows follow `storageGroups` order) and toggles it. */
@@ -63,6 +63,26 @@ test('#66 fixture: storage groups by session; a branch session is its own row an
   assert.deepEqual(cli(`session:${index.label('session', names['session.coding'])}`).sort(), [`session:${names['session.coding']}`, `session:${names['session.fork-1']}`].sort());
   assert.deepEqual(cli(`session:${index.label('session', names['session.fork-2'])}`), [`session:${names['session.fork-2']}`]);
   assert.deepEqual(cli(`session:${names['session.fork-1']}`), [`session:${names['session.fork-1']}`], 'a full durable id stays one store');
+});
+
+test('storage write access blocks preview records and rechecks a retained cleanup confirmation', async () => {
+  const root = copy(), { state, host: h } = host(), view = new StorageView(root, h);
+  await view.ready;
+  await choose(view, root, 'unowned');
+  state.blocked = '只读查看 · 不能清理';
+  const before = readFileSync(join(root, 'host.sqlite'));
+  await view.handleInput('\r');
+  assert.equal(state.confirms.length, 0);
+  assert.equal(state.feedback.at(-1), state.blocked);
+  assert.deepEqual(readFileSync(join(root, 'host.sqlite')), before);
+  state.blocked = undefined;
+  await view.handleInput('\r');
+  assert.equal(state.confirms.length, 1);
+  const previewed = readFileSync(join(root, 'host.sqlite'));
+  state.blocked = '只读查看 · 不能清理';
+  await state.confirms[0].confirm();
+  assert.equal(state.feedback.at(-1), state.blocked);
+  assert.deepEqual(readFileSync(join(root, 'host.sqlite')), previewed, 'confirm cannot start a cleanup after write access is withdrawn');
 });
 
 test('#66 fixture: a multi-select preview lists every unit with protected dependencies and their reasons', async () => {
