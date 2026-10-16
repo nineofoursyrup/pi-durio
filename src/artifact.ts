@@ -26,16 +26,15 @@ function installationInventory() {
   return files;
 }
 
-export function captureArtifact(evidence: Evidence, workspace: string) {
-  const root = fileURLToPath(new URL('../../', import.meta.url));
-  const files: { path: string; sha256: string; bytes: number }[] = [];
-  const save = (path: string, label: string) => files.push({ path: label, ...evidence.blob(readFileSync(path)) });
+/** Own build, exact lock and direct dependency manifests, in recording order; `save` captures each file. */
+function collectBuild(save: (path: string, label: string) => void) {
+  const root = artifactRoot;
   save(join(root, 'package.json'), 'package.json');
   save(join(root, 'dist', 'execution', 'package-lock.json'), 'package-lock.json');
   save(join(root, 'dist', 'execution', 'source-build.json'), 'dist/execution/source-build.json');
   const walk = (path: string) => { for (const entry of readdirSync(path, { withFileTypes: true })) { const child = join(path, entry.name); if (entry.isDirectory()) walk(child); else save(child, relative(root, child)); } };
   walk(join(root, 'dist', 'src'));
-  const dependencies = ['@earendil-works/pi-ai', '@earendil-works/pi-durable', '@earendil-works/chord'].map(name => {
+  return ['@earendil-works/pi-ai', '@earendil-works/pi-durable', '@earendil-works/chord'].map(name => {
     let directory = dirname(fileURLToPath(import.meta.resolve(name)));
     while (!existsSync(join(directory, 'package.json'))) directory = dirname(directory);
     const path = join(directory, 'package.json');
@@ -43,6 +42,11 @@ export function captureArtifact(evidence: Evidence, workspace: string) {
     save(path, `dependencies/${name}/package.json`);
     return { name, version: metadata.version };
   });
+}
+
+export function captureArtifact(evidence: Evidence, workspace: string) {
+  const files: { path: string; sha256: string; bytes: number }[] = [];
+  const dependencies = collectBuild((path, label) => files.push({ path: label, ...evidence.blob(readFileSync(path)) }));
   let git: unknown;
   try {
     const command = (args: string[]) => execFileSync('git', ['-C', workspace, '-c', 'core.fsmonitor=false', ...args], { encoding: 'utf8', maxBuffer: 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'], env: { PATH: process.env.PATH, HOME: process.env.HOME, LANG: 'C', GIT_OPTIONAL_LOCKS: '0', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' } });
@@ -63,3 +67,15 @@ export function verifyArtifact(root: string, artifact: ReturnType<typeof capture
   const original = readObject(root, artifact.installation);
   if (!original.equals(Buffer.from(JSON.stringify(installationInventory())))) throw new Error('EXECUTION_INSTALLATION_CHANGED: original dependency content is not available in this installation');
 }
+
+/**
+ * The build identity a new task started now would record (`execution.artifact` id, Node and platform),
+ * computed without writing any object. The installation inventory digest walks every installed production
+ * package (about a second when cold), so it is a separate call.
+ */
+export function currentBuild() {
+  const files: { path: string; sha256: string; bytes: number }[] = [];
+  collectBuild((path, label) => { const bytes = readFileSync(path); files.push({ path: label, sha256: digest(bytes), bytes: bytes.length }); });
+  return { id: digest(JSON.stringify(files)), node: process.version, platform: process.platform, arch: process.arch };
+}
+export function currentInstallation() { return digest(JSON.stringify(installationInventory())); }

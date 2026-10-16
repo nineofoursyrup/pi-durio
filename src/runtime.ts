@@ -446,11 +446,10 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       const closed=(prior.findLast(r=>r.kind==='recovery.closed')?.data as any)?.result??prior.findLast(r=>r.kind==='run.closed')?.data as RunResult|undefined;
       if(!accepted||closed?.status!=='completed'||closed.cleanup!=='confirmed')throw Error('CONTEXT_SOURCE_NOT_COMPLETED');
       if(queueItems(dataRoot).some(i=>i.target.sessionId===accepted.sessionId&&['pending','dispatching','frozen'].includes(i.status)))throw Error('QUEUE_PREDECESSOR_UNRESOLVED');
-      verifyArtifact(dataRoot,prior.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>);
-      const config=prior.find(r=>r.kind==='execution.config')?.data as any;
-      const expected=configuration;
-      if(accepted.workspace!==workspace||Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('CONTEXT_EXECUTION_CONFIGURATION_CHANGED');
-      if(config.providerBoundary)throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
+      // 已完成会话的接续不属于旧 pending（R6、#62 Q1）：执行版本不是条件，新任务按当前版本运行；工作区与授权沿用链尾。
+      const config=prior.find(r=>r.kind==='execution.config')?.data as any,tools=coding?['read','write','edit','bash']:['read'];
+      if(accepted.workspace!==workspace||JSON.stringify([...(accepted.authorization?.tools??[])].sort())!==JSON.stringify([...tools].sort()))throw Error('CONTEXT_EXECUTION_CONFIGURATION_CHANGED: continuation keeps the tail workspace and authorization');
+      if(config?.providerBoundary)throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
       if(inspected?.selectedSession?.pending||prior.some(r=>r.kind==='recovery.ended'))throw Error('CONTEXT_SOURCE_FROZEN');
       const snapshot=prior.findLast(r=>r.kind==='context.snapshot');if(!snapshot)throw Error('CONTEXT_UNAVAILABLE');
       continued={...(snapshot.data as Omit<ContextSnapshot,'receiptSeq'>),receiptSeq:snapshot.seq};readObject(dataRoot,continued.messages);

@@ -141,7 +141,7 @@ test('trace, usage and show CLI output display CNY estimates with price version,
   const usage=JSON.parse(cli(['usage','--run','cny']));
   assert.deepEqual(usage.requestAllocations.map((a:any)=>a.cost.display),trace.items.map((i:any)=>i.cost.display));assert.equal(usage.costEstimate.display,trace.costEstimate.display);assert.equal(usage.costEstimate.notice,'估算 · 非账单');
   assert.match(usage.price.role,/not the displayed amount/);
-  const show=JSON.parse(cli(['show','--run','cny']));assert.equal(show.costEstimate.display,trace.costEstimate.display);assert.equal(show.costEstimate.notice,'估算 · 非账单');
+  const show=JSON.parse(cli(['show','cny','--format','json']));assert.equal(show.costEstimate.display,trace.costEstimate.display);assert.equal(show.costEstimate.notice,'估算 · 非账单');
 });
 
 test('usage cost totals cover exactly the requested runs; totals.estimatedUSD is marked as the original USD estimate',()=>{

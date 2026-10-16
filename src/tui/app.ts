@@ -30,7 +30,9 @@ import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageLine, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
 import { ConfirmDialog, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
-import { TIPS, WelcomeScreen, readWelcomeFacts, welcomeStatus } from './welcome.js';
+import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatus } from './welcome.js';
+import { COMPACT_VERSION_CHANGED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
+import { currentExecutionVersion } from '../execution-version.js';
 
 /** 全屏视图（视图栈条目）的种类。 */
 type PanelKind='help'|'exit'|'detail'|'queue'|'recovery'|'history'|'eval'|'storage'|'trace'|'improve'|'improve-selection'|'metrics';
@@ -45,6 +47,14 @@ export interface TuiOptions {
   coding?:boolean;toolEnvironment?:ToolEnvironmentConfig;runId?:string;
   /** 启动后直接打开该 run 的 2a（`pi-durio show … --trace`）。 */
   trace?:string;
+  /** `pi-durio resume s-…`：指向该会话（会话身份）的链尾，按链尾状态处理（U6）。 */
+  resume?:string;
+  /** `pi-durio resume` 不带号：打开当前工作区的会话列表。 */
+  sessions?:boolean;
+  /** `pi-durio show`：只读查看，不能提交、不取锁、不调度；`session` 时打开会话层，主区为 `run`。 */
+  show?:{run:string;session?:string};
+  /** 工作区取自会话记录且与当前目录不同：头部写明。 */
+  elsewhere?:boolean;
   terminal?:Terminal; draftRoot?:string; copy?:(text:string)=>Promise<boolean|string>;
   /** Only deterministic injected-terminal tests may skip native measurement. */
   widthCalibration?:false;
@@ -141,6 +151,11 @@ export class ReadOnlyTui {
   private usageMemo?:{key:string;scope:'本会话'|'本任务';tokens:number;cost:string};
   /** 1a 欢迎屏：本进程受理第一个任务前显示，之后为 1b 布局（U1）。 */
   private welcome?:WelcomeScreen;
+  /** 下一次空闲 Enter 接续的会话里的一个 run（链尾按会话推导）；improve 分析的结果不改变它（T3）。 */
+  private continueFrom?:string;
+  private continuationMemo?:{key:string;value?:Continuation};
+  /** resume 的链尾正在被其他进程执行：欢迎屏锁探测显示被占用，不能提交。 */
+  private occupied=false;
 
   constructor(private readonly options:TuiOptions) {
     if(options.widthCalibration===false&&!options.terminal)throw Error('WIDTH_CALIBRATION_TEST_TERMINAL_REQUIRED');
@@ -173,7 +188,7 @@ export class ReadOnlyTui {
       // 1a 空闲时第一行是欢迎屏的状态行（#71），否则是 1b 底栏用量。
       return [this.welcome&&this.phase==='idle'&&!this.viewingRecovery?welcomeStatus(this.welcome.facts.model.id,this.contextUsage(),width):usageLine(this.model,this.contextUsage(),usage.scope,usage.tokens,usage.cost,width),feedback!==undefined?hintLine([],width,{feedback}):hintLine(this.sessionHints(),width,{keepLast:'? 帮助'})];
     }};
-    if(!options.runId){
+    if(!options.runId&&!options.show){
       const tip=TIPS[Math.floor(Math.random()*TIPS.length)];
       this.welcome=new WelcomeScreen({coding:!!options.coding,
         read:()=>readWelcomeFacts({workspace:options.workspace,dataRoot:options.dataRoot,coding:!!options.coding,mode:options.mode,toolEnvironment:options.toolEnvironment},id=>this.shown('session',id),tip),
@@ -232,6 +247,9 @@ export class ReadOnlyTui {
     // installed bytes synchronously; a valid terminal reply must not queue behind it.
     if(this.runId){this.pendingRefresh=true;void this.openRecovery(this.runId);}
     else if(this.options.trace)this.openTrace(this.options.trace);
+    else if(this.options.resume)void this.resumeSession(this.options.resume);
+    else if(this.options.show){this.welcome=undefined;this.runId=this.options.show.run;this.pendingRefresh=true;if(this.options.show.session)this.openHistory({session:this.options.show.session});}
+    else if(this.options.sessions)this.openHistory({project:this.options.workspace});
     this.widths?.inspect();
     this.terminal.write('\x1b[?1004h'); // Focus reports invalidate any pending exit confirmation.
     this.timer=setInterval(()=>{if(this.pendingRefresh)this.refresh();else if(this.phase!=='idle')this.tui.requestRender();},SPINNER_INTERVAL_MS);
@@ -273,7 +291,7 @@ export class ReadOnlyTui {
   private headerState():HeaderState {
     const chain=this.runId?this.chainOf(this.runId):undefined,home=homedir(),workspace=this.options.workspace;
     const round=this.runId?this.views.get(this.runId)?.progress.round:undefined;
-    return {workspace:safe(workspace.startsWith(`${home}/`)?`~${workspace.slice(home.length)}`:workspace),readOnly:!this.options.coding,
+    return {workspace:safe(workspace.startsWith(`${home}/`)?`~${workspace.slice(home.length)}`:workspace),readOnly:!this.options.coding||!!this.options.show,elsewhere:this.options.elsewhere,
       session:chain?this.shown('session',chain.id):undefined,run:this.runId?this.shown('run',this.runId):undefined,task:chain?.number,
       ...(this.phase==='running'?{round:round||undefined}:{status:this.runStatus()})};
   }
@@ -356,12 +374,14 @@ export class ReadOnlyTui {
       this.tui.requestRender(); return;
     }
     if(!text.trim())return;
+    if(this.options.show||this.occupied){this.editor.setText(text);this.lastText=text;this.notice=this.options.show?'只读查看 · 不能提交 · 接续用 pi-durio resume s-…':'工作区被其他进程占用 · 不能提交';this.tui.requestRender();return;}
     if(this.historyWindow||this.viewingRecovery){this.editor.setText(text);this.lastText=text;this.notice='只读历史/恢复视图不能提交；/bottom 返回活动会话，恢复限制仍需显式处置';this.tui.requestRender();return;}
     if(this.phase==='running') {this.enqueue(text,followUp?'follow-up':'steer');return;}
     if(this.phase!=='idle') {this.editor.setText(text);this.lastText=text;this.notice='当前正在清理；草稿保留，未受理';this.tui.requestRender();return;}
     if(followUp){this.editor.setText(text);this.lastText=text;this.notice='当前没有运行任务；文本保留，按普通 Enter 明确提交新任务';this.tui.requestRender();return;}
     if(this.result?.status==='unknown'||this.result?.cleanup==='unknown') {this.editor.setText(text);this.lastText=text;this.notice='旧工作存在未知；只读查看，不能由 TUI 绕过恢复核对';this.tui.requestRender();return;}
-    const contextRunId=this.result?.status==='completed'&&this.result.improve?.runId!==this.result.runId&&this.result.cleanup==='confirmed'?this.result.runId:undefined;
+    // 空闲 Enter 接续链尾（U13）；不能接续时开启新会话，原因已写在前序任务行的位置。
+    const continuation=this.continuation(),contextRunId=continuation?.state==='ready'?continuation.tailRunId:undefined;
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
     if(!contextRunId)this.context=this.prefix();
     this.welcome=undefined;this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.toggled.clear();this.events=[];this.historyWindow=false;this.scroll.scrollToEnd();
@@ -376,6 +396,8 @@ export class ReadOnlyTui {
   private command(parsed:ParsedCommand) {
     const root=this.options.dataRoot,{positional,options,raw}=parsed;
     const fail=(prefix:string,error:unknown)=>{if(error instanceof CommandError)throw error;this.notice=`${prefix}${safe(String(error))}`;this.tui.requestRender();};
+    // show 只读查看：写记录或可能调度的命令不可用（R3）。
+    if(this.options.show&&/^(acceptance|compact|improve$|improve-|follow-up|withdraw|reattach|decide|recover|stop)/.test(parsed.spec.name)){this.notice='只读查看 · 该命令不可用';this.tui.requestRender();return;}
     switch(parsed.path.length?`${parsed.spec.name} ${parsed.path.join(' ')}`:parsed.spec.name){
     case 'help':this.openPanel('help');break;
     case 'exit':this.requestExit();break;
@@ -393,7 +415,7 @@ export class ReadOnlyTui {
       try{this.evalView=new EvalView(root,id);this.openPanel('eval');}catch(error){fail('Eval记录不可读取：',error);}
       break;
     }
-    case 'storage':this.storageView=new StorageView(root,{changed:()=>this.tui.requestRender(),busy:()=>this.phase!=='idle',feedback:text=>this.feedback(text),confirm:(config,confirm)=>this.openConfirm(config,()=>void confirm())});this.openPanel('storage');break;
+    case 'storage':this.storageView=new StorageView(root,{changed:()=>this.tui.requestRender(),busy:()=>this.phase!=='idle'||!!this.options.show,feedback:text=>this.feedback(text),confirm:(config,confirm)=>this.openConfirm(config,()=>void confirm())});this.openPanel('storage');break;
     case 'history':{
       const filter:HistoryFilter={};
       if(positional[0]!==undefined){
@@ -406,7 +428,7 @@ export class ReadOnlyTui {
       if(options.project&&options.project!=='all')filter.project=options.project as string;
       // recovery = 结果未知、需恢复核对的任务。
       if(options.status)filter.status=options.status==='recovery'?'unknown':options.status as string;
-      try{this.historyView=new HistoryView(root,filter);this.openPanel('history');}catch(error){fail('历史查询失败（当前工作未改变）：',error);}
+      this.openHistory(filter);
       break;
     }
     case 'trace':this.openTrace(positional[0]===undefined?undefined:resolveArgument(root,positional[0],['run']).id);break;
@@ -461,8 +483,11 @@ export class ReadOnlyTui {
   private async compact() {
     if(this.historyWindow||this.viewingRecovery){this.notice='只读历史/恢复视图不能压缩；先返回活动会话并完成恢复核对';this.tui.requestRender();return;}
     if(this.phase==='running'){this.enqueue('compact','compact');return;}
-    if(this.phase!=='idle'||this.result?.status!=='completed'||this.result.cleanup!=='confirmed'){this.notice='压缩需要已完成且清理确认的活动会话';this.tui.requestRender();return;}
-    const runId=this.result.runId;this.controller=new AbortController();this.cancellation='exit';this.phase='running';this.notice='正在压缩当前上下文；原文保留，摘要生成与接入分别记录';const self=this;
+    // 空闲手动压缩针对可接续的链尾；链尾执行版本与当前不同时不可用（E8）。
+    const continuation=this.phase==='idle'?this.continuation():undefined;
+    if(continuation?.state!=='ready'){this.notice='压缩需要已完成且清理确认的活动会话';this.tui.requestRender();return;}
+    if(continuation.versionChanged!==false){this.notice=COMPACT_VERSION_CHANGED;this.tui.requestRender();return;}
+    const runId=continuation.tailRunId;this.controller=new AbortController();this.cancellation='exit';this.phase='running';this.notice='正在压缩当前上下文；原文保留，摘要生成与接入分别记录';const self=this;
     this.active=compactContext({dataRoot:this.options.dataRoot,runId,requestId:randomUUID(),authorization:this.authorization(),transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:()=>{this.pendingRefresh=true;}}).then(result=>{
       this.result=result;this.viewingRecovery=result.status!=='completed'||result.cleanup!=='confirmed';this.notice=`上下文压缩 ${result.compaction?.state??result.status}；Ctrl+T 在 trace 中查看源范围、摘要与接入事实；磁盘原文保留`;
     }).catch(error=>{this.notice=`压缩未执行：${safe(String(error))}`;}).finally(()=>this.finished());
@@ -470,6 +495,7 @@ export class ReadOnlyTui {
   }
   private applyResult(result:RunResult) {
     this.result=result;this.sessionId=result.sessionId;this.runId=result.runId;
+    if(result.improve?.runId!==result.runId)this.continueFrom=result.runId;
     this.viewingRecovery=result.status==='unknown'||result.cleanup==='unknown';
     // 终态在状态行与头部；这里只留需要处理的事。
     this.notice=result.controls?'队列已冻结；/queue 查看目标与原因，普通输入不会接入旧项':result.cleanup!=='confirmed'?'清理未知；原工作保留，/recover 核对':'';
@@ -502,6 +528,7 @@ export class ReadOnlyTui {
   }
   private authorization():RecoveryAuthorization {return {workspace:this.options.workspace,mode:this.options.mode,tools:this.options.coding?['read','write','edit','bash']:['read'],toolEnvironment:this.options.toolEnvironment};}
   private async queueDecision(input:string,action:'withdraw'|'reattach') {
+    if(this.options.show){this.notice='只读查看 · 不能撤回或重新接入';this.tui.requestRender();return;}
     let requestId:string;try{requestId=resolveDisplayInput(this.options.dataRoot,'queue-request',input);}catch(error){this.notice=`队列决定未执行：${safe(String(error))}`;this.tui.requestRender();return;}
     this.loadQueue();const item=this.queue.find(item=>item.requestId===requestId);
     if(!item){this.notice='当前窗口没有该请求；/queue 核对 q- 号';return;}
@@ -595,6 +622,10 @@ export class ReadOnlyTui {
     const chain=this.runId?this.chainOf(this.runId):undefined;
     const preceding=chain&&precedingText({session:this.shown('session',chain.id),preceding:chain.number-chain.first,forkedFrom:chain.forkedFrom?{session:this.shown('session',chain.forkedFrom.sessionId),number:chain.forkedFrom.number}:undefined});
     if(preceding){this.displaySources.push(preceding.text);block(width=>plainLines(preceding.text,width,'fg.faint'),()=>this.command(parseCommand(preceding.command)));}
+    // 前序任务行之后：跨执行版本接续的提示，或不能接续的原因（U2、U13）。
+    const continuation=this.phase==='idle'&&!this.viewingRecovery?this.continuation():undefined;
+    const line=continuation?.state==='blocked'?continuation.reason:continuation?.state==='ready'&&continuation.versionChanged?VERSION_CHANGED_HINT:undefined;
+    if(line){this.displaySources.push(line);block(width=>plainLines(line,width,continuation?.state==='blocked'?'ac.warn':'fg.muted'));}
     if(!this.records.length) {
       const text=`在输入区发起一个${this.options.coding?'coding':'只读'}项目请求。\n${this.options.mode==='offline'?'offline-demo：真实 runtime + 固定传输；没有模型推理。':'DeepSeek 凭据从环境读取；没有自动 fallback。'}\nCtrl+J / Shift+Enter / 反斜杠后 Enter 换行。\n忙时 Enter 补充当前任务；Ctrl+X → Enter 后续请求。\n/queue 队列；/recover 恢复；拖选复制。`;
       this.displaySources.push(text);block(width=>plainLines(text,width,'fg.muted'));
@@ -632,6 +663,45 @@ export class ReadOnlyTui {
     const page=readRunRecords(this.options.dataRoot,this.runId,direction==='older'?{before:this.records[0]?.seq,limit:WINDOW,kinds:VISIBLE_KINDS}:{after:this.records.at(-1)?.seq,limit:WINDOW,kinds:VISIBLE_KINDS});
     if(!page.records.length){this.notice='已到记录边界（只读历史）；/bottom 返回活动会话';this.tui.requestRender();return;}
     this.historyWindow=true;this.records=page.records;this.rebuild();this.scroll.scrollTo(0,{disableFollow:true});this.notice='只读历史窗口；/older /newer 翻页，/bottom 跟随最新';
+  }
+  /**
+   * `pi-durio resume`（U6）：按链尾状态打开。待恢复核对时打开恢复面板（没有关闭记录且工作区被占用时
+   * 留在欢迎屏、显示被占用、不能提交）；其余为 1b 空闲布局，可以接续时下一次 Enter 接续链尾，
+   * 不能接续时在前序任务行的位置写原因。不取锁、不调度。
+   */
+  private async resumeSession(id:string) {
+    let continuation:Continuation|null;
+    try{continuation=readContinuation(this.options.dataRoot,id,{workspace:this.options.workspace});}
+    catch(error){this.notice=`会话不可读取：${safe(String(error))}`;this.tui.requestRender();return;}
+    if(!continuation){this.notice='会话没有记录';this.tui.requestRender();return;}
+    if(continuation.state==='recovery'){
+      if(continuation.status==='running'||continuation.status==='accepted'){
+        // 欢迎屏自己也在探测（它显示持有者）；这里单独探测一次，不依赖其先后。
+        const lock=await probeWelcomeLock(this.options.workspace,!!this.options.coding).catch(()=>undefined);
+        if(lock?.state==='held'){this.occupied=true;this.notice=`会话 ${this.shown('session',id)} 正在被其他进程执行 · 不能提交`;this.tui.requestRender();return;}
+      }
+      void this.openRecovery(continuation.tailRunId);return;
+    }
+    this.welcome=undefined;this.runId=continuation.tailRunId;this.continueFrom=continuation.tailRunId;this.pendingRefresh=true;this.refresh();
+  }
+  /** 空闲 Enter 的接续条件（U13）；按刷新与队列变化重算，只读。 */
+  private continuation() {
+    if(!this.continueFrom||this.options.show)return undefined;
+    const key=`${this.continueFrom}:${this.refreshes}:${this.queue.map(item=>item.status).join()}`;
+    if(this.continuationMemo?.key!==key){
+      let value:Continuation|undefined;
+      try{
+        const root=this.options.dataRoot,chains=readSessionChains(root),of=chains.sessionOfRun(this.continueFrom);
+        const current=()=>{try{return currentExecutionVersion({dataRoot:root,workspace:this.options.workspace,coding:!!this.options.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}catch{return null;}};
+        value=(of&&readContinuation(root,of.id,{workspace:this.options.workspace,chains,current}))||undefined;
+      }catch{value=undefined;}
+      this.continuationMemo={key,value};
+    }
+    return this.continuationMemo.value;
+  }
+  private openHistory(filter:HistoryFilter) {
+    try{this.historyView=new HistoryView(this.options.dataRoot,filter);this.openPanel('history');}
+    catch(error){this.notice=`历史查询失败（当前工作未改变）：${safe(String(error))}`;this.tui.requestRender();}
   }
   /** 2a：指定 run，或当前会话正在运行 / 最近一次的 run；尚无 run 时只提示（U7）。 */
   private openTrace(runId=this.runId) {
