@@ -5,7 +5,8 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { stripTerminalSequences, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
 import { Evidence } from '../src/evidence.js';
-import { RunView } from '../src/tui/run-view.js';
+import { RunView, sumUsage } from '../src/tui/run-view.js';
+import { formatCostTotals } from '../src/cost-estimate.js';
 import { readRunRecords } from '../src/query.js';
 import { narrowing, statusParts, toolLines, headerLine, statusLine, type HeaderState } from '../src/tui/session-screen.js';
 import { overrideColorTierForTest } from '../src/tui/theme.js';
@@ -22,6 +23,56 @@ function records() {
   const evidence = new Evidence(root, runId);
   return { root, runId, append: (kind: string, data: unknown) => evidence.append(kind, data), close: () => evidence.db.close() };
 }
+
+test('run usage follows new intents and dispatch outcomes before any response, and reuses unchanged facts', () => {
+  const r = records(), view = new RunView(r.root, r.runId);
+  const intent = (attemptId: string) => r.append('model.intent', { attemptId, durableTaskId: 9, purpose: 'generation', model: { provider: 'deepseek', id: 'deepseek-flash' } });
+  try {
+    assert.equal(formatCostTotals(sumUsage([view.usage()]).totals), '≈ ¥0.00');
+    intent('pending');
+    const pending = view.usage();
+    assert.equal(pending.requests[0]?.state, 'unknown');
+    assert.ok(pending.requests[0].gaps.includes('transport entry not proven'));
+    r.append('model.dispatch', { attemptId: 'pending', transportEntered: true });
+    const dispatched = view.usage();
+    assert.equal(formatCostTotals(sumUsage([dispatched]).totals), '+1 unknown');
+    assert.ok(!dispatched.requests[0].gaps.includes('transport entry not proven'));
+
+    intent('not-admitted');
+    assert.equal(sumUsage([view.usage()]).totals.unknownRequests, 2);
+    r.append('model.dispatch-failed', { attemptId: 'not-admitted', dispatched: false, attemptDispatched: false });
+    const settled = view.usage();
+    assert.equal(settled.requests[1].state, 'not-applicable');
+    assert.equal(formatCostTotals(sumUsage([settled]).totals), '+1 unknown');
+    assert.strictEqual(view.usage(), settled, 'unchanged usage facts reuse the projection');
+    r.append('tool.intent', { attemptId: 'tool-1', durableTaskId: 12, tool: 'read', args: { path: 'README.md' } });
+    assert.strictEqual(view.usage(), settled, 'unrelated tool facts do not trigger a full usage reread');
+  } finally { r.close(); }
+});
+
+test('run usage observes sourced estimate revisions and provider usage details after the response', () => {
+  const r = records(), view = new RunView(r.root, r.runId), attemptId = 'priced';
+  try {
+    r.append('model.intent', { attemptId, durableTaskId: 9, purpose: 'generation', model: { provider: 'deepseek', id: 'deepseek-flash' } });
+    r.append('model.dispatch', { attemptId, transportEntered: true });
+    r.append('model.response', { attemptId, usage: 'reported', completeness: 'complete', message: { usage: { input: 1000, cacheRead: 0, cacheWrite: 0, output: 200 } } });
+    const original = view.usage().requests[0];
+    const estimate = { method: 'explicit-sourced-estimate-v1', requestSource: original.source, usageSources: original.usageSources, currency: 'CNY', price: { source: 'explicit tariff', version: 'explicit-v1', effectiveAt: '2000-01-01T00:00:00Z', provider: 'deepseek', model: 'deepseek-flash' } };
+    r.append('cost.estimate', { ...estimate, id: 'first', amount: 3 });
+    assert.equal(formatCostTotals(sumUsage([view.usage()]).totals), '≈ ¥3.00');
+    r.append('cost.estimate', { ...estimate, id: 'revised', revisionOf: 'first', amount: 2 });
+    const revised = view.usage();
+    assert.equal(formatCostTotals(sumUsage([revised]).totals), '≈ ¥2.00');
+    assert.equal(revised.tokens, 1200, 'price revisions preserve reported token usage');
+
+    r.append('model.provider-event', { attemptId, event: { usage: { prompt_tokens: 1000, completion_tokens: 200 } } });
+    assert.equal(view.usage().requests[0].state, 'partial', 'late provider details can establish incomplete usage');
+    r.append('model.provider-event', { attemptId, event: { usage: { prompt_tokens: 1000, completion_tokens: 200, prompt_cache_hit_tokens: 0 } } });
+    const complete = view.usage();
+    assert.equal(formatCostTotals(sumUsage([complete]).totals), '≈ ¥2.00');
+    assert.strictEqual(view.usage(), complete);
+  } finally { r.close(); }
+});
 
 test('第 M 轮 counts task requests only: a compaction request is not a round, a retry is another round flagged as 重试', async () => {
   const r = records();
