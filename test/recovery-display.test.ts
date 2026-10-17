@@ -59,7 +59,7 @@ async function until(predicate: () => boolean) {
   throw Error('display did not settle');
 }
 
-test('opening and rechecking recovery preserve original files, directories, pending controls and owner paths', async () => {
+test('opening and rechecking recovery preserve original files, directories, pending controls and owner paths', async t => {
   const f = await fixture(), terminal = new TestTerminal();
   const app = new ReadOnlyTui({ ...f, draftRoot: join(f.root, 'drafts'), mode: 'offline', terminal, widthCalibration: false });
   const screen = () => app.screen().map(stripTerminalSequences).join('\n');
@@ -69,10 +69,21 @@ test('opening and rechecking recovery preserve original files, directories, pend
     await until(() => screen().includes('4  结束旧工作'));
     assert.deepEqual(await originalState(f.dataRoot), before, 'even temporary owner-marker creation/deletion changes original directory identity');
     assert.equal(readQueue(f.dataRoot).items[0].status, 'pending', 'display cannot write a frozen control receipt');
-    terminal.input('\r');
+    const originalCopy = fs.copyFile;
+    let entered = false, released!: () => void;
+    const pause = new Promise<void>(resolve => { released = resolve; });
+    const mock = t.mock.method(fs, 'copyFile', async (...args: Parameters<typeof fs.copyFile>) => {
+      if (String(args[0]) === f.path) { entered = true; await pause; }
+      return Reflect.apply(originalCopy, fs, args);
+    }); syncBuiltinESMExports();
+    try {
+      terminal.input('\r');
+      // Observe this inspection's loading state before accepting its returned panel.
+      await until(() => entered && screen().includes('恢复核对中'));
+      released();
+      await until(() => !screen().includes('恢复核对中') && screen().includes('4  结束旧工作'));
+    } finally { released(); mock.mock.restore(); syncBuiltinESMExports(); }
     // The next explicit inspection must also be purely observational.
-    await new Promise(resolve => setTimeout(resolve, 100));
-    await until(() => screen().includes('4  结束旧工作'));
     assert.deepEqual(await originalState(f.dataRoot), before);
     terminal.input('4');terminal.input('\r');
     assert.match(screen(),/╭/);assert.match(screen(),/╰/);
