@@ -33,7 +33,7 @@ node "$PREP/harness/goldens.mjs" --manifest "$PREP/manifest.json" --output "$PRE
 
 生成 37 份带颜色 token / 样式列区间的 UTF-8 字符网格：九屏各有 132×38、80×24、40×12；1b、1e 在 132×38 补 256 色和无色；1e 同时包含六例 oracle、零分母和未知状态。宽字符的 continuation cell 不重复打印字形，列号按公开 `visibleWidth` 与 grapheme 分割；共用 SGR 的 token 会以 `|` 并列。该列宽不是 native CPR。2c 仅对布局比较，示意数字用 `#`，不作性能测量。
 
-输入来自本目录 `fixtures.mjs` 的明确合成事实：只新建小 SQLite/objects fixture；合成时钟固定，不是采集的宿主时间。1a 包含完整输入框、状态及提示行，不沿用旧 33 行 welcome golden；1c 依照当前 `ReadOnlyTui.recoveryPlan` 保留头部/状态并依次收起；1d/1e/2a/2b/2c 使用产品 renderer 和公开 `TuiAltScreen.showOverlay`，几何与当前 `ReadOnlyTui.openPanel/panelBody` 一致（96% 宽、90% 高、居中）。这些是当前产品构帧，不预先修成设计稿。1f 直接调用 `exitSummary`，没有 `bg.base`；网格剩余行仅为原缓冲区空位。
+输入来自本目录 `fixtures.mjs` 的明确合成事实：只新建小 SQLite/objects fixture；合成时钟固定，不是采集的宿主时间。1a 包含完整输入框、状态及提示行，不沿用旧 33 行 welcome golden；1c 依照当前 `ReadOnlyTui.recoveryPlan` 保留头部/状态并依次收起；1d/1e/2a/2b/2c 使用产品 renderer 和 `ReadOnlyTui.openPanel` 共用的 `showFullScreen` compositor，覆盖完整 terminal 的宽高，短内容也填满视图。这些是当前产品构帧；既有 PREP 与其网格保持原件，新候选需生成新输出。1f 直接调用 `exitSummary`，没有 `bg.base`；网格剩余行仅为原缓冲区空位。
 
 `golden-index.json` 分开记录 `generated=GENERATED`、`regression=NOT_RUN|MATCH|DIFFERENT|MISSING`、`userConfirmation.status=NOT_RUN`。一致只证明相同夹具重复渲染，没有用户接受含义。首次请用户逐屏对照设计快照：`docs/specs/pi-durio-redesign-spec.md` 的 U1–U14；设计 HTML 固定 SHA256 为 `3aa504953f46bec54012b380cdbbea6800fb9f4a1818f4b746b920f208eb2dec`。每屏将具体差异修正，或由用户明确接受偏离，并保存用户原话、时间和本份 grid 的 SHA256。不得自动把 `MATCH` 填成确认。
 

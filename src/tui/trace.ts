@@ -8,7 +8,7 @@ import { fixEvidence, verifyFixed } from '../fixed-evidence.js';
 import { TraceReader, RAW_STATE_LABEL, type Trace, type TraceSpan, type TraceLlm, type TraceRaw } from '../trace.js';
 import { readDisplayIndex, type DisplayIndex } from '../display-number.js';
 import { formatCostTotals, requestCostView } from '../cost-estimate.js';
-import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, resetSgr, type TextSegment, type TokenName } from './theme.js';
+import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, type TextSegment, type TokenName } from './theme.js';
 import { clean, hintLine, statusEmpty, truncateEnd, truncateMiddle, type ConfirmConfig } from './view-stack.js';
 import { mayWrite, type WriteAccess } from './write-access.js';
 
@@ -330,7 +330,6 @@ export class TraceView {
       tokens = count === undefined ? right('—', c.tok, 'fg.faint') : count === null ? right('?', c.tok, 'ac.warn') : right(formatTokens(count), c.tok);
     }
     segments.push({ text: ' ' }, right(duration, c.dur), { text: ' ' }, tokens);
-    if (selected && COLOR_TIER === 'none') return `\x1b[7m${styledLine(segments, width).replace(/\x1b\[0m/g, `${resetSgr()}\x1b[7m`)}${resetSgr()}`;
     return styledLine(segments.map(s => ({ ...s, bg: selected ? 'bg.selected' : s.bg })), width, selected ? 'bg.selected' : undefined);
   }
 

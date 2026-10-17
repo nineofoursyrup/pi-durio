@@ -7,7 +7,7 @@ import { stripTerminalSequences, visibleWidth, type Terminal } from '@earendil-w
 import { inspectRecovery, runCodingTask } from '../src/runtime.js';
 import { scriptedTransport } from '../src/offline.js';
 import { ReadOnlyTui } from '../src/tui/app.js';
-import { RecoveryPanel, readRecoveryFacts, recoveryChecks, type RecoveryFacts } from '../src/tui/recovery.js';
+import { RecoveryPanel, DISPOSITIONS, readRecoveryFacts, recoveryChecks, type RecoveryFacts } from '../src/tui/recovery.js';
 import { overrideColorTierForTest } from '../src/tui/theme.js';
 import { captureSnapshot, type SnapshotGrid } from '../src/tui/snapshot.js';
 
@@ -129,4 +129,50 @@ test('the v1 fixture shows a first-version skip as “跳过（首版处置）�
   const panel = new RecoveryPanel(readRecoveryFacts(dataRoot, [report]));
   assert.equal(panel.facts.items.length, 0, 'resolved items are not asked again');
   assert.match(text(panel), /你的决定 +此前 · read README\.md · 跳过（首版处置） · Fixture skip decision for redesign test coverage/);
+});
+
+
+test('40×12 keeps all four dispositions and pages complete checks and selected action text', () => {
+  const panel = new RecoveryPanel(facts({ checks: recoveryChecks(['Error: EXECUTION_VERSION_CHANGED: src/a.js', 'MYSTERY_RECOVERY_CONDITION_WITH_A_LONG_CODE']) }));
+  panel.handleInput('4');
+  const seen = new Set<string>(), checks = new Set<string>(), descriptions = new Set<string>();
+  for (let page = 0; page < 30; page++) {
+    const lines = panel.render(40, 10, 'none').map(plain), shown = lines.join('\n');
+    assert.equal(lines.length,10);
+    assert.ok(lines.every(line=>visibleWidth(line)<=40));
+    for(const kept of [/^工作/m,/^未知 1\/1/m,/^检查/m,/1 {2}重新核对（只读）/,/2 {2}视为已完成/,/3 {2}从中断处继续/,/4 {2}结束旧工作，开新任务/,/Esc 返回查看/])assert.match(shown,kept);
+    assert.match(shown,/n\/p.*\d+\/\d+/,'all remaining checks and selected text have a visible page entry');
+    if(seen.has(shown))break;seen.add(shown);
+    for(const line of lines.filter(line=>/^检查/.test(line)))checks.add(line.replace(/^检查 /,''));
+    for(const line of lines.slice(lines.findIndex(line=>/4 {2}结束旧工作/.test(line))+1,-1))descriptions.add(line);
+    panel.handleInput('n');
+  }
+  const all=[...checks,...descriptions].join('').replace(/\s/g,'');
+  for(const value of ['EXECUTION_VERSION_CHANGED','MYSTERY_RECOVERY_CONDITION_WITH_A_LONG_CODE','执行版本的文件已变化','授权仍适用','写入者锁可取得',DISPOSITIONS[3].text])assert.ok(all.includes(value.replace(/\s/g,'')),value);
+  const last=panel.render(40,10,'none').map(plain).join('\n');panel.handleInput('p');
+  assert.notEqual(panel.render(40,10,'none').map(plain).join('\n'),last,'previous page works without changing the disposition');
+  assert.equal(panel.cursor,3);assert.deepEqual(panel.handleInput('\r'),{type:'end'});
+});
+
+
+test('40×12 long completed notes keep the caret visible and use PgUp/PgDn without consuming note letters',()=>{
+  const panel=new RecoveryPanel(facts({status:'needs-decision',options:['inspect','continue','end'],checks:recoveryChecks([])}));
+  panel.handleInput('2');panel.handleInput('\r');
+  const note='独立确认说明。'.repeat(20)+'最后确认';panel.handleInput(note);
+  const render=()=>panel.render(40,10,'none').map(plain),shown=()=>render().join('\n');
+  assert.match(shown(),/最后确认▏/,'typing follows the page containing the caret');
+  assert.match(shown(),/PgUp\/Dn/);assert.doesNotMatch(shown(),/n\/p 详情/);
+  assert.match(shown(),/Esc 取消说明/);
+  const tail=shown();panel.handleInput('\x1b[5~');assert.notEqual(shown(),tail,'PageUp moves inside the note');
+  for(let i=0;i<30;i++)panel.handleInput('\x1b[5~');
+  const first=shown();assert.match(first,/说明（可选）/);
+  const descriptions:string[]=[];
+  for(let page=0;page<30;page++){
+    const lines=render(),start=lines.findIndex(line=>/2 {2}视为已完成/.test(line))+1,end=lines.findIndex(line=>/3 {2}从中断处继续/.test(line));
+    for(const line of lines.slice(start,end))descriptions.push(line);
+    const before=shown();panel.handleInput('\x1b[6~');if(shown()===before)break;
+  }
+  assert.ok(descriptions.join('').replace(/\s/g,'').includes(note));
+  panel.handleInput('n');panel.handleInput('p');assert.equal(panel.note,note+'np');assert.match(shown(),/最后确认np▏/);
+  const action=panel.handleInput('\r');assert.equal(action.type,'summary');if(action.type==='summary')assert.equal(action.resolutions[0].reason,note+'np');
 });

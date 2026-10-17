@@ -16,7 +16,7 @@ import { realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Container, Editor, MouseRegion, ProcessTerminal, ScrollView, Text, TuiAltScreen, VStack, matchesKey, isKeyRelease, isKeyRepeat, stripTerminalSequences, truncateToWidth, wrapTextWithAnsi, type Component, type Terminal } from '@earendil-works/pi-tui';
-import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, decideQueue, inspectRecovery, checkRecovery, recoverRun, settleRecoveryOwners, estimateTaskPrefix, type ContextUsage, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
+import { runReadTask, runCodingTask, analyzeImprove, compactContext, TaskControl, decideQueue, inspectRecoveryForDisplay, recoverRun, settleRecoveryOwners, estimateTaskPrefix, type ContextUsage, type CodingTaskOptions, type RunResult, type ToolEnvironmentConfig, type RecoveryReport, type RecoveryDecision, type RecoveryAuthorization, type QueueDecision } from '../runtime.js';
 import { readObject, type QueueItemFact } from '../evidence.js';
 import { calculateContextTokens } from '@earendil-works/pi-ai/utils/estimate';
 import { readRunRecords, readObjectRange, type RecordReference } from '../query.js';
@@ -39,6 +39,7 @@ import { TraceRawView, outputItem } from './trace-raw.js';
 import type { TraceSpan } from '../trace.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
+import { showFullScreen } from './fullscreen.js';
 import { readDisplayIndex, resolveDisplayInput, type DisplayIndex, type DisplayKind } from '../display-number.js';
 import { readSessionChains } from '../session-chain.js';
 import { formatCostTotals } from '../cost-estimate.js';
@@ -145,6 +146,9 @@ export class ReadOnlyTui {
   private recoveryPanel?:RecoveryPanel;
   private recoveryOpen=false;
   private recoveryChecking=false;
+  private recoveryGeneration=0;
+  private recoveryLoading?:LoadingState;
+  private recoveryAbort?:AbortController;
   private phase:'idle'|'running'|'stopping'|'exiting'='idle';
   /** 状态反馈：与即时反馈一样替换会话屏底部键位提示行，下一次按键后恢复（U12）。 */
   private notice='';
@@ -251,7 +255,7 @@ export class ReadOnlyTui {
       const feedback=this.hintFeedback??(this.notice||undefined);
       return [feedback!==undefined?hintLine([],width,{feedback}):hintLine(this.sessionHints(),width,{keepLast:'? 帮助'})];
     }};
-    const recoveryPanel:Component={invalidate(){},render:width=>{const lines=this.recoveryPanel?.render(width,this.recoveryPlan(width).panel)??[];this.widths?.inspect(lines);return lines;}};
+    const recoveryPanel:Component={invalidate(){},render:width=>{const lines=this.recoveryLoading?.isShowing?[this.recoveryLoading.renderLine(width),hintLine([],width,{esc:'Esc 返回查看'})]:this.recoveryPanel?.render(width,this.recoveryPlan(width).panel)??[];this.widths?.inspect(lines);return lines;}};
     const disabledInput:Component={invalidate(){},render:width=>disabledInputLines(this.editor.getExpandedText(),width)};
     const queue:Component={invalidate(){},render:width=>this.queueStrip.render(this.sessionQueue(),width,this.terminal.rows),handleMouse:event=>{
       if(event.type==='click'){const id=this.queueStrip.hit(event.x,event.y);if(id){void this.queueDecision(id,'withdraw');return {handled:true};}}
@@ -274,7 +278,7 @@ export class ReadOnlyTui {
     // 1c 时：头部 → 主区 → 恢复面板 → 状态行 → 已禁用的输入框 → 底栏；高度不够时按 recoveryPlan 依次收起。
     const layout=new VStack([{component:header,basis:1,visible:()=>!this.welcome},...welcome,
       {component:this.scroll,basis:0,grow:1,minSize:1,visible:view=>!this.welcome&&this.recoveryPlan(view.width).main},
-      {component:recoveryPanel,basis:'auto',visible:()=>!this.welcome&&this.viewingRecovery&&this.recoveryOpen&&!!this.recoveryPanel},
+      {component:recoveryPanel,basis:'auto',visible:()=>!this.welcome&&this.viewingRecovery&&(!!this.recoveryLoading?.isShowing||this.recoveryOpen&&!!this.recoveryPanel)},
       {component:statusRegion,basis:1,visible:()=>!this.welcome},
       {component:queue,basis:'auto',visible:()=>!this.welcome&&!this.viewingRecovery&&this.queueEntries.length>0},
       {component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6,visible:()=>!this.viewingRecovery},
@@ -333,12 +337,12 @@ export class ReadOnlyTui {
     // Route owner detail pages after the width gate, before pi-tui consumes page keys for its primary transcript.
     const gatedStart=this.terminal.start.bind(this.terminal);
     this.terminal.start=(input,resize)=>gatedStart(data=>{
-      if(this.phase==='idle'&&this.viewingRecovery&&this.recoveryOpen&&this.recoveryPanel?.ownerStage&&!this.dialog&&!this.panel&&(matchesKey(data,'pageUp')||matchesKey(data,'pageDown'))&&this.input(data)?.consume)return;
+      if(this.phase==='idle'&&this.viewingRecovery&&this.recoveryOpen&&this.recoveryPanel?.pageable&&!this.dialog&&!this.panel&&(matchesKey(data,'pageUp')||matchesKey(data,'pageDown'))&&this.input(data)?.consume)return;
       input(data);
     },resize);
     this.tui.start();
-    // Claim the query hold before the first calibration can start. Recovery verifies
-    // installed bytes synchronously; a valid terminal reply must not queue behind it.
+    // Display snapshots are asynchronous. Their synchronous execution-material read
+    // claims a query hold only after any in-flight terminal measurement has settled.
     if(this.runId){this.pendingRefresh=true;void this.openRecovery(this.runId);}
     else if(this.options.trace)this.openTrace(this.options.trace);
     else if(this.options.resume)void this.resumeSession(this.options.resume);
@@ -915,32 +919,42 @@ export class ReadOnlyTui {
     if(this.phase!=='idle'){const running=this.control.target()?.runId??this.runId;this.notice=`正在执行 ${running?this.shown('run',running):'受理中'}；先停止或退出后核对`;this.tui.requestRender();return;}
     if(this.recoveryChecking)return;
     this.welcome=undefined;this.viewingRecovery=true;this.runId=runId;this.recoveryChecking=true;
+    const generation=++this.recoveryGeneration,controller=new AbortController();this.recoveryAbort=controller;
+    const current=()=>generation===this.recoveryGeneration&&!this.stopped&&!this.exiting;
+    const loading=new LoadingState('恢复核对',this.shown('run',runId),()=>{if(current())this.tui.requestRender();});this.recoveryLoading=loading;
     const dataRoot=this.options.dataRoot,authorization=this.authorization();
-    const load=async()=>{
-      this.beginCleanupAttempt();
-      const first=await checkRecovery({dataRoot,runId,authorization});
-      const pages=await recoveryPages(first,offset=>inspectRecovery({dataRoot,runId,authorization,page:{offset,snapshotId:first.snapshotId}}));
-      this.loadQueue();
-      return {first,facts:readRecoveryFacts(dataRoot,pages,{round:this.view(runId).updateProgress().round,task:this.chainOf(runId)?.number,queue:this.queue})};
-    };
+    const inspect=(page?:{offset:number;snapshotId:string})=>inspectRecoveryForDisplay({dataRoot,runId,authorization,page,signal:controller.signal,beforeExecutionRead:this.widths?()=>this.widths!.holdQueries():undefined});
     try {
-      const {first,facts}=await (this.widths?this.widths.withoutQueries(load):load());
-      if(this.stopped||this.exiting)return;
+      const first=await inspect();
+      if(!current())return;
+      const pages=await recoveryPages(first,offset=>inspect({offset,snapshotId:first.snapshotId}));
+      if(!current())return;
+      this.loadQueue();
+      const facts=readRecoveryFacts(dataRoot,pages,{round:this.view(runId).updateProgress().round,task:this.chainOf(runId)?.number,queue:this.queue});
+      loading.complete();this.recoveryLoading=undefined;this.recoveryAbort=undefined;this.recoveryChecking=false;
       this.recovery=first;this.pendingRefresh=true;this.refresh();
       if(first.status==='completed'||first.status==='ended'){this.viewingRecovery=false;this.recoveryPanel=undefined;this.recoveryOpen=false;this.tui.requestRender();return;}
       this.closeViews();this.recoveryPanel=new RecoveryPanel(facts);this.recoveryOpen=true;
       // 0 项未知（如退出时中断、清理已确认）：直接给出“继续旧工作”确认。
       if(this.recoveryPanel.zeroUnknown)this.recoveryAction({type:'continue'});
     }
-    catch(error){this.notice=`恢复核对受阻：${safe(String(error))}`;}
-    finally{this.recoveryChecking=false;this.tui.requestRender();}
+    catch(error){if(current())this.notice=`恢复核对受阻：${safe(String(error))}`;}
+    finally{loading.complete();if(current()){this.recoveryChecking=false;this.recoveryLoading=undefined;this.recoveryAbort=undefined;this.tui.requestRender();}}
+  }
+  /** A new view or Esc owns the screen immediately; a superseded read cannot change any UI state. */
+  private cancelRecoveryCheck() {
+    if(!this.recoveryAbort)return;
+    this.recoveryGeneration++;this.recoveryAbort.abort();this.recoveryAbort=undefined;
+    this.recoveryLoading?.cancel();this.recoveryLoading=undefined;this.recoveryChecking=false;this.recoveryOpen=false;
+    this.tui.requestRender();
   }
   /** 恢复期间的按键（U3）：面板打开时交给面板；关闭时输入框禁用，只有 Enter 重开与少数全局键。返回 true 表示已消费。 */
   private recoveryInput(data:string) {
     const global=(['ctrl+c','ctrl+d','ctrl+r','ctrl+t','ctrl+o','ctrl+l'] as const).some(key=>matchesKey(data,key));
     const panel=this.recoveryOpen?this.recoveryPanel:undefined;
+    if(this.recoveryChecking&&matchesKey(data,'escape')){this.cancelRecoveryCheck();return true;}
     // 所有者的完整锁路径在面板内翻页；其他情况下鼠标与翻页留给主区。
-    if(data.startsWith('\x1b[<')||data.startsWith('\x1b[M')||(!panel?.ownerStage&&(matchesKey(data,'pageUp')||matchesKey(data,'pageDown'))))return false;
+    if(data.startsWith('\x1b[<')||data.startsWith('\x1b[M')||(!panel?.pageable&&(matchesKey(data,'pageUp')||matchesKey(data,'pageDown'))))return false;
     if(global&&!(panel?.note!==undefined&&!matchesKey(data,'ctrl+c')&&!matchesKey(data,'ctrl+l')))return false;
     if(data==='?'&&panel?.note===undefined){this.openPanel('help');return true;}
     if(panel){this.recoveryAction(panel.handleInput(data));this.tui.requestRender();return true;}
@@ -948,11 +962,12 @@ export class ReadOnlyTui {
     return true;
   }
   private recoveryAction(action:RecoveryAction) {
+    if(action.type==='close'){this.cancelRecoveryCheck();this.recoveryOpen=false;this.tui.requestRender();return;}
+    if(this.recoveryChecking)return;
     const panel=this.recoveryPanel,report=this.recovery;if(!panel||!report)return;
     const snapshotId=panel.facts.snapshotId,unknown=panel.facts.unknownModelAttempts;
     const cost=['续跑按原授权进行；视为已完成的操作不重做，宿主拦截工具与参数完全相同的新调用',`续跑可能新增模型请求费用${unknown?`；此前 ${unknown} 次模型请求的用量未知，仍记为未知`:''}`,'原 interrupted/unknown 记录不会被改写'];
-    if(action.type==='close'){this.recoveryOpen=false;this.tui.requestRender();}
-    else if(action.type==='recheck')void this.openRecovery(report.runId);
+    if(action.type==='recheck')void this.openRecovery(report.runId);
     else if(action.type==='release-owner'){
       if(!mayWrite(this.writeAccess)||this.recoveryChecking||panel.disabled(1))return;
       const holders=[...new Set((panel.facts.ownerCleanup?.holders??[]).map(holder=>`pid ${holder.pid??'未记录'} · ${holder.host||'主机未记录'} · ${holder.started||'起始时间未记录'}`))];
@@ -997,6 +1012,7 @@ export class ReadOnlyTui {
    * 仍放不下时面板内部收起。头部与状态行始终保留。
    */
   private recoveryPlan(width:number) {
+    if(this.recoveryLoading?.isShowing)return {main:true,input:true,usage:true,hints:true,panel:2};
     if(!this.viewingRecovery||!this.recoveryOpen||!this.recoveryPanel)return {main:true,input:true,usage:true,hints:true,panel:0};
     const rows=this.terminal.rows-2,full=this.recoveryPanel.fullHeight(width);
     if(rows>=full+3+2+1)return {main:true,input:true,usage:true,hints:true,panel:full};
@@ -1230,8 +1246,7 @@ export class ReadOnlyTui {
       if(event.type==='wheel'&&panel.kind==='queue'){this.queueView?.scroll(event.wheelDelta??0);return {handled:true};}
       if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve-home')this.improveHome?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalList?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-plan')this.evalPlan?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-trial')this.evalTrial?.scroll(event.wheelDelta??0);else if(panel.kind==='trace')this.traceView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
     }};
-    const fullscreen=kind==='history'||kind==='queue';
-    const overlay=this.tui.showOverlay(component,{width:fullscreen?'100%':'96%',maxHeight:fullscreen?'100%':'90%',anchor:'center'});this.hidePanel=()=>overlay.hide();this.tui.requestRender();
+    const overlay=kind==='exit'?this.tui.showOverlay(component,{width:'96%',maxHeight:'90%',anchor:'center'}):showFullScreen(this.tui,this.terminal,component);this.hidePanel=()=>overlay.hide();this.tui.requestRender();
   }
   /**
    * 在当前视图之上压入下一层：共用同一个全屏浮层，Esc 回到当前层（closePanel）。
@@ -1249,7 +1264,7 @@ export class ReadOnlyTui {
     if(this.hintFeedback!==undefined&&lines.length)lines[lines.length-1]=hintLine([],width,{feedback:this.hintFeedback,esc:escHint(this.panel?.kind==='metrics'?this.metricsView?.depth??1:this.panel?.kind==='history'?this.historyView?.depth??1:this.viewStack.length)});
     return lines;
   }
-  private overlayHeight(){const root=this.viewStack[0]?.kind;return root==='history'||root==='queue'?this.terminal.rows:Math.max(3,Math.floor(this.terminal.rows*0.9)-1);}
+  private overlayHeight(){return this.viewStack[0]?.kind==='exit'?Math.max(3,Math.floor(this.terminal.rows*0.9)-1):this.terminal.rows;}
   /** 帮助视图：会话屏键位与命令清单（同一张命令表），正文在固定头尾之间滚动。 */
   private helpLines(width:number) {
     const panel=this.panel!;
@@ -1279,14 +1294,14 @@ export class ReadOnlyTui {
   }
   private panelBody(width:number):string[] {
     const panel=this.panel;if(!panel)return[];
-    if(panel.kind==='improve-selection'){const lines=this.improveSelectionView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
-    if(panel.kind==='improve'){const lines=this.improveView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='improve-selection'){const lines=this.improveSelectionView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='improve'){const lines=this.improveView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='improve-home'){const lines=this.improveHome?.render(width,this.overlayHeight(),this.viewStack.length)??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval'){const lines=this.evalList?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval-plan'){const loading=this.evaluation?.preparing&&this.evalPlan&&samePlan(this.evalPlan.source,this.evaluation.source)?this.evaluation.loading:undefined;const lines=loading?.isShowing?fixedFrame([` ◆ eval ${this.evaluation!.source.label}`],[loading.renderLine(width)],[hintLine([],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),0).lines:this.evalPlan?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval-trial'){const lines=this.evalTrial?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
-    if(panel.kind==='storage') {const lines=this.storageView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
-    if(panel.kind==='metrics') {const lines=this.metricsView?.render(width,Math.max(2,Math.floor(this.terminal.rows*0.9)-2))??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='storage') {const lines=this.storageView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='metrics') {const lines=this.metricsView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='history') {const lines=this.historyView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='trace') {const lines=this.traceView?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='trace-raw') {const lines=this.traceRaw?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
@@ -1342,7 +1357,7 @@ export class ReadOnlyTui {
   }
   /** 离开全部视图回到会话屏（开始执行、退出、从菜单换到另一视图）。 */
   private closeViews() {
-    this.closeConfirm();
+    this.cancelRecoveryCheck();this.closeConfirm();
     if(this.viewStack.some(view=>view.kind==='eval-trial'))this.closeTrial();
     this.viewStack.length=0;this.hidePanel?.();this.hidePanel=undefined;this.tui.setFocus(this.editor);
     this.confirmation=undefined;this.tui.requestRender();
@@ -1387,6 +1402,7 @@ export class ReadOnlyTui {
     return this.exiting??=this.finishExit();
   }
   private async finishExit():Promise<TuiExit> {
+    this.cancelRecoveryCheck();
     this.phase='exiting';this.confirmation=undefined;this.notice='退出中；等待 runtime 清理与 storage 关闭';this.tui.requestRender();
     try {this.widths?.beginClose();}catch(error){this.failure=`待处理输入保存失败：${String(error)}`;}
     const evalStopping=this.evaluation||this.improveBatch.running?this.stopEval():undefined;

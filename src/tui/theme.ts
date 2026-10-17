@@ -151,7 +151,7 @@ export interface TextSegment {
 
 /**
  * 构建一行带颜色的文本字符串，按指定档位输出 SGR，并在末尾用 lineBg 底色（或 bg.base）填满 width。
- * 无色档不填底色。
+ * 无色档用 token 的属性替代底色；选中行的反显包含尾部空白。
  */
 export function styledLine(
   segments: TextSegment[],
@@ -160,7 +160,7 @@ export function styledLine(
   tier: ColorTier = COLOR_TIER
 ): string {
   const bg = lineBg ?? 'bg.base';
-  const fillBg = tier !== 'none' ? bgSgr(bg, tier) : '';
+  const fillBg = tier !== 'none' ? bgSgr(bg, tier) : fgSgr(bg, tier);
   let out = resetSgr() + fillBg;
   let col = 0;
 
@@ -172,6 +172,9 @@ export function styledLine(
       else sgr += fillBg; // inherit line bg
       if (seg.fg) sgr += fgSgr(seg.fg, tier);
     } else {
+      // Attributes are segment-local, including an explicit background override.
+      // Reset first so dim/bold/reverse from the previous segment cannot leak.
+      sgr += resetSgr() + fgSgr(seg.bg ?? bg, tier);
       if (seg.fg) sgr += fgSgr(seg.fg, tier);
     }
     if (seg.bold) sgr += boldSgr();
@@ -189,7 +192,7 @@ export function styledLine(
   // Pad remaining width with line background
   const remaining = width - col;
   if (remaining > 0) {
-    out += fillBg + ' '.repeat(remaining);
+    out += (tier === 'none' ? resetSgr() : '') + fillBg + ' '.repeat(remaining);
   }
   out += resetSgr();
   return out;

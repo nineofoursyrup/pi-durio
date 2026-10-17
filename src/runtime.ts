@@ -36,7 +36,7 @@ import { prepareRecovery, recoveryRecords, sessionWasEnded, type RecoveryAuthori
 export { readRun, readObject, readAcceptedTasks, readQueue } from './evidence.js';
 export { TaskControl } from './control.js';
 export type { ControlInput, QueueDecision } from './control.js';
-export { readRecoveryDetail, inspectRecovery, checkRecovery, settleRecoveryOwners } from './recovery.js';
+export { readRecoveryDetail, inspectRecovery, inspectRecoveryForDisplay, checkRecovery, settleRecoveryOwners } from './recovery.js';
 export type { RecoveryOptions, RecoveryDecision, RecoveryReport, RecoveryAuthorization } from './recovery.js';
 
 const CTX = BACKGROUND_CONTEXT;
