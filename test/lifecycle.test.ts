@@ -153,21 +153,57 @@ test('real long command and child finish or cancel before storage closes, retain
     const root = await mkdtemp(join(tmpdir(), `durio-child-${action}-`));
     const workspace = join(root, 'project');
     await mkdir(workspace);
-    await writeFile(join(workspace, 'child.cjs'), `const fs=require('node:fs'); let n=0; fs.writeFileSync('child.pid',String(process.pid)); const t=setInterval(()=>{ fs.appendFileSync('effects.txt','child-'+(++n)+'\\n'); console.log('child-'+n); if(process.argv[2]==='finish' && n===5)clearInterval(t); },30);`);
+    await writeFile(join(workspace, 'child.cjs'), `const fs=require('node:fs'); let n=0; fs.writeFileSync('child.pid',String(process.pid)); const t=setInterval(()=>{ if(process.argv[2]==='timeout' && !fs.existsSync('allow-effects'))return; fs.appendFileSync('effects.txt','child-'+(++n)+'\\n'); console.log('child-'+n); if(process.argv[2]==='finish' && n===5)clearInterval(t); },30);`);
     await writeFile(join(workspace, 'parent.cjs'), `const fs=require('node:fs'); const cp=require('node:child_process'); fs.writeFileSync('parent.pid',String(process.pid)); fs.appendFileSync('starts.txt','start\\n'); const child=cp.spawn(process.execPath,['child.cjs',process.argv[2]],{stdio:['ignore','pipe','pipe']}); child.stdout.pipe(process.stdout); child.stderr.pipe(process.stderr); child.on('close',()=>console.log('parent-finished'));`);
     const controller = new AbortController();
     const transport = scriptedTransport([{ name: 'bash', args: { command: `'${process.execPath}' parent.cjs ${action}`, ...(action === 'timeout' ? { timeout: 0.2 } : {}) } }, { name: 'write', args: { path: 'after.txt', content: 'new work' } }]);
+    const producerSnapshot = () => {
+      const read = (name: string) => {
+        try { return readFileSync(join(workspace, name), 'utf8'); }
+        catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null; throw error; }
+      };
+      return { starts: read('starts.txt'), effects: read('effects.txt'), processes: ['parent.pid', 'child.pid'].map(name => {
+        const pid = read(name);
+        if (pid === null) return { name, pid, state: 'not-observed' };
+        if (!/^[1-9]\d*$/.test(pid)) throw Error(`Invalid fixture PID marker: ${name}`);
+        try { process.kill(Number(pid), 0); return { name, pid, state: 'running' }; }
+        catch (error) { if ((error as NodeJS.ErrnoException).code === 'ESRCH') return { name, pid, state: 'ESRCH' }; throw error; }
+      }) };
+    };
+    const timeoutSnapshots = new Map<string, ReturnType<typeof producerSnapshot>>();
+    let snapshotError: unknown;
     const result = await runCodingTask({ workspace, dataRoot: join(root, 'data'), input: 'Run the controlled child process fixture', mode: 'offline', transport: transport.fetch, signal: controller.signal, cancellation: action === 'stop' ? 'stop' : 'exit',
-      onObservation: event => { if ((action === 'stop' || action === 'exit') && event.kind === 'tool.output') controller.abort(); }
+      onObservation: event => {
+        if ((action === 'stop' || action === 'exit') && event.kind === 'tool.output') controller.abort();
+        if (action === 'timeout' && (event.kind === 'shell.completed' || event.kind === 'lifecycle.storage-closing')) {
+          try { timeoutSnapshots.set(event.kind, producerSnapshot()); } catch (error) { snapshotError = error; }
+        }
+      }
     });
     assert.equal(result.cleanup, 'confirmed', JSON.stringify(result));
     assert.equal(result.status, action === 'stop' ? 'aborted' : action === 'exit' ? 'unknown' : 'completed');
-    assert.equal(await readFile(join(workspace, 'starts.txt'), 'utf8'), 'start\n');
-    const effects = await readFile(join(workspace, 'effects.txt'), 'utf8');
-    await new Promise(resolve => setTimeout(resolve, 120));
-    assert.equal(await readFile(join(workspace, 'effects.txt'), 'utf8'), effects);
-    for (const name of ['child.pid', 'parent.pid']) assert.throws(() => process.kill(Number((readFileSync(join(workspace, name)))), 0), /ESRCH/);
-    if (action === 'finish') assert.equal(effects, 'child-1\nchild-2\nchild-3\nchild-4\nchild-5\n');
+    if (action === 'timeout') {
+      assert.ifError(snapshotError);
+      const completed = timeoutSnapshots.get('shell.completed');
+      assert.ok(completed, 'capture the actual shell completion boundary');
+      // The dispatch deadline may precede any producer marker. Absence is not proof of no dispatch.
+      assert.equal(completed.effects, null, 'timeout producer is gated before its first effect');
+      if (completed.starts !== null) assert.equal(completed.starts, 'start\n');
+      for (const process of completed.processes) if (process.pid !== null) assert.equal(process.state, 'ESRCH', process.name);
+      assert.deepEqual(timeoutSnapshots.get('lifecycle.storage-closing'), completed);
+      assert.deepEqual(producerSnapshot(), completed, 'producer state remains unchanged when the run returns');
+      // Only now release the producer. A surviving child can write on its unchanged 30ms interval.
+      await writeFile(join(workspace, 'allow-effects'), 'released');
+      await new Promise(resolve => setTimeout(resolve, 120));
+      assert.deepEqual(producerSnapshot(), completed, 'no late PID marker or effect after timeout cleanup');
+    } else {
+      assert.equal(await readFile(join(workspace, 'starts.txt'), 'utf8'), 'start\n');
+      const effects = await readFile(join(workspace, 'effects.txt'), 'utf8');
+      await new Promise(resolve => setTimeout(resolve, 120));
+      assert.equal(await readFile(join(workspace, 'effects.txt'), 'utf8'), effects);
+      for (const name of ['child.pid', 'parent.pid']) assert.throws(() => process.kill(Number((readFileSync(join(workspace, name)))), 0), /ESRCH/);
+      if (action === 'finish') assert.equal(effects, 'child-1\nchild-2\nchild-3\nchild-4\nchild-5\n');
+    }
     const page = await readRun(join(root, 'data'), result.runId);
     const shell = page.records.find(r => r.kind === 'shell.completed')!;
     assert.ok(shell.seq < page.records.find(r => r.kind === 'lifecycle.storage-closing')!.seq);
@@ -179,6 +215,8 @@ test('real long command and child finish or cancel before storage closes, retain
     }
     if (action === 'timeout') {
       assert.equal((shell.data as any).acquired.code, 'timeout');
+      assert.equal((shell.data as any).acquired.managedCommand, 'settled');
+      assert.deepEqual(result.executionCleanup, { managedCommands: 'settled', started: 1, settled: 1, externalProcesses: 'unknown' });
       assert.match(JSON.stringify(page.records.filter(r => r.kind === 'tool.error')), /Command timed out/);
     }
   }
