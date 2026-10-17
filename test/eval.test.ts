@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,unlinkSync,readFileSync,mkdirSync,writeFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {mkdtempSync,unlinkSync,readFileSync,mkdirSync,writeFileSync,copyFileSync,symlinkSync} from 'node:fs';
+import {join,dirname} from 'node:path';
 import {tmpdir} from 'node:os';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {spawnSync} from 'node:child_process';
 import {Evidence,digest} from '../src/evidence.js';
 import {fixEvidence} from '../src/fixed-evidence.js';
 import {representativeCases} from '../src/eval/fixtures.js';
@@ -25,6 +27,17 @@ test('fixed eval runtime carries execution source identity but excludes host gra
  for(const [path,content]of Object.entries({'package.json':'{}','dist/execution/package-lock.json':'{"packages":{}}','eval-environment.json':'{}','dist/execution/source-build.json':identity,'dist/src/runtime.js':'runtime','dist/src/eval/guest.js':'guest','dist/src/eval/runner.js':'host-only grader'}))writeFileSync(join(installation,path),content);
  const files=installedRuntimeFiles(installation);assert.ok(files.includes('dist/execution/source-build.json'));assert.ok(!files.includes('dist/src/eval/runner.js'));
  const evidence=new Evidence(join(root,'data'),'fixed-runtime'),fixed=captureFiles(evidence,installation,files);evidence.close();materialize(join(root,'data'),fixed.files,join(root,'guest'));assert.equal(readFileSync(join(root,'guest/dist/execution/source-build.json'),'utf8'),identity);
+});
+
+test('the cropped eval product runtime loads without exposing host eval plans or graders',()=>{
+ const installation=fileURLToPath(new URL('../../',import.meta.url)),guest=mkdtempSync(join(tmpdir(),'durio-eval-runtime-import-')),files=installedRuntimeFiles(installation);
+ assert.deepEqual(files.filter(path=>path.startsWith('dist/src/eval/')).sort(),['dist/src/eval/guest.d.ts','dist/src/eval/guest.js','dist/src/eval/guest.js.map']);
+ // Exercise the real product files selected for eval. Host dependencies serve
+ // only import resolution here; Linux VM acceptance is a separate gate.
+ for(const path of files.filter(path=>!path.startsWith('node_modules/')&&path!=='eval-environment.json')){const target=join(guest,path);mkdirSync(dirname(target),{recursive:true});copyFileSync(join(installation,path),target);}
+ symlinkSync(join(installation,'node_modules'),join(guest,'node_modules'),'dir');
+ const child=spawnSync(process.execPath,['--input-type=module','-e',"const runtime=await import(process.argv[1]);console.log(JSON.stringify([typeof runtime.runCodingTask,typeof runtime.runReadTask]));",pathToFileURL(join(guest,'dist/src/runtime.js')).href],{cwd:guest,encoding:'utf8',timeout:10000});
+ assert.equal(child.status,0,child.stderr||String(child.error));assert.deepEqual(JSON.parse(child.stdout),['function','function']);
 });
 
 test('a started trial without final host duration is unknown time rather than a zero-duration total',async()=>{

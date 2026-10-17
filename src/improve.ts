@@ -9,8 +9,8 @@ import {PersistentBudget} from './provider-boundary.js';
 import {readDisplayIndex,isUserChosenId} from './display-number.js';
 import {readSessionChains} from './session-chain.js';
 import {scopedImproveDecisions,listImproveSuppressions,suppressionMatch,conditionIdentity,readImproveDecision,improveFacts} from './improve-history.js';
-import {validateCandidateChecks,type CandidateCheck} from './improve-check-plan.js';
-export type {CandidateCheck} from './improve-check-plan.js';
+import {validateCandidateChecks,type CandidateCheck} from './improve-check-declaration.js';
+export type {CandidateCheck} from './improve-check-declaration.js';
 import type {ValidationGroup} from './improve-validation.js';
 
 export interface ImproveLimits {maxRequests:number;maxTokens:number;maxRequestTokens:number;maxDurationMs:number;maxOutputTokens:number}
