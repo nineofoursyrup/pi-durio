@@ -29,7 +29,7 @@ import { AcceptanceDialog, AnnotationWriteError, ANNOTATION_RUNNING, annotationT
 import { HistoryView, historyScope, historyProjects, type HistoryTarget } from './history.js';
 import { EvalListView, EvalPlanView, type PlanViewHost } from './eval.js';
 import { TrialTraceView } from './eval-trial.js';
-import { evalBlocked,evalRunConfirmation,evalGradeConfirmation,executeEval,evalStoppedFact,samePlan,type EvalAction } from './eval-operation.js';
+import { evalBlocked,evalRunConfirmation,evalGradeConfirmation,executeEval,evalStoppedFact,readEvalProgress,samePlan,type EvalAction } from './eval-operation.js';
 import type {EvalCleanupReceipt} from '../eval/cleanup.js';
 import {evalReport} from '../eval/runner.js';
 import { ownPlanSource,readPlanReport,planState,listPlanSources,type PlanSource,type EvalReport } from '../eval/overview.js';
@@ -391,7 +391,7 @@ export class ReadOnlyTui {
   }
   private statusParts() {
     if(this.activity?.kind==='improve-execution')this.activity.progress=this.improveBatch.progress();
-    if(this.activity?.kind==='eval'&&this.evaluation)try{const r=evalReport(this.evaluation.source.root,this.evaluation.source.id);this.activity.trial=[r.counts.started,r.counts.planned];}catch{/* Keep last acquired progress. */}
+    if(this.activity?.kind==='eval'&&this.evaluation)try{this.activity.trial=readEvalProgress(this.evaluation.source);}catch{/* Keep last acquired progress. */}
     // improve 分析期间：第 M 轮与计时取分析 run（#59 第 5 节）。
     const run=this.analysis?this.analysis.runId:this.runId,progress=run?this.views.get(run)?.progress:undefined,start=progress?.segmentStart;
     // 计时从当前执行段开始（run.started，恢复后为 recovery.started），不计中断时间（T2）。

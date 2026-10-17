@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtempSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+import fs from 'node:fs';
+import {syncBuiltinESMExports} from 'node:module';
 import {spawnSync} from 'node:child_process';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
@@ -8,7 +10,7 @@ import {Evidence} from '../src/evidence.js';
 import {representativeCases} from '../src/eval/fixtures.js';
 import {type EvalPlan,verifiedImage} from '../src/eval/plan.js';
 import {ownPlanSource,type PlanSource} from '../src/eval/overview.js';
-import {evalBlocked,evalGradeConfirmation,evalRunConfirmation,evalStoppedFact,samePlan} from '../src/tui/eval-operation.js';
+import {evalBlocked,evalGradeConfirmation,evalRunConfirmation,evalStoppedFact,readEvalProgress,samePlan} from '../src/tui/eval-operation.js';
 import {ConfirmDialog} from '../src/tui/view-stack.js';
 import {ReadOnlyTui} from '../src/tui/app.js';
 import {stripTerminalSequences,type Terminal} from '@earendil-works/pi-tui';
@@ -19,7 +21,7 @@ import {EvalCleanupTracker} from '../src/eval/cleanup.js';
 import {exitSummary,tuiExitCode} from '../src/tui/exit-summary.js';
 import {evalFacts} from '../src/eval/store.js';
 import {verifyEvalBeforeStart} from '../src/eval/preflight.js';
-import {runEval} from '../src/eval/runner.js';
+import {evalReport,runEval} from '../src/eval/runner.js';
 
 function fixture(ended=false){
  const base=mkdtempSync(join(tmpdir(),'durio-eval-operation-')),root=join(base,'data'),workspace=join(base,'project');mkdirSync(workspace);
@@ -31,6 +33,56 @@ class TestTerminal implements Terminal {
  columns=132;rows=38;kittyProtocolActive=false;input:(text:string)=>void=()=>{};
  start(input:(text:string)=>void){this.input=input;}stop(){}async drainInput(){}write(){}moveBy(){}hideCursor(){}showCursor(){}clearLine(){}clearFromCursor(){}clearScreen(){}setTitle(){}setProgress(){}setProgramStatus(){}
 }
+
+test('eval status redraws follow durable trial progress without rereading fixed execution payloads',async t=>{
+ const f=fixture(),e=new Evidence(f.root,f.plan.id),payload=e.blob(Buffer.alloc(65536,7));e.append('eval.content',{files:[{path:'runtime-fixture',ref:payload}]});e.close();
+ const planFact=evalFacts(f.root,f.plan.id).find(f=>f.kind==='eval.plan')!;
+ await fixEvidence(f.root,{id:`eval-plan:${f.plan.id}`,sources:[planFact.source],purpose:'fixed progress regression input'});
+ const payloadPath=join(f.root,'objects',payload.sha256),realOpen=fs.openSync,realRead=fs.readFileSync;let payloadReads=0;
+ const opened=t.mock.method(fs,'openSync',(...args:Parameters<typeof fs.openSync>)=>{if(String(args[0])===payloadPath)payloadReads++;return Reflect.apply(realOpen,fs,args);});
+ const read=t.mock.method(fs,'readFileSync',(...args:Parameters<typeof fs.readFileSync>)=>{if(String(args[0])===payloadPath)payloadReads++;return Reflect.apply(realRead,fs,args);});syncBuiltinESMExports();
+ const terminal=new TestTerminal(),app=new ReadOnlyTui({dataRoot:f.root,workspace:f.workspace,mode:'offline',terminal,widthCalibration:false,draftRoot:join(f.base,'drafts')});
+ try{
+  assert.equal(evalReport(f.root,f.plan.id).planAvailability,'protected');assert.ok(payloadReads>0,'the formal report checks the fixed payload');
+  app.start();terminal.input(`/eval run ${f.source.label}`);terminal.input('\r');terminal.input('\r');
+  // Leave the plan panel and cancel preparation before the first async runner turn.
+  // The pending operation still renders its status, without starting a VM.
+  terminal.input('\x1b');payloadReads=0;
+  assert.match(plain(app.screen()),/trial 0\/2/);assert.match(plain(app.screen()),/trial 0\/2/);
+  assert.equal(payloadReads,0,'spinner/status frames must not verify fixed execution content');
+  const updates=new Evidence(f.root,f.plan.id);try{
+   updates.append('eval.trial-started',{trialId:'local-fix'});updates.append('eval.trial-started',{trialId:'local-fix'});updates.append('eval.trial-started',{trialId:'foreign'});
+   assert.match(plain(app.screen()),/trial 1\/2/);
+   updates.append('eval.outcome',{trialId:'local-fix',started:false,status:'budget-stopped',valid:false});
+   assert.match(plain(app.screen()),/trial 0\/2/);
+   updates.append('eval.outcome',{trialId:'multi-file',started:true,status:'completed',valid:true});
+   assert.match(plain(app.screen()),/trial 1\/2/);assert.equal(payloadReads,0,'progress updates must not reopen fixed payloads');
+  }finally{updates.close();}
+ }finally{opened.mock.restore();read.mock.restore();syncBuiltinESMExports();const exit=await app.exit();assert.deepEqual(exit.evalCleanup?.executions,[]);}
+ const before=readFileSync(join(f.root,'host.sqlite'));writeFileSync(payloadPath,Buffer.alloc(payload.bytes,8));
+ assert.match(evalReport(f.root,f.plan.id).planAvailability,/EVAL_PLAN_CONTENT_UNAVAILABLE/);assert.deepEqual(readFileSync(join(f.root,'host.sqlite')),before,'content tampering changes no database facts');
+});
+
+test('eval progress keeps root, plan and acquisition boundaries with report started semantics',()=>{
+ const f=fixture(),otherRoot=fixture(),e=new Evidence(f.root,f.plan.id),planSeq=evalFacts(f.root,f.plan.id).find(f=>f.kind==='eval.plan')!.seq;
+ let startedSeq:number,outcomeSeq:number;
+ try{
+  startedSeq=e.append('eval.trial-started',{trialId:'local-fix'});e.append('eval.trial-started',{trialId:'local-fix'});e.append('eval.trial-started',{trialId:'foreign'});
+  outcomeSeq=e.append('eval.outcome',{trialId:'local-fix',started:false,status:'budget-stopped',valid:false});
+  e.append('eval.outcome',{trialId:'local-fix',started:true,status:'completed',valid:true});e.append('eval.trial-started',{trialId:'local-fix'});
+  e.append('eval.outcome',{trialId:'multi-file',started:true,status:'completed',valid:true});e.append('eval.outcome',{trialId:'foreign',started:true,status:'completed',valid:true});
+ }finally{e.close();}
+ const other=new Evidence(f.root,'other-plan');try{other.append('eval.plan',{...f.plan,id:'other-plan',trials:f.plan.trials.slice(0,1)});other.append('eval.trial-started',{trialId:'local-fix'});}finally{other.close();}
+ assert.throws(()=>readEvalProgress({...f.source,through:planSeq-1}),/EVAL_PLAN_NOT_FOUND/);
+ assert.deepEqual(readEvalProgress({...f.source,through:planSeq}),[0,2]);
+ assert.deepEqual(readEvalProgress({...f.source,through:startedSeq}),[1,2]);
+ assert.deepEqual(readEvalProgress({...f.source,through:outcomeSeq}),[0,2]);
+ assert.deepEqual(readEvalProgress(f.source),[1,2]);
+ const report=evalReport(f.root,f.plan.id);assert.equal(readEvalProgress(f.source)[0],report.counts.started);
+ assert.deepEqual(readEvalProgress(otherRoot.source),[0,2],'the same plan id in another root has independent progress');
+ assert.deepEqual(readEvalProgress({...f.source,id:'other-plan'}),[1,1],'another plan in the same root has independent scope');
+ assert.deepEqual(readEvalProgress({...f.source,through:startedSeq}),[1,2],'reading live or other plans does not advance a pinned source');
+});
 
 test('eval commands only prefill confirmed scope and refuse expired, busy, read-only, owned or child plans',async()=>{
  const f=fixture(),before=readFileSync(join(f.root,'host.sqlite')),run=parseCommand(`/eval run ${f.source.label}`),grade=parseCommand(`/eval grade ${f.source.label} --case local-fix --case multi-file`);
