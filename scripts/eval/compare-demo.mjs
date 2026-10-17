@@ -7,6 +7,12 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 
+/** Both main report stages use the same installed text API as the smoke. */
+export async function saveComparisonReport(product,root,stem,report,save) {
+ const {formatEvalReport}=await import(pathToFileURL(join(product,'dist/src/eval/runner.js')).href);
+ await save(`${stem}.json`,report);await save(`${stem}.txt`,formatEvalReport(report,root));
+}
+
 /** Read-only presentation shared by the acceptance demo and its small API smoke. */
 export async function renderComparisonViews(product,root,id) {
  const {EvalPlanView}=await import(pathToFileURL(join(product,'dist/src/tui/eval.js')).href);
@@ -22,7 +28,7 @@ const [productArg,linuxArg,destinationArg]=process.argv.slice(2);
 if(!productArg||!linuxArg||!destinationArg)throw Error('Usage: node compare-demo.mjs INSTALLED_PRODUCT LINUX_RUNTIME NEW_EVIDENCE_DIRECTORY');
 const product=resolve(productArg),installation=resolve(linuxArg),directory=resolve(destinationArg);
 const fromProduct=path=>import(pathToFileURL(join(product,'dist/src',path)).href);
-const {prepareEval,runEval,regradeEval,evalReport,formatEvalReport}=await fromProduct('eval/runner.js');
+const {prepareEval,runEval,regradeEval,evalReport}=await fromProduct('eval/runner.js');
 const {representativeCases}=await fromProduct('eval/fixtures.js');
 const {readObject}=await fromProduct('evidence.js');
 const {evalFacts}=await fromProduct('eval/store.js');
@@ -42,7 +48,7 @@ const prepared=await prepareEval({dataRoot:root,id,installation,purpose:'Fresh p
   trialBudget:{maxRequests:6,maxTokens:6144},sides:{baseline:{instructions:''},candidate:{instructions:'Keep your final response concise while meeting every task requirement.'}}}});
 await save('displayed-plan.json',prepared);
 const report=await runEval({dataRoot:root,id,directory:join(directory,'execution')});
-await save('report.json',report);await save('report.txt',formatEvalReport(report));
+await saveComparisonReport(product,root,'report',report,save);
 assert.equal(report.improvement,'无明显差异');assert.equal(report.counts.planned,8);assert.equal(report.counts.passed,8);assert.equal(report.comparison.validPairs,4);
 assert.equal(report.cost.requests,28);assert.equal(report.cost.knownTokens,392);assert.equal(report.cost.missing,0);
 assert.deepEqual(report.trials.map(t=>t.side),['baseline','candidate','candidate','baseline','baseline','candidate','candidate','baseline']);
@@ -57,7 +63,7 @@ for(let i=0;i<initialStates.length;i+=2)assert.equal(initialStates[i].initialSha
 // material makes both add trials FAIL; this is not a product regression claim.
 const grader={...cases[0].grader,version:'paired-add-deliberate-oracle-failure-v2',expectedStdout:'[6,1,0]\n'};
 const revised=await regradeEval({dataRoot:root,id,directory:join(directory,'regrade'),revisionId:'deliberate-oracle-revision',graders:{'local-fix':grader}});
-await save('regraded-report.json',revised);await save('regraded-report.txt',formatEvalReport(revised));
+await saveComparisonReport(product,root,'regraded-report',revised,save);
 assert.equal(revised.improvement,'证据不足');assert.equal(revised.cost.requests,28);assert.equal(revised.cost.knownTokens,392);
 assert.deepEqual(revised.trials.map(t=>t.outcome.source),report.trials.map(t=>t.outcome.source));
 assert.equal(revised.trials.filter(t=>t.caseId==='local-fix'&&t.grade.judgment==='FAIL').length,4);
