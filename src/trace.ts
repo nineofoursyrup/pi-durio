@@ -22,7 +22,7 @@ export interface TraceRaw { label: string; sources: string[]; state: TraceRawSta
 export interface TraceLlm {
   /** `llm #N`：run 内 model.intent 的记录顺序，含压缩请求，跨执行段连续。 */
   number: number; attemptId: string; purpose: string;
-  /** 第 M 轮：generation/improve 请求按 durableTaskId 计的逻辑请求序位；压缩请求为 null。 */
+  /** 第 M 轮：generation/improve 请求序位，重试另算一轮、跨执行段连续；压缩请求为 null。 */
   round: number | null;
   /** 重试：同一 durableTaskId 的上一次请求号。 */
   retryOf: number | null;
@@ -233,14 +233,14 @@ function buildTrace(runId: string, facts: readonly Fact[], costs: readonly Model
   const spans: TraceSpan[] = [];
   // ── 模型请求 ──
   const llmOf = new Map<string, { fact: Fact; detail: TraceLlm; end: number; running: boolean; outcome: SpanOutcome; raws: TraceRaw[]; sources: string[] }>();
-  const lastByTask = new Map<number, number>(), rounds = new Map<number, number>();
-  let number = 0;
+  const lastByTask = new Map<number, number>();
+  let number = 0, round = 0;
   for (const fact of facts.filter(f => f.ref.kind === 'model.intent' && segOf.has(f.ref.seq))) {
     const d = fact.data, id: string = d.attemptId; number++;
     const purpose: string = d.purpose ?? related(id, 'model.response')[0]?.data.purpose ?? 'generation';
     const task = purpose === 'compaction' ? null : typeof d.durableTaskId === 'number' ? d.durableTaskId : null;
     const retryOf = task !== null ? lastByTask.get(task) ?? null : null;
-    if (task !== null) { lastByTask.set(task, number); if (!rounds.has(task)) rounds.set(task, rounds.size + 1); }
+    if (task !== null) lastByTask.set(task, number);
     const response = related(id, 'model.response').at(-1), failed = related(id, 'model.dispatch-failed').at(-1), http = related(id, 'model.http').at(-1);
     const message = response?.data.message, stop: string | null = message?.stopReason ?? null;
     const usage = response?.data.usage === 'reported' && message?.usage ? { input: Number(message.usage.input) || 0, cacheRead: Number(message.usage.cacheRead) || 0, output: Number(message.usage.output) || 0 } : null;
@@ -248,7 +248,7 @@ function buildTrace(runId: string, facts: readonly Fact[], costs: readonly Model
     const terminal = response ?? failed;
     const outcome: SpanOutcome = status !== null && status >= 400 || stop === 'error' || message?.errorMessage && stop !== 'aborted' || failed && !response ? 'failed' : stop === 'aborted' ? 'cancelled' : response ? 'ok' : 'unknown';
     const running = !terminal && isLive(fact);
-    const detail: TraceLlm = { number, attemptId: id, purpose, round: task !== null ? rounds.get(task)! : null, retryOf, model: d.model?.id ?? message?.model ?? null, http: status, stopReason: stop, error: message?.errorMessage ?? failed?.data.reason ?? null, usage, tokens: usage ? usage.input + usage.cacheRead + usage.output : null, cost: costs.find(c => c.attemptId === id) ?? null };
+    const detail: TraceLlm = { number, attemptId: id, purpose, round: purpose === 'compaction' ? null : ++round, retryOf, model: d.model?.id ?? message?.model ?? null, http: status, stopReason: stop, error: message?.errorMessage ?? failed?.data.reason ?? null, usage, tokens: usage ? usage.input + usage.cacheRead + usage.output : null, cost: costs.find(c => c.attemptId === id) ?? null };
     const payload = related(id, 'model.payload').map(f => f.ref), responses = [...related(id, 'model.response'), ...related(id, 'model.provider-event')].map(f => f.ref);
     llmOf.set(id, { fact, detail, end: terminal ? at(terminal) : segEnd(fact), running, outcome: running ? 'unknown' : outcome, sources: (byAttempt.get(id) ?? []).map(f => f.ref.id),
       raws: [raw('请求 payload', payload, payload.length ? {} : { state: 'source-not-returned' }), raw('响应', responses, response ? response.data.completeness === 'partial' ? { state: 'partial' } : {} : { state: 'source-not-returned' })] });

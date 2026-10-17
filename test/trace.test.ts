@@ -85,18 +85,18 @@ test('2a golden at 132x38 and the <100 / <60 layouts', () => {
   });
 });
 
-test('bash exit 1: predeclared check vs tool failure; environment names checked for DEEPSEEK_API_KEY; 429 retry chain', async () => {
+test('bash exit 1: predeclared check vs tool failure; environment names checked for DEEPSEEK_API_KEY; 429 retry rounds continue across compaction and recovery', async () => {
   const { dataRoot } = await workspace(), runId = '11111111-2222-4333-8444-555555555555';
   const e = new Evidence(dataRoot, runId);
   e.append('task.accepted', { taskId: 'task-1', runId, sessionId: 'session-1', authorization: { tools: ['read', 'write', 'edit', 'bash'] } });
   e.append('execution.config', { toolEnvironment: { version: 'minimal-build-v1', names: ['HOME', 'PATH'] } });
   e.append('run.started', { taskId: 'task-1' });
   e.append('acceptance.requirements', { taskId: 'task-1', necessary: [{ check: { command: 'npm test', passExitCodes: [0], failExitCodes: [1] } }] });
-  const llm = (id: string, task: number, status: number, ok: boolean) => {
-    e.append('model.intent', { attemptId: id, durableTaskId: task, model: { provider: 'deepseek', id: 'deepseek-flash' }, purpose: 'generation' });
-    e.append('model.dispatch', { attemptId: id, purpose: 'generation', transportEntered: true });
+  const llm = (id: string, task: number | null, status: number, ok: boolean, purpose = 'generation') => {
+    e.append('model.intent', { attemptId: id, durableTaskId: task, model: { provider: 'deepseek', id: 'deepseek-flash' }, purpose });
+    e.append('model.dispatch', { attemptId: id, purpose, transportEntered: true });
     e.append('model.http', { attemptId: id, status });
-    e.append('model.response', { attemptId: id, purpose: 'generation', message: ok ? { stopReason: 'stop', usage: { input: 100, cacheRead: 20, cacheWrite: 0, output: 5 } } : { stopReason: 'error', errorMessage: 'rate limited' }, completeness: ok ? 'complete' : 'partial', usage: ok ? 'reported' : 'unknown' });
+    e.append('model.response', { attemptId: id, purpose, message: ok ? { stopReason: 'stop', usage: { input: 100, cacheRead: 20, cacheWrite: 0, output: 5 } } : { stopReason: 'error', errorMessage: 'rate limited' }, completeness: ok ? 'complete' : 'partial', usage: ok ? 'reported' : 'unknown' });
   };
   const bash = (id: string, task: number, command: string, names: string[]) => {
     e.append('tool.intent', { attemptId: id, durableTaskId: task, callId: id, tool: 'bash', args: { command } });
@@ -110,7 +110,14 @@ test('bash exit 1: predeclared check vs tool failure; environment names checked 
   bash('t2', 13, 'npm run lint', ['DEEPSEEK_API_KEY', 'HOME', 'PATH']);
   llm('m2', 14, 429, false);
   llm('m3', 14, 200, true);
-  e.append('run.closed', { runId, status: 'completed' }); e.close();
+  e.append('compaction.task', { taskId: 16, trigger: 'automatic' });
+  e.append('compaction.source', { taskId: 16, trigger: 'automatic', entries: [] });
+  llm('compact', null, 200, true, 'compaction');
+  e.append('compaction.finished', { taskId: 16, state: 'applied' });
+  e.append('run.closed', { runId, status: 'aborted' });
+  e.append('recovery.started', { decisionId: 'resume-generation' });
+  llm('m4', 18, 200, true);
+  e.append('recovery.closed', { runId, result: { status: 'completed' } }); e.close();
 
   const trace = readTrace(dataRoot, runId);
   const [check, failure] = trace.spans.filter(s => s.kind === 'tool');
@@ -118,7 +125,9 @@ test('bash exit 1: predeclared check vs tool failure; environment names checked 
   assert.equal(failure.outcome, 'failed'); assert.equal(failure.tool!.check, false);
   assert.equal(check.tool!.env!.apiKey, false); assert.equal(failure.tool!.env!.apiKey, true);
   const retry = trace.spans.find(s => s.llm?.number === 3)!;
-  assert.equal(retry.llm!.retryOf, 2); assert.equal(retry.llm!.round, 2);
+  assert.equal(retry.llm!.retryOf, 2); assert.equal(retry.llm!.round, 3);
+  assert.equal(trace.spans.find(s => s.compaction)!.compaction!.requests[0].round, null, 'automatic compaction is not a task round');
+  assert.equal(trace.spans.find(s => s.key === 'm4')!.llm!.round, 4, 'rounds continue after compaction and across recovery');
   assert.equal(trace.counts.retries, 1);
   assert.equal(trace.spans.find(s => s.llm?.number === 2)!.llm!.tokens, null);
   assert.equal(trace.spans.find(s => s.llm?.number === 1)!.llm!.tokens, 125, 'input with cache hits plus output');
@@ -136,11 +145,11 @@ test('bash exit 1: predeclared check vs tool failure; environment names checked 
     text = at('m3');
     assert.match(text, /llm generation #3 ← #2/);
     assert.match(text, /llm generation #2 429 · 重试/);
-    assert.match(text, /llm · #3 {2}generation · 第 2 轮/);
+    assert.match(text, /llm · #3 {2}generation · 第 3 轮/);
     assert.match(text, /同一逻辑请求的上一次 attempt/);
     assert.match(text, /HTTP 429 · error · 未返回 usage/);
     assert.match(text, /unknown — 不记为 0/);
-    assert.match(text, /1 次模型请求|3 次模型请求（重试 1）/);
+    assert.match(text, /5 次模型请求（重试 1）/);
     assert.match(at('t2').split('\n').at(-2)!, /│/);
     view.select('t2');
     assert.match(plain(view.render(80, 24, 'Esc 返回会话')).at(-2)!, /^tool bash · exit 1 · 计入工具失败 · /);

@@ -89,11 +89,11 @@ export class RunView {
     return this.progress;
   }
 
-  /** 本 run 的用量：tok = 输入（含缓存命中）+ 输出；只在出现新的模型响应时重算。 */
+  /** 本 run 的用量：tok = 输入（含缓存命中）+ 输出；费用投影依赖的事实水位变化时重算。 */
   usage(): RunUsage {
-    const through = readRunRecords(this.root, this.runId, { tail: true, limit: 1, kinds: ['model.response'] }).records.at(-1)?.seq ?? 0;
+    const through = readRunRecords(this.root, this.runId, { tail: true, limit: 1, kinds: ['model.intent','model.dispatch','model.dispatch-failed','model.response','model.provider-event','cost.estimate'] }).records.at(-1)?.seq ?? 0;
     if (this.usageCache?.through === through) return this.usageCache.usage;
-    const requests = estimateRunRequests(this.root, this.runId).requests;
+    const requests = estimateRunRequests(this.root, this.runId, { through }).requests;
     const tokens = requests.reduce((sum, request) => {
       const usage = request.usage as Record<string, number> | null;
       return usage ? sum + (usage.input ?? 0) + (usage.cacheRead ?? 0) + (usage.output ?? 0) : sum;
