@@ -7,13 +7,23 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 
+/** Read-only presentation shared by the acceptance demo and its small API smoke. */
+export async function renderComparisonViews(product,root,id) {
+ const {EvalPlanView}=await import(pathToFileURL(join(product,'dist/src/tui/eval.js')).href);
+ const {ownPlanSource}=await import(pathToFileURL(join(product,'dist/src/eval/overview.js')).href);
+ const view=new EvalPlanView(ownPlanSource(root,id),{openTrial(){throw Error('DEMO_RENDER_MUST_REMAIN_READ_ONLY');}}),currentReport=view.report;
+ const current=view.render(180,120).join('\n');
+ assert.equal(view.handleInput('v'),true,'the saved report revision must remain available');
+ return {current,original:view.render(180,120).join('\n'),currentReport,originalReport:view.report};
+}
+
+async function main(){
 const [productArg,linuxArg,destinationArg]=process.argv.slice(2);
 if(!productArg||!linuxArg||!destinationArg)throw Error('Usage: node compare-demo.mjs INSTALLED_PRODUCT LINUX_RUNTIME NEW_EVIDENCE_DIRECTORY');
 const product=resolve(productArg),installation=resolve(linuxArg),directory=resolve(destinationArg);
 const fromProduct=path=>import(pathToFileURL(join(product,'dist/src',path)).href);
 const {prepareEval,runEval,regradeEval,evalReport,formatEvalReport}=await fromProduct('eval/runner.js');
 const {representativeCases}=await fromProduct('eval/fixtures.js');
-const {EvalView}=await fromProduct('tui/eval.js');
 const {readObject}=await fromProduct('evidence.js');
 const {evalFacts}=await fromProduct('eval/store.js');
 await mkdir(directory,{recursive:false});
@@ -27,7 +37,7 @@ const prepared=await prepareEval({dataRoot:root,id,installation,purpose:'Fresh p
  budget:{maxRequests:48,maxTokens:49152,maxRequestTokens:1024,deadline:new Date(Date.now()+20*60*1000).toISOString(),unknownUpperBound:null},
  trialTimeoutMs:90000,gradingTimeoutMs:30000,
  comparison:{kind:'deterministic',repetitions:2,repetitionBasis:'Two fixed pairs exercise both AB and BA execution order; exact controlled script, no stochastic stability claim.',change:'Candidate adds one concise-output instruction to the same installed runtime; the combination is evaluated as fixed.',hypothesis:'An additional concise-output instruction may affect request count; this controlled script is a no-difference execution oracle.',
-  roles:{'local-fix':'objective',regression:'protection'},objective:{metric:'requests',direction:'lower',delta:1,basis:'One complete host provider dispatch is the smallest meaningful request difference for this exact script.'},
+  roles:{'local-fix':'objective',regression:'protection'},objective:{metric:'requests',direction:'lower',delta:1,basis:'New plans use relative d: delta 1 requires a 100% request reduction. The exact controlled script predicts zero difference; old saved absolute-delta plans retain their original units.'},
   protections:[{id:'scope',kind:'hard',check:'scope',cases:['local-fix','regression']},{id:'signed-add',kind:'hard',check:'signed-add',cases:['local-fix']},{id:'empty-mean',kind:'hard',check:'empty-mean',cases:['regression']},{id:'tokens',kind:'soft',metric:'tokens',direction:'lower',tolerance:0,basis:'Exact scripted usage is fixed at 14 tokens per request; zero token increase allowed for this deterministic wiring demonstration.',cases:['local-fix','regression']}],
   trialBudget:{maxRequests:6,maxTokens:6144},sides:{baseline:{instructions:''},candidate:{instructions:'Keep your final response concise while meeting every task requirement.'}}}});
 await save('displayed-plan.json',prepared);
@@ -55,15 +65,20 @@ assert.ok(revised.timing.gradingMs>report.timing.gradingMs);
 const preserved=JSON.parse(readObject(root,revised.gradingRevisions[0].previousReport).toString());assert.equal(preserved.improvement,'无明显差异');
 await save('original-preserved-report.json',preserved);
 const db=join(root,'host.sqlite'),before=hash(await readFile(db));
-const reopened=evalReport(root,id),historical=evalReport(root,id,{asOf:report.asOf}),view=new EvalView(root,id);
+const reopened=evalReport(root,id),historical=evalReport(root,id,{asOf:report.asOf});
 for(const [name,args]of [['installed-report.json',[]],['installed-report.txt',['--format','text']],['installed-original-report.json',['--snapshot',String(report.asOf)]]]){
  const result=spawnSync(process.execPath,[join(product,'dist/src/cli.js'),'eval','report','--data-root',root,'--id',id,...args],{encoding:'utf8',maxBuffer:8*1024*1024});
  await save(name,result.stdout);await save(name+'.stderr',result.stderr);assert.equal(result.status,0);
  if(name.endsWith('.json'))assert.equal(JSON.parse(result.stdout).improvement,name.includes('original')?'无明显差异':'证据不足');
 }
-await save('tui-current.txt',view.render(180,120).join('\n'));view.handleInput('r');await save('tui-original.txt',view.render(180,120).join('\n'));
+const views=await renderComparisonViews(product,root,id);
+await save('tui-current.txt',views.current);await save('tui-original.txt',views.original);
+assert.equal(views.currentReport.improvement,revised.improvement);assert.equal(views.originalReport.improvement,preserved.improvement);
 await save('reopened-report.json',reopened);await save('historical-report.json',historical);
 assert.equal(historical.improvement,'无明显差异');assert.equal(historical.ruleImpact.length,1);assert.equal(hash(await readFile(db)),before);
 await assert.rejects(runEval({dataRoot:root,id,directory:join(directory,'must-not-restart')}),/EVAL_ALREADY_STARTED/);
 const result={kind:'actual fresh restricted installed product with controlled provider; not model inference',product,installation,planId:id,counts:report.counts,conclusion:report.improvement,regression:report.comparison.regression.counts,requests:report.cost.requests,tokens:report.cost.knownTokens,freshness:{runIds:sessions.map(r=>r.runId),sessionIds:sessions.map(r=>r.sessionId),vmIds:vms.map(r=>r.id),allTerminated:true,initialStates,actualOrder:starts.map(f=>f.data.trialId)},regrade:{conclusion:revised.improvement,outcomesUnchanged:true,providerRequestsUnchanged:true,oldConclusion:preserved.improvement,affectedRules:revised.gradingRevisions[0].affectedRules},readonly:{sqliteSha256:before,reopen:true,tui:true,installedCli:true,oldSnapshot:true},automaticRerun:'denied',paidCalls:0};
 await save('verification.json',result);console.log(JSON.stringify(result,null,2));
+
+}
+if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)await main();

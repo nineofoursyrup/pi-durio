@@ -1,3 +1,4 @@
+import {saveDeclaredFixture} from './helpers/improve-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readdirSync,existsSync} from 'node:fs';
@@ -5,7 +6,7 @@ import {mkdtemp,mkdir,writeFile,readFile,realpath} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {Evidence,readObject} from '../src/evidence.js';
-import {captureImproveSources} from '../src/improve-source.js';
+import {captureImproveSources,registerImproveSource} from '../src/improve-source.js';
 import {readImproveReport} from '../src/improve.js';
 import {parseEvalAsset} from '../src/improve-eval-assets.js';
 import {previewImproveDecision,submitImproveDecision,readImproveEvalAssets,regradeImproveAsset} from '../src/improve-decisions.js';
@@ -18,14 +19,16 @@ async function fixture(){
  const directory=await realpath(await mkdtemp(join(tmpdir(),'durio-assets-'))),workspace=join(directory,'project'),assets=join(directory,'assets'),dataRoot=join(directory,'data');await mkdir(workspace);await mkdir(assets);
  const before={schema:1,id:'addition-check',kind:'grader',version:'wrong-v1',value:{...representativeCases[0].grader,version:'wrong-v1',expectedStdout:'[6,1,0]\n'}},after={...before,version:'corrected-v2',value:{...representativeCases[0].grader,version:'corrected-v2'}};
  await writeFile(join(assets,'grader.json'),JSON.stringify(before));
+ registerImproveSource(dataRoot,workspace,{kind:'eval-asset',root:assets,paths:['grader.json']});
  const e=new Evidence(dataRoot,'asset-analysis'),target=captureImproveSources(e,workspace,[{id:'asset',kind:'eval-asset',root:assets,paths:['grader.json']}],'fixture').targets[0];
  const c:any={id:'candidate:asset',revision:'asset-r1',target,objective:'bug',scope:['grader.json'],steps:['Check corrected arithmetic grader on saved output','Write independent version'],activation:{writeback:true,enable:false},dependencies:[],conflicts:[],suggestionOnly:false};
- const report={id:'asset-report',revision:'report-r1',runId:e.runId,target:{workspace},targets:[target],candidates:[c],state:'complete',evidence:[]};e.append('improve.started',{request:{id:report.id},target:report.target});e.append('improve.report',report);e.close();
+ const report={id:'asset-report',revision:'report-r1',runId:e.runId,target:{workspace},targets:[target],candidates:[c],state:'complete',evidence:[]};e.append('improve.started',{request:{id:report.id},target:report.target});e.close();
  const decision:any={id:'asset-execution',reportId:report.id,reportRevision:report.revision,selections:[{candidateId:c.id,candidateRevision:c.revision,target,steps:c.steps,mode:'execute-declared-scope',formal:{writeback:true,activate:null,failureCompensation:'none'}}],directory:join(directory,'validation'),groups:[{id:'asset',candidateIds:[c.id],changes:[{targetId:'asset',path:'grader.json',content:JSON.stringify(after)}],checks:[{kind:'regression',timeoutMs:30000,program:"import assert from'node:assert/strict';import{readFileSync}from'node:fs';const before=JSON.parse(readFileSync('/input/baseline/asset/grader.json')),after=JSON.parse(readFileSync('/input/targets/asset/grader.json'));assert.notEqual(before.version,after.version);assert.equal(after.value.expectedStdout,JSON.stringify([2+3,-2+3,0+0])+'\\n');assert.notEqual(before.value.expectedStdout,after.value.expectedStdout);"}]}],limits:{deadline:new Date(Date.now()+120000).toISOString(),maxChecks:1,maxRequests:0,maxTokens:0}};
- return {directory,workspace,assets,dataRoot,before,after,decision};
+ saveDeclaredFixture(dataRoot,report,decision);
+ return {directory,workspace,assets,dataRoot,before,after,decision,report};
 }
 test('formal eval revisions require a new independent version; cases retain explicit identities',async()=>{
- const f=await fixture(),d=structuredClone(f.decision);d.groups[0].changes[0].content=JSON.stringify({...f.after,version:f.before.version,value:{...f.after.value,version:f.before.version}});assert.throws(()=>previewImproveDecision(f.dataRoot,d),/NEW_VERSION_REQUIRED/);
+ const f=await fixture(),d=structuredClone(f.decision);d.groups[0].changes[0].content=JSON.stringify({...f.after,version:f.before.version,value:{...f.after.value,version:f.before.version}});saveDeclaredFixture(f.dataRoot,f.report,d);assert.throws(()=>previewImproveDecision(f.dataRoot,d),/NEW_VERSION_REQUIRED/);
  const cases=parseEvalAsset(JSON.stringify({schema:1,id:'public-cases',version:'cases-v1',kind:'cases',value:[representativeCases[0]]}));assert.equal(cases.kind,'cases');
  assert.throws(()=>parseEvalAsset(JSON.stringify({...f.after,value:{...f.after.value,version:'unrelated'}})),/VERSION_MISMATCH/);
 });
@@ -34,8 +37,9 @@ test('formal eval revisions require a new independent version; cases retain expl
 test('a formal grader change cannot accompany the evaluated project candidate in another group',async()=>{
  const f=await fixture();await writeFile(join(f.workspace,'math.mjs'),'export const add=(a,b)=>a-b;');
  const e=new Evidence(f.dataRoot,'asset-analysis'),target=captureImproveSources(e,f.workspace,[{id:'project',kind:'project',paths:['math.mjs']}],'fixture').targets[0],report=readImproveReport(f.dataRoot,f.decision.reportId).report!;
- const c:any={...report.candidates[0],id:'candidate:project',target,scope:['math.mjs']};report.candidates.push(c);report.targets.push(target);e.append('improve.report',report);e.close();
+ const c:any={...report.candidates[0],id:'candidate:project',target,scope:['math.mjs']};report.candidates.push(c);report.targets.push(target);e.close();
  f.decision.selections.push({candidateId:c.id,candidateRevision:c.revision,target,steps:c.steps,mode:'validate-only'});f.decision.groups.push({id:'project',candidateIds:[c.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;'}],checks:[{kind:'regression',program:'console.log(5)',timeoutMs:1000}]});f.decision.limits.maxChecks=2;
+ saveDeclaredFixture(f.dataRoot,report,f.decision);
  assert.throws(()=>previewImproveDecision(f.dataRoot,f.decision),/EVAL_ASSET_INDEPENDENT_DECISION_REQUIRED/);
 });
 

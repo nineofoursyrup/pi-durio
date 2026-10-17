@@ -83,6 +83,7 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
  if(!d||!identifier(d.id)||typeof d.reportId!=='string'||!/^[-\w.]{1,128}$/.test(d.reportId)||typeof d.reportRevision!=='string'||!Array.isArray(d.selections)||d.selections.length>5||!Array.isArray(d.groups)||d.groups.length>5||!Object.keys(d).every(k=>['id','reportId','reportRevision','selections','groups','limits','directory'].includes(k)))throw Error('IMPROVE_DECISION_INVALID');
  const l=d.limits;if(!l||!Object.keys(l).every(k=>['deadline','maxChecks','maxRequests','maxTokens'].includes(k))||!Number.isFinite(Date.parse(l.deadline))||!['maxChecks','maxRequests','maxTokens'].every(k=>Number.isSafeInteger((l as any)[k])&&(l as any)[k]>=0)||l.maxChecks>32||l.maxRequests>100)throw Error('IMPROVE_TOTAL_LIMITS_REQUIRED');
  const report=readImproveReport(root,d.reportId).report;if(!report||report.revision!==d.reportRevision)throw Error('IMPROVE_REPORT_REVISION_DRIFT');
+ if(improveReportContract(report)==='legacy')throw Error('IMPROVE_LEGACY_REPORT_READ_ONLY: start a new analysis; only recorded writeback may be rolled back');
  if(new Set(d.selections.map(s=>s.candidateId)).size!==d.selections.length)throw Error('IMPROVE_DUPLICATE_SELECTION');
  const candidates:ImproveCandidate[]=[];
  for(const s of d.selections){
@@ -95,21 +96,11 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
   if(['validate-only','execute-declared-scope'].includes(s.mode)&&(c.suggestionOnly||c.target.state!=='verified'))throw Error('IMPROVE_SUGGESTION_ONLY');
   if(c.target.workspace)checkImproveBaseline(c.target);candidates.push(c);
  }
- // Redesign candidates are decided once, except passed validation -> execute.
- // Legacy headless decisions keep their recorded first-version contract.
- const finalModes:ImproveMode[]=['execute-declared-scope','defer','do-not-suggest'];
- const existingDecisions=improveFacts(root).filter(f=>f.kind==='improve.decision'&&f.data.decision.reportId===d.reportId&&f.data.id!==d.id);
+ // Candidates are decided once, except passed validation -> execute.
  const latest=improveCandidateDecisions(root,d.reportId);
  for(const s of d.selections){
-  const c=candidates.find(c=>c.id===s.candidateId)!,prior=latest.get(s.candidateId);
-  if(improveReportContract(report)!=='legacy') {
-   if(prior&&prior.decisionId!==d.id&&!(prior.canExecute&&s.mode==='execute-declared-scope'))throw Error('IMPROVE_CANDIDATE_ALREADY_DECIDED');
-   continue;
-  }
-  if(!finalModes.includes(s.mode))continue; // validate-only is exploratory; only final modes trigger the check
-  const final=existingDecisions.find(f=>f.data.decision.selections.some((es:any)=>es.candidateId===s.candidateId&&finalModes.includes(es.mode)));
-  if(!final)continue;
-  throw Error('IMPROVE_CANDIDATE_ALREADY_DECIDED');
+  const prior=latest.get(s.candidateId);
+  if(prior&&prior.decisionId!==d.id&&!(prior.canExecute&&s.mode==='execute-declared-scope'))throw Error('IMPROVE_CANDIDATE_ALREADY_DECIDED');
  }
  const active=candidates.filter(c=>['validate-only','execute-declared-scope'].includes(d.selections.find(s=>s.candidateId===c.id)!.mode)),groups=d.groups;
  if(new Set(groups.map(g=>g.id)).size!==groups.length)throw Error('IMPROVE_GROUP_ID_CONFLICT');
@@ -257,6 +248,8 @@ export interface ImproveResume {id:string;resumeId:string;decisionSource:string;
 /** The confirmation and actual resume share these original-authority checks. */
 export function previewImproveResume(dataRoot:string,options:Omit<ImproveResume,'resumeId'>) {
  const state=readImproveDecision(dataRoot,options.id),decision=state.decision as ImproveDecision;
+ const report=readImproveReport(dataRoot,decision.reportId).report;
+ if(report&&improveReportContract(report)==='legacy')throw Error('IMPROVE_LEGACY_REPORT_READ_ONLY: frozen first-version batches cannot continue');
  if(state.sourceId!==options.decisionSource||state.state!=='frozen'||state.groups.some((g:any)=>g.state==='unknown'||['unknown','frozen'].includes(g.formal?.state))||state.executionVersion!==currentVersion())throw Error('IMPROVE_RESUME_PRECONDITIONS_CHANGED');
  const groups=decision.groups.filter(g=>options.groupIds.includes(g.id));
  if(!groups.length||groups.length!==options.groupIds.length||!isDeepStrictEqual(groups.map(g=>g.id),options.groupIds)||groups.some(g=>state.groups.find((item:any)=>item.id===g.id)?.state!=='not-run'))throw Error('IMPROVE_RESUME_ONLY_INDEPENDENT_NOT_RUN');

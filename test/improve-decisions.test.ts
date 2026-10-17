@@ -1,10 +1,11 @@
+import {saveDeclaredFixture} from './helpers/improve-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {Evidence,digest,readObject} from '../src/evidence.js';
-import {captureImproveSources} from '../src/improve-source.js';
+import {captureImproveSources,registerImproveSource} from '../src/improve-source.js';
 import {submitImproveDecision,readImproveDecision,previewImproveDecision,resumeImproveDecision,suppressionMatch,listImproveSuppressions,restoreImproveSuggestion,decisionDigest,type ImproveMode,type ImproveDecision} from '../src/improve-decisions.js';
 import {hostPlanPrice} from '../src/cost-estimate.js';
 import {scopedImproveDecisions} from '../src/improve-history.js';
@@ -17,8 +18,8 @@ async function fixture(){
  const e=new Evidence(dataRoot,'analysis-1');
  const target={workspace,sessionId:'session-1',taskId:'task-1',runId:'coding-1'};
  const sources=captureImproveSources(e,workspace,[{id:'project',kind:'project',paths:['math.mjs']}],'test-version');
- const candidate={id:'candidate:first',revision:'candidate-rev-1',display:'R1',title:'Correct addition',problem:'Subtraction used for addition',problemKey:'math.add.operator',conditionKey:'initial',objective:'bug',target:sources.targets[0],facts:[],hypotheses:[],successCounterexamples:[],gaps:[],mechanismsReviewed:['math.mjs'],steps:['Replace subtraction with addition'],scope:['math.mjs'],validation:{method:'regression',checks:['Positive and signed addition'],budget:'one restricted check',protections:['No project writes']},risks:['Numeric inputs only'],rollback:'Preserved baseline',activation:{writeback:true,enable:false,conditions:['regression pass'],timing:'new task'},dependencies:[],conflicts:[],suggestionOnly:false};
- const report={id:'report-1',revision:'report-rev-1',runId:e.runId,target,candidates:[candidate],selected:[],targets:sources.targets,state:'complete',evidence:[]};
+ const candidate={id:'candidate:first',revision:'candidate-rev-1',display:'R1',title:'Correct addition',problem:'Subtraction used for addition',problemKey:'math.add.operator',conditionKey:'initial',objective:'bug',target:sources.targets[0],facts:[],hypotheses:[],successCounterexamples:[],gaps:[],mechanismsReviewed:['math.mjs'],steps:['Replace subtraction with addition'],scope:['math.mjs'],validation:{method:'regression',checks:['Positive and signed addition'],budget:'one restricted check',protections:['No project writes']},risks:['Numeric inputs only'],rollback:'Preserved baseline',activation:{writeback:true,enable:false,conditions:['regression pass'],timing:'new task'},dependencies:[],conflicts:[],suggestionOnly:false,replacements:[],structuredChecks:[]};
+ const report={selectionContract:'declared-v1',id:'report-1',revision:'report-rev-1',runId:e.runId,target,candidates:[candidate],selected:[],targets:sources.targets,state:'complete',evidence:[]};
  e.append('improve.started',{request:{id:report.id},target});e.append('improve.report',report);e.close();
  return {directory,workspace,dataRoot,report,candidate};
 }
@@ -38,6 +39,7 @@ test('explicit non-executing decision persists exact identities and duplicate re
 });
 test('validate-only constructs and checks real restricted content while preserving the formal non-Git target',async()=>{
  const f=await fixture(),d={...decision(f,'validate-only'),directory:join(f.directory,'validation'),groups:[{id:'math',candidateIds:[f.candidate.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',program:"import assert from 'node:assert/strict'; const {add}=await import('/work/targets/project/math.mjs'); assert.equal(add(2,3),5); assert.equal(add(2,-3),-1); console.log('addition passed');",timeoutMs:30000}]}],limits:{...decision(f).limits,maxChecks:1}};
+ saveDeclaredFixture(f.dataRoot,f.report,d as ImproveDecision);
  const submitted=structuredClone(d);
  const outcome=await submitImproveDecision({dataRoot:f.dataRoot,decision:d as any,fault:kind=>{if(kind==='improve.decision'){d.groups[0].changes[0].content='caller mutated after dispatch';d.groups[0].checks[0].program='throw Error("must not execute changed input")';}}});
  assert.equal(outcome.state,'completed',JSON.stringify(outcome));assert.equal(outcome.groups[0].state,'completed');assert.equal(outcome.groups[0].reason,null);
@@ -52,6 +54,7 @@ test('over-limit restricted check output reopens from retained byte blocks witho
   const f=await fixture();t.diagnostic(`Output retention evidence: ${f.directory}`);
   const program=`process.${stream}.write(Buffer.alloc(1048575,97));setTimeout(()=>{process.${stream}.write(Buffer.from([0xff,0x80]));setInterval(()=>{},1000);},100);`;
   const d={...decision(f,'validate-only'),directory:join(f.directory,'output-validation'),groups:[{id:'math',candidateIds:[f.candidate.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',program,timeoutMs:30000},{kind:'direct',program:'throw Error("must remain not-run")',timeoutMs:30000}]}],limits:{...decision(f).limits,maxChecks:2}};
+  saveDeclaredFixture(f.dataRoot,f.report,d as ImproveDecision);
   const result=await submitImproveDecision({dataRoot:f.dataRoot,decision:d as any}),check=result.groups[0].result.checks[0];
   assert.equal(check.state,'failed');assert.equal(check.execution.reason,'output_limit');assert.equal(check.execution.terminated,true);
   assert.equal(result.groups[0].result.checks[1].state,'not-run');assert.ok(Buffer.byteLength(check.execution[stream])<=16384);
@@ -98,22 +101,24 @@ test('decision record failure prevents candidate construction',async()=>{
  assert.equal(await readFile(join(f.workspace,'math.mjs'),'utf8'),'export const add=(a,b)=>a-b;\n');
 });
 test('TUI starts unselected, shows each mode and aggregate, and only submits after rendered summary plus explicit Enter',async()=>{
- const f=await fixture(),template=decision(f);let submits=0;
- const view=new ImproveSelectionView(f.dataRoot,template,async d=>{submits++;return submitImproveDecision({dataRoot:f.dataRoot,decision:d});});
+ const f=await fixture(),template=decision(f);let submits=0,submittedId:string|undefined;
+ const view=new ImproveSelectionView(f.dataRoot,template,async d=>{submits++;submittedId=d.id;return submitImproveDecision({dataRoot:f.dataRoot,decision:d});});
  assert.deepEqual(view.draft().selections,[]);await view.handleInput('thanks, do everything');await view.handleInput('\r');assert.equal(submits,0);
  await view.handleInput('3');assert.equal(view.draft().selections[0].mode,'defer');await view.handleInput('\r');await view.handleInput('\r');assert.equal(submits,0,'unrendered summary cannot be submitted');
  const shown=view.render(160,100).join('\n');assert.match(shown,/report-rev-1/);assert.match(shown,/本次只记录决定/);assert.match(shown,/选择不包含提交、推送、发布或清理数据/);
- await view.handleInput('\r');assert.equal(submits,1);assert.equal(readImproveDecision(f.dataRoot,template.id).state,'completed');
+ await view.handleInput('\r');assert.equal(submits,1);assert.ok(submittedId);assert.notEqual(submittedId,template.id,'current selections use a host-generated request ID');assert.equal(readImproveDecision(f.dataRoot,submittedId).state,'completed');
  await view.handleInput('\r');assert.equal(submits,1);
  const again=new ImproveSelectionView(f.dataRoot,template,async()=>{throw Error('view must not submit')});assert.deepEqual(again.draft().selections,[]);
 });
 async function twoGroups(){
  const f=await fixture(),other=join(f.directory,'independent-eval-asset');await mkdir(other);await writeFile(join(other,'math.mjs'),'export const add=(a,b)=>a-b;\n');
+ registerImproveSource(f.dataRoot,f.workspace,{kind:'eval-asset',root:other,paths:['math.mjs']});
  const e=new Evidence(f.dataRoot,'analysis-1'),target=captureImproveSources(e,f.workspace,[{id:'asset',kind:'eval-asset',root:other,paths:['math.mjs']}],'test-version').targets[0];
  const second={...f.candidate,id:'candidate:second',revision:'candidate-rev-2',target};f.report.candidates.push(second);f.report.revision='report-rev-two';e.append('improve.report',f.report);e.close();
  const selections=f.report.candidates.map(c=>({candidateId:c.id,candidateRevision:c.revision,target:c.target,mode:'validate-only' as const,steps:c.steps}));
  const group=(id:string,c:typeof f.candidate,fail:boolean)=>({id,candidateIds:[c.id],changes:[{targetId:c.target.id,path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression' as const,program:`import assert from 'node:assert/strict'; const {add}=await import('/work/targets/${c.target.id}/math.mjs'); assert.equal(add(2,3),${fail?6:5});`,timeoutMs:30000}]});
  const d:ImproveDecision={...decision(f,'validate-only'),id:'two-groups',selections,directory:join(f.directory,'validation'),groups:[group('first',f.candidate,true),group('second',second,false)],limits:{...decision(f).limits,maxChecks:2}};
+ saveDeclaredFixture(f.dataRoot,f.report,d);
  return {...f,d,second};
 }
 test('a necessary failure freezes independent remaining work; explicit continuation preserves failure and spends only remaining original authorization',async()=>{
@@ -166,9 +171,13 @@ test('explicit exact validation basis permits config formatting equivalence, cat
  const config={...f.candidate,id:'config-choice',revision:'config-revision',target:targets[0],scope:['config.json'],objective:'maintenance'},prompt={...f.candidate,id:'prompt-choice',revision:'prompt-revision',target:targets[1],scope:['instructions.md'],objective:'maintenance'};f.report.candidates=[config,prompt];e.append('improve.report',f.report);e.close();
  const group:any={id:'format',candidateIds:[config.id],basis:{impact:'no-behavior',reason:'JSON parse equivalence proves the effective configuration is unchanged; formatting is the entire change',checkIndices:[0]},changes:[{targetId:'config',path:'config.json',content:'{\n  "mode": "strict",\n  "budget": 4\n}\n'}],checks:[{kind:'direct',program:"import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';assert.deepEqual(JSON.parse(readFileSync('/input/baseline/config/config.json')),JSON.parse(readFileSync('/work/targets/config/config.json')));",timeoutMs:30000},{kind:'direct',program:'console.log("necessary follow-up")',timeoutMs:30000}]};
  const d:any={...decision(f,'validate-only'),id:'formatting',selections:[{candidateId:config.id,candidateRevision:config.revision,target:config.target,steps:config.steps,mode:'validate-only'}],directory:join(f.directory,'formatting'),groups:[group],limits:{...decision(f).limits,maxChecks:2}};
+ saveDeclaredFixture(f.dataRoot,f.report,d);
  assert.throws(()=>previewImproveDecision(f.dataRoot,{...d,groups:[{...group,basis:undefined}]}),/BEHAVIOR_FRESH_REQUIRED/);
  const good=await submitImproveDecision({dataRoot:f.dataRoot,decision:d});assert.equal(good.state,'completed');
- const bad=await submitImproveDecision({dataRoot:f.dataRoot,decision:{...d,id:'semantics',directory:join(f.directory,'semantics'),groups:[{...group,changes:[{targetId:'config',path:'config.json',content:'{"mode":"permissive","budget":4}\n'}]}]}});assert.equal(bad.state,'frozen');assert.deepEqual(bad.groups[0].result.checks.map((c:any)=>c.state),['failed','not-run']);assert.equal(await readFile(join(f.workspace,'config.json'),'utf8'),' {"mode":"strict","budget":4} \n');
+ // A different declared change needs its own analysis; passed validation only permits executing the original candidate.
+ const badReport={...structuredClone(f.report),id:'semantic-report',runId:'semantic-analysis',revision:'semantic-report-r1'},badDecision={...d,id:'semantics',reportId:badReport.id,reportRevision:badReport.revision,directory:join(f.directory,'semantics'),groups:[{...group,changes:[{targetId:'config',path:'config.json',content:'{"mode":"permissive","budget":4}\n'}]}]};
+ const semanticEvidence=new Evidence(f.dataRoot,badReport.runId);semanticEvidence.append('improve.started',{request:{id:badReport.id},target:badReport.target});semanticEvidence.close();saveDeclaredFixture(f.dataRoot,badReport,badDecision);
+ const bad=await submitImproveDecision({dataRoot:f.dataRoot,decision:badDecision});assert.equal(bad.state,'frozen');assert.deepEqual(bad.groups[0].result.checks.map((c:any)=>c.state),['failed','not-run']);assert.equal(await readFile(join(f.workspace,'config.json'),'utf8'),' {"mode":"strict","budget":4} \n');
  const behavior={...d,id:'markdown',directory:join(f.directory,'markdown'),selections:[{candidateId:prompt.id,candidateRevision:prompt.revision,target:prompt.target,steps:prompt.steps,mode:'validate-only'}],groups:[{id:'prompt',candidateIds:[prompt.id],changes:[{targetId:'prompt',path:'instructions.md',content:'Always answer confidently.\n'}],checks:[{kind:'direct',program:'console.log("lint passes")',timeoutMs:30000}]}]};
  assert.throws(()=>previewImproveDecision(f.dataRoot,behavior),/BEHAVIOR_FRESH_REQUIRED/);
  assert.throws(()=>previewImproveDecision(f.dataRoot,{...behavior,groups:[{...behavior.groups[0],basis:{impact:'unknown',reason:'Changed Markdown instructions could affect model behavior',checkIndices:[0]}}]}),/BEHAVIOR_FRESH_REQUIRED/);

@@ -11,7 +11,7 @@ import { taskTypeOf } from './task-type.js';
 import { readImproveDefaults, type TaskType } from './improve-defaults.js';
 import { listRegisteredSources, registerImproveSource, sourceBytes, verifySelfSource, type ImproveSource, type SourceRegistration } from './improve-source.js';
 import { listImproveReports, priorImprove, type ImproveReport, type ImproveRequest } from './improve.js';
-import { improveFacts, listImproveSuppressions } from './improve-history.js';
+import { improveCandidateDecisions, listImproveSuppressions } from './improve-history.js';
 import { upperBoundAmount } from './cost-estimate.js';
 import { digest } from './evidence.js';
 import { improveReportContract } from './improve-contract.js';
@@ -171,7 +171,7 @@ export interface PendingReport { id: string; startedAt: string; sessionId: strin
 export interface ImproveHomeFacts { pending: PendingReport[]; reports: number; suppressions: number }
 /**
  * 第一层的条目事实：本工作区待选择的报告（新版报告中还有未决候选的，新的在前；首版报告不列入）、历史报告数、生效的建议抑制数。
- * “未决”= 没有执行、暂缓或不再建议的决定；仅验证不算决定（I4）。至多看最近 200 份报告。
+ * “未决”= 尚无决定，或最后一次仅验证已通过、还可选执行（I4）。至多看最近 200 份报告。
  */
 export function improveHome(root: string, workspace: string): ImproveHomeFacts {
   const items: ReturnType<typeof listImproveReports>['items'] = [];
@@ -181,20 +181,13 @@ export function improveHome(root: string, workspace: string): ImproveHomeFacts {
     if (page.next === null) break;
     after = page.next;
   }
-  const decided = new Map<string, Set<string>>();
-  try {
-    for (const fact of improveFacts(root)) if (fact.kind === 'improve.decision') {
-      const set = decided.get(fact.data.decision.reportId) ?? new Set<string>();
-      for (const d of fact.data.decisions ?? []) if (['execute-declared-scope', 'defer', 'do-not-suggest'].includes(d.mode)) set.add(d.candidateId);
-      decided.set(fact.data.decision.reportId, set);
-    }
-  } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
   const chains = readSessionChains(root), pending: PendingReport[] = [];
   for (const item of [...items].reverse()) {
     let report: ImproveReport | null = null;
     for (const ref of records(root, { runId: item.runId, kinds: ['improve.report'] })) report = decode(root, ref);
     if (!report || isFirstVersionReport(report)) continue;
-    const undecided = report.candidates.filter(c => !decided.get(report!.id)?.has(c.id)).length;
+    const latest = improveCandidateDecisions(root, report.id);
+    const undecided = report.candidates.filter(c => { const prior = latest.get(c.id); return !prior || prior.canExecute; }).length;
     if (undecided) pending.push({ id: report.id, startedAt: report.startedAt, sessionId: chains.sessionOfRun(report.target.runId)?.id ?? null, candidates: report.candidates.length, undecided });
   }
   let suppressions = 0;

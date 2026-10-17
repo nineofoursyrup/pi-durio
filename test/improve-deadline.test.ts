@@ -1,3 +1,4 @@
+import {saveDeclaredFixture} from './helpers/improve-fixture.js';
 import test, {mock} from 'node:test';
 import assert from 'node:assert/strict';
 import fs, {existsSync} from 'node:fs';
@@ -31,8 +32,9 @@ if(!process.execArgv.includes('--experimental-test-module-mocks')){
   const directory=await realpath(await mkdtemp(join(tmpdir(),'durio-deadline-check-'))),workspace=join(directory,'project'),dataRoot=join(directory,'data');await mkdir(workspace);await writeFile(join(workspace,'math.mjs'),'export const add=(a,b)=>a-b;\n');
   const e=new Evidence(dataRoot,'analysis'),target=captureImproveSources(e,workspace,[{id:'project',kind:'project',paths:['math.mjs']}],'test-version').targets[0];
   const candidate={id:'candidate:one',revision:'r1',display:'R1',title:'Fix addition',objective:'bug',target,scope:['math.mjs'],steps:['Check exact addition'],dependencies:[],conflicts:[],suggestionOnly:false};
-  const report={id:'report',revision:'r1',runId:e.runId,target:{workspace,runId:'run',taskId:'task',sessionId:'session'},candidates:[candidate],targets:[target],state:'complete',evidence:[]};e.append('improve.started',{request:{id:report.id},target:report.target});e.append('improve.report',report);e.close();
+  const report={id:'report',revision:'r1',runId:e.runId,target:{workspace,runId:'run',taskId:'task',sessionId:'session'},candidates:[candidate],targets:[target],state:'complete',evidence:[]};e.append('improve.started',{request:{id:report.id},target:report.target});e.close();
   const decision:any={id:'decision',reportId:report.id,reportRevision:report.revision,selections:[{candidateId:candidate.id,candidateRevision:candidate.revision,target,steps:candidate.steps,mode:'validate-only'}],directory:join(directory,'validation'),groups:[{id:'group',candidateIds:[candidate.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',timeoutMs:1000,program:'throw Error("controller fixture must not execute candidate code")'},{kind:'direct',timeoutMs:1000,program:'throw Error("must remain not-run")'}]}],limits:{deadline:new Date(Date.now()+60000).toISOString(),maxChecks:2,maxRequests:0,maxTokens:0}};
+  saveDeclaredFixture(dataRoot,report,decision);
   controller=join(directory,'controller');calls=0;
   await writeFile(controller,`#!${process.execPath}\nconst fs=require('node:fs'),a=process.argv.slice(2),state=${JSON.stringify(join(directory,'controller-state.json'))},digest=${JSON.stringify(verifiedImage.split('@')[1])};
 if(a[0]==='--version')console.log('version 1.4.1 ');

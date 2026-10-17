@@ -90,11 +90,12 @@ function reports(data: string, workspace: string, targetRunId: string) {
   write('fixture-v1', [candidate(1, false)]);
   write('fixture-new', [candidate(1, true), candidate(2, true), candidate(3, false)]);
   const decision = new Evidence(data, 'improve-decision');
-  decision.append('improve.decision', { id: 'd1', decision: { reportId: 'fixture-new' }, decisions: [{ candidateId: 'candidate:1', mode: 'defer', problem: { target: { workspace, kind: 'project' }, paths: [], key: 'k' } }, { candidateId: 'candidate:2', mode: 'validate-only' }] });
+  decision.append('improve.decision', { id: 'd1', decision: { reportId: 'fixture-new', groups: [{id:'validation',candidateIds:['candidate:2']}], limits: {maxTokens:0} }, decisions: [{ candidateId: 'candidate:1', mode: 'defer', problem: { target: { workspace, kind: 'project' }, paths: [], key: 'k' } }, { candidateId: 'candidate:2', mode: 'validate-only' }] });
+  decision.append('improve.validation',{id:'d1',groupId:'validation',state:'completed',result:{conclusion:{allChecksPassed:true,allRequiredBenefitsMet:true}}});
   decision.db.close();
 }
 
-test('first layer facts: first-version reports never pending; undecided counts ignore validate-only', async () => {
+test('first layer facts: first-version reports never pending; only passed validation remains selectable', async () => {
   const p = project(), task = await read(p.workspace, p.data, []);
   reports(p.data, p.workspace, task.runId);
   const facts = improveHome(p.data, p.workspace);

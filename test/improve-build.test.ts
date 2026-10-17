@@ -1,3 +1,4 @@
+import {saveDeclaredFixture} from './helpers/improve-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {validateFormalSelection} from '../src/improve-formal.js';
@@ -30,21 +31,23 @@ test('registration rejects a newly added build input even when all previously li
 
 import {cp,readFile,chmod,unlink} from 'node:fs/promises';
 import {Evidence} from '../src/evidence.js';
-import {captureImproveSources} from '../src/improve-source.js';
+import {captureImproveSources,registerImproveSource} from '../src/improve-source.js';
 import {submitImproveDecision,readImproveBuildDefault,launchImproveBuild,rollbackImproveDecision} from '../src/improve-decisions.js';
 async function sourceFixture(){
  const directory=await realpath(await mkdtemp(join(tmpdir(),'durio-build-execution-'))),source=join(directory,'source'),workspace=join(directory,'project'),dataRoot=join(directory,'data');await mkdir(source);await mkdir(workspace);
  const manifest=JSON.parse(readFileSync(join(installation,'dist/execution/source-build.json'),'utf8'));
  for(const file of [...manifest.inputs,...manifest.outputs,{path:'dist/execution/source-build.json'}]){const to=join(source,file.path);await mkdir(dirname(to),{recursive:true});await copyFile(join(installation,file.path),to);}
  await cp(join(installation,'node_modules'),join(source,'node_modules'),{recursive:true});
+ registerImproveSource(dataRoot,workspace,{kind:'self-source',root:source,paths:['src/cli.ts']});
  const e=new Evidence(dataRoot,'analysis-build'),target=captureImproveSources(e,workspace,[{id:'self',kind:'self-source',root:source,paths:['src/cli.ts']}],'fixture').targets[0];assert.equal(target.state,'verified',JSON.stringify(target.gaps));
  const original=await readFile(join(source,'src/cli.ts'),'utf8'),content=original.replace('Improve: improve analyze','Improve new-build: improve analyze')+'\n// Candidate source adds a physical line as well as changing executable help.\n';assert.notEqual(content,original);
  const c={...candidate('self-source'),target,id:'candidate:cli',revision:'candidate-r1',display:'R1',title:'Clarify CLI help',scope:['src/cli.ts'],steps:['Prepare explicit source bytes','Build and check executable help','Write source and select a future process'],dependencies:[],conflicts:[],suggestionOnly:false};
- const report={id:'source-report',revision:'report-r1',runId:e.runId,target:{workspace,runId:'task-1',taskId:'task-1',sessionId:'session-1'},candidates:[c],targets:[target],state:'complete',evidence:[]};e.append('improve.started',{request:{id:report.id},target:report.target});e.append('improve.report',report);e.close();
+ const report={id:'source-report',revision:'report-r1',runId:e.runId,target:{workspace,runId:'task-1',taskId:'task-1',sessionId:'session-1'},candidates:[c],targets:[target],state:'complete',evidence:[]};e.append('improve.started',{request:{id:report.id},target:report.target});e.close();
  // A new controlled happy-path plan: the preserved 300s first failure took
  // 350166ms overall, including nearly five minutes of content preparation.
  // This fixture grants 600s up front; production deadlines are never extended.
  const decision:any={id:'source-execution',reportId:report.id,reportRevision:report.revision,selections:[{candidateId:c.id,candidateRevision:c.revision,target,steps:c.steps,mode:'execute-declared-scope',formal:{writeback:true,activate:null,failureCompensation:'none',newProcess:{workspace,baseline:readImproveBuildDefault(dataRoot,workspace).revision}}}],directory:join(directory,'temporary'),groups:[{id:'build',candidateIds:[c.id],changes:[{targetId:'self',path:'src/cli.ts',content}],build:{targetId:'self',timeoutMs:180000},basis:{impact:'no-behavior',reason:'CLI help text only; actual startup and expected printed text are checked',checkIndices:[0]},checks:[{kind:'direct',timeoutMs:30000,program:"import assert from 'node:assert/strict';import{execFileSync}from'node:child_process';const text=execFileSync(process.execPath,['/input/build/dist/src/cli.js','--help'],{encoding:'utf8'});assert.match(text,/Improve new-build:/);assert.match(text,/Eval:/);"}]}],limits:{deadline:new Date(Date.now()+600000).toISOString(),maxChecks:2,maxRequests:0,maxTokens:0}};
+ saveDeclaredFixture(dataRoot,report,decision);
  return {directory,source,workspace,dataRoot,decision,original,content};
 }
 test('selected source produces a content-bound executable and only an explicit new process observes it',async()=>{

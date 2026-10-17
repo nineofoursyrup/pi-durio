@@ -375,3 +375,18 @@ test('trial trace: restricted-side raw beside host-mediated usage; fallback list
     }finally{release();late.mock.restoreAll();syncBuiltinESMExports();await (closing??closingApp.exit());}
   });
 });
+
+
+test('compare-demo renders current and old revisions with the installed view API without changing evidence',async()=>{
+  const f=await planRoot({cases:{'local-fix':'objective'},reps:1,scale:'relative',stopReason:null,outcome:()=>({status:'completed',judgment:'PASS'})});
+  const old=evalReport(f.root,f.id),e=new Evidence(f.root,f.id);
+  assert.equal(old.improvement,'改善');
+  appendFact(e,'eval.grader-revision',{id:'smoke-revision',graders:{'local-fix':f.plan.cases[0].grader},previousReport:e.blob(JSON.stringify(old)),affectedRules:[],at:'2026-10-17T00:00:00Z'});e.close();
+  const before=readFileSync(join(f.root,'host.sqlite'));
+  const demo=await import(new URL('../../scripts/eval/compare-demo.mjs',import.meta.url).href);
+  const views=await demo.renderComparisonViews(fileURLToPath(new URL('../../',import.meta.url)),f.root,f.id);
+  assert.equal(views.currentReport.improvement,'证据不足');assert.equal(views.originalReport.improvement,'改善');
+  assert.match(stripTerminalSequences(views.current),/证据不足/);assert.match(stripTerminalSequences(views.original),/改善/);
+  assert.notEqual(views.currentReport.asOf,views.originalReport.asOf);
+  assert.deepEqual(readFileSync(join(f.root,'host.sqlite')),before,'rendering and old revision navigation are read-only');
+});

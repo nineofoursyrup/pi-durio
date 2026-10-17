@@ -6,6 +6,7 @@ import {join} from 'node:path';
 import * as runtime from '../src/runtime.js';
 import {scriptedTransport} from '../src/offline.js';
 import {digest} from '../src/evidence.js';
+import {registerImproveSource} from '../src/improve-source.js';
 import {recoveryRecords} from '../src/recovery.js';
 
 async function fixture(){const root=await realpath(await mkdtemp(join(tmpdir(),'durio-improve-'))),workspace=join(root,'project'),dataRoot=join(root,'data');await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Small fixture.\n');const source=await runtime.runCodingTask({workspace,dataRoot,input:'Inspect fixture',mode:'offline',transport:scriptedTransport([]).fetch});return {workspace,dataRoot,source};}
@@ -89,6 +90,7 @@ test('source views freeze content and reject links; explicit self source require
  const f=await fixture(),{symlink,cp}=await import('node:fs/promises');await writeFile(join(f.workspace,'safe.ts'),'export const answer=42;');await writeFile(join(f.workspace,'secret.env'),'password=unshared-secret');await symlink('/etc/hosts',join(f.workspace,'alias.ts'));
  const source=transport([{name:'evidence_summary',args:{}},[{name:'source_view',args:{targetId:'project',path:'safe.ts'}},{name:'source_view',args:{targetId:'project',path:'alias.ts'}},{name:'source_view',args:{targetId:'project',path:'secret.env'}},{name:'source_view',args:{targetId:'self',path:'src/runtime.ts'}}]]);let changed=false;
  const fetcher:typeof fetch=async(url,init)=>{if(!changed){changed=true;await writeFile(join(f.workspace,'safe.ts'),'changed later by external editor');}return source.fetch(url,init);};
+ registerImproveSource(f.dataRoot,f.workspace,{kind:'self-source',root:process.cwd(),paths:['src/runtime.ts']});
  const result=await runtime.analyzeImprove({dataRoot:f.dataRoot,workspace:f.workspace,targetRunId:f.source.runId,request:{id:'sources',purpose:'Inspect only registered source views',limits,sources:[{id:'project',kind:'project',paths:['safe.ts','alias.ts','secret.env']},{id:'self',kind:'self-source',root:process.cwd(),paths:['src/runtime.ts']}]},mode:'offline',transport:fetcher});
  assert.equal(result.improve?.state,'complete');assert.equal(result.improve?.targets.find(t=>t.id==='self')?.state,'verified',JSON.stringify(result.improve?.targets));assert.match(JSON.stringify(source.calls),/answer=42/);assert.doesNotMatch(JSON.stringify(source.calls),/changed later by external editor|unshared-secret|127\.0\.0\.1/);assert.match(JSON.stringify(result.improve),/ALIAS_DENIED|withheld/);
  const fake=join(f.workspace,'same-name');await mkdir(fake);await writeFile(join(fake,'package.json'),'{"name":"pi-durio","version":"0.1.0"}');

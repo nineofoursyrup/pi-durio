@@ -1,3 +1,4 @@
+import {saveDeclaredFixture} from './helpers/improve-fixture.js';
 import test,{mock} from 'node:test';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
@@ -6,7 +7,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {Evidence} from '../src/evidence.js';
-import {captureImproveSources} from '../src/improve-source.js';
+import {captureImproveSources,registerImproveSource} from '../src/improve-source.js';
 import {acquireOwner} from '../src/ownership.js';
 import type {EvalCleanupReceipt} from '../src/eval/cleanup.js';
 import type {ImproveDecision} from '../src/improve-decisions.js';
@@ -33,10 +34,12 @@ if(!process.execArgv.includes('--experimental-test-module-mocks')){
  function fixture(){
   const root=realpathSync(mkdtempSync(join(tmpdir(),'durio-resume-receipts-'))),dataRoot=join(root,'data'),workspace=join(root,'project'),other=join(root,'independent');mkdirSync(workspace);mkdirSync(other);
   writeFileSync(join(workspace,'first.mjs'),'export const value=0;\n');writeFileSync(join(other,'second.mjs'),'export const value=0;\n');
+  registerImproveSource(dataRoot,workspace,{kind:'eval-asset',root:other,paths:['second.mjs']});
   const e=new Evidence(dataRoot,'analysis'),targets=captureImproveSources(e,workspace,[{id:'first',kind:'project',paths:['first.mjs']},{id:'second',kind:'eval-asset',root:other,paths:['second.mjs']}],'receipt-contract').targets;
   const candidates=['first','second'].map((name,i)=>({id:`candidate:${name}`,revision:'r1',display:`R${i+1}`,title:name,objective:'bug',target:targets[i],scope:[`${name}.mjs`],steps:['Check exact replacement'],dependencies:[],conflicts:[],suggestionOnly:false}));
-  const report={id:'report',revision:'r1',runId:e.runId,target:{workspace,runId:'source'},candidates,targets,state:'complete',evidence:[]};e.append('improve.started',{request:{id:report.id},target:report.target});e.append('improve.report',report);e.close();
+  const report={id:'report',revision:'r1',runId:e.runId,target:{workspace,runId:'source'},candidates,targets,state:'complete',evidence:[]};e.append('improve.started',{request:{id:report.id},target:report.target});e.close();
   const decision:ImproveDecision={id:'decision',reportId:report.id,reportRevision:report.revision,selections:candidates.map(c=>({candidateId:c.id,candidateRevision:c.revision,target:c.target,steps:c.steps,mode:'validate-only'})),directory:join(root,'validation'),groups:candidates.map((c,i)=>({id:`g${i+1}`,candidateIds:[c.id],changes:[{targetId:c.target.id,path:c.scope[0],content:'export const value=1;\n'}],checks:[{kind:'regression',timeoutMs:1000,program:'throw Error("validation seam fixture must not execute")'}]})),limits:{deadline:new Date(Date.now()+60000).toISOString(),maxChecks:2,maxRequests:0,maxTokens:0}};
+  saveDeclaredFixture(dataRoot,report,decision);
   return {dataRoot,decision};
  }
  test('resume forwards only current receipts and an old completed-attempt group cannot stop the current group',async t=>{

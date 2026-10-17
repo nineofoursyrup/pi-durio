@@ -57,14 +57,20 @@ export function verifySelfSource(root:string) {
 }
 export function captureImproveSources(evidence:Evidence,workspace:string,sources:ImproveSource[],version:string|null) {
  const targets:SourceTarget[]=[],texts=new Map<string,{text:string;sourceId:string;redaction:ReturnType<typeof redactAnalysisText>}>();let total=0;
- for(const source of sources){const gaps:string[]=[];let root:string|null=null,applicableVersion=version;
+ for(const source of sources){const gaps:string[]=[];let root:string|null=null,applicableVersion=version,registration:SourceRegistration|undefined;
   const target:SourceTarget={id:source.id,kind:source.kind,workspace:null,files:[],baseline:'',applicableVersion,state:'verified',gaps};
   try{root=realpathSync(source.root??workspace);target.workspace=root;
    if(source.kind!=='self-source'&&(root===realpathSync(installation)||inside(realpathSync(installation),root)))throw Error('SELF_SOURCE_EXPLICIT_REGISTRATION_REQUIRED');
    if(source.kind==='project'&&root!==workspace)throw Error('IMPROVE_CROSS_PROJECT_SOURCE_DENIED');
+   if(source.kind==='self-source'||source.kind==='eval-asset'){
+    registration=listRegisteredSources(evidence.root,realpathSync(workspace)).find(reg=>reg.kind===source.kind&&reg.root===root&&source.paths.every(path=>reg.paths.includes(path)&&reg.fingerprints.some(fp=>fp.path===path)));
+    if(!registration)throw Error('IMPROVE_SOURCE_REGISTRATION_REQUIRED: selected workspace, kind, root and paths must match an active registration');
+   }
    if(source.kind==='self-source'){if(!source.root)throw Error('SELF_SOURCE_EXPLICIT_REGISTRATION_REQUIRED');applicableVersion=verifySelfSource(root);target.applicableVersion=applicableVersion;}
-   if(source.kind==='eval-asset'){verifyRegisteredSourceFingerprints(evidence.root,workspace);}
-   for(const path of source.paths){try{const bytes=sourceBytes(root,path,Math.max(0,Math.min(262144,1048576-total)));total+=bytes.length;if(total>1048576)throw Error('IMPROVE_SOURCE_TOTAL_LIMIT');const redaction=redactAnalysisText(bytes.toString('utf8')),content=evidence.blob(bytes),data={targetId:source.id,kind:source.kind,root,path,content,redaction:{reasons:redaction.reasons,coverage:redaction.coverage},applicableVersion};const seq=evidence.append('improve.source',data),sourceId=`e1:${seq}:${digest(JSON.stringify(data))}`;
+   for(const path of source.paths){try{const bytes=sourceBytes(root,path,Math.max(0,Math.min(262144,1048576-total)));
+    const fingerprint=registration?.fingerprints.find(fp=>fp.path===path);
+    if(fingerprint&&(bytes.length!==fingerprint.bytes||digest(bytes)!==fingerprint.sha256))throw Error(`IMPROVE_REGISTERED_SOURCE_CHANGED: ${root}/${path} changed since registration ${registration!.id}`);
+    total+=bytes.length;if(total>1048576)throw Error('IMPROVE_SOURCE_TOTAL_LIMIT');const redaction=redactAnalysisText(bytes.toString('utf8')),content=evidence.blob(bytes),data={targetId:source.id,kind:source.kind,root,path,content,redaction:{reasons:redaction.reasons,coverage:redaction.coverage},applicableVersion};const seq=evidence.append('improve.source',data),sourceId=`e1:${seq}:${digest(JSON.stringify(data))}`;
     target.files.push({path,...content,content,sourceId,state:redaction.reasons.length?'withheld':'available',reason:redaction.reasons});texts.set(`${source.id}\0${path}`,{text:redaction.text,sourceId,redaction});
    }catch(error){gaps.push(`${path}: ${String(error)}`);}}
   }catch(error){gaps.push(String(error));}
