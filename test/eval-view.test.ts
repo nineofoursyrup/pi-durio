@@ -375,3 +375,28 @@ test('trial trace: restricted-side raw beside host-mediated usage; fallback list
     }finally{release();late.mock.restoreAll();syncBuiltinESMExports();await (closing??closingApp.exit());}
   });
 });
+
+
+test('compare-demo saves current and regraded text and renders old views without changing evidence',async()=>{
+  const f=await planRoot({cases:{'local-fix':'objective'},reps:1,scale:'relative',stopReason:null,outcome:()=>({status:'completed',judgment:'PASS'})});
+  const old=evalReport(f.root,f.id),product=fileURLToPath(new URL('../../',import.meta.url));
+  assert.equal(old.improvement,'改善');
+  const demo=await import(new URL('../../scripts/eval/compare-demo.mjs',import.meta.url).href);
+  const saved=new Map<string,unknown>(),save=async(name:string,value:unknown)=>{saved.set(name,value);};
+  const originalBytes=readFileSync(join(f.root,'host.sqlite'));
+  await demo.saveComparisonReport(product,f.root,'report',old,save);
+  assert.deepEqual([...saved.keys()],['report.json','report.txt']);assert.equal(saved.get('report.json'),old);
+  assert.equal(String(saved.get('report.txt')).split('\n')[0],`Eval ${ownPlanSource(f.root,f.id).label} · offline · 报告快照 #${old.asOf}`);assert.match(String(saved.get('report.txt')),/效果：改善/);
+  assert.deepEqual(readFileSync(join(f.root,'host.sqlite')),originalBytes,'initial report output is read-only');
+  const e=new Evidence(f.root,f.id);
+  appendFact(e,'eval.grader-revision',{id:'smoke-revision',graders:{'local-fix':f.plan.cases[0].grader},previousReport:e.blob(JSON.stringify(old)),affectedRules:[],at:'2026-10-17T00:00:00Z'});e.close();
+  const before=readFileSync(join(f.root,'host.sqlite')),revised=evalReport(f.root,f.id);
+  await demo.saveComparisonReport(product,f.root,'regraded-report',revised,save);
+  assert.deepEqual([...saved.keys()],['report.json','report.txt','regraded-report.json','regraded-report.txt']);assert.equal(saved.get('regraded-report.json'),revised);
+  assert.equal(String(saved.get('regraded-report.txt')).split('\n')[0],`Eval ${ownPlanSource(f.root,f.id).label} · offline · 报告快照 #${revised.asOf}`);assert.match(String(saved.get('regraded-report.txt')),/效果：证据不足/);assert.match(String(saved.get('regraded-report.txt')),/评分修订 smoke-revision/);
+  const views=await demo.renderComparisonViews(product,f.root,f.id);
+  assert.equal(views.currentReport.improvement,'证据不足');assert.equal(views.originalReport.improvement,'改善');
+  assert.match(stripTerminalSequences(views.current),/证据不足/);assert.match(stripTerminalSequences(views.original),/改善/);
+  assert.notEqual(views.currentReport.asOf,views.originalReport.asOf);
+  assert.deepEqual(readFileSync(join(f.root,'host.sqlite')),before,'regraded output, rendering and old revision navigation are read-only');
+});

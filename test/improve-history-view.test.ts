@@ -12,11 +12,13 @@ import {parseCommand,commandCompletion,helpBody} from '../src/tui/commands.js';
 import {ReadOnlyTui} from '../src/tui/app.js';
 import {improveFacts,listImproveSuppressions,suppressionMatch,readImproveDecision} from '../src/improve-history.js';
 import {captureImproveSources,listRegisteredSources} from '../src/improve-source.js';
-import {submitImproveDecision,type ImproveDecision} from '../src/improve-decisions.js';
+import {submitImproveDecision,decisionDigest,type ImproveDecision} from '../src/improve-decisions.js';
 import {readImproveHistory,continuationBlocked} from '../src/improve-report-history.js';
 import {ImproveManagement,type ImproveManagementHost} from '../src/tui/improve-management.js';
 import {ImproveBatchController} from '../src/improve-batch.js';
 import {acquireOwner} from '../src/ownership.js';
+import {appendFact} from '../src/eval/store.js';
+import {fileIdentity} from '../src/improve-formal.js';
 import {tuiCleanupStatus,tuiExitCode} from '../src/tui/exit-summary.js';
 
 const fixture=resolve('test/fixtures/v1-records/data'),id='fixture-improve-1';
@@ -112,6 +114,24 @@ function ownReport(declared:boolean) {
  const decision:ImproveDecision={id:'synthetic-decision',reportId:report.id,reportRevision:report.revision,selections:[{candidateId:candidate.id,candidateRevision:candidate.revision,target,steps:candidate.steps,mode:declared?'validate-only':'execute-declared-scope',...(!declared?{formal:{writeback:true as const,activate:null,failureCompensation:'none' as const}}:{})}],directory:join(root,'validation'),groups:[{id:'math',candidateIds:[candidate.id],changes:[{targetId:target.id,path:'math.mjs',content}],checks:[check]}],limits:{deadline:new Date(Date.now()+120000).toISOString(),maxChecks:1,maxRequests:0,maxTokens:0}};
  return {root,dataRoot,workspace,report,decision,content};
 }
+/** Existing first-version outcomes are history, not permission to submit them now.
+ * These small facts are deliberately synthetic; no current validation or VM is claimed. */
+function savedLegacyState(f:ReturnType<typeof ownReport>,written:boolean){
+ const e=new Evidence(f.dataRoot,f.report.runId),d=f.decision;
+ const source=appendFact(e,'improve.decision',{id:d.id,workspace:f.workspace,executionVersion:'first-version-build',requestDigest:decisionDigest(d),decision:d,decisions:d.selections});
+ if(written){
+  const file={targetId:'project',root:f.workspace,path:'math.mjs',before:f.report.candidates[0].target.files[0].content,after:e.blob(f.content),identity:fileIdentity(f.workspace,'math.mjs')};
+  e.append('improve.group-started',{id:d.id,groupId:'math',reserved:{checks:1,requests:0,tokens:0}});
+  const check={id:d.id,groupId:'math',index:0,kind:'regression',state:'completed',execution:{stdout:'history original retained\n',stderr:'',status:'completed',code:0,terminated:true}};
+  e.append('improve.check',check);e.append('improve.validation',{id:d.id,groupId:'math',state:'completed',result:{checks:[check],conclusion:{allChecksPassed:true,allRequiredBenefitsMet:true}}});
+  e.append('improve.formal-started',{id:d.id,groupId:'math',files:[file],fences:[{dataRoot:f.dataRoot,decisionId:d.id,decisionSource:source,groupId:'math',workspace:f.workspace}],defaults:[],buildChange:null});
+  writeFileSync(join(f.workspace,'math.mjs'),f.content);
+  e.append('improve.write-intent',{id:d.id,groupId:'math',index:0,file});e.append('improve.write-result',{id:d.id,groupId:'math',index:0,state:'written',file});
+  e.append('improve.formal',{id:d.id,groupId:'math',state:'completed',writeback:'written',activation:'not-enabled',files:[file]});
+ }
+ e.append('improve.batch',{id:d.id,state:written?'completed':'frozen',reason:written?null:'first-version cancellation'});e.close();
+ return readImproveDecision(f.dataRoot,d.id);
+}
 function management(f:ReturnType<typeof ownReport>) {
  let box:Parameters<ImproveManagementHost['confirm']>[0]|undefined,confirm:()=>void=()=>{},pending=Promise.resolve(),error:unknown,blocked:string|undefined;
  const messages:string[]=[],batch=new ImproveBatchController(f.dataRoot);
@@ -119,7 +139,7 @@ function management(f:ReturnType<typeof ownReport>) {
  return {host,batch,manager:new ImproveManagement(f.dataRoot,f.workspace,host),messages,dialog:()=>box,error:()=>error,pending:()=>pending,block:(reason?:string)=>{blocked=reason;},reset:()=>{box=undefined;error=undefined;},enter:()=>{if(box?.handleInput('\r').type==='confirm')confirm();}};
 }
 test('synthetic legacy rollback confirms exact files, rechecks capabilities and preserves later edits before any rollback fact',async()=>{
- const f=ownReport(false),state=await submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision});assert.equal(state.writeback,'written');
+ const f=ownReport(false),state=savedLegacyState(f,true);assert.equal(state.writeback,'written');
  const m=management(f),history=readImproveHistory(f.dataRoot,f.report.id);assert.equal(history.contract,'legacy');assert.equal(history.actions.length,1);
  const before=contents(f.dataRoot);m.manager.command('rollback',`${f.report.id}·C-01`,{reason:'regression',note:'keep other files'});
  assert.ok(m.dialog()!);assert.match(plain(m.dialog()!.render(132,38)),/math.mjs/);assert.match(plain(m.dialog()!.render(132,38)),/引入了新问题/);assert.match(plain(m.dialog()!.render(132,38)),/keep other files/);assert.deepEqual(contents(f.dataRoot),before);
@@ -136,7 +156,7 @@ test('synthetic legacy rollback confirms exact files, rechecks capabilities and 
 test('continuation confirms only original untouched work, rejects changed baseline and exposes legacy/version reasons without opening a dialog',async()=>{
  const f=ownReport(true),state=await submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision,signal:AbortSignal.abort()});assert.equal(state.state,'frozen');assert.equal(state.groups[0].state,'not-run');
  assert.equal(continuationBlocked(state,'declared',state.executionVersion),undefined);assert.match(continuationBlocked(state,'declared','other-build')!,/执行版本已变/);assert.match(continuationBlocked(state,'legacy',state.executionVersion)!,/首版冻结批次不能继续/);
- const legacy=ownReport(false);await submitImproveDecision({dataRoot:legacy.dataRoot,decision:legacy.decision,signal:AbortSignal.abort()});
+ const legacy=ownReport(false);savedLegacyState(legacy,false);
  const legacyHistory=readImproveHistory(legacy.dataRoot,legacy.report.id),legacyManager=management(legacy);assert.match(legacyHistory.actions[0].disabled!,/执行版本已变/);
  legacyManager.manager.command('continue',legacy.report.id);assert.equal(legacyManager.dialog(),undefined);assert.match(legacyManager.messages.join('\n'),/首版冻结批次不能继续/);
  const m=management(f),history=readImproveHistory(f.dataRoot,f.report.id);assert.equal(history.actions[0].disabled,undefined);

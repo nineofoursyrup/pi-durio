@@ -184,6 +184,7 @@ test('check originals show retained full stdout bytes and route fresh by child r
 // applies to the enclosing submission, not just the currently selected check.
 test('host batch stop matches its origin, waits for cleanup, and leaves the independent remainder not-run',async()=>{
  const f=fixture(),other=join(f.root,'other');mkdirSync(other);writeFileSync(join(other,'math.mjs'),'export const add=(a,b)=>a-b;\n');
+ registerImproveSource(f.dataRoot,f.workspace,{kind:'eval-asset',root:other,paths:['math.mjs']});
  const e=new Evidence(f.dataRoot,f.report.runId),target=captureImproveSources(e,f.workspace,[{id:'asset',kind:'eval-asset',root:other,paths:['math.mjs']}],'fixture-version').targets[0];e.close();
  f.candidate.structuredChecks=[{kind:'regression',program:"import {writeFileSync} from 'node:fs';writeFileSync('/work/started','yes');setInterval(()=>{},1000)",timeoutMs:30000}];
  f.report.candidates.push({...structuredClone(f.candidate),id:'candidate:two',display:'R2',revision:'candidate-rev-2',target,structuredChecks:[{kind:'regression',program:'throw Error("must never start")',timeoutMs:30000}]});f.save();
