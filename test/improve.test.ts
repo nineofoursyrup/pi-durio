@@ -112,6 +112,9 @@ test('headless list/report and TUI viewer reopen the same persisted identity wit
  const {readDisplayIndex}=await import('../src/display-number.js'),label=readDisplayIndex(f.dataRoot).label('improve-report','read-only');
  // Machine output keeps the full report ID; the text report names it by its display number, which is also accepted as input.
  for(const [args,expected] of [[['list'],/read-only/],[['report','--id','read-only'],/read-only/],[['report','--id','read-only','--format','text'],new RegExp(`^improve ${label} · `)],[['report','--id',label,'--format','text'],new RegExp(`^improve ${label} · `)]] as const){const processResult=spawnSync(process.execPath,['dist/src/cli.js','improve',...args,'--data-root',f.dataRoot],{encoding:'utf8'});assert.equal(processResult.status,0,processResult.stderr);assert.match(processResult.stdout,expected);}
- const view=new ImproveView(f.dataRoot,'read-only');assert.match(view.render(160,40).join('\n'),/Selected: none/);view.handleInput('x');view.handleInput('\r');assert.match(view.render(160,40).join('\n'),/Selected: none/);
+ const view=new ImproveView(f.dataRoot,'read-only');assert.ok(result.improve);
+ assert.equal(view.reportId,result.improve.id);assert.equal(view.current?.report.revision,result.improve.revision);assert.deepEqual(view.current?.report.target,result.improve.target);assert.deepEqual(view.current?.report.selected,[]);
+ const shown=view.render(160,40).join('\n');assert.match(shown,new RegExp(`◆ improve 历史 · ${label} · 只读报告`));assert.match(shown,/原 id read-only/);assert.match(shown,/没有可执行的历史操作/);
+ view.handleInput('x');view.handleInput('\r');assert.equal(view.render(160,40).join('\n'),shown,'history remains on the same read-only report after non-action input');
  assert.equal(digest(await readFile(join(f.dataRoot,'host.sqlite'))),hash);assert.equal(provider.calls.length,2);
 });
