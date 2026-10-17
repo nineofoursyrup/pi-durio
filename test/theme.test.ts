@@ -127,6 +127,17 @@ test('styledLine none 不输出颜色 SGR', () => {
   assert.doesNotMatch(line, /38;[25]|48;[25]/, '无色档不应有颜色 SGR');
 });
 
+test('styledLine none keeps selected rows reversed across segments and padding, with explicit background overrides', () => {
+  const line = styledLine([{text:'A',fg:'fg.label',bold:true},{text:'B'},{text:'C',bg:'bg.base'},{text:'D'}], 6, 'bg.selected', 'none');
+  const cells = captureSnapshot([line, styledLine([{text:'E',bg:'bg.selected'},{text:'F'}],6,undefined,'none')], 6, 2, 'none').rows;
+  assert.deepEqual(cells[0].map(cell=>!!cell.reverse), [true,true,false,true,true,true]);
+  assert.deepEqual(cells[1].map(cell=>!!cell.reverse), [true,false,false,false,false,false]);
+  assert.equal(cells[0][0].dim,true); assert.equal(cells[0][0].bold,true);
+  assert.equal(!!cells[0][1].dim,false); assert.equal(!!cells[0][1].bold,false);
+  assert.doesNotMatch(line, /\x1b\[(?:[349][0-9]|(?:38|48);)[^m]*m/);
+  assert.ok(line.endsWith('\x1b[0m'),'selection cannot leak to the next line');
+});
+
 test('styledLine 填满宽度', () => {
   const line = styledLine([{text:'AB'}], 10, undefined, 'truecolor');
   const plain = stripTerminalSequences(line);

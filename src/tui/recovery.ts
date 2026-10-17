@@ -195,7 +195,11 @@ export class RecoveryPanel {
   readonly choices = new Map<number, { choice: 'completed' | 'retry'; reason: string; note?: string }>();
   private ownerOffset = 0;
   private ownerPageSize = 1;
+  private compactPage = 0;
+  private compactPages = 1;
+  private followNote = false;
   constructor(readonly facts: RecoveryFacts) {}
+  get pageable() { return this.ownerStage || this.compactPages > 1; }
   get ownerStage() { return this.facts.options.includes('confirm-cleanup'); }
   private get dispositions() { return this.ownerStage ? OWNER_DISPOSITIONS : DISPOSITIONS; }
 
@@ -214,27 +218,33 @@ export class RecoveryPanel {
 
   handleInput(data: string): RecoveryAction {
     if (this.note !== undefined) {
+      if (this.pageable && (matchesKey(data,'pageUp') || matchesKey(data,'pageDown'))) {
+        this.compactPage = Math.max(0,Math.min(this.compactPages-1,this.compactPage+(matchesKey(data,'pageUp')?-1:1)));
+        this.followNote = false;return {type:'none'};
+      }
       if (matchesKey(data, 'escape')) { this.note = undefined; return { type: 'none' }; }
       if (matchesKey(data, 'enter')) { const note = this.note.trim(); this.note = undefined; return this.choose('completed', note); }
-      if (matchesKey(data, 'backspace')) { this.note = Array.from(this.note).slice(0, -1).join(''); return { type: 'none' }; }
+      if (matchesKey(data, 'backspace')) { this.note = Array.from(this.note).slice(0, -1).join(''); this.followNote = true; return { type: 'none' }; }
       const text = clean(data).replace(/[\r\n]/g, '');
-      if (text && !data.startsWith('\x1b')) this.note = Array.from(this.note + text).slice(0, 200).join('');
+      if (text && !data.startsWith('\x1b')) { this.note = Array.from(this.note + text).slice(0, 200).join(''); this.followNote = true; }
       return { type: 'none' };
     }
     if (matchesKey(data, 'escape')) return { type: 'close' };
-    if (this.ownerStage && (matchesKey(data, 'pageUp') || matchesKey(data, 'pageDown'))) {
-      this.ownerOffset = Math.max(0, this.ownerOffset + (matchesKey(data, 'pageUp') ? -1 : 1) * this.ownerPageSize);
+    const pageStep = matchesKey(data, 'pageUp') || data === 'p' ? -1 : matchesKey(data, 'pageDown') || data === 'n' ? 1 : 0;
+    if (this.pageable && pageStep) {
+      if (this.ownerStage) this.ownerOffset = Math.max(0, this.ownerOffset + pageStep * this.ownerPageSize);
+      else this.compactPage = Math.max(0, Math.min(this.compactPages - 1, this.compactPage + pageStep));
       return { type: 'none' };
     }
     const step = matchesKey(data, 'up') ? -1 : matchesKey(data, 'down') ? 1 : 0;
-    if (step) { for (let next = this.cursor + step; next >= 0 && next < this.dispositions.length; next += step) if (!this.disabled(next)) { this.cursor = next; break; } return { type: 'none' }; }
-    if (/^[1-4]$/.test(data)) { const option = Number(data) - 1; if (!this.disabled(option)) this.cursor = option; return { type: 'none' }; }
+    if (step) { for (let next = this.cursor + step; next >= 0 && next < this.dispositions.length; next += step) if (!this.disabled(next)) { this.cursor = next; this.compactPage = 0; break; } return { type: 'none' }; }
+    if (/^[1-4]$/.test(data)) { const option = Number(data) - 1; if (!this.disabled(option)) { this.cursor = option; this.compactPage = 0; } return { type: 'none' }; }
     if (!matchesKey(data, 'enter') || this.disabled(this.cursor)) return { type: 'none' };
     if (this.cursor === 0) return { type: 'recheck' };
     if (this.ownerStage) return { type: 'release-owner' };
     if (this.cursor === 3) return { type: 'end' };
     if (!this.facts.items.length) return { type: 'continue' };
-    if (this.cursor === 1) { this.note = ''; return { type: 'none' }; }
+    if (this.cursor === 1) { this.note = ''; this.followNote = true; return { type: 'none' }; }
     return this.choose('retry');
   }
   /** 汇总确认里按 Esc：回到最后一项调整。 */
@@ -270,11 +280,12 @@ export class RecoveryPanel {
       this.ownerOffset = frame.offset;
       return frame.lines;
     }
+    this.compactPages = 1;
     for (let level = 0; level <= 4; level++) {
       const lines = this.lines(width, level, tier);
-      if (lines.length <= height) return lines;
-      // 连最小形式都放不下：保留面板底栏，其余从下往上截去。
-      if (level === 4) return height <= 0 ? [] : [...lines.slice(0, height - 1), lines.at(-1)!];
+      const descriptionWidth = width >= 100 ? width - 30 : width - 5;
+      if (lines.length <= height && (width < 100 || visibleWidth(this.selectedDescription()) <= descriptionWidth)) return lines;
+      if (level === 4) return this.compactLines(width, height, tier);
     }
     return [];
   }
@@ -304,13 +315,7 @@ export class RecoveryPanel {
       if (level < 4) row('影响', [{ text: impactOf(item.tool), fg: 'fg.body' }]);
     } else row('未知 0', [{ text: '没有结果未提交的操作', fg: 'fg.muted' }]);
     // 检查行：可折成多行、不截断；原因码 dim 附行末。
-    const checks: TextSegment[] = [];
-    facts.checks.forEach((check, i) => {
-      if (i) checks.push({ text: ' · ', fg: 'fg.faint' });
-      checks.push({ text: `${check.ok ? GLYPHS.ok : GLYPHS.err} `, fg: check.ok ? 'ac.ok' : 'ac.err' }, { text: check.text, fg: 'fg.body' });
-    });
-    const codes = facts.checks.filter(check => check.code && REASON_TEXT[check.code]).map(check => check.code!);
-    if (codes.length) checks.push({ text: `  ${codes.join(' ')}`, fg: 'fg.faint', dim: true });
+    const checks = this.checkSegments();
     wrapSegments(checks, valueWidth).forEach((segments, i) => (i ? more : (s: TextSegment[]) => row('检查', s))(segments));
     if (level < 4) for (const session of facts.otherSessions) row('需先处理', [{ text: `会话 ${session} 有未完成的工作 · pi-durio resume ${session}`, fg: 'ac.warn' }]);
     if (level < 3 && facts.frozen.count) {
@@ -327,6 +332,45 @@ export class RecoveryPanel {
     }
     out.push(...this.dispositionLines(width, level, tier));
     return out;
+  }
+
+  private selectedDescription() {
+    const off = this.disabled(this.cursor);
+    return this.note === undefined ? off ? `不可选 · ${off}` : this.dispositions[this.cursor].text : `说明（可选）：${this.note}▏  Enter 确认 · Esc 取消`;
+  }
+  private checkSegments(): TextSegment[] {
+    const checks: TextSegment[] = [];
+    this.facts.checks.forEach((check, i) => {
+      if (i) checks.push({ text: ' · ', fg: 'fg.faint' });
+      checks.push({ text: `${check.ok ? GLYPHS.ok : GLYPHS.err} `, fg: check.ok ? 'ac.ok' : 'ac.err' }, { text: check.text, fg: 'fg.body' });
+    });
+    const codes = this.facts.checks.filter(check => check.code && REASON_TEXT[check.code]).map(check => check.code!);
+    if (codes.length) checks.push({ text: `  ${codes.join(' ')}`, fg: 'fg.faint', dim: true });
+    return checks;
+  }
+
+  /** Fixed work/unknown/actions/footer; complete checks and selected wording page without truncation. */
+  private compactLines(width: number, height: number, tier: ColorTier): string[] {
+    const summary = this.lines(width, 4, tier).slice(0, 2);
+    const names = this.dispositionLines(width, 4, tier, true).slice(0, -1);
+    const checks = wrapSegments(this.checkSegments(), Math.max(1, width - 5)).map(segments => styledLine([{text:'检查 ',fg:'fg.label'},...segments],width,undefined,tier));
+    const description = wrapSegments([{text:this.selectedDescription(),fg:'fg.muted'}],width).map(segments=>styledLine(segments,width,'bg.selected',tier));
+    const space = Math.max(2, height - summary.length - names.length - 1);
+    const descriptionSize = Math.min(description.length, space - 1), checkSize = Math.max(1, space - descriptionSize);
+    this.compactPages = Math.max(1, Math.ceil(checks.length / checkSize), Math.ceil(description.length / descriptionSize));
+    if (this.note !== undefined && this.followNote) {
+      this.compactPage = Math.floor(Math.max(0,description.findLastIndex(line=>line.includes('▏'))) / descriptionSize);
+      this.followNote = false;
+    }
+    this.compactPage = Math.min(this.compactPage, this.compactPages - 1);
+    const page = (lines:string[],size:number) => {
+      const start = Math.min(this.compactPage, Math.max(0,Math.ceil(lines.length / size) - 1)) * size;
+      const part = lines.slice(start,start+size);
+      return [...part,...Array.from({length:size-part.length},()=>styledLine([],width,undefined,tier))];
+    };
+    const hint = this.compactPages > 1 ? [`${this.note===undefined?'n/p 详情':'PgUp/Dn'} ${this.compactPage+1}/${this.compactPages}`] : this.note===undefined?['↑↓ 选择','Enter 确认']:['Enter 确认'];
+    const actions = names.flatMap((name,index)=>index===this.cursor?[name,...page(description,descriptionSize)]:[name]);
+    return [...summary,...page(checks,checkSize),...actions,hintLine(hint,width,{esc:this.note===undefined?'Esc 返回查看':'Esc 取消说明',tier})];
   }
 
   /** Long owner identities and recovery paths remain available in full via PgUp/PgDn. Actions stay fixed. */
@@ -359,19 +403,22 @@ export class RecoveryPanel {
     return out;
   }
 
-  private dispositionLines(width: number, level: number, tier: ColorTier = COLOR_TIER): string[] {
+  private dispositionLines(width: number, level: number, tier: ColorTier = COLOR_TIER, namesOnly = false): string[] {
     const out: string[] = [], wide = width >= 100, nameWidth = this.ownerStage ? 40 : 28;
     this.dispositions.forEach((option, i) => {
       const selected = i === this.cursor, off = this.disabled(i), bg: TokenName | undefined = selected ? 'bg.selected' : undefined;
       const name = `${i + 1}  ${option.name}`, description = off ? `不可选 · ${off}` : option.text;
       const head: TextSegment[] = [{ text: selected ? '▏ ' : '  ', fg: 'ac.brand' }, { text: wide ? pad(name, nameWidth) : name, fg: off ? 'fg.gutter' : selected ? 'fg.primary' : 'fg.body', bold: selected && !off }];
-      const showText = level < 2 || selected || (this.ownerStage && !!off);
+      const showText = !namesOnly && (level < 2 || selected || (this.ownerStage && !!off));
       const note = selected && this.note !== undefined;
       const descSegments: TextSegment[] = note ? [{ text: `说明（可选）：${this.note}▏`, fg: 'fg.primary' }, { text: '  Enter 确认 · Esc 取消', fg: 'fg.label' }] : [{ text: description, fg: off ? 'fg.gutter' : 'fg.muted' }];
       if (wide && showText && !note) out.push(styledLine([...head, ...fit(descSegments, Math.max(1, width - 2 - nameWidth))], width, bg, tier));
       else {
         out.push(styledLine(head, width, bg, tier));
-        if (showText) out.push(styledLine([{ text: '     ' }, ...fit(descSegments, Math.max(1, width - 5))], width, bg, tier));
+        if (showText) {
+          const rows = selected ? wrapSegments(descSegments, Math.max(1, width - 5)) : [fit(descSegments, Math.max(1, width - 5))];
+          for (const segments of rows) out.push(styledLine([{ text: '     ' }, ...segments], width, bg, tier));
+        }
       }
     });
     out.push(hintLine(this.ownerStage ? width < 60 ? ['↑↓选', 'PgUp/Dn', 'Enter'] : ['↑↓ 选择', 'Enter 确认', 'PgUp/PgDn 详情'] : ['↑↓ 选择', 'Enter 确认'], width, { esc: 'Esc 返回查看', tier }));

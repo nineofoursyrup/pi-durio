@@ -5,7 +5,8 @@ import { hostname } from 'node:os';
 import { Evidence, digest } from './evidence.js';
 import { acquireOwner, type OwnerLease } from './ownership.js';
 import { inspectSnapshot, inspectAdmission } from './preflight.js';
-import { forEachDirectory } from './storage-projection.js';
+import { forEachDirectory, type StorageReader } from './storage-projection.js';
+import { assertDisplayOwnerAbsent, recoveryDisplayIdentity, inspectDisplaySnapshot, inspectDisplayAdmission } from './recovery-display-snapshot.js';
 import { DetailPage, projectRecovery, recoverySteerRequests, boundedText, type RecoveryPage, type DetailSummary } from './recovery-projection.js';
 import { recoveryRecords, recoverySnapshotId, ownerSnapshotId, type RecoveryRecords } from './recovery-facts.js';
 export { recoveryRecords } from './recovery-facts.js';
@@ -148,30 +149,80 @@ export function sessionWasEnded(records: RecoveryRecords, sessionId: string, fil
 
 export async function inspectOwnedRecovery(options: RecoveryOptions, owner: OwnerLease, resolutions: NonNullable<RecoveryDecision['resolutions']> = []) {
   owner.assertHeld();
-  const records = recoveryRecords(owner.path, options.runId);
+  const result = await inspectRecoveryState(options, owner.path,
+    (path, inspect) => inspectSnapshot(path, owner, inspect), path => inspectAdmission(path, owner), resolutions);
+  owner.assertHeld();
+  return result;
+}
+
+/** Display-only R3/U3 inspection. No original lock, writable store, control freeze or report append.
+ * Its report can prefill a decision only: prepareRecovery obtains a real lease and repeats every check.
+ */
+export interface DisplayRecoveryOptions extends RecoveryOptions {
+  /** Wait for an external read/paint boundary, then return its release. Verification remains host-owned. */
+  beforeExecutionRead?: () => Promise<() => void>;
+  signal?: AbortSignal;
+}
+export async function inspectRecoveryForDisplay(options: DisplayRecoveryOptions): Promise<RecoveryReport> {
+  const root = await realpath(options.dataRoot), records = recoveryRecords(root, options.runId);
+  if (!last(records, 'task.accepted')) throw Error('RUN_NOT_FOUND');
+  try {
+    const before = await recoveryDisplayIdentity(root);
+    const checkLocations = async () => { for (const location of await ownerLocations(root, records)) await assertDisplayOwnerAbsent(location.path); };
+    await checkLocations();
+    const result = await inspectRecoveryState(options, root,
+      (path, inspect) => inspectDisplaySnapshot(path, root, inspect), path => inspectDisplayAdmission(path, root), [], options);
+    await checkLocations();
+    if (before !== await recoveryDisplayIdentity(root)) throw Error('RECOVERY_SNAPSHOT_CHANGED: display source changed; recheck before deciding');
+    return result.report;
+  } catch (error) {
+    if (/STALE_RECOVERY_SNAPSHOT|INVALID_RECOVERY_PAGE|INVALID_DETAIL_PAGE/.test(String(error))) throw error;
+    options.signal?.throwIfAborted();
+    // Retained owners use the same host evidence as explicit settlement. Unstable/unknown
+    // sources with no owner stay blocked, without pretending a cleanup action can repair them.
+    let claims:OwnerClaim[] = [], ownerCleanup:RecoveryOwnerCleanup | undefined;
+    try {
+      claims = await ownerClaims(root, records);
+      const cleanup = await inspectOwnerCleanup(root, records, claims);
+      if (cleanup.holders.length) ownerCleanup = cleanup;
+    } catch { /* Malformed owner identity is an unresolved observation, never an admission. */ }
+    const choices = ownerCleanup ? ['inspect', 'confirm-cleanup'] : ['inspect', 'external-verification'];
+    return { runId:options.runId, snapshotId:ownerSnapshotId(records, claims), status:'blocked', exitCode:75,
+      reasons:[boundedText(String(error))], options:choices,
+      original:{status:last(records,'run.closed')?.status??'unknown',cleanup:last(records,'run.closed')?.cleanup,projection:'original remains in host evidence'},
+      tools:[], unknownModelAttempts:[], remainingModelAttempts:0, persistence:'not-requested',
+      ...(ownerCleanup ? {ownerClaims:claims,ownerCleanup} : {}),
+      needsInput:{reason:'Ownership or stable display snapshot unavailable',options:choices,risks:['Display checks never grant execution authority. Recheck after the source and ownership are stable.']} };
+  }
+}
+
+type SnapshotReader = <T>(path: string, inspect: (storage: StorageReader) => Promise<T>) => Promise<{source: string; sourceFiles: {path:string;sha256:string}[]} & T>;
+async function inspectRecoveryState(options: RecoveryOptions, root: string, snapshot: SnapshotReader, admission: (path:string) => ReturnType<typeof inspectDisplayAdmission>, resolutions: NonNullable<RecoveryDecision['resolutions']> = [], display?: DisplayRecoveryOptions) {
+  display?.signal?.throwIfAborted();
+  const records = recoveryRecords(root, options.runId);
   const accepted = last(records, 'task.accepted');
   if (!accepted || !/^[a-f0-9-]{36}$/.test(accepted.sessionId)) throw new Error('RUN_NOT_FOUND');
   const original = last(records, 'run.closed') ?? { status: 'unknown', reason: 'No original close receipt' };
-  for (const location of await ownerLocations(owner.path,records)) if(location.path!==owner.path) {
+  for (const location of await ownerLocations(root,records)) if(location.path!==root) {
     for(const marker of [join(location.path,'owner.json'),`${location.path}.lock`]) {
       try { await access(marker); throw new Error(`OWNER_CONFLICT: unresolved ${location.scope} owner`); } catch(error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
     }
   }
   const started = last(records, 'run.started');
-  const allRecords = recoveryRecords(owner.path);
+  const allRecords = recoveryRecords(root);
   const page = options.page ?? {};
   if (page.offset && !page.snapshotId) throw Error('INVALID_RECOVERY_PAGE: subsequent pages require snapshotId');
   const reasons = new DetailPage<string>(page.offset, page.limit);
   let externalBlock = false;
   const reason = (value: string) => { reasons.add(boundedText(value)); if (/OTHER_PENDING|OTHER_SESSION|SESSION_WITHOUT|ALIAS/.test(value)) externalBlock = true; };
-  const session = await inspectSnapshot(join(owner.path, 'sessions', accepted.sessionId, 'durable.sqlite'), owner,
+  const session = await snapshot(join(root, 'sessions', accepted.sessionId, 'durable.sqlite'),
     storage => projectRecovery(storage, records, accepted, started, options.runId, page, resolutions, reason));
   const submission = session.main;
   const remainingModelAttempts = Math.max(0, 8 - session.modelAttempts);
-  await forEachDirectory(join(owner.path,'sessions'), async dir => {
+  await forEachDirectory(join(root,'sessions'), async dir => {
     if (!dir.isDirectory) { reason('SESSION_STORAGE_ALIAS'); return; }
     if (dir.name === accepted.sessionId) return;
-    const other = await inspectAdmission(join(owner.path,'sessions',dir.name,'durable.sqlite'),owner);
+    const other = await admission(join(root,'sessions',dir.name,'durable.sqlite'));
     if (other.pending && !sessionWasEnded(allRecords,dir.name,other.sourceFiles)) reason(`OTHER_SESSION_PENDING:${dir.name}`);
     const otherAccepted = allRecords.find(r => r.kind === 'task.accepted' && (r.data as any).sessionId === dir.name);
     if (!otherAccepted) reason(`SESSION_WITHOUT_HOST_IDENTITY:${dir.name}`);
@@ -182,7 +233,17 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
   const config = last(records,'execution.config');
   const coding = accepted.authorization?.execution === 'trusted-local-coding';
   if (!settled && !ended) {
-    try { verifyArtifact(owner.path,last(records,'execution.artifact')); } catch (error) { reason(String(error)); }
+    let releaseRead:(() => void)|undefined;
+    try {
+      // Only display checks use this scheduling boundary. The caller cannot replace or skip
+      // verifyArtifact; a failed boundary is itself a blocking reason, never an admission.
+      display?.signal?.throwIfAborted();
+      releaseRead = await display?.beforeExecutionRead?.();
+      display?.signal?.throwIfAborted();
+      verifyArtifact(root,last(records,'execution.artifact'));
+    } catch (error) { reason(String(error)); }
+    finally { releaseRead?.(); }
+    display?.signal?.throwIfAborted();
     if (!options.authorization) reason('CURRENT_AUTHORIZATION_REQUIRED');
     else {
       const auth = options.authorization;
@@ -193,7 +254,7 @@ export async function inspectOwnedRecovery(options: RecoveryOptions, owner: Owne
         const previous = last(records,'workspace.owner');
         if (!previous || previous.root !== await resolveWorkspaceRoot(workspace)) reason('WORKSPACE_ROOT_CHANGED');
       }
-      const expected = retainedExecutionConfig(owner.path,coding,auth.mode,auth.toolEnvironment,config);
+      const expected = retainedExecutionConfig(root,coding,auth.mode,auth.toolEnvironment,config);
       if (!config || config.recoveryProtocol !== 1 || Object.entries(expected).some(([key,value]) => JSON.stringify(config[key]) !== JSON.stringify(value))) reason('EXECUTION_CONFIGURATION_CHANGED');
       const agent = session.agent as any;
       if (!agent || agent.cwd !== accepted.workspace || agent.instructions !== expected.instructions || agent.model?.provider !== 'deepseek' || agent.model?.modelId !== 'deepseek-flash' || agent.tools !== undefined || agent.extensions !== undefined || agent.thinkingLevel !== undefined) reason('DURABLE_AGENT_CHANGED');

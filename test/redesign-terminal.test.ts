@@ -73,6 +73,8 @@ test('offline grids render all nine screens, complete 1a/1f and the stats states
     const text = readFileSync(join(output, path), 'utf8');
     assert.match(text, title, `${path} keeps its header`);
     assert.match(text, /Esc/, `${path} keeps its exit hint`);
+    assert.match(text, new RegExp('00\\|[^\\n]*' + (screen === '2c' ? '指标 · 本机实测' : title.source)), `${path} starts the view in terminal row zero`);
+    assert.doesNotMatch(text, /◆ pi-durio|Enter steer|Ctrl\+X Enter follow-up|检查已保留的合成事实/, `${path} covers the underlying session`);
   }
   const stats = readFileSync(join(output, '1e-132x38-truecolor-six-oracles.txt'), 'utf8');
   assert.match(stats, /80\.0%/); assert.match(stats, /25\.0%/); assert.match(stats, /1\/3/); assert.match(stats, /62\.5%/);

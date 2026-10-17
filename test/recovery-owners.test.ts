@@ -127,7 +127,7 @@ test('release confirms the retained uncertainty, automatically rechecks, and all
     const records = Array.from(recoveryRecords(f.dataRoot, f.runId));
     const settled = records.find(record => record.kind === 'recovery.owner-settled')!;
     assert.ok(settled); assert.equal((settled.data as any).externalProcesses, 'unknown');
-    assert.ok(records.some(record => record.kind === 'recovery.report' && record.seq > settled.seq), 'a fresh host check follows the release without another key');
+    assert.ok(!records.some(record => record.kind === 'recovery.report' && record.seq > settled.seq), 'the automatic fresh check shown above is display-only and appends no report after explicit owner settlement');
     assert.equal((records.find(record => record.kind === 'run.closed')!.data as any).status, 'unknown');
     key('\x1b'); assert.match(screen(), /2  视为已完成/); assert.match(screen(), /4  结束旧工作，开新任务/);
     assert.doesNotMatch(screen(), /所有者/); assert.equal(calls, 0);

@@ -82,6 +82,7 @@ export async function createFixtures(packageRoot, directory) {
 export async function renderers(packageRoot, fixture) {
   const theme = await load(packageRoot, 'dist/src/tui/theme.js');
   const frame = await load(packageRoot, 'dist/src/tui/view-stack.js');
+  const { showFullScreen } = await load(packageRoot, 'dist/src/tui/fullscreen.js');
   const welcome = await load(packageRoot, 'dist/src/tui/welcome.js');
   const session = await load(packageRoot, 'dist/src/tui/session-screen.js');
   const { HardwareCursorEditor } = await load(packageRoot, 'dist/src/tui/cursor.js');
@@ -136,14 +137,14 @@ export async function renderers(packageRoot, fixture) {
       const host = new pi.TuiAltScreen(terminal, true);
       host.setLayoutRoot({ invalidate() {}, render: () => base });
       const component = { invalidate() {}, render: w => {
-        const h = Math.max(2, Math.floor(height * 0.9) - 2);
+        const h = height;
         if (id === '1d') return selection.render(w, h);
         if (id === '1e') { const figures = statsFigures(state); return new StatsView(request, () => ({ scope: request.scope, sample: { N: figures.acceptance.N, excluded: 3 }, versions: { ids: ['synthetic'], unknown: 0 }, figures })).render(w, h, tier); }
         if (id === '2c') return self.render(w, h, tier);
-        const overlayHeight = Math.max(3, Math.floor(height * 0.9) - 1);
+        const overlayHeight = height;
         return id === '2a' ? trace.render(w, overlayHeight, 'Esc 返回会话') : evaluation.render(w, overlayHeight, tier);
       } };
-      host.showOverlay(component, { width: '96%', maxHeight: '90%', anchor: 'center' });
+      showFullScreen(host, terminal, component);
       try { host.start(); host.renderNow(true); return host.getScreenLines(); } finally { host.stop(); }
     }
     throw Error(`UNKNOWN_SCREEN:${id}`);

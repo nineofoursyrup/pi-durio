@@ -79,20 +79,21 @@ export class TerminalWidthGate {
   consumeTerminalReply(data:string){return this.probe.consume(data);}
   get blocked(){return this.busy||this.queryHolds>0||this.error!==undefined;}
   /** Keep synchronous host checks out of a timed CPR exchange, including any already in flight. */
-  async withoutQueries<T>(work:()=>Promise<T>):Promise<T> {
+  async holdQueries():Promise<() => void> {
     this.queryHolds++;
-    try {
-      await this.calibration;
-      if(this.closing)throw Error('WIDTH_GATE_CLOSED');
-      if(!this.error)this.message('Checking recovery; input retained. Ctrl+C / Esc available.');
-      return await work();
-    } finally {
-      this.queryHolds--;
+    let held=true;
+    const release=()=>{
+      if(!held)return;held=false;this.queryHolds--;
       if(!this.closing&&!this.queryHolds) {
         this.inspect();
         if(!this.blocked){this.options.ready();this.options.tui.renderNow(true);this.drain();}
       }
-    }
+    };
+    try {
+      await this.calibration;
+      if(this.closing)throw Error('WIDTH_GATE_CLOSED');
+      return release;
+    } catch(error) {release();throw error;}
   }
   inspect(extra:string[]=[]):void {
     if(this.closing)return;
