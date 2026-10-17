@@ -4,9 +4,10 @@ import {existsSync} from 'node:fs';
 import {randomUUID} from 'node:crypto';
 import {join} from 'node:path';
 import {newEvalDirectory} from '../eval/directory.js';
+import {openHostReadonly,readObject} from '../evidence.js';
 import {formatAmount,type CostTotals} from '../cost-estimate.js';
 import {evalReport,regradeEval,runEval} from '../eval/runner.js';
-import {loadEvalPlan} from '../eval/plan.js';
+import {loadEvalPlan,validatePlan,type EvalPlan} from '../eval/plan.js';
 import {planState,readPlanReport,type PlanSource,type EvalReport} from '../eval/overview.js';
 import type {EvalCleanupReceipt} from '../eval/cleanup.js';
 import type {ConfirmConfig} from './view-stack.js';
@@ -14,6 +15,21 @@ import type {EvalExitFact} from './exit-summary.js';
 
 export type EvalAction='run'|'grade';
 export const samePlan=(a:PlanSource,b:PlanSource)=>a.root===b.root&&a.id===b.id&&a.origin?.reportId===b.origin?.reportId&&a.origin?.decisionId===b.origin?.decisionId&&a.origin?.groupId===b.origin?.groupId;
+/** Status-only counts from acquired facts, without verifying fixed execution content.
+ * No completion, grading or evidence-protection conclusion is returned here. */
+export function readEvalProgress(source:PlanSource):[number,number] {
+  const db=openHostReadonly(source.root),started=new Set<string>(),outcomes=new Map<string,boolean>();let plan:EvalPlan|undefined;
+  try {
+    for(const row of db.prepare("SELECT kind,body FROM records WHERE run_id=? AND seq<=? AND kind IN ('eval.plan','eval.trial-started','eval.outcome') ORDER BY seq").iterate(source.id,source.through??Number.MAX_SAFE_INTEGER)) {
+      const data=JSON.parse(readObject(source.root,JSON.parse(String(row.body))).toString());
+      if(row.kind==='eval.plan')plan??=data;
+      else if(row.kind==='eval.trial-started')started.add(data.trialId);
+      else if(!outcomes.has(data.trialId))outcomes.set(data.trialId,!!data.started);
+    }
+  } finally {db.close();}
+  if(!plan)throw Error('EVAL_PLAN_NOT_FOUND');validatePlan(plan);
+  return [plan.trials.filter(trial=>outcomes.has(trial.id)?outcomes.get(trial.id):started.has(trial.id)).length,plan.trials.length];
+}
 export function evalBlocked(source:PlanSource,action:EvalAction,host:{writeBlocked?:string;busy?:boolean;now?:number}={}) {
   if(host.writeBlocked)return host.writeBlocked;
   if(host.busy)return '有任务运行中，结束后再启动';
