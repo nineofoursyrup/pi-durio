@@ -37,4 +37,3 @@ export function validateCandidateChecks(value:unknown,targets:SourceTarget[]):as
   validateComparison({...c.comparison,scale:'relative',sides:{baseline:{runtime,instructions:''},candidate:{runtime,instructions:''}}},ids,pairedTrials('declaration',ids,c.comparison.repetitions),b);
  }
 }
-
