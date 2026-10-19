@@ -11,3 +11,7 @@ Use the five default triage labels; read `docs/agents/triage-labels.md` before t
 ### Domain docs
 
 Use a single-context layout; read `docs/agents/domain.md` before exploring domain terms or architectural decisions.
+
+## Tests
+
+Read `docs/agents/testing.md` before running `node --test` directly or running a check while another worktree may be testing.
