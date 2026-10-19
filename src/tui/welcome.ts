@@ -193,9 +193,12 @@ export function renderWelcome(facts: WelcomeFacts, width: number, height: number
 }
 
 /** 1a 状态行：`○ 空闲 · 模型 · ctx ≈… / 1M · 本会话 0 tok ≈ ¥0.00`（本进程尚无会话）。 */
+export function welcomeStatusSegments(model: string, context: string): TextSegment[] {
+  return [{ text: GLYPHS.idle, fg: 'ac.ok' }, { text: ' 空闲', fg: 'ac.ok' }, { text: ' · ', fg: 'fg.faint' }, { text: model, fg: 'ac.model' }, { text: ' · ', fg: 'fg.faint' },
+    { text: `${context} · 本会话 0 tok ${formatAmount(0, 'CNY')}`, fg: 'fg.label' }];
+}
 export function welcomeStatus(model: string, context: string, width: number, tier: ColorTier = COLOR_TIER) {
-  return styledLine([{ text: GLYPHS.idle, fg: 'ac.ok' }, { text: ' 空闲', fg: 'ac.ok' }, { text: ' · ', fg: 'fg.faint' }, { text: model, fg: 'ac.model' }, { text: ' · ', fg: 'fg.faint' },
-    { text: `${context} · 本会话 0 tok ${formatAmount(0, 'CNY')}`, fg: 'fg.label' }], width, undefined, tier);
+  return styledLine(welcomeStatusSegments(model, context), width, undefined, tier);
 }
 
 export interface WelcomeHost {

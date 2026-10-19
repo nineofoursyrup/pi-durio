@@ -41,7 +41,7 @@ import { TraceRawView, outputItem } from './trace-raw.js';
 import type { TraceSpan } from '../trace.js';
 import { HardwareCursorEditor, hideCursorDuringPaint } from './cursor.js';
 import { TerminalWidthGate } from './width-gate.js';
-import { showFullScreen } from './fullscreen.js';
+import { fullScreenHeight, showFullScreen } from './fullscreen.js';
 import { readDisplayIndex, resolveDisplayInput, type DisplayIndex, type DisplayKind } from '../display-number.js';
 import { readSessionChains } from '../session-chain.js';
 import { formatCostTotals } from '../cost-estimate.js';
@@ -49,10 +49,10 @@ import { exitSummary, ProcessCleanupReceipts, type EvalExitFact } from './exit-s
 export { exitCostSummary } from './exit-summary.js';
 import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor, dimForOverlay } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
-import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageLine, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
-import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
+import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageSegments, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
+import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, footerLines, inset, sideMargin, bottomMargin, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
-import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatus } from './welcome.js';
+import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatusSegments } from './welcome.js';
 import { COMPACT_VERSION_CHANGED, CONTINUE_TAIL_UNFINISHED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
 import { currentExecutionVersion } from '../execution-version.js';
 import { RecoveryPanel, OWNER_RELEASE_RISK, disabledInputLines, readRecoveryFacts, recoveryPages, type RecoveryAction } from './recovery.js';
@@ -249,19 +249,13 @@ export class ReadOnlyTui {
     // 1b（U2）：头部一行；主区；状态行；输入框；底栏用量与键位提示（状态反馈替换键位提示行）。
     const header:Component={invalidate(){},render:width=>{const state=this.headerState();return [headerLine(state,width,narrowing(width,state,this.statusParts()).headerRight)];}};
     const status:Component={invalidate(){},render:width=>{const parts=this.statusParts();return [statusLine(parts,width,narrowing(width,this.headerState(),parts).statusHint)];}};
-    const usageRow:Component={invalidate(){},render:width=>{
-      const usage=this.usageText();
-      // 1a 空闲时第一行是欢迎屏的状态行（#71），否则是 1b 底栏用量。
-      return [this.welcome&&this.phase==='idle'&&!this.viewingRecovery?welcomeStatus(this.welcome.facts.model.id,this.contextUsage(),width):usageLine(this.model,this.contextUsage(),usage.scope,usage.tokens,usage.cost,width)];
-    }};
-    const hintRow:Component={invalidate(){},render:width=>{
-      const feedback=this.hintFeedback??(this.notice||undefined);
-      return [feedback!==undefined?hintLine([],width,{feedback}):hintLine(this.sessionHints(),width,{keepLast:'? 帮助'})];
-    }};
+    // 底栏（U10）：左侧用量，右侧键位提示与即时反馈；放不下时退回两行。1c 收起用量时只剩提示。
+    const footer:Component={invalidate(){},render:width=>footerLines(this.recoveryPlan(width).usage?this.footerLeft():[],this.sessionHints(),width,{feedback:this.hintFeedback??(this.notice||undefined),keepLast:'? 帮助'})};
+    const bottomPad:Component={invalidate(){},render:width=>[styledLine([],width)]};
     const recoveryPanel:Component={invalidate(){},render:width=>{const lines=this.recoveryLoading?.isShowing?[this.recoveryLoading.renderLine(width),hintLine([],width,{esc:'Esc 返回查看'})]:this.recoveryPanel?.render(width,this.recoveryPlan(width).panel)??[];this.widths?.inspect(lines);return lines;}};
     const disabledInput:Component={invalidate(){},render:width=>disabledInputLines(this.editor.getExpandedText(),width)};
     const queue:Component={invalidate(){},render:width=>this.queueStrip.render(this.sessionQueue(),width,this.terminal.rows),handleMouse:event=>{
-      if(event.type==='click'){const id=this.queueStrip.hit(event.x,event.y);if(id){void this.queueDecision(id,'withdraw');return {handled:true};}}
+      if(event.type==='click'){const id=this.queueStrip.hit(event.x-sideMargin(this.terminal.columns),event.y);if(id){void this.queueDecision(id,'withdraw');return {handled:true};}}
       return undefined;
     }};
     // 点击状态栏的 `◈ 恢复核对` 重开面板（U3）。
@@ -273,7 +267,7 @@ export class ReadOnlyTui {
       const tip=TIPS[Math.floor(Math.random()*TIPS.length)];
       this.welcome=new WelcomeScreen({coding:!!options.coding,
         read:()=>readWelcomeFacts({workspace:options.workspace,dataRoot:options.dataRoot,coding:!!options.coding,mode:options.mode,toolEnvironment:options.toolEnvironment},id=>this.shown('session',id),tip),
-        height:width=>this.terminal.rows-2-Math.min(6,Math.max(3,this.editor.render(width).length)),
+        height:width=>this.terminal.rows-bottomMargin(this.terminal.rows)-this.footerRows(width)-Math.min(6,Math.max(3,this.editor.render(width).length)),
         open:session=>{try{this.command(parseCommand(`/history ${session}`));}catch(error){this.notice=error instanceof CommandError?error.line:safe(String(error));}this.tui.requestRender();},
         changed:()=>this.tui.requestRender(),inspect:lines=>this.widths?.inspect(lines)});
     }
@@ -286,17 +280,18 @@ export class ReadOnlyTui {
       {component:queue,basis:'auto',visible:()=>!this.welcome&&!this.viewingRecovery&&this.queueEntries.length>0},
       {component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6,visible:()=>!this.viewingRecovery},
       {component:disabledInput,basis:3,visible:view=>this.viewingRecovery&&this.recoveryPlan(view.width).input},
-      {component:usageRow,basis:1,visible:view=>this.recoveryPlan(view.width).usage},
-      {component:hintRow,basis:1,visible:view=>this.recoveryPlan(view.width).hints}]);
+      {component:footer,basis:'auto',visible:view=>this.recoveryPlan(view.width).hints},
+      {component:bottomPad,basis:1,visible:()=>bottomMargin(this.terminal.rows)>0}]);
     const root:Component={invalidate:()=>layout.invalidate(),render:width=>{
       if(width<40 || this.terminal.rows<12) return new Text(`窗口过小：建议至少 40 × 12 字符格（待真实终端确认）\n当前 ${width} × ${this.terminal.rows}\n扩大窗口继续；${this.dialog?'Esc 关闭确认框':'Ctrl+C 中止/再次退出'}。草稿保留。`,0,0).render(width).slice(0,this.terminal.rows);
       return layout.render(width);
     }};
     // Viewport layout renders the leaf components directly, bypassing VStack.render.
     // Keep each component identity so focus, scrolling, mouse regions and sizing remain intact.
-    for(const component of [header,this.transcript,recoveryPanel,statusRegion,queue,this.editor,disabledInput,usageRow,hintRow,...welcome.map(entry=>entry.component)]){
+    // Side margins (U10) are painted here: each component renders at the inner width.
+    for(const component of [header,this.transcript,recoveryPanel,statusRegion,queue,this.editor,disabledInput,footer,...welcome.map(entry=>entry.component)]){
       const render=component.render.bind(component);
-      component.render=width=>{const lines=render(width);return this.dialog?lines.map(line=>dimForOverlay(line)):lines;};
+      component.render=width=>{const margin=sideMargin(width),lines=inset(render(width-2*margin),width,margin);return this.dialog?lines.map(line=>dimForOverlay(line)):lines;};
     }
     // Preserve upstream layout-node behavior by selecting the appropriate layout on resize.
     const resizeLayout=()=>this.tui.setLayoutRoot(this.terminal.columns<40||this.terminal.rows<12?root:layout);
@@ -413,6 +408,17 @@ export class ReadOnlyTui {
   }
   private prefix() {return estimateTaskPrefix({dataRoot:this.options.dataRoot,workspace:this.options.workspace,coding:!!this.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}
   private contextUsage() {return `ctx ${this.context.estimated?'≈':''}${tokenCount(this.context.tokens)} / ${tokenCount(this.context.contextWindow)}`;}
+  /** 底栏左侧：1a 空闲时是欢迎屏的状态（#71），否则是 1b 的用量。 */
+  private footerLeft() {
+    if(this.welcome&&this.phase==='idle'&&!this.viewingRecovery)return welcomeStatusSegments(this.welcome.facts.model.id,this.contextUsage());
+    const usage=this.usageText();
+    return usageSegments(this.model,this.contextUsage(),usage.scope,usage.tokens,usage.cost);
+  }
+  /** 底栏占的行数：用量与键位提示合成一行，放不下时两行。 */
+  private footerRows(width:number) {
+    const inner=width-2*sideMargin(width);
+    return footerLines(this.footerLeft(),this.sessionHints(),inner,{feedback:this.hintFeedback??(this.notice||undefined),keepLast:'? 帮助'}).length;
+  }
   /**
    * 底栏用量：运行时为本任务（当前 run），空闲时为本会话（上下文链上各 run 之和）；tok = 输入（含缓存命中）+ 输出。
    * 每次刷新或状态变化后重算一次；只是显示，读取失败只让金额未知。
@@ -1047,10 +1053,10 @@ export class ReadOnlyTui {
   private recoveryPlan(width:number) {
     if(this.recoveryLoading?.isShowing)return {main:true,input:true,usage:true,hints:true,panel:2};
     if(!this.viewingRecovery||!this.recoveryOpen||!this.recoveryPanel)return {main:true,input:true,usage:true,hints:true,panel:0};
-    const rows=this.terminal.rows-2,full=this.recoveryPanel.fullHeight(width);
-    if(rows>=full+3+2+1)return {main:true,input:true,usage:true,hints:true,panel:full};
-    if(rows>=full+3+2)return {main:false,input:true,usage:true,hints:true,panel:full};
-    if(rows>=full+2)return {main:false,input:false,usage:true,hints:true,panel:full};
+    const rows=this.terminal.rows-2-bottomMargin(this.terminal.rows),full=this.recoveryPanel.fullHeight(width),foot=this.footerRows(width);
+    if(rows>=full+3+foot+1)return {main:true,input:true,usage:true,hints:true,panel:full};
+    if(rows>=full+3+foot)return {main:false,input:true,usage:true,hints:true,panel:full};
+    if(rows>=full+foot)return {main:false,input:false,usage:true,hints:true,panel:full};
     if(rows>=full+1)return {main:false,input:false,usage:false,hints:true,panel:full};
     return {main:false,input:false,usage:false,hints:false,panel:rows};
   }
@@ -1295,7 +1301,7 @@ export class ReadOnlyTui {
     if(this.hintFeedback!==undefined&&lines.length)lines[lines.length-1]=hintLine([],width,{feedback:this.hintFeedback,esc:escHint(this.panel?.kind==='metrics'?this.metricsView?.depth??1:this.panel?.kind==='history'?this.historyView?.depth??1:this.viewStack.length)});
     return this.dialog&&this.viewStack[0]?.kind==='exit'?lines.map(line=>dimForOverlay(line)):lines;
   }
-  private overlayHeight(){return this.viewStack[0]?.kind==='exit'?Math.max(3,Math.floor(this.terminal.rows*0.9)-1):this.terminal.rows;}
+  private overlayHeight(){return this.viewStack[0]?.kind==='exit'?Math.max(3,Math.floor(this.terminal.rows*0.9)-1):fullScreenHeight(this.terminal.rows);}
   /** 帮助视图：会话屏键位与命令清单（同一张命令表），正文在固定头尾之间滚动。 */
   private helpLines(width:number) {
     const panel=this.panel!;

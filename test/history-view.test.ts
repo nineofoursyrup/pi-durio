@@ -40,7 +40,7 @@ test('history filters use last activity and the same three-dimensional scope as 
   b.append('run.closed', { status: 'completed', cleanup: 'confirmed' });
   a.append('run.closed', { status: 'completed', cleanup: 'confirmed' }); a.close(); b.close();
   const view = new HistoryView(root, { project: '/project' });
-  assert.match(text(view).split('\n').find(line => line.startsWith('›'))!, /active last/);
+  assert.match(text(view).split('\n').find(line => line.trimStart().startsWith('›'))!, /active last/);
 });
 
 import { historyScope, historyCommand, HistoryFilter } from '../src/tui/history-filter.js';

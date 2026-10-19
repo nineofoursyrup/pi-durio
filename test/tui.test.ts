@@ -213,11 +213,11 @@ test('usage line and exit summary show CNY estimates with unknown and partial re
   try {
     key('Read the readme');key('\r');await until(()=>f.screen().includes('✓ 完成'));
     // 1M cache-miss input plus 1M output: ¥10.00 at peak, ¥5.00 off-peak; the second response has no usage.
-    assert.match(f.screen(),/ · 本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown\s*\n/);
+    assert.match(f.screen(),/ · 本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown(?! partial).*$/m);
     const first=(await readRun(dataRoot,readAcceptedTasks(dataRoot).tasks[0].runId!)).result as {sessionId:string};
     key('Again');key('\r');await until(()=>readAcceptedTasks(dataRoot).tasks.length===2&&f.screen().includes('✓ 完成')&&f.screen().includes('partial'));
     // The idle footer sums the session's chain; the new run lacks a cache-hit count, so the sum is partial.
-    assert.match(f.screen(),/ · 本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown partial\s*\n/);
+    assert.match(f.screen(),/ · 本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown partial.*$/m);
     key('\x03');key('\x03');const closed=await f.app.closed;
     assert.match(exitCostSummary(dataRoot,closed.result!),new RegExp(`^本次会话 ${readDisplayIndex(dataRoot).label('session',first.sessionId)} 费用 ≈ ¥(10|5)\\.00 \\+1 unknown partial（估算 · 非账单）$`));
     assert.match(closed.summary.join('\n'),/本会话 2M tok ≈ ¥(10|5)\.00（估算 · 非账单） · \+1 unknown · partial/);
@@ -287,7 +287,7 @@ test('focused editor uses one hardware caret without a competing painted caret',
     assert.ok(overlay.lastIndexOf('\x1b[?25l')>overlay.lastIndexOf('\x1b[?25h'),'a view owns focus and hides the editor caret');
     assert.doesNotMatch(overlay,/\x1b\[7m/,'blurred editor must not leave a painted caret behind');
     key('\x1b');f.app.screen();
-    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;12H\x1b\[\?25h/,'return to the unchanged editor insertion point');
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;14H\x1b\[\?25h/,'return to the unchanged editor insertion point');
   } finally { await f.app.exit(); }
 });
 
@@ -303,6 +303,7 @@ test('caret adaptation preserves independent reverse-video component styles', ()
     assert.doesNotMatch(lines[1],/\x1b\[7m/,'only the editor caret loses reverse-video styling');
     assert.equal(lines[1].includes(CURSOR_MARKER),focused,'only focused input provides the IME insertion marker');
     assert.equal(editor.focused,focused,'rendering does not change input focus');
+    assert.match(lines[1],/^(\x1b\[[0-9;]*m)*❯(\x1b\[[0-9;]*m)* /,'the first content row starts with the ❯ prompt (U10)');
   }
 });
 
@@ -312,7 +313,7 @@ test('real bracketed paste preserves combining text and keeps caret visible thro
     key('\x1b[200~A👩‍💻é中B\x1b[201~');f.app.screen();
     assert.equal(f.transport.calls.length,0,'paste must not submit');
     assert.match(f.screen(),/A👩‍💻é中B/);
-    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;8H\x1b\[\?25h/,'wide and combining text position the hardware caret in terminal cells');
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;10H\x1b\[\?25h/,'wide and combining text position the hardware caret in terminal cells');
     key('\x01');key('\x1b[C');key('\x1b[C');key('\x04');
     assert.match(f.screen(),/A👩‍💻中B/,'Ctrl+D removes the complete combining grapheme');
     key('\x03');
@@ -336,7 +337,7 @@ test('repainting hides the hardware caret before moving it through display rows'
     const paint=f.terminal.writes.find(value=>value.includes('\x1b[2K'));
     assert.ok(paint,'typing must repaint the real ANSI frame');
     assert.match(paint,/^\x1b\[\?2026h\x1b\[\?25l/,'hide before drawing on terminals without synchronized-output support');
-    assert.match(paint,/\x1b\[21;2H\x1b\[\?25h\x1b\[\?2026l$/,'restore the hardware caret at the actual insertion point');
+    assert.match(paint,/\x1b\[21;4H\x1b\[\?25h\x1b\[\?2026l$/,'restore the hardware caret at the actual insertion point');
   } finally {await f.app.exit();}
 });
 

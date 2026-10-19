@@ -112,11 +112,14 @@ export function narrowing(width: number, header: HeaderState, status: { left: Te
 // ─── 底栏用量 ──────────────────────────────────────────────────────────────
 
 /** `模型 · ctx ≈… / 1M · 本会话 X tok ≈ ¥Y`；unknown/partial 用 `ac.warn`。 */
-export function usageLine(model: string, context: string, scope: '本会话' | '本任务', tokens: number, cost: string, width: number, tier: ColorTier = COLOR_TIER) {
+export function usageSegments(model: string, context: string, scope: '本会话' | '本任务', tokens: number, cost: string): TextSegment[] {
   const segments: TextSegment[] = [{ text: model, fg: 'ac.model' }, { text: ` · ${context} · ${scope} ${tokenCount(tokens)} tok`, fg: 'fg.label' }];
   segments.push({ text: ' ' });
   for (const part of cost.split(/(\+\d+ unknown|partial|unknown)/).filter(Boolean)) segments.push({ text: part, fg: /unknown|partial/.test(part) ? 'ac.warn' : 'fg.label' });
-  return styledLine(segments, width, undefined, tier);
+  return segments;
+}
+export function usageLine(model: string, context: string, scope: '本会话' | '本任务', tokens: number, cost: string, width: number, tier: ColorTier = COLOR_TIER) {
+  return styledLine(usageSegments(model, context, scope, tokens, cost), width, undefined, tier);
 }
 
 // ─── 主区 ──────────────────────────────────────────────────────────────────

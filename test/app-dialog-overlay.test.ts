@@ -36,7 +36,7 @@ test('app dialog dims session and full-view backgrounds, and yields to the small
     app.start(); assert.match(text(), /pi·durio/);
     open(); assert.match(text(), /确认测试动作/); assertDimmedHeader('pi·durio');
     terminal.input('\x1b'); terminal.input('/help'); terminal.input('\r');
-    assert.match(text(), /^帮助/);
+    assert.match(text(), /^ {2}帮助/);
     open(); assertDimmedHeader('帮助');
     terminal.columns = 39; terminal.rows = 11; terminal.resize();
     assert.match(text(), /窗口过小/); assert.match(text(), /Esc 关闭确认框/); assert.doesNotMatch(text(), /Ctrl\+C 中止/); assert.doesNotMatch(text(), /确认测试动作|^帮助/m);

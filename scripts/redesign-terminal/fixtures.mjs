@@ -82,7 +82,7 @@ export async function createFixtures(packageRoot, directory) {
 export async function renderers(packageRoot, fixture) {
   const theme = await load(packageRoot, 'dist/src/tui/theme.js');
   const frame = await load(packageRoot, 'dist/src/tui/view-stack.js');
-  const { showFullScreen } = await load(packageRoot, 'dist/src/tui/fullscreen.js');
+  const { showFullScreen, fullScreenHeight } = await load(packageRoot, 'dist/src/tui/fullscreen.js');
   const welcome = await load(packageRoot, 'dist/src/tui/welcome.js');
   const session = await load(packageRoot, 'dist/src/tui/session-screen.js');
   const { HardwareCursorEditor } = await load(packageRoot, 'dist/src/tui/cursor.js');
@@ -109,26 +109,38 @@ export async function renderers(packageRoot, fixture) {
   await self.ready;
   const empty = (width, tier) => theme.styledLine([], width, undefined, tier);
   const pad = (lines, width, height, tier) => { if (lines.length > height) throw Error('FIXTURE_FRAME_OVERFLOW'); return [...lines, ...Array.from({ length: height - lines.length }, () => empty(width, tier))]; };
+  // Session screens (1a/1b/1c) mirror ReadOnlyTui: components render at the inner width,
+  // the side margins and the bottom margin are painted around them (U10).
+  const sessionScreen = (width, height, tier, build) => {
+    const margin = frame.sideMargin(width), bottom = frame.bottomMargin(height);
+    return [...frame.inset(build(width - 2 * margin, height - bottom), width, margin, tier), ...Array.from({ length: bottom }, () => empty(width, tier))];
+  };
   async function render(id, width, height, tier = 'truecolor', state = 'six-oracles') {
     theme.overrideColorTierForTest(tier);
-    if (id === '1a') return [...welcome.renderWelcome(welcomeFacts, width, height - 5, new Date(at), tier).lines, ...editor.render(width), welcome.welcomeStatus('deepseek-flash', 'ctx ≈863 / 1M', width, tier), frame.hintLine(['Enter 提交', '/ 命令', 'Ctrl+R 历史', '? 帮助'], width, { keepLast: '? 帮助', tier })];
-    if (id === '1b') {
-      const header = { workspace: '/synthetic/shop-api', readOnly: false, session: 's-6666', run: 'r-1111', task: 1, round: 3 }, status = session.statusParts({ phase: 'running', recovery: false, round: 3, retry: false, elapsedMs: 42000, frame: 0 }), narrow = session.narrowing(width, header, status);
-      const tool = session.toolLines({ kind: 'tool', tool: 'bash', args: 'npm test', argKind: 'command', state: 'error', startedAt: at, summary: 'exit 1 · 20 行', output: { lines: ['FAIL expected 80.00 received 80.01'], total: 20, end: 'tail' } }, width, false, Date.parse(at), 0, tier);
-      const body = [...session.userLines('修复购物车舍入（合成显示）', width, false, tier), ...session.assistantLines('改为以分为单位，检查仍有一项失败。', width, tier), tool.row, ...tool.body, ...(tool.paging ? [tool.paging] : [])];
-      return [session.headerLine(header, width, narrow.headerRight, tier), ...pad(body.slice(0, height - 7), width, height - 7, tier), session.statusLine(status, width, narrow.statusHint, tier), ...editor.render(width), session.usageLine('deepseek-flash', 'ctx ≈863 / 1M', '本任务', 1800, '≈¥0.01', width, tier), frame.hintLine(['Enter steer', 'Ctrl+X Enter follow-up', 'Ctrl+C 中止', 'Ctrl+O 展开'], width, { tier })];
-    }
-    if (id === '1c') {
+    if (id === '1a') return sessionScreen(width, height, tier, (w, h) => {
+      const footer = frame.footerLines(welcome.welcomeStatusSegments('deepseek-flash', 'ctx ≈863 / 1M'), ['Enter 提交', '/ 命令', 'Ctrl+R 历史', '? 帮助'], w, { keepLast: '? 帮助', tier }), input = editor.render(w);
+      return [...welcome.renderWelcome(welcomeFacts, w, h - input.length - footer.length, new Date(at), tier).lines, ...input, ...footer];
+    });
+    if (id === '1b') return sessionScreen(width, height, tier, (w, h) => {
+      const header = { workspace: '/synthetic/shop-api', readOnly: false, session: 's-6666', run: 'r-1111', task: 1, round: 3 }, status = session.statusParts({ phase: 'running', recovery: false, round: 3, retry: false, elapsedMs: 42000, frame: 0 }), narrow = session.narrowing(w, header, status);
+      const tool = session.toolLines({ kind: 'tool', tool: 'bash', args: 'npm test', argKind: 'command', state: 'error', startedAt: at, summary: 'exit 1 · 20 行', output: { lines: ['FAIL expected 80.00 received 80.01'], total: 20, end: 'tail' } }, w, false, Date.parse(at), 0, tier);
+      const body = [...session.userLines('修复购物车舍入（合成显示）', w, false, tier), ...session.assistantLines('改为以分为单位，检查仍有一项失败。', w, tier), tool.row, ...tool.body, ...(tool.paging ? [tool.paging] : [])];
+      const footer = frame.footerLines(session.usageSegments('deepseek-flash', 'ctx ≈863 / 1M', '本任务', 1800, '≈¥0.01'), ['Enter steer', 'Ctrl+X Enter follow-up', 'Ctrl+C 中止', 'Ctrl+O 展开'], w, { tier }), input = editor.render(w), rows = h - 2 - input.length - footer.length;
+      return [session.headerLine(header, w, narrow.headerRight, tier), ...pad(body.slice(0, rows), w, rows, tier), session.statusLine(status, w, narrow.statusHint, tier), ...input, ...footer];
+    });
+    if (id === '1c') return sessionScreen(width, height, tier, (w, h) => {
       // Current ReadOnlyTui.recoveryPlan: preserve header/status, then collapse
       // transcript, disabled editor, usage, hints in that order. No missing chrome is padded away.
-      const available = height - 2, full = recovery.fullHeight(width);
-      const input = available >= full + 5, usage = available >= full + 2, hints = available >= full + 1;
+      const available = h - 2, full = recovery.fullHeight(w);
+      const usageSegments = session.usageSegments('deepseek-flash', 'ctx ≈863 / 1M', '本任务', 1800, '≈¥0.01'), hintItems = ['Ctrl+R 历史', 'Ctrl+T trace', '? 帮助'];
+      const foot = frame.footerLines(usageSegments, hintItems, w, { tier }).length;
+      const input = available >= full + 3 + foot, usage = available >= full + foot, hints = available >= full + 1;
       const panelHeight = hints ? full : available;
       const header = { workspace: '/synthetic/shop-api', readOnly: false, session: 's-6666', run: 'r-1111', task: 1, round: 3 };
-      const status = session.statusParts({ phase: 'idle', recovery: true, round: 3, retry: false, elapsedMs: 42000, frame: 0 }), narrow = session.narrowing(width, header, status);
-      const tail = [...recovery.render(width, panelHeight, tier), session.statusLine(status, width, narrow.statusHint, tier), ...(input ? disabledInputLines('', width, tier) : []), ...(usage ? [session.usageLine('deepseek-flash', 'ctx ≈863 / 1M', '本任务', 1800, '≈¥0.01', width, tier)] : []), ...(hints ? [frame.hintLine(['Ctrl+R 历史', 'Ctrl+T trace', '? 帮助'], width, { tier })] : [])];
-      return [session.headerLine(header, width, narrow.headerRight, tier), ...pad([], width, height - 1 - tail.length, tier), ...tail];
-    }
+      const status = session.statusParts({ phase: 'idle', recovery: true, round: 3, retry: false, elapsedMs: 42000, frame: 0 }), narrow = session.narrowing(w, header, status);
+      const tail = [...recovery.render(w, panelHeight, tier), session.statusLine(status, w, narrow.statusHint, tier), ...(input ? disabledInputLines('', w, tier) : []), ...(hints ? frame.footerLines(usage ? usageSegments : [], hintItems, w, { tier }) : [])];
+      return [session.headerLine(header, w, narrow.headerRight, tier), ...pad([], w, h - 1 - tail.length, tier), ...tail];
+    });
     if (id === '1f') { const lines = await exitSummary(fixture.dataRoot, { workspace: fixture.workspace, runId: fixture.runId, elapsedMs: 848000, draftLines: 0, terminalRestored: true }, width); return [...lines, ...Array(height - lines.length).fill('')]; }
     if (['1d', '1e', '2a', '2b', '2c'].includes(id)) {
       // Use the public TuiAltScreen compositor with the exact openPanel geometry
@@ -137,11 +149,11 @@ export async function renderers(packageRoot, fixture) {
       const host = new pi.TuiAltScreen(terminal, true);
       host.setLayoutRoot({ invalidate() {}, render: () => base });
       const component = { invalidate() {}, render: w => {
-        const h = height;
+        const h = fullScreenHeight(height);
         if (id === '1d') return selection.render(w, h);
         if (id === '1e') { const figures = statsFigures(state); return new StatsView(request, () => ({ scope: request.scope, sample: { N: figures.acceptance.N, excluded: 3 }, versions: { ids: ['synthetic'], unknown: 0 }, figures })).render(w, h, tier); }
         if (id === '2c') return self.render(w, h, tier);
-        const overlayHeight = height;
+        const overlayHeight = fullScreenHeight(height);
         return id === '2a' ? trace.render(w, overlayHeight, 'Esc 返回会话') : evaluation.render(w, overlayHeight, tier);
       } };
       showFullScreen(host, terminal, component);
