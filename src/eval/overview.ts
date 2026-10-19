@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { openHostReadonly, readObject, type BlobRef } from '../evidence.js';
-import { readDisplayIndex } from '../display-number.js';
+import { DisplayIndex, DisplayInputError, readDisplayIndex } from '../display-number.js';
 import { readImproveReport } from '../improve.js';
 import { evalReport } from './runner.js';
 import { evalFacts } from './store.js';
@@ -58,7 +58,7 @@ export function listPlanSources(root: string, options: { through?: number; limit
     const group = decision?.groups?.find((g: any) => g.id === link.groupId);
     let origin: PlanSource['origin'] = null;
     if (decision) {
-      if (!reports.has(decision.reportId)) { try { reports.set(decision.reportId, readImproveReport(root, decision.reportId).report); } catch { reports.set(decision.reportId, null); } }
+      if (!reports.has(decision.reportId)) reports.set(decision.reportId, readImproveReport(root, decision.reportId).report);
       const candidates = (group?.candidateIds ?? []).map((id: string) => reports.get(decision.reportId)?.candidates.find(c => c.id === id)).filter(Boolean);
       const first = candidates[0] ? index.qualifiedCandidate(decision.reportId, candidates[0]) : index.label('improve-report', decision.reportId);
       origin = { label: `${first}${candidates.length > 1 ? ` +${candidates.length - 1}` : ''}`, reportId: decision.reportId, decisionId: link.parent.decisionId, groupId: link.groupId };
@@ -69,6 +69,17 @@ export function listPlanSources(root: string, options: { through?: number; limit
     return { root: link.dataRoot, id: link.planId, label, at: String(links[i].at), origin, snapshot: check ? { root, ref: check.reportDocument } : null };
   });
   return [...own, ...improve].sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+}
+
+/** Resolve displayed plans across the parent and improve child roots. Ambiguous
+ * short numbers are never guessed; the full id remains accepted. */
+export function resolvePlanSource(root:string,input:string):PlanSource {
+ const sources=listPlanSources(root,{limit:null}),index=new DisplayIndex(sources.map(source=>({kind:'eval-plan' as const,id:source.id,project:null,at:source.at})));
+ const resolution=index.resolve('eval-plan',input);
+ if(resolution.status!=='found')throw new DisplayInputError(resolution);
+ const matches=sources.filter(source=>source.id===resolution.object.id);
+ if(matches.length!==1)throw Error(`EVAL_PLAN_AMBIGUOUS: ${input}; 多个数据根含相同计划 id，请从 /eval 列表选择具体来源`);
+ return matches[0];
 }
 
 /** 主数据根中的一份计划（`/eval ep-号`）。 */

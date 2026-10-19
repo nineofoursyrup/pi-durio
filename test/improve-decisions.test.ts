@@ -85,9 +85,10 @@ test('scope/problem suppression survives rewording, new IDs and versions; ambigu
 test('deferral needs relevant content change; revision, baseline, dependencies, conflicts and missing budgets reject before work',async()=>{
  const f=await fixture(),d=decision(f);await submitImproveDecision({dataRoot:f.dataRoot,decision:d});
  assert.equal(suppressionMatch(f.dataRoot,f.candidate as any).blocked,true);
+ assert.deepEqual(listImproveSuppressions(f.dataRoot),[],'deferral is not a persistent do-not-suggest suppression');
  const changed={...f.candidate,target:{...f.candidate.target,files:f.candidate.target.files.map(x=>({...x,sha256:'changed-content'}))}};
  assert.equal(suppressionMatch(f.dataRoot,changed as any).blocked,true,'bytes alone are not a substantive reconsideration');
- const renewed=suppressionMatch(f.dataRoot,{...changed,reconsideration:{sourceId:listImproveSuppressions(f.dataRoot)[0].sourceId,reason:'The actual numeric operation changed; new source demonstrates the affected behavior',evidence:['acquired-new-source']}} as any);assert.equal(renewed.blocked,false);assert.match(renewed.matches[0].reason,/target content changed/);
+ const renewed=suppressionMatch(f.dataRoot,{...changed,reconsideration:{sourceId:suppressionMatch(f.dataRoot,f.candidate as any).matches[0].sourceId,reason:'The actual numeric operation changed; new source demonstrates the affected behavior',evidence:['acquired-new-source']}} as any);assert.equal(renewed.blocked,false);assert.match(renewed.matches[0].reason,/target content changed/);
  await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...d,id:'old-report',reportRevision:'old'}}),/REPORT_REVISION_DRIFT/);
  await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:{...d,id:'old-candidate',selections:[{...d.selections[0],candidateRevision:'old'}]}}),/CANDIDATE_REVISION_DRIFT/);
  await writeFile(join(f.workspace,'math.mjs'),'user edit\n');
@@ -102,13 +103,13 @@ test('decision record failure prevents candidate construction',async()=>{
 });
 test('TUI starts unselected, shows each mode and aggregate, and only submits after rendered summary plus explicit Enter',async()=>{
  const f=await fixture(),template=decision(f);let submits=0,submittedId:string|undefined;
- const view=new ImproveSelectionView(f.dataRoot,template,async d=>{submits++;submittedId=d.id;return submitImproveDecision({dataRoot:f.dataRoot,decision:d});});
+ const view=new ImproveSelectionView(f.dataRoot,f.report.id,async d=>{submits++;submittedId=d.id;return submitImproveDecision({dataRoot:f.dataRoot,decision:d});});
  assert.deepEqual(view.draft().selections,[]);await view.handleInput('thanks, do everything');await view.handleInput('\r');assert.equal(submits,0);
  await view.handleInput('3');assert.equal(view.draft().selections[0].mode,'defer');await view.handleInput('\r');await view.handleInput('\r');assert.equal(submits,0,'unrendered summary cannot be submitted');
  const shown=view.render(160,100).join('\n');assert.match(shown,/report-rev-1/);assert.match(shown,/本次只记录决定/);assert.match(shown,/选择不包含提交、推送、发布或清理数据/);
  await view.handleInput('\r');assert.equal(submits,1);assert.ok(submittedId);assert.notEqual(submittedId,template.id,'current selections use a host-generated request ID');assert.equal(readImproveDecision(f.dataRoot,submittedId).state,'completed');
  await view.handleInput('\r');assert.equal(submits,1);
- const again=new ImproveSelectionView(f.dataRoot,template,async()=>{throw Error('view must not submit')});assert.deepEqual(again.draft().selections,[]);
+ const again=new ImproveSelectionView(f.dataRoot,f.report.id,async()=>{throw Error('view must not submit')});assert.deepEqual(again.draft().selections,[]);
 });
 async function twoGroups(){
  const f=await fixture(),other=join(f.directory,'independent-eval-asset');await mkdir(other);await writeFile(join(other,'math.mjs'),'export const add=(a,b)=>a-b;\n');
@@ -185,7 +186,7 @@ test('explicit exact validation basis permits config formatting equivalence, cat
 test('narrow selection viewport keeps the current candidate title and mode visible while navigating wrapped choices',async()=>{
  const f=await fixture();f.report.candidates=Array.from({length:5},(_,i)=>({...f.candidate,id:`candidate:${i}`,revision:`revision:${i}`,display:`R${i+1}`,title:`Choice ${i+1} 中文`,validation:{...f.candidate.validation,checks:['A deliberately long declared necessary check whose wrapped text must not conceal the next selectable choice']}}));
  const e=new Evidence(f.dataRoot,'analysis-1');e.append('improve.report',f.report);e.close();
- const view=new ImproveSelectionView(f.dataRoot,decision(f),async()=>{throw Error('navigation does not submit');});
+ const view=new ImproveSelectionView(f.dataRoot,f.report.id,async()=>{throw Error('navigation does not submit');});
  for(let i=0;i<5;i++){if(i)await view.handleInput('\t');await view.handleInput('3');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('暂缓'),screen);}
  const resized=view.render(32,8).join('\n');assert.ok(resized.includes('Choice 5'),resized);
  for(let i=3;i>=0;i--){await view.handleInput('\x1b[Z');const screen=view.render(40,12).join('\n');assert.ok(screen.includes(`Choice ${i+1}`),screen);assert.ok(screen.includes('暂缓'),screen);}

@@ -1,15 +1,14 @@
 /** 2a trace 视图的列表层与详情栏（U7）。只读：不调用模型、不取锁；只有 `p` 固定为证据经确认后写一条固定记录。 */
 import { randomUUID } from 'node:crypto';
-import { existsSync, realpathSync } from 'node:fs';
-import { join } from 'node:path';
 import { matchesKey, visibleWidth, wrapTextWithAnsi } from '@earendil-works/pi-tui';
+import { hasOwnerMarker } from '../ownership.js';
 import { records, decode } from '../history.js';
 import { fixEvidence, verifyFixed } from '../fixed-evidence.js';
 import { TraceReader, RAW_STATE_LABEL, type Trace, type TraceSpan, type TraceLlm, type TraceRaw } from '../trace.js';
 import { readDisplayIndex, type DisplayIndex } from '../display-number.js';
 import { formatCostTotals, requestCostView } from '../cost-estimate.js';
 import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, type TextSegment, type TokenName } from './theme.js';
-import { clean, hintLine, statusEmpty, truncateEnd, truncateMiddle, type ConfirmConfig } from './view-stack.js';
+import { fitSegments, errorCode, clean, hintLine, statusEmpty, truncateEnd, truncateMiddle, type ConfirmConfig } from './view-stack.js';
 import { mayWrite, type WriteAccess } from './write-access.js';
 
 /** 秒级耗时：0.04s、8.7s、1m02s、3h12m。 */
@@ -20,26 +19,11 @@ export function formatDuration(ms: number) {
   if (minutes < 60) return `${minutes}m${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}s`;
   return `${Math.floor(minutes / 60)}h${String(minutes % 60).padStart(2, '0')}m`;
 }
-/** 950、18.2k、1M（同 1b 状态行）。 */
-export function formatTokens(tokens: number) {
-  const [value, unit] = tokens >= 999_950 ? [tokens / 1e6, 'M'] : tokens >= 1000 ? [tokens / 1e3, 'k'] : [tokens, ''];
-  return unit ? `${value.toFixed(1).replace(/\.0$/, '')}${unit}` : String(value);
-}
+import { tokenCount as formatTokens } from './session-screen.js';
+export { formatTokens };
+import { runVersionChanged } from '../continuation.js';
 const COMPACTION_STATE: Record<string, string> = { applied: '已接入', generated: '已生成未接入', stale: '过期', noop: '无需压缩', failed: '失败', cancelled: '已取消', interrupted: '中断' };
 const requestRange = (requests: TraceLlm[]) => !requests.length ? '无模型请求' : requests.length === 1 ? `llm #${requests[0].number}` : `llm #${requests[0].number}–#${requests.at(-1)!.number}`;
-
-/** styledLine 不会在分段之间关掉粗体：粗体分段各自成段渲染，后面的分段从重置后的状态开始。 */
-function line(segments: TextSegment[], width: number): string {
-  const groups: TextSegment[][] = [[]];
-  for (const segment of segments) { if (segment.bold) groups.push([segment], []); else groups.at(-1)!.push(segment); }
-  let out = '', used = 0;
-  const filled = groups.filter(g => g.length);
-  filled.forEach((group, i) => {
-    const w = i === filled.length - 1 ? width - used : Math.min(width - used, group.reduce((sum, seg) => sum + visibleWidth(seg.text), 0));
-    if (w > 0) { out += styledLine(group, w); used += w; }
-  });
-  return used < width ? out + styledLine([], width - used) : out;
-}
 
 /** 列表层的 Enter 与 `p` 需要宿主（app.ts）提供的；不传时这两个键不起作用。 */
 export interface TraceHost extends WriteAccess {
@@ -53,31 +37,8 @@ export interface TraceHost extends WriteAccess {
   openRaw(span: TraceSpan): void;
 }
 
-/** 数据根写入者锁是否被占用（只看锁标记，不取锁）。 */
-function ownerHeld(root: string) {
-  try { const canonical = realpathSync(root); return existsSync(`${canonical}.lock`) || existsSync(join(canonical, 'owner.json')); } catch { return false; }
-}
-const failureCode = (error: unknown) => clean((error as NodeJS.ErrnoException).code ?? (error instanceof Error ? error.message : String(error)).split(/[\s:]/)[0]) || 'FIX_FAILED';
-
 type Row = { kind: 'run' } | { kind: 'span'; span: TraceSpan; last: boolean } | { kind: 'gap'; text: string };
 
-/** 按宽度裁切一组分段：超出处加 `…`，不足处补空格。 */
-function fit(segments: TextSegment[], width: number): TextSegment[] {
-  const out: TextSegment[] = []; let used = 0;
-  for (const segment of segments) {
-    if (!segment.text) continue;
-    const w = visibleWidth(segment.text);
-    if (used + w > width) {
-      // 宽字符处截断可能少一格；按实际宽度补齐，决不超出。
-      let room = width - used, text = truncateEnd(segment.text, room);
-      while (room > 0 && visibleWidth(text) > width - used) text = truncateEnd(segment.text, --room);
-      out.push({ ...segment, text }); used += visibleWidth(text); break;
-    }
-    out.push(segment); used += w;
-  }
-  if (used < width) out.push({ text: ' '.repeat(width - used) });
-  return out;
-}
 const right = (text: string, width: number, fg?: TokenName): TextSegment => { const shown = truncateEnd(text, width); return { text: ' '.repeat(width - visibleWidth(shown)) + shown, fg }; };
 
 /**
@@ -93,12 +54,14 @@ export class TraceView {
   private follow = true;
   private rows: Row[] = [];
   private bodyTop = 0;
+  private readonly versionChanged: boolean;
   private lastRead = 0;
   /** 未解除的固定记录（来源记录集合）；核对结果按固定记录缓存。 */
   private readonly fixations: { source: string; selected: Set<string> }[] = [];
   private readonly verified = new Map<string, boolean>();
   /** `host` 接入原文与固定操作；`adjust` 让 eval trial 使用宿主中介记录的用量与金额。 */
   constructor(readonly root: string, readonly runId: string, private readonly live: () => boolean = () => false, private readonly host?: TraceHost, private readonly adjust: (trace: Trace) => Trace = trace => trace) {
+    this.versionChanged = runVersionChanged(root, runId) === true;
     this.reader = new TraceReader(root, runId);
     this.index = readDisplayIndex(root);
     this.current = adjust(this.reader.trace(live()));
@@ -131,7 +94,7 @@ export class TraceView {
     if (!span) { host.feedback('选中一个 span 后按 p 固定为证据'); return; }
     if (this.fixedOf(span)) { host.feedback('已固定为证据 · 不重复固定'); return; }
     // fixEvidence 要取数据根写入者锁：锁被占用时不弹框，只提示（#47 第 6 节）。
-    if (host.busy() || ownerHeld(this.root)) { host.feedback('有任务运行中，结束后再固定'); return; }
+    if (host.busy() || hasOwnerMarker(this.root)) { host.feedback('有任务运行中，结束后再固定'); return; }
     const purpose = `trace：${this.runLabel} ${this.spanName(span)}`, sources = span.sources.slice(0, 50);
     host.confirm({
       title: '固定为证据', action: '固定',
@@ -145,7 +108,7 @@ export class TraceView {
         this.verified.delete(result.source);
         host.feedback(this.fixedOf(span) ? '已固定为证据' : '固定记录已写入，但内容核对未通过');
       } catch (error) {
-        const code = failureCode(error);
+        const code = errorCode(error, 'FIX_FAILED');
         host.feedback(code.startsWith('OWNER_') ? '有任务运行中，结束后再固定' : `固定失败 · ${code}`);
       }
       host.changed();
@@ -210,21 +173,22 @@ export class TraceView {
     if (wide) {
       const detail = this.detail(trace, detailWidth - 2);
       const bar = styledLine([{ text: '│', fg: 'line.subtle' }], 1);
-      body = list.map((row, i) => row + bar + line([{ text: ' ' }, ...(detail[i] ?? [])], detailWidth));
+      body = list.map((row, i) => row + bar + styledLine([{ text: ' ' }, ...(detail[i] ?? [])], detailWidth));
     }
     return [...header, styledLine([{ text: '─'.repeat(width), fg: 'line.subtle' }], width), ...body, ...summary, this.footer(trace, width, esc)];
   }
 
   private header(trace: Trace, width: number, wide: boolean): string[] {
     const task = trace.taskId ? ` · 任务 ${this.index.label('task', trace.taskId)}` : '';
-    const left: TextSegment[] = [{ text: '◆', fg: 'ac.info' }, { text: ' trace', fg: 'fg.primary', bold: true }, { text: `  run ${this.index.label('run', trace.runId)} · ${trace.taskKind}${task} · 执行版本 ${trace.version ? `build ${trace.version.slice(0, 7)}` : '未记录'}`, fg: 'fg.faint' }];
+    const left: TextSegment[] = [{ text: '◆', fg: 'ac.info' }, { text: ' trace', fg: 'fg.primary', bold: true }, { text: ` ${this.versionChanged ? ' · 执行版本已变 ' : ' '}run ${this.index.label('run', trace.runId)} · ${trace.taskKind}${task} · 执行版本 ${trace.version ? `build ${trace.version.slice(0, 7)}` : '未记录'}`, fg: 'fg.faint' }];
     const status = this.statusSegment(trace.status);
     const facts = `${formatDuration(trace.duration)} · ${formatTokens(trace.tokens)} tok ${formatCostTotals(trace.cost)}${trace.maintenance ? ` · 另有维护 ${trace.maintenance} 项` : ''}`;
     const rightSegments: TextSegment[] = [status, { text: ` · ${facts}`, fg: 'fg.faint' }];
     const leftWidth = left.reduce((w, s) => w + visibleWidth(s.text), 0), rightWidth = rightSegments.reduce((w, s) => w + visibleWidth(s.text), 0);
+    const errors = trace.costError ? [styledLine([{ text: `✗ 费用估算不可读取 · ${clean(trace.costError)}`, fg: 'ac.err' }], width)] : [];
     // 头部右侧是事实：放不下（宽度小于 100）时移到第二行，不收起（U12）。
-    if (wide && leftWidth + rightWidth + 2 <= width) return [line([...left, { text: ' '.repeat(width - leftWidth - rightWidth) }, ...rightSegments], width)];
-    return [line(fit(left, width), width), line(fit([{ text: '  ' }, ...rightSegments], width), width)];
+    if (wide && leftWidth + rightWidth + 2 <= width) return [styledLine([...left, { text: ' '.repeat(width - leftWidth - rightWidth) }, ...rightSegments], width), ...errors];
+    return [styledLine(fitSegments(left, width), width), styledLine(fitSegments([{ text: '  ' }, ...rightSegments], width), width), ...errors];
   }
   private statusSegment(status: Trace['status']): TextSegment {
     if (status === 'running') return { text: `${SPINNER_FRAMES[Math.floor(Date.now() / SPINNER_INTERVAL_MS) % SPINNER_FRAMES.length]} 运行中`, fg: 'ac.brand' };
@@ -263,7 +227,7 @@ export class TraceView {
     return { name, bar: Math.max(4, listWidth - name - dur - tok - 5), dur, tok };
   }
   private columnHeader(c: ReturnType<TraceView['columns']>, total: number, width: number) {
-    const segments: TextSegment[] = [{ text: ' ' }, ...fit([{ text: 'span', fg: 'fg.faint' }], c.name)];
+    const segments: TextSegment[] = [{ text: ' ' }, ...fitSegments([{ text: 'span', fg: 'fg.faint' }], c.name)];
     if (c.bar) {
       const start = '0s', mid = formatDuration(total / 2), end = formatDuration(total);
       const gap = Math.max(1, c.bar - start.length - mid.length - end.length), a = Math.floor(gap / 2);
@@ -315,7 +279,7 @@ export class TraceView {
     if (!row) return styledLine([], width);
     if (row.kind === 'gap') return styledLine([{ text: ' ' }, { text: truncateEnd(row.text, width - 1), fg: 'fg.faint' }], width);
     const selected = row.kind === 'run' ? this.selected === 'run' : row.span.key === this.selected;
-    const segments: TextSegment[] = [{ text: ' ' }, ...fit(this.nameSegments(row, trace, c.name), c.name)];
+    const segments: TextSegment[] = [{ text: ' ' }, ...fitSegments(this.nameSegments(row, trace, c.name), c.name)];
     let duration: string, tokens: TextSegment;
     if (row.kind === 'run') {
       const main = trace.segments.filter(s => s.kind !== 'maintenance');
@@ -357,7 +321,7 @@ export class TraceView {
   }
 
   /** 选中项的完整详情，渲染成整行（宽度小于 100 时原文层顶部显示）。 */
-  detailRows(width: number): string[] { return this.detail(this.current, width - 2).map(segments => line([{ text: ' ' }, ...segments], width)); }
+  detailRows(width: number): string[] { return this.detail(this.current, width - 2).map(segments => styledLine([{ text: ' ' }, ...segments], width)); }
   private detail(trace: Trace, width: number): TextSegment[][] {
     const lines: TextSegment[][] = [];
     const title = (bold: string, rest = '') => lines.push([{ text: truncateEnd(bold, width), fg: 'fg.primary', bold: true }, { text: truncateEnd(rest ? `  ${rest}` : '', Math.max(0, width - visibleWidth(bold))), fg: 'fg.faint' }]);
@@ -394,6 +358,7 @@ export class TraceView {
       kv('耗时', `${formatDuration(trace.duration)} · 不计中断`);
       kv('用量', `${formatTokens(trace.tokens)} tok${trace.unknownTokens ? ` · ${trace.unknownTokens} 次请求 unknown` : ''}`);
       kv('费用', `${formatCostTotals(trace.cost)} · 估算 · 非账单`);
+      if (trace.costError) kv('费用错误', trace.costError, 'ac.err');
       return lines;
     }
     const fixed = this.fixedOf(span);

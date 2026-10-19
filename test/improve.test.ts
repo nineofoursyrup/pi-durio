@@ -120,3 +120,28 @@ test('headless list/report and TUI viewer reopen the same persisted identity wit
  view.handleInput('x');view.handleInput('\r');assert.equal(view.render(160,40).join('\n'),shown,'history remains on the same read-only report after non-action input');
  assert.equal(digest(await readFile(join(f.dataRoot,'host.sqlite'))),hash);assert.equal(provider.calls.length,2);
 });
+
+test('analysis retains nonunique replacement fragments as suggestion-only and 1d offers only nonexecuting decisions',async()=>{
+ const f=await fixture();await writeFile(join(f.workspace,'helper.ts'),'const repeated = 1;\nconst repeatedAgain = 2;\nexport const unique = 3;\n');
+ const {ImproveSelectionView,improveSelectionPrefill}=await import('../src/tui/improve-selection.js');
+ const {improveCandidateRows}=await import('../src/tui/improve-card.js');
+ const {candidateExecutable}=await import('../src/improve-contract.js');
+ const candidate={title:'Replace exact fragment',problem:'Known target expression',objective:'maintenance',targetId:'project',facts:[{claim:'Acquired helper source',evidence:[] as string[]}],hypotheses:[],successCounterexamples:[],gaps:['No execution evidence'],mechanismsReviewed:['helper.ts'],steps:['Replace declared fragment'],scope:['helper.ts'],validation:{method:'direct',checks:['Check resulting source'],budget:'One local check',protections:['Preserve all unrelated bytes']},risks:['Local change'],rollback:'Restore retained original',activation:{writeback:true,enable:false,conditions:['Check passes'],timing:'Next task'},dependencies:[],conflicts:[],structuredChecks:[{kind:'direct',program:'console.log("checked")',timeoutMs:1000}]};
+ const variants=['missing','const','unique = 3'],scripted=transport([{name:'evidence_summary',args:{}},{name:'source_view',args:{targetId:'project',path:'helper.ts'}}]);
+ const provider:typeof fetch=async(url,init)=>{
+  const payload=JSON.parse(String(init?.body)),view=payload.messages.filter((m:any)=>m.role==='tool').map((m:any)=>{try{return JSON.parse(m.content);}catch{return {};}}).find((m:any)=>m.path==='helper.ts');
+  const response=await scripted.fetch(url,init);if(!view)return response;
+  const answer={...report,candidates:variants.map(before=>({...candidate,facts:[{claim:'Acquired helper source',evidence:[view.sourceId]}],replacements:[{path:'helper.ts',before,content:'replacement'}]}))};
+  return new Response((await response.text()).replace(JSON.stringify(report).replaceAll('\\','\\\\').replaceAll('"','\\"'),JSON.stringify(answer).replaceAll('\\','\\\\').replaceAll('"','\\"')),{headers:{'content-type':'text/event-stream'}});
+ };
+ const result=await runtime.analyzeImprove({dataRoot:f.dataRoot,workspace:f.workspace,targetRunId:f.source.runId,request:{id:'fragment-validation',purpose:'Validate unique fragments',limits,sources:[{id:'project',kind:'project',paths:['helper.ts']}]},mode:'offline',transport:provider});
+ assert.equal(result.improve?.state,'complete',JSON.stringify(result.improve));
+ const saved=result.improve!;assert.deepEqual(saved.candidates.map(candidateExecutable),[false,false,true]);
+ for(const c of saved.candidates.slice(0,2)){
+  const card=improveCandidateRows(f.dataRoot,saved,c,{expanded:true}).map(row=>row.text).join('\n');
+  assert.match(card,/替换片段与取证基线不唯一匹配/);assert.doesNotMatch(card,/原文不可读取|IMPROVE_REPLACEMENT/);
+  const view=new ImproveSelectionView(f.dataRoot,saved.id,async()=>assert.fail('must not execute'),()=>{});
+  for(const mode of ['execute-declared-scope','validate-only'] as const)assert.throws(()=>improveSelectionPrefill(f.dataRoot,saved,{[mode==='validate-only'?'validate':'execute']:c.id}),/仅建议/);
+  for(const mode of ['defer','do-not-suggest'] as const){view.prefill([{candidateId:c.id,mode}]);assert.doesNotMatch(view.render(132,38).join('\n'),/IMPROVE_REPLACEMENT/);}
+ }
+});

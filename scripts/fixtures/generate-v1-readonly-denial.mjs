@@ -4,7 +4,7 @@
  * recovery denial. Run under the shared check.lock; no container or provider.
  *
  * node scripts/fixtures/generate-v1-readonly-denial.mjs NEW_OUTPUT FROZEN_CANDIDATE
- * FROZEN_CANDIDATE contains candidate-identity.json, source.tar.gz, pack/, install/.
+ * FROZEN_CANDIDATE contains the portable candidate-identity.json and rebuilt install/.
  * Both the old installation and the old v1-records directory stay read-only.
  */
 import assert from 'node:assert/strict';
@@ -17,11 +17,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const candidate = 'f26ae8f4b8039608a1fa796e1c69da4d8173d112';
 const tree = 'ceebaeb3805dd8f2eeab948792f88e6f9a0ba2e0';
-const identityHash = 'ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091';
-const archiveHashes = {
-  'pack/pi-durio-0.1.0.tgz': '0be03d6d7e090f3ba58f55297f1c9dd50b28540fbba0ed76ae55d34419f1221b',
-  'source.tar.gz': '508268f5708ba67e169a24ad71103bb9a560293983d0fad7b8991e29aefb73b4',
-};
+const identityHash = '7cd21af10280ae331aa3b77df06588d398a2d343d6f2aed71725d39b84b05546';
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const file = path => { const bytes = readFileSync(path); return { bytes: bytes.length, sha256: sha256(bytes) }; };
 const [outputArg, frozenArg] = process.argv.slice(2);
@@ -33,8 +29,7 @@ const identityPath = join(frozen, 'candidate-identity.json');
 assert.equal(file(identityPath).sha256, identityHash, 'Use the frozen final-candidate-f26ae8f identity');
 const identity = JSON.parse(readFileSync(identityPath, 'utf8'));
 assert.equal(identity.candidate, candidate);
-assert.equal(identity.tree, tree);
-for (const [path, expected] of Object.entries(archiveHashes)) assert.equal(file(join(frozen, path)).sha256, expected, path);
+assert.equal(file(join(install, 'dist/execution/source-build.json')).sha256, identity.sourceBuildSha256, 'The rebuilt source/compiler/output manifest matches the frozen SHA');
 
 function inventory(root) {
   const entries = [];
@@ -52,7 +47,8 @@ function inventory(root) {
 const sorted = entries => [...entries].sort((a, b) => a.path.localeCompare(b.path));
 function verifyInstallation() {
   const actual = sorted(inventory(install));
-  assert.deepEqual(actual, sorted(identity.installed), 'Frozen runtime and dependencies must exactly match their manifest');
+  const content = actual.map(row => ({ path: row.path, sha256: row.symlink ? `link:${row.symlink}` : row.sha256 }));
+  assert.equal(sha256(JSON.stringify(content)), identity.installedInventorySha256, 'Frozen runtime and dependencies must exactly match their portable manifest');
   return { entries: actual.length, inventorySha256: sha256(JSON.stringify(actual)) };
 }
 const installed = verifyInstallation();
@@ -132,7 +128,7 @@ const proof = {
   schema: 1,
   generatedBy: candidate, tree,
   scope: 'Offline synthetic transport; real frozen runtime, Harness, SQLite and recovery; no model inference or paid request',
-  source: { identity: { path: identityPath, ...file(identityPath) }, archives: Object.entries(archiveHashes).map(([path, sha256]) => ({ path, sha256 })), installation: { path: install, ...installed } },
+  source: { identity: { path: identityPath, ...file(identityPath) }, sourceBuild: { path: 'dist/execution/source-build.json', sha256: identity.sourceBuildSha256 }, installation: { path: install, ...installed } },
   generator: { path: 'scripts/fixtures/generate-v1-readonly-denial.mjs', ...file(fileURLToPath(import.meta.url)) },
   environment: { node: process.version, platform: process.platform, arch: process.arch, work },
   names: { run: initial.runId, session: initial.sessionId, decision: decisionId, snapshot: report.snapshotId },

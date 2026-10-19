@@ -5,8 +5,9 @@ import { formatCostTotals, COST_ESTIMATE_NOTICE, type CostTotals } from '../cost
 import { stripTerminalSequences, truncateToWidth } from '@earendil-works/pi-tui';
 import { readContinuation } from '../continuation.js';
 import { readObject, readQueue } from '../evidence.js';
-import { readObjectRange, readRunRecords } from '../query.js';
+import { readRunRecords } from '../query.js';
 import { resolve } from 'node:path';
+import {editLineChanges,writeLineChanges} from './tool-facts.js';
 import { RunView, sumUsage } from './run-view.js';
 import { tokenCount } from './session-screen.js';
 import { probeWelcomeLock } from './welcome.js';
@@ -102,7 +103,6 @@ function frozenLine(dataRoot: string, workspace: string) {
   }
   return count ? `⧗ ${count} 项已冻结 · 「${first}」· 不会自动接入` : undefined;
 }
-const lineCount = (text: string) => text ? text.split('\n').length - Number(text.endsWith('\n')) : 0;
 /** 只计已取得的成功 edit/write 结果，不扫描工作区、不解析 bash 或检查输出。 */
 function fileSummary(root: string, runId: string, workspace: string) {
   const pending = new Map<string, { tool: 'edit' | 'write'; path?: string; added?: number; removed?: number }>();
@@ -113,11 +113,6 @@ function fileSummary(root: string, runId: string, workspace: string) {
       const page = readRunRecords(root, runId, { after, limit: 50, kinds: ['tool.intent', 'tool.result', 'tool.error', 'file.write-intent'] });
       for (const ref of page.records) {
         after = ref.seq;
-        // Results may contain large read/bash output. Skip unrelated attempts without decoding it.
-        if (ref.kind === 'tool.result' || ref.kind === 'tool.error') {
-          const id = /^\{"attemptId":"([^"\\]+)"/.exec(readObjectRange(root, ref.ref, { limit: 256 }).bytes.toString())?.[1];
-          if (id && !pending.has(id)) continue;
-        }
         const data = JSON.parse(readObject(root, ref.ref).toString());
         if (ref.kind === 'tool.intent') {
           if (data.tool === 'edit' || data.tool === 'write') pending.set(data.attemptId, { tool: data.tool, path: typeof data.args?.path === 'string' ? resolve(workspace, data.args.path) : undefined });
@@ -126,8 +121,7 @@ function fileSummary(root: string, runId: string, workspace: string) {
           if (!item || !acquired) continue;
           if (typeof acquired.path === 'string') item.path = resolve(workspace, acquired.path);
           if (item.tool === 'write' && typeof acquired.content === 'string' && (acquired.previous === null || typeof acquired.previous === 'string')) {
-            item.added = lineCount(Buffer.from(acquired.content, 'base64').toString('utf8'));
-            item.removed = acquired.previous === null ? 0 : lineCount(Buffer.from(acquired.previous, 'base64').toString('utf8'));
+            const changes=writeLineChanges(acquired);item.added=changes.added;item.removed=changes.removed;
           }
         } else {
           const item = pending.get(data.attemptId);
@@ -136,9 +130,7 @@ function fileSummary(root: string, runId: string, workspace: string) {
           if (ref.kind === 'tool.error' || data.result?.isError === true) continue;
           if (item.path) files.add(item.path); else incomplete = true;
           if (item.tool === 'edit' && typeof data.result?.details?.diff === 'string') {
-            const diff = data.result.details.diff.split('\n') as string[];
-            item.added = diff.filter(line => /^\+\s*\d/.test(line)).length;
-            item.removed = diff.filter(line => /^-\s*\d/.test(line)).length;
+            const changes=editLineChanges(data.result.details.diff);item.added=changes.added;item.removed=changes.removed;
           }
           if (item.added === undefined || item.removed === undefined) incomplete = true;
           else { added += item.added; removed += item.removed; }
@@ -178,7 +170,8 @@ async function summaryLines(dataRoot: string, facts: ExitSummaryFacts): Promise<
   if (session) {
     try {
       const usage = sumUsage(chains.contextRunIds(session.tailRunId).map(id => new RunView(dataRoot, id).usage()));
-      lines.push(`◇ 本会话 ${tokenCount(usage.tokens)} tok ${formatCostTotals(usage.totals)}（${COST_ESTIMATE_NOTICE}）`);
+      const knownCost=Object.keys(usage.totals.amounts).length?formatCostTotals({amounts:usage.totals.amounts,unknownRequests:0,partial:false}):usage.totals.unknownRequests||usage.totals.partial?'unknown':formatCostTotals(usage.totals);
+      lines.push(`◇ 本会话 ${tokenCount(usage.tokens)} tok ${knownCost}（${COST_ESTIMATE_NOTICE}）${usage.totals.unknownRequests?` · +${usage.totals.unknownRequests} unknown`:''}${usage.totals.partial?' · partial':''}`);
     } catch { lines.push('◇ 本会话用量 unknown'); }
   }
   const cleanupSession = facts.cleanup && chains.sessionOfRun(facts.cleanup.runId);
@@ -205,7 +198,7 @@ export async function exitSummary(dataRoot: string, facts: ExitSummaryFacts, col
     if (facts.draftLines) lines.push(`◇ 草稿已保存 · ${facts.draftLines} 行 · 下次 /restore 恢复`);
     lines.push(cleanupLine({ ...facts, error: facts.error ?? String(error) }));
   }
-  const width = Number.isFinite(columns) ? Math.max(1, Math.floor(columns)) : 80;
+  const width = Math.max(1, Math.floor(columns));
   return lines.map(line => truncateToWidth(firstLine(line), width));
 }
 

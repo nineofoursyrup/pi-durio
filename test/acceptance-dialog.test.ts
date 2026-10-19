@@ -118,3 +118,13 @@ test('pending follow-ups and reopened recoveries remain blocked; a withdrawn unr
  assert.equal(after.acceptance.outcome, 'FAIL');
  assert.deepEqual(after.acceptance.results[0].evidence, [[...records(target.root, { kinds: ['control.receipt'] })].at(-1)!.id]);
 });
+
+
+test('annotation note accepts pasted text and cursor edits; arrow keys can reveal the final explanation without PageDown', () => {
+ const dialog = new AcceptanceDialog(readAnnotation(fixture()));
+ for (let i = 0; i < 3; i++) dialog.handleInput(key.down);
+ dialog.handleInput('\x1b[200~说明 AB\x1b[201~'); dialog.handleInput('\x1b[D'); dialog.handleInput('X');
+ assert.equal(dialog.submission.note, '说明 AXB');
+ for (let i = 0; i < 30; i++) { dialog.handleInput(key.down); dialog.render(40, 12); }
+ assert.match(text(dialog.render(40, 12)), /首尾继续滚动/);
+});

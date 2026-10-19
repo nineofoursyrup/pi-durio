@@ -4,7 +4,7 @@
  */
 import { visibleWidth, wrapTextWithAnsi } from '@earendil-works/pi-tui';
 import { COLOR_TIER, GLYPHS, SPINNER_FRAMES, fgSgr, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { truncateEnd, truncateMiddle } from './view-stack.js';
+import { clean, truncateEnd, truncateMiddle } from './view-stack.js';
 import type { ToolEntry } from './run-view.js';
 
 const cells = (segments: TextSegment[]) => segments.reduce((sum, s) => sum + visibleWidth(s.text), 0);
@@ -173,6 +173,7 @@ export function toolLines(entry: ToolEntry, width: number, expanded: boolean, no
     for (const line of lines) body.push(styledLine([{ text: indent }, { text: truncateEnd(line, inner), fg: 'fg.muted' }], width, undefined, tier));
     shown = lines.length; total = entry.output.total;
   }
+  if (entry.error) body.push(styledLine([{ text: indent }, { text: truncateEnd(clean(entry.error).replace(/\n/g, ' '), inner), fg: 'ac.err' }], width, undefined, tier));
   const paging = total > shown
     ? styledLine([{ text: indent }, { text: `显示 ${shown}/${total} 行 `, fg: 'fg.faint' }, { text: `${GLYPHS.trunc} 截断`, fg: 'ac.warn' }, { text: ` · 原文完整保存 · 分页查看 ${total - shown} 行`, fg: 'fg.faint' }], width, undefined, tier)
     : undefined;

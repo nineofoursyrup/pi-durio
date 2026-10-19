@@ -1,0 +1,10 @@
+{
+  "format": "tar+gzip",
+  "bytes": 1261261,
+  "sha256": "f0312d15fdf42133266d04182d0e998f926c741cddf2b79a03aa242b7516644e",
+  "parts": [
+    "readonly-denial.tar.gz"
+  ],
+  "source": "../v1-readonly-denial",
+  "identitySha256": "1d48c63d06094b8208c6759ee7d6980b5b3bacd5e5516932f63bdb18337b0148"
+}

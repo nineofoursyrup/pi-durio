@@ -2,6 +2,22 @@ import { createHash } from 'node:crypto';
 import { lstatSync, readFileSync, readdirSync, readlinkSync, writeFileSync, realpathSync } from 'node:fs';
 import { isAbsolute, join, normalize, relative, sep, resolve, dirname, basename } from 'node:path';
 
+export const BUILD_INPUT_PATHS = ['src', 'test', 'scripts', 'vendor', 'package.json', 'package-lock.json', 'tsconfig.json'];
+/** Shared build/verification inventory; neither caller executes source files. */
+export function buildInventory(root, paths, lines = false) {
+  const entries = [];
+  function visit(path) {
+    const full = join(root, path), info = lstatSync(full);
+    if (info.isSymbolicLink()) throw Error(`BUILD_INPUT_ALIAS:${path}`);
+    if (info.isDirectory()) { for (const name of readdirSync(full).sort()) visit(join(path, name)); }
+    else if (info.isFile()) {
+      const bytes = readFileSync(full);
+      entries.push({ path, sha256: sha256(bytes), bytes: bytes.length, ...(lines ? { physicalLines: bytes.reduce((n, b) => n + (b === 10 ? 1 : 0), 0) + (bytes.length && bytes.at(-1) !== 10 ? 1 : 0) } : {}) });
+    } else throw Error(`BUILD_INPUT_TYPE:${path}`);
+  }
+  for (const path of paths) visit(path);
+  return entries;
+}
 export const schema = 'pi-durio-redesign-terminal-v1';
 export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n', { flag: 'wx', mode: 0o600 });

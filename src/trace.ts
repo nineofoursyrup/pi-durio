@@ -85,6 +85,8 @@ export interface Trace {
   duration: number;
   /** 头部 tok 与费用：非维护请求。 */
   tokens: number; unknownTokens: number; cost: CostTotals;
+  /** An estimation failure is explicit; retained timeline facts remain inspectable. */
+  costError?: string;
   counts: { models: number; retries: number; tools: number; recoveryRetries: number };
   /** 维护段（run 结束后追加的手动压缩）的项数。 */
   maintenance: number;
@@ -115,6 +117,7 @@ export class TraceReader {
   private facts: Fact[] = [];
   private after = 0;
   private costs: ModelRequestCost[] = [];
+  private costError?: string;
   private declared = new Map<string, Availability>();
   constructor(readonly root: string, readonly runId: string) {
     for (const ref of records(root, { kinds: ['evidence.availability'] })) {
@@ -140,12 +143,13 @@ export class TraceReader {
     }
     if (costChanged) {
       // 费用不可读时只让金额 unknown，trace 照常显示。
-      try { this.costs = estimateModelRequests(this.root, this.facts.filter(f => COST_KINDS.has(f.ref.kind))); } catch { this.costs = []; }
+      try { this.costs = estimateModelRequests(this.root, this.facts.filter(f => COST_KINDS.has(f.ref.kind))); this.costError = undefined; }
+      catch (error) { this.costs = []; this.costError = `TRACE_COST_ESTIMATE_FAILED: ${String(error)}`; }
     }
     return added;
   }
   get through() { return this.after; }
-  trace(live = false): Trace { return buildTrace(this.runId, this.facts, this.costs, this.declared, live ? factClock() : null); }
+  trace(live = false): Trace { return { ...buildTrace(this.runId, this.facts, this.costs, this.declared, live ? factClock() : null), ...(this.costError ? { costError: this.costError } : {}) }; }
 }
 
 /** 一次读取并推导（CLI、测试）。 */

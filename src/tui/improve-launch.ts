@@ -4,8 +4,8 @@
  * `/improve new …` 的参数只预填，仍须在框内按 Enter。
  */
 import { matchesKey, visibleWidth } from '@earendil-works/pi-tui';
-import { bgSgr, fgSgr, resetSgr, styledLine, GLYPHS, COLOR_TIER, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { ConfirmDialog, TOO_SMALL_TO_CONFIRM, clean, truncateEnd, truncateMiddle, wrapAuthorized, type ConfirmResult } from './view-stack.js';
+import { GLYPHS, COLOR_TIER, type ColorTier, type TextSegment, type TokenName } from './theme.js';
+import { ConfirmDialog, SingleLineInput, TOO_SMALL_TO_CONFIRM, clean, truncateEnd, truncateMiddle, wrapAuthorized, type ConfirmResult } from './view-stack.js';
 import { DEFAULT_FOCUS, REGISTER_HINT, improveBudgetAmount, improveLimits, sourceLabel, type ImproveBudget, type ImproveScope, type LaunchChoice, type VisibleFiles } from '../improve-entry.js';
 import type { SourceRegistration } from '../improve-source.js';
 
@@ -18,6 +18,7 @@ export interface LaunchHost {
   /** A replacement analysis keeps the withdrawn request's original session/workspace. */
   binding?: string[];
   register(input: string): SourceRegistration;
+  remove(id:string):void;
   complete(input: string): { text: string; matches: number };
 }
 type Row = { kind: 'scope' } | { kind: 'budget' } | { kind: 'source'; registration: SourceRegistration } | { kind: 'register' } | { kind: 'focus' };
@@ -28,18 +29,23 @@ const LABEL = 12;
 export class ImproveLaunchDialog {
   scope: ImproveScope;
   budget: ImproveBudget;
-  focus: string;
+  private focusInput:SingleLineInput;
+  get focus(){return this.focusInput.getValue();}
   private readonly chosen = new Set<string>();
   private registrations: SourceRegistration[];
   private cursor = 0;
-  private scroll = 0;
+  private dialog:ConfirmDialog;
+  private pathInput=new SingleLineInput();
+  private notice?:string;
+  private removal?:{registration:SourceRegistration;dialog:ConfirmDialog};
   private tooSmall = false;
   /** “登记新路径”展开的一行输入。 */
   private input?: { text: string; error?: string; note?: string };
 
   constructor(private readonly host: LaunchHost, prefill: LaunchPrefill = {}) {
-    this.scope = prefill.scope ?? '7d'; this.budget = prefill.budget ?? 'standard'; this.focus = prefill.focus ?? '';
+    this.scope = prefill.scope ?? '7d'; this.budget = prefill.budget ?? 'standard'; this.focusInput = new SingleLineInput(prefill.focus??'',1000);
     this.registrations = [...host.registrations];
+    this.dialog=new ConfirmDialog({title:'新建 improve 分析',action:host.queued?'排队分析':'开始分析',bodyRows:inner=>this.body(inner),footer:reason=>[{text:this.input?'Enter 登记 · Tab 补全 · Esc 收起':reason?`Enter ${reason} · Esc 取消`:`Enter ${host.queued?'排队分析':'开始分析'} · Esc 取消`,fg:'fg.label'}]});
     for (const r of this.registrations) if (prefill.sources?.includes(r.kind === 'self-source' ? 'self' : 'eval')) this.chosen.add(r.id);
   }
   get choice(): LaunchChoice {
@@ -54,11 +60,19 @@ export class ImproveLaunchDialog {
   get disabledReason() { return this.tooSmall ? TOO_SMALL_TO_CONFIRM : undefined; }
 
   handleInput(data: string): ConfirmResult {
+    if(this.removal){
+      const removal=this.removal,result=removal.dialog.handleInput(data);
+      if(result.type==='confirm'){
+        try{this.host.remove(removal.registration.id);this.chosen.delete(removal.registration.id);this.registrations=this.registrations.filter(registration=>registration.id!==removal.registration.id);this.notice=undefined;}catch(error){this.notice=clean(String(error));}
+        this.removal=undefined;
+      }else if(result.type==='cancel')this.removal=undefined;
+      return {type:'handled'};
+    }
     if (this.input) return this.inputKey(data);
     const row = this.rows[this.cursor];
     if (matchesKey(data, 'escape')) return { type: 'cancel' };
     if (matchesKey(data, 'enter')) {
-      if (row.kind === 'register') { this.input = { text: '' }; return { type: 'handled' }; }
+      if (row.kind === 'register') { this.pathInput.setValue('');this.input = { text: '' }; return { type: 'handled' }; }
       return this.disabledReason ? { type: 'noop' } : { type: 'confirm', selected: [] };
     }
     if (matchesKey(data, 'up') || matchesKey(data, 'shift+tab')) { this.cursor = Math.max(0, this.cursor - 1); return { type: 'handled' }; }
@@ -74,10 +88,12 @@ export class ImproveLaunchDialog {
       if (!this.chosen.delete(row.registration.id)) this.chosen.add(row.registration.id);
       return { type: 'handled' };
     }
-    if (row.kind === 'focus') {
-      if (matchesKey(data, 'backspace')) { this.focus = Array.from(this.focus).slice(0, -1).join(''); return { type: 'handled' }; }
-      if (printable(data)) { this.focus = Array.from(this.focus + data).slice(0, 1000).join(''); return { type: 'handled' }; }
+    if(row.kind==='source'&&matchesKey(data,'delete')){
+      const registration=row.registration;
+      this.removal={registration,dialog:new ConfirmDialog({title:'移除来源登记',action:'移除',wrapBody:true,body:[`来源 ${sourceLabel(registration)}`,`目录 ${registration.root}`,...registration.paths.map(path=>`文件 ${path}`)],fixed:['仅移除来源登记，不删除目录或文件；已有分析报告保留。','不调用模型 · 费用 ¥0.00']})};
+      return {type:'handled'};
     }
+    if(row.kind==='focus'){this.focusInput.handleInput(data);return {type:'handled'};}
     return { type: 'noop' };
   }
   private inputKey(data: string): ConfirmResult {
@@ -85,7 +101,7 @@ export class ImproveLaunchDialog {
     if (matchesKey(data, 'escape')) { this.input = undefined; return { type: 'handled' }; }
     if (matchesKey(data, 'tab')) {
       const done = this.host.complete(input.text);
-      this.input = { text: done.text, note: done.matches > 1 ? `${done.matches} 个匹配` : done.matches ? undefined : '没有匹配' };
+      this.pathInput.setValue(done.text);this.pathInput.handleInput('\x1b[F');this.input = { text: done.text, note: done.matches > 1 ? `${done.matches} 个匹配` : done.matches ? undefined : '没有匹配' };
       return { type: 'handled' };
     }
     if (matchesKey(data, 'enter')) {
@@ -97,9 +113,7 @@ export class ImproveLaunchDialog {
       } catch (error) { this.input = { text: input.text, error: clean(String(error instanceof Error ? error.message : error)) }; }
       return { type: 'handled' };
     }
-    if (matchesKey(data, 'backspace')) { this.input = { text: Array.from(input.text).slice(0, -1).join('') }; return { type: 'handled' }; }
-    if (printable(data)) { this.input = { text: input.text + data }; return { type: 'handled' }; }
-    return { type: 'noop' };
+    this.pathInput.handleInput(data);this.input={text:this.pathInput.getValue()};return {type:'handled'};
   }
 
   /** 固定行：上限金额、请求数与时限（只换行、不截断）。 */
@@ -109,28 +123,9 @@ export class ImproveLaunchDialog {
   }
 
   render(columns: number, rows: number, tier: ColorTier = COLOR_TIER): string[] {
-    const width = ConfirmDialog.width(columns), inner = Math.max(1, width - 4);
-    const fixed = this.fixedLines().flatMap(text => wrapAuthorized(text, inner));
-    const chrome = 4; // 上框线、标题、末行、下框线
-    this.tooSmall = rows < chrome + fixed.length;
-    const border = (text: string) => (tier === 'none' ? '' : bgSgr('bg.block', tier) + fgSgr('border.input', tier)) + text + resetSgr();
-    const row = (segments: TextSegment[], lineBg: TokenName = 'bg.block') => border('│ ') + styledLine(segments.map(s => ({ bg: lineBg, ...s })), inner, lineBg, tier) + border(' │');
-    const lines = [border(`╭${'─'.repeat(Math.max(0, width - 2))}╮`), row([{ text: truncateEnd('新建 improve 分析', inner), fg: 'fg.primary', bold: true }])];
-    if (!this.tooSmall) {
-      const body = this.body(inner), height = Math.min(body.length, rows - chrome - fixed.length);
-      const first = body.findIndex(line => line.cursor), last = body.length - 1 - [...body].reverse().findIndex(line => line.cursor);
-      if (first >= 0 && first < this.scroll) this.scroll = first;
-      if (first >= 0 && last >= this.scroll + height) this.scroll = Math.max(first, last - height + 1);
-      this.scroll = Math.max(0, Math.min(this.scroll, body.length - height));
-      for (const line of body.slice(this.scroll, this.scroll + height)) lines.push(row(line.segments, line.cursor ? 'bg.selected' : 'bg.block'));
-      for (const text of fixed) lines.push(row([{ text, fg: 'fg.label' }]));
-    }
-    const action = this.host.queued ? '排队分析' : '开始分析', reason = this.disabledReason;
-    lines.push(row(this.input ? [{ text: truncateEnd('Enter 登记 · Tab 补全 · Esc 收起', inner), fg: 'fg.label' }]
-      : reason ? [{ text: 'Enter ', fg: 'fg.gutter' }, { text: reason, fg: 'fg.muted' }, { text: ' · Esc 取消', fg: 'fg.label' }]
-      : [{ text: `Enter ${action}`, fg: 'fg.body' }, { text: ' · Esc 取消', fg: 'fg.label' }]));
-    lines.push(border(`╰${'─'.repeat(Math.max(0, width - 2))}╯`));
-    return lines.slice(0, Math.max(0, rows));
+    if(this.removal)return this.removal.dialog.render(columns,rows,tier);
+    this.dialog.update({fixed:this.fixedLines()});this.dialog.revealCursor();
+    const lines=this.dialog.render(columns,rows,tier);this.tooSmall=this.dialog.disabledReason===TOO_SMALL_TO_CONFIRM;return lines;
   }
 
   private body(inner: number) {
@@ -163,19 +158,19 @@ export class ImproveLaunchDialog {
         const label = index === 2 ? head('附加来源', index) : `${focused ? '›' : ' '}${pad.slice(1)}`;
         out.push({ segments: [{ text: label, fg: focused ? 'fg.primary' : 'fg.label' }, { text: '+ 登记新路径', fg: focused ? 'fg.primary' : 'fg.body' }, ...(focused && !this.input ? [{ text: ' · Enter 输入路径', fg: 'fg.muted' as const }] : [])], cursor: focused });
         if (this.input) {
-          out.push({ segments: [{ text: pad }, { text: truncateEnd(clean(this.input.text) || REGISTER_HINT, inner - LABEL - 1), fg: this.input.text ? 'fg.primary' : 'fg.faint' }, { text: '▏', fg: 'fg.body' }], cursor: true });
+          out.push({ segments: [{ text: pad }, { text: this.input.text?this.pathInput.render(Math.max(1,inner-LABEL))[0]:truncateEnd(REGISTER_HINT,inner-LABEL), fg: this.input.text ? 'fg.primary' : 'fg.faint' }], cursor: true });
           if (this.input.error) out.push({ segments: [{ text: pad }, { text: truncateEnd(`${GLYPHS.err} ${this.input.error}`, inner - LABEL), fg: 'ac.err' }], cursor: true });
           else if (this.input.note) out.push({ segments: [{ text: pad }, { text: this.input.note, fg: 'fg.muted' }], cursor: true });
         }
       } else {
         // 光标停在“分析重点”时直接输入；空时用默认重点。
         const text = clean(this.focus);
-        out.push({ segments: [{ text: head('分析重点', index), fg: focused ? 'fg.primary' : 'fg.label' }, { text: truncateEnd(text || `${DEFAULT_FOCUS}（选填）`, inner - LABEL - 1), fg: text ? 'fg.primary' : 'fg.faint' }, ...(focused ? [{ text: '▏', fg: 'fg.body' as const }] : [])], cursor: focused });
+        out.push({ segments: [{ text: head('分析重点', index), fg: focused ? 'fg.primary' : 'fg.label' }, { text: focused&&text?this.focusInput.render(Math.max(1,inner-LABEL))[0]:truncateEnd(text || `${DEFAULT_FOCUS}（选填）`, inner-LABEL), fg: text ? 'fg.primary' : 'fg.faint' }], cursor: focused });
       }
     });
     plain('');
-    plain('↑↓ 换行 · 数字键选择 · 空格勾选来源', 'fg.muted');
+    plain('↑↓ 换行 · 数字键选择 · 空格勾选来源 · Delete 移除登记', 'fg.muted');
+    if(this.notice)plain(this.notice,'ac.err');
     return out;
   }
 }
-function printable(data: string) { return !!data && clean(data) === data && !/[\t\n\x1b]/.test(data); }

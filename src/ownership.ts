@@ -11,6 +11,16 @@ const owners = new Map<string, ReturnType<typeof leaseState>>();
 const missing = (error: unknown) => error instanceof Error && 'code' in error && error.code === 'ENOENT';
 const sameFile = (a: Stats, b: Stats) => a.dev === b.dev && a.ino === b.ino && a.isDirectory() === b.isDirectory() && !b.isSymbolicLink();
 const lockOptions = { stale: Number.MAX_SAFE_INTEGER, update: 1000, retries: 0 };
+/** Read-only UI preflight. A marker is evidence of occupancy, never proof of authority. */
+export function hasOwnerMarker(path: string): boolean {
+  let canonical: string;
+  try { canonical = realpathSync(path); } catch (error) { if (missing(error)) return false; throw error; }
+  for (const marker of [`${canonical}.lock`, join(canonical, 'owner.json')]) {
+    try { lstatSync(marker); return true; } catch (error) { if (!missing(error)) throw error; }
+  }
+  return false;
+}
+
 function rejectExisting(canonical: string) {
   for (const marker of [`${canonical}.lock`, join(canonical, 'owner.json')]) {
     try { lstatSync(marker); } catch (error) { if (missing(error)) continue; throw error; }

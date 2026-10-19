@@ -50,3 +50,18 @@ test('the shared full-screen compositor paints short lines and empty rows with t
     assert.match(grid.rows[0].map(cell=>cell.char).join(''),/^short +$/);
   } finally {tui.stop();}
 });
+
+
+test('an open full-screen view yields to the root warning below the supported terminal size', () => {
+  const terminal = new TestTerminal(), tui = new TuiAltScreen(terminal, true);
+  tui.setLayoutRoot({ invalidate() {}, render: width => [styledLine([{ text: '窗口过小' }], width)] });
+  showFullScreen(tui, terminal, { invalidate() {}, render: width => [styledLine([{ text: 'active view' }], width)] });
+  try {
+    tui.start(); tui.renderNow(true); assert.match(tui.getScreenLines().join(''), /active view/);
+    terminal.columns = 30; terminal.rows = 10; terminal.resize(); tui.renderNow(true);
+    assert.match(tui.getScreenLines().map(stripTerminalSequences).join(''), /窗口过小/);
+    assert.doesNotMatch(tui.getScreenLines().join(''), /active view/);
+    terminal.columns = 80; terminal.rows = 24; terminal.resize(); tui.renderNow(true);
+    assert.match(tui.getScreenLines().join(''), /active view/);
+  } finally { tui.stop(); }
+});

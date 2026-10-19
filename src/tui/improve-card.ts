@@ -4,6 +4,7 @@ import {wrapTextWithAnsi,visibleWidth} from '@earendil-works/pi-tui';
 import type {ImproveCandidate,ImproveReport} from '../improve.js';
 import type {ImproveMode} from '../improve-decisions.js';
 import {readObject} from '../evidence.js';
+import {applyReplacement,ReplacementMismatchError,REPLACEMENT_MISMATCH_REASON} from '../improve-replacements.js';
 import {readDisplayIndex} from '../display-number.js';
 import {candidateExecutable,improveReportContract} from '../improve-contract.js';
 import {upperBoundAmount,formatAmount} from '../cost-estimate.js';
@@ -17,6 +18,7 @@ export interface CandidateDecisionLabel {mode:string;state:string;canExecute?:bo
 export interface CandidateCardOptions {expanded:boolean;selected?:boolean;mode?:ImproveMode;decision?:CandidateDecisionLabel;readOnly?:boolean;label?:string;tier?:ColorTier}
 export interface CandidateCardRow {text:string;fg?:TokenName}
 export function suggestionReason(c:ImproveCandidate) {
+ if(c.suggestionReason)return c.suggestionReason;
  if(c.target.state!=='verified')return c.target.gaps.join('；')||'目标未经核对';
  if(!c.replacements?.length)return '缺少声明范围的替换内容';
  if(!c.structuredChecks?.length)return '缺少结构化检查与数值预算';
@@ -34,9 +36,13 @@ export function candidateValidation(c:ImproveCandidate) {
  * command/diff continuations wrap without manufactured line numbers. */
 function replacementDiff(root:string,c:ImproveCandidate) {
  return (c.replacements??[]).flatMap(r=>{
+  if(c.suggestionReason)return [{text:`diff ${r.path} · ${c.suggestionReason}`,fg:'ac.warn' as const},{text:r.content,fg:'ac.code' as const}];
   const file=c.target.files.find(f=>f.path===r.path);
-  let before:string;try{if(!file)throw Error('missing');before=readObject(root,file.content).toString('utf8');}catch{return [{text:`diff ${r.path} · 原文不可读取，不能证明替换内容`,fg:'ac.warn' as const},{text:r.content,fg:'ac.code' as const}];}
-  const a=before.split('\n'),b=r.content.split('\n');let start=0,end=0;
+  let before:string,after:string;try{if(!file)throw Error('missing');before=readObject(root,file.content).toString('utf8');after=applyReplacement(before,r);}catch(error){
+   const reason=error instanceof ReplacementMismatchError?REPLACEMENT_MISMATCH_REASON:'原文不可读取，不能证明替换内容';
+   return [{text:`diff ${r.path} · ${reason}`,fg:'ac.warn' as const},{text:r.content,fg:'ac.code' as const}];
+  }
+  const a=before.split('\n'),b=after.split('\n');let start=0,end=0;
   while(start<a.length&&start<b.length&&a[start]===b[start])start++;
   while(end<a.length-start&&end<b.length-start&&a[a.length-1-end]===b[b.length-1-end])end++;
   if(start===a.length&&start===b.length)return [{text:`diff ${r.path} · 内容未变`,fg:'fg.muted' as const}];

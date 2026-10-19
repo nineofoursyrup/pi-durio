@@ -4,7 +4,7 @@ import { previewCleanup, commitCleanup, type CleanupPlan } from '../storage.js';
 import { storageGroups, type StorageGroup, type StorageTotals, type GroupedUnit } from '../storage-groups.js';
 import { readDisplayIndex, type DisplayIndex } from '../display-number.js';
 import { GLYPHS, styledLine, type TextSegment } from './theme.js';
-import { LoadingState, clean, escHint, fixedFrame, hintLine, statusEmpty, statusError, truncateEnd, truncateMiddle, widthTier, type ConfirmConfig } from './view-stack.js';
+import { LoadingState, errorCode, clean, escHint, fixedFrame, hintLine, statusEmpty, statusError, truncateEnd, truncateMiddle, widthTier, type ConfirmConfig } from './view-stack.js';
 import { mayWrite, type WriteAccess } from './write-access.js';
 
 /** What the storage view needs from its host (app.ts): render, the busy state, feedback and the confirm box. */
@@ -109,7 +109,7 @@ export class StorageView {
       if (!value) return;
       this.root = value.root; this.totals = value.totals; this.index = readDisplayIndex(this.root); this.error = undefined;
       if (!keepRows) { this.groups = value.groups; this.cursor = 0; this.offset = 0; }
-    } catch (error) { this.error = { message: '存储统计失败', code: failureCode(error), action: '/storage 重新打开' }; }
+    } catch (error) { this.error = { message: '存储统计失败', code: errorCode(error, 'STORAGE_FAILURE'), action: '/storage 重新打开' }; }
   }
 
   /** Returns the preview started by Enter, if any (tests await it; the host does not). */
@@ -146,7 +146,7 @@ export class StorageView {
         return output;
       });
     } catch (error) {
-      const code = failureCode(error);
+      const code = errorCode(error, 'STORAGE_FAILURE');
       // Preview takes the data-root writer lock; while a task holds it there is only a hint, no box (E9).
       if (code.startsWith('OWNER_')) { this.host.feedback(`写入者锁被占用 · 有任务运行中，结束后再清理 · ${code}`); return; }
       this.error = { message: '清理预览失败', code, action: 'Enter 重新预览' };
@@ -195,7 +195,7 @@ export class StorageView {
         try {
           const done = await commitCleanup(this.root, { id: p.plan.id, identity: p.identity });
           for (const part of done.parts) results.set(part.id, part.status === 'completed' ? { status: 'deleted' } : part.status === 'failed' ? { status: 'failed', reason: part.reason ?? undefined } : { status: 'not-run' });
-        } catch (error) { for (const unit of p.plan.units) results.set(unit.id, { status: 'failed', reason: failureCode(error) }); }
+        } catch (error) { for (const unit of p.plan.units) results.set(unit.id, { status: 'failed', reason: errorCode(error, 'STORAGE_FAILURE') }); }
       }
       return results;
     });
@@ -218,7 +218,7 @@ export class StorageView {
     let head: string, flexible: string, tail: string;
     if (group.session) {
       head = `${mark} ${this.index!.label('session', group.session.id)} · `; flexible = firstLine(group.session.first.input);
-      tail = ` · ${group.session.tasks} 个任务 · ${sizes}${tier === 'wide' ? ` · ${activity(group.session.tail.at)}` : ''}`;
+      tail = ` · ${group.session.tasks} 个任务 · ${sizes}${tier === 'wide' ? ` · ${activity(group.session.lastAt)}` : ''}`;
     } else { head = `${mark} `; flexible = '未归属附件'; tail = ` · ${group.units.length} 个单元 · ${sizes}`; }
     const room = width - visibleWidth(head) - visibleWidth(tail);
     return room >= 4 ? `${head}${truncateEnd(flexible, room)}${tail}` : truncateEnd(`${head}${flexible}${tail}`, width);
@@ -274,8 +274,4 @@ export class StorageView {
 function firstLine(text: string) { return clean(text.split('\n')[0] ?? '') || '（无输入）'; }
 function unitName(unit: GroupedUnit) {
   return unit.kind === 'session' ? `会话存储${unit.task ? ` · 任务 ${unit.task}` : ''}` : `附件 ${unit.id.slice('object:'.length, 'object:'.length + 8)}`;
-}
-function failureCode(error: unknown) {
-  const code = (error as NodeJS.ErrnoException).code;
-  return clean(code ?? (error instanceof Error ? error.message : String(error)).split(/[\s:]/)[0]) || 'STORAGE_FAILURE';
 }

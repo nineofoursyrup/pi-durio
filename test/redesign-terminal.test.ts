@@ -92,6 +92,10 @@ test('native assessment keeps missing facts unrun, the first failure and the rea
   const { assessNative } = await import(pathToFileURL(join(scripts, 'assess.mjs')).href);
   const item = (record: any, id: string) => assessNative(record).items.find((i: any) => i.id === id);
   assert.ok(assessNative({ before: {}, after: {} }).items.every((i: any) => i.status === 'NOT_RUN'));
+  assert.equal(item({events:[{kind:'key-attempt',key:'page-up',completed:true,received:false}]},'page-up').status,'FAIL');
+  assert.equal(item({events:[{kind:'key-attempt',key:'page-up',completed:false,received:false}]},'page-up').status,'NOT_RUN');
+  assert.equal(item({events:[{kind:'key-attempt',key:'page-down',completed:true,received:true}]},'page-down').status,'PASS');
+  assert.equal(item({events:[{kind:'key-attempt',key:'page-up',completed:true,received:false},{kind:'received',data:'\x1b[5~'}]},'page-up').status,'FAIL');
   const screen = (editor: string) => ['header', editor, 'border', 'usage', 'keys'];
   const before = { screen: screen('补充当前任务…'), queue: ['q-first', 'q-last'] }, after = { screen: screen('补充当前任务…'), queue: ['q-first'] };
   const pair = [{ kind: 'input', data: '\x7f', ms: 1000, settled: true, before, after }, { kind: 'input', data: '\x7f', ms: 1300, settled: true, before: after, after }];

@@ -8,7 +8,8 @@ import {runCodingTask,readAcceptedTasks} from '../src/runtime.js';
 import {scriptedTransport} from '../src/offline.js';
 import {records,decode,watermark} from '../src/history.js';
 import {recordFeedback,queryFeedbackMetrics} from '../src/metrics/index.js';
-import {MetricsView} from '../src/tui/metrics.js';
+import {StatsBrowser} from '../src/tui/stats-browser.js';
+import {statsMembers} from '../src/tui/stats-drilldown.js';
 import {ReadOnlyTui} from '../src/tui/app.js';
 import {stripTerminalSequences,type Terminal} from '@earendil-works/pi-tui';
 class TestTerminal implements Terminal {columns=110;rows=30;kittyProtocolActive=false;input:(s:string)=>void=()=>{};start(input:(s:string)=>void){this.input=input;}stop(){}async drainInput(){}write(){}moveBy(){}hideCursor(){}showCursor(){}clearLine(){}clearFromCursor(){}clearScreen(){}setTitle(){}setProgress(){}setProgramStatus(){}}
@@ -32,7 +33,7 @@ test('real public delivery, explicit correction and independent repair retain id
  const machine=cli(['feedback-report','--scope',JSON.stringify(finalScope)]);assert.equal(machine.status,0,machine.stderr);assert.deepEqual(content(JSON.parse(machine.stdout)),content(report));
  const readable=cli(['feedback-report','--scope',JSON.stringify(finalScope),'--format','text']);assert.equal(readable.status,0,readable.stderr);assert.match(readable.stdout,/成熟返工 0\/0 = N\/A/);
  const destination=join(root,'report.json');assert.equal(cli(['feedback-report','--scope',JSON.stringify(finalScope),'--destination',destination]).status,0);assert.deepEqual(content(JSON.parse(readFileSync(destination,'utf8'))),content(report));assert.notEqual(cli(['feedback-report','--scope',JSON.stringify(finalScope),'--destination',destination]).status,0);
- const view=new MetricsView(dataRoot,finalScope);view.handleInput('f');assert.deepEqual(content(view.feedbackReport),content(report));view.handleInput('e');view.handleInput('\r');assert.match(view.render(110,100).join('\n'),/task.accepted/);view.handleInput('b');view.handleInput('b');view.handleInput('r');assert.ok(view.feedbackReport!.scope.through<report.scope.through);
+ const view=new StatsBrowser(dataRoot,workspace,{scope:report.scope,command:'/stats'},{open(){},copy:async()=>true,feedback(){},changed(){}});assert.deepEqual(content(view.stats!.reports.feedback),content(report));assert.ok(statsMembers(view.stats!,'rework')[0].evidence().some(e=>e.label.includes('task.accepted')));view.handleInput('v');assert.ok(view.stats!.reports.feedback.scope.through<report.scope.through);
  const terminal=new TestTerminal(),app=new ReadOnlyTui({workspace,dataRoot,draftRoot:join(root,'drafts'),mode:'offline',terminal,widthCalibration:false,transport:async()=>{throw Error('readonly report called provider');}});app.start();try{terminal.input(`/stats --as-of ${finalScope.asOf} --source ${finalScope.source}`);terminal.input('\r');const screen=app.screen().map(stripTerminalSequences).join('\n');assert.match(screen,/人工介入 +\S/);assert.match(screen,/返工 +\S/);assert.match(screen,/期间开销（去重）/);}finally{await app.exit();}
  assert.equal(calls,beforeCalls);assert.equal(watermark(dataRoot),seq);assert.deepEqual(readFileSync(join(dataRoot,'host.sqlite')),before);assert.equal(queryFeedbackMetrics(dataRoot,old.scope).id,old.id);
 });

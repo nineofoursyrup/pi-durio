@@ -9,7 +9,7 @@
  * - PresetFilter：预设选项筛选层（1e 与历史视图复用）
  */
 
-import { matchesKey, truncateToWidth, visibleWidth, wrapTextWithAnsi, stripTerminalSequences } from '@earendil-works/pi-tui';
+import { Input, matchesKey, truncateToWidth, visibleWidth, wrapTextWithAnsi, stripTerminalSequences } from '@earendil-works/pi-tui';
 import {
   styledLine, fgSgr, bgSgr, resetSgr,
   GLYPHS, spinnerFrame, SPINNER_FRAMES, SPINNER_INTERVAL_MS,
@@ -19,6 +19,23 @@ import {
 /** 显示前去掉控制字符与终端序列（原因码、路径、用户内容都经过这里）。 */
 export function clean(text: string): string {
   return stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g, '');
+}
+
+/** A filesystem/API error becomes a stable, sanitized status code at the UI boundary. */
+export function errorCode(error: unknown, fallback: string): string {
+  return clean((error as NodeJS.ErrnoException)?.code ?? (error instanceof Error ? error.message : String(error)).split(/[\s:]/)[0]) || fallback;
+}
+
+/** Public pi-tui single-line editing, with the product's existing clear shortcut and input bounds. */
+export class SingleLineInput extends Input {
+  constructor(value = '', private readonly maxLength = Infinity, placeholder = '') { super({ prompt: '', placeholder }); this.setValue(value); super.handleInput('\x1b[F'); }
+  override setValue(value: string): void { super.setValue(clean(value).replace(/[\r\n\t]/g, ' ').slice(0, this.maxLength).replace(/[\uD800-\uDBFF]$/u, '')); }
+  override handleInput(data: string): void {
+    if (matchesKey(data, 'ctrl+a')) { this.setValue(''); return; }
+    super.handleInput(data);
+    const value = this.getValue(), bounded = clean(value).replace(/[\r\n\t]/g, ' ').slice(0, this.maxLength).replace(/[\uD800-\uDBFF]$/u, '');
+    if (bounded !== value) super.setValue(bounded);
+  }
 }
 
 // ─── 全屏视图的键规则（T6） ──────────────────────────────────────────────────
@@ -96,6 +113,23 @@ export function truncateEnd(text: string, width: number): string {
   return truncateToWidth(text, width, '…');
 }
 
+/** 按宽度裁切一组分段：超出处加 `…`，不足处补空格。 */
+export function fitSegments(segments: TextSegment[], width: number): TextSegment[] {
+  const out: TextSegment[] = []; let used = 0;
+  for (const segment of segments) {
+    if (!segment.text) continue;
+    const w = visibleWidth(segment.text);
+    if (used + w > width) {
+      // 宽字符处截断可能少一格；按实际宽度补齐，决不超出。
+      let room = width - used, text = truncateEnd(segment.text, room);
+      while (room > 0 && visibleWidth(text) > width - used) text = truncateEnd(segment.text, --room);
+      out.push({ ...segment, text }); used += visibleWidth(text); break;
+    }
+    out.push(segment); used += w;
+  }
+  if (used < width) out.push({ text: ' '.repeat(width - used) });
+  return out;
+}
 /** 路径从中间省略：保留开头与结尾，中间写 `…`。 */
 export function truncateMiddle(text: string, width: number): string {
   if (visibleWidth(text) <= width) return text;
@@ -222,12 +256,18 @@ export interface ConfirmConfig {
   action: string;
   /** 正文：高度不够时在框内滚动（逐行截断） */
   body?: string[];
+  /** Custom wrapped body rows; the shared dialog owns frame, clipping and cursor visibility. */
+  bodyRows?: (inner: number) => Array<{ segments: TextSegment[]; cursor?: boolean }>;
+  /** Custom footer, wrapped by the shared frame. Receives the current confirmation blocker. */
+  footer?: (reason: string | undefined) => TextSegment[];
   /** Authorization-bearing body text must wrap completely, including after a resize. */
   wrapBody?: boolean;
   /** 单选（数字键）或多选（空格切换、↑↓ 换行）；排在正文之后，与正文一起滚动 */
   choice?: { mode: 'single' | 'multi'; options: ConfirmOption[]; selected?: number[] };
   /** 影响与费用行：固定显示、不随框内滚动，只换行不截断 */
   fixed?: string[];
+  /** Trusted component rows, kept in the fixed area with their cursor styling. */
+  fixedRows?: (inner: number) => string[];
   /** Enter 不可用的原因（冲突、截止时间已过、尚未选择…）；末行写明并灰显 Enter */
   disabled?: string | ((selected: number[]) => string | undefined);
 }
@@ -250,12 +290,15 @@ export class ConfirmDialog {
   private scroll = 0;
   private cursor = 0;
   private chosen: Set<number>;
+  private followCursor = true;
   private tooSmall = false;
 
   constructor(private readonly config: ConfirmConfig) {
     this.chosen = new Set(config.choice?.selected ?? []);
     this.cursor = Math.max(0, config.choice?.options.findIndex(option => !option.disabled) ?? 0);
   }
+
+  update(config: Partial<ConfirmConfig>): void { Object.assign(this.config, config); }
 
   static width(columns: number): number { return Math.max(1, Math.min(columns - 4, 88)); }
 
@@ -268,14 +311,19 @@ export class ConfirmDialog {
     return typeof disabled === 'function' ? disabled(this.selected) : disabled;
   }
 
+  scrollBy(delta: number): void { this.scroll = Math.max(0, this.scroll + delta); this.followCursor = false; }
+  revealCursor(): void { this.followCursor = true; }
+
   render(columns: number, rows: number, tier: ColorTier = COLOR_TIER): string[] {
     const width = ConfirmDialog.width(columns), inner = Math.max(1, width - 4);
-    const fixed = (this.config.fixed ?? []).flatMap(text => wrapAuthorized(text, inner));
-    // 末行放不下时换行（原因不截断，Esc 不去掉）；以“窗口过小”的写法计算高度，Enter 可用与否不改变框高。
-    const footer = (reason: string | undefined) => wrapSegments(reason
+    const fixed = [...(this.config.fixed ?? []).flatMap(text => wrapAuthorized(text, inner)), ...(this.config.fixedRows?.(inner) ?? []).flatMap(text => wrapTextWithAnsi(text, inner))];
+    // 末行放不下时换行（原因不截断，Esc 不去掉）；当前提示和“窗口过小”的提示都必须完整容纳。
+    const footer = (reason: string | undefined) => wrapSegments(this.config.footer ? this.config.footer(reason) : reason
       ? [{ text: 'Enter ', fg: 'fg.gutter' }, { text: clean(reason), fg: 'fg.muted' }, { text: ' · Esc 取消', fg: 'fg.label' }]
       : [{ text: `Enter ${clean(this.config.action)}`, fg: 'fg.body' }, { text: ' · Esc 取消', fg: 'fg.label' }], inner);
-    const chrome = 3 + footer(TOO_SMALL_TO_CONFIRM).length; // 上框线、标题、末行、下框线
+    const disabled = this.config.disabled;
+    const reason = typeof disabled === 'function' ? disabled(this.selected) : disabled;
+    const chrome = 3 + Math.max(footer(TOO_SMALL_TO_CONFIRM).length, footer(reason).length); // 上框线、标题、末行、下框线
     this.tooSmall = rows < chrome + fixed.length;
     const border = (text: string) => (tier === 'none' ? '' : bgSgr('bg.block', tier) + fgSgr('border.input', tier)) + text + resetSgr();
     const row = (segments: TextSegment[], lineBg: TokenName = 'bg.block') =>
@@ -285,8 +333,8 @@ export class ConfirmDialog {
       const scrollable = this.scrollable(inner);
       const height = Math.min(scrollable.length, rows - chrome - fixed.length);
       const at = scrollable.findIndex(line => line.cursor);
-      if (at >= 0 && at < this.scroll) this.scroll = at;
-      if (at >= 0 && at >= this.scroll + height) this.scroll = at - height + 1;
+      if (this.followCursor && at >= 0 && at < this.scroll) this.scroll = at;
+      if (this.followCursor && at >= 0 && at >= this.scroll + height) this.scroll = at - height + 1;
       this.scroll = Math.max(0, Math.min(this.scroll, scrollable.length - height));
       for (const line of scrollable.slice(this.scroll, this.scroll + height)) lines.push(row(line.segments, line.cursor ? 'bg.selected' : 'bg.block'));
       for (const text of fixed) lines.push(row([{ text, fg: 'fg.label' }]));
@@ -317,12 +365,13 @@ export class ConfirmDialog {
         if (!choice.options[next].disabled) { this.cursor = next; break; }
       return { type: 'handled' };
     }
-    if (matchesKey(data, 'up')) { this.scroll = Math.max(0, this.scroll - 1); return { type: 'handled' }; }
-    if (matchesKey(data, 'down')) { this.scroll++; return { type: 'handled' }; }
+    if (matchesKey(data, 'up') || matchesKey(data, 'pageUp')) { this.scrollBy(matchesKey(data, 'up') ? -1 : -3); return { type: 'handled' }; }
+    if (matchesKey(data, 'down') || matchesKey(data, 'pageDown')) { this.scrollBy(matchesKey(data, 'down') ? 1 : 3); return { type: 'handled' }; }
     return { type: 'noop' };
   }
 
   private scrollable(inner: number): Array<{ segments: TextSegment[]; cursor?: boolean }> {
+    if (this.config.bodyRows) return this.config.bodyRows(inner);
     const lines: Array<{ segments: TextSegment[]; cursor?: boolean }> = (this.config.body ?? [])
       .flatMap(text => this.config.wrapBody ? wrapAuthorized(text, inner) : clean(text.replace(/\r/g, '')).split('\n'))
       .map(text => ({ segments: [{ text: truncateEnd(text, inner), fg: 'fg.body' as TokenName }] }));
@@ -374,7 +423,7 @@ export type FilterValues = Record<string, { option: number; value?: string }>;
 export class PresetFilter {
   private row = 0;
   private values: FilterValues;
-  private editing?: { key: string; text: string; error?: string; listIndex: number };
+  private editing?: { key: string; input: SingleLineInput; error?: string; listIndex: number };
 
   constructor(private readonly dimensions: FilterDimension[], initial?: FilterValues) {
     this.values = Object.fromEntries(dimensions.map(d => [d.key, { ...(initial?.[d.key] ?? { option: d.selected ?? 0 }) }]));
@@ -400,7 +449,9 @@ export class PresetFilter {
       const here = dimension.options[current.option]?.custom && current.value === undefined ? this.row : -1;
       const missing = here >= 0 ? here : this.dimensions.findIndex(d => d.options[this.values[d.key].option]?.custom && this.values[d.key].value === undefined);
       if (missing < 0) return 'apply';
-      this.row = missing; this.editing = { key: this.dimensions[missing].key, text: '', listIndex: 0 };
+      this.row = missing;
+      const custom = this.dimensions[missing].options[this.values[this.dimensions[missing].key].option].custom!;
+      this.editing = { key: this.dimensions[missing].key, input: new SingleLineInput('', Infinity, custom.kind === 'input' ? custom.placeholder : ''), listIndex: 0 };
       return 'handled';
     }
     return 'noop';
@@ -431,7 +482,7 @@ export class PresetFilter {
       if (this.editing?.key !== dimension.key) return;
       const editing = this.editing, custom = dimension.options[current.option].custom!;
       if (custom.kind === 'input') {
-        lines.push(styledLine([{ text: pad }, { text: editing.text || custom.placeholder, fg: editing.text ? 'fg.primary' : 'fg.faint' }, { text: '▏', fg: 'fg.body' }], width, undefined, tier));
+        lines.push(styledLine([{ text: pad }, { text: editing.input.render(Math.max(1, width - indent))[0], fg: 'fg.primary' }], width, undefined, tier));
         if (editing.error) lines.push(styledLine([{ text: pad }, { text: `${GLYPHS.err} ${clean(editing.error)}`, fg: 'ac.err' }], width, undefined, tier));
       } else custom.items.forEach((item, index) => lines.push(styledLine([
         { text: pad },
@@ -462,12 +513,10 @@ export class PresetFilter {
       return 'handled';
     }
     if (matchesKey(data, 'enter')) {
-      const text = editing.text.trim(), error = text ? custom.validate?.(text) : '不能为空';
+      const text = editing.input.getValue().trim(), error = text ? custom.validate?.(text) : '不能为空';
       if (error) { editing.error = error; return 'handled'; }
       this.values[editing.key] = { option: current.option, value: text }; this.editing = undefined; return 'handled';
     }
-    if (matchesKey(data, 'backspace')) { editing.text = Array.from(editing.text).slice(0, -1).join(''); editing.error = undefined; return 'handled'; }
-    if (data && clean(data) === data && !data.startsWith('\x1b')) { editing.text += data; editing.error = undefined; return 'handled'; }
-    return 'noop';
+    editing.input.handleInput(data); editing.error = undefined; return 'handled';
   }
 }

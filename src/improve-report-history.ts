@@ -28,7 +28,7 @@ export function historyResult(state:HistoryDecision,groupId?:string) {
  return parts.join(' · ');
 }
 export function continuationBlocked(state:HistoryDecision,contract:ReturnType<typeof improveReportContract>,version:string|null) {
- if(contract==='legacy')return '执行版本已变 · 首版冻结批次不能继续';
+ if(contract==='legacy')return '首版冻结批次不能继续 · 请重新分析';
  if(contract==='unknown')return '报告格式未确认 · 请重新分析';
  if(version===null)return '当前执行版本无法核对';
  if(state.executionVersion!==version)return '执行版本已变';
@@ -54,7 +54,7 @@ export function readImproveHistory(root:string,id:string,facts:ImproveFact[]=imp
  const counts={'execute-declared-scope':0,'validate-only':0,defer:0,'do-not-suggest':0};
  for(const c of candidates)if(c.latest&&c.latest.mode in counts)counts[c.latest.mode as keyof typeof counts]++;
  let version:string|null=null;
- if(decisions.some(d=>d.state.groups.some((g:any)=>g.state==='not-run'))&&contract==='declared')try{version=currentImproveVersion();}catch{/* Explicit unavailable reason. */}
+ if(decisions.some(d=>d.state.groups.some((g:any)=>g.state==='not-run'))&&contract==='declared')try{version=currentImproveVersion(root,report.target.workspace);}catch{/* Explicit unavailable reason. */}
  const actions:ImproveHistoryAction[]=[];
  for(const {state}of decisions) {
   const groups=state.groups.filter((g:any)=>g.state==='not-run');
@@ -67,7 +67,7 @@ export function readImproveHistory(root:string,id:string,facts:ImproveFact[]=imp
    actions.push({kind:'rollback',reportId:id,decisionId:state.id,decisionSource:state.sourceId,groupIds:[group.id],candidateIds:group.candidateIds,label:`回退 ${historyCandidateLabel(root,report,c)} 所在组合的写回`});
   }
  }
- let cost='费用未记录';try{cost=formatCostTotals(estimateRunRequests(root,report.runId).totals);}catch{/* Missing facts are not zero. */}
+ const cost=formatCostTotals(estimateRunRequests(root,report.runId).totals);
  const sessionId=readSessionChains(root).sessionOfRun(report.target.runId)?.id??null;
  return {report,contract,candidates,counts,decisions,actions,cost,sessionId};
 }

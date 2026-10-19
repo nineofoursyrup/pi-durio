@@ -9,7 +9,7 @@ import { runReadTask, analyzeImprove } from '../src/runtime.js';
 import { offlineImproveTransport, readImproveReport, type ImproveRequest } from '../src/improve.js';
 import { scriptedTransport } from '../src/offline.js';
 import { completePath, improveBudgetAmount, improveHome, improveLimits, improveRequest, improveVisibleFiles, isFirstVersionReport, registerFromInput } from '../src/improve-entry.js';
-import { listRegisteredSources } from '../src/improve-source.js';
+import { listRegisteredSources,unregisterImproveSource } from '../src/improve-source.js';
 import { ImproveLaunchDialog } from '../src/tui/improve-launch.js';
 import { overrideColorTierForTest } from '../src/tui/theme.js';
 import { captureSnapshot, type SnapshotGrid } from '../src/tui/snapshot.js';
@@ -72,10 +72,15 @@ test('registering a new path: eval <dir> is fingerprinted once, Tab completes pa
   assert.equal(listRegisteredSources(p.data, p.workspace).length, 1);
   assert.throws(() => registerFromInput(p.data, p.workspace, 'evals'), /IMPROVE_REGISTER_INPUT/);
   // The launch box checks a new registration and counts its files.
-  const dialog = new ImproveLaunchDialog({ visible: { project: [], enabled: [], files: 0, omitted: 0, taskType: 'read' }, registrations: [], queued: false, register: input => registerFromInput(p.data, p.workspace, input), complete: input => completePath(p.workspace, input) });
+  const dialog = new ImproveLaunchDialog({ visible: { project: [], enabled: [], files: 0, omitted: 0, taskType: 'read' }, registrations: [], queued: false, register: input => registerFromInput(p.data, p.workspace, input), remove:id=>unregisterImproveSource(p.data,id), complete: input => completePath(p.workspace, input) });
   for (const key of ['\x1b[B', '\x1b[B', '\r', ...'eval ev', '\t', '\r']) dialog.handleInput(key);
   assert.equal(dialog.choice.sources[0]?.id, registration.id); assert.equal(dialog.files, 1);
   assert.match(dialog.render(132, 38).map(plain).join('\n'), /\[✓\] eval 资产 .*case\.json/);
+  dialog.handleInput('\x1b[3~');assert.equal(listRegisteredSources(p.data,p.workspace).length,1,'Delete only opens a confirmation');assert.equal(dialog.choice.sources.length,1);
+  const removal=dialog.render(132,38).map(plain).join('\n'),unwrapped=removal.replace(/[\s│╭╮╰╯─]/g,'');assert.match(removal,/移除来源登记/);assert.ok(unwrapped.includes(registration.root));assert.ok(unwrapped.includes('不删除目录或文件'));
+  dialog.handleInput('\x1b');assert.equal(listRegisteredSources(p.data,p.workspace).length,1,'Esc preserves the source registration');
+  dialog.handleInput('\x1b[3~');dialog.render(40,6);dialog.handleInput('\r');assert.equal(listRegisteredSources(p.data,p.workspace).length,1,'an undersized confirmation cannot remove a source');
+  dialog.render(132,38);assert.notEqual(dialog.handleInput('\r').type,'confirm','removal confirmation never submits an analysis');assert.equal(listRegisteredSources(p.data,p.workspace).length,0);assert.equal(dialog.choice.sources.length,0);
 });
 
 /** Synthetic report records: a redesign report (candidates with replacements) and a first-version one. */
@@ -100,7 +105,7 @@ test('first layer facts: first-version reports never pending; only passed valida
   reports(p.data, p.workspace, task.runId);
   const facts = improveHome(p.data, p.workspace);
   assert.deepEqual(facts.pending.map(r => [r.id, r.candidates, r.undecided]), [['fixture-new', 3, 2]]);
-  assert.equal(facts.reports, 2); assert.equal(facts.suppressions, 1);
+  assert.equal(facts.reports, 2); assert.equal(facts.suppressions, 0);
   assert.equal(isFirstVersionReport({ candidates: [{ title: 'x' }] as never, suppressed: [] }), true);
 });
 
@@ -122,7 +127,7 @@ function assertGolden(grid: SnapshotGrid, name: string) {
   });
   const text = `${grid.width}x${grid.height} ${grid.tier}\n${rows.join('\n')}\n`;
   const dir = join(process.cwd(), 'test', 'fixtures', 'snapshots'), path = join(dir, `${name}.txt`);
-  if (!existsSync(path)) { mkdirSync(dir, { recursive: true }); writeFileSync(path, text); return; }
+  if (process.env.UPDATE_IMPROVE_GOLDENS==='1'||!existsSync(path)) { mkdirSync(dir, { recursive: true }); writeFileSync(path, text); return; }
   assert.equal(text, readFileSync(path, 'utf8'), `snapshot ${name} changed; delete ${path} to accept`);
 }
 
@@ -149,7 +154,7 @@ test('improve first layer and launch box at 132×38 (golden); 80×24 and 40×12 
     terminal.input('/improve'); terminal.input('\r');
     assert.match(screen(), /◆ improve  ~\/project +分析不执行候选/);
     assert.match(screen(), /› ir-[0-9a-f]{4,} · \d\d-\d\d \d\d:\d\d · 来自 s-[0-9a-f]{4,} · 候选 3 · 未决 2/, 'a pending report is selected by default');
-    assert.match(screen(), /新建分析/); assert.match(screen(), /历史报告 · 2 份/); assert.match(screen(), /建议抑制 · 1 项/);
+    assert.match(screen(), /新建分析/); assert.match(screen(), /历史报告 · 2 份/); assert.match(screen(), /建议抑制 · 没有生效的抑制/);
     assertGolden(captureSnapshot(lines(), 132, 38, 'truecolor'), 'improve-home-132x38');
     fits(80, 24); fits(40, 12);
     terminal.input('\x1b[B'); terminal.input('\r');
@@ -162,4 +167,30 @@ test('improve first layer and launch box at 132×38 (golden); 80×24 and 40×12 
     assert.match(screen(), /上限约 ¥34\.60（按最坏情况预留） · ≤32 请求 · ≤20 分钟/);
     terminal.input('\x1b'); assert.doesNotMatch(screen(), /新建 improve 分析/);
   } finally { process.env.HOME = home; await app.exit(); }
+});
+
+
+test('queued session-scope analysis captures files used before actual start while explicit headless paths stay fixed',async()=>{
+ const p=project(),task=await read(p.workspace,p.data,[{name:'read',args:{path:'README.md'}}]);
+ const visible=improveVisibleFiles(p.data,p.workspace,task.runId),request=improveRequest('queued-source-scope',{scope:'session',budget:'standard',sources:[],focus:''},visible);
+ const later=new Evidence(p.data,task.runId);later.append('tool.intent',{tool:'read',args:{path:'a.ts'}});later.close();
+ await analyzeImprove({dataRoot:p.data,workspace:p.workspace,targetRunId:task.runId,request,mode:'offline',transport:offlineImproveTransport().fetch});
+ assert.deepEqual(readImproveReport(p.data,request.id).report!.targets.find(t=>t.id==='project')!.files.map(f=>f.path),['a.ts','README.md']);
+ const explicit={...request,id:'explicit-source-scope'};delete explicit.sourceScope;
+ await analyzeImprove({dataRoot:p.data,workspace:p.workspace,targetRunId:task.runId,request:explicit,mode:'offline',transport:offlineImproveTransport().fetch});
+ assert.deepEqual(readImproveReport(p.data,explicit.id).report!.targets.find(t=>t.id==='project')!.files.map(f=>f.path),['README.md']);
+});
+
+test('launch focus and registration input preserve bracketed paste and cursor edits',()=>{
+ const p=project(),dialog=new ImproveLaunchDialog({visible:{project:[],enabled:[],files:0,omitted:0,taskType:'read'},registrations:[],queued:false,register:input=>registerFromInput(p.data,p.workspace,input),remove:id=>unregisterImproveSource(p.data,id),complete:input=>completePath(p.workspace,input)});
+ for(const key of ['\x1b[B','\x1b[B','\x1b[B','\x1b[200~hello world\x1b[201~','\x1b[D','!'])dialog.handleInput(key);
+ assert.equal(dialog.choice.focus,'hello worl!d');
+});
+
+test('launch path completion places subsequent typing after the completed directory before registration',()=>{
+ const p=project();mkdirSync(join(p.workspace,'evals','subdir'),{recursive:true});writeFileSync(join(p.workspace,'evals','subdir','case.json'),'{}');
+ const dialog=new ImproveLaunchDialog({visible:{project:[],enabled:[],files:0,omitted:0,taskType:'read'},registrations:[],queued:false,register:input=>registerFromInput(p.data,p.workspace,input),remove:id=>unregisterImproveSource(p.data,id),complete:input=>completePath(p.workspace,input)});
+ for(const key of ['\x1b[B','\x1b[B','\r','eval ev','\t','subdir','\r'])dialog.handleInput(key);
+ assert.equal(dialog.choice.sources[0]?.root,join(p.workspace,'evals','subdir'));
+ assert.equal(listRegisteredSources(p.data,p.workspace).length,1);
 });

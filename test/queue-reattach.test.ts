@@ -1,3 +1,4 @@
+import { fixtureDir as v1FixtureDir, dataRoot as v1DataRoot, names as v1Names } from './v1-runtime-fixture.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, realpathSync, cpSync, rmSync, readFileSync } from 'node:fs';
@@ -10,7 +11,6 @@ import { readRunRecords } from '../src/query.js';
 import { readSessionChains } from '../src/session-chain.js';
 import { readQueueReattachment, readOpenQueue } from '../src/queue.js';
 import { scriptedTransport } from '../src/offline.js';
-import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 
 function fixture() {
@@ -91,6 +91,13 @@ test('reattachment reasons cover earlier product-session admissions, dispatch un
     const plan = readQueueReattachment(dataRoot, item, { workspace: f.workspace, mode: 'offline', busy });
     assert.equal(plan.state, 'blocked'); return plan.state === 'blocked' ? plan.reason : '';
   };
+  for (const state of ['failed', 'aborted', 'ended'] as const) {
+    const c = clone(), item = admit(c.dataRoot, original.runId, `tail-${state}`), e = new Evidence(c.dataRoot, tail.runId);
+    if (state === 'ended') e.append('recovery.ended', { runId: tail.runId });
+    else e.append('run.closed', { status: state, cleanup: 'confirmed' });
+    e.close();
+    assert.equal(reason(c.dataRoot, item), '链尾任务未完成 · 新任务将开启新会话');
+  }
   {
     const c = clone(); admit(c.dataRoot, original.runId, 'earlier', 'steer');
     const item = admit(c.dataRoot, tail.runId, 'later');
@@ -135,8 +142,7 @@ test('changed-version improve confirmation withdraws the old request only; it ne
 });
 
 test('the immutable v1 aborted queue refuses reattachment; withdrawal and a new task in an independent workspace never revive it', async () => {
-  const sourceFixture = fileURLToPath(new URL('../../test/fixtures/v1-records', import.meta.url)), source = join(sourceFixture, 'data');
-  const names = JSON.parse(readFileSync(join(sourceFixture, 'fixture-identity.json'), 'utf8')).names as Record<string, string>;
+  const sourceFixture = v1FixtureDir, source = v1DataRoot, names = v1Names;
   const runId = names['run.frozen-source'], sessionId = names['session.frozen-source'], recordedWorkspace = readSessionChains(source).session(sessionId)!.workspace!;
   const root = mkdtempSync(join(tmpdir(), 'durio-queue-v1-')), workspace = join(root, 'project'), dataRoot = join(root, 'data'), originalBytes = readFileSync(join(source, 'host.sqlite'));
   cpSync(join(sourceFixture, 'workspace'), workspace, { recursive: true });
@@ -164,4 +170,36 @@ test('the immutable v1 aborted queue refuses reattachment; withdrawal and a new 
   assert.equal(readOpenQueue(dataRoot, recordedWorkspace).length, 0); assert.equal(transport.calls.length, 1);
   assert.deepEqual(admissions(), originalAdmissions);
   assert.deepEqual(readFileSync(join(source, 'host.sqlite')), originalBytes);
+});
+
+
+test('changed-version replacement keeps the original frozen when cancellation prevents new acceptance', async () => {
+  const f = fixture(), original = await runReadTask({ ...f, input: 'Completed source', mode: 'offline', transport: scriptedTransport([]).fetch });
+  const item = admit(f.dataRoot, original.runId, 'cancel-replacement'); activate(f.dataRoot, f.workspace);
+  const plan = readQueueReattachment(f.dataRoot, item, { workspace: f.workspace, mode: 'offline' });
+  assert.equal(plan.state, 'ready'); if (plan.state !== 'ready') return;
+  const request = { dataRoot: f.dataRoot, runId: item.target.runId, authorization: plan.confirmation.authorization,
+    decision: { id: 'cancel-confirmation', requestId: item.requestId, target: item.target, receiptSeq: item.receipt.seq, action: 'reattach' as const },
+    confirmation: plan.confirmation, transport: scriptedTransport([]).fetch };
+  await assert.rejects(decideQueue({ ...request, signal: AbortSignal.abort() }), /RUN_CANCELLED_BEFORE_ACCEPTANCE/);
+  assert.equal(findQueueItem(f.dataRoot, item.requestId)!.status, 'frozen');
+  assert.equal(readSessionChains(f.dataRoot).session(original.sessionId)!.tasks, 1);
+  const retried = await decideQueue(request);
+  assert.equal(retried.status, 'completed');
+  assert.equal(findQueueItem(f.dataRoot, item.requestId)!.status, 'withdrawn');
+});
+
+
+test('replacement host facts roll back together when the withdrawal record fails', () => {
+  const root = mkdtempSync(join(tmpdir(), 'durio-replacement-atomic-'));
+  const e = new Evidence(root, 'new-run', kind => { if(kind === 'control.receipt') throw Error('injected receipt write failure'); });
+  try {
+    assert.throws(() => e.appendBatch([
+      {runId:'new-run',kind:'task.accepted',data:{taskId:'new',sessionId:'new-session'}},
+      {runId:'old-run',kind:'control.decision',data:{decision:{id:'replace'}}},
+      {runId:'old-run',kind:'control.receipt',data:{requestId:'queued',status:'withdrawn'}},
+    ]), /injected receipt write failure/);
+    assert.deepEqual(readRunRecords(root,'new-run').records,[]);
+    assert.deepEqual(readRunRecords(root,'old-run').records,[]);
+  } finally { e.close(); }
 });

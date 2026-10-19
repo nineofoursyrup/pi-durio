@@ -1,14 +1,14 @@
 132x38 truecolor
-00| 指标 · 本机实测                                                                                                                          |
-   0-0 -/bg.base ; 1-2 fg.primary/bg.base/b ; 3-5 fg.faint/bg.base/b ; 6-125 fg.label/bg.base/b ; 126-131 -/-
-01| ◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api                                  只读 · 不调用模型 · 不重记费用                 |
-   0-2 ac.model/bg.base ; 3-9 fg.primary/bg.base/b ; 10-115 fg.faint/bg.base/b ; 116-131 -/-
+00| 指标 · 本机实测                                                                                                                    |
+   0-0 -/bg.base ; 1-4 fg.primary/bg.base/b ; 5-7 fg.faint/bg.base ; 8-15 fg.label/bg.base ; 16-131 -/bg.base
+01| ◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api                                  只读 · 不调用模型 · 不重记费用 |
+   0-2 ac.model/bg.base ; 3-7 fg.primary/bg.base/b ; 8-9 -/bg.base ; 10-66 fg.faint/bg.base ; 67-100 -/bg.base ; 101-130 fg.faint/bg.base ; 131-131 -/bg.base
 02|                                                                                                                                    |
    0-131 -/-
-03|✗ 范围过大 · 受理任务超过 10000 个 · METRICS_SCOPE_TOO_LARGE                                                                                   |
-   0-1 ac.err/bg.base ; 2-25 fg.body/bg.base ; 26-120 fg.muted/bg.base ; 121-131 -/-
-04|  / 缩小时间或项目范围                                                                                                                       |
-   0-122 fg.label/bg.base ; 123-131 -/-
+03|✗ 范围过大 · 受理任务超过 10000 个 · METRICS_SCOPE_TOO_LARGE                                                                        |
+   0-1 ac.err/bg.base ; 2-36 fg.body/bg.base ; 37-59 fg.muted/bg.base ; 60-131 -/bg.base
+04|  / 缩小时间或项目范围                                                                                                              |
+   0-21 fg.label/bg.base ; 22-131 -/bg.base
 05|                                                                                                                                    |
    0-131 -/-
 06|                                                                                                                                    |
@@ -72,6 +72,6 @@
 35|                                                                                                                                    |
    0-131 -/-
 36| ❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                      |
-   0-2 ac.brand/bg.base ; 3-131 fg.body/bg.base
-37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                                                                                                         |
-   0-121 fg.label/bg.base ; 122-131 -/-
+   0-2 ac.brand/bg.base ; 3-109 fg.body/bg.base ; 110-131 -/bg.base
+37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                                                                                               |
+   0-36 fg.label/bg.base ; 37-131 -/bg.base

@@ -1,6 +1,6 @@
 import type {EvalCleanupReceipt} from './eval/cleanup.js';
 import {planEvalAssets} from './improve-eval-assets.js';
-import {readFileSync,realpathSync,existsSync} from 'node:fs';
+import {realpathSync,existsSync} from 'node:fs';
 import {mkdir} from 'node:fs/promises';
 import {dirname,join,isAbsolute,relative,resolve} from 'node:path';
 import {isDeepStrictEqual} from 'node:util';
@@ -22,6 +22,8 @@ import {decisionBudgetAmount} from './improve-history.js';
 import {bindCandidateCheck,candidateCheckDuration} from './improve-check-plan.js';
 import type {ImproveReport} from './improve.js';
 import {improveReportContract} from './improve-contract.js';
+import {currentExecutionVersion,refreshExecutionVersionArtifacts} from './execution-version.js';
+import {replacementContent} from './improve-replacements.js';
 export {readImproveBuildDefault,launchImproveBuild,type ImproveBuildLaunch} from './improve-process.js';
 export {readImproveDefaults} from './improve-defaults.js';
 export {readImproveEffectiveConfig,type EffectiveConfig,type EffectiveProfileChange} from './improve-profile-validation.js';
@@ -36,12 +38,12 @@ export function decisionDigest(value:unknown):string {
  const canonical=(x:any):any=>Array.isArray(x)?x.map(canonical):x&&typeof x==='object'?Object.fromEntries(Object.keys(x).sort().map(k=>[k,canonical(x[k])])):x;
  return digest(JSON.stringify(canonical(value)));
 }
-export function currentImproveVersion(){
- const bytes=readFileSync(new URL('../execution/source-build.json',import.meta.url)),manifest=JSON.parse(bytes.toString());
- for(const file of manifest.outputs)if(digest(readFileSync(new URL('../../'+file.path,import.meta.url)))!==file.sha256)throw Error('IMPROVE_EXECUTION_VERSION_DRIFT');
- return digest(JSON.stringify({node:process.version,platform:process.platform,arch:process.arch,build:digest(bytes)}));
+/** Bind the same product, tools, instructions and model configuration used by tasks.
+ * Both task profiles are relevant because a batch may validate or activate either. */
+export function currentImproveVersion(dataRoot:string,workspace:string){
+ refreshExecutionVersionArtifacts();
+ return decisionDigest(([false,true] as const).flatMap(coding=>(['live','offline'] as const).map(mode=>currentExecutionVersion({dataRoot,workspace,coding,mode}))));
 }
-const currentVersion=currentImproveVersion;
 const contains=(parent:string,child:string)=>{const p=relative(parent,child);return !p||!isAbsolute(p)&&p!=='..'&&!p.startsWith('../');};
 function checkTemporaryDirectory(path:string|undefined,targets:SourceTarget[]){
  if(!path||!isAbsolute(path)||resolve(path)!==path||realpathSync(dirname(path))!==dirname(path)||existsSync(path)&&realpathSync(path)!==path||targets.some(t=>t.workspace&&contains(t.workspace,path)))throw Error('IMPROVE_TEMPORARY_SCOPE_REQUIRED: an explicit new directory outside every formal target');
@@ -61,8 +63,8 @@ function formalSelection(root:string,report:ImproveReport,c:ImproveCandidate):Fo
  return {writeback:true,activate:c.activation.enable&&['prompt-skill','agent-config'].includes(c.target.kind)?profileScope(root,report,[c])??null:null,failureCompensation:'none',
   ...(c.activation.enable&&c.target.kind==='self-source'?{newProcess:{workspace:report.target.workspace,baseline:readImproveBuildDefault(root,report.target.workspace).revision}}:{})};
 }
-function declaredChanges(candidates:ImproveCandidate[]) {
- const changes=candidates.flatMap(c=>(c.replacements??[]).map(r=>({targetId:c.target.id,path:r.path,content:r.content})));
+function declaredChanges(root:string,candidates:ImproveCandidate[]) {
+ const changes=candidates.flatMap(c=>(c.replacements??[]).map(r=>({targetId:c.target.id,path:r.path,content:replacementContent(root,c,r)})));
  // Identical bytes can be shared; incompatible replacements remain separate so
  // validateGroup rejects them rather than choosing a winner or composing a patch.
  return changes.filter((change,i)=>!changes.slice(0,i).some(old=>isDeepStrictEqual(old,change)));
@@ -121,7 +123,7 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
  for(const group of groups){validateGroup(group,active,l.deadline);const selected=d.selections.filter(s=>group.candidateIds.includes(s.candidateId)),modes=selected.map(s=>s.mode);if(new Set(modes).size!==1)throw Error('IMPROVE_COMBINATION_MODE_CONFLICT');
   const declared=group.candidateIds.map(id=>active.find(c=>c.id===id)!);
   if(declared.every(c=>c.replacements!==undefined&&c.structuredChecks!==undefined)) {
-   const changes=declaredChanges(declared);
+   const changes=declaredChanges(root,declared);
    if(!isDeepStrictEqual(group.changes,changes))throw Error('IMPROVE_DECLARED_CONTENT_CHANGED');
    const details=declaredGroupDetails(declared);
    if(!isDeepStrictEqual(group.basis,details.basis)||!isDeepStrictEqual(group.build,details.build))throw Error('IMPROVE_DECLARED_BASIS_CHANGED');
@@ -141,15 +143,16 @@ export function previewImproveDecision(root:string,value:ImproveDecision){
  if(groups.length){checkTemporaryDirectory(d.directory,candidates.map(c=>c.target));if(candidates.some(c=>c.target.workspace&&contains(c.target.workspace,realpathSync(root))))throw Error('IMPROVE_RECORDING_ROOT_OVERLAPS_FORMAL_TARGET');if(Date.parse(l.deadline)<=Date.now())throw Error('IMPROVE_DEADLINE');}
  return {...d,summary:{order:d.selections.map(s=>s.candidateId),executionOrder:groups.map(g=>({group:g.id,candidates:g.candidateIds})),targets:candidates.map(c=>c.target.workspace),dependencies:candidates.map(c=>({candidateId:c.id,dependencies:c.dependencies,conflicts:c.conflicts})),totalBudget:d.limits,budgetAmount:decisionBudgetAmount(l.maxTokens,hostPlanPrice('deepseek','deepseek-flash')),plannedReservation:total,effectiveProfiles,writeback:'not-written',activation:'not-enabled'}};
 }
+export function improveDecisionDuration(candidates:ImproveCandidate[]){return candidates.reduce((sum,candidate)=>sum+(candidate.structuredChecks??[]).reduce((n,check)=>n+candidateCheckDuration(check),0)+(candidate.buildTimeoutMs??0),0);}
 /** Derive a complete ImproveDecision from selected candidates' replacements and structuredChecks.
  * Groups candidates by shared workspace or dependency; orders by topological sort then candidate index.
- * Limits are derived from structuredChecks: maxChecks = total check count, maxRequests/maxTokens = 0. */
+ * Limits are derived from structuredChecks: maxChecks = total check count, request and token limits come from each declared check. */
 export function deriveImproveDecision(root:string,reportId:string,selections:{candidateId:string;mode:ImproveMode}[],opts:{id:string;directory?:string;deadline?:string;now?:number;maxChecks?:number;installation?:string}):ImproveDecision{
  const {report}=readImproveReport(root,reportId);if(!report)throw Error('IMPROVE_REPORT_NOT_FOUND');
  const allCandidates=report.candidates;
  const selected=selections.map(s=>{const c=allCandidates.find(c=>c.id===s.candidateId);if(!c)throw Error(`IMPROVE_CANDIDATE_NOT_IN_REPORT: ${s.candidateId}`);return {sel:s,c};});
  const active=selected.filter(({sel})=>['validate-only','execute-declared-scope'].includes(sel.mode)).map(({c})=>c);
- const duration=active.reduce((sum,c)=>sum+(c.structuredChecks??[]).reduce((n,ch)=>n+candidateCheckDuration(ch),0)+(c.buildTimeoutMs??0),0);
+ const duration=improveDecisionDuration(active);
  const deadline=opts.deadline??new Date((opts.now??Date.now())+Math.max(1,duration)).toISOString();
  // Build adjacency: candidates that must go into the same group (shared workspace or dependency)
  const union=new Map<string,string>();const find=(id:string):string=>{if(union.get(id)===id)return id;const p=find(union.get(id)!);union.set(id,p);return p;};
@@ -168,7 +171,7 @@ export function deriveImproveDecision(root:string,reportId:string,selections:{ca
  // Build ValidationGroups from candidate replacements and structuredChecks
  const groups:ValidationGroup[]=groupEntries.map((g,gi)=>{
   const cands=g.ids.map(id=>allCandidates.find(c=>c.id===id)!);
-  const changes=declaredChanges(cands),checks=cands.flatMap(c=>(c.structuredChecks??[]).map(ch=>bindCandidateCheck(root,report,cands,ch,deadline,opts.installation)));
+  const changes=declaredChanges(root,cands),checks=cands.flatMap(c=>(c.structuredChecks??[]).map(ch=>bindCandidateCheck(root,report,cands,ch,deadline,opts.installation)));
   const scope=profileScope(root,report,cands),{basis,build}=declaredGroupDetails(cands);
   return {id:`g${gi+1}`,candidateIds:g.ids,changes,checks,...(scope?{profileScope:scope}:{}),...(basis?{basis}:{}),...(build?{build}:{})};
  });
@@ -179,6 +182,17 @@ export function deriveImproveDecision(root:string,reportId:string,selections:{ca
  const limits={deadline,maxChecks:opts.maxChecks??total.checks,maxRequests:total.requests,maxTokens:total.tokens};
  return {id:opts.id,reportId,reportRevision:report.revision,selections:deriveSelections,groups,limits,...(opts.directory?{directory:opts.directory}:{})};
 }
+/** Final confirmation starts the declared allowance without changing the scope,
+ * runtime identities, default baselines or contents already shown to the user. */
+export function startImproveDecisionClock(root:string,prepared:ImproveDecision,now=Date.now()):ImproveDecision {
+ const report=readImproveReport(root,prepared.reportId).report!;
+ const selected=new Set(prepared.groups.flatMap(group=>group.candidateIds));
+ const duration=improveDecisionDuration(report.candidates.filter(candidate=>selected.has(candidate.id)));
+ const decision=structuredClone(prepared),deadline=new Date(now+Math.max(1,duration)).toISOString();decision.limits.deadline=deadline;
+ for(const group of decision.groups)for(const check of group.checks)if(check.kind==='fresh')check.options.budget!.deadline=deadline;
+ return decision;
+}
+
 export interface ImproveCleanupReceipt {storage:'not-opened'|'closed'|'unknown';owner:'released'|'unknown';workspaces:{root:string;released:boolean}[]}
 type SubmitOptions={dataRoot:string;decision:ImproveDecision;fault?:(kind:string)=>void;signal?:AbortSignal;onEvalCleanup?:(receipt:EvalCleanupReceipt)=>void;onCleanup?:(receipt:ImproveCleanupReceipt)=>void};
 async function workspaceLeases(decision:ImproveDecision,onCompromised:(error:Error)=>void){
@@ -196,13 +210,15 @@ async function executeGroups(options:SubmitOptions,evidence:Evidence,sourceId:st
    guard();if(options.signal?.aborted){stopped='cancelled before next group';break;}
    checkTemporaryDirectory(d.directory,report.candidates.filter(c=>d.selections.some(s=>s.candidateId===c.id)).map(c=>c.target));
    if(Date.parse(d.limits.deadline)<=Date.now()){stopped='IMPROVE_DEADLINE';break;}
-   if(currentVersion()!==version)throw Error('IMPROVE_EXECUTION_VERSION_DRIFT');
+   if(currentImproveVersion(options.dataRoot,report.target.workspace)!==version)throw Error('IMPROVE_EXECUTION_VERSION_DRIFT');
    const candidates=report.candidates.filter(c=>group.candidateIds.includes(c.id));
    for(const c of candidates)checkImproveBaseline(c.target);
    for(const root of ownerRoots)assertWorkspaceUnfenced(root);
    const selections=d.selections.filter(s=>group.candidateIds.includes(s.candidateId));
    const identities=selections.some(s=>s.mode==='execute-declared-scope')?captureGroupIdentities(candidates):[];
    const defaults=plannedDefaults(options.dataRoot,selections,group,bytes=>evidence.blob(bytes));
+   const activatedTypes=new Set(selections.flatMap(selection=>selection.formal?.activate?.taskTypes??[]));
+   const originalDefaults=activatedTypes.size?(['read','coding'] as const).map(taskType=>({taskType,revision:readImproveDefaults(options.dataRoot,report.target.workspace,taskType).revision})):[];
    const reserved=groupReservation(group),spent=readImproveDecision(options.dataRoot,d.id).reserved;
    if(spent.checks+reserved.checks>d.limits.maxChecks||spent.requests+reserved.requests>d.limits.maxRequests||spent.tokens+reserved.tokens>d.limits.maxTokens)throw Error('IMPROVE_TOTAL_BUDGET_EXCEEDED');
    record('improve.group-started',{groupId:group.id,reserved,directory:join(d.directory!,group.id)});
@@ -210,8 +226,19 @@ async function executeGroups(options:SubmitOptions,evidence:Evidence,sourceId:st
    try{for(const c of candidates)checkImproveBaseline(c.target);}catch(error){result={...result,state:'failed',reason:String(error),effect:'证据不足',conclusion:{...result.conclusion,effect:'证据不足',allChecksPassed:false,allDeclaredBenefitsMet:false}};}
    record('improve.validation',{groupId:group.id,state:result.state,reason:result.reason,result});
    if(result.state!=='completed'){stopped=result.reason??result.state;break;}
-   const formal=await applyImproveGroup({evidence,decisionId:d.id,decisionSource:sourceId,group,candidates,selections,result,identities,defaults,ownerRoots:ownerRoots.filter(root=>candidates.some(c=>contains(root,c.target.workspace!))||defaults.some(d=>contains(root,d.current.workspace))),record,guard:()=>{guard();if(currentVersion()!==version)throw Error('IMPROVE_EXECUTION_VERSION_DRIFT');},baseline:()=>{for(const c of candidates)checkImproveBaseline(c.target);},signal:options.signal});
+   const formal=await applyImproveGroup({evidence,decisionId:d.id,decisionSource:sourceId,group,candidates,selections,result,identities,defaults,ownerRoots:ownerRoots.filter(root=>candidates.some(c=>contains(root,c.target.workspace!))||defaults.some(d=>contains(root,d.current.workspace))),record,guard:()=>{guard();if(currentImproveVersion(options.dataRoot,report.target.workspace)!==version)throw Error('IMPROVE_EXECUTION_VERSION_DRIFT');},baseline:()=>{for(const c of candidates)checkImproveBaseline(c.target);},signal:options.signal});
    if(formal.state==='blocked'){stopped=formal.reason??'IMPROVE_FORMAL_BLOCKED';break;}
+   if(formal.state==='completed'&&activatedTypes.size){
+    guard();
+    // An authorized activation changes defaults for future tasks, not this
+    // already-fixed batch. Accept only the exact planned default revisions.
+    for(const original of originalDefaults){
+     const expected=activatedTypes.has(original.taskType)?defaults.find(change=>change.current.taskType===original.taskType)!.current.revision:original.revision;
+     if(readImproveDefaults(options.dataRoot,report.target.workspace,original.taskType).revision!==expected)throw Error('IMPROVE_EXECUTION_VERSION_DRIFT');
+    }
+    version=currentImproveVersion(options.dataRoot,report.target.workspace);
+    record('improve.execution-version',{groupId:group.id,executionVersion:version,reason:'authorized-default-activation'});
+   }
   }
   record('improve.batch',{state:stopped?'frozen':'completed',reason:stopped});
  }catch(error){try{record('improve.batch',{state:'frozen',reason:String(error)});}catch{/* An unsaved outcome stays unknown; no action is retried. */}throw error;}
@@ -233,7 +260,7 @@ export async function submitImproveDecision(options:SubmitOptions){
   const report=readImproveReport(dataRoot,decision.reportId).report!;
   const guard=()=>{owner.assertHeld();for(const lease of leases)lease.assertHeld();};
   storage='unknown';evidence=new Evidence(dataRoot,report.runId,kind=>{guard();options.fault?.(kind);});
-  const executionVersion=currentVersion();
+  const executionVersion=currentImproveVersion(dataRoot,report.target.workspace);
   // The host fixes the selection's budget price when the decision is saved; the request digest stays the user's structured data.
   const sourceId=appendFact(evidence,'improve.decision',{id:decision.id,workspace:report.target.workspace,requestDigest,executionVersion,price:hostPlanPrice('deepseek','deepseek-flash'),decision,decisions:decision.selections.map(s=>{const c=report.candidates.find(c=>c.id===s.candidateId)!;return {candidateId:c.id,mode:s.mode,problem:problemIdentity(c),condition:conditionIdentity(c),conditionFiles:conditionFiles(c)};})});
   await executeGroups({...options,signal},evidence,sourceId,decision.groups,executionVersion,guard,leases.map(l=>l.root));
@@ -250,7 +277,7 @@ export function previewImproveResume(dataRoot:string,options:Omit<ImproveResume,
  const state=readImproveDecision(dataRoot,options.id),decision=state.decision as ImproveDecision;
  const report=readImproveReport(dataRoot,decision.reportId).report;
  if(report&&improveReportContract(report)==='legacy')throw Error('IMPROVE_LEGACY_REPORT_READ_ONLY: frozen first-version batches cannot continue');
- if(state.sourceId!==options.decisionSource||state.state!=='frozen'||state.groups.some((g:any)=>g.state==='unknown'||['unknown','frozen'].includes(g.formal?.state))||state.executionVersion!==currentVersion())throw Error('IMPROVE_RESUME_PRECONDITIONS_CHANGED');
+ if(state.sourceId!==options.decisionSource||state.state!=='frozen'||state.groups.some((g:any)=>g.state==='unknown'||['unknown','frozen'].includes(g.formal?.state))||state.executionVersion!==currentImproveVersion(dataRoot,report!.target.workspace))throw Error('IMPROVE_RESUME_PRECONDITIONS_CHANGED');
  const groups=decision.groups.filter(g=>options.groupIds.includes(g.id));
  if(!groups.length||groups.length!==options.groupIds.length||!isDeepStrictEqual(groups.map(g=>g.id),options.groupIds)||groups.some(g=>state.groups.find((item:any)=>item.id===g.id)?.state!=='not-run'))throw Error('IMPROVE_RESUME_ONLY_INDEPENDENT_NOT_RUN');
  const pendingDecision={...decision,groups,selections:decision.selections.filter(s=>groups.some(g=>g.candidateIds.includes(s.candidateId)))};

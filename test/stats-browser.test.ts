@@ -31,7 +31,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { stripTerminalSequences, visibleWidth } from '@earendil-works/pi-tui';
 import { resolveProjectFilter } from '../src/tui/project-filter.js';
-import { StatsFilter } from '../src/tui/stats-filter.js';
+import { StatsFilter, statsChoices } from '../src/tui/stats-filter.js';
+import { DatabaseSync } from 'node:sqlite';
+import { Evidence } from '../src/evidence.js';
 import { StatsBrowser } from '../src/tui/stats-browser.js';
 import { ExportDialog } from '../src/tui/export-dialog.js';
 import { readStats } from '../src/tui/stats.js';
@@ -130,4 +132,58 @@ test('scope overflow still permits a narrower preset query while forbidding expo
     for (const line of lines) assert.ok(visibleWidth(line) <= w);
     view.back();
   }
+});
+
+
+test('stats export retains full regression identities while omitting every display-only label', () => {
+  const stats = readStats(fixtureRoot, allRequest().scope);
+  assert.ok(stats.plans.length);
+  const exported = statsExport({ ...stats, plans: stats.plans.map(plan => ({ ...plan, label: 'ep-display', source: { ...plan.source, label: 'ep-display', origin: { label: 'ir-display', reportId: 'report-full-id', decisionId: 'decision-full-id', groupId: 'group' } } })) });
+  assert.doesNotMatch(JSON.stringify(exported.regression), /ep-display|ir-display/);
+  assert.equal(exported.regression[0].source.id, stats.plans[0].source.id);
+  assert.deepEqual(exported.regression[0].source.origin, { reportId: 'report-full-id', decisionId: 'decision-full-id', groupId: 'group' });
+});
+
+test('stats choices stop before returning partial selection metadata when count or bytes exceed their bounds', () => {
+  const root = mkdtempSync(join(tmpdir(), 'durio-choices-bound-')), e = new Evidence(root, 'r');
+  const small = e.blob('{"workspace":"/a"}'), large = e.blob(JSON.stringify({ id: 'build', padding: 'x'.repeat(1100000) })); e.close();
+  const db = new DatabaseSync(join(root, 'host.sqlite'));
+  try {
+    const insert = db.prepare('INSERT INTO records(run_id,kind,at,body) VALUES(?,?,?,?)');
+    db.exec('BEGIN'); for (let i = 0; i < 10001; i++) insert.run('r', 'task.accepted', '2000-01-01T00:00:00Z', JSON.stringify(small)); db.exec('COMMIT');
+    assert.throws(() => statsChoices(root, '/here'), error => {
+      assert.match(String(error), /STATS_CHOICES_TOO_LARGE/);
+      assert.doesNotMatch(String(error), /日期/);
+      assert.match(String(error), /较小的数据根/);
+      return true;
+    });
+    db.exec('DELETE FROM records; BEGIN'); for (let i = 0; i < 31; i++) insert.run('r', 'execution.artifact', '2000-01-01T00:00:00Z', JSON.stringify(large)); db.exec('COMMIT');
+    assert.throws(() => statsChoices(root, '/here'), /STATS_CHOICES_TOO_LARGE/);
+    const before = watermark(root);
+    const view = new StatsBrowser(root, '/here', statsRequest({}, '/here', now), { open() {}, copy: async () => true, feedback() {}, changed() {} }, {
+      read(dataRoot, scope) { if (Date.parse(scope.to) - Date.parse(scope.from) > 8 * 86400000) throw Error('METRICS_SCOPE_TOO_LARGE'); return readStats(dataRoot, scope); },
+    });
+    assert.equal(view.exportable, false);
+    view.handleInput('/'); assert.equal(view.layer, 'filter');
+    assert.match(screen(view), /选项列表超出上限/);
+    view.handleInput('1'); view.handleInput(keys.enter);
+    assert.equal(view.layer, 'table'); assert.equal(view.exportable, true);
+    assert.equal(watermark(root), before, 'shrinking a view never writes records');
+  } finally { db.close(); }
+});
+
+test('export loading waits 200ms, animates, and cancellation discards late feedback', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] });
+  let resolve!: (value: boolean) => void, changed = 0, done = 0; const notices: string[] = [];
+  const pending = new Promise<boolean>(finish => { resolve = finish; });
+  const view = new ExportDialog({ title: 'stats', value: {}, suggestedPath: 'stats.json', cwd: '/tmp' }, {
+    copy: () => pending, changed() { changed++; }, feedback(text) { notices.push(text); }, done() { done++; },
+  });
+  const task = view.handleInput('\r');
+  const text = () => view.render(80, 24).map(stripTerminalSequences).join('\n');
+  t.mock.timers.tick(199); assert.doesNotMatch(text(), /导出中/);
+  t.mock.timers.tick(1); assert.match(text(), /⠋ 导出中/);
+  t.mock.timers.tick(80); assert.match(text(), /⠙ 导出中/);
+  view.cancel(); const before = changed; t.mock.timers.tick(800); resolve(true); await task;
+  assert.equal(changed, before); assert.equal(done, 0); assert.deepEqual(notices, []);
 });

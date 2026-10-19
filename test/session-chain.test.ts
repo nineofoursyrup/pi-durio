@@ -4,7 +4,6 @@ import { join } from 'node:path';
 import { readFileSync, readdirSync, statSync, mkdtempSync, cpSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { readSessionChains } from '../src/session-chain.js';
 import { readDisplayIndex, resolveDisplayInput, DisplayIndex, DisplayInputError } from '../src/display-number.js';
@@ -13,9 +12,7 @@ import { taskTypeOf } from '../src/task-type.js';
 import { formatImproveReport, readImproveReport } from '../src/improve.js';
 import { Evidence, readQueue } from '../src/evidence.js';
 
-const fixtureDir = fileURLToPath(new URL('../../test/fixtures/v1-records', import.meta.url));
-const dataRoot = join(fixtureDir, 'data');
-const names = (JSON.parse(readFileSync(join(fixtureDir, 'fixture-identity.json'), 'utf8')) as { names: Record<string, string> }).names;
+import { dataRoot, names } from './v1-runtime-fixture.js';
 const sha = (text: string) => createHash('sha256').update(text).digest('hex');
 
 /** Every file under the data root with its size, mtime and content hash. */
@@ -48,7 +45,7 @@ test('v1 fixture: a run continued twice yields the original session and one bran
   assert.deepEqual(chains.sessionOfRun(names['run.fork-1']), { id: names['session.coding'], headRunId: names['run.coding'], number: 2 });
   assert.equal(chains.session(names['session.fork-1']), null);
   assert.equal(index.has('session', names['session.fork-1']), false);
-  assert.match(index.label('session', branch.id), /^s-fb21/);
+  assert.equal(index.label('session', branch.id), 's-7360');
   assert.equal(resolveDisplayInput(dataRoot, 'session', index.label('session', branch.id)), branch.id);
   // Paging is bounded and stable.
   const first = chains.tasks(original.id, { limit: 1 });

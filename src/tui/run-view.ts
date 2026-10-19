@@ -3,6 +3,7 @@
  * 只读宿主记录；已完成的工具调用与用量按 run 缓存，同一 run 的新记录增量读取。
  */
 import { readRunRecords, readObjectRange, type RecordReference } from '../query.js';
+import {lineCount,editLineChanges,writeLineChanges} from './tool-facts.js';
 import { readObject } from '../evidence.js';
 import { estimateRunRequests, sumCostEstimates, type CostTotals, type ModelRequestCost } from '../cost-estimate.js';
 
@@ -20,6 +21,8 @@ export interface ToolEntry {
   /** edit 的 diff 行（带行号前缀 `+12 `/`-12 `/` 12 `）；write 为新内容开头。 */
   diff?: string[];
   output?: ToolOutput;
+  /** bash 的已记录错误说明，独立于输出行数。 */
+  error?: string;
   /** “分页查看”打开的原文记录（2a 原文层改版前为首版详情）。 */
   detail: RecordReference;
 }
@@ -41,7 +44,6 @@ export interface RunUsage { tokens: number; requests: ModelRequestCost[] }
 
 const OUTPUT_KEEP = 40;
 const decode = (root: string, ref: RecordReference) => JSON.parse(readObject(root, ref.ref).toString());
-const lineCount = (text: string) => text ? text.split('\n').length - (text.endsWith('\n') ? 1 : 0) : 0;
 const linesOf = (text: string) => { const lines = text.split('\n'); if (lines.at(-1) === '') lines.pop(); return lines; };
 function keep(lines: string[], end: 'head' | 'tail'): ToolOutput {
   return { lines: end === 'head' ? lines.slice(0, OUTPUT_KEEP) : lines.slice(-OUTPUT_KEEP), total: lines.length, end };
@@ -56,7 +58,7 @@ function* pages(root: string, runId: string, options: { after?: number; before?:
     after = page.records.at(-1)!.seq;
   }
 }
-const headAttempt = (root: string, ref: RecordReference) => /^\{"attemptId":"([^"\\]+)"/.exec(readObjectRange(root, ref.ref, { limit: 256 }).bytes.toString('utf8'))?.[1];
+const headAttempt = (root: string, ref: RecordReference) => decode(root, ref).attemptId as string | undefined;
 
 export class RunView {
   private readonly tools = new Map<string, ToolEntry>();
@@ -74,10 +76,8 @@ export class RunView {
     for (const ref of pages(this.root, this.runId, { after: this.progressAfter, kinds: ['model.intent','model.response','run.started','recovery.started','compaction.started'] })) {
       this.progressAfter = ref.seq;
       if (ref.kind === 'model.intent') {
-        // 意图以 attemptId 开头，压缩请求紧接着写 durableTaskId:null；意图带整个上下文，只读开头。
-        const head = readObjectRange(this.root, ref.ref, { limit: 512 }).bytes.toString('utf8');
-        const attempt = /^\{"attemptId":"([^"\\]+)"/.exec(head)?.[1] ?? decode(this.root, ref).attemptId;
-        if (/^\{"attemptId":"[^"\\]+","durableTaskId":null[,}]/.test(head)) { this.compaction.add(attempt); continue; }
+        const intent = decode(this.root, ref), attempt = intent.attemptId;
+        if (intent.purpose === 'compaction' || intent.durableTaskId === null) { this.compaction.add(attempt); continue; }
         this.progress.round++;
         this.progress.retry = this.lastGeneration !== undefined && !this.completed.has(this.lastGeneration);
         this.lastGeneration = attempt;
@@ -213,20 +213,22 @@ export class RunView {
     } else if (tool === 'edit' && entry.state === 'ok') {
       const diff = String(sourceData?.result?.details?.diff ?? '').split('\n').filter(Boolean);
       entry.diff = diff;
-      entry.summary = `+${diff.filter(line => /^\+\s*\d/.test(line)).length} −${diff.filter(line => /^-\s*\d/.test(line)).length}`;
+      const changes=editLineChanges(String(sourceData?.result?.details?.diff ?? ''));
+      entry.summary = `+${changes.added} −${changes.removed}`;
     } else if (tool === 'write' && entry.state === 'ok') {
       const write = [...pages(this.root, this.runId, { after: intent.seq, before: summaryRef.seq, kinds: ['file.write-intent'] })].map(ref => decode(this.root, ref)).find(value => value.toolAttempt?.attemptId === attemptId)?.acquired;
       if (write) {
-        const content = Buffer.from(write.content, 'base64').toString('utf8'), previous = write.previous === null ? '' : Buffer.from(write.previous, 'base64').toString('utf8');
-        entry.summary = `+${lineCount(content)} −${lineCount(previous)}`;
+        const {content,added,removed}=writeLineChanges(write);
+        entry.summary = `+${added} −${removed}`;
         entry.diff = linesOf(content).slice(0, OUTPUT_KEEP).map((line, index) => `+${index + 1} ${line}`);
       }
     } else if (tool === 'bash') {
       const output = this.shellOutput(intent.seq, summaryRef.seq, attemptId) ?? keep(linesOf(resultText), 'tail');
-      const code = entry.state === 'ok' ? 0 : /exited with code (\d+)/.exec(error ?? '')?.[1];
-      const outcome = code !== undefined ? `exit ${code}` : /timed out/.test(error ?? '') ? '超时' : /abort/i.test(error ?? '') ? '已中止' : (error ?? '').split('\n')[0];
+      const shell = [...pages(this.root, this.runId, { after: intent.seq, before: summaryRef.seq, kinds: ['shell.completed'] })].map(ref => decode(this.root, ref)).find(value => value.toolAttempt?.attemptId === attemptId)?.acquired;
+      const outcome = typeof shell?.exitCode === 'number' ? `exit ${shell.exitCode}` : shell?.code === 'timeout' ? '超时' : shell?.code === 'aborted' ? '已中止' : '退出状态未知';
       entry.summary = `${outcome} · ${output.total} 行`;
       entry.output = output;
+      if (entry.state === 'error' && error) entry.error = error;
     }
     // 失败的说明：错误、结果正文与诊断（如 read 的 unsupported_image）都是已记录的事实。
     if (entry.state === 'error' && tool !== 'bash') entry.output = keep([error, resultText, ...(summary.diagnostics ?? []).map((d: { message?: string }) => d.message)].filter((text): text is string => !!text).flatMap(linesOf), 'tail');

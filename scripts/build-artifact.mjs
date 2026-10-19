@@ -1,10 +1,11 @@
+import {buildInventory, BUILD_INPUT_PATHS} from './redesign-terminal/common.mjs';
 import {mkdir,copyFile,readdir,readFile,writeFile,lstat,rm} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
-async function inventory(paths,lines=false){const entries=[];async function visit(path){const info=await lstat(path);if(info.isSymbolicLink())throw Error(`BUILD_INPUT_ALIAS:${path}`);if(info.isDirectory()){for(const name of (await readdir(path)).sort())await visit(join(path,name));}else if(info.isFile()){const bytes=await readFile(path);entries.push({path,sha256:digest(bytes),bytes:bytes.length,...lines?{physicalLines:bytes.reduce((n,b)=>n+(b===10?1:0),0)+(bytes.length&&bytes.at(-1)!==10?1:0)}:{}});}else throw Error(`BUILD_INPUT_TYPE:${path}`);}for(const path of paths)await visit(path);return entries;}
-const inputPaths=['src','test','scripts','vendor','package.json','package-lock.json','tsconfig.json'];
+const inventory = (paths, lines = false) => buildInventory(process.cwd(), paths, lines);
+const inputPaths = BUILD_INPUT_PATHS;
 const lock=JSON.parse(await readFile('package-lock.json','utf8'));
 const compilerPaths=Object.entries(lock.packages).filter(([path,metadata])=>path&&metadata.dev).map(([path])=>path).sort();
 const before=await inventory(inputPaths,true),compiler=await inventory(compilerPaths);
@@ -19,5 +20,12 @@ await copyFile('scripts/isolation/fixtures/native-probe.py','dist/execution/isol
 await copyFile('scripts/eval/fixtures/runtime-probe.mjs','dist/execution/isolation/runtime-probe.mjs');
 const after=await inventory(inputPaths,true);
 if(JSON.stringify(before)!==JSON.stringify(after)||JSON.stringify(compiler)!==JSON.stringify(await inventory(compilerPaths)))throw Error('BUILD_INPUT_CHANGED: no source/build correspondence emitted');
+// PREP consumes this data without importing or starting the product. Values come
+// from the same compiled functions and table as the product, not a second copy.
+const {improveLimits} = await import('../dist/src/improve-entry.js');
+const {HOST_PRICE_TABLE: price} = await import('../dist/src/cost-estimate.js');
+const redesignLive = {schema:'pi-durio-redesign-live-interface-v1',
+ price:{currency:price.currency,version:price.version,source:price.source,consultedAt:price.consultedAt,perMillionTokens:price.models['deepseek/deepseek-flash'].peak.output},
+ improveLimits:{standard:improveLimits('standard'),large:improveLimits('large')}};
 const outputs=await inventory(['dist/src','dist/execution/package-lock.json','dist/execution/isolation']);
-await writeFile('dist/execution/source-build.json',JSON.stringify({version:1,claim:'Local content correspondence: fixed inputs before compilation, unchanged after successful tsc and execution-file copies; no remote provenance claim',inputs:before,compiler,outputs},null,2)+'\n');
+await writeFile('dist/execution/source-build.json',JSON.stringify({version:1,claim:'Local content correspondence: fixed inputs before compilation, unchanged after successful tsc and execution-file copies; no remote provenance claim',inputs:before,compiler,outputs,redesignLive},null,2)+'\n');

@@ -1,0 +1,8 @@
+{
+  "candidate": "f26ae8f4b8039608a1fa796e1c69da4d8173d112",
+  "sourceBuildSha256": "8f4ce2a273559d871b76c1cf14971a0df048d7f86b8216ff45b3d8dd2a710821",
+  "installedInventorySha256": "523e37e0ac33db2fe078fc836de8234c87f9dd79b16acf2e9d5fee2419feda37",
+  "linuxInventorySha256": "d68693b680484721424943bac65f621e288fb0881dace94e3454f9f0157d2100",
+  "linuxRuntimeIdentity": "173a8fcf34c463c7bcf2527c16c7852ead668fc9c69c26acf3d7d0d2991e1d9c",
+  "image": "pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c"
+}

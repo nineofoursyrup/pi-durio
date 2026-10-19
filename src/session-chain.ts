@@ -141,7 +141,8 @@ export class SessionChains {
     if (!closed) return started ? 'running' : 'accepted';
     if (closed.kind === 'recovery.ended') return 'ended';
     const data = JSON.parse(readObject(this.root, JSON.parse(String(closed.body))).toString());
-    return (data.result ?? data).status ?? 'unknown';
+    const result = data.result ?? data;
+    return result.cleanup === 'unknown' ? 'unknown' : result.status ?? 'unknown';
   }
 }
 

@@ -1,14 +1,13 @@
 import { basename } from 'node:path';
-import { realpathSync } from 'node:fs';
-import { matchesKey, truncateToWidth, visibleWidth } from '@earendil-works/pi-tui';
+import { matchesKey, visibleWidth } from '@earendil-works/pi-tui';
 import { queryFeedbackMetrics, queryOperationsMetrics, queryTaskMetrics, type MetricsScope, type TaskMetricsReport, type OperationsMetricsReport, type FeedbackMetricsReport } from '../metrics/index.js';
 import { records, decode } from '../history.js';
 import { listPlanSources, readPlanReport, type PlanSource, type EvalReport } from '../eval/overview.js';
 import { formatAmount, sumCostEstimates, type CostTotals } from '../cost-estimate.js';
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
 import { CommandError } from './commands.js';
-import { resolveProjectFilter } from './project-filter.js';
-import { clean, escHint, fixedFrame, hintLine, statusError, truncateEnd, widthTier } from './view-stack.js';
+import { resolveProjectFilter, canonicalProject } from './project-filter.js';
+import { fitSegments, clean, escHint, fixedFrame, hintLine, statusError, truncateEnd, widthTier } from './view-stack.js';
 
 // ─── 范围（M0、U5） ───────────────────────────────────────────────────────────
 
@@ -116,7 +115,7 @@ const tokensOf = (usage: any): number => {
   if (typeof usage.totalTokens === 'number') return usage.totalTokens;
   return ['input', 'output', 'cacheRead', 'cacheWrite'].reduce((n, k) => n + (typeof usage[k] === 'number' ? usage[k] : 0), 0);
 };
-const spendKind = (kind: string): SpendKind => kind === 'coding' || kind === 'eval' || kind === 'improve' || kind === 'maintenance' ? kind : 'unassigned';
+export const spendKind = (kind: string): SpendKind => kind === 'coding' || kind === 'eval' || kind === 'improve' || kind === 'maintenance' ? kind : 'unassigned';
 const sourceOfMode = (mode: unknown) => mode === 'offline' ? 'synthetic' : mode === 'live' ? 'ordinary' : null;
 
 /** The same request identities and currency/unknown rules serve 1e and 2c. */
@@ -138,10 +137,9 @@ export function readStats(root: string, scope: StatsScope): StatsSnapshot {
   // A display number is local to its root. Retain the complete source and the same acquisition cutoff for 2b.
   const sources = listPlanSources(root, { through: task.scope.through, limit: null });
   const candidates: PlanSource[] = sources.filter(s => s.root === root).map(s => ({ ...s, through: task.scope.through }));
-  const canonical = (path: string) => { try { return realpathSync(path); } catch { return path; } };
   for (const child of ops.ownedChildren.snapshots as { dataRoot: string; planId: string; through: number }[]) {
     const ref = [...records(child.dataRoot, { through: child.through, kinds: ['eval.plan'] })].find(r => r.runId === child.planId);
-    const source = sources.find(s => canonical(s.root) === child.dataRoot && s.id === child.planId);
+    const source = sources.find(s => canonicalProject(s.root) === child.dataRoot && s.id === child.planId);
     if (source && ref) candidates.push({ ...source, root: child.dataRoot, at: ref.at, through: child.through });
   }
   const plans: StatsPlan[] = candidates.filter(source => inWindow(source.at)).flatMap(source => {
@@ -333,25 +331,8 @@ const NOTE = '零分母显示 N/A · 缺依据显示 unknown/partial · 索引�
 const RIGHT_NOTE = '只读 · 不调用模型 · 不重记费用';
 const LABEL_W = 16, VALUE_W = 16, COVER_W = 32, GAP = '  ';
 
-/** 把若干段放进恰好 w 列：放不下时末尾加 `…`，不足时补空格。 */
-function fit(segments: TextSegment[], w: number): TextSegment[] {
-  const out: TextSegment[] = []; let used = 0;
-  const total = segments.reduce((n, s) => n + visibleWidth(s.text), 0);
-  for (const s of segments) {
-    const sw = visibleWidth(s.text);
-    if (total <= w || used + sw < w) { out.push(s); used += sw; continue; }
-    const t = truncateToWidth(s.text, Math.max(0, w - used), '…'); out.push({ ...s, text: t }); used += visibleWidth(t); break;
-  }
-  if (used < w) out.push({ text: ' '.repeat(w - used) });
-  return out;
-}
-
-/**
- * `/stats` 视图（U5）：最上层两个页签“指标”“本机实测”，Tab / Shift+Tab 切换；本票实现指标页签的表格层，
- * 本机实测（2c，#85）先放占位。查询同步完成、靠上限保证有界；超上限整屏报错。下钻、筛选、导出由 #84 接入。
- */
+/** Metrics table; StatsBrowser owns tab selection, filters and evidence navigation. */
 export class StatsView {
-  tab: StatsTab;
   /** Set by the interactive browser; omitted by standalone render oracles. */
   selectedRow?: number;
   hints?: string[];
@@ -362,8 +343,7 @@ export class StatsView {
   /** 超上限时的原因码；此时不显示任何部分结果，`e` 不可用 */
   readonly limit?: string;
 
-  constructor(readonly request: StatsRequest, read: (scope: StatsScope) => StatsData, opts: { tab?: StatsTab } = {}) {
-    this.tab = opts.tab ?? 'metrics';
+  constructor(readonly request: StatsRequest, read: (scope: StatsScope) => StatsData) {
     try { this.data = read(request.scope); }
     catch (error) { const code = limitCode(error); if (!code) throw error; this.limit = code; }
   }
@@ -373,7 +353,6 @@ export class StatsView {
 
   /** 返回 true 表示按键已处理。 */
   handleInput(data: string): boolean {
-    if (matchesKey(data, 'tab') || matchesKey(data, 'shift+tab')) { this.tab = this.tab === 'metrics' ? 'self' : 'metrics'; this.offset = 0; return true; }
     if (matchesKey(data, 'up')) { this.scroll(-1); return true; }
     if (matchesKey(data, 'down')) { this.scroll(1); return true; }
     if (matchesKey(data, 'pageUp')) { this.scroll(-5); return true; }
@@ -384,13 +363,9 @@ export class StatsView {
 
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
     const line = (segments: TextSegment[], bg?: TokenName) => styledLine(segments, width, bg, tier);
-    const tabs = line([{ text: ' ' }, { text: '指标', fg: this.tab === 'metrics' ? 'fg.primary' : 'fg.label', bold: this.tab === 'metrics' }, { text: ' · ', fg: 'fg.faint' }, { text: '本机实测', fg: this.tab === 'self' ? 'fg.primary' : 'fg.label', bold: this.tab === 'self' }]);
-    const hints = this.tab === 'metrics' ? this.hints ?? ['Tab 切换页签', '↑↓ 滚动'] : ['Tab 切换页签'];
+    const tabs = line([{ text: ' ' }, { text: '指标', fg: 'fg.primary', bold: true }, { text: ' · ', fg: 'fg.faint' }, { text: '本机实测', fg: 'fg.label' }]);
+    const hints = this.hints ?? ['Tab 切换页签', '↑↓ 滚动'];
     const hint = hintLine(hints, width, { esc: escHint(1), tier });
-    if (this.tab === 'self') {
-      const frame = fixedFrame([tabs, line([{ text: ' ◆ ', fg: 'ac.model' }, { text: 'self', fg: 'fg.primary', bold: true }])], ['', line([{ text: ' 本机实测页签尚未提供 · Tab 回到指标', fg: 'fg.muted' }])], [hint], height, 0);
-      return frame.lines;
-    }
     const tierW = widthTier(width), scope = this.request.scope;
     const head = [tabs, ...this.header(width, tier)];
     const command = line([{ text: ` ${GLYPHS.prompt} `, fg: 'ac.brand' }, { text: truncateEnd(clean(this.request.command), width - 4), fg: 'fg.body' }]);
@@ -406,7 +381,7 @@ export class StatsView {
     if (!this.data.sample.N) table.push(line([{ text: ` 窗口内没有${SOURCE_LABEL[scope.source]}受理样本 · / 调整范围`, fg: 'fg.muted' }]));
     const covW = tierW === 'wide' ? COVER_W : tierW === 'medium' ? Math.min(COVER_W, width - 2 - LABEL_W - VALUE_W - 2 * GAP.length) : 0;
     const scopeW = Math.max(8, width - 2 - LABEL_W - VALUE_W - COVER_W - 3 * GAP.length);
-    if (tierW === 'wide') table.push(line([{ text: '  ' }, ...fit([{ text: '指标' }], LABEL_W), { text: GAP }, ...fit([{ text: '值' }], VALUE_W), { text: GAP }, ...fit([{ text: '口径' }], scopeW), { text: GAP }, { text: '覆盖' }].map(s => ({ ...s, fg: 'fg.faint' as TokenName }))));
+    if (tierW === 'wide') table.push(line([{ text: '  ' }, ...fitSegments([{ text: '指标' }], LABEL_W), { text: GAP }, ...fitSegments([{ text: '值' }], VALUE_W), { text: GAP }, ...fitSegments([{ text: '口径' }], scopeW), { text: GAP }, { text: '覆盖' }].map(s => ({ ...s, fg: 'fg.faint' as TokenName }))));
     const bar = (ratio: number | null | undefined): TextSegment[] => {
       if (ratio === undefined) return [];
       const filled = ratio === null ? 0 : Math.round(Math.min(1, Math.max(0, ratio)) * 10);
@@ -420,13 +395,13 @@ export class StatsView {
       const bg: TokenName | undefined = selected ? 'bg.selected' : index % 2 === 0 ? 'bg.zebra' : undefined;
       const value: TextSegment[] = [{ text: row.value.text, fg: TONE[row.value.tone], bold: row.value.tone !== 'na' }, ...row.value.unit ? [{ text: row.value.unit, fg: 'fg.faint' as TokenName }] : []];
       const scopeSegs = row.scope.map(s => ({ ...s, fg: s.fg ?? 'fg.body' as TokenName }));
-      const label = fit([{ text: row.label, fg: 'fg.primary' }], LABEL_W);
-      if (tierW === 'wide') table.push(line([{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fit(value, VALUE_W), { text: GAP }, ...fit(scopeSegs, scopeW), { text: GAP }, ...fit(coverage(row), COVER_W)], bg));
+      const label = fitSegments([{ text: row.label, fg: 'fg.primary' }], LABEL_W);
+      if (tierW === 'wide') table.push(line([{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fitSegments(value, VALUE_W), { text: GAP }, ...fitSegments(scopeSegs, scopeW), { text: GAP }, ...fitSegments(coverage(row), COVER_W)], bg));
       else {
         // 宽度小于 100：指标、值、覆盖一行，口径缩进一行，共用斑马底色；小于 60 去掉覆盖列。
-        const first: TextSegment[] = [{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fit(value, VALUE_W)];
-        if (covW > 0) first.push({ text: GAP }, ...fit(coverage(row), covW));
-        table.push(line(first, bg), line([{ text: '    ' }, ...fit(scopeSegs, Math.max(1, width - 4))], bg));
+        const first: TextSegment[] = [{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fitSegments(value, VALUE_W)];
+        if (covW > 0) first.push({ text: GAP }, ...fitSegments(coverage(row), covW));
+        table.push(line(first, bg), line([{ text: '    ' }, ...fitSegments(scopeSegs, Math.max(1, width - 4))], bg));
       }
     });
     const range = `[${monthDay(scope.from)}, ${monthDay(scope.to)})`;
@@ -435,14 +410,14 @@ export class StatsView {
     const max = Math.max(0, ...spend.map(r => r.known));
     const spendLine = (row: SpendRow) => {
       const selected = this.selectedRow === 7 + spend.findIndex(r => r.kind === row.kind);
-      const segs: TextSegment[] = [{ text: selected ? '› ' : '  ' }, ...fit([{ text: row.label, fg: row.kind === 'total' ? 'fg.primary' : 'fg.body' }], LABEL_W), { text: GAP }];
+      const segs: TextSegment[] = [{ text: selected ? '› ' : '  ' }, ...fitSegments([{ text: row.label, fg: row.kind === 'total' ? 'fg.primary' : 'fg.body' }], LABEL_W), { text: GAP }];
       if (barW) {
         const cells = max ? row.known / max * barW : 0, whole = Math.floor(cells);
         const glyphs = '█'.repeat(whole) + (cells - whole >= 0.5 || (row.known > 0 && whole === 0) ? '▌' : '');
-        segs.push(...fit([{ text: glyphs, fg: SPEND[row.kind].fg }], barW), { text: GAP });
+        segs.push(...fitSegments([{ text: glyphs, fg: SPEND[row.kind].fg }], barW), { text: GAP });
       }
       segs.push(...row.text.map(s => ({ ...s, fg: s.fg ?? 'fg.muted' as TokenName })));
-      return line(fit(segs, width), selected ? 'bg.selected' : undefined);
+      return line(fitSegments(segs, width), selected ? 'bg.selected' : undefined);
     };
     const spendLines = spend.map(spendLine), totalOnly = [spendLine(spend.at(-1)!)];
 

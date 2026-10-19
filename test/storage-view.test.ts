@@ -4,7 +4,6 @@ import { join, resolve } from 'node:path';
 import { cpSync, existsSync, mkdtempSync, readFileSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { stripTerminalSequences } from '@earendil-works/pi-tui';
 import { storageGroups } from '../src/storage-groups.js';
 import { StorageView, DELETE_NOTE } from '../src/tui/storage.js';
@@ -14,8 +13,9 @@ import { records, decode, readEvidence, summarizeRun } from '../src/history.js';
 import { blobReferences } from '../src/retention.js';
 import { acquireOwner } from '../src/ownership.js';
 
-const fixtureDir = fileURLToPath(new URL('../../test/fixtures/v1-records', import.meta.url));
-const names = (JSON.parse(readFileSync(join(fixtureDir, 'fixture-identity.json'), 'utf8')) as { names: Record<string, string> }).names;
+import { dataRoot as v1DataRoot, names as v1Names } from './v1-runtime-fixture.js';
+const fixtureDir = resolve('test/fixtures/v1-records');
+const names = JSON.parse(readFileSync(join(fixtureDir, 'fixture-identity.json'), 'utf8')).names;
 /** Cleanup writes management facts and deletes files, so every test works on its own copy of the #66 data root. */
 function copy() { const root = join(realpathSync(mkdtempSync(join(tmpdir(), 'durio-storage-view-'))), 'data'); cpSync(join(fixtureDir, 'data'), root, { recursive: true }); return root; }
 function host(busy = false) {
@@ -33,7 +33,7 @@ async function choose(view: StorageView, root: string, key: string) {
 }
 
 test('#66 fixture: storage groups by session; a branch session is its own row and the original keeps both its stores', async () => {
-  const root = copy(), { groups, totals } = await storageGroups(root), index = readDisplayIndex(root);
+  const root = v1DataRoot, names = v1Names, { groups, totals } = await storageGroups(root), index = readDisplayIndex(root);
   const original = groups.find(group => group.key === `session:${names['session.coding']}`)!, branch = groups.find(group => group.key === `session:${names['session.fork-2']}`)!;
   assert.deepEqual(original.units.filter(unit => unit.kind === 'session').map(unit => [unit.id, unit.task]).sort(), [[`session:${names['session.coding']}`, 1], [`session:${names['session.fork-1']}`, 2]]);
   assert.deepEqual(branch.units.filter(unit => unit.kind === 'session').map(unit => unit.id), [`session:${names['session.fork-2']}`]);
@@ -57,6 +57,11 @@ test('#66 fixture: storage groups by session; a branch session is its own row an
   assert.ok(medium.some(line => / · 会话存储 \d+ KB \+ 附件 \d+ KB$/.test(line)));
   const narrow = plain(view.render(50, 40)).filter(line => line.startsWith('['));
   assert.ok(narrow.length && narrow.every(line => !line.includes('会话存储') && !line.includes('+ 附件')));
+
+});
+
+test('storage CLI resolves session display numbers for deterministic preview inputs', () => {
+  const root = copy(), index = readDisplayIndex(root);
   // CLI: `session:<s- number>` selects every durable store of that session, the branch's own only for the branch.
   let n = 0;
   const cli = (units: string) => JSON.parse(spawnSync(process.execPath, ['dist/src/cli.js', 'storage', 'preview', '--data-root', root, '--id', `cli-${++n}`, '--units', units, '--reason', 'fixture'], { cwd: resolve('.'), encoding: 'utf8' }).stdout).plan.request.units;

@@ -1,7 +1,7 @@
 /** 1e navigation: the table and every child retain their own position. Only leaf routes enter the app stack. */
 import { matchesKey, stripTerminalSequences, wrapTextWithAnsi } from '@earendil-works/pi-tui';
 import { StatsView, readStats, statsCommand, metricRows, type StatsRequest, type StatsSnapshot, type StatsTab } from './stats.js';
-import { StatsFilter, statsChoices, statsDate, type StatsChoices } from './stats-filter.js';
+import { StatsFilter, StatsChoicesLimitError, statsChoices, statsDate, type StatsChoices } from './stats-filter.js';
 import { statsRows, statsMembers, statsExport, type StatsRow, type StatsTarget, type StatsTaskTarget, type StatsMember, type StatsEvidence } from './stats-drilldown.js';
 import { ExportDialog } from './export-dialog.js';
 import { SelfView, type SelfOptions } from './self.js';
@@ -21,7 +21,7 @@ type Level =
   | { kind: 'members'; row: StatsRow; selected: number; offset: number }
   | { kind: 'evidence'; row: StatsRow; memberKey: string; selected: number; offset: number }
   | { kind: 'raw'; view: EvidenceRawView }
-  | { kind: 'filter'; view: StatsFilter; offset: number }
+  | { kind: 'filter'; view: StatsFilter; offset: number; notice?: string }
   | { kind: 'export'; view: ExportDialog };
 const PAGE = 20;
 
@@ -59,12 +59,11 @@ export class StatsBrowser {
       catch (error) { this.tableError = clean(String(error)).split(':')[0]; }
     }
     this.activeTab = value;
-    if (this.table) this.table.tab = value;
     if (value === 'self') this.selfView ??= new SelfView(this.root, { ...this.host, export: value => this.openExport(value) }, this.selfOptions);
     else { this.selfView?.cancel(); this.selfView = undefined; }
   }
   get self() { return this.selfView; }
-  cancel() { this.selfView?.cancel(); }
+  cancel() { this.selfView?.cancel(); for (const level of this.levels) if (level.kind === 'export') level.view.cancel(); }
   get depth() { return 1 + this.levels.length; }
   get layer() { return this.levels.at(-1)?.kind ?? 'table'; }
   /** Only text entry bypasses global view keys; Escape in a filter editor cancels that editor first. */
@@ -86,14 +85,14 @@ export class StatsBrowser {
     return level?.kind === 'members' ? this.members(level.row)[level.selected]?.task : undefined;
   }
   private load(input: StatsRequest, resetRevisions: boolean) {
-    const selected = this.table?.selectedRow ?? 0, tab = this.table?.tab ?? 'metrics';
+    const selected = this.table?.selectedRow ?? 0;
     const request = { scope: { ...input.scope }, command: input.command };
     let value: StatsSnapshot | undefined;
     const table = new StatsView(request, scope => {
       value = this.read(this.root, scope);
       request.scope = value.scope; request.command = statsCommand(value.scope);
       return value;
-    }, { tab });
+    });
     this.table = table; this.value = value; this.tableError = undefined;
     this.memberCache.clear(); this.evidenceCache.clear();
     if (resetRevisions) { this.revisions = value?.revisions ?? []; this.revision = 0; }
@@ -115,7 +114,7 @@ export class StatsBrowser {
   }
   back(): boolean {
     if (!this.levels.length) { this.cancel(); return false; }
-    this.levels.pop(); this.host.changed(); return true;
+    const level = this.levels.pop(); if (level?.kind === 'export') level.view.cancel(); this.host.changed(); return true;
   }
   handleInput(data: string): boolean {
     const level = this.levels.at(-1);
@@ -144,7 +143,16 @@ export class StatsBrowser {
       }
       if (matchesKey(data, 'tab') || matchesKey(data, 'shift+tab')) { this.tab = this.tab === 'metrics' ? 'self' : 'metrics'; this.host.changed(); return true; }
       if (this.tab === 'self') { void this.selfView?.handleInput(data); this.host.changed(); return true; }
-      if (data === '/') { this.levels.push({ kind: 'filter', view: new StatsFilter(this.request, this.workspace, this.choices()), offset: 0 }); }
+      if (data === '/') {
+        let choices: StatsChoices, notice: string | undefined;
+        try { choices = this.choices(); }
+        catch (error) {
+          if (!(error instanceof StatsChoicesLimitError)) throw error;
+          choices = { projects: [this.workspace], types: [], versions: [] };
+          notice = '选项列表超出上限 · 仅保留当前项目与已选条件；较小的数据根可读取完整列表';
+        }
+        this.levels.push({ kind: 'filter', view: new StatsFilter(this.request, this.workspace, choices), offset: 0, notice });
+      }
       else if (data === 'e') {
         if (!this.exportable) this.host.feedback('范围过大 · 缩小范围后再导出');
         else this.openExport();
@@ -198,7 +206,7 @@ export class StatsBrowser {
     if (level.kind === 'filter') {
       const body = level.view.preset.render(width, tier), command = level.view.request?.command;
       const focus = body.findLastIndex(l => /^\s*›/.test(stripTerminalSequences(l)));
-      const head = [tabs, line('◆ stats · 筛选')], foot = [...command ? [line(command)] : [], hintLine(level.view.preset.hints(), width, { esc: 'Esc 返回上层', tier })];
+      const head = [tabs, line('◆ stats · 筛选'), ...level.notice ? [line(level.notice)] : []], foot = [...command ? [line(command)] : [], hintLine(level.view.preset.hints(), width, { esc: 'Esc 返回上层', tier })];
       const available = Math.max(1, height - head.length - foot.length);
       if (focus < level.offset) level.offset = Math.max(0, focus);
       if (focus >= level.offset + available) level.offset = focus - available + 1;

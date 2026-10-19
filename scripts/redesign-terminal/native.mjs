@@ -41,7 +41,7 @@ const before = { raw: !!process.stdin.isRaw, stty: stty(), columns: process.stdo
 save(join(output, 'before.json'), before);
 writeFileSync(join(output, 'events.jsonl'), '', { flag: 'wx', mode: 0o600 });
 writeFileSync(join(output, 'terminal-output.ansi'), '', { flag: 'wx', mode: 0o600 });
-const events = [], timers = new Set(); let app, sequence = 0, terminalOutput = '', result, failure, during;
+const events = [], timers = new Set(); let keyAttempt, app, sequence = 0, terminalOutput = '', result, failure, during;
 const append = event => { events.push(event); appendFileSync(join(output, 'events.jsonl'), JSON.stringify(event) + '\n'); };
 const snapshot = () => {
   let screen = [], queue = null; const errors = [];
@@ -52,6 +52,15 @@ const snapshot = () => {
 };
 const terminal = new ProcessTerminal(), originalStart = terminal.start.bind(terminal);
 terminal.start = (input, resize) => originalStart(data => {
+  // Harness-only markers: Ctrl+G opens/closes PgUp; Ctrl+N opens/closes PgDn.
+  // The closing marker is the operator's confirmation that the physical key was tried.
+  const probeKey = data === '\x07' ? 'page-up' : data === '\x0e' ? 'page-down' : null;
+  if (probeKey) {
+    if (keyAttempt?.key === probeKey) { append({kind:'key-attempt',...keyAttempt,completed:true,endedAt:new Date().toISOString()}); keyAttempt = null; }
+    else keyAttempt = {key:probeKey,startedAt:new Date().toISOString(),received:false};
+    return;
+  }
+  if (keyAttempt && data === (keyAttempt.key === 'page-up' ? '\x1b[5~' : '\x1b[6~')) keyAttempt.received = true;
   const ordinal = ++sequence, event = { kind: 'input', ordinal, at: new Date().toISOString(), ms: performance.now(), data, before: snapshot(), settled: false };
   append({ kind: 'received', ordinal, at: event.at, ms: event.ms, data });
   input(data);

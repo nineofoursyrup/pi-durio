@@ -53,11 +53,11 @@ export interface VisibleFiles {
  * 默认可看：本会话（上下文链）各 run 实际读过或改过的项目文件，加上本项目当前由 improve 启用的 prompt、skill 与配置；
  * 超出首版上限时保留最近用过的，其余计入省略数。已不存在或不能作为源视图读取的文件不计入。
  */
-export function improveVisibleFiles(root: string, workspace: string, runId: string): VisibleFiles {
-  const chain = readSessionChains(root).contextRunIds(runId), runs = chain.length ? chain : [runId];
+export function improveVisibleFiles(root: string, workspace: string, runId: string, through?:number): VisibleFiles {
+  const chain = readSessionChains(root,{through}).contextRunIds(runId), runs = chain.length ? chain : [runId];
   const used = new Map<string, number>();
   let taskType: TaskType | null = null;
-  for (const id of runs) for (const ref of records(root, { runId: id, kinds: ['task.accepted', 'tool.intent'] })) {
+  for (const id of runs) for (const ref of records(root, { runId: id, through, kinds: ['task.accepted', 'tool.intent'] })) {
     const data = decode(root, ref);
     if (ref.kind === 'task.accepted') { if (id === runId) { const type = taskTypeOf(data); taskType = type === 'coding' || type === 'read' ? type : null; } continue; }
     if (!['read', 'edit', 'write'].includes(data.tool) || typeof data.args?.path !== 'string') continue;
@@ -152,12 +152,12 @@ export interface LaunchChoice { scope: ImproveScope; budget: ImproveBudget; sour
 export function improveRequest(id: string, choice: LaunchChoice, visible: VisibleFiles): ImproveRequest {
   const sources: ImproveSource[] = [{ id: 'project', kind: 'project', paths: visible.project }, ...visible.enabled,
     ...choice.sources.map(r => ({ id: `registered-${r.id.slice(0, 8)}`, kind: r.kind, root: r.root, paths: r.paths }))];
-  return { id, purpose: choice.focus.trim() || DEFAULT_FOCUS, limits: improveLimits(choice.budget), sources, query: QUERY, window: SCOPE_DAYS[choice.scope] };
+  return { id, sourceScope:'session-at-start', purpose: choice.focus.trim() || DEFAULT_FOCUS, limits: improveLimits(choice.budget), sources, query: QUERY, window: SCOPE_DAYS[choice.scope] };
 }
 
 // ─── 第一层 ────────────────────────────────────────────────────────────────
 
-/** 首版报告按已知完整格式识别；零候选不能证明报告版本。 */
+/** 首版报告按已知完整格式识别；无格式标记的零候选也属于历史报告。 */
 export function isFirstVersionReport(report: Pick<ImproveReport, 'candidates' | 'suppressed' | 'selectionContract'>) { return improveReportContract(report)==='legacy'; }
 /** 该报告的 improve.report 记录；分析未结束或没有报告时 null。 */
 export function readReportRecord(root: string, id: string): ImproveReport | null {

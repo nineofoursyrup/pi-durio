@@ -237,17 +237,6 @@ test('over the query limit: whole-screen error, no partial result, export unavai
   assert.throws(() => new StatsView(request(), () => { throw Error('INVALID_METRICS_SNAPSHOT'); }), /INVALID_METRICS_SNAPSHOT/);
 });
 
-test('Tab / Shift+Tab switch between 指标 and the 本机实测 placeholder', () => {
-  const v = view();
-  assert.equal(v.tab, 'metrics');
-  assert.equal(v.handleInput('\t'), true);
-  assert.equal(v.tab, 'self');
-  assert.match(text(v.render(132, 38, 'truecolor')), /本机实测页签尚未提供/);
-  v.handleInput('\x1b[Z');
-  assert.equal(v.tab, 'metrics');
-  assert.equal(new StatsView(request(), () => data(oracle()), { tab: 'self' }).tab, 'self');
-});
-
 test('color tiers: values follow the state colors; none tier keeps bars distinguishable', () => {
   const lines = view().render(132, 38, '256color');
   assert.ok(lines.some(l => l.includes('38;5;')));

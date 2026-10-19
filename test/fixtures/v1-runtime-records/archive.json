@@ -1,0 +1,14 @@
+{
+  "format": "tar+gzip",
+  "bytes": 25336882,
+  "sha256": "63e0c24a77e8e1cff58c02021cfa80e001bbb75f7bc223d1726777d328702d52",
+  "parts": [
+    "records.tar.gz.part-001",
+    "records.tar.gz.part-002",
+    "records.tar.gz.part-003",
+    "records.tar.gz.part-004",
+    "records.tar.gz.part-005",
+    "records.tar.gz.part-006",
+    "records.tar.gz.part-007"
+  ]
+}

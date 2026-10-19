@@ -1,8 +1,9 @@
 import test from 'node:test';
+import { DatabaseSync } from 'node:sqlite';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, realpathSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
 import { Evidence } from '../src/evidence.js';
@@ -94,7 +95,9 @@ test('identical parent and child ep numbers retain distinct sources and pinned R
   const own = await plan(root, 'PASS'), owned = await plan(child, 'FAIL');
   const parent = new Evidence(root, 'analysis');
   parent.append('task.accepted', { taskId: 'analysis', sessionId: 'analysis', workspace: '/fixture', input: 'synthetic validation', origin: { kind: 'improve', source: 'synthetic' } });
-  parent.append('improve.decision', { id: 'decision', decision: { reportId: 'report', directory, groups: [{ id: 'group', checks: [{ kind: 'fresh' }] }] } }); parent.close();
+  parent.append('improve.started', { request: { id: 'report' } });
+  parent.append('improve.report', { id: 'report', runId: parent.runId, target: { workspace: '/fixture' }, candidates: [] });
+  parent.append('improve.decision', { id: 'decision', decision: { reportId: 'report', directory, limits: { maxTokens: 0 }, groups: [{ id: 'group', candidateIds: [], checks: [{ kind: 'fresh' }] }] } }); parent.close();
   const decision = [...records(root, { kinds: ['improve.decision'] })][0], e = new Evidence(root, 'analysis');
   e.append('improve.eval', { id: 'decision', groupId: 'group', index: 0, kind: 'eval', dataRoot: child, planId: owned.id, planSource: { scope: 'child-data-root', dataRoot: child, sequence: owned.ref.seq, digest: owned.ref.ref.sha256 }, parent: { dataRoot: root, decisionSource: decision.id, decisionId: 'decision' } });
   e.append('improve.check', { id: 'decision', groupId: 'group', index: 0, dataRoot: child, planId: owned.id, reportOrigin: { dataRoot: child, planId: owned.id }, reportDocument: e.blob(JSON.stringify(owned.report)) }); e.close();
@@ -174,4 +177,37 @@ test('show-mode stats returns from trace/raw and eval to the same evidence, memb
     assert.equal(calls, 0); assert.equal(watermark(root), through); assert.deepEqual(readFileSync(join(root, 'host.sqlite')), before);
   } finally { await app.exit(); }
   assert.deepEqual(readFileSync(join(root, 'host.sqlite')), before);
+});
+
+
+test('project stats resolves known identities on a data root beyond the selection catalogue limit', async t => {
+  const root = temp(), workspace = join(root, 'workspace'), project = join(root, 'recorded-project');
+  mkdirSync(workspace);
+  const evidence = new Evidence(root, 'large-catalogue');
+  const body = evidence.blob(JSON.stringify({ taskId: 'old', workspace: '/other', origin: { kind: 'coding', source: 'synthetic' } })); evidence.close();
+  const db = new DatabaseSync(join(root, 'host.sqlite'));
+  try {
+    db.exec('BEGIN');
+    const insert = db.prepare('INSERT INTO records(run_id,kind,at,body) VALUES(?,?,?,?)');
+    for (let i = 0; i < 10001; i++) insert.run(`old-${i}`, 'task.accepted', '2000-01-01T00:00:00Z', JSON.stringify(body));
+    db.exec('COMMIT');
+  } finally { db.close(); }
+  for (const input of [project, basename(workspace), 'other-project']) await t.test(input, async () => {
+    const terminal = new TestTerminal();
+    const app = new ReadOnlyTui({ dataRoot: root, workspace, draftRoot: join(root, 'drafts'), mode: 'offline', terminal, widthCalibration: false });
+    try {
+      app.start(); terminal.input(`/stats --from 2026-10-01 --project ${input}`); terminal.input(key.enter);
+      if (input === 'other-project') {
+        assert.doesNotMatch(text(app.screen()), /◆ stats/);
+        assert.match(text(app.screen()), /STATS_CHOICES_TOO_LARGE/);
+      } else {
+        assert.match(text(app.screen()), /◆ stats/, 'an absolute identity or the current workspace name opens without a catalogue');
+        assert.doesNotMatch(text(app.screen()), /STATS_CHOICES_TOO_LARGE/);
+        terminal.input('/');
+        assert.match(text(app.screen()), /选项列表超出上限/);
+        assert.doesNotMatch(text(app.screen()), /日期.*缩小|日期、当前项目/);
+        assert.match(text(app.screen()), /较小的数据根/);
+      }
+    } finally { await app.exit(); }
+  });
 });

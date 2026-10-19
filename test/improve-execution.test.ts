@@ -5,10 +5,12 @@ import {mkdtemp,mkdir,writeFile,readFile,realpath} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {Evidence,digest} from '../src/evidence.js';
-import {captureImproveSources} from '../src/improve-source.js';
-import {submitImproveDecision,previewImproveDecision,readImproveDecision,readImproveDefaults,readImproveEffectiveConfig,rollbackImproveDecision} from '../src/improve-decisions.js';
+import {captureImproveSources,registerImproveSource} from '../src/improve-source.js';
+import {submitImproveDecision,previewImproveDecision,previewImproveResume,resumeImproveDecision,currentImproveVersion,readImproveDecision,readImproveDefaults,readImproveEffectiveConfig,rollbackImproveDecision} from '../src/improve-decisions.js';
 import {runReadTask,readRun,inspectRecovery,recoverRun} from '../src/runtime.js';
 import {scriptedTransport} from '../src/offline.js';
+import {improveFacts} from '../src/improve-history.js';
+import {readImproveHistory} from '../src/improve-report-history.js';
 import {profileFromContent} from '../src/task-profile.js';
 
 async function fixture(kind:'project'|'prompt-skill'|'agent-config'='project',files:Record<string,string>={'math.mjs':'export const add=(a,b)=>a-b;\n'}){
@@ -123,4 +125,59 @@ test('explicit config activation fixes new-task effective profile while file wri
  const result=await submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision});assert.equal(result.activation,'new-default');assert.equal(result.facts.some(f=>f.kind==='improve.default-observed'),false);
  const transport=scriptedTransport([]);const run=await runReadTask({dataRoot:f.dataRoot,workspace:f.workspace,input:'Observe selected defaults',mode:'offline',transport:transport.fetch});assert.equal(run.status,'completed');
  const config=(await readRun(f.dataRoot,run.runId)).records.find(r=>r.kind==='execution.config')!.data as any;assert.equal(config.settings.compaction.reserveTokens,20000);assert.equal(config.instructions,before.instructions);assert.equal(config.improveDefaults.profileId,readImproveDefaults(f.dataRoot,f.workspace,'read').profileId);assert.equal(readImproveDecision(f.dataRoot,f.decision.id).facts.some(f=>f.kind==='improve.default-observed'),true);
+});
+
+async function configWithIndependentValidation(){
+ const f=await fixture('agent-config',{'config.json':'{"compaction":{"reserveTokens":16384}}\n'}),before=readImproveEffectiveConfig(f.dataRoot,f.workspace,'read'),after=structuredClone(before);after.settings.compaction.reserveTokens=20000;
+ f.decision.selections[0].formal.activate={scope:'project-default',workspace:f.workspace,taskTypes:['read'],baseline:{read:readImproveDefaults(f.dataRoot,f.workspace,'read').revision}};
+ f.decision.groups[0].basis={impact:'deterministic-fix',reason:'Correct the reserve while preserving the complete remaining profile',checkIndices:[0],expectedProfiles:[{workspace:f.workspace,taskType:'read',before,after}]};
+ f.decision.groups[0].changes=[{targetId:'target',path:'config.json',content:'{"compaction":{"reserveTokens":20000}}\n'}];
+ f.decision.groups[0].checks[0].program="import assert from'node:assert/strict';import{readFileSync}from'node:fs';assert.equal(JSON.parse(readFileSync('/work/targets/target/config.json')).compaction.reserveTokens,20000);";
+ const asset=join(f.directory,'independent-asset');await mkdir(asset);await writeFile(join(asset,'math.mjs'),'export const add=(a,b)=>a-b;\n');
+ registerImproveSource(f.dataRoot,f.workspace,{kind:'eval-asset',root:asset,paths:['math.mjs']});
+ const e=new Evidence(f.dataRoot,f.report.runId),target=captureImproveSources(e,f.workspace,[{id:'asset',kind:'eval-asset',root:asset,paths:['math.mjs']}],'fixture-version').targets[0];e.close();
+ const candidate={...f.candidate,id:'candidate:asset',revision:'asset-r1',display:'R2',target,scope:['math.mjs'],activation:{...f.candidate.activation,enable:false}};f.report.candidates.push(candidate);f.report.targets.push(target);
+ f.decision.selections.push({candidateId:candidate.id,candidateRevision:candidate.revision,target,steps:candidate.steps,mode:'validate-only'});
+ f.decision.groups.push({id:'asset',candidateIds:[candidate.id],changes:[{targetId:'asset',path:'math.mjs',content:'export const add=(a,b)=>a+b;\n'}],checks:[{kind:'regression',program:"import assert from'node:assert/strict';const{add}=await import('/work/targets/asset/math.mjs');assert.equal(add(2,3),5);",timeoutMs:30000}]});f.decision.limits.maxChecks=2;f.save();
+ return {...f,asset};
+}
+test('a config activation does not invalidate later independent validation in the same authorized batch',async()=>{
+ const f=await configWithIndependentValidation(),result=await submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision});
+ assert.equal(result.state,'completed');assert.deepEqual(result.groups.map((group:any)=>group.state),['completed','completed']);assert.equal(result.groups[0].formal.activation,'new-default');
+ assert.equal(readImproveEffectiveConfig(f.dataRoot,f.workspace,'read').settings.compaction.reserveTokens,20000);assert.equal(await readFile(join(f.asset,'math.mjs'),'utf8'),'export const add=(a,b)=>a-b;\n','independent validation never writes its target');
+});
+test('a successful config activation cannot bless an unrelated default change before the next group',async()=>{
+ const f=await configWithIndependentValidation();let changed=false;
+ await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision,fault:kind=>{
+  if(kind!=='improve.formal'||changed)return;changed=true;
+  const e=new Evidence(f.dataRoot,'outside-current-group'),content=e.blob('{"stream":{"timeoutMs":1000}}');
+  e.append('improve.activation',{defaults:[{current:{workspace:f.workspace,taskType:'coding',files:[{targetId:'foreign',root:f.workspace,path:'foreign.json',kind:'agent-config',content}]}}]});e.close();
+ }}),/IMPROVE_EXECUTION_VERSION_DRIFT/);
+ const state=readImproveDecision(f.dataRoot,f.decision.id);assert.equal(state.groups[0].formal.activation,'new-default');assert.equal(state.groups[1].state,'not-run');assert.equal(state.state,'frozen');
+ assert.equal(await readFile(join(f.asset,'math.mjs'),'utf8'),'export const add=(a,b)=>a-b;\n');
+});
+
+
+test('a frozen batch resumes independent work against its recorded authorized activation version',async()=>{
+ for(const outsideChange of [false,true]){
+  const f=await configWithIndependentValidation(),abort=new AbortController();
+  const state=await submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision,signal:abort.signal,fault:kind=>{if(kind==='improve.formal')abort.abort();}});
+  assert.equal(state.state,'frozen');assert.deepEqual(state.groups.map((group:any)=>group.state),['completed','not-run']);
+  const accepted=improveFacts(f.dataRoot).find(f=>f.kind==='improve.decision')!;
+  assert.notEqual(accepted.data.executionVersion,currentImproveVersion(f.dataRoot,f.workspace),'original submission version remains immutable');
+  assert.equal(state.executionVersion,currentImproveVersion(f.dataRoot,f.workspace),'readback uses the persisted self-activation baseline');
+  if(outsideChange){
+   const e=new Evidence(f.dataRoot,'outside-frozen-batch'),content=e.blob('{"stream":{"timeoutMs":1000}}');
+   e.append('improve.activation',{defaults:[{current:{workspace:f.workspace,taskType:'coding',files:[{targetId:'foreign',root:f.workspace,path:'foreign.json',kind:'agent-config',content}]}}]});e.close();
+  }
+  const input={id:f.decision.id,resumeId:'resume-independent',decisionSource:state.sourceId,groupIds:['asset']};
+  const action=readImproveHistory(f.dataRoot,f.report.id).actions.find(action=>action.kind==='continue')!;
+  if(outsideChange){
+   assert.equal(action.disabled,'执行版本已变');assert.throws(()=>previewImproveResume(f.dataRoot,input),/IMPROVE_RESUME_PRECONDITIONS_CHANGED/);
+   await assert.rejects(resumeImproveDecision({...input,dataRoot:f.dataRoot}),/IMPROVE_RESUME_PRECONDITIONS_CHANGED/);
+  }else{
+   assert.equal(action.disabled,undefined);assert.doesNotThrow(()=>previewImproveResume(f.dataRoot,input));
+   const resumed=await resumeImproveDecision({...input,dataRoot:f.dataRoot});assert.equal(resumed.state,'completed');assert.deepEqual(resumed.groups.map((group:any)=>group.state),['completed','completed']);
+  }
+ }
 });

@@ -71,8 +71,8 @@ const STATUS: Record<SessionTaskStatus, { glyph: string; text: string; fg: Token
   completed: { glyph: GLYPHS.ok, text: '完成', fg: 'ac.ok' },
   failed: { glyph: GLYPHS.err, text: '失败', fg: 'ac.err' },
   aborted: { glyph: GLYPHS.aborted, text: '已中止', fg: 'fg.muted' },
-  // 恢复核对里“结束旧工作”的 run 没有完成，按已中止显示。
-  ended: { glyph: GLYPHS.aborted, text: '已中止', fg: 'fg.muted' },
+  // 恢复核对里处置 4 与普通中止分别显示。
+  ended: { glyph: GLYPHS.aborted, text: '已结束', fg: 'fg.muted' },
   unknown: { glyph: GLYPHS.warn, text: '待恢复核对', fg: 'ac.warn' },
   // 没有关闭记录：本进程尚未受理任务，所以它不属于本进程，按需恢复核对显示。
   running: { glyph: GLYPHS.warn, text: '待恢复核对', fg: 'ac.warn' },

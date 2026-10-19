@@ -3,7 +3,9 @@
  * golden 文件存为 JSON，供测试夹具复用。
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { TOKENS, type TokenName, type ColorTier } from './theme.js';
+import { TOKENS, fgSgr, bgSgr, type TokenName, type ColorTier } from './theme.js';
+import { visibleWidth } from '@earendil-works/pi-tui';
+const graphemes = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
 // ─── 类型定义 ──────────────────────────────────────────────────────────────────
 
@@ -30,26 +32,11 @@ export interface SnapshotGrid {
 
 function buildReverseMap(tier: ColorTier): Map<string, TokenName> {
   const m = new Map<string, TokenName>();
-  for (const [name, def] of Object.entries(TOKENS) as [TokenName, typeof TOKENS[TokenName]][]) {
-    if (tier === 'none') continue; // 无色档没有颜色 SGR
-    if (tier === 'truecolor') {
-      const hex = def.hex;
-      const [r, g, b] = [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
-      m.set(`38;2;${r};${g};${b}`, name);
-      m.set(`48;2;${r};${g};${b}`, name);
-    } else {
-      // 256color
-      const idx = def.c256;
-      if (idx === 'drop' || idx === undefined) {
-        // 用最近邻（反查时用同样方法）
-        if (idx !== 'drop') {
-          // nearest – build separate
-        }
-      } else {
-        m.set(`38;5;${idx}`, name);
-        m.set(`48;5;${idx}`, name);
-      }
-    }
+  for (const name of Object.keys(TOKENS) as TokenName[]) {
+    if (tier === 'none') continue;
+    // Several tokens quantize to the same color; choose one stable semantic token per channel.
+    const sgr = name.startsWith('bg.') ? bgSgr(name, tier) : fgSgr(name, tier);
+    if (sgr) { const code = sgr.slice(2, -1); if (!m.has(code)) m.set(code, name); }
   }
   return m;
 }
@@ -65,7 +52,7 @@ interface SgrState {
 }
 
 function parseSgrCodes(params: string): Partial<SgrState> & { reset?: boolean } {
-  const codes = params.split(';').filter(Boolean);
+  const codes = (params || '0').split(';').map(code => code || '0');
   const result: Partial<SgrState> & { reset?: boolean } = {};
 
   let i = 0;
@@ -73,7 +60,7 @@ function parseSgrCodes(params: string): Partial<SgrState> & { reset?: boolean } 
     const code = parseInt(codes[i], 10);
     if (isNaN(code) || codes[i] === '') { i++; continue; }
     switch (code) {
-      case 0: result.reset = true; break;
+      case 0: Object.assign(result, { reset: true, fg: undefined, bg: undefined, bold: false, dim: false, reverse: false }); break;
       case 1: result.bold = true; break;
       case 2: result.dim = true; break;
       case 7: result.reverse = true; break;
@@ -130,18 +117,19 @@ export function captureSnapshot(lines: string[], width: number, height: number, 
 
     // Parse the line character by character, handling ANSI escape sequences
     let pos = 0;
-    while (pos < line.length) {
+    parseLine: while (pos < line.length) {
       if (line[pos] === '\x1b' && line[pos+1] === '[') {
         // Find end of escape sequence (ends at letter)
         let end = pos + 2;
-        while (end < line.length && !/[A-Za-z]/.test(line[end])) end++;
+        while (end < line.length && !/[@-~]/.test(line[end])) end++;
         const cmd = line[end];
         const params = line.slice(pos+2, end);
         if (cmd === 'm') {
           const parsed = parseSgrCodes(params);
           if (parsed.reset) {
             state = { bold: false, dim: false, reverse: false };
-          } else {
+          }
+          {
             if (parsed.bold !== undefined) state.bold = parsed.bold;
             if (parsed.dim !== undefined) state.dim = parsed.dim;
             if (parsed.reverse !== undefined) state.reverse = parsed.reverse;
@@ -152,27 +140,25 @@ export function captureSnapshot(lines: string[], width: number, height: number, 
         // Skip other escape sequences (cursor movement, etc.)
         pos = end + 1;
       } else if (line[pos] === '\x1b') {
-        // Other ESC sequence – skip
-        pos++;
-        if (pos < line.length && line[pos] === '[') {
-          while (pos < line.length && !/[A-Za-z]/.test(line[pos])) pos++;
-          pos++;
-        }
+        // OSC/APC (links and public Input cursor markers) carry no terminal cells.
+        if (line[pos + 1] === ']' || line[pos + 1] === '_') {
+          const ending = /\x07|\x1b\\/g; ending.lastIndex = pos + 2;
+          const match = ending.exec(line); pos = match ? match.index + match[0].length : line.length;
+        } else pos += 2;
       } else {
-        // Regular character
-        const char = line[pos];
-        if (col < width) {
-          cells.push({
-            char,
-            fg: lookupToken(state.fg),
-            bg: lookupToken(state.bg),
-            bold: state.bold || undefined,
-            dim: state.dim || undefined,
-            reverse: state.reverse || undefined,
-          });
-          col++;
+        // A terminal cell follows grapheme width, not UTF-16 code units. The empty continuation
+        // cell records the second column of CJK/emoji while snapshotText keeps intact glyphs.
+        const end = line.indexOf('\x1b', pos), chunk = line.slice(pos, end < 0 ? undefined : end);
+        for (const { segment: char } of graphemes.segment(chunk)) {
+          const size = visibleWidth(char);
+          if (size === 0) { if (cells.length) cells[cells.length - 1].char += char; continue; }
+          if (col + size > width) break parseLine;
+          const style = { fg: lookupToken(state.fg), bg: lookupToken(state.bg), bold: state.bold || undefined, dim: state.dim || undefined, reverse: state.reverse || undefined };
+          cells.push({ char, ...style });
+          for (let i = 1; i < size; i++) cells.push({ char: '', ...style });
+          col += size;
         }
-        pos++;
+        pos += chunk.length;
       }
     }
 
@@ -232,7 +218,7 @@ export function assertMatchesGolden(grid: SnapshotGrid, filePath: string): void 
       if (gc.char !== ac.char) diffs.push(`[${r},${c}] char: golden=${JSON.stringify(gc.char)} actual=${JSON.stringify(ac.char)}`);
       if (gc.fg !== ac.fg) diffs.push(`[${r},${c}] fg: golden=${gc.fg} actual=${ac.fg}`);
       if (gc.bg !== ac.bg) diffs.push(`[${r},${c}] bg: golden=${gc.bg} actual=${ac.bg}`);
-      if (!!gc.bold !== !!ac.bold) diffs.push(`[${r},${c}] bold: golden=${gc.bold} actual=${ac.bold}`);
+      for (const attr of ['bold', 'dim', 'reverse'] as const) if (!!gc[attr] !== !!ac[attr]) diffs.push(`[${r},${c}] ${attr}: golden=${gc[attr]} actual=${ac[attr]}`);
     }
   }
 

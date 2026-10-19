@@ -1,5 +1,5 @@
 60x2 truecolor
-00|✗ 范围过大 · 受理任务超过 10000 个 · METRICS_SCOPE_TOO_LARGE           |
-   0-1 ac.err/bg.base ; 2-25 fg.body/bg.base ; 26-48 fg.muted/bg.base ; 49-59 -/-
-01|  / 缩小时间或项目范围                                               |
-   0-50 fg.label/bg.base ; 51-59 -/-
+00|✗ 范围过大 · 受理任务超过 10000 个 · METRICS_SCOPE_TOO_LARGE|
+   0-1 ac.err/bg.base ; 2-36 fg.body/bg.base ; 37-59 fg.muted/bg.base
+01|  / 缩小时间或项目范围                                      |
+   0-21 fg.label/bg.base ; 22-59 -/bg.base

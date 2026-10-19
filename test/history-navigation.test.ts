@@ -1,7 +1,7 @@
+import { fixtureDir as v1FixtureDir, dataRoot as v1DataRoot, names as v1Names } from './v1-runtime-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
@@ -94,6 +94,7 @@ test('c rejects failed tails, unhandled queue items and missing snapshots while 
       t.press('c');
       await until(() => t.screen().includes(reason), t.screen);
       assert.match(t.screen(), /◆ history/);
+      if (session === failed) { assert.match(t.screen(), /不能接续 · 链尾任务未完成 · 新任务将开启新会话/); assert.doesNotMatch(t.screen(), /该会话不能接续/); }
       if (session === cleaned) { assert.match(t.screen(), /存储已清理/); t.press(key.enter); assert.match(t.screen(), /┃ Cleaned task/); assert.match(t.screen(), /宿主正文保留/); t.press(key.esc); }
       t.press(key.esc, key.esc);
     }
@@ -120,7 +121,10 @@ test('history filter text owns ? and Esc, and applying presets gives the same ap
   const t = open(f);
   try {
     t.press(key.ctrlR, '/', '5', key.enter, '?');
-    assert.match(t.screen(), /◆ history · 筛选/); assert.match(t.screen(), /\?▏/);
+    assert.match(t.screen(), /◆ history · 筛选/);
+    const inputRow = t.app.screen().find(line => stripTerminalSequences(line).trim() === '?');
+    assert.ok(inputRow, 'the filter keeps ? as input text');
+    assert.match(inputRow, /\?\x1b\[7m \x1b\[27m/, 'the public Input displays its block cursor after the text');
     t.press(key.esc); assert.match(t.screen(), /◆ history · 筛选/);
     t.press('4', key.down, '2', key.down, '3', key.enter);
     const filtered = t.screen(); assert.match(filtered, /Failed selection/); assert.doesNotMatch(filtered, /Successful selection/);
@@ -162,8 +166,7 @@ test('c is inert during real runtime work, and another workspace only offers its
 });
 
 test('c on an original v1 session selects its tail without dispatch, then the next task records the changed version in history', async () => {
-  const original = fileURLToPath(new URL('../../test/fixtures/v1-records', import.meta.url));
-  const source = join(original, 'data'), names = JSON.parse(readFileSync(join(original, 'fixture-identity.json'), 'utf8')).names;
+  const original = v1FixtureDir, source = v1DataRoot, names = v1Names;
   const sessionId = names['session.read'], oldRun = names['run.read'], workspace = readSessionChains(source).session(sessionId)!.workspace!;
   if (!existsSync(workspace)) { mkdirSync(workspace, { recursive: true }); cpSync(join(original, 'workspace'), workspace, { recursive: true }); }
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'durio-history-v1-'))), dataRoot = join(root, 'data');

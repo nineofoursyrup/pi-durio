@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync,cpSync,mkdtempSync,realpathSync,mkdirSync,writeFileSync} from 'node:fs';
-import {join,resolve} from 'node:path';
+import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {stripTerminalSequences,visibleWidth,type Terminal} from '@earendil-works/pi-tui';
 import {Evidence,digest} from '../src/evidence.js';
@@ -21,7 +21,8 @@ import {appendFact} from '../src/eval/store.js';
 import {fileIdentity} from '../src/improve-formal.js';
 import {tuiCleanupStatus,tuiExitCode} from '../src/tui/exit-summary.js';
 
-const fixture=resolve('test/fixtures/v1-records/data'),id='fixture-improve-1';
+import { dataRoot as fixture } from './v1-runtime-fixture.js';
+const id='fixture-improve-1';
 const plain=(lines:string[])=>lines.map(stripTerminalSequences).join('\n');
 function contents(root:string):[string,string][] {
  return readdirSync(root,{recursive:true,withFileTypes:true}).filter(e=>e.isFile()).map(e=>{
@@ -39,7 +40,7 @@ test('v1 fixture history uses latest decisions and shared read-only cards withou
  const list=plain(new ImproveView(fixture).render(132,38));
  assert.match(list,/执行 1 验证 0 暂缓 0 不再建议 1/);
  const detail=all(new ImproveView(fixture,id));
- assert.match(detail,/C-01@r1.*首版另有 2 次决定/);
+ assert.match(detail,/C-01@r1.*首版另有 3 次决定/);
  assert.match(detail,/C-02@r1.*不再建议/);
  assert.match(detail,/回退 C-01@r1 所在组合的写回/);
  assert.match(detail,/原 id fixture-improve-1/);
@@ -157,7 +158,7 @@ test('continuation confirms only original untouched work, rejects changed baseli
  const f=ownReport(true),state=await submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision,signal:AbortSignal.abort()});assert.equal(state.state,'frozen');assert.equal(state.groups[0].state,'not-run');
  assert.equal(continuationBlocked(state,'declared',state.executionVersion),undefined);assert.match(continuationBlocked(state,'declared','other-build')!,/执行版本已变/);assert.match(continuationBlocked(state,'legacy',state.executionVersion)!,/首版冻结批次不能继续/);
  const legacy=ownReport(false);savedLegacyState(legacy,false);
- const legacyHistory=readImproveHistory(legacy.dataRoot,legacy.report.id),legacyManager=management(legacy);assert.match(legacyHistory.actions[0].disabled!,/执行版本已变/);
+ const legacyHistory=readImproveHistory(legacy.dataRoot,legacy.report.id),legacyManager=management(legacy);assert.match(legacyHistory.actions[0].disabled!,/首版冻结批次不能继续/);
  legacyManager.manager.command('continue',legacy.report.id);assert.equal(legacyManager.dialog(),undefined);assert.match(legacyManager.messages.join('\n'),/首版冻结批次不能继续/);
  const m=management(f),history=readImproveHistory(f.dataRoot,f.report.id);assert.equal(history.actions[0].disabled,undefined);
  const blocked=management(f);blocked.block('有任务运行中');blocked.manager.command('continue',f.report.id);assert.equal(blocked.dialog(),undefined);assert.match(blocked.messages.join('\n'),/有任务运行中/);

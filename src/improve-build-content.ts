@@ -10,7 +10,7 @@ const contentBytesLimit=160*1024*1024,fileBytesLimit=16*1024*1024,fileCountLimit
 function checkFileCount(count:number){if(count>fileCountLimit)throw Error('IMPROVE_BUILD_FILE_LIMIT');}
 function contentBudget(){
  let total=0;
- return (path:string,bytes:number)=>{if(!Number.isSafeInteger(bytes)||bytes<0||bytes>fileBytesLimit)throw Error('IMPROVE_SOURCE_SIZE_OR_TYPE_DENIED');total+=bytes;if(total>contentBytesLimit)throw Error(`IMPROVE_BUILD_CONTENT_LIMIT: ${path}: ${total} > ${contentBytesLimit}`);};
+ return (path:string,bytes:number)=>{if(bytes>fileBytesLimit)throw Error('IMPROVE_SOURCE_SIZE_OR_TYPE_DENIED');total+=bytes;if(total>contentBytesLimit)throw Error(`IMPROVE_BUILD_CONTENT_LIMIT: ${path}: ${total} > ${contentBytesLimit}`);};
 }
 /** Apply the same bound after changed inputs and compiled outputs are combined. */
 export function assertBuildContentBudget(files:readonly ContentFile[]){

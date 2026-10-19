@@ -1,0 +1,44 @@
+{
+  "names": {
+    "run.coding": "09697fe1-21dc-4c60-a92c-7da338d912b5",
+    "session.coding": "ae261871-9316-41a6-8131-62035e1d6425",
+    "run.read": "08f3ae09-dd58-4bb9-b3b5-08296c3fb535",
+    "session.read": "d663e3c0-f32b-46b1-9c1f-8204a014be5a",
+    "run.fork-1": "122bb9ea-6044-43c0-b4b9-793e265ae1d7",
+    "session.fork-1": "b73de9e7-c190-4f48-887c-1ac5027199f4",
+    "run.fork-2": "6e6f4419-bc50-4a17-8ecd-46e5258f425c",
+    "session.fork-2": "736093e9-9fcc-4d1c-b27a-d70b2a3f160f",
+    "run.early-abort": "51e146e9-4c6f-434a-ac86-f62ba5803195",
+    "run.uncertain-source": "0c9835ba-b862-4428-882b-b7feec79b90f",
+    "session.uncertain": "71292f47-0eec-47e4-8f07-9aea3cbed4bc",
+    "recovery.snapshot-uncertain": "9d7ac08399b2580f7640889b429d86304579475db59253bb04a02613e74b7097",
+    "run.recovery-skip": "0c9835ba-b862-4428-882b-b7feec79b90f",
+    "run.readonly-followup": "9f0e6179-a712-41d0-92ed-f60330972838",
+    "run.improve": "e437020e-7f4d-45d4-966e-3a0da5882c0e",
+    "improve.report": "fixture-improve-1",
+    "improve.decision-defer": "improve-decision-defer-1",
+    "improve.decision-validate": "improve-decision-validate-1",
+    "improve.decision-suppress": "improve-decision-suppress-1",
+    "improve.suppression": "e1:346:d0d4fa9de6c4be05745ca5793b37898314e8e93471585566b5262dfac49d2965:6899d68c8f41bd83f4eef169b5d80c759f2c871642846134617226dca2af3be8",
+    "improve.decision-frozen": "improve-decision-frozen-1",
+    "improve.decision-execute": "improve-decision-execute-1",
+    "run.frozen-source": "b4902a61-04e6-4ce7-b20e-50967e02c27e",
+    "session.frozen-source": "60b18f0f-efb4-4ed5-b881-7492b77841a4",
+    "eval.plan": "fixture-eval-plan-1"
+  },
+  "unavailable": {
+    "readonly-write-denial": "Provided by the separately preserved v1-readonly-denial fixture, generated through the same frozen runtime."
+  },
+  "provenance": "runtime-generated",
+  "frozenIdentitySha256": "ec96dbf9a74cc0c8a4a6964453012c271c374c65c1d09b2e79589b44e5a2e091",
+  "linuxRuntimeIdentity": "173a8fcf34c463c7bcf2527c16c7852ead668fc9c69c26acf3d7d0d2991e1d9c",
+  "generatedBy": "f26ae8f",
+  "generatedAt": "2026-10-19T05:55:41.066Z",
+  "note": "All records written through the verified f26ae8f runtime public entry points, with offline transport and the public fault seam. No direct Evidence append, durable mutation, provider request or paid call. Unavailable scenarios are explicit.",
+  "size": {
+    "files": 12766,
+    "bytes": 102078478,
+    "scope": "data and workspace files; metadata and README excluded"
+  },
+  "metadataCorrection": "Named suppression points to do-not-suggest, excluding the legacy defer item. No data/workspace record was changed."
+}
