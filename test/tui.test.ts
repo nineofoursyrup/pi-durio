@@ -1,3 +1,4 @@
+import { dataRoot as v1DataRoot } from './v1-runtime-fixture.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, mkdirSync, existsSync, cpSync, readFileSync } from 'node:fs';
@@ -219,7 +220,7 @@ test('usage line and exit summary show CNY estimates with unknown and partial re
     assert.match(f.screen(),/ · 本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown partial\s*\n/);
     key('\x03');key('\x03');const closed=await f.app.closed;
     assert.match(exitCostSummary(dataRoot,closed.result!),new RegExp(`^本次会话 ${readDisplayIndex(dataRoot).label('session',first.sessionId)} 费用 ≈ ¥(10|5)\\.00 \\+1 unknown partial（估算 · 非账单）$`));
-    assert.match(closed.summary.join('\n'),/本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown partial（估算 · 非账单）/);
+    assert.match(closed.summary.join('\n'),/本会话 2M tok ≈ ¥(10|5)\.00（估算 · 非账单） · \+1 unknown · partial/);
   } finally { await f.app.exit(); }
 });
 
@@ -512,8 +513,8 @@ test('full-screen views stack: Esc returns layer by layer; in-view Ctrl+C and gl
 
 test('queue panel preserves v1 q identities without opening the recorded workspace, and /withdraw accepts the number', async () => {
   const root=mkdtempSync(join(tmpdir(),'durio-tui-q-')),workspace=join(root,'project'),dataRoot=join(root,'data');mkdirSync(workspace);
-  const original=new URL('../../test/fixtures/v1-records/data/host.sqlite',import.meta.url),originalBytes=readFileSync(original);
-  cpSync(new URL('../../test/fixtures/v1-records/data',import.meta.url),dataRoot,{recursive:true});
+  const original=join(v1DataRoot,'host.sqlite'),originalBytes=readFileSync(original);
+  cpSync(v1DataRoot,dataRoot,{recursive:true});
   // Historical queue projection never opens or creates the recorded workspace.
   const item=readQueue(dataRoot).items.find(item=>item.requestId==='frozen-follow')!;
   const q=readDisplayIndex(dataRoot).label('queue-request','frozen-follow'),terminal=new TestTerminal();terminal.columns=120;

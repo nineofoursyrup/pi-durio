@@ -2,14 +2,14 @@
  * 1c 恢复核对面板（U3）：取数与纯渲染、按项处置的状态机。宿主（app.ts）负责打开时的只读核对、
  * 确认框与提交；本文件不取锁、不写记录。
  */
-import { matchesKey, visibleWidth } from '@earendil-works/pi-tui';
+import { matchesKey, visibleWidth, wrapTextWithAnsi } from '@earendil-works/pi-tui';
 import { recoveryRecords } from '../recovery-facts.js';
 import type { RecoveryDecision, RecoveryReport, RecoveryTool } from '../recovery.js';
 import type { QueueItemFact } from '../evidence.js';
 import { readSessionChains } from '../session-chain.js';
 import { readDisplayIndex } from '../display-number.js';
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { clean, fixedFrame, hintLine, truncateEnd, wrapSegments } from './view-stack.js';
+import { SingleLineInput, fitSegments, clean, fixedFrame, hintLine, truncateEnd, wrapSegments } from './view-stack.js';
 
 /** 原因码中文对照（#59 第 4 节）；表外原因码原样显示。 */
 export const REASON_TEXT: Record<string, string> = {
@@ -117,7 +117,7 @@ export function readRecoveryFacts(root: string, pages: RecoveryReport[], context
     return { taskId: tool.taskId, tool: tool.tool, target: targetOf(tool), intentAt: intent?.at, dispatched: dispatched.has(tool.taskId) || tool.evidence.length > 0,
       ...(output ? { output: { bytes: output.bytes, tail: firstLine(output.tail.toString('utf8').replace(/^�+/, '').split('\n').filter(Boolean).at(-1) ?? '') } } : {}) };
   });
-  const frozen = (context.queue ?? []).filter(item => item.status === 'frozen' && item.target.runId === report.runId);
+  const frozen = (context.queue ?? []).filter(item => ['pending', 'dispatching', 'frozen'].includes(item.status) && item.target.runId === report.runId);
   const otherSessions = reasons.filter(reason => reason.startsWith('OTHER_SESSION_PENDING:')).map(reason => sessionLabel(root, reason.slice('OTHER_SESSION_PENDING:'.length).trim()));
   return {
     runId: report.runId, snapshotId: report.snapshotId, status: report.status, options: report.options,
@@ -191,7 +191,9 @@ export class RecoveryPanel {
   /** 当前处置的未知项。 */
   index = 0;
   /** 正在为“视为已完成”填写说明。 */
-  note?: string;
+  private noteEditor?:SingleLineInput;
+  get note(){return this.noteEditor?.getValue();}
+  set note(value:string|undefined){this.noteEditor=value===undefined?undefined:new SingleLineInput(value,200);}
   readonly choices = new Map<number, { choice: 'completed' | 'retry'; reason: string; note?: string }>();
   private ownerOffset = 0;
   private ownerPageSize = 1;
@@ -224,9 +226,7 @@ export class RecoveryPanel {
       }
       if (matchesKey(data, 'escape')) { this.note = undefined; return { type: 'none' }; }
       if (matchesKey(data, 'enter')) { const note = this.note.trim(); this.note = undefined; return this.choose('completed', note); }
-      if (matchesKey(data, 'backspace')) { this.note = Array.from(this.note).slice(0, -1).join(''); this.followNote = true; return { type: 'none' }; }
-      const text = clean(data).replace(/[\r\n]/g, '');
-      if (text && !data.startsWith('\x1b')) { this.note = Array.from(this.note + text).slice(0, 200).join(''); this.followNote = true; }
+      this.noteEditor!.handleInput(data);this.followNote=true;
       return { type: 'none' };
     }
     if (matchesKey(data, 'escape')) return { type: 'close' };
@@ -297,8 +297,8 @@ export class RecoveryPanel {
   private lines(width: number, level: number, tier: ColorTier = COLOR_TIER): string[] {
     const facts = this.facts, labelWidth = width >= 60 ? 12 : 11, valueWidth = Math.max(1, width - labelWidth);
     const out: string[] = [];
-    const row = (label: string, segments: TextSegment[]) => out.push(styledLine([{ text: pad(label, labelWidth), fg: 'fg.label' }, ...fit(segments, valueWidth)], width, undefined, tier));
-    const more = (segments: TextSegment[]) => out.push(styledLine([{ text: ' '.repeat(labelWidth) }, ...fit(segments, valueWidth)], width, undefined, tier));
+    const row = (label: string, segments: TextSegment[]) => out.push(styledLine([{ text: pad(label, labelWidth), fg: 'fg.label' }, ...fitSegments(segments, valueWidth)], width, undefined, tier));
+    const more = (segments: TextSegment[]) => out.push(styledLine([{ text: ' '.repeat(labelWidth) }, ...fitSegments(segments, valueWidth)], width, undefined, tier));
     if (level < 4) out.push(styledLine([{ text: '恢复核对', fg: 'fg.primary', bold: true }, { text: ' · 只读 · 未打开可写存储', fg: 'fg.muted' }, ...rightAlign(width, '恢复核对 · 只读 · 未打开可写存储', 'Esc 返回查看')], width, undefined, tier));
     const work = facts.work;
     row('工作', [{ text: work.title, fg: 'fg.body' }, { text: `${work.task ? ` · 任务 ${work.task}` : ''}${work.round ? ` · 第 ${work.round} 轮` : ''}`, fg: 'fg.faint' }]);
@@ -327,7 +327,7 @@ export class RecoveryPanel {
       const decided: TextSegment[] = chosen ? [{ text: CHOICE_TEXT[chosen.choice], fg: 'fg.body' }, ...(chosen.note ? [{ text: ` · “${chosen.note}”`, fg: 'fg.muted' as TokenName }] : [])] : [];
       if (decided.length) row('你的决定', decided);
       facts.prior.slice(0, level < 1 ? 3 : 1).forEach((prior, i) => (i || decided.length ? more : (s: TextSegment[]) => row('你的决定', s))([
-        { text: `此前 · ${prior.tool} ${prior.target} · `, fg: 'fg.faint' }, { text: CHOICE_TEXT[prior.choice] ?? prior.choice, fg: 'fg.body' }, ...(prior.reason ? [{ text: ` · ${prior.reason}`, fg: 'fg.muted' as TokenName }] : [])]));
+        { text: `此前 · ${prior.tool} ${prior.target} · `, fg: 'fg.faint' }, { text: CHOICE_TEXT[prior.choice] ?? prior.choice, fg: 'fg.body' }, ...(prior.reason ? [{ text: ` · ${clean(prior.reason)}`, fg: 'fg.muted' as TokenName }] : [])]));
       out.push(styledLine([{ text: '处置', fg: 'fg.label' }, { text: ' · 原 interrupted/unknown 记录不会被改写', fg: 'fg.faint' }], width, undefined, tier));
     }
     out.push(...this.dispositionLines(width, level, tier));
@@ -336,7 +336,7 @@ export class RecoveryPanel {
 
   private selectedDescription() {
     const off = this.disabled(this.cursor);
-    return this.note === undefined ? off ? `不可选 · ${off}` : this.dispositions[this.cursor].text : `说明（可选）：${this.note}▏  Enter 确认 · Esc 取消`;
+    return this.note === undefined ? off ? `不可选 · ${off}` : this.dispositions[this.cursor].text : `说明（可选）：${this.noteEditor!.render(visibleWidth(this.note??'')+1)[0]}  Enter 确认 · Esc 取消`;
   }
   private checkSegments(): TextSegment[] {
     const checks: TextSegment[] = [];
@@ -354,12 +354,15 @@ export class RecoveryPanel {
     const summary = this.lines(width, 4, tier).slice(0, 2);
     const names = this.dispositionLines(width, 4, tier, true).slice(0, -1);
     const checks = wrapSegments(this.checkSegments(), Math.max(1, width - 5)).map(segments => styledLine([{text:'检查 ',fg:'fg.label'},...segments],width,undefined,tier));
-    const description = wrapSegments([{text:this.selectedDescription(),fg:'fg.muted'}],width).map(segments=>styledLine(segments,width,'bg.selected',tier));
+    const noteLines = this.note === undefined ? undefined : wrapTextWithAnsi(this.selectedDescription(),width);
+    const description = noteLines === undefined
+      ? wrapSegments([{text:this.selectedDescription(),fg:'fg.muted'}],width).map(segments=>styledLine(segments,width,'bg.selected',tier))
+      : noteLines.map(text=>styledLine([{text,fg:'fg.muted'}],width,undefined,tier));
     const space = Math.max(2, height - summary.length - names.length - 1);
     const descriptionSize = Math.min(description.length, space - 1), checkSize = Math.max(1, space - descriptionSize);
     this.compactPages = Math.max(1, Math.ceil(checks.length / checkSize), Math.ceil(description.length / descriptionSize));
     if (this.note !== undefined && this.followNote) {
-      this.compactPage = Math.floor(Math.max(0,description.findLastIndex(line=>line.includes('▏'))) / descriptionSize);
+      this.compactPage = Math.floor(Math.max(0,noteLines!.findIndex(line=>line.includes('\x1b[7m'))) / descriptionSize);
       this.followNote = false;
     }
     this.compactPage = Math.min(this.compactPage, this.compactPages - 1);
@@ -411,13 +414,14 @@ export class RecoveryPanel {
       const head: TextSegment[] = [{ text: selected ? '▏ ' : '  ', fg: 'ac.brand' }, { text: wide ? pad(name, nameWidth) : name, fg: off ? 'fg.gutter' : selected ? 'fg.primary' : 'fg.body', bold: selected && !off }];
       const showText = !namesOnly && (level < 2 || selected || (this.ownerStage && !!off));
       const note = selected && this.note !== undefined;
-      const descSegments: TextSegment[] = note ? [{ text: `说明（可选）：${this.note}▏`, fg: 'fg.primary' }, { text: '  Enter 确认 · Esc 取消', fg: 'fg.label' }] : [{ text: description, fg: off ? 'fg.gutter' : 'fg.muted' }];
-      if (wide && showText && !note) out.push(styledLine([...head, ...fit(descSegments, Math.max(1, width - 2 - nameWidth))], width, bg, tier));
+      const descSegments: TextSegment[] = note ? [{ text: `说明（可选）：${this.noteEditor!.render(visibleWidth(this.note??'')+1)[0]}`, fg: 'fg.primary' }, { text: '  Enter 确认 · Esc 取消', fg: 'fg.label' }] : [{ text: description, fg: off ? 'fg.gutter' : 'fg.muted' }];
+      if (wide && showText && !note) out.push(styledLine([...head, ...fitSegments(descSegments, Math.max(1, width - 2 - nameWidth))], width, bg, tier));
       else {
         out.push(styledLine(head, width, bg, tier));
         if (showText) {
-          const rows = selected ? wrapSegments(descSegments, Math.max(1, width - 5)) : [fit(descSegments, Math.max(1, width - 5))];
-          for (const segments of rows) out.push(styledLine([{ text: '     ' }, ...segments], width, bg, tier));
+          const rows = note ? wrapTextWithAnsi(descSegments.map(segment=>segment.text).join(''),Math.max(1,width-5)).map(text=>[{text,fg:'fg.primary' as TokenName}])
+            : selected ? wrapSegments(descSegments, Math.max(1, width - 5)) : [fitSegments(descSegments, Math.max(1, width - 5))];
+          for (const segments of rows) out.push(styledLine([{ text: '     ' }, ...segments], width, note?undefined:bg, tier));
         }
       }
     });
@@ -431,7 +435,7 @@ export function disabledInputLines(draft: string, width: number, tier: ColorTier
   const rule = styledLine([{ text: '─'.repeat(width), fg: 'border.off' }], width, undefined, tier);
   const text = firstLine(draft);
   const body: TextSegment[] = text
-    ? [{ text: `${GLYPHS.prompt} `, fg: 'fg.gutter' }, ...fit([{ text, fg: 'fg.faint' }, { text: '  草稿已保留，不会提交', fg: 'fg.muted' }], Math.max(1, width - 2))]
+    ? [{ text: `${GLYPHS.prompt} `, fg: 'fg.gutter' }, ...fitSegments([{ text, fg: 'fg.faint' }, { text: '  草稿已保留，不会提交', fg: 'fg.muted' }], Math.max(1, width - 2))]
     : [{ text: `${GLYPHS.prompt} `, fg: 'fg.gutter' }, { text: '恢复核对进行中 · 输入不会提交', fg: 'fg.faint' }];
   return [rule, styledLine(body, width, undefined, tier), rule];
 }
@@ -441,15 +445,4 @@ function pad(text: string, width: number) { const w = visibleWidth(text); return
 function rightAlign(width: number, left: string, right: string): TextSegment[] {
   const gap = width - visibleWidth(left) - visibleWidth(right);
   return gap >= 2 ? [{ text: ' '.repeat(gap) }, { text: right, fg: 'fg.label' }] : [];
-}
-/** 片段逐个截断到给定宽度，末尾加 `…`。 */
-function fit(segments: TextSegment[], width: number): TextSegment[] {
-  const out: TextSegment[] = [];
-  let used = 0;
-  for (const segment of segments) {
-    const text = clean(segment.text), w = visibleWidth(text);
-    if (used + w <= width) { out.push({ ...segment, text }); used += w; continue; }
-    out.push({ ...segment, text: truncateEnd(text, width - used) }); break;
-  }
-  return out;
 }

@@ -53,7 +53,7 @@ export function readContinuation(root: string, sessionId: string, options: { wor
   // run.closed 或恢复后的 recovery.closed（与 runtime 接续检查同一来源）。
   const closed = decoded(root, tail.runId, ['run.closed', 'recovery.closed']), result = closed?.kind === 'recovery.closed' ? closed.data.result : closed?.data;
   if (result?.cleanup !== 'confirmed') return { state: 'recovery', ...base, status: tail.status };
-  if (session.kind === 'improve' || accepted?.kind === 'improve') return blocked(CONTINUE_TAIL_UNFINISHED);
+  if (session.kind === 'improve' || accepted?.kind === 'improve') return blocked('不能接续 · improve 分析自成会话 · 新任务将开启新会话');
   let queued = 0, after: number | undefined, through: number | undefined;
   do {
     const page = readQueue(root, { after, through, limit: 200 });

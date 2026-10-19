@@ -301,9 +301,11 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
           const source=recoveryRecords(owner.path,plan.confirmation.tailRunId),snapshot=source.findLast(record=>record.kind==='context.snapshot');
           if(!snapshot)throw Error('QUEUE_CONTEXT_UNAVAILABLE');
           const context={...(snapshot.data as Omit<ContextSnapshot,'receiptSeq'>),receiptSeq:snapshot.seq};readObject(owner.path,context.messages);
+          if(plan.confirmation.route==='relaunch-improve'){
           evidence.append('control.decision',{decision,replacement:{route:plan.confirmation.route,tailRunId:plan.confirmation.tailRunId,version:plan.confirmation.version},authorization:{workspace:options.authorization.workspace,mode:options.authorization.mode,tools:options.authorization.tools}});
           evidence.append('control.receipt',{requestId:item.requestId,status:'withdrawn',reason:'Explicit changed-version confirmation withdraws the original admission; any new work has a new identity and authorization'});
-          if(plan.confirmation.route==='relaunch-improve')return findQueueItem(owner.path,item.requestId)!;
+            return findQueueItem(owner.path,item.requestId)!;
+          }
           dispatch={item,context,replacement:{item,confirmation:plan.confirmation,decision}};
         }
       }
@@ -472,7 +474,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     const inspected = recovery ? undefined : await preflight(owner, { runId: maintenance?.source.sourceRunId ?? options.contextRunId });
     if(replacement){
       const {item,confirmation,decision}=replacement,current=findQueueItem(dataRoot,item.requestId),chains=readSessionChains(dataRoot),session=chains.session(confirmation.sessionId);
-      if(current?.status!=='withdrawn'||!previousQueueDecision(dataRoot,decision))throw Error('QUEUE_REPLACEMENT_NOT_WITHDRAWN');
+      if(current?.status!=='frozen'||current.receipt.seq!==decision.receiptSeq||previousQueueDecision(dataRoot,decision))throw Error('QUEUE_CONFIRMATION_CHANGED: original admission changed');
       if(session?.tailRunId!==confirmation.tailRunId||options.contextRunId!==confirmation.tailRunId)throw Error('QUEUE_CONFIRMATION_CHANGED: session tail changed');
       if(queueWasDispatched(dataRoot,item))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
       if(versionChanged(confirmation.version,currentExecutionVersion({dataRoot,workspace,coding,mode:options.mode,toolEnvironment:options.toolEnvironment}))!==false)throw Error('QUEUE_CONFIRMATION_CHANGED: execution version changed');
@@ -542,7 +544,18 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     accepted = true;
     if(improve){analysis=prepareImprove(evidence,improve.request,improve.target,guard);providerBoundary={budget:analysis.budget,purpose:'improve',operationId:`improve:${improve.request.id}`};analysisTimer=setTimeout(()=>fatal(Error('BUDGET_DEADLINE')),Math.max(1,Date.parse(analysis.deadline)-Date.now()));}
     const authorization={ tools: improve ? ['evidence_summary','evidence_read','source_view'] : coding ? ['read', 'write', 'edit', 'bash'] : ['read'], execution: improve ? 'scoped-improve-analysis' : coding ? 'trusted-local-coding' : 'trusted-local-read-only', requestLimit: improve?improve.request.limits.maxRequests:8, fileLimitBytes: 256 * 1024, replay: 'unsafe' };
-    if (!recovery&&!maintenance) record('task.accepted', { taskId, runId, sessionId, ...(improve?{kind:'improve',improveRequestId:improve.request.id,sourceTarget:improve.target}:{}), input: options.input, workspace, mode: options.mode, origin: improve ? {kind:'improve',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'} : options.taskOrigin ?? {kind:'coding',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'}, ...(queued?{queueRequestId:queued.item.requestId,sourceTarget:queued.item.target}:{}), ...(replacement?{replacesQueueRequestId:replacement.item.requestId,replacementDecisionId:replacement.decision.id,sourceTarget:replacement.item.target}:{}), authorization, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } });
+    if (!recovery&&!maintenance) {
+      const taskAdmission = { taskId, runId, sessionId, ...(improve?{kind:'improve',improveRequestId:improve.request.id,sourceTarget:improve.target}:{}), input: options.input, workspace, mode: options.mode, origin: improve ? {kind:'improve',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'} : options.taskOrigin ?? {kind:'coding',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'}, ...(queued?{queueRequestId:queued.item.requestId,sourceTarget:queued.item.target}:{}), ...(replacement?{replacesQueueRequestId:replacement.item.requestId,replacementDecisionId:replacement.decision.id,sourceTarget:replacement.item.target}:{}), authorization, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } };
+      if(replacement){
+        const {item,confirmation,decision}=replacement;
+        evidence.appendBatch([
+          {runId,kind:'task.accepted',data:taskAdmission},
+          {runId:item.target.runId,kind:'control.decision',data:{decision,replacement:{route:confirmation.route,tailRunId:confirmation.tailRunId,version:confirmation.version},authorization:{workspace,mode:options.mode,tools:authorization.tools}}},
+          {runId:item.target.runId,kind:'control.receipt',data:{requestId:item.requestId,status:'withdrawn',reason:'Explicit changed-version replacement accepted atomically as a new task',execution:{runId,sessionId}}},
+        ]);
+        try{options.onObservation?.({kind:'task.accepted',runId});}catch{observationDegraded=true;}
+      }else record('task.accepted',taskAdmission);
+    }
     record('ownership.acquired', { dataRoot: {path:owner.path,claim:owner.claim}, ...(workspaceOwner ? {workspace:{path:workspaceOwner.path,claim:workspaceOwner.claim}}:{}) });
     if (workspaceOwner && !recovery) record('workspace.owner', { root: workspaceOwner.root, workspace, scope: 'protocol participants only; external editors, shared Git metadata and external resources are not isolated' });
     const artifact=maintenance?maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:captureArtifact(evidence,workspace);

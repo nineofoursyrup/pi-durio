@@ -8,7 +8,8 @@ import {runCodingTask,compactContext,readAcceptedTasks} from '../src/runtime.js'
 import {scriptedTransport} from '../src/offline.js';
 import {records,decode,watermark} from '../src/history.js';
 import {recordAcceptance,recordCostEstimate,queryOperationsMetrics} from '../src/metrics/index.js';
-import {MetricsView} from '../src/tui/metrics.js';
+import {StatsBrowser} from '../src/tui/stats-browser.js';
+import {statsMembers} from '../src/tui/stats-drilldown.js';
 const scope={from:'2000-01-01T00:00:00Z',to:'2100-01-01T00:00:00Z',asOf:'2100-01-01T00:00:00Z',source:'synthetic' as const};
 function withoutGenerated(r:any):any{if(Array.isArray(r))return r.map(withoutGenerated);if(r&&typeof r==='object')return Object.fromEntries(Object.entries(r).filter(([k])=>k!=='generatedAt').map(([k,v])=>[k,withoutGenerated(v)]));return r;}
 test('actual public runtime success/failure/cancel/manual maintenance share immutable CLI/TUI/export reports and retain no-usage gaps',async()=>{
@@ -27,5 +28,5 @@ test('actual public runtime success/failure/cancel/manual maintenance share immu
  const before=readFileSync(join(dataRoot,'host.sqlite')),seq=watermark(dataRoot),callCount=calls;
  const cli=(args:string[])=>spawnSync(process.execPath,['dist/src/cli.js','operations','--data-root',dataRoot,'--scope',JSON.stringify(scope),...args],{encoding:'utf8',maxBuffer:4*1024*1024});
  const output=cli([]);assert.equal(output.status,0,output.stderr);assert.deepEqual(withoutGenerated(JSON.parse(output.stdout)),withoutGenerated(report));const text=cli(['--format','text']);assert.equal(text.status,0,text.stderr);assert.match(text.stdout,/成本与故障/);const destination=join(dir,'export.json');assert.equal(cli(['--destination',destination]).status,0);assert.deepEqual(withoutGenerated(JSON.parse(readFileSync(destination,'utf8'))),withoutGenerated(report));
- const view=new MetricsView(dataRoot,scope);view.handleInput('o');assert.deepEqual(withoutGenerated(view.operationsReport),withoutGenerated(report));view.handleInput('e');view.handleInput('\r');view.render(120,60);assert.equal(watermark(dataRoot),seq);assert.deepEqual(readFileSync(join(dataRoot,'host.sqlite')),before);assert.equal(calls,callCount);
+ const view=new StatsBrowser(dataRoot,workspace,{scope:report.sample.scope,command:'/stats'},{open(){},copy:async()=>true,feedback(){},changed(){}});assert.deepEqual(withoutGenerated(view.stats!.reports.operations),withoutGenerated(report));view.handleInput('\r');view.handleInput('\r');view.render(120,60);assert.equal(watermark(dataRoot),seq);assert.deepEqual(readFileSync(join(dataRoot,'host.sqlite')),before);assert.equal(calls,callCount);
 });

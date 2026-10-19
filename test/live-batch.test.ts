@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,existsSync,rmSync,appendFileSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,existsSync,rmSync,appendFileSync,realpathSync} from 'node:fs';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
@@ -55,7 +55,7 @@ const write=(path:string,value:unknown)=>writeFileSync(path,JSON.stringify(value
 async function runFixture(name:string,signal:NodeJS.Signals,scenario=name){
  const evidence=process.env.PI_DURIO_TEST_EVIDENCE;
  if(evidence)mkdirSync(evidence,{recursive:true});
- const root=mkdtempSync(join(evidence??tmpdir(),`${name}-`));
+ const root=realpathSync(mkdtempSync(join(evidence??tmpdir(),`${name}-`)));
  let runner=resolve('scripts/live-batch/run.mjs'),common=resolve('scripts/live-batch/common.mjs');
  if(scenario==='tampered-runner'){
   writeFileSync(join(root,'run.mjs'),readFileSync(runner));writeFileSync(join(root,'common.mjs'),readFileSync(common));

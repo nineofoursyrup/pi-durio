@@ -32,11 +32,14 @@ export class TrialTraceView {
   private closing?:Promise<void>;
   private mismatches: RequestMismatch[] = [];
   private readonly title: string;
+  private readonly usage:Pick<Trace,'tokens'|'unknownTokens'|'cost'>;
 
   constructor(private readonly source: PlanSource, private readonly report: EvalReport, readonly trialId: string, private readonly changed: () => void = () => {}, private readonly copyText: TraceRawHost['copy'] = async () => '复制不可用 · 宿主未提供剪贴板') {
     const trial = report.trials.find(t => t.id === trialId)!;
     this.requests = hostRequests(source, report, trialId);
     this.timing = hostTiming(trial);
+    const known=this.requests.filter(request=>request.tokens!==null);
+    this.usage={tokens:known.reduce((sum,request)=>sum+request.tokens!,0),unknownTokens:this.requests.length-known.length,cost:sumCostEstimates(this.requests.map(request=>({currency:request.currency,amount:request.amount,state:request.amount===null?'unknown':'complete'})))};
     const side = report.plan.comparison ? `${trial.side === 'baseline' ? 'A' : 'B'} ` : '';
     this.title = `${source.label} · ${trial.caseId} · ${side}r${trial.repeat}`;
     this.loading = new LoadingState('打开原文副本', `trial ${this.title}`, changed);
@@ -96,12 +99,7 @@ export class TrialTraceView {
     });
     for (const r of this.requests) if (r.ordinal !== null && r.ordinal > llms.length) mismatches.push({ ordinal: r.ordinal, host: r.tokens, restricted: null, reason: 'host-only' });
     this.mismatches = mismatches.sort((a, b) => a.ordinal - b.ordinal);
-    const known = this.requests.filter(r => r.tokens !== null);
-    return {
-      ...trace, spans,
-      tokens: known.reduce((n, r) => n + r.tokens!, 0), unknownTokens: this.requests.length - known.length,
-      cost: sumCostEstimates(this.requests.map(r => ({ currency: r.currency, amount: r.amount, state: r.amount === null ? 'unknown' : 'complete' }))),
-    };
+    return {...trace,spans,...this.usage};
   }
 
   handleInput(data: string) {
@@ -121,10 +119,9 @@ export class TrialTraceView {
       ? line([...left, { text: ' '.repeat(width - used - visibleWidth(label) - 1) }, { text: label, fg: 'ac.warn' }])
       : line([{ text: ' ' }, { text: truncateEnd(`trial ${this.title} · ${label}`, width - 1), fg: 'ac.warn' }]);
     const ms = (n: number | null) => n === null ? '未记录' : formatDuration(n);
-    const known = this.requests.filter(r => r.tokens !== null), tokens = known.reduce((n, r) => n + r.tokens!, 0);
-    const amount = this.requests.length ? sumCostEstimates(this.requests.map(r => ({ currency: r.currency, amount: r.amount, state: r.amount === null ? 'unknown' : 'complete' }))) : null;
+    const {tokens,unknownTokens,cost:amount}=this.usage;
     const money = amount ? Object.entries(amount.amounts).map(([c, v]) => formatAmount(v, c)).join(' · ') || 'unknown' : '';
-    const timing = line([{ text: ' 宿主计时  ', fg: 'fg.label' }, { text: truncateEnd(`准备 ${ms(this.timing.preparationMs)} · 任务 ${ms(this.timing.taskMs)} · 评分 ${ms(this.timing.gradingMs)} · 宿主中介 ${this.requests.length} 次请求${this.requests.length ? ` · ${formatTokens(tokens)} tok${known.length < this.requests.length ? ` +${this.requests.length - known.length} unknown` : ''} · ${money}` : ''}`, width - 11), fg: 'fg.body' }]);
+    const timing = line([{ text: ' 宿主计时  ', fg: 'fg.label' }, { text: truncateEnd(`准备 ${ms(this.timing.preparationMs)} · 任务 ${ms(this.timing.taskMs)} · 评分 ${ms(this.timing.gradingMs)} · 宿主中介 ${this.requests.length} 次请求${this.requests.length ? ` · ${formatTokens(tokens)} tok${unknownTokens ? ` +${unknownTokens} unknown` : ''} · ${money}` : ''}`, width - 11), fg: 'fg.body' }]);
 
     if (this.failure || (!this.trace && !this.loading.isShowing && this.closed)) {
       const f = this.failure ?? { message: '原文不可取得', code: 'RESTRICTED_RAW_UNAVAILABLE' };

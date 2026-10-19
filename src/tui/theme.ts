@@ -168,6 +168,7 @@ export function styledLine(
     if (!seg.text) continue;
     let sgr = '';
     if (tier !== 'none') {
+      sgr += resetSgr();
       if (seg.bg) sgr += bgSgr(seg.bg, tier);
       else sgr += fillBg; // inherit line bg
       if (seg.fg) sgr += fgSgr(seg.fg, tier);
@@ -192,25 +193,10 @@ export function styledLine(
   // Pad remaining width with line background
   const remaining = width - col;
   if (remaining > 0) {
-    out += (tier === 'none' ? resetSgr() : '') + fillBg + ' '.repeat(remaining);
+    out += resetSgr() + fillBg + ' '.repeat(remaining);
   }
   out += resetSgr();
   return out;
-}
-
-/**
- * 构建一行带颜色的纯文本行（无分段，整行同色）。
- */
-export function styledText(
-  text: string,
-  fg: TokenName,
-  opts?: { bold?: boolean; dim?: boolean },
-  tier: ColorTier = COLOR_TIER
-): string {
-  let sgr = fgSgr(fg, tier);
-  if (opts?.bold) sgr += boldSgr();
-  if (opts?.dim) sgr += dimSgr();
-  return sgr + text + resetSgr();
 }
 
 // ─── 弹层内容暗化（宿主实现） ─────────────────────────────────────────────────
@@ -220,10 +206,9 @@ export function styledText(
  * 宿主（app.ts）负责在需要时调用此函数处理底层行。
  */
 export function dimForOverlay(line: string, tier: ColorTier = COLOR_TIER): string {
-  if (tier === 'none') return line;
   // Strip existing SGR color codes and re-paint with fg.gutter (no background)
   const plain = line.replace(/\x1b\[\d+(?:;\d+)*m/g, '');
-  return fgSgr('fg.gutter', tier) + plain + resetSgr();
+  return resetSgr() + (tier === 'none' ? dimSgr() : fgSgr('fg.gutter', tier)) + plain + resetSgr();
 }
 
 // ─── Spinner ─────────────────────────────────────────────────────────────────
@@ -255,52 +240,6 @@ export const GLYPHS = {
   diff_del: '−',
   diff_add: '+',
 } as const;
-
-/**
- * 构建状态文本，包含字形与颜色（按档位）。
- * phase: running/stopping/exiting → spinner + text; recovery → ◈; done/fail/abort → glyph + text; idle → ○
- */
-export function statusText(
-  phase: 'idle' | 'running' | 'stopping' | 'exiting',
-  viewingRecovery: boolean,
-  result: { status: 'completed' | 'failed' | 'aborted' | 'unknown' } | undefined,
-  spinFrame: number,
-  extraText: string,
-  tier: ColorTier = COLOR_TIER
-): string {
-  if (phase === 'running' || phase === 'stopping' || phase === 'exiting') {
-    const spin = spinnerFrame(spinFrame, tier);
-    const label = phase === 'running' ? '运行中' : phase === 'stopping' ? '中止中' : '退出中';
-    const detail = extraText ? ` ${extraText}` : '';
-    return `${spin} ${label}${detail}`;
-  }
-  if (viewingRecovery) {
-    const glyph = tier === 'none' ? GLYPHS.warn : fgSgr('ac.warn', tier) + GLYPHS.warn + resetSgr();
-    return `${glyph} 恢复核对（只读）`;
-  }
-  if (!result) {
-    const glyph = tier === 'none' ? GLYPHS.idle : fgSgr('fg.muted', tier) + GLYPHS.idle + resetSgr();
-    return `${glyph} 等待输入`;
-  }
-  switch (result.status) {
-    case 'completed': {
-      const glyph = tier === 'none' ? GLYPHS.ok : fgSgr('ac.ok', tier) + GLYPHS.ok + resetSgr();
-      return `${glyph} 已完成`;
-    }
-    case 'failed': {
-      const glyph = tier === 'none' ? GLYPHS.err : fgSgr('ac.err', tier) + GLYPHS.err + resetSgr();
-      return `${glyph} 失败`;
-    }
-    case 'aborted': {
-      const glyph = tier === 'none' ? GLYPHS.aborted : fgSgr('fg.muted', tier) + GLYPHS.aborted + resetSgr();
-      return `${glyph} 已中止`;
-    }
-    case 'unknown': {
-      const glyph = tier === 'none' ? GLYPHS.warn : fgSgr('ac.warn', tier) + GLYPHS.warn + resetSgr();
-      return `${glyph} 结果未知；需恢复核对`;
-    }
-  }
-}
 
 // ─── 输入框 / 边框颜色函数 ────────────────────────────────────────────────────
 

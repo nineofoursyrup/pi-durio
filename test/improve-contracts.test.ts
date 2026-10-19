@@ -272,7 +272,7 @@ test('offline scripted transport: candidate with replacements+structuredChecks i
   risks:['NaN inputs'],rollback:'Restore saved file',
   activation:{writeback:true,enable:false,conditions:['regression pass'],timing:'next task'},
   dependencies:[],conflicts:[],
-  replacements:[{path:'calc.mjs',content:'export const mul=(a,b)=>a*b;\n'}],
+  replacements:[{path:'calc.mjs',before:'a-b',content:'a*b'}],
   structuredChecks:[{kind:'regression',program:"import assert from 'node:assert/strict';const {mul}=await import('/work/targets/project/calc.mjs');assert.equal(mul(3,4),12);",timeoutMs:10000}]};
  // Suggestion-only candidate: no replacements/structuredChecks
  const suggestionCandidate={title:'Comment improvement',problem:'No JSDoc',objective:'maintenance',targetId:'project',

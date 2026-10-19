@@ -10,7 +10,7 @@ import { demoTransport } from '../src/offline.js';
 import {
   detectColorTier, overrideColorTierForTest,
   fgSgr, bgSgr, styledLine, SPINNER_FRAMES, SPINNER_INTERVAL_MS,
-  statusText, GLYPHS, COLOR_TIER,
+  dimForOverlay, GLYPHS, COLOR_TIER,
   type ColorTier,
 } from '../src/tui/theme.js';
 import {
@@ -142,50 +142,6 @@ test('styledLine 填满宽度', () => {
   const line = styledLine([{text:'AB'}], 10, undefined, 'truecolor');
   const plain = stripTerminalSequences(line);
   assert.equal(plain.length, 10, 'styledLine 应填满指定宽度');
-});
-
-// ─── 状态字形 ──────────────────────────────────────────────────────────────────
-
-test('statusText idle 包含 ○ 字形', () => {
-  for (const tier of ['truecolor','256color','none'] as ColorTier[]) {
-    const text = statusText('idle', false, undefined, 0, '', tier);
-    assert.ok(text.includes(GLYPHS.idle), `idle 状态应含 ○（tier=${tier}）`);
-  }
-});
-
-test('statusText completed 包含 ✓ 字形', () => {
-  for (const tier of ['truecolor','256color','none'] as ColorTier[]) {
-    const text = statusText('idle', false, {status:'completed'}, 0, '', tier);
-    assert.ok(text.includes(GLYPHS.ok), `completed 状态应含 ✓（tier=${tier}）`);
-  }
-});
-
-test('statusText failed 包含 ✗ 字形', () => {
-  for (const tier of ['truecolor','256color','none'] as ColorTier[]) {
-    const text = statusText('idle', false, {status:'failed'}, 0, '', tier);
-    assert.ok(text.includes(GLYPHS.err), `failed 状态应含 ✗（tier=${tier}）`);
-  }
-});
-
-test('statusText aborted 包含 ◇ 字形', () => {
-  for (const tier of ['truecolor','256color','none'] as ColorTier[]) {
-    const text = statusText('idle', false, {status:'aborted'}, 0, '', tier);
-    assert.ok(text.includes(GLYPHS.aborted), `aborted 状态应含 ◇（tier=${tier}）`);
-  }
-});
-
-test('statusText recovery 包含 ◈ 字形', () => {
-  for (const tier of ['truecolor','256color','none'] as ColorTier[]) {
-    const text = statusText('idle', true, undefined, 0, '', tier);
-    assert.ok(text.includes(GLYPHS.warn), `recovery 状态应含 ◈（tier=${tier}）`);
-  }
-});
-
-test('statusText running 包含 spinner 帧', () => {
-  for (const tier of ['truecolor','256color','none'] as ColorTier[]) {
-    const text = statusText('running', false, undefined, 3, '', tier);
-    assert.ok(SPINNER_FRAMES.some(f => text.includes(f)), `running 状态应含 spinner 帧（tier=${tier}）`);
-  }
 });
 
 // ─── spinner ───────────────────────────────────────────────────────────────────
@@ -320,4 +276,35 @@ test('snapshotContains 能检测字形', () => {
   const grid = captureSnapshot([line], 20, 1, 'truecolor');
   assert.ok(snapshotContains(grid, GLYPHS.ok));
   assert.ok(!snapshotContains(grid, GLYPHS.err));
+});
+
+
+test('styledLine keeps bold and dim local to each segment and clears both for padding', () => {
+  for (const tier of ['truecolor', '256color', 'none'] as const) {
+    const grid = captureSnapshot([styledLine([{ text: 'A', bold: true, dim: true }, { text: 'B', fg: 'fg.body' }], 4, undefined, tier)], 4, 1, tier);
+    assert.equal(grid.rows[0][0].bold, true); assert.equal(grid.rows[0][0].dim, true);
+    for (const cell of grid.rows[0].slice(1)) { assert.equal(cell.bold, undefined); assert.equal(cell.dim, undefined); }
+  }
+});
+
+test('overlay dim removes selected background and original colors in every color tier', () => {
+  for (const tier of ['truecolor', '256color', 'none'] as const) {
+    const original = styledLine([{ text: '中文 A', fg: 'ac.err', bold: true }], 8, 'bg.selected', tier);
+    const dimmed = dimForOverlay(original, tier), grid = captureSnapshot([dimmed], 8, 1, tier);
+    assert.equal(stripTerminalSequences(dimmed), stripTerminalSequences(original));
+    for (const cell of grid.rows[0]) { assert.equal(cell.bg, undefined); assert.equal(cell.bold, undefined); assert.equal(cell.reverse, undefined); }
+    if (tier === 'none') assert.ok(grid.rows[0].every(cell => cell.dim));
+    else assert.ok(grid.rows[0].every(cell => cell.fg === 'fg.gutter'));
+  }
+});
+
+test('snapshots place Chinese and emoji in terminal columns and resolve quantized foreground tokens', () => {
+  const grid = captureSnapshot([styledLine([{ text: '中😀e\u0301X', fg: 'ac.brand' }], 7, undefined, '256color')], 7, 1, '256color');
+  assert.deepEqual(grid.rows[0].map(cell => cell.char), ['中', '', '😀', '', 'e\u0301', 'X', ' ']);
+  assert.equal(grid.rows[0][0].fg, 'ac.brand'); assert.equal(grid.rows[0][5].fg, 'ac.brand');
+  assert.equal(grid.rows[0][0].bg, 'bg.base');
+  assert.deepEqual(captureSnapshot(['中中'], 3, 1, 'none').rows[0].map(cell => cell.char), ['中', '', ' ']);
+  assert.deepEqual(captureSnapshot(['中中\x1b[0mX'], 3, 1, 'none').rows[0].map(cell => cell.char), ['中', '', ' '], 'later ANSI chunks cannot fill a clipped wide glyph');
+  const framed = captureSnapshot(['\x1b_pi:c\x07\x1b[1;0m\x1b]8;;https://example.test\x07字\x1b]8;;\x07'], 2, 1, 'none').rows[0];
+  assert.deepEqual(framed.map(cell => cell.char), ['字', '']); assert.equal(framed[0].bold, undefined);
 });

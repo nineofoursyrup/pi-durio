@@ -1,18 +1,18 @@
 132x38 truecolor
-00|◆ pi-durio  ~/project  · 会话 s-xxxx · run r-xxxx                                                   任务 1 · ◈ 结果未知 · 需恢复核对             |
-   0-0 ac.brand/bg.base ; 1-11 fg.primary/bg.base/b ; 12-20 ac.path/bg.base/b ; 21-104 fg.faint/bg.base/b ; 105-105 ac.warn/bg.base/b ; 106-118 fg.faint/bg.base/b ; 119-131 -/-
-01|┃ 订单导出 CSV 增加时区列，并迁移历史数据                                                                                                            |
-   0-1 fg.muted/bg.block ; 2-114 fg.primary/bg.block ; 115-131 -/-
+00|◆ pi-durio  ~/project  · 会话 s-xxxx · run r-xxxx                                                   任务 1 · ◈ 结果未知 · 需恢复核对|
+   0-0 ac.brand/bg.base ; 1-9 fg.primary/bg.base/b ; 10-11 -/bg.base ; 12-20 ac.path/bg.base ; 21-48 fg.faint/bg.base ; 49-99 -/bg.base ; 100-108 fg.faint/bg.base ; 109-109 ac.warn/bg.base ; 110-131 fg.faint/bg.base
+01|┃ 订单导出 CSV 增加时区列，并迁移历史数据                                                                                           |
+   0-1 fg.muted/bg.block ; 2-40 fg.primary/bg.block ; 41-131 -/bg.block
 02|                                                                                                                                    |
    0-131 -/bg.base
 03|✓ write export.csv +1 −0                                                                                                            |
-   0-0 ac.ok/bg.base ; 1-6 fg.muted/bg.base ; 7-18 ac.path/bg.base ; 19-20 ac.ok/bg.base ; 21-131 ac.err/bg.base
-04|✗ bash printf 'migrating orders 1200/4810\n' result persistence failure · 1 行                                                       |
-   0-0 ac.err/bg.base ; 1-5 fg.muted/bg.base ; 6-44 ac.warn/bg.base ; 45-130 fg.faint/bg.base ; 131-131 -/-
+   0-0 ac.ok/bg.base ; 1-6 fg.muted/bg.base ; 7-17 ac.path/bg.base ; 18-18 -/bg.base ; 19-20 ac.ok/bg.base ; 21-23 ac.err/bg.base ; 24-131 -/bg.base
+04|✗ bash printf 'migrating orders 1200/4810\n' exit 0 · 1 行                                                                          |
+   0-0 ac.err/bg.base ; 1-5 fg.muted/bg.base ; 6-43 ac.warn/bg.base ; 44-44 -/bg.base ; 45-50 ac.err/bg.base ; 51-57 fg.faint/bg.base ; 58-131 -/bg.base
 05|    migrating orders 1200/4810                                                                                                      |
-   0-3 -/bg.base ; 4-131 fg.muted/bg.base
-06|                                                                                                                                    |
-   0-131 -/-
+   0-3 -/bg.base ; 4-29 fg.muted/bg.base ; 30-131 -/bg.base
+06|    result persistence failure                                                                                                      |
+   0-3 -/bg.base ; 4-29 ac.err/bg.base ; 30-131 -/bg.base
 07|                                                                                                                                    |
    0-131 -/-
 08|                                                                                                                                    |
@@ -37,41 +37,41 @@
    0-131 -/-
 18|                                                                                                                                    |
    0-131 -/-
-19|恢复核对 · 只读 · 未打开可写存储                                                                                        Esc 返回查看                 |
-   0-3 fg.primary/bg.base/b ; 4-106 fg.muted/bg.base/b ; 107-114 fg.label/bg.base/b ; 115-131 -/-
-20|工作        订单导出 CSV 增加时区列，并迁移历史数据 · 任务 1 · 第 2 轮                                                                                     |
-   0-9 fg.label/bg.base ; 10-31 fg.body/bg.base ; 32-108 fg.faint/bg.base ; 109-131 -/-
-21|最后确认点  ✓ write export.csv · 00:00:00 已提交结果                                                                                          |
-   0-6 fg.label/bg.base ; 7-8 ac.ok/bg.base ; 9-24 fg.body/bg.base ; 25-121 fg.faint/bg.base ; 122-131 -/-
-22|未知 1/1    ◈ bash printf 'migrating orders 1200/4810\n' · intent 已记录 00:00:00，结果未提交 · 可能已产生影响                                        |
-   0-9 fg.label/bg.base ; 10-11 ac.warn/bg.base ; 12-16 fg.body/bg.base ; 17-53 ac.code/bg.base ; 54-113 fg.faint/bg.base ; 114-131 -/-
-23|证据        已收输出 27 B：“migrating orders 1200/4810”                                                                                    |
-   0-9 fg.label/bg.base ; 10-18 fg.body/bg.base ; 19-124 fg.muted/bg.base ; 125-131 -/-
-24|影响        可能重复命令已产生的影响                                                                                                              |
-   0-9 fg.label/bg.base ; 10-117 fg.body/bg.base ; 118-131 -/-
-25|检查        ✓ 执行版本一致 · ✓ 授权仍适用 · ✓ 写入者锁可取得                                                                                            |
-   0-9 fg.label/bg.base ; 10-11 ac.ok/bg.base ; 12-17 fg.body/bg.base ; 18-20 fg.faint/bg.base ; 21-22 ac.ok/bg.base ; 23-27 fg.body/bg.base ; 28-30 fg.faint/bg.base ; 31-32 ac.ok/bg.base ; 33-111 fg.body/bg.base ; 112-131 -/-
-26|处置 · 原 interrupted/unknown 记录不会被改写                                                                                                  |
-   0-1 fg.label/bg.base ; 2-121 fg.faint/bg.base ; 122-131 -/-
-27|▏ 1  重新核对（只读）         只重跑宿主检查，不运行命令、不调用模型                                                                                           |
-   0-1 ac.brand/line.inner ; 2-21 fg.primary/line.inner/b ; 22-104 fg.muted/line.inner/b ; 105-131 -/-
-28|  2  视为已完成               需你确认该操作已完成；不重做，追加你的决定                                                                                      |
-   0-1 ac.brand/bg.base ; 2-24 fg.body/bg.base ; 25-105 fg.muted/bg.base ; 106-131 -/-
-29|  3  从中断处继续             允许重新运行该操作，可能重复已发生的影响                                                                                        |
-   0-1 ac.brand/bg.base ; 2-23 fg.body/bg.base ; 24-105 fg.muted/bg.base ; 106-131 -/-
-30|  4  结束旧工作，开新任务     旧 run 标记已结束；新任务不接续旧上下文；冻结项需重新提交                                                                                 |
-   0-1 ac.brand/bg.base ; 2-19 fg.body/bg.base ; 20-95 fg.muted/bg.base ; 96-131 -/-
-31|↑↓ 选择 · Enter 确认 · Esc 返回查看                                                                                                         |
-   0-123 fg.label/bg.base ; 124-131 -/-
-32|◈ 恢复核对                                                                                             Ctrl+C 退出（保留可恢复工作）               |
-   0-0 ac.warn/bg.base ; 1-98 fg.body/bg.base ; 99-116 fg.faint/bg.base ; 117-131 -/-
+19|恢复核对 · 只读 · 未打开可写存储                                                                                        Esc 返回查看|
+   0-7 fg.primary/bg.base/b ; 8-31 fg.muted/bg.base ; 32-119 -/bg.base ; 120-131 fg.label/bg.base
+20|工作        订单导出 CSV 增加时区列，并迁移历史数据 · 任务 1 · 第 2 轮                                                              |
+   0-11 fg.label/bg.base ; 12-50 fg.body/bg.base ; 51-69 fg.faint/bg.base ; 70-131 -/bg.base
+21|最后确认点  ✓ write export.csv · 00:00:00 已提交结果                                                                                |
+   0-11 fg.label/bg.base ; 12-13 ac.ok/bg.base ; 14-29 fg.body/bg.base ; 30-51 fg.faint/bg.base ; 52-131 -/bg.base
+22|未知 1/1    ◈ bash printf 'migrating orders 1200/4810\n' · intent 已记录 00:00:00，结果未提交 · 可能已产生影响                      |
+   0-11 fg.label/bg.base ; 12-13 ac.warn/bg.base ; 14-18 fg.body/bg.base ; 19-55 ac.code/bg.base ; 56-109 fg.faint/bg.base ; 110-131 -/bg.base
+23|证据        已收输出 27 B：“migrating orders 1200/4810”                                                                             |
+   0-11 fg.label/bg.base ; 12-24 fg.body/bg.base ; 25-54 fg.muted/bg.base ; 55-131 -/bg.base
+24|影响        可能重复命令已产生的影响                                                                                                |
+   0-11 fg.label/bg.base ; 12-35 fg.body/bg.base ; 36-131 -/bg.base
+25|检查        ✓ 执行版本一致 · ✓ 授权仍适用 · ✓ 写入者锁可取得                                                                        |
+   0-11 fg.label/bg.base ; 12-13 ac.ok/bg.base ; 14-25 fg.body/bg.base ; 26-28 fg.faint/bg.base ; 29-30 ac.ok/bg.base ; 31-40 fg.body/bg.base ; 41-43 fg.faint/bg.base ; 44-45 ac.ok/bg.base ; 46-59 fg.body/bg.base ; 60-131 -/bg.base
+26|处置 · 原 interrupted/unknown 记录不会被改写                                                                                        |
+   0-3 fg.label/bg.base ; 4-43 fg.faint/bg.base ; 44-131 -/bg.base
+27|▏ 1  重新核对（只读）         只重跑宿主检查，不运行命令、不调用模型                                                                |
+   0-1 ac.brand/bg.selected ; 2-29 fg.primary/bg.selected/b ; 30-67 fg.muted/bg.selected ; 68-131 -/bg.selected
+28|  2  视为已完成               需你确认该操作已完成；不重做，追加你的决定                                                            |
+   0-1 ac.brand/bg.base ; 2-29 fg.body/bg.base ; 30-71 fg.muted/bg.base ; 72-131 -/bg.base
+29|  3  从中断处继续             允许重新运行该操作，可能重复已发生的影响                                                              |
+   0-1 ac.brand/bg.base ; 2-29 fg.body/bg.base ; 30-69 fg.muted/bg.base ; 70-131 -/bg.base
+30|  4  结束旧工作，开新任务     旧 run 标记已结束；新任务不接续旧上下文；冻结项需重新提交                                             |
+   0-1 ac.brand/bg.base ; 2-29 fg.body/bg.base ; 30-86 fg.muted/bg.base ; 87-131 -/bg.base
+31|↑↓ 选择 · Enter 确认 · Esc 返回查看                                                                                                 |
+   0-34 fg.label/bg.base ; 35-131 -/bg.base
+32|◈ 恢复核对                                                                                             Ctrl+C 退出（保留可恢复工作）|
+   0-0 ac.warn/bg.base ; 1-9 fg.body/bg.base ; 10-102 -/bg.base ; 103-131 fg.faint/bg.base
 33|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
    0-131 border.off/bg.base
-34|❯ 恢复核对进行中 · 输入不会提交                                                                                                                  |
-   0-1 fg.gutter/bg.base ; 2-118 fg.faint/bg.base ; 119-131 -/-
+34|❯ 恢复核对进行中 · 输入不会提交                                                                                                     |
+   0-1 fg.gutter/bg.base ; 2-30 fg.faint/bg.base ; 31-131 -/bg.base
 35|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
    0-131 border.off/bg.base
-36|deepseek-flash · offline · ctx ≈99 / 1M · 本会话 28 tok < ¥0.01 partial                                                                |
-   0-23 ac.model/bg.base ; 24-60 fg.label/bg.base ; 61-128 ac.warn/bg.base ; 129-131 -/-
-37|Ctrl+R 历史 · Ctrl+T trace · ? 帮助                                                                                                     |
-   0-127 fg.label/bg.base ; 128-131 -/-
+36|deepseek-flash · offline · ctx ≈99 / 1M · 本会话 28 tok < ¥0.01 partial                                                             |
+   0-23 ac.model/bg.base ; 24-54 fg.label/bg.base ; 55-55 -/bg.base ; 56-63 fg.label/bg.base ; 64-70 ac.warn/bg.base ; 71-131 -/bg.base
+37|Ctrl+R 历史 · Ctrl+T trace · ? 帮助                                                                                                 |
+   0-34 fg.label/bg.base ; 35-131 -/bg.base

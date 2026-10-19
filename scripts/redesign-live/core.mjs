@@ -22,17 +22,9 @@ export const EVIDENCE={
  improve:['real-analysis','actual-candidate','selection','validation','writeback-or-effective-task','readback','cleanup','cost'],
  eval:['fixed-plan','tui-2b-confirmation','all-trials','host-budget','cleanup','readback','cost'],
 };
-// These are interface dependencies, not a future acceptance candidate. A changed
-// interface requires reviewing this PREP adapter; unrelated new files do not.
-export const INTERFACES={
- 'src/tui/app.ts':'7c800d9a67043c86f0edc69e44357eafaacfb85013d8621e20f57ae0cf3aec27',
- 'src/tui/commands.ts':'6c0e3de4576362c39791012f6660afc2e18be950c94ba2adaa0efafe0b91b83e',
- 'src/improve-entry.ts':'ce4487fab10d20fb17f0efa575ac6b8b72f9b830064c63dfa09ec1ac3a35d0c6',
- 'src/cost-estimate.ts':'fc9da2c8ec9448ce5ab1915d25fac2e966d120e1029eaaaa2c4c2de4ce13e8d0',
- 'src/eval/plan.ts':'c1fcb219e2a23911f7f130f6910c00456f17116fa9bf5b1a307cc6bcd241ed17',
- 'src/cli.ts':'eb885e074cbad17eb1689ba380ced73661397ff29d86a12a0e5b52799be7d480',
-};
-export const HOST_PRICE={currency:'CNY',version:'deepseek-cny-v1',source:'DeepSeek 官方中文价格页 https://api-docs.deepseek.com/zh-cn/quick_start/pricing',consultedAt:'2026-10-12',perMillionTokens:8};
+// The final candidate carries this versioned data contract. Full source/output
+// identity remains pinned by its source-build hash and installation inventory.
+const INTERFACE_SCHEMA='pi-durio-redesign-live-interface-v1';
 
 export function planTemplate(path){
  if(!PATHS.includes(path))throw Error('PATH_REQUIRED: coding|improve|eval');
@@ -89,15 +81,14 @@ export function candidate(ref,synthetic){
  if(value.schema!=='pi-durio-redesign-terminal-v1'||value.synthetic!==synthetic||!/^([a-f0-9]{40})$/.test(value.candidate?.commit)||!/^([a-f0-9]{40})$/.test(value.candidate?.tree)||!hex(value.source?.sourceBuildSha256))throw Error('SHARED_CANDIDATE_REQUIRED');
  verifyTree(value.installation);verifyTree(value.harness);
  const buildPath=join(value.installation.root,'dist/execution/source-build.json'),build=readRef({path:buildPath,sha256:value.source.sourceBuildSha256});
- for(const [path,sha256]of Object.entries(INTERFACES))if(!build.inputs?.some(i=>i.path===path&&i.sha256===sha256))throw Error(`INTERFACE_CHANGED:${path}`);
+ if(build.redesignLive?.schema!==INTERFACE_SCHEMA||!build.redesignLive.price||!['standard','large'].every(tier=>build.redesignLive.improveLimits?.[tier]))throw Error('LIVE_INTERFACE_CONTRACT_REQUIRED: rebuild the candidate');
  if(!synthetic&&(value.runtime?.node!==process.version||value.runtime?.platform!==process.platform||value.runtime?.arch!==process.arch))throw Error('PREP_NODE_OR_PLATFORM_CHANGED');
- return value;
+ return {...value,liveInterface:build.redesignLive};
 }
 function casesValid(value){
  if(value?.schema!==`${SCHEMA}-cases`||!Array.isArray(value.cases)||value.cases.length<1||value.cases.length>16||new Set(value.cases.map(c=>c.id)).size!==value.cases.length)return false;
  return value.cases.every(c=>text(c.id)&&text(c.input)&&['local-fix','multi-file','regression','no-change'].includes(c.category)&&c.visibility==='public-development'&&c.files&&Object.keys(c.files).length>0&&Object.values(c.files).every(x=>typeof x==='string')&&c.dirty&&Object.values(c.dirty).every(x=>typeof x==='string')&&Array.isArray(c.writable)&&[...Object.keys(c.files),...Object.keys(c.dirty),...c.writable].every(relativeFile)&&text(c.dependencyLock)&&text(c.grader?.version)&&typeof c.grader.program==='string'&&c.grader.program.trim()&&typeof c.grader.expectedStdout==='string'&&Array.isArray(c.grader.required)&&c.grader.required.length>0&&c.grader.required.every(text));
 }
-function limits(tier){const k=tier==='large'?2:1;return{maxRequests:16*k,maxTokens:2162688*k,maxRequestTokens:1048576+32768*k,maxOutputTokens:32768*k,maxDurationMs:600000*k};}
 
 /** The operator prepares this new directory. Validation only compares bytes:
  * retained dirty input overlays files; the fixed dependencyLock is package-lock.json. */
@@ -128,7 +119,7 @@ export function validate(planPath,grantPath,{now=Date.now()}={}){
  if(plan.path!=='eval')require(plan.repetitions===1&&caseDocument?.cases?.length===1,'A1_ONE_PATH','repetitions/cases','One coding task or one improve analysis; no automatic replacement attempt.');
  require(isAbsolute(plan.execution?.workspace??'')&&isAbsolute(plan.execution?.dataRoot??'')&&plan.execution.workspace!==plan.execution.dataRoot,'EXECUTION_PATHS','execution','Fix distinct absolute workspace and data root.');
  require(hex(plan.version?.sourceBuildSha256)&&plan.version.sourceBuildSha256===manifest?.source.sourceBuildSha256&&plan.version.provider==='deepseek'&&plan.version.model==='deepseek-flash'&&plan.version.configuration==='default; no enabled improve overrides','VERSION_REQUIRED','version','Bind the final shared build/model/default configuration; retain the actual execution.config at runtime.');
- require(equal(plan.price,HOST_PRICE),'CNY_PRICE_REQUIRED','price','Use the pinned host CNY peak-output table, including source/version/consulted date; verify applicability before authorizing. Old USD grants do not apply.');
+ require(!!manifest&&equal(plan.price,manifest.liveInterface.price),'CNY_PRICE_REQUIRED','price','Use the pinned host CNY peak-output table, including source/version/consulted date; verify applicability before authorizing. Old USD grants do not apply.');
  const b=plan.budget??{};
  for(const key of ['maxRequests','maxTokens','maxRequestTokens','maxOutputTokens',...(plan.path==='eval'?[]:['maxDurationMs'])])require(positive(b[key]),'BUDGET_REQUIRED',`budget.${key}`,'A fixed positive integer is required.');
  require(b.requestRetryLimit===0,'RETRY_LIMIT','budget.requestRetryLimit','Current paths disable automatic request retries; do not add replacement trials.');
@@ -147,11 +138,11 @@ export function validate(planPath,grantPath,{now=Date.now()}={}){
   require(grant?.manualBudgetAccepted===true,'MANUAL_BUDGET_AUTHORIZATION','grant.manualBudgetAccepted','Do not infer acceptance of manual supervision from a general paid grant.');
  }
  if(plan.path==='improve'){
-  const r=plan.route??{},fixed=limits(r.tier);
+  const r=plan.route??{},fixed=manifest?.liveInterface.improveLimits[r.tier];
   require(['session','7d','30d'].includes(r.scope)&&['standard','large'].includes(r.tier)&&text(r.sessionId)&&text(r.targetRunId)&&text(r.focus)&&!/[\r\n]/.test(r.focus),'IMPROVE_TARGET_REQUIRED','route','Fix the real session/run, scope, tier and single-line analysis focus.');
   require(Array.isArray(r.sources)&&r.sources.length===0&&r.selection===null,'ANALYSIS_ONLY','route.sources/selection','This minimal path uses recorded project sources only; no unknown future candidate can be selected.');
-  require(b.enforcement==='product-analysis-tier'&&Object.entries(fixed).every(([key,value])=>b[key]===value),'TUI_TIER_LIMIT_MISMATCH','budget','Use the exact standard/large stage limits; /improve new does not accept custom lower limits.');
-  require(iso(b.deadline)&&now+fixed.maxDurationMs<Date.parse(b.deadline),'ANALYSIS_START_WINDOW','budget.deadline','The TUI starts a relative stage timer; validate immediately before confirmation, never queue, and start before cutoff minus the full stage duration.');
+  require(b.enforcement==='product-analysis-tier'&&!!fixed&&Object.entries(fixed).every(([key,value])=>b[key]===value),'TUI_TIER_LIMIT_MISMATCH','budget','Use the exact standard/large stage limits; /improve new does not accept custom lower limits.');
+  require(!!fixed&&iso(b.deadline)&&now+fixed.maxDurationMs<Date.parse(b.deadline),'ANALYSIS_START_WINDOW','budget.deadline','The TUI starts a relative stage timer; validate immediately before confirmation, never queue, and start before cutoff minus the full stage duration.');
  }
  if(plan.path==='eval'){
   try{

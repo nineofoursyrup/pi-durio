@@ -129,13 +129,20 @@ export class Evidence {
     } else if (digest(readFileSync(path)) !== sha256) { throw new Error('EVIDENCE_CORRUPT'); }
     return { sha256, bytes: value.byteLength };
   }
-  append(kind: string, data: unknown): number {
+  append(kind: string, data: unknown): number { return this.appendFor(this.runId, kind, data); }
+  /** Related host facts become visible together; content-addressed blobs may precede the transaction. */
+  appendBatch(records: readonly { runId: string; kind: string; data: unknown }[]): number[] {
+    this.db.exec('BEGIN IMMEDIATE');
+    try { const seqs = records.map(record => this.appendFor(record.runId, record.kind, record.data)); this.db.exec('COMMIT'); return seqs; }
+    catch (error) { this.db.exec('ROLLBACK'); throw error; }
+  }
+  private appendFor(runId: string, kind: string, data: unknown): number {
     this.fault?.(kind);
     const stamped=stampFact(kind,data);
     const body = JSON.stringify(stamped.data);
     if (Buffer.byteLength(body) > 2 * 1024 * 1024) throw new Error('EVIDENCE_RECORD_LIMIT');
     const ref = this.blob(body);
-    const row = this.db.prepare('INSERT INTO records(run_id,kind,at,body) VALUES(?,?,?,?)').run(this.runId, kind, stamped.acquiredAt, JSON.stringify(ref));
+    const row = this.db.prepare('INSERT INTO records(run_id,kind,at,body) VALUES(?,?,?,?)').run(runId, kind, stamped.acquiredAt, JSON.stringify(ref));
     return Number(row.lastInsertRowid);
   }
   close() { this.db.close(); }

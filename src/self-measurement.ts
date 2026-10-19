@@ -4,7 +4,7 @@ import { cpus } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isKeyRelease } from '@earendil-works/pi-tui';
-import { digest, readObject } from './evidence.js';
+import { digest, readObject, openHostReadonly } from './evidence.js';
 import { records, decode, queryHistory, watermark } from './history.js';
 import { factClock } from './fact-clock.js';
 import { storageGroups } from './storage-groups.js';
@@ -60,7 +60,7 @@ export class ProcessMeasurements {
   /** Called after Terminal.write returns, only for a complete synchronized frame, not cursor/query traffic. */
   paint(data: string) {
     // Width calibration saves/restores the cursor for its temporary status line and CPR probes.
-    if (!data.includes('\x1b[?2026h') || !data.includes('\x1b[?2026l') || data.includes('\x1b7') || !/\x1b\[\d+;\d+H/.test(data)) return;
+    if (!data.includes('\x1b[?2026h') || !data.includes('\x1b[?2026l') || data.includes('\x1b7')) return;
     const end = this.now(); this.firstFrameMs ??= end;
     for (const start of this.pending) this.samples.push(Math.max(0, end - start));
     this.pending = [];
@@ -75,32 +75,40 @@ export const processMeasurements = new ProcessMeasurements();
 export function selfCostScope(now = new Date()): MetricsScope & { from: string; to: string; asOf: string } {
   return { from: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString(), to: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString(), asOf: now.toISOString(), source: 'ordinary' };
 }
-const originalKind = (kind: string) => /^(model\.(payload|provider-event|response)|tool\.(output|result|error)|read\.(bytes|text)|shell\.(stdout|stderr)|generation\.(request|response))$/.test(kind);
+const originalKinds = ['model.payload', 'model.provider-event', 'model.response', 'tool.output', 'tool.result', 'tool.error', 'read.bytes', 'read.text', 'shell.stdout', 'shell.stderr', 'generation.request', 'generation.response'];
 const installationBasis = '本进程任务记录的当前执行版本 lockfile 生产安装清单字节合计，含 provider SDK/原生依赖；不含 Node、开发依赖；非文件系统 allocated bytes';
 
 /** No writable Evidence is opened. Every selected artifact must bind this process build and platform. */
 export function readSelfRecords(root: string, build: string | null, processId = factClock().processId) {
   const tasks = new Set<string>(), processTasks = new Set<string>(), ownAttempts = new Set<string>();
-  const outputs = new Map<string, { raw: number; text: number; hasRaw: boolean }>(), rawBodies = new Map<string, number>();
+  const outputs = new Map<string, { raw: number; text: number; hasRaw: boolean }>();
+  const gaps: string[] = [];
+  let tasksComplete = true, processComplete = true, outputsComplete = true;
   let installation = measured<number>(null, 'records', installationBasis, null, '未记录 · 当前执行版本尚无安装清单');
-  if (!existsSync(join(root, 'host.sqlite'))) return { tasks: 0, processTasks: 0, toolOutputBytes: 0, rawBodyBytes: 0, installation, through: 0 };
-  const through = watermark(root); let count = 0, bytes = 0;
-  for (const ref of records(root, { through })) {
-    if (++count > 50000) throw Error('SELF_RECORD_LIMIT');
-    if (originalKind(ref.kind)) rawBodies.set(ref.ref.sha256, ref.ref.bytes);
-    if (!['task.accepted', 'control.accepted', 'run.started', 'recovery.started', 'tool.dispatch', 'tool.output', 'tool.result', 'execution.artifact'].includes(ref.kind)) continue;
-    bytes += ref.ref.bytes; if (bytes > 32 * 1024 * 1024) throw Error('SELF_RECORD_BYTES_LIMIT');
+  if (!existsSync(join(root, 'host.sqlite'))) return { tasks: 0, processTasks: 0, toolOutputBytes: 0, rawBodyBytes: 0, installation, through: 0, gaps };
+  const through = watermark(root);
+  // Aggregate content-addressed original sizes in SQLite; chunk count does not become JS heap or
+  // a shared failure gate for unrelated installation/process measurements.
+  const db = openHostReadonly(root);
+  let rawBodyBytes: number;
+  try {
+    rawBodyBytes = Number(db.prepare(`SELECT COALESCE(SUM(bytes),0) AS bytes FROM
+      (SELECT json_extract(body,'$.sha256') AS sha, MAX(json_extract(body,'$.bytes')) AS bytes
+       FROM records WHERE seq<=? AND kind IN (${originalKinds.map(() => '?').join(',')}) GROUP BY sha)`).get(through, ...originalKinds)!.bytes);
+  } finally { db.close(); }
+  const keep = (set: Set<string>, id: string) => { if (set.has(id)) return true; if (set.size >= 50000) return false; set.add(id); return true; };
+  for (const ref of records(root, { through, kinds: ['task.accepted', 'control.accepted', 'run.started', 'recovery.started', 'tool.dispatch', 'tool.output', 'tool.result', 'execution.artifact'] })) {
     const d = decode(root, ref), sameProcess = d.clock?.processId === processId;
-    if (ref.kind === 'task.accepted') tasks.add(d.taskId ?? ref.runId);
-    if (ref.kind === 'control.accepted' && d.kind === 'follow-up' && d.taskId) tasks.add(d.taskId);
-    if (sameProcess && ['task.accepted', 'run.started', 'recovery.started'].includes(ref.kind)) processTasks.add(ref.runId);
+    if (ref.kind === 'task.accepted') tasksComplete = keep(tasks, d.taskId ?? ref.runId) && tasksComplete;
+    if (ref.kind === 'control.accepted' && d.kind === 'follow-up' && d.taskId) tasksComplete = keep(tasks, d.taskId) && tasksComplete;
+    if (sameProcess && ['task.accepted', 'run.started', 'recovery.started'].includes(ref.kind)) processComplete = keep(processTasks, ref.runId) && processComplete;
     const attempt = d.attemptId ?? d.toolAttempt?.attemptId, key = `${ref.runId}:${attempt}`;
-    if (ref.kind === 'tool.dispatch' && sameProcess && typeof attempt === 'string') ownAttempts.add(key);
-    if (typeof attempt === 'string' && (ownAttempts.has(key) || ref.kind === 'tool.result' && sameProcess)) {
+    if (ref.kind === 'tool.dispatch' && sameProcess && typeof attempt === 'string') outputsComplete = keep(ownAttempts, key) && outputsComplete;
+    if (outputsComplete && typeof attempt === 'string' && (ownAttempts.has(key) || ref.kind === 'tool.result' && sameProcess)) {
       const item = outputs.get(key) ?? { raw: 0, text: 0, hasRaw: false };
       if (ref.kind === 'tool.output' && typeof d.acquired?.bytes === 'string') { item.raw += Buffer.from(d.acquired.bytes, 'base64').length; item.hasRaw = true; }
       if (ref.kind === 'tool.result') item.text = (d.result?.content ?? []).reduce((n: number, c: any) => n + (c.type === 'text' && typeof c.text === 'string' ? Buffer.byteLength(c.text) : 0), 0);
-      outputs.set(key, item);
+      if (outputs.has(key) || outputs.size < 50000) outputs.set(key, item); else outputsComplete = false;
     }
     if (ref.kind === 'execution.artifact' && processTasks.has(ref.runId) && build && d.node === process.version && d.platform === process.platform && d.arch === process.arch && d.files?.some((f: any) => f.path === 'dist/execution/source-build.json' && f.sha256 === build)) {
       try {
@@ -111,11 +119,16 @@ export function readSelfRecords(root: string, build: string | null, processId = 
       } catch (error) { installation = measured<number>(null, 'records', installationBasis, null, String(error)); }
     }
   }
-  return { tasks: tasks.size, processTasks: processTasks.size, toolOutputBytes: [...outputs.values()].reduce((n, o) => n + (o.hasRaw ? o.raw : o.text), 0), rawBodyBytes: [...rawBodies.values()].reduce((a, b) => a + b, 0), installation, through };
+  if (!tasksComplete) gaps.push('SELF_TASK_IDENTITIES_LIMIT: 超过 50000 个独立任务，任务均值未取得');
+  if (!processComplete) gaps.push('SELF_PROCESS_TASKS_LIMIT: 本进程超过 50000 个任务，峰值附带任务数未取得');
+  if (!outputsComplete) gaps.push('SELF_PROCESS_OUTPUTS_LIMIT: 本进程超过 50000 次工具尝试，输出量未取得');
+  return { tasks: tasksComplete ? tasks.size : null, processTasks: processComplete ? processTasks.size : null,
+    toolOutputBytes: outputsComplete ? [...outputs.values()].reduce((n, o) => n + (o.hasRaw ? o.raw : o.text), 0) : null,
+    rawBodyBytes, installation, through, gaps };
 }
 
-export interface SelfEnvironment { build: string | null; chip: string; system: string; node: string; terminal: string; terminalVersion: string | null; columns: number; rows: number; dataRoot: string; uptimeMs: number }
-export function selfEnvironment(root: string, dimensions: { columns: number; rows: number }, build: string | null): SelfEnvironment {
+export interface SelfEnvironment { build: string | null; chip: string; system: string; node: string; terminal: string; terminalVersion: string | null; columns: number | null; rows: number | null; dataRoot: string; uptimeMs: number }
+export function selfEnvironment(root: string, dimensions: { columns: number | null; rows: number | null }, build: string | null): SelfEnvironment {
   let system = '未知';
   if (process.platform === 'darwin') try { system = readFileSync('/System/Library/CoreServices/SystemVersion.plist', 'utf8').match(/<key>ProductVersion<\/key>\s*<string>([^<]+)<\/string>/)?.[1] ?? '未知'; } catch {}
   else system = `${process.platform}（macOS 版本未知）`;
@@ -129,7 +142,7 @@ export const NOT_MEASURED = [
   { name: '输出取得写入耗时 / 大输出', reason: '需要产品外固定负载与采集边界' },
 ] as const;
 
-export function readSelfSnapshot(root: string, dimensions: { columns: number; rows: number }, samples = processMeasurements, busy = false, now = new Date()) {
+export function readSelfSnapshot(root: string, dimensions: { columns: number | null; rows: number | null }, samples = processMeasurements, busy = false, now = new Date()) {
   const build = installedBuild, environment = selfEnvironment(root, dimensions, build.id), scope = selfCostScope(now);
   const attempt = <T>(source: SelfValue<T>['source'], basis: string, fn: () => T) => { try { return measured(fn(), source, basis, 1); } catch (error) { return measured<T>(null, source, basis, null, String(error)); } };
   const facts = attempt('records', '宿主记录：按任务身份去重；本进程仅取 acquisition clock.processId', () => readSelfRecords(root, build.id));
@@ -151,6 +164,6 @@ export async function selfStorage(root: string, facts: SelfSnapshot['facts']) {
   return measured({ total: totals.total, tasks: facts.value?.tasks ?? null,
     perTask: facts.value?.tasks ? totals.total / facts.value.tasks : null,
     originals: facts.value ? totals.sessions + totals.attachments + facts.value.rawBodyBytes : null,
-    breakdown: totals,
+    breakdown: totals, gaps: facts.value?.gaps ?? [],
   }, 'records', '当前数据根现存字节 ÷ 已受理任务；完整原文单列会话、附件和原文事实正文（保留表示副本，不做内容去重）；清理后的现存量不代表历史累计增长；异步扫描期间活跃写入可能改变结果', 1);
 }

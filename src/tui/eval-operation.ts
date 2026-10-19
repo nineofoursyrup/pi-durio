@@ -1,10 +1,11 @@
 /** Shared authorization and process facts for 2b operations. No ownership is
  * acquired while a confirmation is open; the runner owns its real lease. */
-import {existsSync} from 'node:fs';
 import {randomUUID} from 'node:crypto';
-import {join} from 'node:path';
 import {newEvalDirectory} from '../eval/directory.js';
-import {openHostReadonly,readObject} from '../evidence.js';
+import {readObject} from '../evidence.js';
+import {readRunRecords} from '../query.js';
+import {trialGlyph} from './eval.js';
+import {hasOwnerMarker} from '../ownership.js';
 import {formatAmount,type CostTotals} from '../cost-estimate.js';
 import {evalReport,regradeEval,runEval} from '../eval/runner.js';
 import {loadEvalPlan,validatePlan,type EvalPlan} from '../eval/plan.js';
@@ -18,26 +19,29 @@ export const samePlan=(a:PlanSource,b:PlanSource)=>a.root===b.root&&a.id===b.id&
 /** Status-only counts from acquired facts, without verifying fixed execution content.
  * No completion, grading or evidence-protection conclusion is returned here. */
 export function readEvalProgress(source:PlanSource):[number,number] {
-  const db=openHostReadonly(source.root),started=new Set<string>(),outcomes=new Map<string,boolean>();let plan:EvalPlan|undefined;
-  try {
-    for(const row of db.prepare("SELECT kind,body FROM records WHERE run_id=? AND seq<=? AND kind IN ('eval.plan','eval.trial-started','eval.outcome') ORDER BY seq").iterate(source.id,source.through??Number.MAX_SAFE_INTEGER)) {
-      const data=JSON.parse(readObject(source.root,JSON.parse(String(row.body))).toString());
-      if(row.kind==='eval.plan')plan??=data;
-      else if(row.kind==='eval.trial-started')started.add(data.trialId);
+  const started=new Set<string>(),outcomes=new Map<string,boolean>();let plan:EvalPlan|undefined,after=0,more=true;
+  while(more){
+    const page=readRunRecords(source.root,source.id,{after,limit:50,kinds:['eval.plan','eval.trial-started','eval.outcome']});
+    for(const ref of page.records){
+      if(ref.seq>(source.through??Number.MAX_SAFE_INTEGER)){more=false;break;}
+      const data=JSON.parse(readObject(source.root,ref.ref).toString());
+      if(ref.kind==='eval.plan')plan??=data;
+      else if(ref.kind==='eval.trial-started')started.add(data.trialId);
       else if(!outcomes.has(data.trialId))outcomes.set(data.trialId,!!data.started);
     }
-  } finally {db.close();}
+    after=page.records.at(-1)?.seq??after;more=more&&page.more;
+  }
   if(!plan)throw Error('EVAL_PLAN_NOT_FOUND');validatePlan(plan);
   return [plan.trials.filter(trial=>outcomes.has(trial.id)?outcomes.get(trial.id):started.has(trial.id)).length,plan.trials.length];
 }
-export function evalBlocked(source:PlanSource,action:EvalAction,host:{writeBlocked?:string;busy?:boolean;now?:number}={}) {
+export function evalBlocked(source:PlanSource,action:EvalAction,host:{writeBlocked?:string;busy?:boolean;now?:number;ignoreDeadline?:boolean}={}) {
   if(host.writeBlocked)return host.writeBlocked;
   if(host.busy)return '有任务运行中，结束后再启动';
-  if(source.origin)return action==='grade'?'improve 发起的计划不能在此重评分':'improve 发起的计划由提交批次启动';
+  if(source.origin)return action==='grade'?'improve 发起的计划请在 improve 中处理':'improve 发起的计划由提交批次启动';
   if(source.through!==undefined)return '固定报告快照只读 · 从 /eval 打开当前计划';
-  if(existsSync(`${source.root}.lock`)||existsSync(join(source.root,'owner.json')))return '数据根写入者锁被占用 · 只读跟踪';
+  if(hasOwnerMarker(source.root))return '数据根写入者锁被占用 · 只读跟踪';
   const report=readPlanReport(source).report,state=planState(report);
-  if(action==='run')return state!=='not-started'?'一份计划只运行一次 · 停止后不续跑':Date.parse(report.plan.budget.deadline)<=(host.now??Date.now())?'截止时间已过，不能启动':undefined;
+  if(action==='run')return state!=='not-started'?'一份计划只运行一次 · 停止后不续跑':!host.ignoreDeadline&&Date.parse(report.plan.budget.deadline)<=(host.now??Date.now())?'计划截止时间已过，需新建计划':undefined;
   return state==='running'?'批次运行中，不能重评分':state==='not-started'?'计划尚未运行，不能重评分':undefined;
 }
 export function evalRunConfirmation(source:PlanSource,blocked:()=>string|undefined):ConfirmConfig {
@@ -56,7 +60,7 @@ export function evalRunConfirmation(source:PlanSource,blocked:()=>string|undefin
 export function evalGradeConfirmation(source:PlanSource,requested:string[]|undefined,blocked:()=>string|undefined):ConfirmConfig {
   const report=readPlanReport(source).report,cases=report.plan.cases;
   if(requested?.some(id=>!cases.some(c=>c.id===id)))throw Error('EVAL_CASE_NOT_FOUND');
-  const selected=cases.flatMap((c,i)=>(requested?requested.includes(c.id):report.trials.some(t=>t.caseId===c.id&&(!t.grade||t.grade.judgment==='unknown')))?[i]:[]);
+  const selected=cases.flatMap((c,i)=>(requested?requested.includes(c.id):report.trials.some(t=>t.caseId===c.id&&t.outcome.started&&t.outcome.valid&&trialGlyph(t)==='unknown'))?[i]:[]);
   return {title:`重评分 ${source.label}`,action:'重评分',wrapBody:true,body:['只对已取得的同一 outcome 使用当前报告中的同版本 grader。'],choice:{mode:'multi',options:cases.map(c=>({label:`${c.id} · grader ${report.gradingRevisions.findLast(r=>r.graders[c.id])?.graders[c.id].version??c.grader.version}`})),selected},fixed:[`不调用模型 · 占用 VM，最长约 ${report.trials.length} × ${report.plan.gradingTimeoutMs/1000}s 评分超时`,`追加评分修订，原评分保留 · 模型费用 ¥0.00`],disabled:indices=>blocked()??(!indices.length?'至少选择一个案例':undefined)};
 }
 export async function executeEval(source:PlanSource,action:EvalAction,cases:string[]|undefined,signal:AbortSignal,onCleanup:(receipt:EvalCleanupReceipt)=>void,onPrepared?:()=>void){

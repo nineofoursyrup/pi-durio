@@ -15,7 +15,7 @@ function fixture(path:'coding'|'improve'|'eval'='coding'){
  mkdirSync(join(installation,'dist/execution'),{recursive:true});mkdirSync(join(installation,'dist/src'),{recursive:true});mkdirSync(terminal);mkdirSync(workspace);
  const poison=`throw new Error('PRODUCT_IMPORT_FORBIDDEN_IN_PREP');\n`;
  writeFileSync(join(installation,'dist/src/cli.js'),poison);writeFileSync(join(terminal,'verify.mjs'),poison);
- const build=join(installation,'dist/execution/source-build.json');write(build,{inputs:Object.entries(prep.INTERFACES).map(([path,sha256])=>({path,sha256})),outputs:[]});
+ const build=join(installation,'dist/execution/source-build.json');write(build,JSON.parse(readFileSync(resolve('dist/execution/source-build.json'),'utf8')));
  const buildSha=prep.fileRef(build).sha256,manifestPath=join(root,'manifest.json');
  write(manifestPath,{schema:'pi-durio-redesign-terminal-v1',candidate:{commit:'a'.repeat(40),tree:'b'.repeat(40)},source:{root,sourceBuildSha256:buildSha},
   installation:{root:installation,files:['dist/execution/source-build.json','dist/src/cli.js'].map(path=>({path,sha256:prep.fileRef(join(installation,path)).sha256}))},
@@ -25,7 +25,7 @@ function fixture(path:'coding'|'improve'|'eval'='coding'){
  for(const [name,content]of Object.entries({...cases.cases[0].files,...cases.cases[0].dirty,'package-lock.json':cases.cases[0].dependencyLock}))writeFileSync(join(workspace,name),String(content));
  const plan=prep.planTemplate(path),planPath=join(root,'plan.json'),grantPath=join(root,'grant.json'),now=Date.now();
  Object.assign(plan,{id:`synthetic-${path}`,synthetic:true,candidateManifest:prep.fileRef(manifestPath),cases:prep.fileRef(casesPath),repetitions:1,execution:{workspace,dataRoot:join(root,'data')}});
- plan.version.sourceBuildSha256=buildSha;plan.price={...prep.HOST_PRICE};
+ plan.version.sourceBuildSha256=buildSha;plan.price={...JSON.parse(readFileSync(build,'utf8')).redesignLive.price};
  Object.assign(plan.budget,{maxRequests:16,maxTokens:2162688,maxRequestTokens:1081344,maxOutputTokens:32768,deadline:new Date(now+7200000).toISOString(),cnyCeiling:20,enforcement:'operator-observed'});
  if(path!=='eval')plan.budget.maxDurationMs=600000;
  if(path==='improve'){
@@ -103,7 +103,7 @@ test('evidence processing keeps all paths, first failure, unknown costs and synt
  assert.throws(()=>prep.report(inputPath),/OBSERVATION_PLAN_BINDING/,'a plan cannot relabel a synthetic manifest as real');
  const projectionManifest=JSON.parse(readFileSync(f.manifestPath,'utf8'));projectionManifest.synthetic=false;write(f.manifestPath,projectionManifest);
  f.plan.candidateManifest=prep.fileRef(f.manifestPath);f.persist();input.candidateManifest=f.plan.candidateManifest;input.plans=[prep.fileRef(f.planPath)];
- const base={planSha256:input.plans[0].sha256,conclusionBasis:'Projection fixture',evidence,cost:{scopeId:'synthetic-host-scope',basis:'host-ledger',through:10,knownCny:1,unknownRequests:1,complete:false,priceVersion:prep.HOST_PRICE.version}};
+ const base={planSha256:input.plans[0].sha256,conclusionBasis:'Projection fixture',evidence,cost:{scopeId:'synthetic-host-scope',basis:'host-ledger',through:10,knownCny:1,unknownRequests:1,complete:false,priceVersion:f.plan.price.version}};
  input.observations=[{...base,id:'first-failure',at:'2026-10-17T00:00:00Z',status:'FAIL'}, {...base,id:'later-readback',at:'2026-10-17T00:01:00Z',status:'PASS'}];write(inputPath,input);
  result=prep.report(inputPath);assert.equal(result.paths[0].realStatus,'FAIL');assert.equal(result.paths[0].firstFailure,'first-failure');assert.equal(result.paths[0].observations.length,2);assert.equal(result.cost.knownPartCny,1,'same host scope is not charged twice');assert.equal(result.cost.totalCny,null);assert.equal(result.cost.unknownRequests,1);
  input.observations[1].cost={...base.cost,knownCny:2};write(inputPath,input);assert.throws(()=>prep.report(inputPath),/COST_SAME_WATERMARK_CONFLICT/);

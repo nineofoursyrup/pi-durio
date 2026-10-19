@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { DatabaseSync } from 'node:sqlite';
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, readdirSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -73,4 +74,36 @@ test('self records keep process scope and current build identity while reading n
   const scope = selfCostScope(new Date(2026, 9, 17, 10));
   assert.equal(new Date(scope.from!).getDate(), 11); assert.equal(new Date(scope.to!).getDate(), 18);
   assert.equal(new Date(scope.from!).getHours(), 0); assert.equal(scope.project, undefined);
+});
+
+
+test('a synchronized no-change frame completes its key sample before an unrelated later repaint', () => {
+  let now = 1;
+  const samples = new ProcessMeasurements(() => now);
+  samples.input('\x1b[A'); now = 3; samples.paint('\x1b[?2026h\x1b[?25l\x1b[?2026l');
+  now = 1000; samples.paint('\x1b[?2026h\x1b[1;1Hchanged\x1b[?2026l');
+  assert.deepEqual(samples.snapshot().keys, { samples: 1, p50: 2, p95: null });
+});
+
+test('large retained outputs do not erase independent self facts at 32 MiB or 50000 records', () => {
+  const root = mkdtempSync(join(tmpdir(), 'durio-self-large-')), e = new Evidence(root, 'current');
+  e.append('task.accepted', { taskId: 'task', sessionId: 's', input: 'fixture', workspace: '/a' });
+  e.append('tool.dispatch', { attemptId: 'large-output' });
+  const chunk = Buffer.alloc(800000, 'x');
+  for (let i = 0; i < 34; i++) e.append('tool.output', { toolAttempt: { attemptId: 'large-output' }, acquired: { bytes: chunk.toString('base64') } });
+  e.append('execution.artifact', { node: process.version, platform: process.platform, arch: process.arch, files: [{ path: 'dist/execution/source-build.json', sha256: 'build' }], installation: e.blob('[{"bytes":100}]') });
+  const payload = e.blob('{"chunk":"retained"}'); e.close();
+  const first = readSelfRecords(root, 'build');
+  assert.equal(first.tasks, 1); assert.equal(first.toolOutputBytes, 27200000); assert.equal(first.installation.value, 100);
+  const db = new DatabaseSync(join(root, 'host.sqlite'));
+  try {
+    db.exec('BEGIN');
+    const insert = db.prepare('INSERT INTO records(run_id,kind,at,body) VALUES(?,?,?,?)');
+    for (let i = 0; i < 50001; i++) insert.run('historical', 'model.provider-event', '2000-01-01T00:00:00Z', JSON.stringify(payload));
+    db.exec('COMMIT');
+  } finally { db.close(); }
+  const before = readFileSync(join(root, 'host.sqlite')), large = readSelfRecords(root, 'build');
+  assert.equal(large.tasks, 1); assert.equal(large.processTasks, 1); assert.equal(large.toolOutputBytes, 27200000);
+  assert.equal(large.installation.value, 100); assert.equal(large.rawBodyBytes, first.rawBodyBytes + payload.bytes); assert.deepEqual(large.gaps, []);
+  assert.deepEqual(readFileSync(join(root, 'host.sqlite')), before);
 });

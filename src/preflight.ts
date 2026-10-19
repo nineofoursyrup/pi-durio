@@ -1,80 +1,25 @@
-import { createReadStream } from 'node:fs';
-import { createHash } from 'node:crypto';
-import { mkdtemp, opendir, rm, access, copyFile, chmod, realpath } from 'node:fs/promises';
+import { mkdtemp, opendir, rm, access, realpath } from 'node:fs/promises';
 import { DatabaseSync } from 'node:sqlite';
 import { join, relative, isAbsolute } from 'node:path';
 import { tmpdir } from 'node:os';
-import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context';
-import { openNodeSqliteStorage } from '@earendil-works/pi-durable/storage/sqlite/node';
 import { digest } from './evidence.js';
 import { records, decode, watermark } from './history.js';
-import type { Storage, Cursor } from '@earendil-works/pi-durable';
+import type { StorageReader } from './storage-projection.js';
+import { inspectQuiescentSnapshot, inspectAdmissionState } from './sqlite-snapshot.js';
 import type { OwnerLease } from './ownership.js';
 import { sessionRemovalVerified } from './storage-disposition.js';
 
-async function hashFile(path: string) {
-  const hash = createHash('sha256');
-  for await (const chunk of createReadStream(path)) hash.update(chunk);
-  return hash.digest('hex');
-}
-
-/** Caller holds the data-root owner and has no active source connection (before open or after confirmed close).
- * Copy a quiescent main+WAL pair, verify source/copy bytes, then touch ONLY the copy through SQLite/public storage.
- * This is not a live-backup API; active/uncertain writers must be blocked before calling it.
- */
-export async function inspectSnapshot<T>(path: string, owner: OwnerLease, inspect: (storage: Omit<Storage, 'commit' | 'mintId' | 'close'>) => Promise<T>) {
+/** Owner-authorized inspection; only the verified copy is opened through public storage. */
+export async function inspectSnapshot<T>(path: string, owner: OwnerLease, inspect: (storage: StorageReader) => Promise<T>) {
   owner.assertHeld();
   path = await realpath(path);
   const rel = relative(owner.path, path);
   if (rel === '..' || rel.startsWith('../') || isAbsolute(rel)) throw new Error('INSPECTION_OUTSIDE_OWNER');
-  const dir = await mkdtemp(join(tmpdir(), 'durio-inspect-'));
-  const snapshot = join(dir, 'snapshot.sqlite');
-  try {
-    const parts = [path];
-    try { await access(`${path}-wal`); parts.push(`${path}-wal`); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-    const sourceFiles = [];
-    for (const source of parts) {
-      const sha256 = await hashFile(source);
-      const destination = source === path ? snapshot : `${snapshot}-wal`;
-      await copyFile(source, destination);
-      await chmod(destination, 0o600);
-      if (await hashFile(destination) !== sha256 || await hashFile(source) !== sha256) throw new Error('RECOVERY_REQUIRED: source changed during quiescent snapshot');
-      sourceFiles.push({ path: source, sha256 });
-    }
-    owner.assertHeld();
-    const snapshotSha256 = await hashFile(snapshot);
-    const storage = await openNodeSqliteStorage(snapshot);
-    try {
-      const details = await inspect(storage);
-      // Recheck the complete pair, including WAL appearance/disappearance; never accept a changing source.
-      const now = [path];
-      try { await access(`${path}-wal`); now.push(`${path}-wal`); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-      if (JSON.stringify(now) !== JSON.stringify(parts)) throw new Error('RECOVERY_REQUIRED: source file set changed');
-      for (const file of sourceFiles) if (await hashFile(file.path) !== file.sha256) throw new Error('RECOVERY_REQUIRED: source changed during inspection');
-      owner.assertHeld();
-      return { source: path, method: 'owner-fenced-quiescent-main-plus-wal-copy/public-storage-scan', snapshotSha256, sourceFiles, ...details };
-    } finally { await storage.close(BACKGROUND_CONTEXT); }
-  } finally { await rm(dir, { recursive: true, force: true }); }
+  return { ...await inspectQuiescentSnapshot(path, () => owner.assertHeld(), inspect), method: 'owner-fenced-quiescent-main-plus-wal-copy/public-storage-scan' };
 }
 
-/** Admission needs every task/submission state, not their history or message bodies.
- * Pages are discarded immediately; the source-fence checks are shared with full inspection.
- */
 export async function inspectAdmission(path: string, owner: OwnerLease) {
-  return inspectSnapshot(path, owner, async storage => {
-    let cursor: Cursor | undefined, pending = 0, taskCount = 0, submissionCount = 0;
-    do {
-      const page = await storage.scanTasks({}, 32, cursor, BACKGROUND_CONTEXT);
-      for (const task of page.items) { taskCount++; if (task.state.status !== 'terminal') pending++; }
-      cursor = page.next;
-    } while (cursor);
-    do {
-      const page = await storage.scanSubmissions({}, 32, cursor, BACKGROUND_CONTEXT);
-      for (const submission of page.items) { submissionCount++; if (submission.status === 'queued' || submission.status === 'placed') pending++; }
-      cursor = page.next;
-    } while (cursor);
-    return { pending, taskCount, submissionCount };
-  });
+  return inspectSnapshot(path, owner, inspectAdmissionState);
 }
 
 export async function preflight(owner: OwnerLease, options: { runId?: string } = {}) {

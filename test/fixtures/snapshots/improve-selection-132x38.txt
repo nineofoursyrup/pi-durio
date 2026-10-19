@@ -1,56 +1,56 @@
 132x38 truecolor
-00|◆ improve ir-a35b                                                                                                  1 个候选 · ≈¥0.00   |
-   0-128 ac.improve/bg.base ; 129-131 -/-
-01|▸ C-01@r1 修复加法                                                      [ ] 1 执行声明范围  [ ] 2 仅验证  [ ] 3 暂缓  [ ] 4 不再建议                   |
-   0-67 ac.improve/bg.block ; 68-112 fg.label/bg.block ; 113-131 -/-
-02|证据  2 + 3 返回 -1 · 共 1 条 · 引用 1 段原文 · 无反例：还没有成功反例 · 原因假设未证实 · 缺口 1 项                                                                 |
-   0-99 fg.body/bg.block ; 100-131 -/-
-03|动作  把减法改为加法 · 范围 math.mjs                                                                                                           |
-   0-120 fg.body/bg.block ; 121-131 -/-
-04|验证  真实回归 · 1 次 · ≤ 0 请求 / ≈¥0.00                                                                                                    |
-   0-122 fg.body/bg.block ; 123-131 -/-
-05|回退  恢复所保留的原文件 · 后续任务读取新文件                                                                                                           |
-   0-111 fg.body/bg.block ; 112-131 -/-
-06|事实是分析给出的陈述；宿主只核对了引用的原文确实读过。                                                                                                         |
-   0-104 fg.muted/bg.block ; 105-131 -/-
-07|事实 1  2 + 3 返回 -1                                                                                                                   |
-   0-127 fg.body/bg.block ; 128-131 -/-
-08|引用  xx:x:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                                           |
-   0-129 ac.path/bg.block ; 130-131 -/-
-09|原因假设（未证实）  运算符误写                                                                                                                    |
-   0-117 fg.body/bg.block ; 118-131 -/-
-10|缺口  还没有成功反例                                                                                                                         |
-   0-122 fg.muted/bg.block ; 123-131 -/-
-11|声明步骤 1  把减法改为加法                                                                                                                     |
-   0-120 fg.body/bg.block ; 121-131 -/-
-12|完整范围  /xxxxxxx/xxx/xxxxxxxxxxxxxxxxxxxxxx/project/math.mjs                                                                          |
-   0-127 ac.path/bg.block ; 128-131 -/-
-13|--- math.mjs（基线 577b3f8de17b）                                                                                                       |
-   0-127 ac.path/bg.block ; 128-131 -/-
-14|+++ math.mjs（候选）                                                                                                                    |
-   0-127 ac.path/bg.block ; 128-131 -/-
+00|◆ improve ir-a35b                                                                                                  1 个候选 · ≈¥0.00|
+   0-131 ac.improve/bg.base
+01|▸ C-01@r1 修复加法                                                      [ ] 1 执行声明范围  [ ] 2 仅验证  [ ] 3 暂缓  [ ] 4 不再建议|
+   0-17 ac.improve/bg.block ; 18-71 -/bg.block ; 72-89 fg.label/bg.block ; 90-91 -/bg.block ; 92-103 fg.label/bg.block ; 104-105 -/bg.block ; 106-115 fg.label/bg.block ; 116-117 -/bg.block ; 118-131 fg.label/bg.block
+02|证据  2 + 3 返回 -1 · 共 1 条 · 引用 1 段原文 · 无反例：还没有成功反例 · 原因假设未证实 · 缺口 1 项                                 |
+   0-98 fg.body/bg.block ; 99-131 -/bg.block
+03|动作  把减法改为加法 · 范围 math.mjs                                                                                                |
+   0-35 fg.body/bg.block ; 36-131 -/bg.block
+04|验证  真实回归 · 1 次 · ≤ 0 请求 / ≈¥0.00                                                                                           |
+   0-40 fg.body/bg.block ; 41-131 -/bg.block
+05|回退  恢复所保留的原文件 · 后续任务读取新文件                                                                                       |
+   0-44 fg.body/bg.block ; 45-131 -/bg.block
+06|事实是分析给出的陈述；宿主只核对了引用的原文确实读过。                                                                              |
+   0-53 fg.muted/bg.block ; 54-131 -/bg.block
+07|事实 1  2 + 3 返回 -1                                                                                                               |
+   0-20 fg.body/bg.block ; 21-131 -/bg.block
+08|引用  xx:x:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                                         |
+   0-74 ac.path/bg.block ; 75-131 -/bg.block
+09|原因假设（未证实）  运算符误写                                                                                                      |
+   0-29 fg.body/bg.block ; 30-131 -/bg.block
+10|缺口  还没有成功反例                                                                                                                |
+   0-19 fg.muted/bg.block ; 20-131 -/bg.block
+11|声明步骤 1  把减法改为加法                                                                                                          |
+   0-25 fg.body/bg.block ; 26-131 -/bg.block
+12|完整范围  /xxxxxxx/xxx/xxxxxxxxxxxxxxxxxxxxxx/project/math.mjs                                                                      |
+   0-61 ac.path/bg.block ; 62-131 -/bg.block
+13|--- math.mjs（基线 577b3f8de17b）                                                                                                   |
+   0-32 ac.path/bg.block ; 33-131 -/bg.block
+14|+++ math.mjs（候选）                                                                                                                |
+   0-19 ac.path/bg.block ; 20-131 -/bg.block
 15|-export const add=(a,b)=>a-b;                                                                                                       |
-   0-131 ac.err/bg.block
+   0-28 ac.err/bg.block ; 29-131 -/bg.block
 16|+export const add=(a,b)=>a+b;                                                                                                       |
-   0-131 ac.ok/bg.block
+   0-28 ac.ok/bg.block ; 29-131 -/bg.block
 17|                                                                                                                                    |
-   0-131 fg.body/bg.block
-18|检查 1  regression · ≤ 30000 ms                                                                                                       |
-   0-129 fg.body/bg.block ; 130-131 -/-
+   0-0 fg.body/bg.block ; 1-131 -/bg.block
+18|检查 1  regression · ≤ 30000 ms                                                                                                     |
+   0-30 fg.body/bg.block ; 31-131 -/bg.block
 19|console.log("regression")                                                                                                           |
-   0-131 ac.code/bg.block
-20|必要保护  不更改其他文件                                                                                                                       |
-   0-120 fg.body/bg.block ; 121-131 -/-
-21|风险  只覆盖数值输入                                                                                                                         |
-   0-122 fg.body/bg.block ; 123-131 -/-
-22|回退方法  恢复所保留的原文件                                                                                                                     |
-   0-118 fg.body/bg.block ; 119-131 -/-
-23|生效条件  回归通过                                                                                                                          |
-   0-123 fg.body/bg.block ; 124-131 -/-
-24|生效时机  后续任务读取新文件                                                                                                                     |
-   0-118 fg.body/bg.block ; 119-131 -/-
-25|1–4 选择 / 取消 · Tab 切换候选 · ↑↓ 滚动 · Enter 汇总 · Esc 返回第一层                                                                               |
-   0-114 fg.label/bg.base ; 115-131 -/-
+   0-24 ac.code/bg.block ; 25-131 -/bg.block
+20|必要保护  不更改其他文件                                                                                                            |
+   0-23 fg.body/bg.block ; 24-131 -/bg.block
+21|风险  只覆盖数值输入                                                                                                                |
+   0-19 fg.body/bg.block ; 20-131 -/bg.block
+22|回退方法  恢复所保留的原文件                                                                                                        |
+   0-27 fg.body/bg.block ; 28-131 -/bg.block
+23|生效条件  回归通过                                                                                                                  |
+   0-17 fg.body/bg.block ; 18-131 -/bg.block
+24|生效时机  后续任务读取新文件                                                                                                        |
+   0-27 fg.body/bg.block ; 28-131 -/bg.block
+25|1–4 选择 / 取消 · Tab 切换候选 · ↑↓ 滚动 · Enter 汇总 · Esc 返回第一层                                                              |
+   0-69 fg.label/bg.base ; 70-131 -/bg.base
 26|                                                                                                                                    |
    0-131 -/-
 27|                                                                                                                                    |

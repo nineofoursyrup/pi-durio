@@ -5,8 +5,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {Evidence,digest} from '../src/evidence.js';
 import {captureImproveSources,registerImproveSource,unregisterImproveSource} from '../src/improve-source.js';
-import {deriveImproveDecision,previewImproveDecision,submitImproveDecision,type ImproveDecision} from '../src/improve-decisions.js';
-import type {ImproveCandidate,ImproveReport} from '../src/improve.js';
+import {deriveImproveDecision,previewImproveDecision,submitImproveDecision,currentImproveVersion,type ImproveDecision} from '../src/improve-decisions.js';
+import {readImproveReport,type ImproveCandidate,type ImproveReport} from '../src/improve.js';
 import {ImproveSelectionView,improveSelectionPrefill} from '../src/tui/improve-selection.js';
 import {ImproveView} from '../src/tui/improve.js';
 import type {PlanSource} from '../src/eval/overview.js';
@@ -14,9 +14,10 @@ import {ImproveCheckOriginal} from '../src/tui/improve-result.js';
 import {ImproveBatchController} from '../src/improve-batch.js';
 import {improveReportContract} from '../src/improve-contract.js';
 import {improveFacts,readImproveDecision} from '../src/improve-history.js';
-import {candidateValidation} from '../src/tui/improve-card.js';
+import {candidateValidation,improveCandidateRows} from '../src/tui/improve-card.js';
 import {validateCandidateChecks,bindCandidateCheck,type CandidateFreshCheck} from '../src/improve-check-plan.js';
 import {representativeCases} from '../src/eval/fixtures.js';
+import {verifiedImage,type EvalPlan} from '../src/eval/plan.js';
 import {COLOR_TIER,overrideColorTierForTest} from '../src/tui/theme.js';
 import {captureSnapshot} from '../src/tui/snapshot.js';
 import {acquireOwner} from '../src/ownership.js';
@@ -92,10 +93,10 @@ test('suggestions cannot execute; command prefill validates all candidates befor
  const f=fixture();f.candidate.suggestionOnly=true;f.candidate.structuredChecks=[];f.save();let submissions=0;
  const view=new ImproveSelectionView(f.dataRoot,f.report.id,async()=>{submissions++;});
  for(const n of ['1','2']){await view.handleInput(n);assert.equal(view.draft().selections.length,0);assert.match(plain(view.render(132,38)),/仅建议/);}
- assert.throws(()=>improveSelectionPrefill(f.report,{execute:'C-01'}),/仅建议/);
- assert.throws(()=>improveSelectionPrefill(f.report,{defer:'C-99'}),/候选号无效/);
- assert.throws(()=>improveSelectionPrefill(f.report,{defer:'C-01','do-not-suggest':'candidate:one'}),/重复/);
- view.prefill(improveSelectionPrefill(f.report,{defer:'C-01'}));assert.equal(view.currentStage,'summary');assert.equal(submissions,0);
+ assert.throws(()=>improveSelectionPrefill(f.dataRoot,f.report,{execute:'C-01'}),/仅建议/);
+ assert.throws(()=>improveSelectionPrefill(f.dataRoot,f.report,{defer:'C-99'}),/候选号无效/);
+ assert.throws(()=>improveSelectionPrefill(f.dataRoot,f.report,{defer:'C-01','do-not-suggest':'candidate:one'}),/重复/);
+ view.prefill(improveSelectionPrefill(f.dataRoot,f.report,{defer:'C-01'}));assert.equal(view.currentStage,'summary');assert.equal(submissions,0);
  assert.match(plain(view.render(132,38)),/本次只记录决定，不执行任何候选/);
 });
 
@@ -149,8 +150,8 @@ test('running view can leave without cancellation; prefill cannot replace the su
  finish();await submit;assert.equal(view.inProgress,false);
 });
 
-test('zero and half-declared reports do not prove a first-version contract',()=>{
- assert.equal(improveReportContract({candidates:[]}), 'unknown');
+test('unmarked zero-candidate reports are legacy while partial declarations stay unknown',()=>{
+ assert.equal(improveReportContract({candidates:[]}), 'legacy');
  const f=fixture();delete f.candidate.structuredChecks;assert.equal(improveReportContract(f.report),'unknown');
  f.report.selectionContract='declared-v1';assert.equal(improveReportContract(f.report),'declared');
 });
@@ -202,7 +203,7 @@ test('host batch stop matches its origin, waits for cleanup, and leaves the inde
 });
 
 function golden(lines:string[],name:string,masks:{value:string;replace:string}[]) {
- const grid=captureSnapshot(lines,132,38,'truecolor'),cells=grid.rows.flat(),significant=cells.map((cell,index)=>({cell,index})).filter(({cell})=>!/[\s│╭╮╰╯─]/.test(cell.char));
+ const grid=captureSnapshot(lines,132,38,'truecolor'),cells=grid.rows.flat(),significant=cells.map((cell,index)=>({cell,index})).filter(({cell})=>cell.char&&!/[\s│╭╮╰╯─]/.test(cell.char));
  // Mask known fixture roots/identities in the character grid across soft wraps;
  // keep every cell's colors and spacing, so layout remains observable.
  for(const {value,replace}of masks) {
@@ -248,6 +249,8 @@ test('app commands validate before opening, preserve draft on reopen, and backgr
  const original=await runReadTask({workspace:f.workspace,dataRoot:f.dataRoot,input:'原会话任务',mode:'offline',transport:transport.fetch});
  assert.equal(original.status,'completed');assert.equal(original.cleanup,'confirmed');
  const app=new ReadOnlyTui({workspace:f.workspace,dataRoot:f.dataRoot,draftRoot:join(f.root,'drafts'),mode:'offline',transport:transport.fetch,resume:original.sessionId,terminal,widthCalibration:false}),screen=()=>plain(app.screen()),key=(text:string)=>terminal.input(text);
+ let batchDone:Promise<unknown>|undefined,batchSignal:AbortSignal|undefined;const start=app.improveBatch.start.bind(app.improveBatch);
+ app.improveBatch.start=(decision,signal)=>{batchSignal=signal;return batchDone=start(decision,signal);};
  app.start();try {
   assert.match(screen(),/✓ 完成/);assert.match(screen(),/原会话任务/);
   const accepted=readAcceptedTasks(f.dataRoot).tasks.length;
@@ -256,7 +259,77 @@ test('app commands validate before opening, preserve draft on reopen, and backgr
   key('\x1b');key('\x1b');key('\x1b');key('/improve selection-report');key('\r');assert.match(screen(),/修复加法.*仅验证/);
   key('\r');assert.match(screen(),/提交汇总/);key('\r');await untilSelection(()=>app.improveBatch.running);assert.match(screen(),/执行进度/);
   key('\x1b');key('\x1b');key('\x1b');assert.match(screen(),/improve 执行/);assert.match(screen(),/原会话任务/);
+  key('/improve history');key('\r');assert.match(screen(),/improve 历史/);key('\x03');await new Promise<void>(resolve=>setImmediate(resolve));if(batchSignal?.aborted)await batchDone;
+  assert.equal(app.improveBatch.running,true,'history Ctrl+C must not stop an unrelated active batch after asynchronous cleanup');
+  assert.equal(improveFacts(f.dataRoot).some(fact=>fact.kind==='improve.batch'&&fact.data.state==='frozen'),false,'history Ctrl+C writes no stop record');key('\x1b');
   key('执行中保留此输入');key('\r');assert.match(screen(),/执行中保留此输入/);assert.equal(readAcceptedTasks(f.dataRoot).tasks.length,accepted);assert.equal(readQueue(f.dataRoot).items.length,0);
   key('\x03');await untilSelection(()=>!app.improveBatch.running&&/improve.*已停止/.test(screen()));assert.match(screen(),/原会话任务/);assert.match(screen(),/执行中保留此输入/);
+ }finally{await app.exit();}
+});
+
+
+test('reading a submission summary does not consume its declared execution allowance',async()=>{
+ const f=fixture();let now=Date.now(),submitted:ImproveDecision|undefined;
+ const view=new ImproveSelectionView(f.dataRoot,f.report.id,async decision=>{submitted=decision;},()=>{},{now:()=>now});
+ await view.handleInput('2');await view.handleInput('\r');view.render(132,38);
+ now+=120000;
+ await view.handleInput('\r');
+ assert.ok(submitted,'an expired preview is still submittable after explicit confirmation');
+ assert.equal(Date.parse(submitted.limits.deadline)-now,30000,'all 30 seconds belong to execution after confirmation');
+ assert.equal(submitted.groups[0].changes[0].content,'export const add=(a,b)=>a+b;\n');
+});
+
+test('replacement fragments preserve the rest of the captured file and reject ambiguous original text',()=>{
+ const f=fixture();f.candidate.replacements=[{path:'math.mjs',before:'a-b',content:'a+b'}];f.save();
+ const derive=()=>deriveImproveDecision(f.dataRoot,f.report.id,[{candidateId:f.candidate.id,mode:'execute-declared-scope'}],{id:'fragment',directory:join(f.root,'fragment')});
+ const d=derive();assert.equal(d.groups[0].changes[0].content,'export const add=(a,b)=>a+b;\n');
+ assert.doesNotThrow(()=>previewImproveDecision(f.dataRoot,d));
+ f.candidate.replacements[0].before='missing fragment';f.save();assert.throws(derive,/REPLACEMENT_BASELINE_MISMATCH/);
+ f.candidate.replacements[0].before='a';f.save();assert.throws(derive,/REPLACEMENT_BASELINE_MISMATCH/);
+ const view=new ImproveSelectionView(f.dataRoot,f.report.id,async()=>assert.fail('ambiguous saved report cannot execute'));
+ view.prefill([{candidateId:f.candidate.id,mode:'validate-only'}]);const summary=plain(view.render(132,38));
+ assert.match(summary,/替换片段与取证基线不唯一匹配/);assert.match(summary,/IMPROVE_REPLACEMENT_BASELINE_MISMATCH/);
+ assert.equal(readFileSync(join(f.workspace,'math.mjs'),'utf8'),'export const add=(a,b)=>a-b;\n','declaring or rejecting fragments never changes the source');
+});
+
+test('saved reports without suggestionReason distinguish ambiguous fragments from unreadable originals on the card',()=>{
+ const f=fixture();f.candidate.replacements=[{path:'math.mjs',before:'a',content:'b'}];f.save();
+ const saved=readImproveReport(f.dataRoot,f.report.id).report!,candidate=saved.candidates[0];
+ assert.equal('suggestionReason' in candidate,false,'the persisted report predates suggestionReason');
+ const card=()=>improveCandidateRows(f.dataRoot,saved,candidate,{expanded:true,readOnly:true}).map(row=>row.text).join('\n');
+ assert.match(card(),/diff math\.mjs · 替换片段与取证基线不唯一匹配/);assert.doesNotMatch(card(),/原文不可读取/);
+ candidate.target.files=[];
+ assert.match(card(),/diff math\.mjs · 原文不可读取，不能证明替换内容/);
+});
+
+test('improve execution versions include enabled instructions and model settings',()=>{
+ const f=fixture(),before=currentImproveVersion(f.dataRoot,f.workspace),e=new Evidence(f.dataRoot,'config-change');
+ const content=e.blob(JSON.stringify({instructions:'Answer concisely',stream:{timeoutMs:1000}}));
+ e.append('improve.activation',{defaults:[{current:{workspace:f.workspace,taskType:'read',files:[{targetId:'config',root:f.workspace,path:'config.json',kind:'agent-config',content}]}}]});e.close();
+ assert.notEqual(currentImproveVersion(f.dataRoot,f.workspace),before,'same build with a changed instruction/configuration is a different execution version');
+});
+
+
+test('manual eval plan Ctrl+C preserves an unrelated improve batch and still stops its own pending operation',async()=>{
+ const f=fixture(),terminal=new SelectionTerminal(),transport=scriptedTransport([]);
+ f.candidate.structuredChecks=[{kind:'regression',program:'setInterval(()=>{},1000)',timeoutMs:30000}];f.save();
+ const original=await runReadTask({workspace:f.workspace,dataRoot:f.dataRoot,input:'原会话',mode:'offline',transport:transport.fetch});
+ const e=new Evidence(f.dataRoot,'manual-plan');
+ const plan:EvalPlan={id:e.runId,purpose:'手动计划取消接缝',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:{id:'fixed-runtime',manifest:e.blob('[]'),bytes:2},cases:structuredClone(representativeCases.slice(0,1)),trials:representativeCases.slice(0,1).map(c=>({id:c.id,caseId:c.id,version:'fixed-runtime',side:'candidate',repeat:1,pair:null})),budget:{maxRequests:12,maxTokens:12000,maxRequestTokens:1000,deadline:'2099-01-01T00:00:00Z',unknownUpperBound:null},trialTimeoutMs:90000,gradingTimeoutMs:30000,maxOutputTokens:512,requestRetryLimit:0,price:{version:'cny-test',currency:'CNY',source:'fixed fixture',perMillionTokens:10,consultedAt:'2026-10-17T00:00:00Z'},authorization:{paid:false,scope:'run-all-listed-trials'},environment:{node:'v24.8.0',isolation:'fixture only',cache:'fixed read-only',writable:'new trial'},mainObjective:'diagnostic',protection:['scope'],improvementConclusion:'not-evaluated'};
+ e.append('eval.plan',plan);e.close();
+ const app=new ReadOnlyTui({workspace:f.workspace,dataRoot:f.dataRoot,draftRoot:join(f.root,'drafts'),mode:'offline',transport:transport.fetch,resume:original.sessionId,terminal,widthCalibration:false}),screen=()=>plain(app.screen()),key=(text:string)=>terminal.input(text);
+ let stopped:Promise<unknown>|undefined;const stop=app.improveBatch.stop.bind(app.improveBatch);app.improveBatch.stop=origin=>{const pending=stop(origin);stopped=pending;return pending;};
+ app.start();try{
+  key('/improve selection-report --validate C-01');key('\r');assert.match(screen(),/提交汇总/);key('\r');await untilSelection(()=>app.improveBatch.running&&improveFacts(f.dataRoot).some(fact=>fact.kind==='improve.decision'));
+  const origin=app.improveBatch.origin!,link=new Evidence(f.dataRoot,f.report.runId);
+  link.append('improve.eval',{id:origin.decisionId,parent:{decisionId:origin.decisionId},groupId:'g1',planId:'child-plan',dataRoot:join(f.root,'unopened-child-plan')});link.close();
+  key('\x1b');key('\x1b');key('\x1b');key('/eval manual-plan');key('\r');assert.match(screen(),/手动计划取消接缝/);
+  key('\x03');await new Promise<void>(resolve=>setImmediate(resolve));if(stopped)await stopped;
+  assert.equal(app.improveBatch.running,true,'manual plan Ctrl+C must not stop a different improve origin after asynchronous cleanup');
+  assert.equal(improveFacts(f.dataRoot).some(fact=>fact.kind==='improve.batch'&&fact.data.state==='frozen'),false,'manual plan Ctrl+C writes no improve stop record');
+  key('\x1b');await stop(origin);await untilSelection(()=>!app.improveBatch.running&&/improve.*已停止/.test(screen()));
+  key('/eval run manual-plan');key('\r');assert.match(screen(),/启动 eval/);key('\r');key('\x03');key('\x1b');
+  await untilSelection(()=>/eval.*未启动/.test(screen()));
+  const exit=await app.exit();assert.equal(exit.eval?.planId,'manual-plan');assert.equal(exit.evalCleanup?.owner,'not-acquired');
  }finally{await app.exit();}
 });

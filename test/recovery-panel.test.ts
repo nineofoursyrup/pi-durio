@@ -1,6 +1,7 @@
 import { test } from 'node:test';
+import { dataRoot as v1DataRoot, names as v1Names } from './v1-runtime-fixture.js';
 import assert from 'node:assert/strict';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { stripTerminalSequences, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
@@ -62,6 +63,7 @@ test('1c at 132×38 (golden); at 80×24 and 40×12 the always-kept elements stay
     assert.match(shown, /◈ bash printf 'migrating orders 1200\/4810\\n' · intent 已记录 \d\d:\d\d:\d\d，结果未提交 · 可能已产生影响/);
     assert.match(shown, /证据 +已收输出 27 B：“migrating orders 1200\/4810”/);
     assert.match(shown, /影响 +可能重复命令已产生的影响/);
+    assert.match(shown, /result persistence failure/);
     assert.match(shown, /检查 +✓ 执行版本一致 · ✓ 授权仍适用 · ✓ 写入者锁可取得/);
     assert.match(shown, /▏ 1  重新核对（只读） +只重跑宿主检查，不运行命令、不调用模型/);
     assert.match(shown, /◈ 恢复核对/); assert.match(shown, /恢复核对进行中 · 输入不会提交/);
@@ -122,13 +124,11 @@ test('zero unknowns offer continuing; height collapse keeps the always-kept rows
 });
 
 test('the v1 fixture shows a first-version skip as “跳过（首版处置）” with the original note', async () => {
-  const root = mkdtempSync(join(tmpdir(), 'durio-1c-v1-')), dataRoot = join(root, 'data');
-  cpSync(new URL('../../test/fixtures/v1-records/data', import.meta.url), dataRoot, { recursive: true });
-  const ids = JSON.parse(readFileSync(new URL('../../test/fixtures/v1-records/fixture-identity.json', import.meta.url), 'utf8')).names;
+  const dataRoot = v1DataRoot, ids = v1Names;
   const report = await inspectRecovery({ dataRoot, runId: ids['run.recovery-skip'] });
   const panel = new RecoveryPanel(readRecoveryFacts(dataRoot, [report]));
   assert.equal(panel.facts.items.length, 0, 'resolved items are not asked again');
-  assert.match(text(panel), /你的决定 +此前 · read README\.md · 跳过（首版处置） · Fixture skip decision for redesign test coverage/);
+  assert.match(panel.render(180, 20).map(plain).join('\n'), /你的决定 +此前 · write uncertain\.txt · 跳过（首版处置） · Fixture skip decision after an actual unsafe write with unavailable result/);
 });
 
 
@@ -160,7 +160,7 @@ test('40×12 long completed notes keep the caret visible and use PgUp/PgDn witho
   panel.handleInput('2');panel.handleInput('\r');
   const note='独立确认说明。'.repeat(20)+'最后确认';panel.handleInput(note);
   const render=()=>panel.render(40,10,'none').map(plain),shown=()=>render().join('\n');
-  assert.match(shown(),/最后确认▏/,'typing follows the page containing the caret');
+  assert.match(shown(),/最后确认/,'typing follows the page containing the caret');
   assert.match(shown(),/PgUp\/Dn/);assert.doesNotMatch(shown(),/n\/p 详情/);
   assert.match(shown(),/Esc 取消说明/);
   const tail=shown();panel.handleInput('\x1b[5~');assert.notEqual(shown(),tail,'PageUp moves inside the note');
@@ -173,6 +173,23 @@ test('40×12 long completed notes keep the caret visible and use PgUp/PgDn witho
     const before=shown();panel.handleInput('\x1b[6~');if(shown()===before)break;
   }
   assert.ok(descriptions.join('').replace(/\s/g,'').includes(note));
-  panel.handleInput('n');panel.handleInput('p');assert.equal(panel.note,note+'np');assert.match(shown(),/最后确认np▏/);
+  panel.handleInput('n');panel.handleInput('p');assert.equal(panel.note,note+'np');assert.match(shown(),/最后确认np/);assert.ok(panel.render(40,10,'none').some(line=>line.includes('\x1b[7m')),'public Input cursor remains visible');
   const action=panel.handleInput('\r');assert.equal(action.type,'summary');if(action.type==='summary')assert.equal(action.resolutions[0].reason,note+'np');
+});
+
+
+test('recovery confirmation notes accept bracketed paste and public Input cursor editing',()=>{
+  const panel=new RecoveryPanel(facts({status:'needs-decision',options:['inspect','continue','end'],checks:recoveryChecks([])}));
+  panel.handleInput('2');panel.handleInput('\r');
+  panel.handleInput('\x1b[200~已独立核对\x1b[201~');panel.handleInput('\x1b[D');panel.handleInput('结果');
+  assert.equal(panel.note,'已独立核结果对');
+  const action=panel.handleInput('\r');assert.equal(action.type,'summary');if(action.type==='summary')assert.equal(action.resolutions[0].reason,'已独立核结果对');
+});
+
+
+test('prior recovery reasons cannot emit terminal commands or control bytes', () => {
+  const panel = new RecoveryPanel(facts({ prior: [{ tool: 'bash', target: 'true', choice: 'skip', reason: 'before\x1b]0;injected-title\x07after\x01' }] }));
+  const rendered = panel.render(132, 30, 'none').join('\n');
+  assert.doesNotMatch(rendered, /injected-title|\x01/);
+  assert.match(plain(rendered), /beforeafter/);
 });

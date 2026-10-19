@@ -193,9 +193,7 @@ export class HistoryView {
     else if (data === 't') { const run = this.tasks ? (rows[pos.selected] as TaskRow)?.task?.runId : this.list.items[this.list.selected]?.tailRunId; if (run) this.host.trace?.(run); else this.feedback('未运行 · 尚无 run'); }
     else if (data === 'a' && this.tasks && this.host.annotate) { const task = this.selectedTask; if (task) this.host.annotate(task, () => this.refresh()); }
     else if (data === '/' && !this.tasks) {
-      const projects = new Set<string>(); let before: number | undefined;
-      do { const page = this.chains.list({ limit: 50, before }); page.items.forEach(s => { if (s.project) projects.add(s.project); }); before = page.next?.before; } while (before !== undefined);
-      this.filter = new HistoryFilter(this.scope, this.workspace, [...projects]); this.filterOffset = 0;
+      this.filter = new HistoryFilter(this.scope, this.workspace, historyProjects(this.root)); this.filterOffset = 0;
     } else this.move(data, pos);
     this.host.changed?.();
   }

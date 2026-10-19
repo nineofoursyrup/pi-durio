@@ -28,5 +28,7 @@
   },
   "generatedBy": "f26ae8f",
   "generatedAt": "2026-10-14T13:27:19.992Z",
-  "note": "All records written by the v1 build at f26ae8f using offline transport. No paid model calls."
+  "note": "Historical mixed fixture: most records came from f26ae8f offline runtime, but recovery uncertainty and eval.trial-started were manually injected by the original generator. This is a rendering/read-compatibility fixture, not evidence of actual runtime dispatch. Original data/workspace bytes are retained; authentic records are in ../v1-runtime-records.",
+  "provenance": "mixed-synthetic",
+  "originalIdentitySha256": "834050653c127529a3f3d11b036848da88e67af7120d5a4de447109ba769d7d0"
 }

@@ -6,7 +6,7 @@ export interface ImproveFact {sourceId:string;runId:string;seq:number;at:string;
 /** Facts remain in the existing host journal; no separate decision database. */
 export function improveFacts(root:string,through=Number.MAX_SAFE_INTEGER):ImproveFact[]{
  const db=openHostReadonly(root);
- try{return db.prepare("SELECT * FROM records WHERE kind IN ('improve.decision','improve.group-started','improve.validation','improve.batch','improve.resume','improve.restore','improve.prepared','improve.check','improve.check-started','improve.eval','improve.batch-started','improve.formal-started','improve.formal','improve.write-intent','improve.write-result','improve.activation','improve.rollback','improve.rollback-request','improve.rollback-intent','improve.rollback-result','improve.default-observed','improve.build-started','improve.build-execution','improve.build-startup','improve.build','improve.build-activation','improve.process-request','improve.process-started','improve.process-result','improve.eval-asset') AND seq<=? ORDER BY seq").all(through).map(row=>{
+ try{return db.prepare("SELECT * FROM records WHERE kind IN ('improve.decision','improve.execution-version','improve.group-started','improve.validation','improve.batch','improve.resume','improve.restore','improve.prepared','improve.check','improve.check-started','improve.eval','improve.batch-started','improve.formal-started','improve.formal','improve.write-intent','improve.write-result','improve.activation','improve.rollback','improve.rollback-request','improve.rollback-intent','improve.rollback-result','improve.default-observed','improve.build-started','improve.build-execution','improve.build-startup','improve.build','improve.build-activation','improve.process-request','improve.process-started','improve.process-result','improve.eval-asset') AND seq<=? ORDER BY seq").all(through).map(row=>{
   const ref=JSON.parse(String(row.body));return {sourceId:`e1:${row.seq}:${ref.sha256}`,runId:String(row.run_id),seq:Number(row.seq),at:String(row.at),kind:String(row.kind),data:JSON.parse(readObject(root,ref).toString())};
  });}finally{db.close();}
 }
@@ -21,17 +21,20 @@ export function conditionIdentity(candidate:ImproveCandidate){
  return digest(JSON.stringify(conditionFiles(candidate)));
 }
 export function conditionFiles(candidate:ImproveCandidate){return candidate.target.files.filter(f=>candidate.scope.includes(f.path)).map(f=>({path:f.path,sha256:f.sha256})).sort((a,b)=>a.path.localeCompare(b.path));}
-export function listImproveSuppressions(root:string,workspace?:string,through=Number.MAX_SAFE_INTEGER){
+function adviceRestrictions(root:string,workspace:string|undefined,through:number){
  const facts=improveFacts(root,through),restored=new Set(facts.filter(f=>f.kind==='improve.restore').map(f=>f.data.suppressionId));
  return facts.filter(f=>f.kind==='improve.decision').flatMap(f=>(f.data.decisions??[]).filter((item:any)=>['defer','do-not-suggest'].includes(item.mode)&&(!workspace||item.problem.target.workspace===workspace)).map((item:any)=>{
   const id=`${f.sourceId}:${digest(JSON.stringify(item.problem))}`;
   return {id,sourceId:f.sourceId,runId:f.runId,decisionId:f.data.id,reportId:f.data.decision.reportId,at:f.at,...item,active:!restored.has(id)};
  }));
 }
+export function listImproveSuppressions(root:string,workspace?:string,through=Number.MAX_SAFE_INTEGER){
+ return adviceRestrictions(root,workspace,through).filter(item=>item.mode==='do-not-suggest');
+}
 function sameTarget(a:ReturnType<typeof problemIdentity>,b:ReturnType<typeof problemIdentity>){return a.target.workspace===b.target.workspace&&a.target.kind===b.target.kind;}
 export function suppressionMatch(root:string,candidate:ImproveCandidate,through=Number.MAX_SAFE_INTEGER){
  const identity=problemIdentity(candidate),condition=conditionIdentity(candidate),matches:any[]=[];
- for(const item of listImproveSuppressions(root,undefined,through)){if(!item.active||!sameTarget(identity,item.problem))continue;
+ for(const item of adviceRestrictions(root,undefined,through)){if(!item.active||!sameTarget(identity,item.problem))continue;
    const exact=item.problem.key===identity.key;
    const overlap=identity.paths.some(p=>item.problem.paths.includes(p))||!identity.paths.length||!item.problem.paths.length;
    if(!exact&&!overlap)continue;
@@ -78,7 +81,7 @@ export function readImproveDecision(root:string,id:string){
   return {id:g.id,candidateIds:g.candidateIds,state:result?.data.state??(starts.length?'unknown':'not-run'),result:validationView(root,result?.data.result),reason:result?(result.data.reason??null):(starts.length?'Interrupted group has no committed result; never replayed.':null),sourceId:result?.sourceId??starts.at(-1)?.sourceId??null,formal:formal?.data??(formalStart?{state:'unknown',writeback:'partial-or-unknown',activation:'unknown'}:null),formalSource:formal?.sourceId??formalStart?.sourceId??null,writes,rollback:rollback?.data??null,activation:activation?{sourceId:activation.sourceId,...activation.data}:null,observed:observed.map(f=>({sourceId:f.sourceId,runId:f.runId,...f.data})),build:build?.data??(buildStarted?{state:buildOutcome?.data.state==='failed'?'failed':'unknown',reason:buildOutcome?.data.state==='failed'?'Recorded build/startup failed; no candidate output accepted':'Build started without a verified output receipt',executionSource:buildOutcome?.sourceId??null}:null),buildActivation:buildActivation?.data??null,processes};
  });
  const unresolved=groups.some((g:any)=>g.state==='unknown'||['unknown','frozen'].includes(g.formal?.state)&&g.rollback?.state!=='completed'),notRun=groups.some((g:any)=>g.state==='not-run'),failed=groups.some((g:any)=>['failed','cancelled'].includes(g.state));
- return {id,decision:accepted.data.decision,requestDigest:accepted.data.requestDigest,executionVersion:accepted.data.executionVersion,sourceId:accepted.sourceId,runId:accepted.runId,price:accepted.data.price??null,budgetAmount:decisionBudgetAmount(accepted.data.decision.limits.maxTokens,accepted.data.price??null),
+ return {id,decision:accepted.data.decision,requestDigest:accepted.data.requestDigest,executionVersion:related.findLast(f=>f.kind==='improve.execution-version')?.data.executionVersion??accepted.data.executionVersion,sourceId:accepted.sourceId,runId:accepted.runId,price:accepted.data.price??null,budgetAmount:decisionBudgetAmount(accepted.data.decision.limits.maxTokens,accepted.data.price??null),
   state:unresolved||notRun?'frozen':last?.data.state==='completed'&&failed?'completed-with-failures':last?.data.state??(groups.length?'frozen':'completed'),reason:unresolved?'A started group has no certain recorded outcome.':last?.data.reason??(notRun?'Independent not-run groups remain frozen until an explicit valid continuation.':null),groups,
   activation:groups.some((g:any)=>g.buildActivation?.state==='rolled-back')?'see-groups':groups.some((g:any)=>g.buildActivation?.state==='new-process-entry')?'new-process-entry':groups.some((g:any)=>g.activation?.state==='rolled-back')?'see-groups':groups.some((g:any)=>g.activation?.state==='new-default')?'new-default':'not-enabled',writeback:groups.some((g:any)=>g.rollback?.state==='completed')?'see-groups':groups.some((g:any)=>['frozen','unknown'].includes(g.formal?.state))?'partial-or-unknown':groups.some((g:any)=>g.formal?.writeback==='written')?'written':'not-written',effect:groups.length?'see combination results; no separate causal credit':'unverified',
   facts:related.map(f=>({sourceId:f.sourceId,kind:f.kind,runId:f.runId,state:f.data.state??null,reason:f.data.reason??null})),

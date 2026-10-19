@@ -1,33 +1,34 @@
 #!/usr/bin/env node
 /**
- * Generate the v1-records test fixture.
- *
- * Usage:
- *   node scripts/fixtures/generate-v1-records.mjs <output-dir> <v1-installation>
- *
- * <v1-installation>  built directory of pi-durio commit f26ae8f.
- *
- * Quick start (from a clean directory):
- *   git archive f26ae8f | tar -xC /tmp/v1-build
- *   cd /tmp/v1-build && npm ci && npm run build
- *   node <repo>/scripts/fixtures/generate-v1-records.mjs <output-dir> /tmp/v1-build
- *
- * Requires: container system start  (Apple container 1.4.1)
- *           improve validation checks run in the eval container image.
+ * Rebuild authentic f26ae8f compatibility records into a NEW directory.
+ * node scripts/fixtures/generate-v1-records.mjs NEW_OUTPUT FROZEN_CANDIDATE
+ * FROZEN_CANDIDATE contains candidate-identity.json, install/node_modules/pi-durio and linux-runtime.
+ * Offline transport only. Validation uses the existing local container boundary;
+ * no model/provider requests. Original fixtures and installation remain immutable.
  */
-
+import assert from 'node:assert/strict';
+import { inventory, sha256 } from '../redesign-terminal/common.mjs';
 import { mkdir, writeFile, cp } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { mkdtempSync, existsSync, realpathSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, existsSync, realpathSync, readFileSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 const [outputArg, installArg] = process.argv.slice(2);
 if (!outputArg || !installArg) {
-  console.error('Usage: node generate-v1-records.mjs <output-dir> <v1-installation>');
+  console.error('Usage: node generate-v1-records.mjs NEW_OUTPUT FROZEN_CANDIDATE');
   process.exit(1);
 }
-const installDir = resolve(installArg);
+const frozenDir = resolve(installArg), installDir = join(frozenDir, 'install/node_modules/pi-durio');
 const outputDir = resolve(outputArg);
+assert.equal(existsSync(outputDir), false, 'Refuse to replace an existing fixture');
+const identityPath = join(frozenDir, 'candidate-identity.json');
+assert.equal(sha256(readFileSync(identityPath)), '7cd21af10280ae331aa3b77df06588d398a2d343d6f2aed71725d39b84b05546');
+const frozen = JSON.parse(readFileSync(identityPath, 'utf8'));
+assert.equal(frozen.candidate, 'f26ae8f4b8039608a1fa796e1c69da4d8173d112');
+const sorted = rows => [...rows].sort((a,b) => a.path.localeCompare(b.path));
+const expectedInstallation = sorted(inventory(installDir));
+assert.equal(sha256(JSON.stringify(expectedInstallation)), frozen.installedInventorySha256, 'Frozen installation must match every file and link');
+globalThis.fetch = async () => { throw Error('FIXTURE_NETWORK_FORBIDDEN'); };
 
 // ── dynamic imports from v1 build ──────────────────────────────────────────
 
@@ -41,19 +42,12 @@ const { demoTransport, scriptedTransport } = await import(join(installDir, 'dist
 const { submitImproveDecision, listImproveSuppressions } =
   await import(join(installDir, 'dist/src/improve-decisions.js'));
 
-const { Evidence } = await import(join(installDir, 'dist/src/evidence.js'));
-const { acquireOwner } = await import(join(installDir, 'dist/src/ownership.js'));
 const { prepareEval } = await import(join(installDir, 'dist/src/eval/plan.js'));
-const { appendFact, captureFiles } = await import(join(installDir, 'dist/src/eval/store.js'));
+const { runEval } = await import(join(installDir, 'dist/src/eval/runner.js'));
+const linuxRuntime = join(frozenDir, 'linux-runtime');
+const linuxInventory = inventory(linuxRuntime);
+assert.equal(sha256(JSON.stringify(sorted(linuxInventory))), frozen.linuxInventorySha256, 'Frozen Linux runtime must match every file and link');
 const { representativeCases } = await import(join(installDir, 'dist/src/eval/fixtures.js'));
-const { captureImproveSources } = await import(join(installDir, 'dist/src/improve-source.js'));
-// pi-durable internals (bundled inside v1 node_modules)
-const { createSession, ToolTask, LiveDoc } =
-  await import(join(installDir, 'node_modules/@earendil-works/pi-durable/dist/index.js'));
-const { BACKGROUND_CONTEXT: context } =
-  await import(join(installDir, 'node_modules/@earendil-works/chord/dist/context/index.js'));
-const { openNodeSqliteStorage } =
-  await import(join(installDir, 'node_modules/@earendil-works/pi-durable/dist/storage/sqlite/node.js'));
 
 // ── workspace + data root setup ────────────────────────────────────────────
 
@@ -65,21 +59,10 @@ await mkdir(workspace);
 await writeFile(join(workspace, 'README.md'),  'Fixture project for pi-durio redesign tests.\n');
 await writeFile(join(workspace, 'math.mjs'),   'export const add = (a, b) => a - b;\n');
 
-// Minimal eval installation: eval-environment.json + stubs so captureFiles doesn't
-// traverse the full 12k-file node_modules tree used by the real eval container.
-const miniInstallDir = join(tmpRoot, 'mini-eval-install');
-mkdirSync(join(miniInstallDir, 'dist/src'), { recursive: true });
-mkdirSync(join(miniInstallDir, 'dist/execution'), { recursive: true });
-writeFileSync(join(miniInstallDir, 'eval-environment.json'), JSON.stringify({ platform: 'linux', arch: 'arm64', node: 'v24.8.0', image: 'pi-durio-eval@sha256:7cfd5ced23d374c1c17d6848c192965f3f4daa6f6f10a6e8d88ae408b559b37c' }));
-writeFileSync(join(miniInstallDir, 'package.json'), JSON.stringify({ name: 'pi-durio-eval-mini', version: '0.0.0' }));
-writeFileSync(join(miniInstallDir, 'dist/execution/package-lock.json'), JSON.stringify({ lockfileVersion: 3, packages: {} }));
-writeFileSync(join(miniInstallDir, 'dist/execution/source-build.json'), JSON.stringify({ build: 'fixture' }));
-writeFileSync(join(miniInstallDir, 'dist/src/index.js'), '// fixture stub\n');
-
 console.log('workspace:', workspace);
 console.log('dataRoot: ', dataRoot);
 
-const identity = { names: {} };
+const identity = { names: {}, unavailable: {}, provenance: 'runtime-generated', frozenIdentitySha256: sha256(readFileSync(identityPath)) };
 function record(label, id) { identity.names[label] = id; console.log(`  ${label}: ${id}`); }
 
 // ── helper: improve transport that returns a scripted report ───────────────
@@ -225,106 +208,29 @@ if (report4.status !== 'completed') {
   console.log('  ended recovery4:', ended4.status);
 }
 
-// ── scenario 5a: run with uncertain tools ──────────────────────────────────
-
-console.log('\n[5a] interrupted run for recovery fixture');
-const interruptController = new AbortController();
-const interruptTransport = async (_url, init) =>
-  new Promise((_resolve, reject) => {
-    init.signal.addEventListener('abort', () => reject(Error('offline interruption')));
-    interruptController.abort();
-  });
-
-const uncertainResult = await runReadTask({
-  workspace, dataRoot,
-  input: 'Fixture run to be interrupted for recovery.',
-  mode: 'offline',
-  transport: interruptTransport,
-  signal: interruptController.signal,
-  cancellation: 'exit',
+// ── scenario 5: actual unsafe dispatch with retained-result fault, then skip ──
+// The public v1 fault seam refuses result/error recording after a real write.
+// No private durable task, checkpoint, LiveDoc or host fact is manufactured.
+console.log('\n[5] actual uncertain write and legacy skip');
+const uncertainResult = await runCodingTask({
+ workspace, dataRoot, input:'Write uncertain.txt once.', mode:'offline',
+ transport:scriptedTransport([{name:'write',args:{path:'uncertain.txt',content:'real side effect\n'}}]).fetch,
+ fault:kind=>{if(['tool.result','tool.error'].includes(kind))throw Error('FIXTURE_RESULT_UNAVAILABLE');},
 });
-record('run.uncertain-source', uncertainResult.runId);
-record('session.uncertain', uncertainResult.sessionId);
+assert.equal(uncertainResult.status,'unknown');
+assert.equal(readFileSync(join(workspace,'uncertain.txt'),'utf8'),'real side effect\n');
+record('run.uncertain-source',uncertainResult.runId);record('session.uncertain',uncertainResult.sessionId);
+const authorization5={workspace,mode:'offline',tools:['read','write','edit','bash']};
+const report5=await checkRecovery({dataRoot,runId:uncertainResult.runId,authorization:authorization5});
+assert.equal(report5.status,'needs-decision');assert.ok(report5.tools.some(tool=>tool.fact==='unknown'));
+record('recovery.snapshot-uncertain',report5.snapshotId);
+const recovered5=await recoverRun({dataRoot,runId:uncertainResult.runId,authorization:authorization5,
+ decision:{id:'skip-actual-uncertain',snapshotId:report5.snapshotId,action:'continue',acceptAdditionalModelAttempts:true,
+  resolutions:report5.tools.filter(tool=>tool.fact==='unknown').map(tool=>({taskId:tool.taskId,choice:'skip',reason:'Fixture skip decision after an actual unsafe write with unavailable result'}))},
+ transport:scriptedTransport([]).fetch});
+assert.equal(recovered5.status,'completed');record('run.recovery-skip',recovered5.runId);
 
-console.log('\n[5b] injecting uncertain tool dispatches');
-
-const sessionPath = join(dataRoot, 'sessions', uncertainResult.sessionId, 'durable.sqlite');
-const conversationId = (await readRun(dataRoot, uncertainResult.runId))
-  .records.find(r => r.kind === 'run.started').data.conversationId;
-
-const owner5 = await acquireOwner(dataRoot, () => {});
-const storage5 = await openNodeSqliteStorage(sessionPath);
-const session5 = createSession(storage5);
-
-const generation5 = (await storage5.scanTasks({ kind: 'pi.generation' }, 1, undefined, context)).items[0];
-const assistant5Id = await storage5.mintId();
-const toolCalls5 = [
-  { type: 'toolCall', id: 'uncertain-0', name: 'read', arguments: { path: 'README.md' } },
-  { type: 'toolCall', id: 'uncertain-1', name: 'write', arguments: { path: 'new.txt', content: 'data' } },
-];
-await storage5.commit([{
-  type: 'entry',
-  value: {
-    id: assistant5Id, conversationId, byTaskId: generation5.id,
-    kind: 'pi.assistant',
-    model: [{ role: 'assistant', api: 'openai-completions', provider: 'deepseek',
-      model: 'deepseek-flash', timestamp: 1, stopReason: 'toolUse',
-      usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
-      content: toolCalls5 }] }
-}], context);
-
-const toolIds5 = [];
-for (const call of toolCalls5) {
-  const id = await session5.commit(
-    tx => tx.createTask(ToolTask, { assistant: assistant5Id, callId: call.id },
-      { ownership: { kind: 'task', taskId: generation5.id }, conversationId }),
-    context
-  );
-  toolIds5.push(id);
-}
-for (let i = 0; i < toolIds5.length; i++) {
-  const task = (await storage5.task(toolIds5[i], context));
-  await storage5.commit([{
-    type: 'task',
-    value: { ...task, state: { status: 'pending', checkpoint: { phase: 'execute', arguments: toolCalls5[i].arguments, replay: 'unsafe' } } }
-  }], context);
-}
-await storage5.commit([{
-  type: 'task',
-  value: { ...generation5, state: { status: 'waiting', checkpoint: { phase: 'tools', assistant: assistant5Id, tools: toolIds5, pending: [] }, on: toolIds5, policy: 'allSettled' } }
-}], context);
-await session5.commit(async tx => {
-  const live = await tx.doc(LiveDoc, conversationId);
-  delete live.generation;
-  live.tools = toolCalls5.map((call, i) => ({ callId: call.id, name: call.name, taskId: toolIds5[i], status: 'pending' }));
-}, context);
-await session5.close(context);
-
-const ev5 = new Evidence(dataRoot, uncertainResult.runId);
-try { for (const id of toolIds5) ev5.append('tool.dispatch', { durableTaskId: id, attemptId: `fixture-${id}` }); }
-finally { ev5.close(); await owner5.release(); }
-
-console.log('\n[5c] recovery inspect + skip decision');
-
-const authorization5 = { workspace, mode: 'offline', tools: ['read'] };
-const report5 = await inspectRecovery({ dataRoot, runId: uncertainResult.runId, authorization: authorization5 });
-console.log('  recovery status:', report5.status);
-record('recovery.snapshot-uncertain', report5.snapshotId);
-
-// skip all uncertain tools
-const resolutions5 = report5.tools.map(tool => ({
-  taskId: tool.taskId, choice: 'skip', reason: 'Fixture skip decision for redesign test coverage',
-}));
-const recovered5 = await recoverRun({
-  dataRoot, runId: uncertainResult.runId, authorization: authorization5,
-  decision: { id: 'skip-all-uncertain', snapshotId: report5.snapshotId, action: 'continue',
-    acceptAdditionalModelAttempts: true, resolutions: resolutions5 },
-  transport: scriptedTransport([]).fetch,
-});
-record('run.recovery-skip', recovered5.runId);
-console.log('  recovery result:', recovered5.status);
-
-console.log('\n[5d] read-only follow-up with rejected write');
+console.log('\n[5d] ordinary read-only follow-up (actual write denial is a separate fixture)');
 // A write attempt is rejected because authorization only allows read
 const readonlyResult = await runReadTask({
   workspace, dataRoot,
@@ -475,7 +381,19 @@ console.log('  state:', decision3.state);
 
 const suppressions = listImproveSuppressions(dataRoot);
 console.log('  suppression count:', suppressions.length);
-if (suppressions.length > 0) record('improve.suppression', suppressions[0].id);
+const suppressed = suppressions.find(item => item.mode === 'do-not-suggest');
+assert.ok(suppressed);record('improve.suppression', suppressed.id);
+
+// A real frozen submission batch: admitted by v1, cancelled before its group.
+// This is separate from a queued improve analysis request.
+const cancelled = AbortSignal.abort('offline fixture: stop before first group');
+const frozenDecision = await submitImproveDecision({dataRoot,signal:cancelled,decision:{
+ id:'improve-decision-frozen-1',reportId:savedReport.report.id,reportRevision:savedReport.report.revision,
+ selections:[{candidateId:candidate1.id,candidateRevision:candidate1.revision,target:candidate1.target,mode:'validate-only',steps:candidate1.steps}],
+ groups:[{id:'frozen-fix-math',candidateIds:[candidate1.id],changes:[{targetId:'project',path:'math.mjs',content:'export const add = (a, b) => a + b;\n'}],checks:[{kind:'regression',program:checkProgram,timeoutMs:30000}]}],
+ directory:join(realpathSync(tmpRoot),'frozen-batch-dir'),limits:{deadline:new Date(Date.now()+120000).toISOString(),maxChecks:1,maxRequests:0,maxTokens:0}
+}});
+assert.equal(frozenDecision.state,'frozen');record('improve.decision-frozen','improve-decision-frozen-1');
 
 // Decision 4: execute-declared-scope on candidate-1 (writes back; done last so baseline drift doesn't affect earlier decisions)
 console.log('\n[6d] decision: execute candidate-1 → write back math.mjs');
@@ -565,7 +483,7 @@ const evalPlan = await prepareEval({
   id: 'fixture-eval-plan-1',
   purpose: 'v1 fixture eval plan with USD price and absolute delta comparison',
   mode: 'offline',
-  installation: miniInstallDir,
+  installation: linuxRuntime,
   price: usdPrice,
   budget: evalBudget,
   cases: [representativeCases[0]],
@@ -579,40 +497,45 @@ const evalPlan = await prepareEval({
     trialBudget: { maxRequests: 4, maxTokens: 1024 },
     protections: [{ id: 'baseline-task-pass', cases: ['local-fix'], kind: 'hard', check: 'task', basis: 'Baseline task must pass to confirm the comparison is valid' }],
     sides: {
-      // Use a minimal install dir so captureFiles doesn't hash 12k+ node_module files.
-      // The minimal dir has eval-environment.json and stub dist files; offline trials
-      // use pre-scripted 'pass' scenarios and never actually run the container.
-      baseline: { installation: miniInstallDir, instructions: '' },
-      candidate: { installation: miniInstallDir, instructions: '' },
+      baseline: { installation: linuxRuntime, instructions: '' },
+      candidate: { installation: linuxRuntime, instructions: '' },
     },
   },
 });
 record('eval.plan', 'fixture-eval-plan-1');
 console.log('  plan mode:', evalPlan.plan.mode, '– price currency:', evalPlan.plan.price.currency);
 
-// Write a trial-started fact (so the plan has actual trial evidence)
-const ev8 = new Evidence(dataRoot, 'fixture-eval-plan-1');
-const trialId = evalPlan.plan.trials[0]?.id;
-appendFact(ev8, 'eval.trial-started', { trialId, startedAt: new Date().toISOString() });
-ev8.close();
-record('eval.trial', trialId);
-console.log('  first trial id:', trialId);
+assert.equal(evalPlan.plan.runtime.id, frozen.linuxRuntimeIdentity, 'Verify frozen Linux runtime content and file modes before any dispatch');
+const evaluated = await runEval({dataRoot,id:evalPlan.plan.id,directory:join(realpathSync(tmpRoot),'eval-trials')});
+console.log('  eval counts:',JSON.stringify(evaluated.counts));
+for(const trial of evaluated.trials)console.log('  trial:',trial.id,trial.outcome.status,trial.grade?.judgment,trial.outcome.reason);
+assert.equal(evaluated.counts.started,2,'Both actual trials must dispatch');
+assert.equal(evaluated.counts.completed,2,'Both actual offline runtime trials must complete');
+assert.equal(evaluated.counts.gradable,2,'Both actual trials must be graded');
+identity.linuxRuntimeIdentity=evalPlan.plan.runtime.id;
+identity.unavailable['readonly-write-denial'] = 'Provided by the separately preserved v1-readonly-denial fixture, generated through the same frozen runtime.';
 
 // ── copy to output directory ───────────────────────────────────────────────
 
 console.log('\nCopying fixture to', outputDir, '...');
-await mkdir(outputDir, { recursive: true });
+assert.deepEqual(sorted(inventory(installDir)), expectedInstallation, 'Generation must leave v1 installation unchanged');
+assert.deepEqual(inventory(linuxRuntime), linuxInventory, 'Generation must leave frozen Linux runtime unchanged');
+await mkdir(outputDir);
 await cp(dataRoot, join(outputDir, 'data'), { recursive: true });
 await cp(workspace, join(outputDir, 'workspace'), { recursive: true });
 
 // Write the identity manifest
 identity.generatedBy = 'f26ae8f';
 identity.generatedAt = new Date().toISOString();
-identity.note = 'All records written by the v1 build at f26ae8f using offline transport. No paid model calls.';
+identity.note = 'All records written through the verified f26ae8f runtime public entry points, with offline transport and the public fault seam. No direct Evidence append, durable mutation, provider request or paid call. Unavailable scenarios are explicit.';
+const files=inventory(outputDir);identity.size={files:files.length,bytes:files.reduce((n,file)=>n+statSync(join(outputDir,file.path)).size,0),scope:'data and workspace files; metadata and README excluded'};
 await writeFile(
   join(outputDir, 'fixture-identity.json'),
   JSON.stringify(identity, null, 2) + '\n'
 );
+
+const rows=Object.entries(identity.names).map(([name,id])=>`| ${name} | ${id} |`).join('\n');
+await writeFile(join(outputDir,'README.md'),`# 首版 runtime 记录夹具\n\n来源：${frozen.candidate}，冻结安装清单逐文件核验。所有记录由首版公开 runtime 入口写出，transport 为离线合成输入。真实 provider、原生 Terminal、日用接受均 NOT_RUN。\n\n生成：\n\n\`\`\`sh\nnode scripts/fixtures/generate-v1-records.mjs NEW_OUTPUT FROZEN_CANDIDATE\n\`\`\`\n\nNEW_OUTPUT 必须不存在。生成过程不修改原夹具、冻结安装；独立临时项目和数据根路径见记录。工具结果故障使用公开 fault 接缝：真实 write 已发生、结果记录失败，经首版恢复接口显式 skip，不制造 durable 状态。improve.decision-frozen 是已受理但首组前取消的提交批次，与 frozen-improve 排队分析不同。\n\n数据/工作区体积：${identity.size.bytes} bytes，${identity.size.files} files（不含此说明和身份清单）。\n\n| 场景身份 | 完整 ID |\n|---|---|\n${rows}\n\n缺口：\n${Object.entries(identity.unavailable).map(([name,reason])=>`- ${name}: ${reason}`).join('\n')}\n`);
 
 console.log('\nFixture written to', outputDir);
 console.log('Identity:', JSON.stringify(identity.names, null, 2));

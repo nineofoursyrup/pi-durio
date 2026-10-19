@@ -1,42 +1,42 @@
 132x38 truecolor
-00| 指标 · 本机实测                                                                                                                          |
-   0-0 -/bg.base ; 1-2 fg.primary/bg.base/b ; 3-5 fg.faint/bg.base/b ; 6-125 fg.label/bg.base/b ; 126-131 -/-
-01| ◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api · f26ae8f · 样本 10（筛除 3）    只读 · 不调用模型 · 不重记费用                       |
-   0-2 ac.model/bg.base ; 3-9 fg.primary/bg.base/b ; 10-109 fg.faint/bg.base/b ; 110-131 -/-
+00| 指标 · 本机实测                                                                                                                    |
+   0-0 -/bg.base ; 1-4 fg.primary/bg.base/b ; 5-7 fg.faint/bg.base ; 8-15 fg.label/bg.base ; 16-131 -/bg.base
+01| ◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api · f26ae8f · 样本 10（筛除 3）    只读 · 不调用模型 · 不重记费用 |
+   0-2 ac.model/bg.base ; 3-7 fg.primary/bg.base/b ; 8-9 -/bg.base ; 10-96 fg.faint/bg.base ; 97-100 -/bg.base ; 101-130 fg.faint/bg.base ; 131-131 -/bg.base
 02|                                                                                                                                    |
    0-131 -/-
-03|  指标              值                口径                                                          覆盖                                   |
-   0-124 fg.faint/bg.base ; 125-131 -/-
-04|  任务验收          80.0%             成功 S/G = 4/5 · 完成 C/N = 6/10 = 60%                        ██████████ G/N 50%                      |
-   0-1 -/bg.zebra ; 2-15 fg.primary/bg.zebra ; 16-33 ac.ok/bg.zebra/b ; 34-91 fg.body/bg.zebra/b ; 92-96 ac.info/bg.zebra/b ; 97-101 line.track/bg.zebra/b ; 102-123 fg.muted/bg.zebra/b ; 124-131 -/-
-05|  成本              ≈ ¥20.00 /成功    样本累计 ≈ ¥80.00 ÷ S=4 · 含失败、取消、重试与自动压缩        估算 · 非账单                                              |
-   0-1 -/bg.base ; 2-17 fg.primary/bg.base ; 18-25 fg.primary/bg.base/b ; 26-33 fg.faint/bg.base/b ; 34-77 fg.body/bg.base/b ; 78-104 fg.muted/bg.base/b ; 105-131 -/-
-06|  双时钟            12m / 24h         均值 · 队列 2m · 用户等待 3m · 活跃 7m                        有效 6/10 · 5/10                               |
-   0-1 -/bg.zebra ; 2-16 fg.primary/bg.zebra ; 17-34 fg.primary/bg.zebra/b ; 35-86 fg.body/bg.zebra/b ; 87-116 fg.muted/bg.zebra/b ; 117-131 -/-
-07|  人工介入          25.0%             I/Ni = 2/8 · 逻辑范围 [25%, 62.5%] 非置信区间                 ██████████ 62.5% · U=3                       |
-   0-1 -/bg.base ; 2-15 fg.primary/bg.base ; 16-33 ac.warn/bg.base/b ; 34-64 fg.body/bg.base/b ; 65-86 fg.faint/bg.base/b ; 87-92 ac.info/bg.base/b ; 93-96 line.track/bg.base/b ; 97-118 fg.muted/bg.base/b ; 119-131 -/-
-08|  回归              1/3               R/V = 1/3（P=4）· ep-c03e                                     ██████████ V/P 75%                  |
-   0-1 -/bg.zebra ; 2-17 fg.primary/bg.zebra ; 18-35 ac.err/bg.zebra/b ; 36-95 fg.body/bg.zebra/b ; 96-103 ac.info/bg.zebra/b ; 104-105 line.track/bg.zebra/b ; 106-127 fg.muted/bg.zebra/b ; 128-131 -/-
-09|  返工              1/3               Rr/Nr = 1/3 · 未成熟阳性 1 另列                               ██████████ 66.7% · Ur=1                  |
-   0-1 -/bg.base ; 2-17 fg.primary/bg.base ; 18-35 ac.err/bg.base/b ; 36-46 fg.body/bg.base/b ; 47-90 fg.muted/bg.base/b ; 91-97 ac.info/bg.base/b ; 98-100 line.track/bg.base/b ; 101-122 fg.muted/bg.base/b ; 123-131 -/-
-10|  运行故障          25.0%             F/B = 2/8 · 完整率 unknown · 范围 [25%, 37.5%]                ██████████ 87.5% · Uf=1                  |
-   0-1 -/bg.zebra ; 2-15 fg.primary/bg.zebra ; 16-33 ac.err/bg.zebra/b ; 34-49 fg.body/bg.zebra/b ; 50-56 ac.warn/bg.zebra/b ; 57-90 fg.body/bg.zebra/b ; 91-99 ac.info/bg.zebra/b ; 100-100 line.track/bg.zebra/b ; 101-122 fg.muted/bg.zebra/b ; 123-131 -/-
+03|  指标              值                口径                                                          覆盖                            |
+   0-103 fg.faint/bg.base ; 104-131 -/bg.base
+04|  任务验收          80.0%             成功 S/G = 4/5 · 完成 C/N = 6/10 = 60%                        ██████████ G/N 50%              |
+   0-1 -/bg.zebra ; 2-9 fg.primary/bg.zebra ; 10-19 -/bg.zebra ; 20-24 ac.ok/bg.zebra/b ; 25-37 -/bg.zebra ; 38-75 fg.body/bg.zebra ; 76-99 -/bg.zebra ; 100-104 ac.info/bg.zebra ; 105-109 line.track/bg.zebra ; 110-117 fg.muted/bg.zebra ; 118-131 -/bg.zebra
+05|  成本              ≈ ¥20.00 /成功    样本累计 ≈ ¥80.00 ÷ S=4 · 含失败、取消、重试与自动压缩        估算 · 非账单                   |
+   0-1 -/bg.base ; 2-5 fg.primary/bg.base ; 6-19 -/bg.base ; 20-27 fg.primary/bg.base/b ; 28-33 fg.faint/bg.base ; 34-37 -/bg.base ; 38-91 fg.body/bg.base ; 92-99 -/bg.base ; 100-112 fg.muted/bg.base ; 113-131 -/bg.base
+06|  双时钟            12m / 24h         均值 · 队列 2m · 用户等待 3m · 活跃 7m                        有效 6/10 · 5/10                |
+   0-1 -/bg.zebra ; 2-7 fg.primary/bg.zebra ; 8-19 -/bg.zebra ; 20-28 fg.primary/bg.zebra/b ; 29-37 -/bg.zebra ; 38-75 fg.body/bg.zebra ; 76-99 -/bg.zebra ; 100-115 fg.muted/bg.zebra ; 116-131 -/bg.zebra
+07|  人工介入          25.0%             I/Ni = 2/8 · 逻辑范围 [25%, 62.5%] 非置信区间                 ██████████ 62.5% · U=3          |
+   0-1 -/bg.base ; 2-9 fg.primary/bg.base ; 10-19 -/bg.base ; 20-24 ac.warn/bg.base/b ; 25-37 -/bg.base ; 38-72 fg.body/bg.base ; 73-82 fg.faint/bg.base ; 83-99 -/bg.base ; 100-105 ac.info/bg.base ; 106-109 line.track/bg.base ; 110-121 fg.muted/bg.base ; 122-131 -/bg.base
+08|  回归              1/3               R/V = 1/3（P=4）· ep-c03e                                     ██████████ V/P 75%              |
+   0-1 -/bg.zebra ; 2-5 fg.primary/bg.zebra ; 6-19 -/bg.zebra ; 20-22 ac.err/bg.zebra/b ; 23-37 -/bg.zebra ; 38-62 fg.body/bg.zebra ; 63-99 -/bg.zebra ; 100-107 ac.info/bg.zebra ; 108-109 line.track/bg.zebra ; 110-117 fg.muted/bg.zebra ; 118-131 -/bg.zebra
+09|  返工              1/3               Rr/Nr = 1/3 · 未成熟阳性 1 另列                               ██████████ 66.7% · Ur=1         |
+   0-1 -/bg.base ; 2-5 fg.primary/bg.base ; 6-19 -/bg.base ; 20-22 ac.err/bg.base/b ; 23-37 -/bg.base ; 38-48 fg.body/bg.base ; 49-68 fg.muted/bg.base ; 69-99 -/bg.base ; 100-106 ac.info/bg.base ; 107-109 line.track/bg.base ; 110-122 fg.muted/bg.base ; 123-131 -/bg.base
+10|  运行故障          25.0%             F/B = 2/8 · 完整率 unknown · 范围 [25%, 37.5%]                ██████████ 87.5% · Uf=1         |
+   0-1 -/bg.zebra ; 2-9 fg.primary/bg.zebra ; 10-19 -/bg.zebra ; 20-24 ac.err/bg.zebra/b ; 25-37 -/bg.zebra ; 38-56 fg.body/bg.zebra ; 57-63 ac.warn/bg.zebra ; 64-83 fg.body/bg.zebra ; 84-99 -/bg.zebra ; 100-108 ac.info/bg.zebra ; 109-109 line.track/bg.zebra ; 110-122 fg.muted/bg.zebra ; 123-131 -/bg.zebra
 11|                                                                                                                                    |
    0-131 -/-
-12| 期间开销（去重）· 请求发生于 [09-16, 10-16)                                                                                                     |
-   0-118 fg.label/bg.base ; 119-131 -/-
-13|  coding            ████████████████          ≈ ¥80.00 · 412k tok · 任务执行与自动压缩                                                       |
-   0-1 -/bg.base ; 2-19 fg.body/bg.base ; 20-45 ac.brand/bg.base ; 46-64 fg.muted/bg.base ; 65-122 fg.faint/bg.base ; 123-131 -/-
-14|  eval              ████                      ≈ ¥20.00 · 96k tok · 两侧 + 评分                                                          |
-   0-1 -/bg.base ; 2-19 fg.body/bg.base ; 20-45 ac.info/bg.base ; 46-63 fg.muted/bg.base ; 64-127 fg.faint/bg.base ; 128-131 -/-
-15|  improve           ██                        ≈ ¥10.00 · 51k tok · 分析 + 候选制作                                                        |
-   0-1 -/bg.base ; 2-19 fg.body/bg.base ; 20-45 ac.improve/bg.base ; 46-63 fg.muted/bg.base ; 64-125 fg.faint/bg.base ; 126-131 -/-
-16|  维护              █                         ≈ ¥5.00 · 24k tok · 空闲手动 /compact                                                       |
-   0-1 -/bg.base ; 2-17 fg.body/bg.base ; 18-43 fg.faint/bg.base ; 44-60 fg.muted/bg.base ; 61-125 fg.faint/bg.base ; 126-131 -/-
-17|  共同/未归属       ▌                         ≈ ¥3.00 · 14k tok · 不分给具体任务                                                                |
-   0-1 -/bg.base ; 2-14 fg.body/bg.base ; 15-57 fg.muted/bg.base ; 58-119 fg.faint/bg.base ; 120-131 -/-
-18|  合计              ████████████████████████  ≈ ¥118.00 · 597k tok · 去重汇总                                                             |
-   0-1 -/bg.base ; 2-17 fg.primary/bg.base ; 18-43 fg.body/bg.base ; 44-63 fg.muted/bg.base ; 64-125 fg.faint/bg.base ; 126-131 -/-
+12| 期间开销（去重）· 请求发生于 [09-16, 10-16)                                                                                        |
+   0-43 fg.label/bg.base ; 44-131 -/bg.base
+13|  coding            ████████████████          ≈ ¥80.00 · 412k tok · 任务执行与自动压缩                                              |
+   0-1 -/bg.base ; 2-7 fg.body/bg.base ; 8-19 -/bg.base ; 20-35 ac.brand/bg.base ; 36-45 -/bg.base ; 46-64 fg.muted/bg.base ; 65-85 fg.faint/bg.base ; 86-131 -/bg.base
+14|  eval              ████                      ≈ ¥20.00 · 96k tok · 两侧 + 评分                                                      |
+   0-1 -/bg.base ; 2-5 fg.body/bg.base ; 6-19 -/bg.base ; 20-23 ac.info/bg.base ; 24-45 -/bg.base ; 46-63 fg.muted/bg.base ; 64-77 fg.faint/bg.base ; 78-131 -/bg.base
+15|  improve           ██                        ≈ ¥10.00 · 51k tok · 分析 + 候选制作                                                  |
+   0-1 -/bg.base ; 2-8 fg.body/bg.base ; 9-19 -/bg.base ; 20-21 ac.improve/bg.base ; 22-45 -/bg.base ; 46-63 fg.muted/bg.base ; 64-81 fg.faint/bg.base ; 82-131 -/bg.base
+16|  维护              █                         ≈ ¥5.00 · 24k tok · 空闲手动 /compact                                                 |
+   0-1 -/bg.base ; 2-5 fg.body/bg.base ; 6-19 -/bg.base ; 20-20 fg.faint/bg.base ; 21-45 -/bg.base ; 46-62 fg.muted/bg.base ; 63-82 fg.faint/bg.base ; 83-131 -/bg.base
+17|  共同/未归属       ▌                         ≈ ¥3.00 · 14k tok · 不分给具体任务                                                    |
+   0-1 -/bg.base ; 2-12 fg.body/bg.base ; 13-19 -/bg.base ; 20-20 fg.muted/bg.base ; 21-45 -/bg.base ; 46-62 fg.muted/bg.base ; 63-79 fg.faint/bg.base ; 80-131 -/bg.base
+18|  合计              ████████████████████████  ≈ ¥118.00 · 597k tok · 去重汇总                                                       |
+   0-1 -/bg.base ; 2-5 fg.primary/bg.base ; 6-19 -/bg.base ; 20-43 fg.body/bg.base ; 44-45 -/bg.base ; 46-65 fg.muted/bg.base ; 66-76 fg.faint/bg.base ; 77-131 -/bg.base
 19|                                                                                                                                    |
    0-131 -/-
 20|                                                                                                                                    |
@@ -70,8 +70,8 @@
 34|                                                                                                                                    |
    0-131 -/-
 35| ❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                      |
-   0-2 ac.brand/bg.base ; 3-131 fg.body/bg.base
-36| 零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈旧不写成「没有发生」                                                                                  |
-   0-108 fg.label/bg.base ; 109-131 -/-
-37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                                                                                                         |
-   0-121 fg.label/bg.base ; 122-131 -/-
+   0-2 ac.brand/bg.base ; 3-109 fg.body/bg.base ; 110-131 -/bg.base
+36| 零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈旧不写成「没有发生」                                                           |
+   0-72 fg.label/bg.base ; 73-131 -/bg.base
+37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                                                                                               |
+   0-36 fg.label/bg.base ; 37-131 -/bg.base

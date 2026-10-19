@@ -20,11 +20,11 @@ export function improveResultGroups(root:string,report:ImproveReport,decision:Im
   const name=group.candidateIds.map(id=>index.candidate(report.candidates.find(c=>c.id===id)!)).join(' + '),mode=decision.selections.find(s=>group.candidateIds.includes(s.candidateId))!.mode;
   const status=running?'运行中':!result||result.state==='not-run'?busy?'待运行':'未运行':checkState(result.state);
   const checks=result?.result?.checks??[],passed=checks.filter((c:any)=>c.state==='completed').length;
-  const formal=result?.formal,write=formal?.writeback==='written'?`已写回 ${[...new Set((formal.files??[]).map((f:any)=>`${f.root}/${f.path}`))].join('、')}`:formal?.writeback?.includes('unknown')?'写回状态未知 · 需要恢复核对':mode==='validate-only'?'正式目标未写回':'尚未写回';
+  const formal=result?.formal,write=formal?.writeback==='written'?`已写回 ${[...new Set((formal.files??[]).map((f:any)=>`${f.root}/${f.path}`))].join('、')}`:formal?.writeback?.includes('unknown')?'写回状态未知 · 需要恢复核对':mode==='validate-only'?`正式目标未写回${result?.state==='completed'&&result.result?.conclusion?.allChecksPassed&&result.result?.conclusion?.allRequiredBenefitsMet?' · 可在本报告再选执行':''}`:'尚未写回';
   const activation=formal?.activation==='new-default'?'下个任务生效':formal?.activation==='new-process-entry'?'后续显式启动的新进程生效':formal?.state==='completed'?group.candidateIds.map(id=>report.candidates.find(c=>c.id===id)!.activation.timing).join('；'):'';
   const stopped=!busy&&(!result||result.state==='not-run')?'前项停止或失败，剩余项不启动':'';
   const effect=group.candidateIds.some(id=>report.candidates.find(c=>c.id===id)!.objective==='performance')?`效果：${result?.result?.effect??'证据不足'}`:'';
-  return {id:group.id,text:[`${running?'⠹':status==='通过'?'✓':status==='失败'?'✗':'·'} ${name}${group.candidateIds.length>1?' 组合':''} ${mode==='execute-declared-scope'?'执行':MODE_LABEL[mode]} · ${status}`,checks.length?`检查 ${passed}/${checks.length} 通过`:'',write,activation,stopped,effect,result?.reason??'',formal?.reason??''].filter(Boolean).join(' · ')};
+  return {id:group.id,text:[`${running?'⠹':result?.state==='completed'?'✓':result?.state==='failed'?'✗':'·'} ${name}${group.candidateIds.length>1?' 组合':''} ${mode==='execute-declared-scope'?'执行':MODE_LABEL[mode]} · ${status}`,checks.length?`检查 ${passed}/${checks.length} 通过`:'',write,activation,stopped,effect,result?.reason??'',formal?.reason??''].filter(Boolean).join(' · ')};
  });
 }
 export function improveActualCost(root:string,decisionId:string) {

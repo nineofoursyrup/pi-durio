@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,readFileSync,realpathSync,writeFileSync} from 'node:fs';
+import {cpSync,mkdtempSync,mkdirSync,readFileSync,realpathSync,rmSync,symlinkSync,writeFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {Evidence,digest} from '../src/evidence.js';
@@ -37,7 +38,7 @@ test('legacy reports reject every new headless decision without writing history 
 
 test('legacy frozen groups cannot resume even with the current execution version; saved IDs still read idempotently',async()=>{
  const f=legacyFixture(),d=f.decision('validate-only','historical-choice'),e=new Evidence(f.dataRoot,f.report.runId);
- appendFact(e,'improve.decision',{id:d.id,workspace:f.workspace,executionVersion:currentImproveVersion(),requestDigest:decisionDigest(d),decision:d,decisions:[]});
+ appendFact(e,'improve.decision',{id:d.id,workspace:f.workspace,executionVersion:currentImproveVersion(f.dataRoot,f.workspace),requestDigest:decisionDigest(d),decision:d,decisions:[]});
  e.append('improve.batch',{id:d.id,state:'frozen',reason:'historical cancellation before first group'});e.close();
  const state=readImproveDecision(f.dataRoot,d.id),resume={id:d.id,resumeId:'new-resume',decisionSource:state.sourceId,groupIds:['g1']},before=digest(readFileSync(join(f.dataRoot,'host.sqlite')));
  assert.throws(()=>previewImproveResume(f.dataRoot,resume),/IMPROVE_LEGACY_REPORT_READ_ONLY/);
@@ -64,3 +65,20 @@ test('passed first-version validation remains read-only and cannot authorize a f
  await assert.rejects(submitImproveDecision({dataRoot:f.dataRoot,decision:f.decision('execute-declared-scope','after-pass')}),/IMPROVE_LEGACY_REPORT_READ_ONLY/);
  assert.deepEqual(await submitImproveDecision({dataRoot:f.dataRoot,decision:d}),saved);assert.deepEqual(readFileSync(join(f.dataRoot,'host.sqlite')),before);
 });
+
+function isolatedVersionProbe(mode:'mismatched-output'|'updated-build'){
+ const installation=realpathSync(mkdtempSync(join(tmpdir(),'durio-improve-version-')));
+ try{
+  cpSync(new URL('../../dist',import.meta.url),join(installation,'dist'),{recursive:true});cpSync(new URL('../../package.json',import.meta.url),join(installation,'package.json'));
+  symlinkSync(new URL('../../node_modules',import.meta.url),join(installation,'node_modules'),'dir');
+  const script=`import assert from 'node:assert/strict';import{readFileSync,writeFileSync}from'node:fs';import{createHash}from'node:crypto';import{currentImproveVersion}from'./dist/src/improve-decisions.js';
+const before=currentImproveVersion('./data','.');
+const path='dist/execution/isolation/restrict.py',original=readFileSync(path),changed=Buffer.concat([original,Buffer.from('\\n# changed after the process cached its execution version\\n')]);
+writeFileSync(path,changed);
+if(${JSON.stringify(mode)}==='mismatched-output')assert.throws(()=>currentImproveVersion('./data','.'),/BUILD.*(?:DRIFT|MISMATCH)|EXECUTION_VERSION_DRIFT/,'every action boundary must verify executable bytes against its manifest');
+else{const manifestPath='dist/execution/source-build.json',manifest=JSON.parse(readFileSync(manifestPath));const file=manifest.outputs.find(file=>file.path===path);file.bytes=changed.length;file.sha256=createHash('sha256').update(changed).digest('hex');writeFileSync(manifestPath,JSON.stringify(manifest));assert.notEqual(currentImproveVersion('./data','.'),before,'a valid changed build must not retain the warmed execution identity');}`;
+  const result=spawnSync(process.execPath,['--input-type=module','-e',script],{cwd:installation,encoding:'utf8'});assert.equal(result.status,0,result.stderr||result.stdout);
+ }finally{rmSync(installation,{recursive:true,force:true});}
+}
+test('improve action boundaries reject output byte drift after the execution version cache is warm',()=>isolatedVersionProbe('mismatched-output'));
+test('improve action boundaries refresh the identity when matching manifest and output bytes change',()=>isolatedVersionProbe('updated-build'));

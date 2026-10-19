@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, mkdirSync, existsSync, cpSync, rmSync, realpathSync, readFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, existsSync, cpSync, rmSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fixtureDir as v1FixtureDir, dataRoot as v1DataRoot, names as v1Names } from './v1-runtime-fixture.js';
 import { DatabaseSync } from 'node:sqlite';
 import { stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui, type TuiOptions } from '../src/tui/app.js';
@@ -15,7 +15,7 @@ import { readDisplayIndex } from '../src/display-number.js';
 import { readRun } from '../src/runtime.js';
 import { readSessionChains } from '../src/session-chain.js';
 import { readRunRecords } from '../src/query.js';
-import { CONTINUE_TAIL_UNFINISHED, COMPACT_VERSION_CHANGED, VERSION_CHANGED_HINT, continueQueued, readContinuation, runVersionChanged } from '../src/continuation.js';
+import { COMPACT_VERSION_CHANGED, VERSION_CHANGED_HINT, continueQueued, readContinuation, runVersionChanged } from '../src/continuation.js';
 import { recordedExecutionVersion, currentExecutionVersion, versionChanged } from '../src/execution-version.js';
 
 class TestTerminal implements Terminal {
@@ -67,7 +67,8 @@ test('resume: a failed tail is shown with the reason and Enter opens a new sessi
   assert.equal(first.status, 'failed');
   const t = open({ ...f, resume: first.sessionId, coding: false });
   try {
-    await until(() => t.screen().includes(CONTINUE_TAIL_UNFINISHED), 'reason line');
+    await until(() => t.screen().includes('该会话不能接续'), 'reason line');
+    assert.ok(t.screen().split('\n').some(line => line.trim() === '该会话不能接续，新任务将开启新会话'), t.screen());
     t.key('Fresh task'); t.key('\r');
     await until(() => readSessionChains(f.dataRoot).list().items.length === 2 && (t.app as any).phase === 'idle', 'new session');
     const [latest] = readSessionChains(f.dataRoot).list().items;
@@ -99,6 +100,14 @@ test('resume: a tail executed by another process shows the lock holder and canno
     await until(() => t.screen().includes('被占用'), 'lock probe');
     t.key('Must not submit'); t.key('\r');
     assert.match(t.screen(), /不能提交/);assert.equal(t.transport.calls.length, 0);
+    controller.abort();await running;await tick();
+    t.key('\x15');t.key('Submit after owner released');t.key('\r');
+    await until(()=>t.screen().includes('该会话不能接续，新任务将开启新会话')&&t.screen().includes('现在可以提交'),'released lock state is visible');
+    assert.equal(t.transport.calls.length,0);assert.equal(readSessionChains(f.dataRoot).list().items.length,1);
+    assert.equal((t.app as any).editor.getExpandedText(),'Submit after owner released');
+    assert.ok(t.screen().split('\n').some(line => line.trim() === '该会话不能接续，新任务将开启新会话'), t.screen());
+    t.key('\r');
+    await until(()=>t.transport.calls.length>0&&(t.app as any).phase==='idle','second Enter explicitly opens the new session');
   } finally { await t.app.exit(); controller.abort(); await running; }
   // A completed coding session: resume and show stay open while another writer takes the workspace lock.
   const done = await runCodingTask({ ...f, input: 'Completed coding task', mode: 'offline', transport: demoTransport().fetch });
@@ -145,9 +154,8 @@ test('continuation is blocked while the session has an unresolved queue item', a
 });
 
 test('v1 records: a completed v1 session continues under the redesign build with the version hint; /compact waits for a new task', async t => {
-  const fixture = fileURLToPath(new URL('../../test/fixtures/v1-records', import.meta.url));
-  const names = JSON.parse(readFileSync(join(fixture, 'fixture-identity.json'), 'utf8')).names as Record<string, string>;
-  const source = join(fixture, 'data'), sessionId = names['session.read'], tailRunId = names['run.read'];
+  const fixture = v1FixtureDir, names = v1Names, source = v1DataRoot;
+  const sessionId = names['session.read'], tailRunId = names['run.read'];
   const workspace = readSessionChains(source).session(sessionId)!.workspace!;
   let created = false;
   if (!existsSync(workspace)) { try { mkdirSync(workspace, { recursive: true }); cpSync(join(fixture, 'workspace'), workspace, { recursive: true }); created = true; } catch { t.skip('recorded v1 workspace path cannot be created on this machine'); return; } }
@@ -194,4 +202,63 @@ test('CLI: tui is removed; show without --format outside a terminal fails fast; 
   const resumeRun = cli('resume', run);assert.notEqual(resumeRun.status, 0);assert.match(resumeRun.stderr, new RegExp(`is a run of session ${session}`));
   const authorization = cli('resume', session, '--read-only');assert.notEqual(authorization.status, 0);assert.match(authorization.stderr, /--coding\/--read-only are not accepted/);
   const resumed = cli('resume', session);assert.equal(resumed.status, 1);assert.match(resumed.stderr, /TUI_REQUIRES_TERMINAL/);
+});
+
+
+test('history continuation keeps tail authorization local and a fresh session restores startup read-only authorization', async () => {
+  const f = base(), first = await runCodingTask({ ...f, input: 'Coding source', mode: 'offline', transport: demoTransport().fetch });
+  let failing = true;
+  const t = open({ ...f, coding: false, transport: async (...args) => failing ? new Response('down', { status: 500 }) : demoTransport().fetch(...args) });
+  try {
+    t.key(`/history ${readDisplayIndex(f.dataRoot).label('session', first.sessionId)}`); t.key('\r'); t.key('c');
+    await until(() => !t.screen().includes('◆ history'), 'history continuation selected');
+    t.key('Fails after continuation'); t.key('\r');
+    await until(() => readSessionChains(f.dataRoot).session(first.sessionId)?.tasks === 2 && (t.app as any).phase === 'idle', 'failed coding continuation');
+    const continued = readSessionChains(f.dataRoot).session(first.sessionId)!.tailRunId;
+    const authorization = (runId: string) => JSON.parse(readObject(f.dataRoot, readRunRecords(f.dataRoot, runId, { kinds: ['task.accepted'], limit: 1 }).records[0].ref).toString()).authorization.tools;
+    assert.deepEqual(authorization(continued), ['read', 'write', 'edit', 'bash']);
+    assert.match(t.screen().split('\n')[0], /只读/);
+    assert.match(t.screen(), /描述要查看或分析的内容/);
+    assert.doesNotMatch(t.screen(), /描述要完成的修改/);
+    assert.ok(t.screen().split('\n').some(line => line.trim() === '不能接续 · 链尾任务未完成 · 新任务将开启新会话'), t.screen());
+    assert.doesNotMatch(t.screen(), /该会话不能接续/);
+    failing = false; t.key('Fresh read-only task'); t.key('\r');
+    await until(() => readSessionChains(f.dataRoot).list().items.length === 2 && t.screen().includes('✓ 完成'), 'fresh read-only session');
+    const fresh = readSessionChains(f.dataRoot).list().items.find(session => session.id !== first.sessionId)!;
+    assert.deepEqual(authorization(fresh.tailRunId), ['read']);
+  } finally { await t.app.exit(); }
+});
+
+test('idle Enter rechecks a tail interrupted by another process and opens recovery while preserving the draft', async () => {
+  const f = base(), first = await runReadTask({ ...f, input: 'Original tail', mode: 'offline', transport: demoTransport().fetch });
+  const t = open({ ...f, resume: first.sessionId, coding: false });
+  try {
+    await until(() => t.screen().includes('✓ 完成'));
+    const controller = new AbortController();
+    await runReadTask({ ...f, input: 'External continuation', contextRunId: first.runId, mode: 'offline', signal: controller.signal, cancellation: 'exit', transport: interrupted(controller) });
+    t.key('Preserved draft'); t.key('\r');
+    await until(() => t.screen().includes('恢复核对 ·'), 'external tail recovery');
+    assert.equal(t.transport.calls.length, 0);
+    assert.equal(readSessionChains(f.dataRoot).list().items.length, 1);
+  } finally { await t.app.exit(); }
+});
+
+
+test('a completed occupied tail reloads and keeps the draft until a second Enter explicitly continues', async () => {
+  const f = base(); let release!: () => void, entered!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; }), started = new Promise<void>(resolve => { entered = resolve; });
+  const transport = demoTransport();
+  const running = runCodingTask({ ...f, input: 'Held until completion', mode: 'offline', transport: async (...args) => { entered(); await gate; return transport.fetch(...args); } });
+  await started;
+  const session = readSessionChains(f.dataRoot).list().items[0], t = open({ ...f, resume: session.id, coding: true });
+  try {
+    await until(() => t.screen().includes('被占用'));
+    release(); assert.equal((await running).status, 'completed');
+    t.key('Continue only after confirmation'); t.key('\r');
+    await until(() => t.screen().includes('现在可以提交'), 'released completed tail reloaded');
+    assert.equal(t.transport.calls.length, 0); assert.equal(readSessionChains(f.dataRoot).session(session.id)!.tasks, 1);
+    assert.equal((t.app as any).editor.getExpandedText(), 'Continue only after confirmation');
+    t.key('\r');
+    await until(() => readSessionChains(f.dataRoot).session(session.id)!.tasks === 2 && (t.app as any).phase === 'idle');
+  } finally { release(); await running; await t.app.exit(); }
 });

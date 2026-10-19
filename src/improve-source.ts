@@ -116,15 +116,3 @@ export function unregisterImproveSource(dataRoot:string,registrationId:string):v
  if(!store.registrations.some(r=>r.id===registrationId))throw Error('IMPROVE_SOURCE_REGISTRATION_NOT_FOUND');
  if(!(store.unregistered??[]).includes(registrationId)){store.unregistered=[...(store.unregistered??[]),registrationId];writeRegistrationStore(dataRoot,store);}
 }
-
-/** Verify that registered eval-asset sources have not changed since registration.
- * Called at analysis start; throws with a descriptive error if content has drifted. */
-export function verifyRegisteredSourceFingerprints(dataRoot:string,workspace:string):void{
- for(const reg of listRegisteredSources(dataRoot,workspace)){
-  if(reg.kind!=='eval-asset')continue;
-  for(const fp of reg.fingerprints){
-   let current:Buffer;try{current=sourceBytes(reg.root,fp.path);}catch(error){throw Error(`IMPROVE_REGISTERED_SOURCE_UNAVAILABLE: ${reg.root}/${fp.path}: ${String(error)}`);}
-   if(current.length!==fp.bytes||digest(current)!==fp.sha256)throw Error(`IMPROVE_REGISTERED_SOURCE_CHANGED: ${reg.root}/${fp.path} changed since registration ${reg.id}`);
-  }
- }
-}

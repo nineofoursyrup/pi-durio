@@ -8,6 +8,8 @@ import { Evidence } from '../src/evidence.js';
 import { RunView, sumUsage } from '../src/tui/run-view.js';
 import { formatCostTotals } from '../src/cost-estimate.js';
 import { readRunRecords } from '../src/query.js';
+import { readTrace } from '../src/trace.js';
+import { RawContent } from '../src/trace-raw.js';
 import { narrowing, statusParts, toolLines, headerLine, statusLine, type HeaderState } from '../src/tui/session-screen.js';
 import { overrideColorTierForTest } from '../src/tui/theme.js';
 import { captureSnapshot, type SnapshotGrid } from '../src/tui/snapshot.js';
@@ -76,7 +78,7 @@ test('run usage observes sourced estimate revisions and provider usage details a
 
 test('第 M 轮 counts task requests only: a compaction request is not a round, a retry is another round flagged as 重试', async () => {
   const r = records();
-  const intent = (attemptId: string, compaction = false) => r.append('model.intent', compaction ? { attemptId, durableTaskId: null, durableTaskSource: 'unknown', ordinal: 0, purpose: 'compaction' } : { attemptId, durableTaskId: 9, ordinal: 0, purpose: 'generation' });
+  const intent = (attemptId: string, compaction = false) => r.append('model.intent', compaction ? { purpose: 'compaction', durableTaskSource: 'unknown', ordinal: 0, durableTaskId: null, attemptId } : { attemptId, durableTaskId: 9, ordinal: 0, purpose: 'generation' });
   const response = (attemptId: string, completeness: 'complete' | 'partial') => r.append('model.response', { attemptId, purpose: 'generation', message: { content: [] }, completeness });
   r.append('run.started', { taskId: 't' });
   intent('a1'); response('a1', 'complete');
@@ -101,7 +103,7 @@ test('第 M 轮 counts task requests only: a compaction request is not a round, 
   r.close();
 });
 
-test('tool rows summarize only held facts: read lines, edit/write +N −M, bash exit N · M 行; failed output stays visible while folded', () => {
+test('tool rows summarize only held facts: read lines, edit/write +N −M, bash exit N · M 行; failed output stays visible while folded', async () => {
   const r = records(), at = (id: string) => ({ attemptId: id, durableTaskId: 1 });
   const tool = (id: string, name: string, args: unknown, result: unknown, error?: string, extra?: () => void) => {
     r.append('tool.intent', { ...at(id), tool: name, args });
@@ -114,14 +116,16 @@ test('tool rows summarize only held facts: read lines, edit/write +N −M, bash 
   tool('e1', 'edit', { path: 'src/cart/total.ts', edits: [] }, { content: [{ type: 'text', text: 'ok' }], details: { diff: ' 38 export function cartTotal() {\n-39   const sum = 1\n+39   const cents = 1\n+40   const off = 2\n 41 }' } });
   tool('w1', 'write', { path: 'notes.md', content: 'x' }, { content: [{ type: 'text', text: 'Successfully wrote to notes.md' }] }, undefined,
     () => r.append('file.write-intent', { toolAttempt: at('w1'), acquired: { path: 'notes.md', previous: Buffer.from('old 1\nold 2\n').toString('base64'), content: Buffer.from('new 1\nnew 2\nnew 3\n').toString('base64'), encoding: 'base64' } }));
-  const output = Array.from({ length: 20 }, (_, i) => `out ${i + 1}`).join('\n') + '\n';
-  tool('b1', 'bash', { command: 'npm test -- cart' }, undefined, 'Command exited with code 1', () => {
+  const output = Array.from({ length: 20 }, (_, i) => `out ${i + 1}${i === 19 ? '\x07' : ''}`).join('\n') + '\n';
+  tool('b1', 'bash', { command: 'npm test -- cart' }, undefined, 'localized shell \x07failure', () => {
+    r.append('shell.started', { toolAttempt: at('b1'), acquired: { command: 'npm test -- cart' } });
+    r.append('shell.completed', { toolAttempt: at('b1'), acquired: { exitCode: 1 } });
     // Output chunks are byte slices; one splits a line.
     const bytes = Buffer.from(output);
-    r.append('tool.output', { toolAttempt: at('b1'), acquired: { index: 0, bytes: bytes.subarray(0, 37).toString('base64') } });
-    r.append('tool.output', { toolAttempt: at('b1'), acquired: { index: 1, bytes: bytes.subarray(37).toString('base64') } });
+    r.append('tool.output', { toolAttempt: at('b1'), acquired: { stream: 'stdout', index: 0, bytes: bytes.subarray(0, 37).toString('base64') } });
+    r.append('tool.output', { toolAttempt: at('b1'), acquired: { stream: 'stdout', index: 1, bytes: bytes.subarray(37).toString('base64') } });
   });
-  tool('b2', 'bash', { command: 'true' }, { content: [] });
+  tool('b2', 'bash', { command: 'true' }, { content: [] }, undefined, () => r.append('shell.completed', { toolAttempt: at('b2'), acquired: { exitCode: 0 } }));
   const view = new RunView(r.root, r.runId);
   {
     const window = readRunRecords(r.root, r.runId, { limit: 50 }).records;
@@ -129,15 +133,30 @@ test('tool rows summarize only held facts: read lines, edit/write +N −M, bash 
     assert.deepEqual(tools.map(entry => entry.kind === 'tool' && `${entry.tool} ${entry.args} ${entry.summary}`), [
       'read src/cart/total.ts 142 行', 'read big.ts 第 40–49 行', 'edit src/cart/total.ts +2 −1', 'write notes.md +3 −2', 'bash npm test -- cart exit 1 · 20 行', 'bash true exit 0 · 0 行']);
     const bash = tools[4] as Extract<typeof tools[number], { kind: 'tool' }>;
+    const trace = readTrace(r.root, r.runId).spans.find(span => span.key === 'b1')!;
+    const original = new RawContent(r.root, trace.raws.find(raw => raw.label === 'stdout')!).page(0);
+    assert.equal(original.text, output, '2a paginates only the captured bash output');
+    assert.equal(original.text.trimEnd().split('\n').length, 20);
+    assert.equal(new RawContent(r.root, trace.raws.find(raw => raw.label === '错误')!).page(0).text, 'localized shell \x07failure');
     const folded = toolLines(bash, 80, false, Date.now(), 0);
     assert.equal(plain(folded.row).trimEnd(), '✗ bash npm test -- cart exit 1 · 20 行');
-    assert.deepEqual(folded.body.map(line => plain(line).trim()), ['out 15', 'out 16', 'out 17', 'out 18', 'out 19', 'out 20']);
+    assert.deepEqual(folded.body.map(line => plain(line).trim()), ['out 15', 'out 16', 'out 17', 'out 18', 'out 19', 'out 20\x07', 'localized shell failure']);
     assert.equal(plain(folded.paging!).trim(), '显示 6/20 行 ⋯ 截断 · 原文完整保存 · 分页查看 14 行');
+    assert.equal(captureSnapshot([folded.body.at(-1)!], 80, 1, 'truecolor').rows[0][4].fg, 'ac.err', 'the separate recorded error keeps the failure style');
+    const expanded = toolLines(bash, 80, true, Date.now(), 0);
+    assert.equal(expanded.body.length, 21); assert.equal(expanded.paging, undefined);
     const ok = toolLines(tools[0] as any, 80, false, Date.now(), 0);
     assert.equal(ok.body.length, 0, 'successful output is folded by default'); assert.equal(ok.paging, undefined);
     const edit = toolLines(tools[2] as any, 80, true, Date.now(), 0);
     assert.deepEqual(edit.body.map(line => plain(line).trim()), ['38 export function cartTotal() {', '−39   const sum = 1', '+39   const cents = 1', '+40   const off = 2', '41 }']);
-    r.close();
+    const terminal = new TestTerminal(), app = new ReadOnlyTui({ workspace: r.root, dataRoot: r.root, draftRoot: join(r.root, 'drafts'), mode: 'offline', show: { run: r.runId }, terminal, widthCalibration: false });
+    const screen = () => app.screen().map(plain).join('\n');
+    try {
+      app.start(); terminal.input('\x1b'); // Return from the initial history view to the 1b session screen.
+      await until(() => screen().includes('out 20'), 'failed bash on 1b');
+      assert.match(screen(), /^ {4}out 20� *$/m, '1b replaces control characters in tool output');
+      assert.match(screen(), /^ {4}localized shell �failure *$/m, '1b applies the same replacement to the recorded error');
+    } finally { await app.exit(); r.close(); }
   }
 });
 
@@ -179,7 +198,9 @@ function assertGolden(grid: SnapshotGrid, name: string) {
   assert.equal(text, readFileSync(path, 'utf8'), `snapshot ${name} changed; delete ${path} to accept`);
 }
 
-test('1b running and idle at 132×38 (golden); 80×24 and 40×12 never overflow', async () => {
+test('1b running and idle at 132×38 (golden); 80×24 and 40×12 never overflow', async t => {
+  // Fix the golden's tariff period; real timers and paid/native acceptance remain separate.
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-19T05:00:00Z') });
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'durio-1b-golden-'))), workspace = join(root, 'project');
   mkdirSync(workspace); writeFileSync(join(workspace, 'total.ts'), 'export const total = 1;\nexport const tax = 0;\n');
   writeFileSync(join(workspace, 'hold.cjs'), "const fs=require('fs');const t=setInterval(()=>{if(fs.existsSync('release')){clearInterval(t);console.log('released');}},20);");

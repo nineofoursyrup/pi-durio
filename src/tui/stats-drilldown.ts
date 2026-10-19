@@ -3,7 +3,7 @@ import { decode, resolveEvidence } from '../history.js';
 import { readDisplayIndex, readRunOrdinals, type DisplayKind } from '../display-number.js';
 import { type CostRequest } from '../metrics/costs.js';
 import { type PlanSource } from '../eval/overview.js';
-import { type StatsSnapshot, type SpendKind, metricRows, spendRows } from './stats.js';
+import { type StatsSnapshot, type SpendKind, metricRows, spendRows, spendKind } from './stats.js';
 import { readSessionChains } from '../session-chain.js';
 
 export type StatsRow = 'acceptance' | 'cost' | 'clocks' | 'intervention' | 'regression' | 'rework' | 'faults' | SpendKind | 'total';
@@ -27,7 +27,6 @@ export function statsRows(stats: StatsSnapshot): { key: StatsRow; label: string 
   return [...metricRows(stats.figures).map((row, i) => ({ key: METRICS[i], label: row.label })), ...spendRows(stats.figures).map(row => ({ key: row.kind, label: row.label }))];
 }
 const unique = (ids: (string | null | undefined)[]) => [...new Set(ids.filter((id): id is string => typeof id === 'string' && !!id))];
-const requestKind = (kind: string): SpendKind => ['coding', 'eval', 'improve', 'maintenance'].includes(kind) ? kind as SpendKind : 'unassigned';
 
 export function statsMembers(stats: StatsSnapshot, row: StatsRow): StatsMember[] {
   const { task, operations: ops, feedback } = stats.reports, root = stats.root;
@@ -69,7 +68,7 @@ export function statsMembers(stats: StatsSnapshot, row: StatsRow): StatsMember[]
 
   if (row === 'cost' || !METRICS.includes(row)) {
     const ids = new Set(row === 'cost' ? ops.costs.sample.requestIds : ops.costs.period.requestIds);
-    const requests = ops.costs.requests.filter(r => ids.has(r.id) && (row === 'cost' || row === 'total' || requestKind(r.kind) === row));
+    const requests = ops.costs.requests.filter(r => ids.has(r.id) && (row === 'cost' || row === 'total' || spendKind(r.kind) === row));
     const ordinals = new Map<string, ReturnType<typeof readRunOrdinals>>();
     const requestLabel = (r: CostRequest) => {
       const source = stats.planSources.find(s => s.root === r.dataRoot && s.id === r.runId);
@@ -146,6 +145,9 @@ export function statsExport(stats: StatsSnapshot) {
     schema: 'pi-durio-stats-v1', scope: stats.scope,
     task: stats.reports.task, operations: stats.reports.operations, feedback: stats.reports.feedback,
     periodSpend: { ...stats.reports.operations.costs.period, ...stats.figures.spend },
-    regression: stats.plans.map(({ source, report, label, at, P, V, R }) => ({ source, label, at, P, V, R, report })),
+    regression: stats.plans.map(({ source: { label: _display, origin, ...source }, report, at, P, V, R }) => ({
+      source: { ...source, origin: origin && { reportId: origin.reportId, decisionId: origin.decisionId, ...(origin.groupId ? { groupId: origin.groupId } : {}) } },
+      at, P, V, R, report,
+    })),
   };
 }

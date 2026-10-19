@@ -10,7 +10,7 @@ import {previewRegisterFromInput,registerFromInput,expandPath} from '../improve-
 import {readImproveHistory,readSuppressionHistory,historyCandidateLabel,type ImproveHistoryAction} from '../improve-report-history.js';
 import {decisionBudgetAmount} from '../improve-history.js';
 import {CommandError,resolveArgument} from './commands.js';
-import {ConfirmDialog,clean,type ConfirmConfig,type ConfirmResult} from './view-stack.js';
+import {ConfirmDialog,SingleLineInput,clean,type ConfirmConfig,type ConfirmResult} from './view-stack.js';
 import {mayWrite,type WriteAccess} from './write-access.js';
 
 export const ROLLBACK_REASONS=[['effect','效果不如预期'],['regression','引入了新问题'],['unneeded','不再需要']] as const;
@@ -29,27 +29,26 @@ export type ReasonPrefill={reason?:string;note?:string};
  * fixed impact/fee rows and the small-window confirmation guard. */
 export class ImproveReasonDialog {
  private config:ConfirmConfig;private dialog:ConfirmDialog;private editing=false;
- note:string;
+ private input:SingleLineInput;
+ get note(){return this.input.getValue();}
  constructor(config:ConfirmConfig,private reasons:readonly (readonly [string,string])[],prefill:ReasonPrefill={}) {
-  this.note=prefill.note??'';
+  this.input=new SingleLineInput(prefill.note??'',1000);
   const at=Math.max(0,reasons.findIndex(([key])=>key===prefill.reason));
-  this.config={...config,wrapBody:true,choice:{mode:'single',options:reasons.map(([,label])=>({label})),selected:[at]}};
+  this.config={...config,wrapBody:true,fixedRows:width=>this.editing?[this.input.render(width)[0]]:[],choice:{mode:'single',options:reasons.map(([,label])=>({label})),selected:[at]}};
   this.dialog=new ConfirmDialog(this.config);
  }
  get reason(){return `${this.reasons[this.dialog.selected[0]??0][1]}${this.note.trim()?' · '+this.note.trim():''}`;}
  handleInput(data:string):ConfirmResult {
   if(matchesKey(data,'tab')||matchesKey(data,'shift+tab')){this.editing=!this.editing;return {type:'handled'};}
   if(this.editing&&!matchesKey(data,'enter')&&!matchesKey(data,'escape')) {
-   if(matchesKey(data,'backspace'))this.note=Array.from(this.note).slice(0,-1).join('');
-   else if(!/[\x00-\x1f\x7f]/.test(data))this.note=Array.from(this.note+data).slice(0,1000).join('');
-   else return this.dialog.handleInput(data);
+   this.input.handleInput(data);
    return {type:'handled'};
   }
   return this.dialog.handleInput(data);
  }
  render(columns:number,rows:number) {
   const previous=this.config.fixed;
-  this.config.fixed=[...(previous??[]),`补充说明（选填${this.editing?'，正在输入':''}）：${this.note||'未填'} · Tab ${this.editing?'返回原因':'编辑说明'}`];
+  this.config.fixed=[...(previous??[]),`补充说明（选填${this.editing?'，正在输入':''}） · Tab ${this.editing?'返回原因':'编辑说明'}`,...(!this.editing?[this.note||'未填']:[])];
   const lines=this.dialog.render(columns,rows);this.config.fixed=previous;return lines;
  }
 }

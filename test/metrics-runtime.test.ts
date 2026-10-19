@@ -8,7 +8,8 @@ import {runCodingTask,readAcceptedTasks} from '../src/runtime.js';
 import {scriptedTransport} from '../src/offline.js';
 import {records,decode,watermark} from '../src/history.js';
 import {recordAcceptance,queryTaskMetrics,type AcceptanceInput} from '../src/metrics/index.js';
-import {MetricsView} from '../src/tui/metrics.js';
+import {StatsBrowser} from '../src/tui/stats-browser.js';
+import {statsMembers} from '../src/tui/stats-drilldown.js';
 import {ReadOnlyTui} from '../src/tui/app.js';
 import {stripTerminalSequences,type Terminal} from '@earendil-works/pi-tui';
 const content=(report:any)=>{const{generatedAt,...rest}=report;return rest;};
@@ -45,7 +46,7 @@ test('public runtime actual check supports PASS; headless/TUI/reopen/export shar
  const machine=cli(['metrics','--scope',JSON.stringify(scope)]);assert.equal(machine.status,0,machine.stderr);assert.deepEqual(content(JSON.parse(machine.stdout)),content(report));
  const readable=cli(['metrics','--scope',JSON.stringify(scope),'--format','text']);assert.equal(readable.status,0,readable.stderr);assert.match(readable.stdout,/成功率 1\/1 = 100.0%/);assert.match(readable.stdout,new RegExp(report.id));
  const destination=join(f.root,'report.json');const exported=cli(['metrics','--scope',JSON.stringify(scope),'--destination',destination]);assert.equal(exported.status,0,exported.stderr);assert.deepEqual(content(JSON.parse(readFileSync(destination,'utf8'))),content(report));assert.notEqual(cli(['metrics','--scope',JSON.stringify(scope),'--destination',destination]).status,0);
- const view=new MetricsView(f.dataRoot,scope);assert.deepEqual(content(view.report),content(report));view.handleInput('e');view.handleInput('\r');assert.ok(view.render(120,80).join('\n').includes('task.accepted'));view.handleInput('b');view.handleInput('b');view.handleInput('r');assert.equal(view.report.counts.G,0);
+ const view=new StatsBrowser(f.dataRoot,f.workspace,{scope:report.scope,command:'/stats'},{open(){},copy:async()=>true,feedback(){},changed(){}});assert.deepEqual(content(view.stats!.reports.task),content(report));assert.ok(statsMembers(view.stats!,'acceptance')[0].evidence().some(e=>e.label.includes('task.accepted')));view.handleInput('v');assert.equal(view.stats!.reports.task.counts.G,0);
  const terminal=new TestTerminal(),app=new ReadOnlyTui({workspace:f.workspace,dataRoot:f.dataRoot,draftRoot:join(f.root,'drafts'),mode:'offline',transport:async()=>{throw Error('report must never call provider');},terminal,widthCalibration:false});app.start();
  try{terminal.input(`/stats --from 2000-01-01 --to 2100-01-01 --as-of ${scope.asOf} --source ${scope.source}`);terminal.input('\r');assert.match(app.screen().map(stripTerminalSequences).join('\n'),/◆ stats  合成 · 受理 .*样本 1（/);terminal.input('\x1b');terminal.input('/compact');terminal.input('\r');assert.match(app.screen().map(stripTerminalSequences).join('\n'),/压缩需要|没有可压缩|没有活动|compact|任务/);}finally{await app.exit();}
  assert.equal(f.calls,calls);assert.equal(watermark(f.dataRoot),seq);assert.deepEqual(readFileSync(join(f.dataRoot,'host.sqlite')),hostBefore);

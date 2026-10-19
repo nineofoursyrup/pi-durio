@@ -4,7 +4,6 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { stripTerminalSequences, visibleWidth } from '@earendil-works/pi-tui';
 import { Evidence } from '../src/evidence.js';
 import { readTrace } from '../src/trace.js';
@@ -15,8 +14,7 @@ import { runCodingTask, checkRecovery, recoverRun, compactContext } from '../src
 import { scriptedTransport } from '../src/offline.js';
 import { readRunOrdinals } from '../src/display-number.js';
 
-const fixtureData = fileURLToPath(new URL('../../test/fixtures/v1-records/data', import.meta.url));
-const names = JSON.parse(readFileSync(fileURLToPath(new URL('../../test/fixtures/v1-records/fixture-identity.json', import.meta.url)), 'utf8')).names as Record<string, string>;
+import { dataRoot as fixtureData, names } from './v1-runtime-fixture.js';
 const plain = (lines: string[]) => lines.map(line => stripTerminalSequences(line));
 
 function assertGolden(grid: SnapshotGrid, name: string) {
@@ -48,7 +46,7 @@ test('v1 fixture: readonly continuation segment, v1 skip and interruption exclud
   assert.ok(trace.duration < main[1].gap!, 'header duration excludes the interruption');
   assert.equal(trace.status, 'completed');
   const skipped = trace.spans.filter(s => s.tool?.skipped);
-  assert.deepEqual(skipped.map(s => s.tool!.name).sort(), ['read', 'write']);
+  assert.deepEqual(skipped.map(s => s.tool!.name).sort(), ['write']);
   assert.deepEqual(trace.spans.filter(s => s.kind === 'llm').map(s => s.llm!.number), [1, 2]);
   const lines = plain(withTier('none', () => new TraceView(fixtureData, names['run.recovery-skip']).render(132, 38, 'Esc 返回会话'))).join('\n');
   assert.match(lines, /┄ 中断 \S+ · 恢复核对 · 只读续跑（首版） ┄/);
@@ -221,4 +219,32 @@ test('live: new spans append while open, running spans spin, the selection stays
   assert.ok(after > before, `spans appended incrementally (${before} → ${after})`);
   assert.equal(view!.selectedSpan?.key, selected, 'selection did not move');
   assert.equal(view!.trace.status, 'completed');
+});
+
+test('trace marks a continued task whose recorded execution version differs from its context source', async () => {
+  const { dataRoot } = await workspace();
+  for (const [run, version, parent] of [['first', 'old-build', null], ['next', 'new-build', 'first']] as const) {
+    const e = new Evidence(dataRoot, run);
+    e.append('task.accepted', { taskId: run, sessionId: run, workspace: '/fixture', input: run });
+    if (parent) e.append('context.imported', { source: { sourceRunId: parent } });
+    e.append('execution.artifact', { id: version, node: 'v1', platform: 'test', arch: 'test' });
+    e.append('execution.config', { mode: 'offline', model: {}, instructions: [] });
+    e.append('run.started', {}); e.append('run.closed', { status: 'completed', cleanup: 'confirmed' }); e.close();
+  }
+  assert.doesNotMatch(plain(new TraceView(dataRoot, 'first').render(132, 38, 'Esc 返回会话')).join('\n'), /执行版本已变/);
+  for (const width of [132, 80, 40]) assert.match(plain(new TraceView(dataRoot, 'next').render(width, 24, 'Esc 返回会话')).join('\n'), /执行版本已变/);
+});
+
+test('an estimation failure retains its explicit reason beside the still-readable timeline', async () => {
+  const { dataRoot } = await workspace(), e = new Evidence(dataRoot, 'bad-estimate');
+  e.append('task.accepted', { taskId: 't', sessionId: 's', workspace: '/fixture', input: 'fixture' }); e.append('run.started', {});
+  const intent = e.append('model.intent', { attemptId: 'm', model: { provider: 'deepseek', id: 'deepseek-flash' } });
+  e.append('model.dispatch', { attemptId: 'm', transportEntered: true });
+  const ref = e.db.prepare('SELECT body FROM records WHERE seq=?').get(intent)!;
+  const source = `e1:${intent}:${JSON.parse(String(ref.body)).sha256}`;
+  e.append('cost.estimate', { id: 'broken-input', requestSource: source, usageSources: {} });
+  e.append('run.closed', { status: 'completed', cleanup: 'confirmed' }); e.close();
+  const trace = readTrace(dataRoot, 'bad-estimate');
+  assert.match(trace.costError!, /TRACE_COST_ESTIMATE_FAILED/); assert.equal(trace.counts.models, 1); assert.equal(trace.cost.unknownRequests, 1);
+  assert.match(plain(new TraceView(dataRoot, 'bad-estimate').render(132, 38, 'Esc 返回会话')).join('\n'), /费用估算不可读取.*TRACE_COST_ESTIMATE_FAILED/);
 });

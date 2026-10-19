@@ -9,9 +9,10 @@ import type {ImproveRequest} from '../improve.js';
 import {ImproveHome,type HomeItem} from './improve-home.js';
 import {ImproveLaunchDialog,type LaunchPrefill} from './improve-launch.js';
 import {completePath,improveRequest,improveVisibleFiles,readReportRecord,registerFromInput} from '../improve-entry.js';
-import {listRegisteredSources} from '../improve-source.js';
+import {listRegisteredSources,unregisterImproveSource} from '../improve-source.js';
+import {withOwnerSync} from '../ownership.js';
 import { homedir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { isAbsolute, join, resolve } from 'node:path';
 import { realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
@@ -24,7 +25,8 @@ import { Drafts } from './drafts.js';
 import { statsRequest } from './stats.js';
 import { StatsBrowser } from './stats-browser.js';
 import { processMeasurements } from '../self-measurement.js';
-import { statsChoices } from './stats-filter.js';
+import { statsChoices, StatsChoicesLimitError } from './stats-filter.js';
+import { resolveProjectFilter } from './project-filter.js';
 import { AcceptanceDialog, AnnotationWriteError, ANNOTATION_RUNNING, annotationTarget, readAnnotation, saveAnnotation, type AnnotationTarget, type AnnotationPrefill } from './acceptance.js';
 import { HistoryView, historyScope, historyProjects, type HistoryTarget } from './history.js';
 import { EvalListView, EvalPlanView, type PlanViewHost } from './eval.js';
@@ -32,7 +34,7 @@ import { TrialTraceView } from './eval-trial.js';
 import { evalBlocked,evalRunConfirmation,evalGradeConfirmation,executeEval,evalStoppedFact,readEvalProgress,samePlan,type EvalAction } from './eval-operation.js';
 import type {EvalCleanupReceipt} from '../eval/cleanup.js';
 import {evalReport} from '../eval/runner.js';
-import { ownPlanSource,readPlanReport,planState,listPlanSources,type PlanSource,type EvalReport } from '../eval/overview.js';
+import { resolvePlanSource,readPlanReport,planState,listPlanSources,type PlanSource,type EvalReport } from '../eval/overview.js';
 import { StorageView } from './storage.js';
 import { TraceView, type TraceHost } from './trace.js';
 import { TraceRawView, outputItem } from './trace-raw.js';
@@ -45,13 +47,13 @@ import { readSessionChains } from '../session-chain.js';
 import { formatCostTotals } from '../cost-estimate.js';
 import { exitSummary, ProcessCleanupReceipts, type EvalExitFact } from './exit-summary.js';
 export { exitCostSummary } from './exit-summary.js';
-import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor } from './theme.js';
+import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor, dimForOverlay } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageLine, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
 import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
 import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatus } from './welcome.js';
-import { COMPACT_VERSION_CHANGED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
+import { COMPACT_VERSION_CHANGED, CONTINUE_TAIL_UNFINISHED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
 import { currentExecutionVersion } from '../execution-version.js';
 import { RecoveryPanel, OWNER_RELEASE_RISK, disabledInputLines, readRecoveryFacts, recoveryPages, type RecoveryAction } from './recovery.js';
 import { mayWrite, SHOW_READ_ONLY, type WriteAccess } from './write-access.js';
@@ -115,7 +117,7 @@ export class ReadOnlyTui {
   private records:RecordReference[]=[];
   private latestText='';
   private runId?:string;
-  private sessionId?:string;
+  private coding=false;
   private model='deepseek-flash';
   private result?:RunResult;
   /** 最近实际返回的 runtime 清理事实；独立 improve 分析不更换主会话，但仍须报告其清理结果。 */
@@ -223,6 +225,7 @@ export class ReadOnlyTui {
     if(options.widthCalibration===false&&!options.terminal)throw Error('WIDTH_CALIBRATION_TEST_TERMINAL_REQUIRED');
     options.workspace=realpathSync(options.workspace);
     options.dataRoot=resolve(options.dataRoot);
+    this.coding=!!options.coding;
     this.improveBatch=new ImproveBatchController(options.dataRoot);
     this.runId=options.runId;this.viewingRecovery=!!options.runId;
     this.context=this.prefix();
@@ -286,9 +289,15 @@ export class ReadOnlyTui {
       {component:usageRow,basis:1,visible:view=>this.recoveryPlan(view.width).usage},
       {component:hintRow,basis:1,visible:view=>this.recoveryPlan(view.width).hints}]);
     const root:Component={invalidate:()=>layout.invalidate(),render:width=>{
-      if(width<40 || this.terminal.rows<12) return new Text(`窗口过小：建议至少 40 × 12 字符格（待真实终端确认）\n当前 ${width} × ${this.terminal.rows}\n扩大窗口继续；Ctrl+C 中止/再次退出。草稿保留。`,0,0).render(width).slice(0,this.terminal.rows);
+      if(width<40 || this.terminal.rows<12) return new Text(`窗口过小：建议至少 40 × 12 字符格（待真实终端确认）\n当前 ${width} × ${this.terminal.rows}\n扩大窗口继续；${this.dialog?'Esc 关闭确认框':'Ctrl+C 中止/再次退出'}。草稿保留。`,0,0).render(width).slice(0,this.terminal.rows);
       return layout.render(width);
     }};
+    // Viewport layout renders the leaf components directly, bypassing VStack.render.
+    // Keep each component identity so focus, scrolling, mouse regions and sizing remain intact.
+    for(const component of [header,this.transcript,recoveryPanel,statusRegion,queue,this.editor,disabledInput,usageRow,hintRow,...welcome.map(entry=>entry.component)]){
+      const render=component.render.bind(component);
+      component.render=width=>{const lines=render(width);return this.dialog?lines.map(line=>dimForOverlay(line)):lines;};
+    }
     // Preserve upstream layout-node behavior by selecting the appropriate layout on resize.
     const resizeLayout=()=>this.tui.setLayoutRoot(this.terminal.columns<40||this.terminal.rows<12?root:layout);
     const originalStart=this.terminal.start.bind(this.terminal);
@@ -389,7 +398,7 @@ export class ReadOnlyTui {
   private headerState():HeaderState {
     const chain=this.runId?this.chainOf(this.runId):undefined,home=homedir(),workspace=this.options.workspace;
     const round=this.runId?this.views.get(this.runId)?.progress.round:undefined;
-    return {workspace:safe(workspace.startsWith(`${home}/`)?`~${workspace.slice(home.length)}`:workspace),readOnly:!this.options.coding||!!this.options.show,elsewhere:this.options.elsewhere,
+    return {workspace:safe(workspace.startsWith(`${home}/`)?`~${workspace.slice(home.length)}`:workspace),readOnly:!this.coding||!!this.options.show,elsewhere:this.options.elsewhere,
       session:chain?this.shown('session',chain.id):undefined,run:this.runId?this.shown('run',this.runId):undefined,task:chain?.number,
       ...(this.phase==='running'&&!this.analysis&&!this.improveBatch.running?{round:round||undefined}:{status:this.runStatus()})};
   }
@@ -402,7 +411,7 @@ export class ReadOnlyTui {
     return statusParts({phase:this.phase,recovery:this.viewingRecovery,status:this.runStatus(),activity:this.activity,round:progress?.round??0,retry:progress?.retry??false,
       elapsedMs:this.improveBatch.running?this.improveBatch.elapsedMs:this.phase==='running'&&start?Date.now()-Date.parse(start):undefined,frame:Math.floor(Date.now()/SPINNER_INTERVAL_MS)});
   }
-  private prefix() {return estimateTaskPrefix({dataRoot:this.options.dataRoot,workspace:this.options.workspace,coding:!!this.options.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}
+  private prefix() {return estimateTaskPrefix({dataRoot:this.options.dataRoot,workspace:this.options.workspace,coding:!!this.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}
   private contextUsage() {return `ctx ${this.context.estimated?'≈':''}${tokenCount(this.context.tokens)} / ${tokenCount(this.context.contextWindow)}`;}
   /**
    * 底栏用量：运行时为本任务（当前 run），空闲时为本会话（上下文链上各 run 之和）；tok = 输入（含缓存命中）+ 输出。
@@ -486,7 +495,16 @@ export class ReadOnlyTui {
     }
     if(!text.trim())return;
     if(!mayWrite(this.writeAccess)){this.editor.setText(text);this.lastText=text;return;}
-    if(this.occupied){this.editor.setText(text);this.lastText=text;this.notice='工作区被其他进程占用 · 不能提交';this.tui.requestRender();return;}
+    if(this.occupied){
+      this.editor.setText(text);this.lastText=text;this.notice='工作区被其他进程占用 · 正在重新核对，不能提交';this.tui.requestRender();
+      void probeWelcomeLock(this.options.workspace,this.coding).then(async lock=>{
+        if(lock.state==='held'||lock.state==='unknown'||lock.state==='probing'){this.notice='工作区被其他进程占用或状态未确认 · 不能提交';this.tui.requestRender();return;}
+        this.occupied=false;
+        if(this.options.resume)await this.resumeSession(this.options.resume);
+        if(!this.viewingRecovery&&!this.occupied)this.notice='写入者锁已释放 · 草稿保留，现在可以提交 · 再按 Enter 提交';
+        this.tui.requestRender();
+      });return;
+    }
     if(this.historyWindow||this.viewingRecovery){this.editor.setText(text);this.lastText=text;this.notice='只读历史/恢复视图不能提交；/bottom 返回活动会话，恢复限制仍需显式处置';this.tui.requestRender();return;}
     // improve 分析期间 Enter 保留文字、不受理，也不作为 steer；结束后下一次 Enter 接续当前会话（T3）。
     if(this.analysis){this.editor.setText(text);this.lastText=text;this.notice='improve 分析进行中 · 文字保留，未受理；分析结束后 Enter 接续当前会话';this.tui.requestRender();return;}
@@ -497,21 +515,26 @@ export class ReadOnlyTui {
     if(followUp){this.editor.setText(text);this.lastText=text;this.notice='当前没有运行任务；文本保留，按普通 Enter 明确提交新任务';this.tui.requestRender();return;}
     if(this.result?.status==='unknown'||this.result?.cleanup==='unknown') {this.editor.setText(text);this.lastText=text;this.notice='旧工作存在未知；只读查看，不能由 TUI 绕过恢复核对';this.tui.requestRender();return;}
     // 空闲 Enter 接续链尾（U13）；不能接续时开启新会话，原因已写在前序任务行的位置。
-    const continuation=this.continuation(),contextRunId=continuation?.state==='ready'?continuation.tailRunId:undefined;
+    this.continuationMemo=undefined;
+    const continuation=this.continuation();
+    if(continuation?.state==='recovery'){this.editor.setText(text);this.lastText=text;this.coding=continuation.coding;void this.openRecovery(continuation.tailRunId);return;}
+    const contextRunId=continuation?.state==='ready'?continuation.tailRunId:undefined;
+    this.coding=continuation?.state==='ready'?continuation.coding:!!this.options.coding;
     this.editor.addToHistory(text);this.editor.setText('');this.lastText='';
     if(!contextRunId)this.context=this.prefix();
-    this.welcome=undefined;this.phase='running';this.result=undefined;this.runId=undefined;this.sessionId=undefined;this.records=[];this.toggled.clear();this.events=[];this.historyWindow=false;this.scroll.scrollToEnd();
+    this.welcome=undefined;this.phase='running';this.result=undefined;this.runId=undefined;this.records=[];this.toggled.clear();this.events=[];this.historyWindow=false;this.scroll.scrollToEnd();
     this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.rebuild();
     const self=this;
     const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe};
-    const run=this.options.coding?runCodingTask:runReadTask;
+    const run=this.coding?runCodingTask:runReadTask;
     this.beginCleanupAttempt();
     this.active=run(options).then(result=>this.applyResult(result)).catch(error=>{this.failure=String(error);this.notice=`未完成：${safe(String(error))}`;}).finally(()=>this.finished());
     this.tui.requestRender();
   }
   /** 按命令表解析后的命令分派；写法见 commands.ts。resolveArgument 的 CommandError 交给 submit 写状态行。 */
   private command(parsed:ParsedCommand) {
-    const root=this.options.dataRoot,{positional,options,raw}=parsed;
+    const root=this.options.dataRoot,{positional,options}=parsed;
+    const planArgument=(input:string)=>{try{return resolvePlanSource(root,input);}catch(error){throw new CommandError(safe(error instanceof Error?error.message:String(error)));}};
     const fail=(prefix:string,error:unknown)=>{if(error instanceof CommandError)throw error;this.notice=`${prefix}${safe(String(error))}`;this.tui.requestRender();};
     // 只读能力在各宿主动作入口核对；纯查看命令不依赖命令名黑名单。
     switch(parsed.path.length?`${parsed.spec.name} ${parsed.path.join(' ')}`:parsed.spec.name){
@@ -522,22 +545,32 @@ export class ReadOnlyTui {
     case 'older':this.window('older');break;
     case 'newer':this.window('newer');break;
     case 'stats':
-      try{if(options.self&&Object.keys(options).some(key=>key!=='self'))throw new CommandError('--self 固定近 7 天、全部项目、日常来源，不接受其他筛选');this.metricsView?.cancel();this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),options.self?[]:statsChoices(root,this.options.workspace).projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),annotate:(task,saved)=>this.annotateTask(task,saved),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.openEvalPlan(target.source);}}},{tab:options.self?'self':'metrics',self:{dimensions:()=>({columns:this.terminal.columns,rows:this.terminal.rows}),busy:()=>this.phase!=='idle'}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
+      try{
+        if(options.self&&Object.keys(options).some(key=>key!=='self'))throw new CommandError('--self 固定近 7 天、全部项目、日常来源，不接受其他筛选');
+        let projects:string[]=[];
+        if(!options.self&&options.project&&options.project!=='all'&&options.project!=='current'&&!isAbsolute(String(options.project))){
+          try{projects=statsChoices(root,this.options.workspace).projects;}
+          catch(error){
+            if(!(error instanceof StatsChoicesLimitError))throw error;
+            try{resolveProjectFilter(String(options.project),this.options.workspace,[]);}catch{throw error;}
+          }
+        }
+        this.metricsView?.cancel();this.metricsView=new StatsBrowser(root,this.options.workspace,statsRequest(options,this.options.workspace,new Date(),projects),{copy:this.copy,feedback:text=>this.feedback(text),changed:()=>this.tui.requestRender(),annotate:(task,saved)=>this.annotateTask(task,saved),open:target=>{if(target.kind==='run'){this.traceView=this.traceOf(target.runId,target.root);this.pushView('trace');}else{this.openEvalPlan(target.source);}}},{tab:options.self?'self':'metrics',self:{dimensions:()=>({columns:this.terminal.columns,rows:this.terminal.rows}),busy:()=>this.phase!=='idle'}});this.openPanel('metrics');}catch(error){fail('任务指标不可读取：',error);}
       break;
     case 'acceptance':
       if(!mayWrite(this.writeAccess))break;
       if(typeof options.note==='string'&&options.note.length>1000)throw new CommandError('补记说明最多 1000 字符');
       this.annotateTask(undefined,undefined,options as AnnotationPrefill,positional[0]?resolveArgument(root,positional[0],['task']).id:undefined);break;
     case 'eval':{
-      const id=positional[0]===undefined?undefined:resolveArgument(root,positional[0],['eval-plan']).id;
+      const source=positional[0]===undefined?undefined:planArgument(positional[0]);
       try{
-        if(id){this.openEvalPlan(ownPlanSource(root,id),true);}
+        if(source){this.openEvalPlan(source,true);}
         else{this.evalList=new EvalListView(root,{openPlan:source=>{this.openEvalPlan(source);if(planState(readPlanReport(source).report)==='not-started')this.confirmEval(source,'run');}});this.openPanel('eval');}
       }catch(error){fail('Eval记录不可读取：',error);}
       break;
     }
     case 'eval run':case 'eval grade':{
-      const source=ownPlanSource(root,resolveArgument(root,positional[0],['eval-plan']).id),action=parsed.path[0] as EvalAction;
+      const source=planArgument(positional[0]),action=parsed.path[0] as EvalAction;
       const cases=options.case===undefined?undefined:String(options.case).split(',');
       try{if(cases?.some(id=>!readPlanReport(source).report.plan.cases.some(c=>c.id===id)))throw new CommandError('未知 eval 案例',['--case 使用计划内案例 id']);this.confirmEval(source,action,cases,true);}catch(error){fail('eval 未启动：',error);}break;
     }
@@ -590,7 +623,7 @@ export class ReadOnlyTui {
     case 'improve':{
       if(!positional[0]){if(Object.keys(options).length)throw new CommandError('选择参数需要先写报告号',['/improve ir-号 --execute C-01']);this.openImproveHome();break;}
       const id=resolveArgument(root,positional[0],['improve-report']).id,report=readReportRecord(root,id);if(!report)throw new CommandError('报告不可读取');
-      try {const prefill=improveSelectionPrefill(report,options);if(prefill.length&&!mayWrite(this.writeAccess))break;this.openImproveSelection(id,prefill,true);}
+      try {const prefill=improveSelectionPrefill(root,report,options);if(prefill.length&&!mayWrite(this.writeAccess))break;this.openImproveSelection(id,prefill,true);}
       catch(error){throw error instanceof CommandError?error:new CommandError(improveChoiceError(error),['本报告的 C-号或完整 id']);}break;
     }
     case 'improve new':{
@@ -689,12 +722,12 @@ export class ReadOnlyTui {
     let dialog:ImproveLaunchDialog;
     try{dialog=new ImproveLaunchDialog({visible:improveVisibleFiles(root,workspace,target),registrations:listRegisteredSources(root,workspace),queued:this.phase==='running',
       ...(binding?{binding:[`原目标：${this.shown('session',binding.sessionId)} · ${this.shown('run',binding.runId)}`,`工作区：${workspace}`]}:{}),
-      register:input=>{if(!mayWrite(this.writeAccess))throw Error('TUI_READ_ONLY');return registerFromInput(root,workspace,input);},complete:input=>completePath(workspace,input)},prefill);}
+      register:input=>{if(!mayWrite(this.writeAccess))throw Error('TUI_READ_ONLY');return withOwnerSync(root,()=>registerFromInput(root,workspace,input));},remove:id=>{if(!mayWrite(this.writeAccess))throw Error('TUI_READ_ONLY');withOwnerSync(root,()=>unregisterImproveSource(root,id));},complete:input=>completePath(workspace,input)},prefill);}
     catch(error){this.notice=`improve 启动框不可打开：${safe(String(error))}`;this.tui.requestRender();return;}
     this.openDialog(dialog,()=>{
       const blocked=this.launchBlocked(binding?.runId);if(blocked){this.notice=blocked;this.tui.requestRender();return;}
       if(binding&&this.phase!=='idle'){this.feedback('当前工作运行中 · 原分析未启动');return;}
-      // 确认时重新取默认可看的文件：分析绑定确认这一刻的会话。
+      // 确认时绑定会话与登记选择；默认会话文件由宿主在分析开始时重新取得。
       const run=binding?.runId??(this.phase==='running'?this.control.target()!.runId:this.runId!);
       let request:ImproveRequest;try{request=improveRequest(randomUUID(),dialog.choice,improveVisibleFiles(root,workspace,run));}catch(error){this.notice=`尚未启动：${safe(String(error))}`;this.tui.requestRender();return;}
       this.closeViews();void this.startImprove(request,binding?.runId);
@@ -748,7 +781,7 @@ export class ReadOnlyTui {
   }
   private confirmEval(source:PlanSource,action:EvalAction,cases?:string[],direct=false) {
     const blocked=()=>evalBlocked(source,action,{writeBlocked:this.writeAccess.writeBlocked(),busy:this.phase!=='idle'||this.viewingRecovery||this.historyWindow});
-    const reason=blocked();if(reason){this.feedback(reason);return;}
+    const reason=evalBlocked(source,action,{writeBlocked:this.writeAccess.writeBlocked(),busy:this.phase!=='idle'||this.viewingRecovery||this.historyWindow,ignoreDeadline:true});if(reason){this.feedback(reason);return;}
     const config=action==='run'?evalRunConfirmation(source,blocked):evalGradeConfirmation(source,cases,blocked);
     if(direct)this.openEvalPlan(source,true);
     this.openConfirm(config,selected=>{const reason=blocked();if(reason){this.feedback(reason);return;}const chosen=action==='grade'?readPlanReport(source).report.plan.cases.filter((_c,i)=>selected.includes(i)).map(c=>c.id):undefined;this.startEval(source,action,chosen);});
@@ -770,7 +803,7 @@ export class ReadOnlyTui {
     if(this.stoppingEval)return this.stoppingEval;
     const own=this.evaluation;
     if(own&&(!source||samePlan(source,own.source))){own.stopRequested=true;this.controller?.abort();if(this.phase!=='exiting')this.phase='stopping';this.feedback(`请求停止 eval ${own.source.label} · 等待 VM 和写入者清理`);return this.active??Promise.resolve();}
-    const origin=source?.origin??this.improveBatch.origin;
+    const origin=source?source.origin:this.improveBatch.origin;
     if(!origin||!this.improveBatch.canStop(origin))return Promise.resolve();
     const sources=listPlanSources(this.options.dataRoot).filter(s=>this.improveBatch.canStop(s.origin));
     if(!sources.length)return Promise.resolve();
@@ -811,7 +844,7 @@ export class ReadOnlyTui {
   }
   private beginCleanupAttempt() {this.cleanupAttempted=true;this.cleanupResult=undefined;}
   private applyResult(result:RunResult) {
-    this.result=result;this.cleanupResult=result;this.sessionId=result.sessionId;this.runId=result.runId;
+    this.result=result;this.cleanupResult=result;this.runId=result.runId;
     if(result.improve?.runId!==result.runId)this.continueFrom=result.runId;
     this.viewingRecovery=result.status==='unknown'||result.cleanup==='unknown';
     // 终态在状态行与头部；这里只留需要处理的事。
@@ -823,7 +856,7 @@ export class ReadOnlyTui {
     if(this.analysis?.queued)this.analysisEnded(this.analysis.requestId,readReportRecord(this.options.dataRoot,this.analysis.requestId));
     for(const receipt of this.improveBatch.evalCleanup){if(this.evalCleanup?.cleanup!=='unknown'||receipt.cleanup==='unknown')this.evalCleanup=receipt;this.evalCleanupUnknown ||= receipt.cleanup==='unknown';}
     const batchCleanup=this.improveBatch.cleanup;this.evalCleanupUnknown ||= !!batchCleanup&&(batchCleanup.owner!=='released'||batchCleanup.storage==='unknown'||batchCleanup.workspaces.some(w=>!w.released));
-    this.analysis=undefined;this.activity=undefined;this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting'){this.phase='idle';void this.welcome?.refresh().catch(error=>{this.notice=`欢迎屏事实不可读取：${safe(String(error))}`;});}this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
+    this.analysis=undefined;this.activity=undefined;if(this.phase!=='exiting')this.phase='idle';this.pendingRefresh=true;this.refresh();if(this.phase!=='exiting'){void this.welcome?.refresh().catch(error=>{this.notice=`欢迎屏事实不可读取：${safe(String(error))}`;});}this.confirmation=undefined;this.followChord=false;this.tui.requestRender();
   }
   private enqueue(text:string,kind:'steer'|'follow-up'|'compact'|'improve') {
     if(!mayWrite(this.writeAccess))return;
@@ -850,7 +883,7 @@ export class ReadOnlyTui {
   private openQueue(id?:string) {
     this.prepareQueue(id);if(this.panel?.kind!=='queue')this.openPanel('queue');
   }
-  private authorization():RecoveryAuthorization {return {workspace:this.options.workspace,mode:this.options.mode,tools:this.options.coding?['read','write','edit','bash']:['read'],toolEnvironment:this.options.toolEnvironment};}
+  private authorization():RecoveryAuthorization {return {workspace:this.options.workspace,mode:this.options.mode,tools:this.coding?['read','write','edit','bash']:['read'],toolEnvironment:this.options.toolEnvironment};}
   private queueBusy() {
     return this.occupied?'工作区被其他进程占用':this.phase!=='idle'?'当前工作运行或清理中':this.activity?'当前有后台工作进行中':
       this.historyWindow?'只读历史视图不能重新接入':this.viewingRecovery||this.recoveryChecking||this.result?.status==='unknown'||this.result?.cleanup==='unknown'?'会话待恢复核对':undefined;
@@ -1041,10 +1074,6 @@ export class ReadOnlyTui {
       const identityRecords=readRunRecords(this.options.dataRoot,this.runId,{limit:8}).records;
       let contextWindow:number|undefined;
       for(const record of identityRecords) {
-        if(record.kind==='task.accepted'||record.kind==='run.started') {
-          const bytes=readObjectRange(this.options.dataRoot,record.ref,{limit:16384});
-          if(bytes.next===null) {const data=JSON.parse(bytes.bytes.toString());this.sessionId=data.sessionId??this.sessionId;}
-        }
         if(record.kind==='execution.config') {
           const bytes=readObjectRange(this.options.dataRoot,record.ref,{limit:16384});
           if(bytes.next===null) {const data=JSON.parse(bytes.bytes.toString());this.model=`${data.model.id}${data.mode==='offline'?' · offline':''}`;contextWindow=data.model.contextWindow;}
@@ -1056,6 +1085,7 @@ export class ReadOnlyTui {
         this.context=reported?{runId:this.runId,tokens:calculateContextTokens(reported.message.usage),estimated:true,contextWindow:contextWindow??this.context.contextWindow}:{...this.prefix(),runId:this.runId};
       }
       this.view(this.runId).updateProgress();if(this.analysis?.runId)this.view(this.analysis.runId).updateProgress();this.refreshes++;
+      if(this.phase==='idle'&&!this.viewingRecovery&&this.continuation()?.state==='blocked')this.coding=!!this.options.coding;
       // 上滚或打开视图时保留阅读位置；“↓ 回到底部”提示由滚动区给出。
       if(!this.historyWindow&&this.scroll.isFollowingEnd&&!this.panel) {this.records=current.records;this.rebuild();}
       this.tui.requestRender();
@@ -1075,10 +1105,10 @@ export class ReadOnlyTui {
     if(preceding){this.displaySources.push(preceding.text);block(width=>plainLines(preceding.text,width,'fg.faint'),()=>this.command(parseCommand(preceding.command)));}
     // 前序任务行之后：跨执行版本接续的提示，或不能接续的原因（U2、U13）。
     const continuation=this.phase==='idle'&&!this.viewingRecovery?this.continuation():undefined;
-    const line=continuation?.state==='blocked'?continuation.reason:continuation?.state==='ready'&&continuation.versionChanged?VERSION_CHANGED_HINT:undefined;
+    const line=continuation?.state==='blocked'?(this.options.resume===continuation.sessionId&&!this.result&&continuation.reason===CONTINUE_TAIL_UNFINISHED?'该会话不能接续，新任务将开启新会话':continuation.reason):continuation?.state==='recovery'?'◈ 链尾待恢复核对 · Enter 打开恢复核对':continuation?.state==='ready'&&continuation.versionChanged?VERSION_CHANGED_HINT:undefined;
     if(line){this.displaySources.push(line);block(width=>plainLines(line,width,continuation?.state==='blocked'?'ac.warn':'fg.muted'));}
     if(!this.records.length) {
-      const text=`在输入区发起一个${this.options.coding?'coding':'只读'}项目请求。\n${this.options.mode==='offline'?'offline-demo：真实 runtime + 固定传输；没有模型推理。':'DeepSeek 凭据从环境读取；没有自动 fallback。'}\nCtrl+J / Shift+Enter / 反斜杠后 Enter 换行。\n忙时 Enter 补充当前任务；Ctrl+X → Enter 后续请求。\n/queue 队列；拖选复制。`;
+      const text=`在输入区发起一个${this.coding?'coding':'只读'}项目请求。\n${this.options.mode==='offline'?'offline-demo：真实 runtime + 固定传输；没有模型推理。':'DeepSeek 凭据从环境读取；没有自动 fallback。'}\nCtrl+J / Shift+Enter / 反斜杠后 Enter 换行。\n忙时 Enter 补充当前任务；Ctrl+X → Enter 后续请求。\n/queue 队列；拖选复制。`;
       this.displaySources.push(text);block(width=>plainLines(text,width,'fg.muted'));
     }
     if(this.records.length&&this.records[0].kind!=='task.accepted')block(width=>plainLines('当前内容窗口 · /older 查看更早内容',width,'fg.faint'));
@@ -1093,8 +1123,8 @@ export class ReadOnlyTui {
       else if(entry.kind==='notice'){const text=`${entry.title}\n${safe(entry.text)}`;this.displaySources.push(text);block(width=>plainLines(text,width,'fg.muted'));}
       else {
         const id=entry.attemptId,expanded=()=>this.expandAll!==this.toggled.has(id),frame=()=>Math.floor(Date.now()/SPINNER_INTERVAL_MS);
-        entry.args=safe(entry.args);if(entry.output)entry.output.lines=entry.output.lines.map(safe);if(entry.diff)entry.diff=entry.diff.map(safe);
-        this.displaySources.push(`${entry.tool} ${entry.args} ${entry.summary}`,...(entry.output?.lines??[]),...(entry.diff??[]));
+        entry.args=safe(entry.args);if(entry.output)entry.output.lines=entry.output.lines.map(safe);if(entry.diff)entry.diff=entry.diff.map(safe);if(entry.error)entry.error=safe(entry.error);
+        this.displaySources.push(`${entry.tool} ${entry.args} ${entry.summary}`,...(entry.output?.lines??[]),...(entry.diff??[]),...(entry.error?[entry.error]:[]));
         const lines=(width:number)=>toolLines(entry,width,expanded(),Date.now(),frame());
         block(width=>{const tool=lines(width);return [tool.row,...tool.body];},()=>{if(!this.toggled.delete(id))this.toggled.add(id);});
         // “分页查看”进入 2a 原文层。
@@ -1130,13 +1160,14 @@ export class ReadOnlyTui {
     try{continuation=readContinuation(this.options.dataRoot,id,{workspace:this.options.workspace});}
     catch(error){this.notice=`会话不可读取：${safe(String(error))}`;this.tui.requestRender();return;}
     if(!continuation){this.notice='会话没有记录';this.tui.requestRender();return;}
+    this.coding=continuation.coding;this.occupied=false;
     if(continuation.state==='recovery'){
       if(continuation.status==='running'||continuation.status==='accepted'){
         // 欢迎屏自己也在探测（它显示持有者）；这里单独探测一次，不依赖其先后。
-        const lock=await probeWelcomeLock(this.options.workspace,!!this.options.coding).catch(()=>undefined);
+        const lock=await probeWelcomeLock(this.options.workspace,!!this.coding).catch(()=>undefined);
         if(lock?.state==='held'){this.occupied=true;this.notice=`会话 ${this.shown('session',id)} 正在被其他进程执行 · 不能提交`;this.tui.requestRender();return;}
       }
-      void this.openRecovery(continuation.tailRunId);return;
+      await this.openRecovery(continuation.tailRunId);return;
     }
     this.welcome=undefined;this.runId=continuation.tailRunId;this.continueFrom=continuation.tailRunId;this.pendingRefresh=true;this.refresh();
   }
@@ -1148,7 +1179,7 @@ export class ReadOnlyTui {
       let value:Continuation|undefined;
       try{
         const root=this.options.dataRoot,chains=readSessionChains(root),of=chains.sessionOfRun(this.continueFrom);
-        const current=()=>{try{return currentExecutionVersion({dataRoot:root,workspace:this.options.workspace,coding:!!this.options.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}catch{return null;}};
+        const current=()=>{try{return currentExecutionVersion({dataRoot:root,workspace:this.options.workspace,coding:!!this.coding,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment});}catch{return null;}};
         value=(of&&readContinuation(root,of.id,{workspace:this.options.workspace,chains,current}))||undefined;
       }catch{value=undefined;}
       this.continuationMemo={key,value};
@@ -1176,7 +1207,7 @@ export class ReadOnlyTui {
       this.openDialog(box,()=>{
         let written=0;
         try{written=saveAnnotation(snapshot,box.submission,()=>this.annotationBlocked()).sources.length;}
-        catch(error){if(error instanceof AnnotationWriteError&&error.sources.length){try{saved?.();}catch{}feedback(`补记已追加部分记录，请核对后重开：${safe(String(error))}`);}else feedback(`补记未写入：${safe(String(error))}`);return;}
+        catch(error){if(error instanceof AnnotationWriteError&&error.sources.length){try{saved?.();}catch(refreshError){feedback(`补记已追加部分记录，视图刷新失败：${safe(String(refreshError))}`);return;}feedback(`补记已追加部分记录，请核对后重开：${safe(String(error))}`);}else feedback(`补记未写入：${safe(String(error))}`);return;}
         if(written){try{saved?.();}catch(error){feedback(`补记已写入，视图刷新失败：${safe(String(error))}`);return;}}
         feedback(written?'补记已追加 · 原记录保留':'没有需要写入的改动');
       });
@@ -1204,7 +1235,7 @@ export class ReadOnlyTui {
       if(target.state==='blocked'){this.feedback(target.reason);return;}
       if(lock.state==='held'){this.feedback('不能接续 · 工作区被其他进程占用');return;}
       if(lock.state==='unknown'||lock.state==='probing'){this.feedback('不能接续 · 工作区锁状态未确认');return;}
-      this.options.coding=target.coding;this.closeViews();this.occupied=false;this.historyWindow=false;
+      this.coding=target.coding;this.closeViews();this.occupied=false;this.historyWindow=false;
       this.result=undefined;this.context=this.prefix();this.continuationMemo=undefined;
       if(target.state==='recovery'){void this.openRecovery(target.tailRunId);return;}
       this.welcome=undefined;this.runId=target.tailRunId;this.continueFrom=target.tailRunId;this.pendingRefresh=true;this.refresh();this.scroll.scrollToEnd();
@@ -1246,7 +1277,7 @@ export class ReadOnlyTui {
       if(event.type==='wheel'&&panel.kind==='queue'){this.queueView?.scroll(event.wheelDelta??0);return {handled:true};}
       if(event.type==='wheel'){if(panel.kind==='improve-selection')this.improveSelectionView?.scroll(event.wheelDelta??0);else if(panel.kind==='metrics')this.metricsView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve')this.improveView?.scroll(event.wheelDelta??0);else if(panel.kind==='improve-home')this.improveHome?.scroll(event.wheelDelta??0);else if(panel.kind==='history')this.historyView?.scroll(event.wheelDelta??0);else if(panel.kind==='storage')this.storageView?.scroll(event.wheelDelta??0);else if(panel.kind==='eval')this.evalList?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-plan')this.evalPlan?.scroll(event.wheelDelta??0);else if(panel.kind==='eval-trial')this.evalTrial?.scroll(event.wheelDelta??0);else if(panel.kind==='trace')this.traceView?.scroll(event.wheelDelta??0);else panel.line=Math.max(0,panel.line+(event.wheelDelta??0));return {handled:true};}
     }};
-    const overlay=kind==='exit'?this.tui.showOverlay(component,{width:'96%',maxHeight:'90%',anchor:'center'}):showFullScreen(this.tui,this.terminal,component);this.hidePanel=()=>overlay.hide();this.tui.requestRender();
+    const overlay=kind==='exit'?this.tui.showOverlay(component,{width:'96%',maxHeight:'90%',anchor:'center',visible:(width,height)=>width>=40&&height>=12}):showFullScreen(this.tui,this.terminal,component,()=>!!this.dialog);this.hidePanel=()=>overlay.hide();this.tui.requestRender();
   }
   /**
    * 在当前视图之上压入下一层：共用同一个全屏浮层，Esc 回到当前层（closePanel）。
@@ -1262,7 +1293,7 @@ export class ReadOnlyTui {
   private panelLines(width:number) {
     const lines=this.panelBody(width);
     if(this.hintFeedback!==undefined&&lines.length)lines[lines.length-1]=hintLine([],width,{feedback:this.hintFeedback,esc:escHint(this.panel?.kind==='metrics'?this.metricsView?.depth??1:this.panel?.kind==='history'?this.historyView?.depth??1:this.viewStack.length)});
-    return lines;
+    return this.dialog&&this.viewStack[0]?.kind==='exit'?lines.map(line=>dimForOverlay(line)):lines;
   }
   private overlayHeight(){return this.viewStack[0]?.kind==='exit'?Math.max(3,Math.floor(this.terminal.rows*0.9)-1):this.terminal.rows;}
   /** 帮助视图：会话屏键位与命令清单（同一张命令表），正文在固定头尾之间滚动。 */
@@ -1290,7 +1321,7 @@ export class ReadOnlyTui {
     if(this.evaluation)return 'eval 批次运行中 · 输入保留，结束后 Enter 接续当前会话';
     if(this.improveBatch.running)return 'improve 执行进行中 · 输入保留，结束后 Enter 接续当前会话';
     if(this.phase==='running')return '补充当前任务…   Ctrl+X Enter 排到下一任务';
-    return `${this.options.coding?'描述要完成的修改…':'描述要查看或分析的内容…'}   / 命令  @ 文件  Shift+Enter 换行`;
+    return `${this.coding?'描述要完成的修改…':'描述要查看或分析的内容…'}   / 命令  @ 文件  Shift+Enter 换行`;
   }
   private panelBody(width:number):string[] {
     const panel=this.panel;if(!panel)return[];
@@ -1327,7 +1358,7 @@ export class ReadOnlyTui {
     if(key==='back'&&panel.kind==='metrics'&&this.metricsView?.back())return;
     if(key==='back') {if(panel.kind==='storage')this.storageView?.cancel();if(panel.kind==='eval-plan'&&this.evaluation?.preparing&&this.evalPlan&&samePlan(this.evalPlan.source,this.evaluation.source)){this.evaluation.loading?.cancel();this.controller?.abort();}if(panel.kind==='eval-trial'){if(this.evalTrial?.back())return;this.closeTrial();}if(panel.kind==='improve-selection'&&this.improveSelectionView?.back()){this.tui.requestRender();return;}this.closePanel();return;}
     if(key==='redraw'){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
-    if(key==='stop'){if(panel.kind==='eval-plan'&&this.evalPlan){void this.stopEval(this.evalPlan.source);return;}if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress||panel.kind==='improve'&&this.improveBatch.running)this.stop();return;}
+    if(key==='stop'){if(panel.kind==='eval-plan'&&this.evalPlan){void this.stopEval(this.evalPlan.source);return;}if(panel.kind==='improve-selection'&&this.improveSelectionView?.inProgress)this.stop();return;}
     if(key==='inert')return;
     if(panel.kind==='improve-selection'){void this.improveSelectionView?.handleInput(data);this.tui.requestRender();return;}
     if(panel.kind==='improve'){this.improveView?.handleInput(data);this.tui.requestRender();return;}
@@ -1374,13 +1405,18 @@ export class ReadOnlyTui {
     this.closeConfirm();
     const terminal=this.terminal;
     const component:Component={invalidate(){},render:()=>box.render(terminal.columns,terminal.rows),handleInput:data=>this.dialogInput(data)};
-    const overlay=this.tui.showOverlay(component,{get width(){return ConfirmDialog.width(terminal.columns);},anchor:'center'});
+    const overlay=this.tui.showOverlay(component,{get width(){return ConfirmDialog.width(terminal.columns);},anchor:'center',visible:(_width,height)=>terminal.columns>=40&&height>=12});
     this.dialog={box,confirm,hide:()=>overlay.hide()};this.tui.requestRender();
   }
   private closeConfirm() {this.dialog?.hide();this.dialog=undefined;this.tui.requestRender();}
   private dialogInput(data:string) {
     const dialog=this.dialog;if(!dialog)return;
     if(matchesKey(data,'ctrl+l')){if(this.widths)this.widths.retry(true);else this.tui.requestRender(true);return;}
+    // Hidden overlays are not rendered by pi-tui. Do not let their previous
+    // size authorize an action, including actions handled inside a nested box.
+    if((this.terminal.columns<40||this.terminal.rows<12)&&!matchesKey(data,'escape')){this.tui.requestRender();return;}
+    // A resize can precede its next paint; refresh fixed-row constraints now.
+    dialog.box.render(this.terminal.columns,this.terminal.rows);
     const result=dialog.box.handleInput(data);
     if(result.type==='cancel')this.closeConfirm();
     else if(result.type==='confirm'){this.closeConfirm();dialog.confirm(result.selected);}

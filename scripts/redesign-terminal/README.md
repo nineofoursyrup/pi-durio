@@ -52,7 +52,7 @@ env NO_COLOR=1 COLORTERM=truecolor node "$PREP/harness/native.mjs" --manifest "$
 每档按以下顺序操作，不需按得很快：
 
 1. 等字宽校准结束。空输入按 `?`，等待帮助出现；`Esc` 返回。输入 `probe`，单独按 `?`，确认仍是文本 `probe?`。每步等待至少 150ms，使前后观察完整。清空这段文本。
-2. 实际按 PgUp、PgDn；Mac 键盘一般是 Fn+↑ / Fn+↓。记录是否真的收到 `ESC [ 5 ~`、`ESC [ 6 ~`，没有收到则保持 `NOT_RUN` 并写明实际键码。
+2. 先按 Ctrl+G 标记 PgUp 尝试开始，实际按 PgUp（Mac 通常 Fn+↑），再按 Ctrl+G 确认已尝试。PgDn 同样用 Ctrl+N → PgDn（通常 Fn+↓）→ Ctrl+N。这四个标记键仅供 harness 记录，不交给产品。闭合尝试收到对应键码记 PASS，已尝试但没收到记 FAIL；未尝试或标记未闭合保持 NOT_RUN。首个失败不会被随后成功覆盖。
 3. 提交 `中文输出测试`，等待合成流开始。输入 `follow one` 后 `Ctrl+X`、Enter，再同样排队 `follow two`；等待两项都显示待接入。输入保持空，在距上次 Backspace 至少 500ms 后按第一次 Backspace，再间隔约 200–400ms 按第二次。首个可判定键对用于结果；需看到只撤回最新一项，第二次没有撤回余下项。太快而无法取得前后观察的键对为 `NOT_RUN`，不能补猜 PASS。
 4. 将窗口依次改为 80×24、40×12，再回到 132×38。保留所有 resize；缺任一尺寸则该尺寸保持 `NOT_RUN`。
 5. `Ctrl+C` 停止合成任务，等待停止完成；在空闲状态按两次 Ctrl+C 退出，或使用 `/exit`（有草稿时按界面确认）。程序等待产品清理并把实际退出摘要写入原缓冲区。检查光标、输入与背景是否恢复。

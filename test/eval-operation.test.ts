@@ -9,7 +9,7 @@ import {tmpdir} from 'node:os';
 import {Evidence} from '../src/evidence.js';
 import {representativeCases} from '../src/eval/fixtures.js';
 import {type EvalPlan,verifiedImage} from '../src/eval/plan.js';
-import {ownPlanSource,type PlanSource} from '../src/eval/overview.js';
+import {ownPlanSource,resolvePlanSource,type PlanSource} from '../src/eval/overview.js';
 import {evalBlocked,evalGradeConfirmation,evalRunConfirmation,evalStoppedFact,readEvalProgress,samePlan} from '../src/tui/eval-operation.js';
 import {ConfirmDialog} from '../src/tui/view-stack.js';
 import {ReadOnlyTui} from '../src/tui/app.js';
@@ -19,13 +19,13 @@ import {acquireOwner} from '../src/ownership.js';
 import {fixEvidence} from '../src/fixed-evidence.js';
 import {EvalCleanupTracker} from '../src/eval/cleanup.js';
 import {exitSummary,tuiExitCode} from '../src/tui/exit-summary.js';
-import {evalFacts} from '../src/eval/store.js';
+import {evalFacts,appendFact} from '../src/eval/store.js';
 import {verifyEvalBeforeStart} from '../src/eval/preflight.js';
 import {evalReport,runEval} from '../src/eval/runner.js';
 
-function fixture(ended=false){
+function fixture(ended=false,id='eval-confirm'){
  const base=mkdtempSync(join(tmpdir(),'durio-eval-operation-')),root=join(base,'data'),workspace=join(base,'project');mkdirSync(workspace);
- const e=new Evidence(root,'eval-confirm'),plan:EvalPlan={id:e.runId,purpose:'固定诊断范围',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:{id:'fixed-runtime',manifest:e.blob('[]'),bytes:2},cases:structuredClone(representativeCases.slice(0,2)),trials:representativeCases.slice(0,2).map(c=>({id:c.id,caseId:c.id,version:'fixed-runtime',side:'candidate',repeat:1,pair:null})),budget:{maxRequests:12,maxTokens:12000,maxRequestTokens:1000,deadline:'2099-01-01T00:00:00Z',unknownUpperBound:null},trialTimeoutMs:90000,gradingTimeoutMs:30000,maxOutputTokens:512,requestRetryLimit:0,price:{version:'cny-test',currency:'CNY',source:'test fixed peak price',perMillionTokens:10,consultedAt:'2026-10-17T00:00:00Z'},authorization:{paid:false,scope:'run-all-listed-trials'},environment:{node:'v24.8.0',isolation:'fixture only',cache:'fixed read-only',writable:'new trial'},mainObjective:'diagnostic',protection:['scope'],improvementConclusion:'not-evaluated'};
+ const e=new Evidence(root,id),plan:EvalPlan={id:e.runId,purpose:'固定诊断范围',mode:'offline',model:{provider:'deepseek',id:'deepseek-flash',endpoint:'https://api.deepseek.com/chat/completions'},image:verifiedImage,runtime:{id:'fixed-runtime',manifest:e.blob('[]'),bytes:2},cases:structuredClone(representativeCases.slice(0,2)),trials:representativeCases.slice(0,2).map(c=>({id:c.id,caseId:c.id,version:'fixed-runtime',side:'candidate',repeat:1,pair:null})),budget:{maxRequests:12,maxTokens:12000,maxRequestTokens:1000,deadline:'2099-01-01T00:00:00Z',unknownUpperBound:null},trialTimeoutMs:90000,gradingTimeoutMs:30000,maxOutputTokens:512,requestRetryLimit:0,price:{version:'cny-test',currency:'CNY',source:'test fixed peak price',perMillionTokens:10,consultedAt:'2026-10-17T00:00:00Z'},authorization:{paid:false,scope:'run-all-listed-trials'},environment:{node:'v24.8.0',isolation:'fixture only',cache:'fixed read-only',writable:'new trial'},mainObjective:'diagnostic',protection:['scope'],improvementConclusion:'not-evaluated'};
  e.append('eval.plan',plan);if(ended){e.append('eval.started',{});e.append('eval.closed',{stopReason:null});}e.close();return {base,root,workspace,plan,source:ownPlanSource(root,plan.id)};
 }
 const plain=(lines:string[])=>lines.map(stripTerminalSequences).join('\n');
@@ -98,11 +98,25 @@ test('eval commands only prefill confirmed scope and refuse expired, busy, read-
  }finally{await app.exit();}
 });
 
-test('same-version grade selection defaults to unknown cases and remains a confirmation',()=>{
- const f=fixture(true),config=evalGradeConfirmation(f.source,undefined,()=>undefined);
- assert.deepEqual(config.choice!.selected,[0,1]);assert.match(config.fixed!.join('\n'),/不调用模型.*占用 VM/);assert.match(config.fixed!.join('\n'),/追加评分修订，原评分保留/);
+test('same-version grade defaults select only valid executed cases with unknown judgments',async()=>{
+ const f=fixture(true),planSource=evalFacts(f.root,f.plan.id).find(f=>f.kind==='eval.plan')!.source;
+ await fixEvidence(f.root,{id:`eval-plan:${f.plan.id}`,sources:[planSource],purpose:'fixed grade defaults fixture'});
+ const e=new Evidence(f.root,f.plan.id);
+ const valid=appendFact(e,'eval.outcome',{trialId:'local-fix',started:true,status:'completed',valid:true,artifacts:[]});
+ appendFact(e,'eval.grade',{trialId:'local-fix',outcome:valid,judgment:'unknown'});
+ const invalid=appendFact(e,'eval.outcome',{trialId:'multi-file',started:true,status:'invalid',valid:false,artifacts:[]});e.close();
+ await fixEvidence(f.root,{id:`eval-outcomes:${f.plan.id}`,sources:[invalid],purpose:'fixed acquired outcomes'});
+ const config=evalGradeConfirmation(f.source,undefined,()=>undefined);
+ assert.deepEqual(config.choice!.selected,[0]);assert.match(config.fixed!.join('\n'),/不调用模型.*占用 VM/);assert.match(config.fixed!.join('\n'),/追加评分修订，原评分保留/);
  assert.deepEqual(evalGradeConfirmation(f.source,['local-fix'],()=>undefined).choice!.selected,[0]);assert.throws(()=>evalGradeConfirmation(f.source,['foreign'],()=>undefined),/CASE_NOT_FOUND/);
  const dialog=new ConfirmDialog(config);dialog.render(132,38);assert.equal(dialog.handleInput('\x1b').type,'cancel');
+});
+
+test('expired eval plans still open a disabled confirmation and Enter writes no execution facts',async()=>{
+ const f=fixture(),expired={...f.plan,id:'expired-plan',budget:{...f.plan.budget,deadline:'2000-01-01T00:00:00Z'}},e=new Evidence(f.root,expired.id);e.append('eval.plan',expired);e.close();
+ const source=ownPlanSource(f.root,expired.id),before=readFileSync(join(f.root,'host.sqlite')),terminal=new TestTerminal(),app=new ReadOnlyTui({dataRoot:f.root,workspace:f.workspace,mode:'offline',terminal,widthCalibration:false,draftRoot:join(f.base,'drafts')});
+ try{app.start();terminal.input(`/eval run ${source.label}`);terminal.input('\r');const screen=plain(app.screen());assert.match(screen,/启动 eval/);assert.match(screen,/计划截止时间已过，需新建计划/);terminal.input('\r');assert.equal(evalFacts(f.root,expired.id).some(f=>f.kind==='eval.started'),false);assert.deepEqual(readFileSync(join(f.root,'host.sqlite')),before);}
+ finally{await app.exit();}
 });
 
 test('cleanup receipt distinguishes unconfirmed VM from released writer and identifies child-root summary',async()=>{
@@ -138,4 +152,37 @@ test('headless eval resolves display numbers for report, run and grade with an o
  const run=cli('run');assert.notEqual(run.status,0);assert.match(run.stderr,/EVAL_PLAN_NOT_FIXED/);assert.doesNotMatch(run.stderr,/requires --directory/);
  const spec=join(f.base,'grade.json');writeFileSync(spec,JSON.stringify({revisionId:'empty',graders:{}}));const grade=cli('grade',['--spec',spec]);assert.notEqual(grade.status,0);assert.match(grade.stderr,/EVAL_PLAN_NOT_FIXED/);assert.doesNotMatch(grade.stderr,/requires --directory/);
  assert.equal(evalFacts(f.root,f.plan.id).length,before);
+});
+
+
+test('never-run cases are not selected for same-outcome regrading',()=>{
+ const f=fixture(true);assert.deepEqual(evalGradeConfirmation(f.source,undefined,()=>undefined).choice!.selected,[]);
+});
+
+test('eval display resolution opens improve child plans and rejects ambiguous displayed numbers',()=>{
+ const f=fixture(),child=fixture(false,'eval-child'),e=new Evidence(f.root,'parent-analysis');
+ e.append('improve.started',{request:{id:'parent-report'}});
+ e.append('improve.report',{id:'parent-report',runId:e.runId,target:{workspace:f.workspace},candidates:[]});
+ e.append('improve.decision',{id:'child-decision',decision:{reportId:'parent-report',groups:[{id:'g1',candidateIds:[]}],limits:{maxTokens:0}}});
+ e.append('improve.eval',{parent:{decisionId:'child-decision'},groupId:'g1',planId:child.plan.id,dataRoot:child.root});e.close();
+ assert.equal(resolvePlanSource(f.root,child.source.label).root,child.root);
+ assert.equal(resolvePlanSource(f.root,child.plan.id).origin!.reportId,'parent-report');
+ const collision=fixture(false,'eval-child'),link=new Evidence(f.root,'parent-analysis');
+ link.append('improve.eval',{parent:{decisionId:'child-decision'},groupId:'g1',planId:collision.plan.id,dataRoot:collision.root});link.close();
+ assert.throws(()=>resolvePlanSource(f.root,child.source.label),/AMBIGUOUS/,'two roots with the same full plan id are not guessed');
+});
+
+test('eval plan commands retain longer display prefixes and case-insensitive display input',()=>{
+ const id='abcde100-0000-4000-8000-000000000001',f=fixture(false,id);
+ assert.equal(resolvePlanSource(f.root,'ep-abcde100').id,id);
+ assert.equal(resolvePlanSource(f.root,'EP-ABCDE100').id,id);
+ assert.equal(resolvePlanSource(f.root,id).id,id);
+ assert.throws(()=>resolvePlanSource(f.root,'ep-abc'),/NOT_FOUND/);
+});
+
+test('eval plan commands do not let display-shaped full ids shadow a longer display prefix',()=>{
+ const f=fixture(false,'abcde100-0000-4000-8000-000000000001'),shaped='ep-abcde100',e=new Evidence(f.root,shaped);e.append('eval.plan',{...f.plan,id:shaped});e.close();
+ assert.throws(()=>resolvePlanSource(f.root,shaped),/AMBIGUOUS/);
+ assert.equal(resolvePlanSource(f.root,f.plan.id).id,f.plan.id);
+ assert.equal(resolvePlanSource(f.root,ownPlanSource(f.root,shaped).label).id,shaped);
 });

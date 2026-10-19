@@ -23,7 +23,7 @@ import { scriptedTransport } from '../src/offline.js';
 import { readTrace } from '../src/trace.js';
 import { ReadOnlyTui } from '../src/tui/app.js';
 
-const fixtureData = fileURLToPath(new URL('../../test/fixtures/v1-records/data', import.meta.url));
+import { dataRoot as fixtureData } from './v1-runtime-fixture.js';
 const plain = (lines: string[]) => lines.map(line => stripTerminalSequences(line));
 function withTier<T>(tier: typeof COLOR_TIER, body: () => T) { const previous = COLOR_TIER; overrideColorTierForTest(tier); try { return body(); } finally { overrideColorTierForTest(previous); } }
 function assertGolden(grid: SnapshotGrid, name: string) {
@@ -223,18 +223,29 @@ test('narrow terminals: every trial stays selectable and opens with Enter; nothi
   assert.match(narrow, /A ✓✓ +B ✓✓/);
 });
 
-test('v1 fixture: list and plan layers read the first-version plan without writes', () => {
+test('v1 fixture: list, plan and trial trace layers read the first-version plan without writes', async () => {
   const before = readFileSync(join(fixtureData, 'host.sqlite'));
   const sources = listPlanSources(fixtureData);
   assert.equal(sources.length, 1);
   let opened: string | undefined;
   const list = new EvalListView(fixtureData, { openPlan: s => { opened = s.id; } });
   const text = plain(withTier('none', () => list.render(132, 38, 'none'))).join('\n');
-  assert.match(text, new RegExp(`› ${sources[0].label} · v1 fixture eval plan.* · 运行中 · 证据不足`));
+  assert.match(text, new RegExp(`› ${sources[0].label} · v1 fixture eval plan.* · 已结束 · 证据不足`));
   list.handleInput('\r'); assert.equal(opened, 'fixture-eval-plan-1');
-  const plan = plain(withTier('none', () => new EvalPlanView(sources[0], noHost).render(132, 38, 'none'))).join('\n');
-  assert.match(plan, /未结束 · 不在本 TUI 运行/); assert.match(plan, /A r1 未取得结果/); assert.match(plan, /A \? +B ·/);
+  let trial: TrialTraceView | undefined;
+  const planView = new EvalPlanView(sources[0], { openTrial: (source, report, id) => { trial = new TrialTraceView(source, report, id); } });
+  const plan = plain(withTier('none', () => planView.render(132, 38, 'none'))).join('\n');
+  assert.match(plan, /已结束 · 2\/2 trial/); assert.match(plan, /A ✓ +B ✓/); assert.match(plan, /重复次数不足/);
   assert.match(plan, /每配对 d ≥ δ = 1/); assert.match(plan, /≈ \$|< \$/);
+  planView.handleInput('\r');
+  assert.ok(trial, 'a recorded v1 trial opens from the plan');
+  await trial.opened;
+  try {
+    const body = plain(trial.render(132, 38, 'Esc 返回上层')).join('\n');
+    assert.match(body, /受限侧自报 · 仅供诊断/);
+    assert.match(body, /◆ trace/);
+    assert.doesNotMatch(body, /原文不可读取/);
+  } finally { await trial.close(); }
   assert.deepEqual(readFileSync(join(fixtureData, 'host.sqlite')), before);
   const empty = plain(new EvalListView(mkdtempSync(join(tmpdir(), 'durio-2b-empty-')), { openPlan() {} }).render(100, 10)).join('\n');
   assert.match(empty, /还没有 eval 计划 · 新建用 pi-durio eval plan，或 improve 的 fresh 对照/);

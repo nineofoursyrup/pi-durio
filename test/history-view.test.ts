@@ -1,3 +1,4 @@
+import { dataRoot as runtimeData, names as runtimeNames, readonlyDenialDir } from './v1-runtime-fixture.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
@@ -85,16 +86,14 @@ test('session pages preserve selection and n/p windows and never overflow at 132
 });
 
 test('v1 recovery notices retain the original skip explanation and readonly recovery facts in the shared transcript', () => {
-  const fixture = fileURLToPath(new URL('../../test/fixtures/v1-records', import.meta.url));
-  const names = JSON.parse(readFileSync(join(fixture, 'fixture-identity.json'), 'utf8')).names;
-  const view = new HistoryView(join(fixture, 'data'), { run: names['run.recovery-skip'] });
+  const view = new HistoryView(runtimeData, { run: runtimeNames['run.recovery-skip'] });
   assert.match(text(view), /跳过（首版处置）/);
-  assert.match(text(view), /Fixture skip decision for redesign test coverage/);
+  assert.match(text(view), /Fixture skip decision after an actual unsafe write with unavailable result/);
   assert.match(text(view), /只读续跑/);
 });
 
 test('history renders the frozen v1 readonly write refusal without relabeling it as a repeated completed call', () => {
-  const fixture = fileURLToPath(new URL('../../test/fixtures/v1-readonly-denial', import.meta.url));
+  const fixture = readonlyDenialDir;
   const identity = JSON.parse(readFileSync(join(fixture, 'fixture-identity.json'), 'utf8'));
   const root = join(fixture, 'data'), hostBefore = readFileSync(join(root, 'host.sqlite'));
   const view = new HistoryView(root, { run: identity.names.run }), body = text(view);
@@ -142,17 +141,15 @@ function assertGolden(grid: SnapshotGrid, name: string) {
   assert.equal(content, readFileSync(path, 'utf8'), `snapshot ${name} changed; delete ${path} to accept`);
 }
 
-test('v1 branches retain their own display identity, counts and chain depth in golden history and fit narrow terminals', () => {
-  const fixture = fileURLToPath(new URL('../../test/fixtures/v1-records', import.meta.url));
-  const names = JSON.parse(readFileSync(join(fixture, 'fixture-identity.json'), 'utf8')).names, root = join(fixture, 'data');
+test('v1 branches retain their own display identity, counts and chain depth and fit narrow terminals', () => {
+  const names = runtimeNames, root = runtimeData;
   const chains = readSessionChains(root), index = readDisplayIndex(root), branch = chains.session(names['session.fork-2'])!;
   assert.equal(branch.tasks, 1); assert.equal(branch.first.number, 2);
   const list = new HistoryView(root), session = new HistoryView(root, { session: branch.id });
   assert.match(text(list), new RegExp(`${index.label('session', branch.id)}.*1 个任务`));
   assert.match(text(session), new RegExp(`分支自 ${index.label('session', names['session.coding'])} 任务 1`));
   assert.match(text(session), /任务 2/); assert.doesNotMatch(text(session), /任务 1 ·/);
-  assertGolden(captureSnapshot(list.render(132, 38, 'truecolor'), 132, 38, 'truecolor'), 'history-list-132x38');
-  assertGolden(captureSnapshot(session.render(132, 38, 'truecolor'), 132, 38, 'truecolor'), 'history-session-132x38');
+
   for (const [w, h] of [[80, 24], [40, 12]]) {
     for (const view of [new HistoryView(root), new HistoryView(root, { session: branch.id }), new HistoryView(root, { run: branch.first.runId })]) {
       const lines = view.render(w, h); assert.equal(lines.length, h); assert.ok(lines.every(line => visibleWidth(line) <= w));
@@ -170,4 +167,12 @@ test('history annotation hooks keep the accepted task identity and selection whe
   view.handleInput('n'); view.handleInput('\x1b[B'); const before = text(view);
   view.handleInput('a'); assert.equal(text(view), before);
   assert.deepEqual(target, view.selectedTask); assert.equal(view.selectedTask?.taskId, 'task9'); assert.equal(view.selectedTask?.runId, 'run9'); assert.equal(view.selectedTask?.sessionId, 'session0'); assert.match(view.selectedTask!.acceptedSource, /^e1:/);
+});
+
+test('deterministic history layout keeps the mixed rendering fixture golden', () => {
+  const fixture = fileURLToPath(new URL('../../test/fixtures/v1-records', import.meta.url));
+  const names = JSON.parse(readFileSync(join(fixture, 'fixture-identity.json'), 'utf8')).names, root = join(fixture, 'data');
+  const list = new HistoryView(root), session = new HistoryView(root, { session: names['session.fork-2'] });
+  assertGolden(captureSnapshot(list.render(132, 38, 'truecolor'), 132, 38, 'truecolor'), 'history-list-132x38');
+  assertGolden(captureSnapshot(session.render(132, 38, 'truecolor'), 132, 38, 'truecolor'), 'history-session-132x38');
 });

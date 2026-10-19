@@ -5,6 +5,7 @@ import { executionConfig } from './execution-config.js';
 import { readImproveDefaults } from './improve-defaults.js';
 import { applyTaskProfile } from './task-profile.js';
 import type { ToolEnvironmentConfig } from './coding-environment.js';
+import { readFileSync } from 'node:fs';
 
 /**
  * 执行版本（R6、#62 Q1）：构建与依赖内容、Node 与平台、执行配置三项。从已有的 `execution.artifact`
@@ -30,6 +31,18 @@ export function recordedExecutionVersion(root: string, runId: string): Execution
 }
 
 let build: ReturnType<typeof currentBuild> | undefined, installation: string | undefined;
+/** Execution boundaries refresh once before comparing multiple task profiles.
+ * UI projections can keep the process cache, but executable bytes must still
+ * match the current manifest and the identity must include fresh dependencies. */
+export function refreshExecutionVersionArtifacts():void {
+  const manifest=JSON.parse(readFileSync(new URL('../execution/source-build.json',import.meta.url),'utf8'));
+  for(const file of manifest.outputs){
+    const bytes=readFileSync(new URL('../../'+file.path,import.meta.url));
+    if(bytes.length!==file.bytes||digest(bytes)!==file.sha256)throw Error(`EXECUTION_BUILD_OUTPUT_DRIFT: ${file.path}`);
+  }
+  const nextBuild=currentBuild(),nextInstallation=currentInstallation();
+  build=nextBuild;installation=nextInstallation;
+}
 /**
  * 现在开始的普通任务会记录的执行版本。构建部分每个进程算一次；配置部分每次重算（improve 默认值可在
  * 同一进程内改变）。安装清单摘要较重，只在比较到它时才算（`versionChanged` 最后比它）。

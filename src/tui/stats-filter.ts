@@ -6,10 +6,16 @@ import { PresetFilter, type FilterValues } from './view-stack.js';
 import { statsCommand, statsRequest, type StatsRequest, type StatsSource } from './stats.js';
 
 export interface StatsChoices { projects: string[]; types: string[]; versions: string[] }
+export class StatsChoicesLimitError extends CommandError {
+  constructor() { super('筛选选项范围过大 · STATS_CHOICES_TOO_LARGE · 使用较小的数据根读取选项，或用绝对项目路径直接打开统计'); }
+}
 /** Only selection metadata is read, so shrinking a rejected metrics query remains possible. */
 export function statsChoices(root: string, workspace: string): StatsChoices {
   const projects = new Set([workspace]), types = new Set<string>(), versions = new Set<string>();
+  let count = 0, bytes = 0;
   for (const ref of records(root, { kinds: ['task.accepted', 'control.accepted', 'execution.artifact'] })) {
+    bytes += ref.ref.bytes;
+    if (++count > 10000 || bytes > 32 * 1024 * 1024) throw new StatsChoicesLimitError();
     try {
       const data = decode(root, ref);
       if (ref.kind === 'execution.artifact') { if (typeof data.id === 'string') versions.add(data.id); continue; }

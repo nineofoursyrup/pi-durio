@@ -16,7 +16,13 @@ export function assessNative(record) {
     const colors = colorModes(output);
     set('color', env.tier === record.expectedTier && (env.tier === 'none' ? colors.length === 0 : colors.length === 1 && colors[0] === env.tier), ['environment.json', 'terminal-output.ansi']);
   }
-  for (const [id, key] of [['page-up', '\x1b[5~'], ['page-down', '\x1b[6~']]) if (events.some(e => ['received', 'input'].includes(e.kind) && e.data === key)) set(id, true, ['events.jsonl']);
+  for (const [id, key] of [['page-up', '\x1b[5~'], ['page-down', '\x1b[6~']]) {
+    // An explicit completed physical-key attempt distinguishes not delivered
+    // from not attempted. Keep the first failed attempt even after a success.
+    const attempts = events.filter(e => e.kind === 'key-attempt' && e.key === id && e.completed === true);
+    for (const attempt of attempts) set(id, attempt.received === true, ['events.jsonl']);
+    if (events.some(e => ['received', 'input'].includes(e.kind) && e.data === key)) set(id, true, ['events.jsonl']);
+  }
   const help = screen => screen?.some(line => line.trim() === '帮助');
   const editor = screen => screen?.at(-4)?.trim() ?? '';
   for (const e of events.filter(e => e.kind === 'input' && e.data === '?' && e.settled && !help(e.before?.screen))) {

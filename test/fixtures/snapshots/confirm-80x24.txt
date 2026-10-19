@@ -1,28 +1,28 @@
 76x24 truecolor
 00|╭──────────────────────────────────────────────────────────────────────────╮|
    0-75 border.input/bg.block
-01|│ 删除会话存储                                                             │      |
-   0-1 border.input/bg.block ; 2-67 fg.primary/bg.block/b ; 68-69 border.input/bg.block ; 70-75 -/-
-02|│ 将删除以下单元：                                                         │        |
-   0-1 border.input/bg.block ; 2-65 fg.body/bg.block ; 66-67 border.input/bg.block ; 68-75 -/-
-03|│ s-3f2a · 会话存储 12 MB                                                  │    |
-   0-1 border.input/bg.block ; 2-69 fg.body/bg.block ; 70-71 border.input/bg.block ; 72-75 -/-
-04|│ s-9c01 · 会话存储 4 MB                                                   │    |
-   0-1 border.input/bg.block ; 2-69 fg.body/bg.block ; 70-71 border.input/bg.block ; 72-75 -/-
+01|│ 删除会话存储                                                             │|
+   0-1 border.input/bg.block ; 2-13 fg.primary/bg.block/b ; 14-73 -/bg.block ; 74-75 border.input/bg.block
+02|│ 将删除以下单元：                                                         │|
+   0-1 border.input/bg.block ; 2-17 fg.body/bg.block ; 18-73 -/bg.block ; 74-75 border.input/bg.block
+03|│ s-3f2a · 会话存储 12 MB                                                  │|
+   0-1 border.input/bg.block ; 2-24 fg.body/bg.block ; 25-73 -/bg.block ; 74-75 border.input/bg.block
+04|│ s-9c01 · 会话存储 4 MB                                                   │|
+   0-1 border.input/bg.block ; 2-23 fg.body/bg.block ; 24-73 -/bg.block ; 74-75 border.input/bg.block
 05|│ [✓] s-3f2a                                                               │|
-   0-1 border.input/bg.block ; 2-73 fg.primary/line.inner ; 74-75 border.input/bg.block
+   0-1 border.input/bg.block ; 2-11 fg.primary/bg.selected ; 12-73 -/bg.selected ; 74-75 border.input/bg.block
 06|│ [✓] s-9c01                                                               │|
-   0-1 border.input/bg.block ; 2-73 fg.primary/bg.block ; 74-75 border.input/bg.block
-07|│ [ ] 未归属附件 · 不可选 · 仍被引用                                       │            |
-   0-1 border.input/bg.block ; 2-61 fg.gutter/bg.block ; 62-63 border.input/bg.block ; 64-75 -/-
-08|│ 影响：删除 3 个会话存储 · 不可撤销 · 宿主记录保留，trace 中对应原文标“已 │                            |
-   0-1 border.input/bg.block ; 2-45 fg.label/bg.block ; 46-47 border.input/bg.block ; 48-75 -/-
-09|│ 清理”                                                                    │  |
-   0-1 border.input/bg.block ; 2-71 fg.label/bg.block ; 72-73 border.input/bg.block ; 74-75 -/-
-10|│ 费用：不调用模型 · ≤ 0 请求 · ≈¥0                                        │          |
-   0-1 border.input/bg.block ; 2-63 fg.label/bg.block ; 64-65 border.input/bg.block ; 66-75 -/-
-11|│ Enter 删除 · Esc 取消                                                    │    |
-   0-1 border.input/bg.block ; 2-9 fg.body/bg.block ; 10-69 fg.label/bg.block ; 70-71 border.input/bg.block ; 72-75 -/-
+   0-1 border.input/bg.block ; 2-11 fg.primary/bg.block ; 12-73 -/bg.block ; 74-75 border.input/bg.block
+07|│ [ ] 未归属附件 · 不可选 · 仍被引用                                       │|
+   0-1 border.input/bg.block ; 2-35 fg.gutter/bg.block ; 36-73 -/bg.block ; 74-75 border.input/bg.block
+08|│ 影响：删除 3 个会话存储 · 不可撤销 · 宿主记录保留，trace 中对应原文标“已 │|
+   0-1 border.input/bg.block ; 2-73 fg.label/bg.block ; 74-75 border.input/bg.block
+09|│ 清理”                                                                    │|
+   0-1 border.input/bg.block ; 2-6 fg.label/bg.block ; 7-73 -/bg.block ; 74-75 border.input/bg.block
+10|│ 费用：不调用模型 · ≤ 0 请求 · ≈¥0                                        │|
+   0-1 border.input/bg.block ; 2-34 fg.label/bg.block ; 35-73 -/bg.block ; 74-75 border.input/bg.block
+11|│ Enter 删除 · Esc 取消                                                    │|
+   0-1 border.input/bg.block ; 2-11 fg.body/bg.block ; 12-22 fg.label/bg.block ; 23-73 -/bg.block ; 74-75 border.input/bg.block
 12|╰──────────────────────────────────────────────────────────────────────────╯|
    0-75 border.input/bg.block
 13|                                                                            |

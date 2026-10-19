@@ -2,14 +2,15 @@ import { readdirSync, statSync, accessSync, constants } from 'node:fs';
 import { delimiter, join, relative } from 'node:path';
 import { CombinedAutocompleteProvider, visibleWidth, wrapTextWithAnsi, type AutocompleteItem, type AutocompleteProvider } from '@earendil-works/pi-tui';
 import { DISPLAY_PREFIXES, readDisplayIndex, resolveDisplayInput, DisplayInputError, type DisplayKind } from '../display-number.js';
+import {fgSgr,resetSgr} from './theme.js';
 import {completePath} from '../improve-entry.js';
 
 /**
  * 命令表（U11、T1）：`/` 补全、帮助视图和参数解析都只从这张表取。
  *
- * T1 标注：`bare` 是不带参数时的行为（打开视图 / 直接执行）；`withArgs` 是带参数时的行为：
+ * `withArgs` 声明命令接受参数时的行为：
  * `open` 只读操作直接打开对应层；`confirm` 计费、写记录或改变保留状态的操作只预填确认框；
- * `direct` 规格明确允许直接执行（`/withdraw`）。各屏票按标注接入，标注不等于当前处理函数已经照做。
+ * `direct` 用于规格明确允许直接执行的操作（`/withdraw`）。
  */
 export interface OptionSpec {
   name: string;
@@ -36,71 +37,65 @@ export interface PositionalSpec {
 export interface CommandSpec {
   name: string;
   summary: string;
-  bare: 'view' | 'action';
   /** 不填 = 不接受参数 */
   withArgs?: 'open' | 'confirm' | 'direct';
   positional?: readonly PositionalSpec[];
   options?: readonly OptionSpec[];
   subcommands?: readonly CommandSpec[];
-  /**
-   * 首版写法（JSON 等）：参数整段原样交给处理函数，不做解析。由对应屏票换成表里的写法或删除。
-   * 有 subcommands 时，第一个词不是子命令才按 raw 处理。
-   */
-  raw?: string;
 }
 
 const date = (name: string): OptionSpec => ({ name, value: '日期', date: true });
 const project: OptionSpec = { name: 'project', value: '名称', values: ['all'], free: true };
 
 export const COMMANDS: readonly CommandSpec[] = [
-  { name: 'help', summary: '打开帮助', bare: 'view' },
-  { name: 'exit', summary: '退出并保留草稿', bare: 'action' },
-  { name: 'restore', summary: '恢复草稿（不执行）', bare: 'action' },
-  { name: 'bottom', summary: '回到底部，跟随最新输出', bare: 'action' },
-  { name: 'older', summary: '上一窗口（只读）', bare: 'action' },
-  { name: 'newer', summary: '下一窗口（只读）', bare: 'action' },
-  { name: 'copy', summary: '复制选文或最新可见输出', bare: 'action' },
-  { name: 'stop', summary: '中止运行中的任务', bare: 'action' },
-  { name: 'follow-up', summary: '把输入排到下一任务', bare: 'action' },
-  { name: 'compact', summary: '压缩当前上下文（原文保留）', bare: 'action' },
+  { name: 'help', summary: '打开帮助' },
+  { name: 'exit', summary: '退出并保留草稿' },
+  { name: 'restore', summary: '恢复草稿（不执行）' },
+  { name: 'bottom', summary: '回到底部，跟随最新输出' },
+  { name: 'older', summary: '上一窗口（只读）' },
+  { name: 'newer', summary: '下一窗口（只读）' },
+  { name: 'copy', summary: '复制选文或最新可见输出' },
+  { name: 'stop', summary: '中止运行中的任务' },
+  { name: 'follow-up', summary: '把输入排到下一任务' },
+  { name: 'compact', summary: '压缩当前上下文（原文保留）' },
   {
-    name: 'history', summary: '查询历史（只读）', bare: 'view', withArgs: 'open',
+    name: 'history', summary: '查询历史（只读）', withArgs: 'open',
     positional: [{ label: 's-号|r-号', kinds: ['session', 'run'] }],
     options: [date('from'), date('to'), project, { name: 'status', value: '状态', values: ['completed', 'failed', 'aborted', 'recovery'] }],
   },
-  { name: 'trace', summary: 'run 的 span 瀑布（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'r-号', kinds: ['run'] }] },
-  { name: 'details', summary: '打开 2a 原文层（不带号取当前 run 最近一次工具调用）', bare: 'view', withArgs: 'open', positional: [{ label: 'tc-号' }] },
-  { name: 'queue', summary: '队列与原目标', bare: 'view' },
-  { name: 'withdraw', summary: '撤回待接入的请求', bare: 'view', withArgs: 'direct', positional: [{ label: 'q-号', kinds: ['queue-request'], required: true }] },
-  { name: 'reattach', summary: '重新接入冻结的请求', bare: 'view', withArgs: 'confirm', positional: [{ label: 'q-号', kinds: ['queue-request'], required: true }] },
-  { name: 'storage', summary: '存储占用与显式清理', bare: 'view' },
+  { name: 'trace', summary: 'run 的 span 瀑布（只读）', withArgs: 'open', positional: [{ label: 'r-号', kinds: ['run'] }] },
+  { name: 'details', summary: '打开 2a 原文层（不带号取当前 run 最近一次工具调用）', withArgs: 'open', positional: [{ label: 'tc-号' }] },
+  { name: 'queue', summary: '队列与原目标' },
+  { name: 'withdraw', summary: '撤回待接入的请求', withArgs: 'direct', positional: [{ label: 'q-号', kinds: ['queue-request'], required: true }] },
+  { name: 'reattach', summary: '重新接入冻结的请求', withArgs: 'confirm', positional: [{ label: 'q-号', kinds: ['queue-request'], required: true }] },
+  { name: 'storage', summary: '存储占用与显式清理' },
   {
-    name: 'stats', summary: '任务指标（只读）', bare: 'view', withArgs: 'open',
+    name: 'stats', summary: '任务指标（只读）', withArgs: 'open',
     options: [{ name: 'self' }, date('from'), date('to'), { name: 'as-of', value: '时间' }, project, { name: 'type', value: '任务类型' }, { name: 'version', value: '执行版本' },
       { name: 'source', value: '来源', values: ['ordinary', 'synthetic', 'diagnostic'] }, { name: 'snapshot', value: '序号' }],
   },
-  { name: 'eval', summary: '评估报告；run/grade 仅预填确认', bare: 'view', withArgs: 'open', positional: [{ label: 'ep-号', kinds: ['eval-plan'] }], subcommands:[
-    {name:'run',summary:'启动固定计划（只预填确认）',bare:'view',withArgs:'confirm',positional:[{label:'ep-号',kinds:['eval-plan'],required:true}]},
-    {name:'grade',summary:'同版本重评分（只预填确认）',bare:'view',withArgs:'confirm',positional:[{label:'ep-号',kinds:['eval-plan'],required:true}],options:[{name:'case',value:'id',repeat:true}]},
+  { name: 'eval', summary: '评估报告；run/grade 仅预填确认', withArgs: 'open', positional: [{ label: 'ep-号', kinds: ['eval-plan'] }], subcommands:[
+    {name:'run',summary:'启动固定计划（只预填确认）',withArgs:'confirm',positional:[{label:'ep-号',kinds:['eval-plan'],required:true}]},
+    {name:'grade',summary:'同版本重评分（只预填确认）',withArgs:'confirm',positional:[{label:'ep-号',kinds:['eval-plan'],required:true}],options:[{name:'case',value:'id',repeat:true}]},
   ] },
-  { name: 'acceptance', summary: '补记验收、介入或返工；参数只预填', bare: 'view', withArgs: 'confirm', positional: [{ label: 't-号', kinds: ['task'] }],
+  { name: 'acceptance', summary: '补记验收、介入或返工；参数只预填', withArgs: 'confirm', positional: [{ label: 't-号', kinds: ['task'] }],
     options: [{ name: 'verdict', value: '验收', values: ['pass', 'fail', 'unknown'] }, { name: 'intervention', value: '介入', values: ['none', 'yes', 'unknown'] }, { name: 'rework', value: '返工', values: ['none', 'yes', 'unknown'] }, { name: 'note', value: '文本' }] },
   {
-    name: 'improve', summary: 'improve 视图；报告参数只预填选择与汇总', bare: 'view', withArgs:'confirm',
+    name: 'improve', summary: 'improve 视图；报告参数只预填选择与汇总', withArgs:'confirm',
     positional:[{label:'ir-号',kinds:['improve-report']}],
     options:['execute','validate','defer','do-not-suggest'].map(name=>({name,value:'C-号…',many:true as const})),
     subcommands: [
       {
-        name: 'new', summary: '新建分析（参数只预填启动框，Enter 确认后开始）', bare: 'view', withArgs: 'confirm',
+        name: 'new', summary: '新建分析（参数只预填启动框，Enter 确认后开始）', withArgs: 'confirm',
         options: [{ name: 'scope', value: '范围', values: ['session', '7d', '30d'] }, { name: 'budget', value: '档位', values: ['standard', 'large'] },
           { name: 'source', value: '来源', values: ['self', 'eval'], repeat: true }, { name: 'focus', value: '文本' }],
       },
-      { name: 'history', summary: '查看 improve 报告（只读）', bare: 'view', withArgs: 'open', positional: [{ label: 'ir-号', kinds: ['improve-report'] }] },
-      { name: 'suppressions', summary: '查看建议抑制（只读）', bare: 'view' },
-      { name:'continue',summary:'继续未运行的独立项（只预填确认框）',bare:'view',withArgs:'confirm',positional:[{label:'ir-号',kinds:['improve-report'],required:true}] },
-      { name:'rollback',summary:'回退候选所在组合的精确写回（只预填）',bare:'view',withArgs:'confirm',positional:[{label:'ir-号·C-号',required:true}],options:[{name:'reason',value:'原因',values:['effect','regression','unneeded']},{name:'note',value:'文本'}] },
-      { name:'restore',summary:'恢复该问题的建议（只预填）',bare:'view',withArgs:'confirm',positional:[{label:'ir-号·C-号',required:true}],options:[{name:'reason',value:'原因',values:['changed','mistaken','reassess']},{name:'note',value:'文本'}] },
-      ...(['register','unregister'] as const).map(name=>({name,summary:name==='register'?'核对并登记来源（只预填确认框）':'移除来源登记（只预填确认框）',bare:'view' as const,withArgs:'confirm' as const,positional:[{label:'self|eval',values:['self','eval'],required:true as const},{label:'路径',required:true as const}]})),
+      { name: 'history', summary: '查看 improve 报告（只读）', withArgs: 'open', positional: [{ label: 'ir-号', kinds: ['improve-report'] }] },
+      { name: 'suppressions', summary: '查看建议抑制（只读）' },
+      { name:'continue',summary:'继续未运行的独立项（只预填确认框）',withArgs:'confirm',positional:[{label:'ir-号',kinds:['improve-report'],required:true}] },
+      { name:'rollback',summary:'回退候选所在组合的精确写回（只预填）',withArgs:'confirm',positional:[{label:'ir-号·C-号',required:true}],options:[{name:'reason',value:'原因',values:['effect','regression','unneeded']},{name:'note',value:'文本'}] },
+      { name:'restore',summary:'恢复该问题的建议（只预填）',withArgs:'confirm',positional:[{label:'ir-号·C-号',required:true}],options:[{name:'reason',value:'原因',values:['changed','mistaken','reassess']},{name:'note',value:'文本'}] },
+      ...(['register','unregister'] as const).map(name=>({name,summary:name==='register'?'核对并登记来源（只预填确认框）':'移除来源登记（只预填确认框）' as const,withArgs:'confirm' as const,positional:[{label:'self|eval',values:['self','eval'],required:true as const},{label:'路径',required:true as const}]})),
     ],
   },
 ];
@@ -113,6 +108,7 @@ export const SESSION_KEYS: readonly (readonly [string, string])[] = [
   ['Esc', '关闭补全；运行中请求中止'],
   ['Ctrl+C', '运行中中止；空闲时清输入并保留草稿，再按退出'],
   ['Ctrl+D', '非空时向前删除；空输入 800ms 内再按退出'],
+  ['Backspace', '空输入时撤回最新待接入请求；清空输入后等待 500ms'],
   ['Ctrl+O', '展开或折叠全部工具行'],
   ['Ctrl+R', '打开历史'],
   ['Ctrl+T', '打开当前或最近一次 run 的 trace'],
@@ -129,7 +125,6 @@ export const ARGUMENT_RULES = '位置参数写显示号或完整 id；选项写 
 export function usage(spec: CommandSpec): string {
   const parts: string[] = [];
   if (spec.subcommands) parts.push(spec.subcommands.map(s => s.name).join('|'));
-  if (spec.raw) parts.push(spec.raw);
   for (const p of spec.positional ?? []) parts.push(p.required ? p.label : `[${p.label}]`);
   for (const o of spec.options ?? []) {
     const value = o.values ? (o.free ? [o.value, ...o.values] : o.values).join('|') : o.value;
@@ -148,8 +143,6 @@ export interface ParsedCommand {
   positional: string[];
   /** 日期选项已转成 ISO 时间；开关为 true */
   options: Record<string, string | true>;
-  /** 命令名之后的原文（raw 命令用） */
-  raw: string;
 }
 export class CommandError extends Error {
   constructor(message: string, readonly available: readonly string[] = []) { super(message); }
@@ -191,7 +184,6 @@ export function parseCommand(text: string, table: readonly CommandSpec[] = COMMA
   let leaf = spec;
   const sub = spec.subcommands?.find(s => s.name === tokens[0]);
   if (sub) { leaf = sub; path.push(sub.name); tokens.shift(); }
-  else if (spec.raw) return { spec, leaf, path, positional: [], options: {}, raw: rest };
   if (tokens.length && !leaf.withArgs) throw new CommandError(`/${[spec.name, ...path].join(' ')} 不接受参数`, path.length ? [] : (spec.subcommands ?? []).map(s => s.name));
   const positional: string[] = [], options: Record<string, string | true> = {};
   for (let i = 0; i < tokens.length; i++) {
@@ -227,7 +219,7 @@ export function parseCommand(text: string, table: readonly CommandSpec[] = COMMA
   if (missing) throw new CommandError(`/${[spec.name, ...path].join(' ')} 需要 ${missing.label}`);
   if (typeof options.from === 'string' && typeof options.to === 'string' && Date.parse(options.from) >= Date.parse(options.to))
     throw new CommandError('区间按 [from,to)，--from 须早于 --to');
-  return { spec, leaf, path, positional, options, raw: rest };
+  return { spec, leaf, path, positional, options };
 }
 
 /**
@@ -238,7 +230,6 @@ export function resolveArgument(root: string, input: string, kinds: readonly Dis
   const prefixed = kinds.find(k => input.toLowerCase().startsWith(prefixOf(k)) && /^[a-z]+-[0-9a-f]+$/i.test(input));
   try {
     if (prefixed) return { kind: prefixed, id: resolveDisplayInput(root, prefixed, input) };
-    if (kinds.length === 1) return { kind: kinds[0], id: input };
     const index = readDisplayIndex(root), found = kinds.filter(k => index.has(k, input));
     if (found.length === 1) return { kind: found[0], id: input };
     throw new CommandError(found.length ? `${input} 同时对应 ${found.join('、')}` : `没有找到 ${input}`, found.length ? [] : kinds.map(k => `${prefixOf(k)}号`));
@@ -330,9 +321,10 @@ export function commandCompletion(workspace: string, table: readonly CommandSpec
       const before = lines[line]?.slice(0, col) ?? '';
       const at = /(?:^|\s)(@(?:"[^"]*|\S*))$/.exec(before)?.[1];
       if (at !== undefined) {
-        if (files) return files.getSuggestions(lines, line, col, options);
-        const items = walkFileSuggestions(workspace, at.slice(1).replace(/^"/, ''));
-        return items.length ? { prefix: at, items } : null;
+        const found = files ? await files.getSuggestions(lines, line, col, options) : { prefix: at, items: walkFileSuggestions(workspace, at.slice(1).replace(/^"/, '')) };
+        if(!found?.items.length)return null;
+        const color=(text:string)=>fgSgr('ac.path')+text+resetSgr();
+        return {...found,items:found.items.map(item=>({...item,label:color(item.label),...(item.description?{description:color(item.description)}:{})}))};
       }
       if (line !== 0 || !before.startsWith('/')) return null;
       const space = before.search(/\s/);

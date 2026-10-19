@@ -8,7 +8,7 @@ import { verifiedImage } from '../eval/plan.js';
 import { BASELINE_ZERO, type Metric } from '../eval/comparison.js';
 import { listPlanSources, planState, readPlanReport, PLAN_STATE_LABEL, type EvalReport, type EvalReportTrial, type PlanSource, type PlanState } from '../eval/overview.js';
 import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { clean, escHint, fixedFrame, hintLine, statusError, truncateEnd, widthTier } from './view-stack.js';
+import { clean, escHint, fixedFrame, fitSegments as fit, hintLine, statusError, truncateEnd, widthTier } from './view-stack.js';
 import { formatDuration, formatTokens } from './trace.js';
 import { clock } from './session-screen.js';
 
@@ -167,20 +167,6 @@ export function verdictWord(report: EvalReport): string {
 // ─── 共用排版 ────────────────────────────────────────────────────────────────
 
 const width$ = (segments: TextSegment[]) => segments.reduce((n, s) => n + visibleWidth(s.text), 0);
-/** 把若干段放进恰好 w 列：放不下时末尾加 `…`，不足时补空格。 */
-function fit(segments: TextSegment[], w: number): TextSegment[] {
-  const out: TextSegment[] = []; let used = 0;
-  for (const s of segments) {
-    if (!s.text) continue;
-    const sw = visibleWidth(s.text);
-    if (used + sw <= w) { out.push(s); used += sw; continue; }
-    let room = w - used, t = truncateEnd(s.text, room);
-    while (room > 0 && visibleWidth(t) > w - used) t = truncateEnd(s.text, --room);
-    out.push({ ...s, text: t }); used += visibleWidth(t); break;
-  }
-  if (used < w) out.push({ text: ' '.repeat(w - used) });
-  return out;
-}
 const spinner = () => SPINNER_FRAMES[Math.floor(Date.now() / SPINNER_INTERVAL_MS) % SPINNER_FRAMES.length];
 const amountText = (report: EvalReport) => {
   const cost = report.cost;
@@ -268,8 +254,7 @@ export class EvalPlanView {
   private revision = 0;
 
   constructor(readonly source: PlanSource, private readonly host: PlanViewHost, private readonly options: PlanViewOptions = {}) {
-    this.read();
-    if (this.current) this.revisions = [source.through, ...this.current.gradingRevisions.toReversed().map(r => Number(String(r.source).split(':')[1]) - 1)];
+    this.refresh();
   }
   get report() { return this.current; }
   refresh(){this.read();if(this.current)this.revisions=[this.source.through,...this.current.gradingRevisions.toReversed().map(r=>Number(String(r.source).split(':')[1])-1)];}
@@ -487,7 +472,7 @@ export class EvalPlanView {
     let left: TextSegment[];
     if(this.options.stoppingHere?.())left=[{text:`${spinner()} 停止中 · ${this.source.origin?'结束整个 improve 提交批次，剩余项不启动':'等待 VM 和写入者清理'}`,fg:'ac.warn'}];
     else if (state === 'not-started') left = [{ text: `○ 未开始 · ${n} trial`, fg: 'fg.muted' }];
-    else if (state === 'running' && this.runningHere()) left = [{ text: `${spinner()} 运行`, fg: 'ac.brand' }, { text: ` · trial ${started}/${n}${batch?.startedAt ? ` · ${clock(this.now() - Date.parse(batch.startedAt))}` : ''}`, fg: 'fg.body' }];
+    else if (state === 'running' && this.runningHere()) left = [{ text: `${spinner()} 运行${this.source.origin?` · 停止将结束 improve 提交批次 ${this.source.origin.label}，剩余项不启动`:''}`, fg: 'ac.brand' }, { text: ` · trial ${started}/${n}${batch?.startedAt ? ` · ${clock(this.now() - Date.parse(batch.startedAt))}` : ''}`, fg: 'fg.body' }];
     else if (state === 'running') left = [{ text: '未结束 · 不在本 TUI 运行', fg: 'ac.warn' }, { text: ` · 已启动 ${started}/${n} trial`, fg: 'fg.muted' }];
     else if (state === 'ended') {
       const done = report.trials.filter(t => t.outcome.status !== 'not-run').length;

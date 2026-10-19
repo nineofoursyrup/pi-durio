@@ -9,8 +9,8 @@ import { withOwnerSync } from '../ownership.js';
 import { readDisplayIndex } from '../display-number.js';
 import { readAcceptance, recordAcceptance, selectAcceptance, type AcceptanceInput, type AcceptanceFact, type Verdict } from '../metrics/acceptance.js';
 import { feedbackHistory, recordFeedback, type FeedbackInput, type FeedbackFact, type OccurrenceInterval } from '../metrics/feedback.js';
-import { bgSgr, fgSgr, resetSgr, styledLine, COLOR_TIER, type ColorTier } from './theme.js';
-import { ConfirmDialog, TOO_SMALL_TO_CONFIRM, clean, truncateEnd, wrapAuthorized, type ConfirmResult } from './view-stack.js';
+import { COLOR_TIER, type ColorTier } from './theme.js';
+import { ConfirmDialog, SingleLineInput, wrapAuthorized, type ConfirmResult } from './view-stack.js';
 
 export interface AnnotationTarget { root: string; taskId: string; runId: string | null; acceptedSource: string; sessionId?: string | null }
 export interface AnnotationPrefill { verdict?: 'pass' | 'fail' | 'unknown'; intervention?: 'none' | 'yes' | 'unknown'; rework?: 'none' | 'yes' | 'unknown'; note?: string }
@@ -147,7 +147,6 @@ export function saveAnnotation(snapshot: AnnotationSnapshot, value: AnnotationSu
   guard();
   const current = readAnnotation(snapshot.target, new Date(snapshot.observedAt));
   if (current.identity !== snapshot.identity) fail('任务或补记记录已变化，请重新打开补记框 · ANNOTATION_CHANGED');
-  if (value.note.length > 1000 || Object.keys(value.findings).some(id => !snapshot.necessary.some(r => r.id === id)) || Object.values(value.findings).some(v => !['unrecorded', 'PASS', 'FAIL', 'unknown'].includes(v)) || !['unrecorded', 'none', 'yes', 'unknown'].includes(value.intervention) || !['unrecorded', 'none', 'yes', 'unknown'].includes(value.rework)) fail('补记内容无效 · INVALID_ANNOTATION');
   const changed = changes(snapshot, value);
   if (changed.acceptance && snapshot.acceptanceBlocked) fail(snapshot.acceptanceBlocked);
   for (const dimension of ['intervention', 'rework'] as const) if (changed[dimension] && snapshot.feedbackBlocked[dimension]) fail(snapshot.feedbackBlocked[dimension]!);
@@ -185,9 +184,8 @@ export class AcceptanceDialog {
  private readonly values: Values;
  private readonly touched = new Set<string>();
  private cursor = 0;
- private scroll = 0;
- private follow = true;
- private tooSmall = false;
+ private readonly frame: ConfirmDialog;
+ private readonly note: SingleLineInput;
  private readonly prefillHint?: string;
  constructor(readonly snapshot: AnnotationSnapshot, prefill: AnnotationPrefill = {}) {
   this.values = structuredClone(snapshot.initial);
@@ -197,11 +195,16 @@ export class AcceptanceDialog {
    else { const id = snapshot.necessary[0].id; this.values.findings[id] = prefill.verdict === 'unknown' ? 'unknown' : prefill.verdict.toUpperCase() as Verdict; this.touched.add(`requirement:${id}`); }
   }
   for (const dimension of ['intervention', 'rework'] as const) if (prefill[dimension]) { this.values[dimension] = prefill[dimension]; this.touched.add(dimension); }
+  this.note = new SingleLineInput(this.values.note, 1000);
+  this.frame = new ConfirmDialog({
+   title: `补记 ${snapshot.label}`, action: '保存补记', fixed: [ANNOTATION_IMPACT], disabled: () => this.blockedReason,
+   bodyRows: inner => this.body(inner).map(item => ({ segments: [{ text: item.text, fg: item.row === this.cursor ? 'fg.primary' : 'fg.body' }], cursor: item.row === this.cursor })),
+  });
  }
  get submission(): AnnotationSubmission { return { ...structuredClone(this.values), changed: [...this.touched] }; }
  private get rowIds() { return [...this.snapshot.necessary.map(r => `requirement:${r.id}`), 'intervention', 'rework', 'note']; }
- get disabledReason() {
-  if (this.tooSmall) return TOO_SMALL_TO_CONFIRM;
+ get disabledReason() { return this.frame.disabledReason; }
+ private get blockedReason() {
   const changed = changes(this.snapshot, this.submission);
   if (changed.acceptance && this.snapshot.acceptanceBlocked) return this.snapshot.acceptanceBlocked;
   for (const d of ['intervention', 'rework'] as const) if (changed[d] && this.snapshot.feedbackBlocked[d]) return this.snapshot.feedbackBlocked[d];
@@ -210,15 +213,12 @@ export class AcceptanceDialog {
  handleInput(data: string): ConfirmResult {
   if (matchesKey(data, 'escape')) return { type: 'cancel' };
   if (matchesKey(data, 'enter')) return this.disabledReason ? { type: 'noop' } : { type: 'confirm', selected: [] };
-  if (matchesKey(data, 'up') || matchesKey(data, 'shift+tab')) { this.cursor = Math.max(0, this.cursor - 1); this.follow = true; return { type: 'handled' }; }
-  if (matchesKey(data, 'down') || matchesKey(data, 'tab')) { this.cursor = Math.min(this.rowIds.length - 1, this.cursor + 1); this.follow = true; return { type: 'handled' }; }
-  if (matchesKey(data, 'pageUp') || matchesKey(data, 'pageDown')) { this.scroll = Math.max(0, this.scroll + (matchesKey(data, 'pageUp') ? -3 : 3)); this.follow = false; return { type: 'handled' }; }
+  if (matchesKey(data, 'up') || matchesKey(data, 'shift+tab')) { if (this.cursor === 0) this.frame.scrollBy(-1); else { this.cursor--; this.frame.revealCursor(); } return { type: 'handled' }; }
+  if (matchesKey(data, 'down') || matchesKey(data, 'tab')) { if (this.cursor === this.rowIds.length - 1) this.frame.scrollBy(1); else { this.cursor++; this.frame.revealCursor(); } return { type: 'handled' }; }
+  if (matchesKey(data, 'pageUp') || matchesKey(data, 'pageDown')) { this.frame.scrollBy(matchesKey(data, 'pageUp') ? -3 : 3); return { type: 'handled' }; }
   const row = this.rowIds[this.cursor];
   if (row === 'note') {
-   if (matchesKey(data, 'backspace')) this.values.note = Array.from(this.values.note).slice(0, -1).join('');
-   else if (matchesKey(data, 'ctrl+a')) this.values.note = '';
-   else if (data && clean(data) === data && !/[\t\r\n\x1b]/.test(data)) this.values.note = (this.values.note + data).slice(0, 1000);
-   else return { type: 'noop' };
+   this.note.handleInput(data); this.values.note = this.note.getValue();
   } else {
    const options = row === 'intervention' || row === 'rework' ? ['unrecorded', 'none', 'yes', 'unknown'] as const : ['unrecorded', 'PASS', 'FAIL', 'unknown'] as const;
    const requirementId = row.slice('requirement:'.length);
@@ -231,24 +231,7 @@ export class AcceptanceDialog {
   return { type: 'handled' };
  }
  render(columns: number, rows: number, tier: ColorTier = COLOR_TIER): string[] {
-  const width = ConfirmDialog.width(columns), inner = Math.max(1, width - 4), fixed = wrapAuthorized(ANNOTATION_IMPACT, inner);
-  const footer = (reason?: string) => wrapAuthorized(`Enter ${reason ?? '保存补记'} · Esc 取消`, inner);
-  const chrome = 3 + footer(TOO_SMALL_TO_CONFIRM).length;
-  this.tooSmall = rows < chrome + fixed.length || columns < 40 || rows < 12;
-  const border = (text: string) => (tier === 'none' ? '' : bgSgr('bg.block', tier) + fgSgr('border.input', tier)) + text + resetSgr();
-  const line = (text: string, selected = false, bold = false) => border('│ ') + styledLine([{ text, fg: selected || bold ? 'fg.primary' : 'fg.body', bold }], inner, selected ? 'bg.selected' : 'bg.block', tier) + border(' │');
-  const result = [border(`╭${'─'.repeat(Math.max(0, width - 2))}╮`), line(truncateEnd(`补记 ${this.snapshot.label}`, inner), false, true)];
-  if (!this.tooSmall) {
-   const body = this.body(inner), height = Math.max(0, rows - 3 - footer(this.disabledReason).length - fixed.length);
-   const first = body.findIndex(l => l.row === this.cursor);
-   if (this.follow && first >= 0 && (first < this.scroll || first >= this.scroll + height)) this.scroll = first;
-   this.scroll = Math.max(0, Math.min(this.scroll, body.length - height));
-   for (const item of body.slice(this.scroll, this.scroll + height)) result.push(line(item.text, item.row === this.cursor));
-   for (const text of fixed) result.push(line(text));
-  }
-  for (const text of footer(this.disabledReason)) result.push(line(text));
-  result.push(border(`╰${'─'.repeat(Math.max(0, width - 2))}╯`));
-  return result.slice(0, Math.max(0, rows));
+  return this.frame.render(columns, rows, tier);
  }
  private body(inner: number) {
   const out: { text: string; row?: number }[] = [];
@@ -271,9 +254,11 @@ export class AcceptanceDialog {
    else add(this.snapshot.reworkMature ? '首次交付起 7 天；“有”指原要求未满足，已提出或开始纠正。' : '未满 7 天 · 仅声明截至打开时的观察；“没有”不表示全窗无返工。', row);
    if (this.snapshot.feedbackBlocked[dimension]) add(this.snapshot.feedbackBlocked[dimension]!, row);
   }
-  add(`说明（选填）：${this.values.note || '直接输入；Ctrl+A 清空'}${this.cursor === this.rowIds.length - 1 ? '▏' : ''}`, this.rowIds.length - 1);
+  add('说明（选填） · Ctrl+A 清空');
+  if (this.cursor === this.rowIds.length - 1) out.push({ text: this.note.render(inner)[0], row: this.cursor });
+  else add(this.values.note || '直接输入', this.rowIds.length - 1);
   if (this.snapshot.acceptanceBlocked) add(this.snapshot.acceptanceBlocked);
-  add('↑↓ 换行 · 数字键选择 · PgUp/PgDn 查看范围');
+  add('↑↓ 换行（首尾继续滚动） · 数字键选择');
   return out;
  }
 }

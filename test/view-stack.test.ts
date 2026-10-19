@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { stripTerminalSequences, visibleWidth } from '@earendil-works/pi-tui';
 import {
-  ConfirmDialog, LoadingState, PresetFilter, TOO_SMALL_TO_CONFIRM,
+  ConfirmDialog, LoadingState, PresetFilter, SingleLineInput, TOO_SMALL_TO_CONFIRM,
   fixedFrame, hintLine, statusEmpty, statusError, truncateMiddle, viewKey, widthTier, wrapAuthorized, escHint,
 } from '../src/tui/view-stack.js';
 import { captureSnapshot, snapshotText, type SnapshotGrid } from '../src/tui/snapshot.js';
@@ -82,6 +82,19 @@ test('confirm dialog disables Enter with the reason on the last line when fixed 
     assert.match(plain(conflictLines).at(-2)!, /Enter 截止时间已过 · Esc 取消/);
     assert.match(conflictLines.at(-2)!, enterStyle, `${tier}: disabled Enter uses fg.gutter`);
     assert.equal(conflict.handleInput('\r').type, 'noop');
+  }
+});
+
+test('confirm dialog reserves the full current footer while scrolling a long body', () => {
+  const active = '↑↓ 选组 · Enter 检查原文 · Ctrl+C 停止 · Esc 返回选择';
+  const dialog = new ConfirmDialog({ title: 'improve 检查中', action: '确认', body: longBody,
+    footer: reason => [{ text: reason ? `Enter ${reason} · Esc 返回调整` : active, fg: 'fg.label' }],
+  });
+  for (const columns of [60, 40, 80]) {
+    const lines = plain(dialog.render(columns, 12));
+    assert.match(lines.at(-1)!, /^╰─+╯$/, `${columns} columns keeps the bottom border`);
+    assert.ok(lines.slice(2, -1).map(line => line.slice(2, -2)).join('').replace(/\s/g, '').includes(active.replace(/\s/g, '')), 'the complete footer remains visible');
+    assert.ok(lines.length <= 12);
   }
 });
 
@@ -180,4 +193,25 @@ test('snapshots: confirm dialog (80x24, 40x12, too small), error and empty state
     assertGolden(captureSnapshot(dialog().render(w, h, 'truecolor'), ConfirmDialog.width(w), h, 'truecolor'), name);
   assertGolden(captureSnapshot(statusError('范围过大 · 受理任务超过 10000 个', 'METRICS_SCOPE_TOO_LARGE', '/ 缩小时间或项目范围', 60, 'truecolor'), 60, 2, 'truecolor'), 'status-error');
   assertGolden(captureSnapshot([statusEmpty('近 7 天 · 当前项目', '日常受理样本', 60, '/ 调整范围', 'truecolor')], 60, 1, 'truecolor'), 'status-empty');
+});
+
+
+test('single-line fields accept bracketed paste and edit at the cursor through the public Input component', () => {
+  const input = new SingleLineInput('旧', 8);
+  input.handleInput('\x1b[200~中文\nAB\x1b[201~');
+  assert.equal(input.getValue(), '旧中文AB');
+  input.handleInput('\x1b[D'); input.handleInput('X');
+  assert.equal(input.getValue(), '旧中文AXB');
+  input.handleInput('\x7f'); assert.equal(input.getValue(), '旧中文AB');
+  input.handleInput('\x01'); assert.equal(input.getValue(), '');
+  input.handleInput('123456789'); assert.equal(input.getValue(), '12345678');
+});
+
+
+test('single-line limits preserve complete Unicode code points on initial value and editing', () => {
+  const input = new SingleLineInput('ab😀', 3);
+  assert.equal(input.getValue(), 'ab');
+  input.setValue('a'); input.handleInput('😀'); assert.equal(input.getValue(), 'a😀');
+  input.setValue('ab'); input.handleInput('😀'); assert.equal(input.getValue(), 'ab');
+
 });

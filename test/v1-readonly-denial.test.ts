@@ -1,16 +1,15 @@
-import { after, test } from 'node:test';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readonlyDenialDir as fixture } from './v1-runtime-fixture.js';
 import { stripTerminalSequences, visibleWidth } from '@earendil-works/pi-tui';
 import { records, decode, type EvidenceReference } from '../src/history.js';
 import { readTrace } from '../src/trace.js';
 import { TraceView } from '../src/tui/trace.js';
 import { COLOR_TIER, overrideColorTierForTest } from '../src/tui/theme.js';
 
-const fixture = fileURLToPath(new URL('../../test/fixtures/v1-readonly-denial/', import.meta.url));
 const dataRoot = join(fixture, 'data');
 interface FileIdentity { path: string; bytes: number; sha256: string }
 const identity = JSON.parse(readFileSync(join(fixture, 'fixture-identity.json'), 'utf8')) as {
@@ -30,7 +29,7 @@ function inventory(directory: string, prefix = ''): FileIdentity[] {
   });
 }
 const beforeReading = inventory(fixture);
-after(() => assert.deepEqual(inventory(fixture), beforeReading, 'Reader/TUI must leave every retained fixture byte unchanged'));
+// The shared archive loader checks every unpacked byte after all read-only tests.
 
 test('frozen v1 runtime denied a different write during readonly recovery and retained the original bytes and facts', () => {
   assert.equal(identity.generatedBy, 'f26ae8f4b8039608a1fa796e1c69da4d8173d112');

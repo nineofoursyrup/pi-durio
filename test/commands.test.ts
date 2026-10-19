@@ -29,6 +29,7 @@ test('slash completion and the help view list the same commands from one table',
   // Subcommands come from the same table entries the help view lists.
   const subs = (await suggest('/improve '))!.items.map(item => item.value);
   assert.deepEqual(subs.map(sub => `/improve ${sub}`), commandNames().filter(name => name.startsWith('/improve ')));
+  assert.match(help,/Backspace.*500ms/);
   assert.ok(help.includes('会话屏键位') && help.indexOf('会话屏键位') < help.indexOf('命令'));
 });
 
@@ -116,6 +117,8 @@ test('ambiguous display numbers are rejected with candidates; full ids pass thro
   assert.deepEqual(resolveArgument(root, 'r-abcde1', ['session', 'run']), { kind: 'run', id: B });
   assert.deepEqual(resolveArgument(root, A, ['session', 'run']), { kind: 'run', id: A });
   assert.throws(() => resolveArgument(root, 'r-9999', ['run']), /没有找到 r-9999/);
+  for (const absent of ['not-a-run', 'r-nope', 'ffffffff-0000-4000-8000-000000000000']) assert.throws(() => resolveArgument(root, absent, ['run']), /没有找到/);
+  assert.deepEqual(resolveArgument(root, A, ['run']), {kind:'run',id:A});
 });
 
 test('help body never exceeds the view width, wide or narrow', () => {

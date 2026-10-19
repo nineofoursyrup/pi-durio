@@ -36,7 +36,7 @@ export class SelfView {
   }
   get inProgress() { return !!this.loading; }
   cancel() { this.cancelled = true; this.loading?.cancel(); this.loading = undefined; }
-  private dimensions() { return this.options.dimensions?.() ?? { columns: process.stdout.columns ?? 80, rows: process.stdout.rows ?? 24 }; }
+  private dimensions() { return this.options.dimensions?.() ?? { columns: process.stdout.columns ?? null, rows: process.stdout.rows ?? null }; }
   private async refresh() {
     const loading = this.loading = new LoadingState('统计', undefined, () => this.host.changed());
     this.snapshot = (this.options.read ?? readSelfSnapshot)(this.root, this.dimensions(), this.samples, this.options.busy?.() ?? false, this.options.now?.());
@@ -110,10 +110,11 @@ export class SelfView {
     };
     const observation = (w: number) => {
       const storage = this.storageResult, value = storage?.value, query = snapshot.query.value;
-      const summary = this.loading ? this.loading.isShowing ? '⠋ 统计中' : '' : !storage || !value ? storage ? absent(storage) : '未取得' : value.tasks === 0 ? `尚无任务 · 数据根总量 ${bytes(value.total)}` : `每任务均值 ${bytes(value.perTask)} · 数据根总量 ${bytes(value.total)}`;
-      return [...section('观测开销', w), ...row('记录增长', summary, w),
+      const summary = this.loading ? '' : !storage || !value ? storage ? absent(storage) : '未取得' : value.tasks === 0 ? `尚无任务 · 数据根总量 ${bytes(value.total)}` : `每任务均值 ${bytes(value.perTask)} · 数据根总量 ${bytes(value.total)}`;
+      return [...section('观测开销', w), ...row('记录增长', summary, w), ...this.loading?.isShowing ? [this.loading.renderLine(w, tier)] : [],
         ...value && value.tasks !== 0 ? row('完整原文（现存）', bytes(value.originals), w) : [],
         ...row('查询摘要', query ? `${ms(query.ms)} · ${query.runs} run${query.more ? ' · 仅首 50 项' : ''}${query.coverage.missing ? ' · 来源有缺失' : ''}` : absent(snapshot.query), w),
+        ...(snapshot.facts.value?.gaps ?? []).flatMap(gap => row('统计范围', gap, w, 'ac.warn')),
         ...row('输出取得写入耗时', unmeasured, w), ...row('导出队列', '外部导出 无 · 观测仅本机', w),
       ];
     };
