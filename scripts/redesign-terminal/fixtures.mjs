@@ -116,7 +116,10 @@ export async function renderers(packageRoot, fixture) {
   // As in the design: C-01 execute, C-02 validate only, C-03 unselected; the current card is C-01. Nothing is submitted.
   for (const key of ['1', '\t', '2', '\x1b[Z']) await selection.handleInput(key);
   // As in the design, 2a shows a selected tool span with its detail and raw sections.
-  const trace = new TraceView(fixture.dataRoot, fixture.runId); for (const key of ['\x1b[B', '\x1b[B']) trace.handleInput(key);
+  // Show the product host's normal action hints, but reject every action in this display-only fixture.
+  const trace = new TraceView(fixture.dataRoot, fixture.runId, () => false, {
+    writeBlocked: () => undefined, busy: () => false, feedback() {}, changed() {}, confirm: refusal, openRaw: refusal,
+  }); for (const key of ['\x1b[B', '\x1b[B']) trace.handleInput(key);
   const evaluation = new EvalPlanView(ownPlanSource(fixture.dataRoot, fixture.plan.id), { openTrial() {} }, { now: () => Date.parse(at) });
   const request = { scope: { from: '2026-09-17T16:00:00.000Z', to: '2026-10-17T16:00:00.000Z', asOf: at, source: 'ordinary', project: '/synthetic/shop-api' }, command: '/stats' };
   const samples = { snapshot: () => ({ firstFrameMs: null, keys: { samples: 0, p50: null, p95: null } }) };

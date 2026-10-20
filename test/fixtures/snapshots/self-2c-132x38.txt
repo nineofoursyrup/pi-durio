@@ -9,13 +9,13 @@
 04|自有维护代码                                                       运行开销                                                         |
    0-11 fg.label/bg.base/b ; 12-66 -/bg.base ; 67-74 fg.label/bg.base/b ; 75-131 -/bg.base
 05|src/tui/                 ### 行  ████████████████                  本次启动到首帧       尚未取得首帧                                |
-   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-48 ac.improve/bg.base ; 49-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-99 fg.primary/bg.base ; 100-131 -/bg.base
+   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-48 ac.brand/bg.base ; 49-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-99 fg.primary/bg.base ; 100-131 -/bg.base
 06|src/                     ### 行  ████████                          冷启动 p##/p##       产品内不测 · 见 A# 报告                     |
-   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-40 ac.improve/bg.base ; 41-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-97 fg.primary/bg.base ; 98-110 fg.faint/bg.base ; 111-131 -/bg.base
+   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-40 ac.brand/bg.base ; 41-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-97 fg.primary/bg.base ; 98-110 fg.faint/bg.base ; 111-131 -/bg.base
 07|src/eval/                ### 行  █████                             当前 RSS             ## MB · 空闲                                |
-   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-37 ac.improve/bg.base ; 38-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-92 fg.primary/bg.base ; 93-99 fg.faint/bg.base ; 100-131 -/bg.base
+   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-37 ac.brand/bg.base ; 38-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-92 fg.primary/bg.base ; 93-99 fg.faint/bg.base ; 100-131 -/bg.base
 08|src/metrics/              ## 行  ███                               本进程峰值 RSS       ## MB · # 个任务 · # KB 工具输出            |
-   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-35 ac.improve/bg.base ; 36-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-92 fg.primary/bg.base ; 93-119 fg.faint/bg.base ; 120-131 -/bg.base
+   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-35 ac.brand/bg.base ; 36-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-92 fg.primary/bg.base ; 93-119 fg.faint/bg.base ; 120-131 -/bg.base
 09|────────────────────────────────────────────────────────────────   受控空闲 / 长会话    产品内不测 · 见 A# 报告                     |
    0-63 line.inner/bg.base ; 64-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-97 fg.primary/bg.base ; 98-110 fg.faint/bg.base ; 111-131 -/bg.base
 10|产品源码合计         ## 文件 · ### 行                              按键到重绘           尚无样本                                    |

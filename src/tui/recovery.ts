@@ -350,6 +350,9 @@ export class RecoveryPanel {
     const off = this.disabled(this.cursor);
     return this.note === undefined ? off ? `不可选 · ${off}` : this.dispositions[this.cursor].text : `说明（可选）：${this.noteEditor!.render(visibleWidth(this.note??'')+1)[0]}  Enter 确认 · Esc 取消`;
   }
+  private descriptionTone(option: number): TokenName {
+    return this.disabled(option) ? 'fg.gutter' : !this.ownerStage && option === 2 ? 'ac.warn' : 'fg.muted';
+  }
   private checkSegments(): TextSegment[] {
     const checks: TextSegment[] = [];
     this.facts.checks.forEach((check, i) => {
@@ -368,7 +371,7 @@ export class RecoveryPanel {
     const checks = wrapSegments(this.checkSegments(), Math.max(1, width - 5)).map(segments => styledLine([{text:'检查 ',fg:'fg.label'},...segments],width,undefined,tier));
     const noteLines = this.note === undefined ? undefined : wrapTextWithAnsi(this.selectedDescription(),width);
     const description = noteLines === undefined
-      ? wrapSegments([{text:this.selectedDescription(),fg:'fg.muted'}],width).map(segments=>styledLine(segments,width,'bg.selected',tier))
+      ? wrapSegments([{text:this.selectedDescription(),fg:this.descriptionTone(this.cursor)}],width).map(segments=>styledLine(segments,width,'bg.selected',tier))
       : noteLines.map(text=>styledLine([{text,fg:'fg.muted'}],width,undefined,tier));
     const space = Math.max(2, height - summary.length - names.length - 1);
     const descriptionSize = Math.min(description.length, space - 1), checkSize = Math.max(1, space - descriptionSize);
@@ -426,7 +429,7 @@ export class RecoveryPanel {
       const head: TextSegment[] = [{ text: selected ? '▏ ' : '  ', fg: 'ac.brand' }, { text: wide ? pad(name, nameWidth) : name, fg: off ? 'fg.gutter' : selected ? 'fg.primary' : 'fg.body', bold: selected && !off }];
       const showText = !namesOnly && (level < 2 || selected || (this.ownerStage && !!off));
       const note = selected && this.note !== undefined;
-      const descSegments: TextSegment[] = note ? [{ text: `说明（可选）：${this.noteEditor!.render(visibleWidth(this.note??'')+1)[0]}`, fg: 'fg.primary' }, { text: '  ' }, ...hintSegments('Enter 确认 · Esc 取消')] : [{ text: description, fg: off ? 'fg.gutter' : 'fg.muted' }];
+      const descSegments: TextSegment[] = note ? [{ text: `说明（可选）：${this.noteEditor!.render(visibleWidth(this.note??'')+1)[0]}`, fg: 'fg.primary' }, { text: '  ' }, ...hintSegments('Enter 确认 · Esc 取消')] : [{ text: description, fg: this.descriptionTone(i) }];
       if (wide && showText && !note) out.push(styledLine([...head, ...fitSegments(descSegments, Math.max(1, width - 2 - nameWidth))], width, bg, tier));
       else {
         out.push(styledLine(head, width, bg, tier));

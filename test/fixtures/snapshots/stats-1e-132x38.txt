@@ -1,8 +1,8 @@
 132x38 truecolor
 00|指标 · 本机实测                                                                                                                     |
    0-3 fg.primary/bg.base/b ; 4-6 fg.faint/bg.base ; 7-14 fg.label/bg.base ; 15-131 -/bg.base
-01|◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api · f26ae8f · 样本 10（筛除 3）     只读 · 不调用模型 · 不重记费用 |
-   0-1 ac.model/bg.base ; 2-6 fg.primary/bg.base/b ; 7-8 -/bg.base ; 9-95 fg.faint/bg.base ; 96-100 -/bg.base ; 101-130 fg.faint/bg.base ; 131-131 -/bg.base
+01|◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api · f26ae8f · 样本 10（筛除 3）      只读 · 不调用模型 · 不重记费用|
+   0-1 ac.model/bg.base ; 2-6 fg.primary/bg.base/b ; 7-8 -/bg.base ; 9-95 fg.faint/bg.base ; 96-101 -/bg.base ; 102-131 fg.faint/bg.base
 02|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
    0-131 line.subtle/bg.base
 03|                                                                                                                                    |
