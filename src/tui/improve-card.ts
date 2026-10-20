@@ -18,7 +18,7 @@ export interface CandidateDecisionLabel {mode:string;state:string;canExecute?:bo
 /** `summary`：收起的卡片也带摘要行（1d）；历史视图收起时只有卡头。 */
 export interface CandidateCardOptions {expanded:boolean;summary?:boolean;selected?:boolean;mode?:ImproveMode;decision?:CandidateDecisionLabel;readOnly?:boolean;label?:string;tier?:ColorTier}
 /** `segments` 是同一行的分色写法（1d 用），拼起来等于 `text`。 */
-export interface CandidateCardRow {text:string;fg?:TokenName;segments?:TextSegment[]}
+export interface CandidateCardRow {text:string;fg?:TokenName;segments?:TextSegment[];codeBlock?:boolean}
 export function suggestionReason(c:ImproveCandidate) {
  if(c.suggestionReason)return c.suggestionReason;
  if(c.target.state!=='verified')return c.target.gaps.join('；')||'目标未经核对';
@@ -80,8 +80,8 @@ export function improveCandidateRows(root:string,report:ImproveReport,c:ImproveC
   ...c.successCounterexamples.flatMap((f,i)=>[{text:`反例 ${i+1}  ${f.claim}`},...f.evidence.map(ref=>({text:`引用  ${ref}`,fg:'ac.path' as const}))]),
   ...c.hypotheses.map(h=>({text:`原因假设（未证实）  ${h}`})),...c.gaps.map(g=>({text:`缺口  ${g}`,fg:'fg.muted' as const})),
   ...c.steps.map((s,i)=>({text:`声明步骤 ${i+1}  ${s}`})),...c.scope.map(path=>({text:`完整范围  ${c.target.workspace??'未经核对'}/${path}`,fg:'ac.path' as const})),
-  ...replacementDiff(root,c),
-  ...(c.structuredChecks??[]).flatMap((ch,i):CandidateCardRow[]=>ch.kind==='fresh'?[{text:`检查 ${i+1}  fresh ${ch.mode} · ${ch.comparison.repetitions} 次配对重复 · ≤ ${ch.budget.maxRequests} 请求 / ${ch.budget.maxTokens} tok / ${ch.budget.maxDurationMs} ms`},{text:JSON.stringify(ch,null,2),fg:'ac.code'}]:[{text:`检查 ${i+1}  ${ch.kind} · ≤ ${ch.timeoutMs} ms`},{text:ch.program,fg:'ac.code'},...(ch.kind==='resource'?[{text:`收益门槛  ${JSON.stringify(ch.resource)} · ${ch.benefit??'required'}`}]:[])]),
+  ...replacementDiff(root,c).map(row=>({...row,codeBlock:true})),
+  ...(c.structuredChecks??[]).flatMap((ch,i):CandidateCardRow[]=>ch.kind==='fresh'?[{text:`检查 ${i+1}  fresh ${ch.mode} · ${ch.comparison.repetitions} 次配对重复 · ≤ ${ch.budget.maxRequests} 请求 / ${ch.budget.maxTokens} tok / ${ch.budget.maxDurationMs} ms`},{text:JSON.stringify(ch,null,2),fg:'ac.code',codeBlock:true}]:[{text:`检查 ${i+1}  ${ch.kind} · ≤ ${ch.timeoutMs} ms`},{text:ch.program,fg:'ac.code',codeBlock:true},...(ch.kind==='resource'?[{text:`收益门槛  ${JSON.stringify(ch.resource)} · ${ch.benefit??'required'}`}]:[])]),
   ...(c.validationBasis?[{text:`验证依据  ${JSON.stringify(c.validationBasis)}`}]:[]),...(c.buildTimeoutMs?[{text:`构建与启动检查  ≤ ${c.buildTimeoutMs} ms`}]:[]),
   ...c.validation.protections.map(p=>({text:`必要保护  ${p}`})),...c.risks.map(r=>({text:`风险  ${r}`})),{text:`回退方法  ${c.rollback}`},
   {text:`生效条件  ${c.activation.conditions.join('；')}`},{text:`生效时机  ${c.activation.timing}${c.activation.taskTypes?.length?' · '+c.activation.taskTypes.join('、')+' 后续新任务':''}`}];
