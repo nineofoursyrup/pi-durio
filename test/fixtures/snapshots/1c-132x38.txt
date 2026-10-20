@@ -44,7 +44,7 @@
 21|                │   2  视为已完成               需你确认该操作已完成；不重做，追加你的决定                         │                |
    0-15 fg.gutter/bg.base ; 16-17 border.input/bg.base ; 18-19 ac.brand/bg.base ; 20-47 fg.body/bg.base ; 48-89 fg.muted/bg.base ; 90-113 -/bg.base ; 114-115 border.input/bg.base ; 116-131 fg.gutter/bg.base
 22|                │   3  从中断处继续             允许重新运行该操作，可能重复已发生的影响                           │                |
-   0-15 fg.gutter/bg.base ; 16-17 border.input/bg.base ; 18-19 ac.brand/bg.base ; 20-47 fg.body/bg.base ; 48-87 fg.muted/bg.base ; 88-113 -/bg.base ; 114-115 border.input/bg.base ; 116-131 fg.gutter/bg.base
+   0-15 fg.gutter/bg.base ; 16-17 border.input/bg.base ; 18-19 ac.brand/bg.base ; 20-47 fg.body/bg.base ; 48-87 ac.warn/bg.base ; 88-113 -/bg.base ; 114-115 border.input/bg.base ; 116-131 fg.gutter/bg.base
 23|                │   4  结束旧工作，开新任务     旧 run 标记已结束；新任务不接续旧上下文；冻结项需重新提交          │                |
    0-15 fg.gutter/bg.base ; 16-17 border.input/bg.base ; 18-19 ac.brand/bg.base ; 20-47 fg.body/bg.base ; 48-104 fg.muted/bg.base ; 105-113 -/bg.base ; 114-115 border.input/bg.base ; 116-131 fg.gutter/bg.base
 24|                │ ──────────────────────────────────────────────────────────────────────────────────────────────── │                |

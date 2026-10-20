@@ -473,7 +473,7 @@ export class StatsView {
     const room = (segs: TextSegment[]) => width - segs.reduce((n, s) => n + visibleWidth(s.text), 0);
     if (widthTier(width) === 'wide') {
       const facts = clean([...first, ...second, ...sample].join(' · '));
-      const left = [...brand, { text: facts, fg: 'fg.faint' as TokenName }], spare = room(left) - visibleWidth(RIGHT_NOTE) - 1;
+      const left = [...brand, { text: facts, fg: 'fg.faint' as TokenName }], spare = room(left) - visibleWidth(RIGHT_NOTE);
       if (spare >= 2) return [styledLine([...left, { text: ' '.repeat(spare) }, { text: RIGHT_NOTE, fg: 'fg.faint' }], width, undefined, tier)];
       return [styledLine([...brand, { text: truncateEnd(facts, room(brand)), fg: 'fg.faint' }], width, undefined, tier)];
     }
