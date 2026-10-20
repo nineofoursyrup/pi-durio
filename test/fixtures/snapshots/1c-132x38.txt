@@ -26,7 +26,7 @@
 12|                │ 最后确认点  ✓ write export.csv · 00:00:00 已提交结果                                             │                |
    0-15 fg.gutter/bg.base ; 16-17 border.input/bg.base ; 18-29 fg.label/bg.base ; 30-31 ac.ok/bg.base ; 32-47 fg.body/bg.base ; 48-69 fg.faint/bg.base ; 70-113 -/bg.base ; 114-115 border.input/bg.base ; 116-131 fg.gutter/bg.base
 13|                │ 未知 1/1    ◈ bash printf 'migrating orders 1200/4810\n' · intent 已记录 00:00:00，结果未提交 ·… │                |
-   0-15 fg.gutter/bg.base ; 16-17 border.input/bg.base ; 18-29 fg.label/bg.base ; 30-31 ac.warn/bg.base ; 32-36 fg.body/bg.base ; 37-73 ac.code/bg.base ; 74-112 fg.faint/bg.base ; 113-113 -/- ; 114-115 border.input/bg.base ; 116-131 fg.gutter/bg.base
+   0-15 fg.gutter/bg.base ; 16-17 border.input/bg.base ; 18-29 fg.label/bg.base ; 30-31 ac.warn/bg.base ; 32-36 fg.body/bg.base ; 37-73 ac.code/bg.base ; 74-112 fg.faint/bg.base ; 113-113 -/bg.base ; 114-115 border.input/bg.base ; 116-131 fg.gutter/bg.base
 14|                │ 证据        已收输出 27 B：“migrating orders 1200/4810”                                          │                |
    0-15 fg.gutter/bg.base ; 16-17 border.input/bg.base ; 18-29 fg.label/bg.base ; 30-42 fg.body/bg.base ; 43-72 fg.muted/bg.base ; 73-113 -/bg.base ; 114-115 border.input/bg.base ; 116-131 fg.gutter/bg.base
 15|                │ 影响        可能重复命令已产生的影响                                                             │                |

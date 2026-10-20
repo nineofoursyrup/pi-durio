@@ -185,7 +185,10 @@ export function styledLine(
     const clipped = truncateToWidth(seg.text, width - col);
     const w = visibleWidth(clipped);
     if (w <= 0) continue;
-    out += sgr + clipped;
+    // Truncation resets SGR around its ellipsis, including in pre-truncated text.
+    // Restore only this segment's background; foreground and attributes keep their existing semantics.
+    const segmentBg = tier === 'none' ? '' : bgSgr(seg.bg ?? bg, tier);
+    out += sgr + (segmentBg ? clipped.replaceAll(resetSgr(), resetSgr() + segmentBg) : clipped);
     col += w;
     if (col >= width) break;
   }
