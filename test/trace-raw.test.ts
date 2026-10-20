@@ -136,7 +136,7 @@ test('cleaned and truncated items are labelled in the raw layer', () => {
   assert.match(truncated, /◐ 完整取得 · 送模截断 · 原文完整 · 第 1\/1 页/);
   assert.match(truncated, /\n line 1 *\n line 2 *\n/);
   const cleaned = shown(write.key, '送模内容');
-  assert.match(cleaned, /◐ 已清理 · 第 1\/1 页/);
+  assert.match(cleaned, /✗ 已清理 · 第 1\/1 页/);
   assert.match(cleaned, /已清理 · 显式清理后原文不可取得，宿主记录保留/);
 });
 

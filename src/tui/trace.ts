@@ -39,6 +39,11 @@ export interface TraceHost extends WriteAccess {
 
 type Row = { kind: 'run' } | { kind: 'span'; span: TraceSpan; last: boolean } | { kind: 'gap'; text: string };
 
+/** 原文取得状态（详情栏与原文层共用）：完整取得且无说明 `●` ac.ok；截断、部分、已归档或暂不可读 `◐` ac.warn；缺口、损坏或已清理 `✗` ac.err（无色档靠字形区分）。 */
+export function rawStateGlyph(state: TraceRaw['state'], note?: string): TextSegment {
+  if (state === 'complete' && !note) return { text: '●', fg: 'ac.ok' };
+  return ['complete', 'partial', 'archived', 'temporarily-unreadable'].includes(state) ? { text: '◐', fg: 'ac.warn' } : { text: '✗', fg: 'ac.err' };
+}
 const right = (text: string, width: number, fg?: TokenName): TextSegment => { const shown = truncateEnd(text, width); return { text: ' '.repeat(width - visibleWidth(shown)) + shown, fg }; };
 
 /**
@@ -346,10 +351,9 @@ export class TraceView {
       if (!items.length) return;
       lines.push([]); lines.push([{ text: '原文', fg: 'fg.label' }]);
       for (const item of items) {
-        // 取得状态：完整取得 `●` ac.ok；截断、部分或暂不可读 `◐` ac.warn；缺口、损坏或已清理 `✗` ac.err（无色档靠字形区分）。状态文字靠右。
-        const ok = item.state === 'complete' && !item.note, partial = ['complete', 'partial', 'archived', 'temporarily-unreadable'].includes(item.state);
+        // 状态文字靠右。
         const size = item.bytes !== undefined ? ` · ${item.bytes} B` : '', state = RAW_STATE_LABEL[item.state], name = truncateEnd(` ${item.label}${size}`, Math.max(1, width - 1 - visibleWidth(state) - 2));
-        lines.push([{ text: ok ? '●' : partial ? '◐' : '✗', fg: ok ? 'ac.ok' : partial ? 'ac.warn' : 'ac.err' }, { text: name }, { text: ' '.repeat(Math.max(2, width - 1 - visibleWidth(name) - visibleWidth(state))) }, { text: state, fg: 'fg.faint' }]);
+        lines.push([rawStateGlyph(item.state, item.note), { text: name }, { text: ' '.repeat(Math.max(2, width - 1 - visibleWidth(name) - visibleWidth(state))) }, { text: state, fg: 'fg.faint' }]);
         if (item.note) lines.push([{ text: `  ${item.note}`, fg: 'fg.faint' }]);
       }
     };
