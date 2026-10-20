@@ -10,11 +10,11 @@ import {captureBuildContents,assertBuildContentBudget} from '../src/improve-buil
 test('build content retains every duplicate path at the expanded limit and rejects excess before writing evidence',t=>{
  const directory=realpathSync(mkdtempSync(join(tmpdir(),'durio-build-content-limit-'))),source=join(directory,'source');mkdirSync(source);
  t.after(()=>rmSync(directory,{recursive:true,force:true}));
- const paths=Array.from({length:10},(_,i)=>`${i}.bin`);
+ const paths=Array.from({length:12},(_,i)=>`${i}.bin`);
  for(const path of paths){writeFileSync(join(source,path),'');truncateSync(join(source,path),16*1024*1024);}
  const e=new Evidence(join(directory,'accepted'),'build'),records:any[]=[];t.after(()=>e.close());
  const files=captureBuildContents(e,source,paths,(kind,data)=>{records.push({kind,data});return 'captured';},'build');
- assert.equal(files.length,10);assert.equal(files.reduce((n,f)=>n+f.ref.bytes,0),167772160);
+ assert.equal(files.length,12);assert.equal(files.reduce((n,f)=>n+f.ref.bytes,0),201326592);
  assert.deepEqual(files.map(f=>f.path),paths);assert.equal(new Set(files.map(f=>f.ref.sha256)).size,1);
  assert.equal(readObject(e.root,files[0].ref).length,16*1024*1024);assert.equal(records[0].kind,'improve.build-content');
  writeFileSync(join(source,'extra.bin'),'x');
@@ -40,7 +40,7 @@ test('build capture keeps per-file, ordinary-path and file-count limits before w
 
 test('candidate content is bounded after separately admissible inputs and outputs are combined',()=>{
  const ref={sha256:digest('content'),bytes:16*1024*1024};
- const inputs=Array.from({length:10},(_,i)=>({path:`input-${i}`,ref})),outputs=[{path:'dist/new.js',ref:{sha256:digest('x'),bytes:1}}];
+ const inputs=Array.from({length:12},(_,i)=>({path:`input-${i}`,ref})),outputs=[{path:'dist/new.js',ref:{sha256:digest('x'),bytes:1}}];
  assert.doesNotThrow(()=>assertBuildContentBudget(inputs));assert.doesNotThrow(()=>assertBuildContentBudget(outputs));
  assert.throws(()=>assertBuildContentBudget([...inputs,...outputs]),/IMPROVE_BUILD_CONTENT_LIMIT/);
  const empty=Array.from({length:20000},(_,i)=>({path:`empty-${i}`,ref:{sha256:digest(''),bytes:0}}));
@@ -51,15 +51,15 @@ test('candidate content is bounded after separately admissible inputs and output
 test('a file growing after the metadata scan cannot bypass the actual-read content budget',t=>{
  const directory=realpathSync(mkdtempSync(join(tmpdir(),'durio-build-content-growth-'))),source=join(directory,'source');mkdirSync(source);
  const e=new Evidence(join(directory,'data'),'build');t.after(()=>{e.close();rmSync(directory,{recursive:true,force:true});});
- const paths=Array.from({length:10},(_,i)=>`${i}.bin`);
- for(const [i,path]of paths.entries()){writeFileSync(join(source,path),'');truncateSync(join(source,path),16*1024*1024-(i===9?1:0));}
+ const paths=Array.from({length:12},(_,i)=>`${i}.bin`);
+ for(const [i,path]of paths.entries()){writeFileSync(join(source,path),'');truncateSync(join(source,path),16*1024*1024-(i===11?1:0));}
  writeFileSync(join(source,'extra.bin'),'x');paths.push('extra.bin');
  const firstInode=lstatSync(join(source,paths[0])).ino,read=fs.readFileSync;let changed=false;
  // Schedule a real file edit at the filesystem read boundary, after the complete
  // metadata scan. Persistence and every subsequent read still use the real disk.
  const hooked=t.mock.method(fs,'readFileSync',(...args:Parameters<typeof fs.readFileSync>)=>{
   const bytes=read(...args),fd=args[0];
-  if(!changed&&typeof fd==='number'&&fstatSync(fd).ino===firstInode){truncateSync(join(source,'9.bin'),16*1024*1024);changed=true;}
+  if(!changed&&typeof fd==='number'&&fstatSync(fd).ino===firstInode){truncateSync(join(source,'11.bin'),16*1024*1024);changed=true;}
   return bytes;
  });
  syncBuiltinESMExports();
