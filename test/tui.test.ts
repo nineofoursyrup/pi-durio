@@ -117,7 +117,8 @@ test('viewport/focus changes invalidate confirmations, and explicit /exit preser
     key('\x03');key('/exit');key('\r');key('\r');
     const result=await f.app.closed; assert.equal(result.draftSaved,true);
     assert.match(stripTerminalSequences(result.summary.join('\n')),/草稿已保存 · 1 行 · 下次 \/restore 恢复/);
-    assert.doesNotMatch(result.summary[0],/会话/);
+    assert.equal(result.summary[0],'');
+    assert.doesNotMatch(result.summary[1],/会话/);
     assert.equal(f.transport.calls.length,0);
   } finally {await f.app.exit();}
 });

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { TuiAltScreen, stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
+import { TuiAltScreen, stripTerminalSequences, truncateToWidth, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
 import { HardwareCursorEditor } from '../src/tui/cursor.js';
 import { disabledInputLines } from '../src/tui/recovery.js';
@@ -12,7 +12,7 @@ import {
   detectColorTier, overrideColorTierForTest,
   fgSgr, bgSgr, styledLine, SPINNER_FRAMES, SPINNER_INTERVAL_MS,
   dimForOverlay, GLYPHS, COLOR_TIER,
-  type ColorTier,
+  type ColorTier, type TokenName,
 } from '../src/tui/theme.js';
 import {
   captureSnapshot, snapshotContains, linesContainSgr,
@@ -285,6 +285,42 @@ test('styledLine keeps bold and dim local to each segment and clears both for pa
     const grid = captureSnapshot([styledLine([{ text: 'A', bold: true, dim: true }, { text: 'B', fg: 'fg.body' }], 4, undefined, tier)], 4, 1, tier);
     assert.equal(grid.rows[0][0].bold, true); assert.equal(grid.rows[0][0].dim, true);
     for (const cell of grid.rows[0].slice(1)) { assert.equal(cell.bold, undefined); assert.equal(cell.dim, undefined); }
+  }
+});
+
+test('truncation ellipses retain the segment background, including wide-character boundaries and explicit overrides', () => {
+  const cases: { text: string; width: number; expected: string; background: TokenName }[] = [
+    { text: 'ABCDEFGH', width: 6, expected: 'ABC...', background: 'bg.base' },
+    { text: truncateToWidth('ABCDEFGH', 6, '…'), width: 6, expected: 'ABCDE…', background: 'bg.block' },
+    { text: '中中中中', width: 6, expected: '中... ', background: 'bg.base' },
+    { text: truncateToWidth('中中中中', 4, '…'), width: 4, expected: '中… ', background: 'bg.block' },
+  ];
+  for (const tier of ['truecolor', '256color'] as const) {
+    for (const entry of cases) {
+      const line = styledLine([{ text: entry.text, fg: 'fg.body' }], entry.width, entry.background, tier);
+      assert.equal(stripTerminalSequences(line), entry.expected);
+      assert.equal(visibleWidth(line), entry.width);
+      const cells = captureSnapshot([line], entry.width, 1, tier).rows[0];
+      assert.ok(cells.every(cell => cell.bg === entry.background), `${tier}: ${entry.expected}`);
+    }
+    const line = styledLine([{ text: truncateToWidth('ABCDEFGH', 6, '…'), bg: 'bg.block' }, { text: 'Z' }], 8, 'bg.selected', tier);
+    const cells = captureSnapshot([line], 8, 1, tier).rows[0];
+    assert.equal(stripTerminalSequences(line), 'ABCDE…Z ');
+    assert.ok(cells.slice(0, 6).every(cell => cell.bg === 'bg.block'), 'explicit code background includes the ellipsis');
+    assert.ok(cells.slice(6).every(cell => cell.bg === 'bg.selected'), 'following segment and padding return to the line background');
+  }
+});
+
+test('truncation background recovery leaves the no-color tier color-free and preserves its visible text', () => {
+  for (const [text, width, expected] of [
+    ['ABCDEFGH', 6, 'ABC...'],
+    [truncateToWidth('中中中中', 4, '…'), 4, '中… '],
+  ] as const) {
+    const line = styledLine([{ text, fg: 'fg.body', bg: 'bg.block' }], width, 'bg.selected', 'none');
+    assert.equal(stripTerminalSequences(line), expected);
+    assert.equal(visibleWidth(line), width);
+    assert.doesNotMatch(line, /\x1b\[(?:[0-9;]*;)?(?:38|48);/);
+    assert.ok(captureSnapshot([line], width, 1, 'none').rows[0].every(cell => cell.bg === undefined));
   }
 });
 

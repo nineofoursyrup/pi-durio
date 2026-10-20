@@ -70,7 +70,7 @@
 34|  合计              ████████████  ≈ ¥118.00 · 597k tok · 去重汇总               |
    0-1 -/bg.base ; 2-5 fg.primary/bg.base ; 6-19 -/bg.base ; 20-31 fg.body/bg.base ; 32-33 -/bg.base ; 34-53 fg.muted/bg.base ; 54-64 fg.faint/bg.base ; 65-79 -/bg.base
 35|❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --p…|
-   0-1 ac.brand/bg.base ; 2-78 fg.body/bg.base ; 79-79 -/-
+   0-1 ac.brand/bg.base ; 2-78 fg.body/bg.base ; 79-79 -/bg.base
 36|零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈旧不写成「没有发生」        |
    0-71 fg.label/bg.base ; 72-79 -/bg.base
 37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                                           |

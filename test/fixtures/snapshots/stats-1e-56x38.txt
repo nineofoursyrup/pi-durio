@@ -18,7 +18,7 @@
 08|  成本              ≈ ¥20.00 /成功                      |
    0-1 -/bg.base ; 2-5 fg.primary/bg.base ; 6-19 -/bg.base ; 20-27 fg.primary/bg.base/b ; 28-33 fg.faint/bg.base ; 34-55 -/bg.base
 09|    样本累计 ≈ ¥80.00 ÷ S=4 · 含失败、取消、重试与自动… |
-   0-3 -/bg.base ; 4-53 fg.body/bg.base ; 54-54 -/- ; 55-55 -/bg.base
+   0-3 -/bg.base ; 4-53 fg.body/bg.base ; 54-55 -/bg.base
 10|                                                        |
    0-55 -/-
 11|  双时钟            12m / 24h                           |
@@ -58,20 +58,20 @@
 28|  期间开销（去重）· 请求发生于 [09-16, 10-16)           |
    0-44 fg.label/bg.base ; 45-55 -/bg.base
 29|  coding            ≈ ¥80.00 · 412k tok · 任务执行与自… |
-   0-1 -/bg.base ; 2-7 fg.body/bg.base ; 8-19 -/bg.base ; 20-38 fg.muted/bg.base ; 39-53 fg.faint/bg.base ; 54-54 -/- ; 55-55 -/bg.base
+   0-1 -/bg.base ; 2-7 fg.body/bg.base ; 8-19 -/bg.base ; 20-38 fg.muted/bg.base ; 39-53 fg.faint/bg.base ; 54-55 -/bg.base
 30|  eval              ≈ ¥20.00 · 96k tok · 两侧 + 评分    |
    0-1 -/bg.base ; 2-5 fg.body/bg.base ; 6-19 -/bg.base ; 20-37 fg.muted/bg.base ; 38-51 fg.faint/bg.base ; 52-55 -/bg.base
 31|  improve           ≈ ¥10.00 · 51k tok · 分析 + 候选制作|
    0-1 -/bg.base ; 2-8 fg.body/bg.base ; 9-19 -/bg.base ; 20-37 fg.muted/bg.base ; 38-55 fg.faint/bg.base
 32|  维护              ≈ ¥5.00 · 24k tok · 空闲手动 /compa…|
-   0-1 -/bg.base ; 2-5 fg.body/bg.base ; 6-19 -/bg.base ; 20-36 fg.muted/bg.base ; 37-54 fg.faint/bg.base ; 55-55 -/-
+   0-1 -/bg.base ; 2-5 fg.body/bg.base ; 6-19 -/bg.base ; 20-36 fg.muted/bg.base ; 37-54 fg.faint/bg.base ; 55-55 -/bg.base
 33|  共同/未归属       ≈ ¥3.00 · 14k tok · 不分给具体任务  |
    0-1 -/bg.base ; 2-12 fg.body/bg.base ; 13-19 -/bg.base ; 20-36 fg.muted/bg.base ; 37-53 fg.faint/bg.base ; 54-55 -/bg.base
 34|  合计              ≈ ¥118.00 · 597k tok · 去重汇总     |
    0-1 -/bg.base ; 2-5 fg.primary/bg.base ; 6-19 -/bg.base ; 20-39 fg.muted/bg.base ; 40-50 fg.faint/bg.base ; 51-55 -/bg.base
 35|❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026…|
-   0-1 ac.brand/bg.base ; 2-54 fg.body/bg.base ; 55-55 -/-
+   0-1 ac.brand/bg.base ; 2-54 fg.body/bg.base ; 55-55 -/bg.base
 36|零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈旧… |
-   0-53 fg.label/bg.base ; 54-54 -/- ; 55-55 -/bg.base
+   0-53 fg.label/bg.base ; 54-55 -/bg.base
 37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                   |
    0-2 fg.body/bg.base ; 3-14 fg.label/bg.base ; 15-16 fg.body/bg.base ; 17-24 fg.label/bg.base ; 25-27 fg.body/bg.base ; 28-36 fg.label/bg.base ; 37-55 -/bg.base
