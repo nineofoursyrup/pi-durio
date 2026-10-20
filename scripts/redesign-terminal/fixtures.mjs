@@ -193,7 +193,7 @@ export async function renderers(packageRoot, fixture) {
       const tail = [...recovery.render(w, panelHeight, tier), session.statusLine(status, w, narrow.statusHint, tier), ...(input ? disabledInputLines('', w, tier) : []), ...(hints ? frame.footerLines(usage ? usageSegments : [], hintItems, w, { tier }) : [])];
       return [session.headerLine(header, w, narrow.headerRight, tier), ...pad([], w, h - 1 - tail.length, tier), ...tail];
     });
-    if (id === '1f') { const lines = await exitSummary(fixture.dataRoot, { workspace: fixture.workspace, runId: fixture.runId, elapsedMs: 848000, draftLines: 0, terminalRestored: true }, width); return [...lines, ...Array(height - lines.length).fill('')]; }
+    if (id === '1f') { const lines = await exitSummary(fixture.dataRoot, { workspace: fixture.workspace, runId: fixture.runId, elapsedMs: 848000, draftLines: 0, terminalRestored: true }, width, tier); return [...lines, ...Array(height - lines.length).fill('')]; }
     if (['1d', '1e', '2a', '2b', '2c'].includes(id)) {
       // Use the public TuiAltScreen compositor with the exact openPanel geometry
       // from this candidate. A component's short body is not a full-screen golden.

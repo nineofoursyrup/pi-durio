@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { visibleWidth } from '@earendil-works/pi-tui';
+import { stripTerminalSequences, visibleWidth } from '@earendil-works/pi-tui';
 import { Evidence } from '../src/evidence.js';
 import { exitSummary, tuiExitCode, ProcessCleanupReceipts, type ExitSummaryFacts } from '../src/tui/exit-summary.js';
 import type { RunResult } from '../src/runtime.js';
 
 const runId = '11111111-2222-4333-8444-555555555555';
+/** 摘要内容：去掉序列与左侧 `┃`，略去“继续 / 原文”之前的空行（U6）。 */
+const content = async (...args: Parameters<typeof exitSummary>) => (await exitSummary(...args)).map(line => stripTerminalSequences(line).replace(/^┃ ?/, '')).filter(Boolean);
 const sessionId = '66666666-7777-4888-8999-aaaaaaaaaaaa';
 function fixture(input = '完成修改') {
   const root = mkdtempSync(join(tmpdir(), 'durio-exit-summary-')), workspace = join(root, 'project'), dataRoot = join(root, 'data');
@@ -30,14 +32,14 @@ test('completed task and no-task exits have bounded human summaries with factual
   const f = fixture();
   f.evidence.append('run.closed', { status: 'completed', cleanup: 'confirmed' });
   f.evidence.close();
-  assert.deepEqual(await exitSummary(f.dataRoot, f.facts, 132), [
+  assert.deepEqual(await content(f.dataRoot, f.facts, 132), [
     '◆ pi-durio 已退出 · 会话 s-6666 · 用时 14m 08s',
     '✓ 任务 1 完成 · 完成修改',
     '◇ 本会话 0 tok ≈ ¥0.00（估算 · 非账单）',
     '◇ 写入者锁未取得 · storage 未打开 · 终端已恢复',
     '继续  pi-durio resume s-6666     原文  pi-durio show s-6666 --trace',
   ]);
-  assert.deepEqual(await exitSummary(join(f.root, 'empty-data'), { ...f.facts, runId: undefined, elapsedMs: 2400 }, 132), [
+  assert.deepEqual(await content(join(f.root, 'empty-data'), { ...f.facts, runId: undefined, elapsedMs: 2400 }, 132), [
     '◆ pi-durio 已退出 · 用时 0m 02s',
     '◇ 写入者锁未取得 · storage 未打开 · 终端已恢复',
   ]);
@@ -54,8 +56,9 @@ test('all optional rows fit eight lines, sanitize user text, and count every fro
   const closed = result('completed', 'confirmed');
   f.evidence.append('run.closed', closed); f.evidence.close();
   const facts: ExitSummaryFacts = { ...f.facts, cleanup: closed, draftLines: 3, eval: { planId: 'bbbbbbbb-cccc-4ddd-8eee-ffffffffffff', trial: 3, total: 12, cost: { amounts: { CNY: 0.08 }, unknownRequests: 1, partial: false }, state: 'stopped', cleanup: 'confirmed' } };
-  const lines = await exitSummary(f.dataRoot, facts, 132);
+  const lines = await content(f.dataRoot, facts, 132);
   assert.equal(lines.length, 8);
+  assert.equal((await exitSummary(f.dataRoot, facts, 132)).length, 9, 'eight rows plus the blank row before the next step');
   assert.equal(lines[1], '✓ 任务 1 完成 · 完成修改');
   assert.equal(lines[2], '⧗ 204 项已冻结 · 「首项」· 不会自动接入');
   assert.equal(lines[3], '◇ 草稿已保存 · 3 行 · 下次 /restore 恢复');
@@ -64,10 +67,10 @@ test('all optional rows fit eight lines, sanitize user text, and count every fro
   assert.doesNotMatch(lines.join(''), /[\x00-\x1f\x7f-\x9f]|不得显示|fake title/);
   for (const width of [132, 80, 40, 1]) {
     const narrow = await exitSummary(f.dataRoot, facts, width);
-    assert.equal(narrow.length, 8);
+    assert.equal(narrow.length, 9);
     assert.ok(narrow.every(line => visibleWidth(line) <= width));
   }
-  const failed = await exitSummary(f.dataRoot, { ...facts, terminalRestored: false, eval: { ...facts.eval!, state: 'unconfirmed', cleanup: 'unknown' } }, 132);
+  const failed = await content(f.dataRoot, { ...facts, terminalRestored: false, eval: { ...facts.eval!, state: 'unconfirmed', cleanup: 'unknown' } }, 132);
   assert.match(failed[4], /停止未确认/);
   assert.match(failed[6], /清理未确认|恢复未确认/);
   assert.match(failed[6], /reset/);
@@ -77,7 +80,7 @@ test('interrupted and unconfirmed cleanup exits preserve recovery status; failed
   for (const [status, cleanup] of [['unknown', 'confirmed'], ['unknown', 'unknown'], ['failed', 'confirmed'], ['aborted', 'confirmed']] as const) {
     const f = fixture(), closed = result(status, cleanup);
     f.evidence.append('run.closed', closed); f.evidence.close();
-    const lines = await exitSummary(f.dataRoot, { ...f.facts, cleanup: closed }, 132);
+    const lines = await content(f.dataRoot, { ...f.facts, cleanup: closed }, 132);
     assert.equal(lines[1], status === 'unknown' ? '◈ 任务 1 已中断 · 待恢复核对' : `${status === 'failed' ? '✗' : '◇'} 任务 1 ${status === 'failed' ? '失败' : '已中止'} · 完成修改`);
     assert.equal(lines[3], cleanup === 'unknown' ? '✗ 清理未确认 · 写入者锁保留 · pi-durio resume s-6666 核对 · 终端已恢复' : '◇ 写入者锁已释放 · storage 已关闭 · 终端已恢复');
     assert.equal(lines[4], `${status === 'unknown' ? '恢复核对  pi-durio resume s-6666     ' : ''}原文  pi-durio show s-6666 --trace`);
@@ -102,7 +105,7 @@ test('file totals count successful edit/write results once per file, excluding b
   e.append('tool.error', { attemptId: 'failed', error: 'no match' });
   e.append('tool.intent', { attemptId: 'unknown', tool: 'write', args: { path: 'unknown.txt', content: 'unconfirmed' } });
   e.append('run.closed', result('completed', 'confirmed')); e.close();
-  const lines = await exitSummary(f.dataRoot, f.facts, 132);
+  const lines = await content(f.dataRoot, f.facts, 132);
   assert.equal(lines[1], '✓ 任务 1 完成 · 完成修改 · 2 文件 +6 −3');
   assert.doesNotMatch(lines.join('\n'), /shell\.txt|unknown\.txt|33\/33|检查/);
 });
@@ -123,7 +126,7 @@ test('ending old work is distinct from stopping and absent current-process clean
   f.evidence.append('run.closed', result('unknown', 'unknown'));
   f.evidence.append('recovery.ended', { runId }); f.evidence.close();
   const facts = { ...f.facts, cleanupAttempted: true };
-  const lines = await exitSummary(f.dataRoot, facts, 132);
+  const lines = await content(f.dataRoot, facts, 132);
   assert.equal(lines[1], '◇ 任务 1 已结束 · 完成修改');
   assert.match(lines[3], /清理结果未取得.*状态未知/);
   assert.doesNotMatch(lines[3], /已释放|已关闭|未取得 · storage 未打开/);

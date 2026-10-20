@@ -115,7 +115,7 @@ test('viewport/focus changes invalidate confirmations, and explicit /exit preser
     key('\x1b');key('/restore');key('\r');assert.match(f.screen(),/需要保留的草稿/);
     key('\x03');key('/exit');key('\r');key('\r');
     const result=await f.app.closed; assert.equal(result.draftSaved,true);
-    assert.match(result.summary.join('\n'),/草稿已保存 · 1 行 · 下次 \/restore 恢复/);
+    assert.match(stripTerminalSequences(result.summary.join('\n')),/草稿已保存 · 1 行 · 下次 \/restore 恢复/);
     assert.doesNotMatch(result.summary[0],/会话/);
     assert.equal(f.transport.calls.length,0);
   } finally {await f.app.exit();}
@@ -187,8 +187,9 @@ test('real runtime facts stream into bounded read-only UI without changing draft
     assert.equal(closed.result?.status,'completed'); assert.equal(closed.result?.cleanup,'confirmed');
     assert.match(exitCostSummary(join(f.root,'data'),closed.result!),/^本次会话 s-[0-9a-f]{4,} 费用 < ¥0\.01（估算 · 非账单）$/);
     assert.ok(f.terminal.stopped);
-    assert.match(closed.summary.join('\n'),/◆ pi-durio 已退出[\s\S]*✓ 任务 1 完成[\s\S]*◇ 写入者锁已释放 · storage 已关闭 · 终端已恢复/);
-    assert.doesNotMatch(closed.summary.join('\n'),/Read back:|"tui"|[\x1b\x07]/);
+    assert.match(stripTerminalSequences(closed.summary.join('\n')),/◆ pi-durio 已退出[\s\S]*✓ 任务 1 完成[\s\S]*◇ 写入者锁已释放 · storage 已关闭 · 终端已恢复/);
+    // 摘要只带 SGR 颜色（U6）；去掉它们后不应剩任何序列。
+    assert.doesNotMatch(closed.summary.join('\n').replace(/\x1b\[[0-9;]*m/g,''),/Read back:|"tui"|[\x1b\x07]/);
     // Without a live runtime the latest reported total stands in, marked as an estimate.
     const terminal=new TestTerminal(),viewer=new ReadOnlyTui({workspace:f.workspace,dataRoot:join(f.root,'data'),runId,draftRoot:join(f.root,'drafts'),mode:'offline',transport:f.transport.fetch,terminal,widthCalibration:false});viewer.start();
     // Opening a run starts its recovery check; a completed run needs no panel.
@@ -220,7 +221,7 @@ test('usage line and exit summary show CNY estimates with unknown and partial re
     assert.match(f.screen(),/ · 本会话 2M tok ≈ ¥(10|5)\.00 \+1 unknown partial.*$/m);
     key('\x03');key('\x03');const closed=await f.app.closed;
     assert.match(exitCostSummary(dataRoot,closed.result!),new RegExp(`^本次会话 ${readDisplayIndex(dataRoot).label('session',first.sessionId)} 费用 ≈ ¥(10|5)\\.00 \\+1 unknown partial（估算 · 非账单）$`));
-    assert.match(closed.summary.join('\n'),/本会话 2M tok ≈ ¥(10|5)\.00（估算 · 非账单） · \+1 unknown · partial/);
+    assert.match(stripTerminalSequences(closed.summary.join('\n')),/本会话 2M tok ≈ ¥(10|5)\.00（估算 · 非账单） · \+1 unknown · partial/);
   } finally { await f.app.exit(); }
 });
 
@@ -447,7 +448,7 @@ test('exit keeps the successful main task separate from unconfirmed cleanup of i
   assert.equal(closed.result?.status,'completed');assert.equal(closed.result?.cleanup,'confirmed');
   assert.equal(closed.cleanupResult?.cleanup,'unknown');
   assert.notEqual(closed.cleanupResult?.runId,closed.result?.runId);
-  const lines=closed.summary.join('\n');
+  const lines=stripTerminalSequences(closed.summary.join('\n'));
   assert.match(lines,/任务 1 完成 · Successful main task/);assert.match(lines,/清理未确认 · 写入者锁保留/);
   assert.match(lines,new RegExp(`pi-durio resume ${readDisplayIndex(data).label('session',closed.cleanupResult!.sessionId)} 核对`));
   assert.doesNotMatch(lines,/写入者锁已释放|^继续 /m);

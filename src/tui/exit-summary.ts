@@ -1,4 +1,4 @@
-/** 1f：退出后的只读取数与无样式摘要，不打开 Harness、不写记录。 */
+/** 1f：退出后的只读取数与摘要，不打开 Harness、不写记录；按终端自身背景输出，不铺底色（U6、U10）。 */
 import { readDisplayIndex } from '../display-number.js';
 import { readSessionChains } from '../session-chain.js';
 import { formatCostTotals, COST_ESTIMATE_NOTICE, type CostTotals } from '../cost-estimate.js';
@@ -11,6 +11,7 @@ import {editLineChanges,writeLineChanges} from './tool-facts.js';
 import { RunView, sumUsage } from './run-view.js';
 import { tokenCount } from './session-screen.js';
 import { probeWelcomeLock } from './welcome.js';
+import { COLOR_TIER, fgSgr, resetSgr, type ColorTier, type TextSegment, type TokenName } from './theme.js';
 import type { RunResult } from '../runtime.js';
 import type { PlanSource } from '../eval/overview.js';
 import type {ImproveCleanupReceipt} from '../improve-decisions.js';
@@ -64,6 +65,19 @@ export class ProcessCleanupReceipts {
   }
 }
 
+/** 摘要的一行：按段上色，拼起来就是这一行的文字。 */
+type Line = TextSegment[];
+/** 字形配色按设计稿 1f（U6）；◈ ◇ 与 1b 的状态字形相同。 */
+const GLYPH_FG: Record<string, TokenName> = { '◆': 'ac.brand', '✓': 'ac.ok', '⧗': 'ac.info', '✗': 'ac.err', '◈': 'ac.warn', '◇': 'fg.muted' };
+/** 字形、正文（终端默认前景）与 `fg.muted` 的说明。 */
+function row(glyph: string, main: string, note = ''): Line {
+  return [{ text: glyph, fg: GLYPH_FG[glyph] }, { text: ` ${main}` }, { text: note, fg: 'fg.muted' }];
+}
+/** 命令 `ac.warn`；其余为正文。 */
+function commands(text: string): Line {
+  return text.split(/(pi-durio (?:resume|show) \S+(?: --trace)?)/).map((part, i) => ({ text: part, fg: i % 2 ? 'ac.warn' : undefined }));
+}
+
 /** 用户文本先取首行，去除终端转义和控制字符；输出行也复用这道边界。 */
 function firstLine(text: string) {
   return stripTerminalSequences(text.split(/[\r\n\u2028\u2029]/, 1)[0]).replace(/[\x00-\x1f\x7f-\x9f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '');
@@ -85,9 +99,10 @@ function cleanupLine(facts: ExitSummaryFacts, session?: string) {
   if(facts.batchCleanup&&(facts.batchCleanup.owner!=='released'||facts.batchCleanup.storage==='unknown'||facts.batchCleanup.workspaces.some(w=>!w.released)))line=`✗ improve 清理未确认 · ${line.slice(2)}`;
   if (facts.eval?.cleanup === 'unknown'||facts.evalCleanup?.cleanup==='unknown') line = `✗ 清理未确认 · eval VM 状态未知 · ${line.slice(2)}`;
   line = facts.terminalRestored ? `${line} · 终端已恢复` : `✗ 终端恢复未确认 · 请运行 reset · ${line.slice(2)}`;
-  return facts.error ? `${line} · 退出异常：${firstLine(facts.error)}` : line;
+  if (facts.error) line = `${line} · 退出异常：${firstLine(facts.error)}`;
+  return [{ text: line[0], fg: GLYPH_FG[line[0]] }, ...commands(line.slice(1))];
 }
-function frozenLine(dataRoot: string, workspace: string) {
+function frozenLine(dataRoot: string, workspace: string): Line | undefined {
   let count = 0, first = '', after: number | undefined, through: number | undefined;
   try {
     do {
@@ -99,9 +114,9 @@ function frozenLine(dataRoot: string, workspace: string) {
       through = page.through; after = page.next ?? undefined;
     } while (after);
   } catch (error) {
-    return (error as NodeJS.ErrnoException).code === 'ENOENT' ? undefined : '⧗ 冻结项未能读取 · unknown';
+    return (error as NodeJS.ErrnoException).code === 'ENOENT' ? undefined : row('⧗', '冻结项未能读取', ' · unknown');
   }
-  return count ? `⧗ ${count} 项已冻结 · 「${first}」· 不会自动接入` : undefined;
+  return count ? row('⧗', `${count} 项已冻结`, ` · 「${first}」· 不会自动接入`) : undefined;
 }
 /** 只计已取得的成功 edit/write 结果，不扫描工作区、不解析 bash 或检查输出。 */
 function fileSummary(root: string, runId: string, workspace: string) {
@@ -143,36 +158,38 @@ function fileSummary(root: string, runId: string, workspace: string) {
   return `${files.size} 文件 +${added} −${removed}${incomplete ? ' · 统计不完整' : ''}`;
 }
 
-async function summaryLines(dataRoot: string, facts: ExitSummaryFacts): Promise<string[]> {
+async function summaryLines(dataRoot: string, facts: ExitSummaryFacts): Promise<Line[]> {
   const chains = readSessionChains(dataRoot), membership = facts.runId && chains.sessionOfRun(facts.runId);
   const session = membership ? chains.session(membership.id) : null;
   const label = session ? readDisplayIndex(dataRoot).label('session', session.id) : undefined;
-  const lines = [`◆ pi-durio 已退出${label ? ` · 会话 ${label}` : ''} · 用时 ${elapsed(facts.elapsedMs)}`];
+  const lines: Line[] = [[{ text: '◆', fg: 'ac.brand' }, { text: ' pi-durio 已退出', bold: true }, { text: `${label ? ` · 会话 ${label}` : ''} · 用时 ${elapsed(facts.elapsedMs)}`, fg: 'fg.muted' }]];
   if (session) {
     const tail = session.tail, prefix = `${session.kind === 'improve' ? 'improve · ' : ''}任务 ${tail.number}`;
-    if (tail.status === 'unknown') lines.push(`◈ ${prefix} 已中断 · 待恢复核对`);
-    else if (tail.status === 'running' || tail.status === 'accepted') lines.push(`◈ ${prefix} 未结束 · 待恢复核对`);
+    let task: Line;
+    if (tail.status === 'unknown') task = row('◈', `${prefix} 已中断`, ' · 待恢复核对');
+    else if (tail.status === 'running' || tail.status === 'accepted') task = row('◈', `${prefix} 未结束`, ' · 待恢复核对');
     else {
       const [glyph, state] = tail.status === 'completed' ? ['✓', '完成'] : tail.status === 'failed' ? ['✗', '失败'] : ['◇', tail.status === 'ended' ? '已结束' : '已中止'];
-      lines.push(`${glyph} ${prefix} ${state}${tail.input ? ` · ${firstLine(tail.input)}` : ''}`);
+      task = row(glyph, `${prefix} ${state}`, tail.input ? ` · ${firstLine(tail.input)}` : '');
     }
     const changes = fileSummary(dataRoot, tail.runId, session.workspace ?? facts.workspace);
-    if (changes) lines[lines.length - 1] += ` · ${changes}`;
+    if (changes) task.push({ text: ` · ${changes}`, fg: 'fg.muted' });
+    lines.push(task);
   }
   const frozen = frozenLine(dataRoot, facts.workspace);
   if (frozen) lines.push(frozen);
-  if (facts.draftLines) lines.push(`◇ 草稿已保存 · ${facts.draftLines} 行 · 下次 /restore 恢复`);
+  if (facts.draftLines) lines.push(row('◇', '草稿已保存', ` · ${facts.draftLines} 行 · 下次 /restore 恢复`));
   if (facts.eval) {
     const evaluation = facts.eval, source=evaluation.source, plan = source?.label??readDisplayIndex(dataRoot).label('eval-plan', evaluation.planId);
     const state = evaluation.state === 'stopped' ? '已停止于' : '停止未确认于';
-    lines.push(`eval ${plan}${source?.origin?` · ${source.origin.label}`:''} ${state} trial ${evaluation.trial}/${evaluation.total} · ${formatCostTotals(evaluation.cost)}`);
+    lines.push([{ text: `eval ${plan}${source?.origin?` · ${source.origin.label}`:''} ${state} trial ${evaluation.trial}/${evaluation.total}` }, { text: ` · ${formatCostTotals(evaluation.cost)}`, fg: 'fg.muted' }]);
   }
   if (session) {
     try {
       const usage = sumUsage(chains.contextRunIds(session.tailRunId).map(id => new RunView(dataRoot, id).usage()));
       const knownCost=Object.keys(usage.totals.amounts).length?formatCostTotals({amounts:usage.totals.amounts,unknownRequests:0,partial:false}):usage.totals.unknownRequests||usage.totals.partial?'unknown':formatCostTotals(usage.totals);
-      lines.push(`◇ 本会话 ${tokenCount(usage.tokens)} tok ${knownCost}（${COST_ESTIMATE_NOTICE}）${usage.totals.unknownRequests?` · +${usage.totals.unknownRequests} unknown`:''}${usage.totals.partial?' · partial':''}`);
-    } catch { lines.push('◇ 本会话用量 unknown'); }
+      lines.push([...row('◇', `本会话 ${tokenCount(usage.tokens)} tok ${knownCost}`, `（${COST_ESTIMATE_NOTICE}）`), { text: `${usage.totals.unknownRequests?` · +${usage.totals.unknownRequests} unknown`:''}${usage.totals.partial?' · partial':''}`, fg: 'ac.warn' }]);
+    } catch { lines.push(row('◇', '本会话用量 unknown')); }
   }
   const cleanupSession = facts.cleanup && chains.sessionOfRun(facts.cleanup.runId);
   const cleanupLabel = cleanupSession ? readDisplayIndex(dataRoot).label('session', cleanupSession.id) : label;
@@ -182,24 +199,42 @@ async function summaryLines(dataRoot: string, facts: ExitSummaryFacts): Promise<
     let next = '';
     if (continuation?.state === 'ready' && (!facts.cleanupAttempted || facts.cleanup) && tuiCleanupStatus({cleanupResult:facts.cleanup,eval:facts.eval,evalCleanup:facts.evalCleanup,batchCleanup:facts.batchCleanup}).cleanup==='confirmed') {
       const lock = session.workspace ? await probeWelcomeLock(session.workspace, continuation.coding) : undefined;
-      if (lock?.state === 'free' || lock?.state === 'readonly') next = `继续  pi-durio resume ${label}     `;
-    } else if (continuation?.state === 'recovery') next = `恢复核对  pi-durio resume ${label}     `;
-    lines.push(`${next}原文  pi-durio show ${label} --trace`);
+      if (lock?.state === 'free' || lock?.state === 'readonly') next = '继续';
+    } else if (continuation?.state === 'recovery') next = '恢复核对';
+    lines.push([...next ? [{ text: next, fg: 'fg.muted' as const }, { text: '  ' }, { text: `pi-durio resume ${label}`, fg: 'ac.warn' as const }, { text: '     ' }] : [], { text: '原文', fg: 'fg.muted' }, { text: '  ' }, { text: `pi-durio show ${label} --trace`, fg: 'ac.warn' }]);
   }
   return lines;
 }
 
-/** 原缓冲区恢复后再调用；原文不可取得不应令已经完成的退出挂起或伪造成功。 */
-export async function exitSummary(dataRoot: string, facts: ExitSummaryFacts, columns: number): Promise<string[]> {
-  let lines: string[];
-  try { lines = await summaryLines(dataRoot, facts); }
+/**
+ * 一行输出：只用前景色、粗体与 dim，不铺底色；无色档的说明用 dim（U6、U10）。
+ * 每段先过 firstLine 这道边界，再加序列。
+ */
+function paint(line: Line, tier: ColorTier) {
+  return line.map(segment => {
+    const text = firstLine(segment.text);
+    if (!text) return '';
+    const sgr = `${segment.bold ? '\x1b[1m' : ''}${tier === 'none' ? segment.fg === 'fg.muted' ? '\x1b[2m' : '' : segment.fg ? fgSgr(segment.fg, tier) : ''}`;
+    return sgr ? `${sgr}${text}${resetSgr()}` : text;
+  }).join('');
+}
+
+/**
+ * 原缓冲区恢复后再调用；原文不可取得不应令已经完成的退出挂起或伪造成功。
+ * 内容不超过 8 行；“继续 / 原文”一行之前另空一行。各行左侧 `ac.brand` 的 `┃`，内容缩进 2 列，截断到终端宽度（U6）。
+ */
+export async function exitSummary(dataRoot: string, facts: ExitSummaryFacts, columns: number, tier: ColorTier = COLOR_TIER): Promise<string[]> {
+  let lines: Line[], next = false;
+  try { lines = await summaryLines(dataRoot, facts); next = lines.length > 1 && lines.at(-1)!.some(segment => segment.text === '原文'); }
   catch (error) {
-    lines = [`◆ pi-durio 已退出 · 用时 ${elapsed(facts.elapsedMs)}`, '◈ 摘要记录不可取得 · unknown'];
-    if (facts.draftLines) lines.push(`◇ 草稿已保存 · ${facts.draftLines} 行 · 下次 /restore 恢复`);
+    lines = [[{ text: '◆', fg: 'ac.brand' }, { text: ' pi-durio 已退出', bold: true }, { text: ` · 用时 ${elapsed(facts.elapsedMs)}`, fg: 'fg.muted' }], row('◈', '摘要记录不可取得', ' · unknown')];
+    if (facts.draftLines) lines.push(row('◇', '草稿已保存', ` · ${facts.draftLines} 行 · 下次 /restore 恢复`));
     lines.push(cleanupLine({ ...facts, error: facts.error ?? String(error) }));
   }
-  const width = Math.max(1, Math.floor(columns));
-  return lines.map(line => truncateToWidth(firstLine(line), width));
+  const width = Math.max(1, Math.floor(columns)), bar = (text: string) => width >= 4 ? paint([{ text, fg: 'ac.brand' }], tier) : '';
+  const out = lines.map(line => bar('┃ ') + truncateToWidth(paint(line, tier), width >= 4 ? width - 2 : width));
+  if (next) out.splice(out.length - 1, 0, bar('┃'));
+  return out;
 }
 
 /** 首版 TUI 退出码映射；未确认清理仍由 exitHostIfUnconfirmed 负责有界退出。 */
