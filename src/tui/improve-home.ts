@@ -21,7 +21,8 @@ export interface HomeHost {
   current(): string | undefined;
 }
 
-function at(iso: string) {
+/** 报告时间 `MM-DD HH:MM`（本地时间）；1d 报告头同用。 */
+export function reportTime(iso: string) {
   const date = new Date(iso), pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
@@ -76,7 +77,7 @@ export class ImproveHome {
       if (item.kind === 'current') segments = [{ text: truncateEnd(`${mark}${clean(item.text)}`, width), fg: 'fg.body' }];
       else if (item.kind === 'report') {
         const p = pending.get(item.id)!, session = p.sessionId ? this.index!.label('session', p.sessionId) : '会话未记录';
-        segments = [{ text: truncateEnd(`${mark}${this.index!.label('improve-report', p.id)} · ${at(p.startedAt)} · 来自 ${session} · 候选 ${p.candidates} · 未决 ${p.undecided}`, width), fg: 'fg.body' }];
+        segments = [{ text: truncateEnd(`${mark}${this.index!.label('improve-report', p.id)} · ${reportTime(p.startedAt)} · 来自 ${session} · 候选 ${p.candidates} · 未决 ${p.undecided}`, width), fg: 'fg.body' }];
       } else if (item.kind === 'new') segments = [{ text: `${mark}新建分析`, fg: 'fg.primary' }];
       else if (item.kind === 'history') segments = facts?.reports ? [{ text: `${mark}历史报告 · ${facts.reports} 份`, fg: 'fg.body' }] : [{ text: `${mark}历史报告 · `, fg: 'fg.body' }, { text: '本工作区还没有报告', fg: 'fg.muted' }];
       else segments = facts?.suppressions ? [{ text: `${mark}建议抑制 · ${facts.suppressions} 项`, fg: 'fg.body' }] : [{ text: `${mark}建议抑制 · `, fg: 'fg.body' }, { text: '没有生效的抑制', fg: 'fg.muted' }];

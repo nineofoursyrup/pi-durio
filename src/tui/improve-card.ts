@@ -1,6 +1,6 @@
 /** Shared read-only candidate presentation for 1d and improve history (#91).
  * It reads retained report bytes only; it has no action or runtime capability. */
-import {wrapTextWithAnsi,visibleWidth} from '@earendil-works/pi-tui';
+import {wrapTextWithAnsi} from '@earendil-works/pi-tui';
 import type {ImproveCandidate,ImproveReport} from '../improve.js';
 import type {ImproveMode} from '../improve-decisions.js';
 import {readObject} from '../evidence.js';
@@ -9,14 +9,16 @@ import {readDisplayIndex} from '../display-number.js';
 import {candidateExecutable,improveReportContract} from '../improve-contract.js';
 import {upperBoundAmount,formatAmount} from '../cost-estimate.js';
 import {clean} from './view-stack.js';
-import {styledLine,type TokenName,type ColorTier,COLOR_TIER} from './theme.js';
+import {styledLine,type TextSegment,type TokenName,type ColorTier,COLOR_TIER} from './theme.js';
 
 export const IMPROVE_MODES:readonly ImproveMode[]=['execute-declared-scope','validate-only','defer','do-not-suggest'];
 export const MODE_LABEL:Record<ImproveMode,string>={'execute-declared-scope':'执行声明范围','validate-only':'仅验证',defer:'暂缓','do-not-suggest':'不再建议'};
 const targetKind:Record<string,string>={'agent-config':'配置','prompt-skill':'prompt·skill','self-source':'自身源码','eval-asset':'eval 资产'};
 export interface CandidateDecisionLabel {mode:string;state:string;canExecute?:boolean;extraDecisions?:number}
-export interface CandidateCardOptions {expanded:boolean;selected?:boolean;mode?:ImproveMode;decision?:CandidateDecisionLabel;readOnly?:boolean;label?:string;tier?:ColorTier}
-export interface CandidateCardRow {text:string;fg?:TokenName}
+/** `summary`：收起的卡片也带摘要行（1d）；历史视图收起时只有卡头。 */
+export interface CandidateCardOptions {expanded:boolean;summary?:boolean;selected?:boolean;mode?:ImproveMode;decision?:CandidateDecisionLabel;readOnly?:boolean;label?:string;tier?:ColorTier}
+/** `segments` 是同一行的分色写法（1d 用），拼起来等于 `text`。 */
+export interface CandidateCardRow {text:string;fg?:TokenName;segments?:TextSegment[]}
 export function suggestionReason(c:ImproveCandidate) {
  if(c.suggestionReason)return c.suggestionReason;
  if(c.target.state!=='verified')return c.target.gaps.join('；')||'目标未经核对';
@@ -56,16 +58,23 @@ export function improveCandidateRows(root:string,report:ImproveReport,c:ImproveC
  const index=readDisplayIndex(root),kind=targetKind[c.target.kind],decision=options.decision,legacy=improveReportContract(report)==='legacy';
  const label=(candidate:ImproveCandidate)=>legacy?`C-${String([...report.candidates,...(report.suppressed??[]).map(s=>s.candidate)].findIndex(item=>item.id===candidate.id)+1).padStart(2,'0')}@r1`:index.candidate(candidate),name=options.label??label(c);
  const chosen=options.mode?` · ${MODE_LABEL[options.mode]}`:decision?` · 已决定：${MODE_LABEL[decision.mode as ImproveMode]??decision.mode} · ${decision.state}${decision.canExecute&&!options.readOnly?' · 验证已通过，可再选执行（重新验证，预算另算）':''}`:options.readOnly?` · 未决${legacy?' · 首版报告不能选择':''}`:'';
- const head=`${options.selected?'▸':' '} ${name} ${c.title}${kind?' · '+kind:''}${!legacy&&!candidateExecutable(c)?' · 仅建议':''}${decision?.extraDecisions?` · 首版另有 ${decision.extraDecisions} 次决定`:''}${chosen}`;
- if(!options.expanded)return [{text:head,fg:'fg.muted'}];
+ const suggestionOnly=!legacy&&!candidateExecutable(c),tail=`${decision?.extraDecisions?` · 首版另有 ${decision.extraDecisions} 次决定`:''}${chosen}`;
+ const head:CandidateCardRow={text:`${options.selected?'▸':' '} ${name} ${c.title}${kind?' · '+kind:''}${suggestionOnly?' · 仅建议':''}${tail}`,fg:options.expanded?'ac.improve':'fg.muted',
+  segments:[{text:`${options.selected?'▸':' '} `,fg:'ac.improve'},{text:`${name} `,fg:'fg.faint'},{text:c.title,fg:'fg.primary',bold:true},{text:kind?' · '+kind:'',fg:'ac.info'},{text:suggestionOnly?' · 仅建议':'',fg:'ac.warn'},{text:tail,fg:'fg.label'}]};
+ if(!options.expanded&&!options.summary)return [head];
  const references=new Set(c.facts.flatMap(f=>f.evidence)),counter=c.successCounterexamples.length?`反例 ${c.successCounterexamples.length} 条`:`无反例：${c.gaps[0]??'未说明缺口'}`;
  const links=(ids:string[])=>ids.map(id=>{const other=report.candidates.find(c=>c.id===id);return other?label(other):id;}).join('、');
- const rows:CandidateCardRow[]=[{text:head,fg:'ac.improve'},{text:`证据  ${c.facts[0]?.claim??'没有事实陈述'} · 共 ${c.facts.length} 条 · 引用 ${references.size} 段原文 · ${counter}${c.hypotheses.length?' · 原因假设未证实':''}${c.gaps.length?` · 缺口 ${c.gaps.length} 项`:''}`},
-  {text:`动作  ${c.steps[0]??'未声明'} · 范围 ${c.scope[0]??'未声明'}${c.scope.length>1?` 等 ${c.scope.length} 个路径`:''}`},
-  {text:`验证  ${legacy?`${c.validation.method} · ${c.validation.checks.join('；')} · ${c.validation.budget}`:candidateValidation(c)}`,fg:candidateExecutable(c)?'fg.body':'fg.muted'},
-  {text:`回退  ${c.rollback} · ${c.activation.timing}`},
-  ...(c.dependencies.length||c.conflicts.length?[{text:`依赖 / 冲突  ${c.dependencies.length?'依赖 '+links(c.dependencies):''}${c.dependencies.length&&c.conflicts.length?'；':''}${c.conflicts.length?'冲突 '+links(c.conflicts):''}`}]:[]),
-  ...(c.reconsideration?[{text:`重提：${c.reconsideration.reason} · ${c.reconsideration.evidence.join('、')}`}]:[]),
+ // 摘要行：标签 fg.label，路径 ac.path，冲突 ac.warn（视觉修正 r1）。
+ const labeled=(name:string,value:TextSegment[],fg?:TokenName):CandidateCardRow=>({text:`${name}  ${value.map(s=>s.text).join('')}`,fg,segments:[{text:`${name}  `,fg:'fg.label'},...value]});
+ const summary:CandidateCardRow[]=[
+  labeled('证据',[{text:c.facts[0]?.claim??'没有事实陈述',fg:'fg.body'},{text:` · 共 ${c.facts.length} 条 · 引用 ${references.size} 段原文 · ${counter}${c.hypotheses.length?' · 原因假设未证实':''}${c.gaps.length?` · 缺口 ${c.gaps.length} 项`:''}`,fg:'fg.muted'}]),
+  labeled('动作',[{text:c.steps[0]??'未声明',fg:'fg.body'},{text:' · 范围 ',fg:'fg.label'},{text:c.scope[0]??'未声明',fg:c.scope[0]?'ac.path':'fg.muted'},{text:c.scope.length>1?` 等 ${c.scope.length} 个路径`:'',fg:'fg.muted'}]),
+  labeled('验证',[{text:legacy?`${c.validation.method} · ${c.validation.checks.join('；')} · ${c.validation.budget}`:candidateValidation(c),fg:candidateExecutable(c)?'fg.body':'fg.muted'}],candidateExecutable(c)?'fg.body':'fg.muted'),
+  labeled('回退',[{text:c.rollback,fg:'fg.body'},{text:` · ${c.activation.timing}`,fg:'fg.muted'}]),
+  ...(c.dependencies.length||c.conflicts.length?[labeled('依赖 / 冲突',[{text:c.dependencies.length?'依赖 '+links(c.dependencies):'',fg:'fg.body'},{text:c.dependencies.length&&c.conflicts.length?'；':'',fg:'fg.body'},{text:c.conflicts.length?'冲突 '+links(c.conflicts):'',fg:'ac.warn'}])]:[]),
+  ...(c.reconsideration?[{text:`重提：${c.reconsideration.reason} · ${c.reconsideration.evidence.join('、')}`,segments:[{text:'重提：',fg:'fg.label' as const},{text:`${c.reconsideration.reason} · ${c.reconsideration.evidence.join('、')}`,fg:'fg.body' as const}]}]:[])];
+ if(!options.expanded)return [head,...summary];
+ const rows:CandidateCardRow[]=[{...head,fg:'ac.improve'},...summary,
   {text:'事实是分析给出的陈述；宿主只核对了引用的原文确实读过。',fg:'fg.muted'},
   ...c.facts.flatMap((f,i)=>[{text:`事实 ${i+1}  ${f.claim}`},...f.evidence.map(ref=>({text:`引用  ${ref}`,fg:'ac.path' as const}))]),
   ...c.successCounterexamples.flatMap((f,i)=>[{text:`反例 ${i+1}  ${f.claim}`},...f.evidence.map(ref=>({text:`引用  ${ref}`,fg:'ac.path' as const}))]),
@@ -83,23 +92,5 @@ export function improveCandidateRows(root:string,report:ImproveReport,c:ImproveC
  * scrolling; this renderer never truncates an expanded card or authorization. */
 export function improveCandidateCard(root:string,report:ImproveReport,candidate:ImproveCandidate,width:number,options:CandidateCardOptions):string[] {
  const rows=improveCandidateRows(root,report,candidate,options),tier=options.tier??COLOR_TIER;
- const lines=rows.flatMap(row=>wrapTextWithAnsi(clean(row.text),Math.max(1,width)).map(text=>styledLine([{text,fg:row.fg??'fg.body'}],width,options.selected?'bg.block':undefined,tier)));
- if(!options.expanded||options.readOnly)return lines;
- const choices=IMPROVE_MODES.map((mode,i)=>({text:`${options.mode===mode?'[✓]':'[ ]'} ${i+1} ${MODE_LABEL[mode]}`,fg:((i<2&&!candidateExecutable(candidate)||options.decision&&!(i===0&&options.decision.canExecute))?'fg.faint':'fg.label') as TokenName}));
- const optionRows=width<60?[choices.slice(0,2),choices.slice(2)]:[choices];
- const optionsLines=optionRows.flatMap(items=>{
-  const text=items.map(item=>item.text).join('  ');
-  if(visibleWidth(text)<=width)return [styledLine(items.flatMap((item,i)=>i?[{text:'  '},item]:[item]),width,undefined,tier)];
-  return items.flatMap(item=>wrapTextWithAnsi(item.text,width).map(text=>styledLine([{...item,text}],width,undefined,tier)));
- });
- // The options sit beside the card when there is room; narrower cards put them
- // below the content. The complete current title is wrapped separately.
- if(width>=100&&optionsLines.length===1) {
-  const optionWidth=visibleWidth(choices.map(item=>item.text).join('  ')),head=rows[0].text,left=width-optionWidth-2;
-  const title=wrapTextWithAnsi(clean(head),Math.max(1,left));
-  const first=styledLine([{text:title[0],fg:'ac.improve'},{text:' '.repeat(Math.max(2,width-visibleWidth(title[0])-optionWidth))},...choices.flatMap((item,i)=>i?[{text:'  '},item]:[item])],width,'bg.block',tier);
-  const oldHead=wrapTextWithAnsi(clean(head),width).length;
-  return [first,...title.slice(1).map(text=>styledLine([{text,fg:'ac.improve'}],width,'bg.block',tier)),...lines.slice(oldHead)];
- }
- return [...lines,...optionsLines];
+ return rows.flatMap(row=>wrapTextWithAnsi(clean(row.text),Math.max(1,width)).map(text=>styledLine([{text,fg:row.fg??'fg.body'}],width,options.selected?'bg.block':undefined,tier)));
 }
