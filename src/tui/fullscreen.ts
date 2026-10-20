@@ -11,9 +11,11 @@ export function fullScreenHeight(rows: number) { return rows - topMargin(rows) -
  */
 export function showFullScreen(tui: TuiAltScreen, terminal: Pick<Terminal,'rows'>, component: Component, dimmed: () => boolean = () => false) {
   const frame: Component = {...component, handleMouse: event => {
+    const y = event.y-topMargin(terminal.rows), height = fullScreenHeight(terminal.rows);
+    if (y < 0 || y >= height) return;
     const margin = sideMargin(event.width);
-    return component.handleMouse?.({...event, x:event.x-margin, y:event.y-topMargin(terminal.rows),
-      width:event.width-2*margin, height:fullScreenHeight(terminal.rows)});
+    return component.handleMouse?.({...event, x:event.x-margin, y,
+      width:event.width-2*margin, height});
   }, render: width => {
     const margin = sideMargin(width);
     const lines = [...Array.from({length:topMargin(terminal.rows)},()=>styledLine([],width)),
