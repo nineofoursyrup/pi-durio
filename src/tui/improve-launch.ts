@@ -5,7 +5,7 @@
  */
 import { matchesKey, visibleWidth } from '@earendil-works/pi-tui';
 import { GLYPHS, COLOR_TIER, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { ConfirmDialog, SingleLineInput, TOO_SMALL_TO_CONFIRM, clean, truncateEnd, truncateMiddle, wrapAuthorized, type ConfirmResult } from './view-stack.js';
+import { ConfirmDialog, SingleLineInput, TOO_SMALL_TO_CONFIRM, clean, hintSegments, truncateEnd, truncateMiddle, wrapAuthorized, type ConfirmResult } from './view-stack.js';
 import { DEFAULT_FOCUS, REGISTER_HINT, improveBudgetAmount, improveLimits, sourceLabel, type ImproveBudget, type ImproveScope, type LaunchChoice, type VisibleFiles } from '../improve-entry.js';
 import type { SourceRegistration } from '../improve-source.js';
 
@@ -45,7 +45,7 @@ export class ImproveLaunchDialog {
   constructor(private readonly host: LaunchHost, prefill: LaunchPrefill = {}) {
     this.scope = prefill.scope ?? '7d'; this.budget = prefill.budget ?? 'standard'; this.focusInput = new SingleLineInput(prefill.focus??'',1000);
     this.registrations = [...host.registrations];
-    this.dialog=new ConfirmDialog({title:'新建 improve 分析',action:host.queued?'排队分析':'开始分析',bodyRows:inner=>this.body(inner),footer:reason=>[{text:this.input?'Enter 登记 · Tab 补全 · Esc 收起':reason?`Enter ${reason} · Esc 取消`:`Enter ${host.queued?'排队分析':'开始分析'} · Esc 取消`,fg:'fg.label'}]});
+    this.dialog=new ConfirmDialog({title:'新建 improve 分析',action:host.queued?'排队分析':'开始分析',bodyRows:inner=>this.body(inner),footer:reason=>this.input?hintSegments('Enter 登记 · Tab 补全 · Esc 收起'):reason?[{text:'Enter ',fg:'fg.gutter'},{text:reason,fg:'fg.muted'},{text:' · ',fg:'fg.label'},...hintSegments('Esc 取消')]:hintSegments(`Enter ${host.queued?'排队分析':'开始分析'} · Esc 取消`)});
     for (const r of this.registrations) if (prefill.sources?.includes(r.kind === 'self-source' ? 'self' : 'eval')) this.chosen.add(r.id);
   }
   get choice(): LaunchChoice {

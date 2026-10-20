@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { TuiAltScreen, stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
 import { HardwareCursorEditor } from '../src/tui/cursor.js';
+import { disabledInputLines } from '../src/tui/recovery.js';
 import { demoTransport } from '../src/offline.js';
 import {
   detectColorTier, overrideColorTierForTest,
@@ -292,10 +293,44 @@ test('overlay dim removes selected background and original colors in every color
     const original = styledLine([{ text: '中文 A', fg: 'ac.err', bold: true }], 8, 'bg.selected', tier);
     const dimmed = dimForOverlay(original, tier), grid = captureSnapshot([dimmed], 8, 1, tier);
     assert.equal(stripTerminalSequences(dimmed), stripTerminalSequences(original));
-    for (const cell of grid.rows[0]) { assert.equal(cell.bg, undefined); assert.equal(cell.bold, undefined); assert.equal(cell.reverse, undefined); }
+    for (const cell of grid.rows[0]) { assert.equal(cell.bg, tier === 'none' ? undefined : 'bg.base'); assert.equal(cell.bold, undefined); assert.equal(cell.reverse, undefined); }
     if (tier === 'none') assert.ok(grid.rows[0].every(cell => cell.dim));
     else assert.ok(grid.rows[0].every(cell => cell.fg === 'fg.gutter'));
   }
+});
+
+test('input frames stay closed and keep their base background around text and the hardware caret', () => {
+  const saved = COLOR_TIER, terminal = new TestTerminal(), tui = new TuiAltScreen(terminal, true);
+  const identity = (text: string) => text;
+  try {
+    for (const tier of ['truecolor', '256color', 'none'] as const) {
+      overrideColorTierForTest(tier);
+      const editor = new HardwareCursorEditor(tui, { borderColor: text => fgSgr('border.input') + text + '\x1b[0m', selectList: { selectedPrefix: identity, selectedText: identity, description: identity, scrollInfo: identity, noMatch: identity } });
+      editor.focused = true;
+      for (const text of ['', '中é', '第一行\n第二行']) {
+        editor.setText(text);
+        const lines = editor.render(40), plain = lines.map(stripTerminalSequences);
+        assert.match(plain[0], /^╭─+╮$/);
+        assert.match(plain.at(-1)!, /^╰─+╯$/);
+        assert.ok(plain.slice(1, -1).every(line => line.startsWith('│') && line.endsWith('│')));
+        const grid = captureSnapshot(lines, 40, lines.length, tier);
+        assert.ok(grid.rows.every(row => row.every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base'))));
+      }
+      editor.setText(Array.from({ length: 20 }, (_, i) => `第 ${i + 1} 行`).join('\n'));
+      assert.match(stripTerminalSequences(editor.render(40)[0]), /^╭.*↑.*╮$/, 'hidden-line counts remain inside the rounded border');
+      editor.setText('中éX'); editor.render(40);
+      editor.handleMouse({ type: 'click', button: 'left', x: 5, y: 1, screenX: 5, screenY: 1, width: 40, height: 3, shift: false, alt: false, ctrl: false });
+      editor.handleInput('!');
+      assert.equal(editor.getText(), '中!éX', 'the new left border does not shift mouse insertion into the next grapheme');
+      const disabled = disabledInputLines('保留草稿', 40, tier), grid = captureSnapshot(disabled, 40, 3, tier);
+      assert.match(stripTerminalSequences(disabled[0]), /^╭─+╮$/);
+      assert.match(stripTerminalSequences(disabled[2]), /^╰─+╯$/);
+      if (tier === 'truecolor') {
+        assert.equal(grid.rows[0][0].fg, 'border.off');
+        assert.equal(grid.rows[1][1].fg, 'ac.brand');
+      }
+    }
+  } finally { overrideColorTierForTest(saved); }
 });
 
 test('snapshots place Chinese and emoji in terminal columns and resolve quantized foreground tokens', () => {

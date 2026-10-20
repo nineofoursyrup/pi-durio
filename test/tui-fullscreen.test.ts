@@ -23,12 +23,14 @@ test('actual full-view entries fill 80×24 and 40×12 and Esc returns to the ses
   const lines=()=>app.screen().map(stripTerminalSequences),screen=()=>lines().join('\n');
   try {
     app.start();
-    for(const [width,height] of [[80,24],[40,12]]) {
+    for(const [width,height] of [[132,38],[80,24],[40,12]]) {
       terminal.columns=width;terminal.rows=height;terminal.resize();
       for(const [command,title] of [['/help',/帮助/],['/stats',/指标/],['/storage',/storage/],['/history',/history/],['/queue',/queue/],['/improve',/improve/],['/eval',/eval/]] as const){
         terminal.input(command);terminal.input('\r');
         const frame=lines();assert.equal(frame.length,height,command);assert.ok(frame.every(line=>visibleWidth(line)<=width),command);
-        assert.match(frame[0],title,`${command} starts in terminal row zero`);
+        const header = height >= 30 ? 1 : 0;
+        assert.match(frame[header],title,`${command} follows the collapsible top margin`);
+        if (header) assert.equal(frame[0].trim(), '');
         assert.doesNotMatch(frame.join('\n'),/描述要查看或分析的内容|最近会话|Enter 提交/,`${command} covers the session`);
         assert.match(frame.join('\n'),/Esc/);
         terminal.input('\x1b');assert.match(screen(),/描述要查看或分析的内容/,'Esc restores the welcome input');

@@ -223,7 +223,8 @@ test('show queue retains expansion/copy but blocks every write entry and leaves 
     t.key('\x1b'); t.key('\x1b'); t.key('\x1b');
     t.key('/queue'); t.key('\r'); t.key('\r'); assert.match(t.screen(), /原目标：/);
     const full = t.app.screen().map(stripTerminalSequences);
-    assert.match(full[0], /^ {2}◆ queue /, 'queue occupies the terminal from its first row, inside the side margin');
+    assert.equal(full[0].trim(), '', 'the top margin row is blank');
+    assert.match(full[1], /^ {2}◆ queue /, 'queue follows the top margin and stays inside the side margin');
     assert.match(full.at(-2)!, /Esc 返回会话/, 'the queue footer stays on the last row above the bottom margin');
     assert.match(full.at(-1)!, /^ *$/, 'the bottom margin row is blank');
     t.key('y'); await tick(); assert.equal(t.copied[0], item.input);

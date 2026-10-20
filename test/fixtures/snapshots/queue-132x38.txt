@@ -74,4 +74,4 @@
 36|                                                                                                                                    |
    0-131 -/-
 37|↑↓ 选择/滚动 · Enter 全文 · w 撤回 · r 重新接入 · y 复制 · Esc 返回会话                                                             |
-   0-70 fg.label/bg.base ; 71-131 -/bg.base
+   0-1 fg.body/bg.base ; 2-14 fg.label/bg.base ; 15-19 fg.body/bg.base ; 20-27 fg.label/bg.base ; 28-28 fg.body/bg.base ; 29-36 fg.label/bg.base ; 37-37 fg.body/bg.base ; 38-49 fg.label/bg.base ; 50-50 fg.body/bg.base ; 51-58 fg.label/bg.base ; 59-61 fg.body/bg.base ; 62-70 fg.label/bg.base ; 71-131 -/bg.base

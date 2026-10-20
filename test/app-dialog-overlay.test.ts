@@ -30,14 +30,14 @@ test('app dialog dims session and full-view backgrounds, and yields to the small
     assert.ok(row, `missing header ${title}`);
     const cells = captureSnapshot([row], terminal.columns, 1, 'truecolor').rows[0].filter(cell => cell.char.trim());
     assert.ok(cells.length);
-    for (const cell of cells) { assert.equal(cell.fg, 'fg.gutter'); assert.equal(cell.bg, undefined); assert.equal(cell.bold, undefined); }
+    for (const cell of cells) { assert.equal(cell.fg, 'fg.gutter'); assert.equal(cell.bg, 'bg.base'); assert.equal(cell.bold, undefined); }
   }
   try {
     // 132×38 的欢迎屏标识是两行方块字（U1），用版本行检查变灰。
     app.start(); assert.match(text(), /本机 coding agent/);
     open(); assert.match(text(), /确认测试动作/); assertDimmedHeader('本机 coding agent');
     terminal.input('\x1b'); terminal.input('/help'); terminal.input('\r');
-    assert.match(text(), /^ {2}帮助/);
+    assert.match(text(), /^ +\n {2}帮助/);
     open(); assertDimmedHeader('帮助');
     terminal.columns = 39; terminal.rows = 11; terminal.resize();
     assert.match(text(), /窗口过小/); assert.match(text(), /Esc 关闭确认框/); assert.doesNotMatch(text(), /Ctrl\+C 中止/); assert.doesNotMatch(text(), /确认测试动作|^帮助/m);
@@ -97,7 +97,7 @@ for (const tier of ['truecolor', '256color', 'none'] as const) test(`full-screen
     for (let y = 0; y < grid.height; y++) for (let x = 0; x < grid.width; x++) {
       if (y >= top && y <= bottom && x >= left && x <= right) continue;
       const cell = grid.rows[y][x];
-      assert.equal(cell.bg, undefined, `background at ${x},${y}`);
+      assert.equal(cell.bg, tier === 'none' ? undefined : 'bg.base', `background at ${x},${y}`);
       if (cell.char.trim()) {
         textCells++;
         if (tier === 'none') assert.equal(cell.dim, true, `text dim at ${x},${y}`);
@@ -106,7 +106,7 @@ for (const tier of ['truecolor', '256color', 'none'] as const) test(`full-screen
     }
     assert.ok(textCells > 0);
     const padding = captureSnapshot([dimForOverlay(styledLine([], 8, 'bg.base', tier), tier)], 8, 1, tier);
-    assert.ok(padding.rows[0].every(cell => cell.bg === undefined));
+    assert.ok(padding.rows[0].every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base')));
   } finally { await app.exit(); overrideColorTierForTest('truecolor'); }
 });
 

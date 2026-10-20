@@ -10,7 +10,7 @@
 04|                      │ 实际 ≈¥0.00 / 上限 ¥0.00 · 用时 00:03                                                │                      |
    0-21 -/- ; 22-23 border.input/bg.block ; 24-60 fg.label/bg.block ; 61-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 05|                      │ ↑↓ 选组 · Enter 检查原文 · Esc 返回选择                                              │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-62 fg.label/bg.block ; 63-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/- ; 22-23 border.input/bg.block ; 24-25 fg.body/bg.block ; 26-33 fg.label/bg.block ; 34-38 fg.body/bg.block ; 39-50 fg.label/bg.block ; 51-53 fg.body/bg.block ; 54-62 fg.label/bg.block ; 63-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 06|                      ╰──────────────────────────────────────────────────────────────────────────────────────╯                      |
    0-21 -/- ; 22-109 border.input/bg.block ; 110-131 -/-
 07|                                                                                                                                    |

@@ -73,4 +73,4 @@
 36|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
    0-131 line.subtle/bg.base
 37|本地时间与网络/模型时间分开 · 磁盘增长不等于上下文变短                       b 重新测量 · e 导出 · Tab 页签 · ↑↓ 滚动 · Esc 返回会话|
-   0-53 fg.label/bg.base ; 54-76 -/bg.base ; 77-131 fg.label/bg.base
+   0-53 fg.label/bg.base ; 54-76 -/bg.base ; 77-77 fg.body/bg.base ; 78-89 fg.label/bg.base ; 90-90 fg.body/bg.base ; 91-98 fg.label/bg.base ; 99-101 fg.body/bg.base ; 102-109 fg.label/bg.base ; 110-111 fg.body/bg.base ; 112-119 fg.label/bg.base ; 120-122 fg.body/bg.base ; 123-131 fg.label/bg.base

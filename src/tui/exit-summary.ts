@@ -234,7 +234,7 @@ export async function exitSummary(dataRoot: string, facts: ExitSummaryFacts, col
   const width = Math.max(1, Math.floor(columns)), bar = (text: string) => width >= 4 ? paint([{ text, fg: 'ac.brand' }], tier) : '';
   const out = lines.map(line => bar('┃ ') + truncateToWidth(paint(line, tier), width >= 4 ? width - 2 : width));
   if (next) out.splice(out.length - 1, 0, bar('┃'));
-  return out;
+  return ['', ...out];
 }
 
 /** 首版 TUI 退出码映射；未确认清理仍由 exitHostIfUnconfirmed 负责有界退出。 */

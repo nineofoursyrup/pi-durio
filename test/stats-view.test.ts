@@ -200,7 +200,12 @@ test('short heights collapse note, command, spend (total only), then scroll the 
     assert.match(plain[0], /指标 · 本机实测/, `${w}x${h} tabs`);
     assert.match(plain.at(-1)!, /Esc 返回会话/, `${w}x${h} esc`);
   }
+  const boxed = text(view().render(132, 38, 'truecolor'));
+  assert.match(boxed, /╭─+╮\n│❯ \/stats/);
+  const airyWithoutBox = text(view().render(80, 38, 'truecolor'));
+  assert.ok(!airyWithoutBox.includes('╭') && airyWithoutBox.includes('❯ /stats'), 'the box gives way before the table spacing');
   const noNote = text(view().render(80, 28, 'truecolor'));
+  assert.ok(!noNote.includes('╭'), 'the command first falls back to a single unframed line');
   assert.ok(!noNote.includes('零分母显示') && noNote.includes('❯ /stats') && noNote.includes('improve '), 'the note goes first');
   const noCommand = text(view().render(80, 27, 'truecolor'));
   assert.ok(!noCommand.includes('❯ /stats') && noCommand.includes('improve '), 'then the equivalent command');

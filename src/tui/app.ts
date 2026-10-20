@@ -50,7 +50,7 @@ export { exitCostSummary } from './exit-summary.js';
 import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor, dimForOverlay } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageSegments, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
-import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, footerLines, inset, sideMargin, bottomMargin, rule, frameBox, composeOverlay, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
+import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, footerLines, inset, sideMargin, bottomMargin, topMargin, rule, frameBox, composeOverlay, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
 import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatusSegments } from './welcome.js';
 import { COMPACT_VERSION_CHANGED, CONTINUE_TAIL_UNFINISHED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
@@ -278,13 +278,14 @@ export class ReadOnlyTui {
       const tip=TIPS[Math.floor(Math.random()*TIPS.length)];
       this.welcome=new WelcomeScreen({coding:!!options.coding,
         read:()=>readWelcomeFacts({workspace:options.workspace,dataRoot:options.dataRoot,coding:!!options.coding,mode:options.mode,toolEnvironment:options.toolEnvironment},id=>this.shown('session',id),tip),
-        height:width=>this.terminal.rows-bottomMargin(this.terminal.rows)-this.footerRows(width)-Math.min(6,Math.max(3,this.editor.render(width).length)),
+        height:width=>this.terminal.rows-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows)-this.footerRows(width)-Math.min(6,Math.max(3,this.editor.render(width).length)),
         open:session=>{try{this.command(parseCommand(`/history ${session}`));}catch(error){this.notice=error instanceof CommandError?error.line:safe(String(error));}this.tui.requestRender();},
         changed:()=>this.tui.requestRender(),inspect:lines=>this.widths?.inspect(lines)});
     }
     const welcome=this.welcome?[{component:this.welcome,basis:0,grow:1,visible:()=>!!this.welcome}]:[];
     // 1c 时：头部 → 主区 → 恢复面板 → 状态行 → 已禁用的输入框 → 底栏；高度不够时按 recoveryPlan 依次收起。
-    const layout=new VStack([{component:header,basis:'auto',visible:()=>!this.welcome},...welcome,
+    const topPad:Component={invalidate(){},render:width=>[styledLine([],width)]};
+    const layout=new VStack([{component:topPad,basis:1,visible:()=>topMargin(this.terminal.rows)>0},{component:header,basis:'auto',visible:()=>!this.welcome},...welcome,
       {component:this.scroll,basis:0,grow:1,minSize:1,visible:view=>!this.welcome&&!this.recoveryOverlay()&&this.recoveryPlan(view.width).main},
       {component:recoveryArea,basis:0,grow:1,minSize:1,visible:()=>this.recoveryOverlay()},
       {component:recoveryPanel,basis:'auto',visible:()=>!this.welcome&&!this.recoveryOverlay()&&this.viewingRecovery&&(!!this.recoveryLoading?.isShowing||this.recoveryOpen&&!!this.recoveryPanel)},
@@ -1077,7 +1078,7 @@ export class ReadOnlyTui {
    * 主区是浮层背后的区域（`area` 行），框画在它中间。贴底面板时按原顺序先收主区。
    */
   private recoveryPlan(width:number):{main:boolean;input:boolean;usage:boolean;hints:boolean;panel:number;airy:boolean;area:number} {
-    const rows=this.terminal.rows-(this.roomy()?4:2)-bottomMargin(this.terminal.rows),foot=this.footerRows(width);
+    const rows=this.terminal.rows-(this.roomy()?4:2)-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows),foot=this.footerRows(width);
     if(this.recoveryOverlay()){
       const inner=this.recoveryBoxWidth()-4,panel=this.recoveryLoading?.isShowing?undefined:this.recoveryPanel;
       const airy=panel?panel.fullHeight(inner,{wide:true,airy:true})+2:4,full=panel?panel.fullHeight(inner,{wide:true})+2:4;

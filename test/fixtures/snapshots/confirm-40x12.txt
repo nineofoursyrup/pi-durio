@@ -18,7 +18,7 @@
 08|│ ≈¥0                              │|
    0-1 border.input/bg.block ; 2-4 fg.label/bg.block ; 5-33 -/bg.block ; 34-35 border.input/bg.block
 09|│ Enter 删除 · Esc 取消            │|
-   0-1 border.input/bg.block ; 2-11 fg.body/bg.block ; 12-22 fg.label/bg.block ; 23-33 -/bg.block ; 34-35 border.input/bg.block
+   0-1 border.input/bg.block ; 2-6 fg.body/bg.block ; 7-14 fg.label/bg.block ; 15-17 fg.body/bg.block ; 18-22 fg.label/bg.block ; 23-33 -/bg.block ; 34-35 border.input/bg.block
 10|╰──────────────────────────────────╯|
    0-35 border.input/bg.block
 11|                                    |

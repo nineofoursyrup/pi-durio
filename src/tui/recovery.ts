@@ -9,7 +9,7 @@ import type { QueueItemFact } from '../evidence.js';
 import { readSessionChains } from '../session-chain.js';
 import { readDisplayIndex } from '../display-number.js';
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { SingleLineInput, fitSegments, clean, fixedFrame, footerLines, hintLine, rule, truncateEnd, wrapSegments } from './view-stack.js';
+import { SingleLineInput, fitSegments, clean, fixedFrame, footerLines, hintLine, hintSegments, inputBox, rule, truncateEnd, wrapSegments } from './view-stack.js';
 
 /**
  * 面板排布：`wide` 按终端宽度判定处置说明是否与名称同行（U3，浮层里面板比终端窄）；
@@ -426,7 +426,7 @@ export class RecoveryPanel {
       const head: TextSegment[] = [{ text: selected ? '▏ ' : '  ', fg: 'ac.brand' }, { text: wide ? pad(name, nameWidth) : name, fg: off ? 'fg.gutter' : selected ? 'fg.primary' : 'fg.body', bold: selected && !off }];
       const showText = !namesOnly && (level < 2 || selected || (this.ownerStage && !!off));
       const note = selected && this.note !== undefined;
-      const descSegments: TextSegment[] = note ? [{ text: `说明（可选）：${this.noteEditor!.render(visibleWidth(this.note??'')+1)[0]}`, fg: 'fg.primary' }, { text: '  Enter 确认 · Esc 取消', fg: 'fg.label' }] : [{ text: description, fg: off ? 'fg.gutter' : 'fg.muted' }];
+      const descSegments: TextSegment[] = note ? [{ text: `说明（可选）：${this.noteEditor!.render(visibleWidth(this.note??'')+1)[0]}`, fg: 'fg.primary' }, { text: '  ' }, ...hintSegments('Enter 确认 · Esc 取消')] : [{ text: description, fg: off ? 'fg.gutter' : 'fg.muted' }];
       if (wide && showText && !note) out.push(styledLine([...head, ...fitSegments(descSegments, Math.max(1, width - 2 - nameWidth))], width, bg, tier));
       else {
         out.push(styledLine(head, width, bg, tier));
@@ -447,17 +447,17 @@ export class RecoveryPanel {
 
 /** 恢复期间禁用的输入框（U3）：草稿灰显保留；没有草稿时写占位。 */
 export function disabledInputLines(draft: string, width: number, tier: ColorTier = COLOR_TIER) {
-  const rule = styledLine([{ text: '─'.repeat(width), fg: 'border.off' }], width, undefined, tier);
+  const inner = Math.max(1, width - 2);
   const text = firstLine(draft);
   const body: TextSegment[] = text
-    ? [{ text: `${GLYPHS.prompt} `, fg: 'fg.gutter' }, ...fitSegments([{ text, fg: 'fg.faint' }, { text: '  草稿已保留，不会提交', fg: 'fg.muted' }], Math.max(1, width - 2))]
-    : [{ text: `${GLYPHS.prompt} `, fg: 'fg.gutter' }, { text: '恢复核对进行中 · 输入不会提交', fg: 'fg.faint' }];
-  return [rule, styledLine(body, width, undefined, tier), rule];
+    ? [{ text: `${GLYPHS.prompt} `, fg: 'ac.brand' }, ...fitSegments([{ text, fg: 'fg.faint' }, { text: '  草稿已保留，不会提交', fg: 'fg.muted' }], Math.max(1, inner - 2))]
+    : [{ text: `${GLYPHS.prompt} `, fg: 'ac.brand' }, { text: '恢复核对进行中 · 输入不会提交', fg: 'fg.faint' }];
+  return inputBox([styledLine(body, inner, undefined, tier)], width, tier, 'border.off');
 }
 
 function time(at: string) { const d = new Date(at); return Number.isNaN(d.getTime()) ? at : [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':'); }
 function pad(text: string, width: number) { const w = visibleWidth(text); return w >= width ? truncateEnd(text, width) : text + ' '.repeat(width - w); }
 function rightAlign(width: number, left: string, right: string): TextSegment[] {
   const gap = width - visibleWidth(left) - visibleWidth(right);
-  return gap >= 2 ? [{ text: ' '.repeat(gap) }, { text: right, fg: 'fg.label' }] : [];
+  return gap >= 2 ? [{ text: ' '.repeat(gap) }, ...hintSegments(right)] : [];
 }

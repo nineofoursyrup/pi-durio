@@ -58,7 +58,7 @@ test('all optional rows fit eight lines, sanitize user text, and count every fro
   const facts: ExitSummaryFacts = { ...f.facts, cleanup: closed, draftLines: 3, eval: { planId: 'bbbbbbbb-cccc-4ddd-8eee-ffffffffffff', trial: 3, total: 12, cost: { amounts: { CNY: 0.08 }, unknownRequests: 1, partial: false }, state: 'stopped', cleanup: 'confirmed' } };
   const lines = await content(f.dataRoot, facts, 132);
   assert.equal(lines.length, 8);
-  assert.equal((await exitSummary(f.dataRoot, facts, 132)).length, 9, 'eight rows plus the blank row before the next step');
+  assert.equal((await exitSummary(f.dataRoot, facts, 132)).length, 10, 'eight rows plus the top margin and the blank row before the next step');
   assert.equal(lines[1], '✓ 任务 1 完成 · 完成修改');
   assert.equal(lines[2], '⧗ 204 项已冻结 · 「首项」· 不会自动接入');
   assert.equal(lines[3], '◇ 草稿已保存 · 3 行 · 下次 /restore 恢复');
@@ -67,7 +67,8 @@ test('all optional rows fit eight lines, sanitize user text, and count every fro
   assert.doesNotMatch(lines.join(''), /[\x00-\x1f\x7f-\x9f]|不得显示|fake title/);
   for (const width of [132, 80, 40, 1]) {
     const narrow = await exitSummary(f.dataRoot, facts, width);
-    assert.equal(narrow.length, 9);
+    assert.equal(narrow.length, 10);
+    assert.equal(narrow[0], '');
     assert.ok(narrow.every(line => visibleWidth(line) <= width));
   }
   const failed = await content(f.dataRoot, { ...facts, terminalRestored: false, eval: { ...facts.eval!, state: 'unconfirmed', cleanup: 'unknown' } }, 132);

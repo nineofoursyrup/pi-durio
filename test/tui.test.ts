@@ -9,6 +9,7 @@ import { CURSOR_MARKER, TuiAltScreen, stripTerminalSequences, type Terminal } fr
 import { ReadOnlyTui, exitCostSummary } from '../src/tui/app.js';
 import { TIPS } from '../src/tui/welcome.js';
 import { HardwareCursorEditor } from '../src/tui/cursor.js';
+import { captureSnapshot } from '../src/tui/snapshot.js';
 import { demoTransport, scriptedTransport } from '../src/offline.js';
 import { readRun, readQueue, readAcceptedTasks, runReadTask } from '../src/runtime.js';
 import { resolveDisplayInput, readDisplayIndex } from '../src/display-number.js';
@@ -288,7 +289,7 @@ test('focused editor uses one hardware caret without a competing painted caret',
     assert.ok(overlay.lastIndexOf('\x1b[?25l')>overlay.lastIndexOf('\x1b[?25h'),'a view owns focus and hides the editor caret');
     assert.doesNotMatch(overlay,/\x1b\[7m/,'blurred editor must not leave a painted caret behind');
     key('\x1b');f.app.screen();
-    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;14H\x1b\[\?25h/,'return to the unchanged editor insertion point');
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;15H\x1b\[\?25h/,'return to the unchanged editor insertion point');
   } finally { await f.app.exit(); }
 });
 
@@ -300,11 +301,12 @@ test('caret adaptation preserves independent reverse-video component styles', ()
   for(const focused of [true,false]) {
     editor.focused=focused;
     const lines=editor.render(20);
-    assert.match(lines[0],/^\x1b\[7m─+/,'the border theme keeps its independent reverse-video style');
-    assert.doesNotMatch(lines[1],/\x1b\[7m/,'only the editor caret loses reverse-video styling');
+    assert.match(lines[0],/\x1b\[7m╭/,'the border theme keeps its independent reverse-video style');
+    const interior = captureSnapshot([lines[1]], 20, 1, 'none').rows[0].slice(1, -1);
+    assert.ok(interior.every(cell => !cell.reverse), 'only the editor caret loses reverse-video styling; border styles remain');
     assert.equal(lines[1].includes(CURSOR_MARKER),focused,'only focused input provides the IME insertion marker');
     assert.equal(editor.focused,focused,'rendering does not change input focus');
-    assert.match(lines[1],/^(\x1b\[[0-9;]*m)*❯(\x1b\[[0-9;]*m)* /,'the first content row starts with the ❯ prompt (U10)');
+    assert.match(lines[1],/^(\x1b\[[0-9;]*m)*│(\x1b\[[0-9;]*m)*❯(\x1b\[[0-9;]*m)* /,'the first content row starts with the ❯ prompt (U10)');
   }
 });
 
@@ -314,7 +316,7 @@ test('real bracketed paste preserves combining text and keeps caret visible thro
     key('\x1b[200~A👩‍💻é中B\x1b[201~');f.app.screen();
     assert.equal(f.transport.calls.length,0,'paste must not submit');
     assert.match(f.screen(),/A👩‍💻é中B/);
-    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;10H\x1b\[\?25h/,'wide and combining text position the hardware caret in terminal cells');
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;11H\x1b\[\?25h/,'wide and combining text position the hardware caret in terminal cells');
     key('\x01');key('\x1b[C');key('\x1b[C');key('\x04');
     assert.match(f.screen(),/A👩‍💻中B/,'Ctrl+D removes the complete combining grapheme');
     key('\x03');
@@ -338,7 +340,7 @@ test('repainting hides the hardware caret before moving it through display rows'
     const paint=f.terminal.writes.find(value=>value.includes('\x1b[2K'));
     assert.ok(paint,'typing must repaint the real ANSI frame');
     assert.match(paint,/^\x1b\[\?2026h\x1b\[\?25l/,'hide before drawing on terminals without synchronized-output support');
-    assert.match(paint,/\x1b\[21;4H\x1b\[\?25h\x1b\[\?2026l$/,'restore the hardware caret at the actual insertion point');
+    assert.match(paint,/\x1b\[21;5H\x1b\[\?25h\x1b\[\?2026l$/,'restore the hardware caret at the actual insertion point');
   } finally {await f.app.exit();}
 });
 
