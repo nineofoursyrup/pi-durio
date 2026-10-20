@@ -200,9 +200,9 @@ test('short heights collapse note, command, spend (total only), then scroll the 
     assert.match(plain[0], /指标 · 本机实测/, `${w}x${h} tabs`);
     assert.match(plain.at(-1)!, /Esc 返回会话/, `${w}x${h} esc`);
   }
-  const noNote = text(view().render(132, 21, 'truecolor'));
+  const noNote = text(view().render(80, 28, 'truecolor'));
   assert.ok(!noNote.includes('零分母显示') && noNote.includes('❯ /stats') && noNote.includes('improve '), 'the note goes first');
-  const noCommand = text(view().render(132, 20, 'truecolor'));
+  const noCommand = text(view().render(80, 27, 'truecolor'));
   assert.ok(!noCommand.includes('❯ /stats') && noCommand.includes('improve '), 'then the equivalent command');
   const total = text(view().render(132, 16, 'truecolor'));
   assert.ok(total.includes('合计') && !total.includes('improve ') && total.includes('运行故障'), 'then spend collapses to the total');

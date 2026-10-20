@@ -7,7 +7,7 @@ import { formatAmount, sumCostEstimates, type CostTotals } from '../cost-estimat
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
 import { CommandError } from './commands.js';
 import { resolveProjectFilter, canonicalProject } from './project-filter.js';
-import { fitSegments, clean, escHint, fixedFrame, hintLine, statusError, truncateEnd, widthTier } from './view-stack.js';
+import { fitSegments, clean, escHint, fixedFrame, footerLines, hintLine, rule, statusError, truncateEnd, widthTier } from './view-stack.js';
 
 // ─── 范围（M0、U5） ───────────────────────────────────────────────────────────
 
@@ -363,13 +363,14 @@ export class StatsView {
 
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
     const line = (segments: TextSegment[], bg?: TokenName) => styledLine(segments, width, bg, tier);
-    const tabs = line([{ text: ' ' }, { text: '指标', fg: 'fg.primary', bold: true }, { text: ' · ', fg: 'fg.faint' }, { text: '本机实测', fg: 'fg.label' }]);
+    // 页签行、头部、等价命令行与底栏都从共用边距起（U10）；底栏左侧说明、右侧键位，放不下时分两行。
+    const tabs = line([{ text: '指标', fg: 'fg.primary', bold: true }, { text: ' · ', fg: 'fg.faint' }, { text: '本机实测', fg: 'fg.label' }]);
     const hints = this.hints ?? ['Tab 切换页签', '↑↓ 滚动'];
     const hint = hintLine(hints, width, { esc: escHint(1), tier });
     const tierW = widthTier(width), scope = this.request.scope;
     const head = [tabs, ...this.header(width, tier)];
-    const command = line([{ text: ` ${GLYPHS.prompt} `, fg: 'ac.brand' }, { text: truncateEnd(clean(this.request.command), width - 4), fg: 'fg.body' }]);
-    const note = line([{ text: ` ${truncateEnd(NOTE, width - 2)}`, fg: 'fg.label' }]);
+    const command = line([{ text: `${GLYPHS.prompt} `, fg: 'ac.brand' }, { text: truncateEnd(clean(this.request.command), width - 2), fg: 'fg.body' }]);
+    const footer = footerLines([{ text: truncateEnd(NOTE, width), fg: 'fg.label' }], hints, width, { esc: escHint(1), tier });
 
     if (!this.data) {
       const error = statusError(SCOPE_LIMITS[this.limit!], this.limit!, '/ 缩小时间或项目范围', width, tier);
@@ -377,35 +378,45 @@ export class StatsView {
     }
 
     const f = this.data.figures, rows = metricRows(f), spend = spendRows(f);
-    const table: string[] = [''];
-    if (!this.data.sample.N) table.push(line([{ text: ` 窗口内没有${SOURCE_LABEL[scope.source]}受理样本 · / 调整范围`, fg: 'fg.muted' }]));
     const covW = tierW === 'wide' ? COVER_W : tierW === 'medium' ? Math.min(COVER_W, width - 2 - LABEL_W - VALUE_W - 2 * GAP.length) : 0;
     const scopeW = Math.max(8, width - 2 - LABEL_W - VALUE_W - COVER_W - 3 * GAP.length);
-    if (tierW === 'wide') table.push(line([{ text: '  ' }, ...fitSegments([{ text: '指标' }], LABEL_W), { text: GAP }, ...fitSegments([{ text: '值' }], VALUE_W), { text: GAP }, ...fitSegments([{ text: '口径' }], scopeW), { text: GAP }, { text: '覆盖' }].map(s => ({ ...s, fg: 'fg.faint' as TokenName }))));
     const bar = (ratio: number | null | undefined): TextSegment[] => {
       if (ratio === undefined) return [];
       const filled = ratio === null ? 0 : Math.round(Math.min(1, Math.max(0, ratio)) * 10);
       return [{ text: '█'.repeat(filled), fg: 'ac.info' }, { text: (tier === 'none' ? '░' : '█').repeat(10 - filled), fg: 'line.track' }];
     };
-    const coverage = (row: MetricRow): TextSegment[] => [...bar(row.bar), ...row.coverage.map(s => ({ ...s, fg: s.fg ?? (row.bar === null ? 'fg.faint' : 'fg.muted') as TokenName }))];
-    const starts: number[] = [];
-    rows.forEach((row, index) => {
-      starts.push(table.length);
-      const selected = this.selectedRow === index;
-      const bg: TokenName | undefined = selected ? 'bg.selected' : index % 2 === 0 ? 'bg.zebra' : undefined;
-      const value: TextSegment[] = [{ text: row.value.text, fg: TONE[row.value.tone], bold: row.value.tone !== 'na' }, ...row.value.unit ? [{ text: row.value.unit, fg: 'fg.faint' as TokenName }] : []];
-      const scopeSegs = row.scope.map(s => ({ ...s, fg: s.fg ?? 'fg.body' as TokenName }));
-      const label = fitSegments([{ text: row.label, fg: 'fg.primary' }], LABEL_W);
-      if (tierW === 'wide') table.push(line([{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fitSegments(value, VALUE_W), { text: GAP }, ...fitSegments(scopeSegs, scopeW), { text: GAP }, ...fitSegments(coverage(row), COVER_W)], bg));
-      else {
-        // 宽度小于 100：指标、值、覆盖一行，口径缩进一行，共用斑马底色；小于 60 去掉覆盖列。
-        const first: TextSegment[] = [{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fitSegments(value, VALUE_W)];
-        if (covW > 0) first.push({ text: GAP }, ...fitSegments(coverage(row), covW));
-        table.push(line(first, bg), line([{ text: '    ' }, ...fitSegments(scopeSegs, Math.max(1, width - 4))], bg));
-      }
-    });
     const range = `[${monthDay(scope.from)}, ${monthDay(scope.to)})`;
-    const spendTitle = line([{ text: ` 期间开销（去重）· 请求发生于 ${range}`, fg: 'fg.label' }]);
+    const coverage = (row: MetricRow): TextSegment[] => [...bar(row.bar), ...row.coverage.map(s => ({ ...s, fg: s.fg ?? (row.bar === null ? 'fg.faint' : 'fg.muted') as TokenName }))];
+    /**
+     * 表格与期间开销的标题部分。`airy` 时（U10）头部下方、表头下方、期间开销之前各一条分隔线，
+     * 数据行之间、期间开销之前各空一行；斑马底色只铺数据行。
+     */
+    const layout = (airy: boolean) => {
+      const table: string[] = [''], starts: number[] = [];
+      if (!this.data!.sample.N) table.push(line([{ text: `窗口内没有${SOURCE_LABEL[scope.source]}受理样本 · / 调整范围`, fg: 'fg.muted' }]));
+      if (tierW === 'wide') {
+        table.push(line([{ text: '  ' }, ...fitSegments([{ text: '指标' }], LABEL_W), { text: GAP }, ...fitSegments([{ text: '值' }], VALUE_W), { text: GAP }, ...fitSegments([{ text: '口径' }], scopeW), { text: GAP }, { text: '覆盖' }].map(s => ({ ...s, fg: 'fg.faint' as TokenName }))));
+        if (airy) table.push(rule(width, 'line.subtle', tier));
+      }
+      rows.forEach((row, index) => {
+        if (airy && index) table.push('');
+        starts.push(table.length);
+        const selected = this.selectedRow === index;
+        const bg: TokenName | undefined = selected ? 'bg.selected' : index % 2 === 0 ? 'bg.zebra' : undefined;
+        const value: TextSegment[] = [{ text: row.value.text, fg: TONE[row.value.tone], bold: row.value.tone !== 'na' }, ...row.value.unit ? [{ text: row.value.unit, fg: 'fg.faint' as TokenName }] : []];
+        const scopeSegs = row.scope.map(s => ({ ...s, fg: s.fg ?? 'fg.body' as TokenName }));
+        const label = fitSegments([{ text: row.label, fg: 'fg.primary' }], LABEL_W);
+        if (tierW === 'wide') table.push(line([{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fitSegments(value, VALUE_W), { text: GAP }, ...fitSegments(scopeSegs, scopeW), { text: GAP }, ...fitSegments(coverage(row), COVER_W)], bg));
+        else {
+          // 宽度小于 100：指标、值、覆盖一行，口径缩进一行，共用斑马底色；小于 60 去掉覆盖列。
+          const first: TextSegment[] = [{ text: selected ? '› ' : '  ' }, ...label, { text: GAP }, ...fitSegments(value, VALUE_W)];
+          if (covW > 0) first.push({ text: GAP }, ...fitSegments(coverage(row), covW));
+          table.push(line(first, bg), line([{ text: '    ' }, ...fitSegments(scopeSegs, Math.max(1, width - 4))], bg));
+        }
+      });
+      const spendTitle = line([{ text: `  期间开销（去重）· 请求发生于 ${range}`, fg: 'fg.label' }]);
+      return { head: airy ? [...head, rule(width, 'line.subtle', tier)] : head, table, starts, spendHead: airy ? ['', rule(width, 'line.subtle', tier), '', spendTitle] : ['', spendTitle] };
+    };
     const barW = tierW === 'wide' ? 24 : tierW === 'medium' ? 12 : 0;
     const max = Math.max(0, ...spend.map(r => r.known));
     const spendLine = (row: SpendRow) => {
@@ -421,20 +432,21 @@ export class StatsView {
     };
     const spendLines = spend.map(spendLine), totalOnly = [spendLine(spend.at(-1)!)];
 
-    // 高度不够时依次收起：底部说明行、等价命令行、期间开销（只剩合计）、表格滚动。页签行与底栏始终保留。
-    const fits = (body: number, foot: number) => head.length + body + foot <= height;
-    const bodyOf = (spendPart: string[]) => [...table, '', spendTitle, ...spendPart];
-    let body = bodyOf(spendLines), foot = [command, note, hint];
+    // 高度不够时依次收起：分隔线与空行、底部说明、等价命令行、期间开销（只剩合计）、表格滚动。页签行与底栏键位始终保留。
+    const bodyOf = (parts: ReturnType<typeof layout>, spendPart: string[]) => [...parts.table, ...parts.spendHead, ...spendPart];
+    const airy = layout(true), parts = airy.head.length + bodyOf(airy, spendLines).length + 1 + footer.length <= height ? airy : layout(false);
+    const fits = (body: number, foot: number) => parts.head.length + body + foot <= height;
+    let body = bodyOf(parts, spendLines), foot = [command, ...footer];
     if (!fits(body.length, foot.length)) foot = [command, hint];
     if (!fits(body.length, foot.length)) foot = [hint];
-    if (!fits(body.length, foot.length) && (this.selectedRow === undefined || this.selectedRow < 7)) body = bodyOf(totalOnly);
+    if (!fits(body.length, foot.length) && (this.selectedRow === undefined || this.selectedRow < 7)) body = bodyOf(parts, totalOnly);
     if (this.selectedRow !== undefined) {
-      const selected = this.selectedRow < 7 ? starts[this.selectedRow] : table.length + 2 + this.selectedRow - 7;
-      const available = Math.max(1, height - head.length - foot.length);
+      const selected = this.selectedRow < 7 ? parts.starts[this.selectedRow] : parts.table.length + parts.spendHead.length + this.selectedRow - 7;
+      const available = Math.max(1, height - parts.head.length - foot.length);
       if (selected < this.offset) this.offset = selected;
       else if (selected >= this.offset + available) this.offset = selected - available + 1;
     }
-    const frame = fixedFrame(head, body, foot, height, this.offset);
+    const frame = fixedFrame(parts.head, body, foot, height, this.offset);
     this.offset = frame.offset;
     return frame.lines;
   }
@@ -452,7 +464,7 @@ export class StatsView {
     }
     if (this.revisionLabel) second.push(this.revisionLabel);
     const sample = data ? [`样本 ${data.sample.N}（筛除 ${data.sample.excluded}）`] : [];
-    const brand: TextSegment[] = [{ text: ' ◆ ', fg: 'ac.model' }, { text: 'stats', fg: 'fg.primary', bold: true }, { text: '  ' }];
+    const brand: TextSegment[] = [{ text: '◆ ', fg: 'ac.model' }, { text: 'stats', fg: 'fg.primary', bold: true }, { text: '  ' }];
     const room = (segs: TextSegment[]) => width - segs.reduce((n, s) => n + visibleWidth(s.text), 0);
     if (widthTier(width) === 'wide') {
       const facts = clean([...first, ...second, ...sample].join(' · '));
@@ -462,7 +474,7 @@ export class StatsView {
     }
     return [
       styledLine([...brand, { text: truncateEnd(clean([...first, ...sample].join(' · ')), room(brand)), fg: 'fg.faint' }], width, undefined, tier),
-      styledLine([{ text: '   ' }, { text: truncateEnd(clean(second.join(' · ')), width - 3), fg: 'fg.faint' }], width, undefined, tier),
+      styledLine([{ text: '  ' }, { text: truncateEnd(clean(second.join(' · ')), width - 2), fg: 'fg.faint' }], width, undefined, tier),
     ];
   }
 }
