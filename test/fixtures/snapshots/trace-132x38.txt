@@ -3,32 +3,32 @@
    0-0 ac.info/bg.base ; 1-6 fg.primary/bg.base/b ; 7-66 fg.faint/bg.base ; 67-92 -/bg.base ; 93-98 ac.ok/bg.base ; 99-131 fg.faint/bg.base
 01|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
    0-131 line.subtle/bg.base
-02| span                                  0s          0.19s           0.39s    耗时    tok │ tool · write  tc-0c98-01 · attempt 1      |
-   0-0 -/bg.base ; 1-4 fg.faint/bg.base ; 5-38 -/bg.base ; 39-71 fg.faint/bg.base ; 72-72 -/bg.base ; 73-79 fg.faint/bg.base ; 80-80 -/bg.base ; 81-86 fg.faint/bg.base ; 87-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-101 fg.primary/bg.base/b ; 102-125 fg.faint/bg.base ; 126-131 -/bg.base
-03| ▾ run r-0c98                          █████████████████████████████████   0.39s     28 │ 路径     uncertain.txt                    |
-   0-0 -/bg.base ; 1-2 fg.faint/bg.base ; 3-5 fg.primary/bg.base ; 6-12 fg.faint/bg.base ; 13-38 -/bg.base ; 39-71 line.track/bg.base ; 72-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-98 fg.label/bg.base ; 99-111 ac.path/bg.base ; 112-131 -/bg.base
-04| ├─ llm generation #1                     ███████                          0.07s     14 │ 起止     +0.13s → +0.13s                  |
-   0-0 -/bg.base ; 1-3 fg.gutter/bg.base ; 4-6 ac.brand/bg.base ; 7-18 -/bg.base ; 19-20 fg.faint/bg.base ; 21-38 -/bg.base ; 39-41 line.track/bg.base ; 42-48 ac.brand/bg.base ; 49-71 line.track/bg.base ; 72-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-98 fg.label/bg.base ; 99-113 fg.body/bg.base ; 114-131 -/bg.base
-05| ├─ tool write unc…xt 跳过（首版处置）           █                         0.00s      — │ 退出     未返回结果                       |
-   0-0 -/bg.selected ; 1-3 fg.gutter/bg.selected ; 4-7 fg.muted/bg.selected ; 8-13 -/bg.selected ; 14-20 ac.path/bg.selected ; 21-37 fg.faint/bg.selected ; 38-38 -/bg.selected ; 39-48 line.track/bg.selected ; 49-49 fg.muted/bg.selected ; 50-71 line.track/bg.selected ; 72-80 -/bg.selected ; 81-86 fg.faint/bg.selected ; 87-87 -/bg.selected ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-98 fg.label/bg.base ; 99-108 fg.body/bg.base ; 109-131 -/bg.base
-06| ┄ 中断 1.6s · 恢复核对 · 只读续跑（首版） ┄                                            │ 重新执行 中断后不自动重新执行             |
-   0-0 -/bg.base ; 1-43 fg.faint/bg.base ; 44-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-98 fg.label/bg.base ; 99-118 fg.body/bg.base ; 119-131 -/bg.base
-07| └─ llm generation #2                                      ███████         0.07s     14 │ 恢复     跳过（首版处置） · Fixture skip  |
-   0-0 -/bg.base ; 1-3 fg.gutter/bg.base ; 4-6 ac.brand/bg.base ; 7-18 -/bg.base ; 19-20 fg.faint/bg.base ; 21-38 -/bg.base ; 39-58 line.track/bg.base ; 59-65 ac.brand/bg.base ; 66-71 line.track/bg.base ; 72-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-98 fg.label/bg.base ; 99-129 fg.body/bg.base ; 130-131 -/bg.base
-08|                                                                                        │          decision after an actual unsafe  |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-98 fg.label/bg.base ; 99-129 fg.body/bg.base ; 130-131 -/bg.base
-09|                                                                                        │          write with unavailable result    |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-98 fg.label/bg.base ; 99-127 fg.body/bg.base ; 128-131 -/bg.base
-10|                                                                                        │                                           |
+02|span                                  0s          0.19s           0.39s    耗时    tok  │  tool · write  tc-0c98-01 · attempt 1     |
+   0-3 fg.faint/bg.base ; 4-37 -/bg.base ; 38-70 fg.faint/bg.base ; 71-71 -/bg.base ; 72-78 fg.faint/bg.base ; 79-79 -/bg.base ; 80-85 fg.faint/bg.base ; 86-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-102 fg.primary/bg.base/b ; 103-126 fg.faint/bg.base ; 127-131 -/bg.base
+03|▾ run r-0c98                          █████████████████████████████████   0.39s     28  │                                           |
+   0-1 fg.faint/bg.base ; 2-4 fg.primary/bg.base ; 5-11 fg.faint/bg.base ; 12-37 -/bg.base ; 38-70 line.track/bg.base ; 71-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+04|├─ llm generation #1                     ███████                          0.07s     14  │  路径     uncertain.txt                   |
+   0-2 fg.gutter/bg.base ; 3-5 ac.brand/bg.base ; 6-17 -/bg.base ; 18-19 fg.faint/bg.base ; 20-37 -/bg.base ; 38-40 line.track/bg.base ; 41-47 ac.brand/bg.base ; 48-70 line.track/bg.base ; 71-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-112 ac.path/bg.base ; 113-131 -/bg.base
+05|├─ tool write unc…xt 跳过（首版处置）           █                         0.00s      —  │  起止     +0.13s → +0.13s                 |
+   0-2 fg.gutter/bg.selected ; 3-6 fg.muted/bg.selected ; 7-12 -/bg.selected ; 13-19 ac.path/bg.selected ; 20-36 fg.faint/bg.selected ; 37-37 -/bg.selected ; 38-47 line.track/bg.selected ; 48-48 fg.muted/bg.selected ; 49-70 line.track/bg.selected ; 71-79 -/bg.selected ; 80-85 fg.faint/bg.selected ; 86-87 -/bg.selected ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-114 fg.body/bg.base ; 115-131 -/bg.base
+06|┄ 中断 1.6s · 恢复核对 · 只读续跑（首版） ┄                                             │  退出     未返回结果                      |
+   0-42 fg.faint/bg.base ; 43-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-109 fg.body/bg.base ; 110-131 -/bg.base
+07|└─ llm generation #2                                      ███████         0.07s     14  │  重新执行 中断后不自动重新执行            |
+   0-2 fg.gutter/bg.base ; 3-5 ac.brand/bg.base ; 6-17 -/bg.base ; 18-19 fg.faint/bg.base ; 20-37 -/bg.base ; 38-57 line.track/bg.base ; 58-64 ac.brand/bg.base ; 65-70 line.track/bg.base ; 71-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-119 fg.body/bg.base ; 120-131 -/bg.base
+08|                                                                                        │  恢复     跳过（首版处置） · Fixture      |
+   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-125 fg.body/bg.base ; 126-131 -/bg.base
+09|                                                                                        │           skip decision after an actual   |
+   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-128 fg.body/bg.base ; 129-131 -/bg.base
+10|                                                                                        │           unsafe write with unavailable   |
+   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-128 fg.body/bg.base ; 129-131 -/bg.base
+11|                                                                                        │           result                          |
+   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-105 fg.body/bg.base ; 106-131 -/bg.base
+12|                                                                                        │                                           |
    0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
-11|                                                                                        │ 原文                                      |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-93 fg.label/bg.base ; 94-131 -/bg.base
-12|                                                                                        │ ● 参数  完整取得                          |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-89 -/bg.base ; 90-90 ac.ok/bg.base ; 91-95 -/bg.base ; 96-105 fg.faint/bg.base ; 106-131 -/bg.base
-13|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
-14|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+13|                                                                                        │  原文                                     |
+   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-94 fg.label/bg.base ; 95-131 -/bg.base
+14|                                                                                        │  ● 参数                         完整取得  |
+   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-91 ac.ok/bg.base ; 92-121 -/bg.base ; 122-129 fg.faint/bg.base ; 130-131 -/bg.base
 15|                                                                                        │                                           |
    0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
 16|                                                                                        │                                           |
@@ -67,11 +67,11 @@
    0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
 33|                                                                                        │                                           |
    0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
-34|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
-35|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
-36| ■ llm  ■ tool  ■ compaction  ■ 重试 / unknown  ■ 失败                                  │                                           |
-   0-0 -/bg.base ; 1-1 ac.brand/bg.base ; 2-7 fg.faint/bg.base ; 8-8 fg.muted/bg.base ; 9-15 fg.faint/bg.base ; 16-16 ac.model/bg.base ; 17-29 fg.faint/bg.base ; 30-30 ac.warn/bg.base ; 31-47 fg.faint/bg.base ; 48-48 ac.err/bg.base ; 49-53 fg.faint/bg.base ; 54-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+34|────────────────────────────────────────────────────────────────────────────────────────│                                           |
+   0-88 line.subtle/bg.base ; 89-131 -/bg.base
+35|■ llm  ■ tool  ■ compaction  ■ 重试 / unknown  ■ 失败                                   │                                           |
+   0-0 ac.brand/bg.base ; 1-6 fg.faint/bg.base ; 7-7 fg.muted/bg.base ; 8-14 fg.faint/bg.base ; 15-15 ac.model/bg.base ; 16-28 fg.faint/bg.base ; 29-29 ac.warn/bg.base ; 30-46 fg.faint/bg.base ; 47-47 ac.err/bg.base ; 48-52 fg.faint/bg.base ; 53-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+36|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
+   0-131 line.subtle/bg.base
 37|2 次模型请求（重试 0）· 1 次工具调用（恢复后重试 0）· 只读，查看不调用模型、不新增用量                        ↑↓ span · Esc 返回会话|
    0-85 fg.label/bg.base ; 86-109 -/bg.base ; 110-131 fg.label/bg.base

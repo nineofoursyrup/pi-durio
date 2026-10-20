@@ -113,7 +113,9 @@ export async function renderers(packageRoot, fixture) {
   const selection = new ImproveSelectionView(fixture.dataRoot, fixture.report.id, refusal, () => {}, { now: () => Date.parse(at), submitBlocked: () => 'PREP fixture 不执行' });
   // As in the design: C-01 execute, C-02 validate only, C-03 unselected; the current card is C-01. Nothing is submitted.
   for (const key of ['1', '\t', '2', '\x1b[Z']) await selection.handleInput(key);
-  const trace = new TraceView(fixture.dataRoot, fixture.runId), evaluation = new EvalPlanView(ownPlanSource(fixture.dataRoot, fixture.plan.id), { openTrial() {} }, { now: () => Date.parse(at) });
+  // As in the design, 2a shows a selected tool span with its detail and raw sections.
+  const trace = new TraceView(fixture.dataRoot, fixture.runId); for (const key of ['\x1b[B', '\x1b[B']) trace.handleInput(key);
+  const evaluation = new EvalPlanView(ownPlanSource(fixture.dataRoot, fixture.plan.id), { openTrial() {} }, { now: () => Date.parse(at) });
   const request = { scope: { from: '2026-09-17T16:00:00.000Z', to: '2026-10-17T16:00:00.000Z', asOf: at, source: 'ordinary', project: '/synthetic/shop-api' }, command: '/stats' };
   const samples = { snapshot: () => ({ firstFrameMs: null, keys: { samples: 0, p50: null, p95: null } }) };
   const self = new SelfView(fixture.dataRoot, { changed() {}, feedback() {}, export() {} }, { read: () => selfFixture(), storage: async () => value({ total: 10240, tasks: 2, perTask: 5120, originals: 2048, breakdown: { host: 8192, sessions: 2048, attachments: 0, incomplete: 0, other: 0, total: 10240 } }, 'records'), samples, now: () => new Date(at) });

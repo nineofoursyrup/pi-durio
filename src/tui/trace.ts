@@ -159,8 +159,9 @@ export class TraceView {
     const summary = wide ? [] : [styledLine([{ text: clean(this.summaryLine()), fg: 'fg.body' }], width)];
     const fixed = header.length + 2 + summary.length + 1;
     const room = Math.max(1, height - fixed);
-    const legend = this.rows.length + 1 <= room;
-    const bodyHeight = room - (legend ? 1 : 0);
+    // 图例上方与底栏上方的区块分隔线（U10）：列表放得下时才画，否则先收它们，再收图例。
+    const legend = this.rows.length + 1 <= room, rules = this.rows.length + 3 <= room;
+    const bodyHeight = room - (legend ? 1 : 0) - (rules ? 2 : 0);
     const selectedRow = this.rows.findIndex(row => row.kind === 'run' ? this.selected === 'run' : row.kind === 'span' && row.span.key === this.selected);
     if (this.follow && selectedRow >= 0) { if (selectedRow < this.offset) this.offset = selectedRow; else if (selectedRow >= this.offset + bodyHeight) this.offset = selectedRow - bodyHeight + 1; }
     this.offset = Math.max(0, Math.min(this.offset, this.rows.length - bodyHeight));
@@ -168,14 +169,17 @@ export class TraceView {
     const columns = this.columns(listWidth, narrow);
     const total = Math.max(1, ...trace.segments.map(s => s.end));
     const list = [this.columnHeader(columns, total, listWidth), ...Array.from({ length: bodyHeight }, (_, i) => this.rowLine(this.rows[this.offset + i], columns, total, listWidth, trace))];
-    if (legend) list.push(styledLine([{ text: ' ' }, { text: '■', fg: 'ac.brand' }, { text: ' llm  ', fg: 'fg.faint' }, { text: '■', fg: 'fg.muted' }, { text: ' tool  ', fg: 'fg.faint' }, { text: '■', fg: 'ac.model' }, { text: ' compaction  ', fg: 'fg.faint' }, { text: '■', fg: 'ac.warn' }, { text: ' 重试 / unknown  ', fg: 'fg.faint' }, { text: '■', fg: 'ac.err' }, { text: ' 失败', fg: 'fg.faint' }], listWidth));
+    if (rules) list.push(styledLine([{ text: '─'.repeat(listWidth), fg: 'line.subtle' }], listWidth));
+    if (legend) list.push(styledLine([{ text: '■', fg: 'ac.brand' }, { text: ' llm  ', fg: 'fg.faint' }, { text: '■', fg: 'fg.muted' }, { text: ' tool  ', fg: 'fg.faint' }, { text: '■', fg: 'ac.model' }, { text: ' compaction  ', fg: 'fg.faint' }, { text: '■', fg: 'ac.warn' }, { text: ' 重试 / unknown  ', fg: 'fg.faint' }, { text: '■', fg: 'ac.err' }, { text: ' 失败', fg: 'fg.faint' }], listWidth));
     let body = list;
     if (wide) {
-      const detail = this.detail(trace, detailWidth - 2);
+      // 详情栏左右各留 2 列（设计稿 2a）。
+      const detail = this.detail(trace, detailWidth - 4);
       const bar = styledLine([{ text: '│', fg: 'line.subtle' }], 1);
-      body = list.map((row, i) => row + bar + styledLine([{ text: ' ' }, ...(detail[i] ?? [])], detailWidth));
+      body = list.map((row, i) => row + bar + styledLine([{ text: '  ' }, ...(detail[i] ?? [])], detailWidth));
     }
-    return [...header, styledLine([{ text: '─'.repeat(width), fg: 'line.subtle' }], width), ...body, ...summary, this.footer(trace, width, esc)];
+    const rule = styledLine([{ text: '─'.repeat(width), fg: 'line.subtle' }], width);
+    return [...header, rule, ...body, ...summary, ...(rules ? [rule] : []), this.footer(trace, width, esc)];
   }
 
   private header(trace: Trace, width: number, wide: boolean): string[] {
@@ -227,7 +231,7 @@ export class TraceView {
     return { name, bar: Math.max(4, listWidth - name - dur - tok - 5), dur, tok };
   }
   private columnHeader(c: ReturnType<TraceView['columns']>, total: number, width: number) {
-    const segments: TextSegment[] = [{ text: ' ' }, ...fitSegments([{ text: 'span', fg: 'fg.faint' }], c.name)];
+    const segments: TextSegment[] = fitSegments([{ text: 'span', fg: 'fg.faint' }], c.name);
     if (c.bar) {
       const start = '0s', mid = formatDuration(total / 2), end = formatDuration(total);
       const gap = Math.max(1, c.bar - start.length - mid.length - end.length), a = Math.floor(gap / 2);
@@ -273,13 +277,14 @@ export class TraceView {
     const room = width - fixed.reduce((w, s) => w + visibleWidth(s.text), 0) - 1;
     const isPath = tool.name !== 'bash' && !!tool.target;
     const shown = room <= 1 ? '' : isPath ? truncateMiddle(target, room) : truncateEnd(target, room);
-    return [tree, { text: 'tool', fg: 'fg.muted' }, { text: ` ${tool.name}` }, ...(shown ? [{ text: ` ${shown}`, fg: (isPath ? 'ac.path' : 'ac.warn') as TokenName }] : []), ...suffix, ...spin];
+    return [tree, { text: 'tool', fg: 'fg.muted' }, { text: ` ${tool.name}` }, ...(shown ? [{ text: ` ${shown}`, fg: 'ac.path' as TokenName }] : []), ...suffix, ...spin];
   }
   private rowLine(row: Row | undefined, c: ReturnType<TraceView['columns']>, total: number, width: number, trace: Trace) {
     if (!row) return styledLine([], width);
-    if (row.kind === 'gap') return styledLine([{ text: ' ' }, { text: truncateEnd(row.text, width - 1), fg: 'fg.faint' }], width);
+    if (row.kind === 'gap') return styledLine([{ text: truncateEnd(row.text, width), fg: 'fg.faint' }], width);
     const selected = row.kind === 'run' ? this.selected === 'run' : row.span.key === this.selected;
-    const segments: TextSegment[] = [{ text: ' ' }, ...fitSegments(this.nameSegments(row, trace, c.name), c.name)];
+    // 列表与头部、底栏左对齐（设计稿 2a）；宽屏时列表右侧到竖线留 2 列。
+    const segments: TextSegment[] = fitSegments(this.nameSegments(row, trace, c.name), c.name);
     let duration: string, tokens: TextSegment;
     if (row.kind === 'run') {
       const main = trace.segments.filter(s => s.kind !== 'maintenance');
@@ -324,40 +329,50 @@ export class TraceView {
   detailRows(width: number): string[] { return this.detail(this.current, width - 2).map(segments => styledLine([{ text: ' ' }, ...segments], width)); }
   private detail(trace: Trace, width: number): TextSegment[][] {
     const lines: TextSegment[][] = [];
-    const title = (bold: string, rest = '') => lines.push([{ text: truncateEnd(bold, width), fg: 'fg.primary', bold: true }, { text: truncateEnd(rest ? `  ${rest}` : '', Math.max(0, width - visibleWidth(bold))), fg: 'fg.faint' }]);
-    const kv = (label: string, value: string, fg: TokenName = 'fg.body', note?: string) => {
-      const labelWidth = 9, text = clean(value), wrapped = wrapTextWithAnsi(note ? `${text} · ${note}` : text, Math.max(4, width - labelWidth));
-      wrapped.forEach((part, i) => lines.push([{ text: i ? ' '.repeat(labelWidth) : label + ' '.repeat(Math.max(1, labelWidth - visibleWidth(label))), fg: 'fg.label' }, { text: part, fg }]));
+    // 标题与各分节之间空一行（U10、设计稿 2a）。
+    const title = (bold: string, rest = '') => lines.push([{ text: truncateEnd(bold, width), fg: 'fg.primary', bold: true }, { text: truncateEnd(rest ? `  ${rest}` : '', Math.max(0, width - visibleWidth(bold))), fg: 'fg.faint' }], []);
+    /** 标签 `fg.label`，值按语义上色；`note`（含分隔符）为 `fg.muted` 的说明，与值同行放不下时另起一行。 */
+    const kv = (label: string, value: string, fg: TokenName = 'fg.body', note?: string, noteFg: TokenName = 'fg.muted') => {
+      const labelWidth = 9, text = clean(value), room = Math.max(4, width - labelWidth), extra = note ? clean(note) : '';
+      const head = (i: number) => ({ text: i ? ' '.repeat(labelWidth) : label + ' '.repeat(Math.max(1, labelWidth - visibleWidth(label))), fg: 'fg.label' as TokenName });
+      if (extra && visibleWidth(text + extra) <= room) { lines.push([head(0), { text, fg }, { text: extra, fg: noteFg }]); return; }
+      const wrapped = [...wrapTextWithAnsi(text, room).map(part => ({ text: part, fg })), ...(extra ? wrapTextWithAnsi(extra.replace(/^ *(· |— )?/, ''), room).map(part => ({ text: part, fg: noteFg })) : [])];
+      wrapped.forEach((part, i) => lines.push([head(i), part]));
     };
     const offsets = (span: TraceSpan) => `+${formatDuration(span.start)} → ${span.running ? '进行中' : `+${formatDuration(span.end)}`}`;
     const raws = (items: TraceRaw[]) => {
       if (!items.length) return;
       lines.push([]); lines.push([{ text: '原文', fg: 'fg.label' }]);
       for (const item of items) {
-        const ok = item.state === 'complete', size = item.bytes !== undefined ? ` · ${item.bytes} B` : '';
-        lines.push([{ text: ok && !item.note ? '●' : '◐', fg: ok && !item.note ? 'ac.ok' : 'ac.warn' }, { text: truncateEnd(` ${item.label}${size}`, Math.max(1, width - 14)) }, { text: `  ${RAW_STATE_LABEL[item.state]}`, fg: 'fg.faint' }]);
+        // 取得状态圆点：完整取得 ac.ok；截断、部分或暂不可读 ac.warn；缺口、损坏或已清理 ac.err。状态文字靠右。
+        const ok = item.state === 'complete' && !item.note, partial = ['complete', 'partial', 'archived', 'temporarily-unreadable'].includes(item.state);
+        const size = item.bytes !== undefined ? ` · ${item.bytes} B` : '', state = RAW_STATE_LABEL[item.state], name = truncateEnd(` ${item.label}${size}`, Math.max(1, width - 1 - visibleWidth(state) - 2));
+        lines.push([{ text: ok ? '●' : partial ? '◐' : '●', fg: ok ? 'ac.ok' : partial ? 'ac.warn' : 'ac.err' }, { text: name }, { text: ' '.repeat(Math.max(2, width - 1 - visibleWidth(name) - visibleWidth(state))) }, { text: state, fg: 'fg.faint' }]);
         if (item.note) lines.push([{ text: `  ${item.note}`, fg: 'fg.faint' }]);
       }
     };
     const llmBlock = (span: TraceSpan, llm: TraceLlm) => {
       kv('请求模型', llm.model ?? '未记录', 'ac.model');
-      kv('结果', this.llmResult(llm), span.outcome === 'failed' ? 'ac.warn' : 'fg.body', llm.error ? clean(llm.error).split('\n')[0] : undefined);
+      const [result, ...detail] = this.llmResult(llm).split(' · ');
+      kv('结果', result, span.outcome === 'failed' ? 'ac.warn' : 'fg.body', [...detail, ...(llm.error ? [clean(llm.error).split('\n')[0]] : [])].map(part => ` · ${part}`).join(''));
       if (llm.usage) kv('用量', `输入 ${llm.usage.input} · 缓存 ${llm.usage.cacheRead} · 输出 ${llm.usage.output}`);
-      else kv('用量', 'unknown — 不记为 0', 'ac.warn');
+      else kv('用量', 'unknown', 'ac.warn', ' — 不记为 0');
       const cost = requestCostView(llm.cost ?? undefined);
-      kv('费用', cost ? `${cost.display} · 价目 ${cost.price.version ?? '无'} · ${cost.price.period}` : 'unknown · 没有估算', cost?.state === 'complete' ? 'fg.body' : 'ac.warn');
+      if (cost) kv('费用', cost.display, cost.state === 'complete' ? 'fg.body' : 'ac.warn', ` · 价目 ${cost.price.version ?? '无'} · ${cost.price.period}`);
+      else kv('费用', 'unknown', 'ac.warn', ' · 没有估算');
     };
     const span = this.selectedSpan;
     if (!span) {
       const segments = trace.segments.filter(s => s.kind !== 'maintenance');
       title('run', this.index.label('run', trace.runId));
-      kv('状态', `${this.statusSegment(trace.status).text}${trace.reason ? ` · ${trace.reason}` : ''}`);
+      const status = this.statusSegment(trace.status);
+      kv('状态', status.text, status.fg, trace.reason ? ` · ${trace.reason}` : undefined);
       kv('执行段', `${segments.length}${segments.length > 1 ? `（恢复后续跑 ${segments.length - 1}）` : ''}${trace.maintenance ? ` · 另有维护 ${trace.maintenance} 项` : ''}`);
       kv('执行版本', trace.version ?? '未记录');
       if (trace.taskId) kv('任务', this.index.label('task', trace.taskId));
-      kv('耗时', `${formatDuration(trace.duration)} · 不计中断`);
-      kv('用量', `${formatTokens(trace.tokens)} tok${trace.unknownTokens ? ` · ${trace.unknownTokens} 次请求 unknown` : ''}`);
-      kv('费用', `${formatCostTotals(trace.cost)} · 估算 · 非账单`);
+      kv('耗时', formatDuration(trace.duration), 'fg.body', ' · 不计中断');
+      kv('用量', `${formatTokens(trace.tokens)} tok`, 'fg.body', trace.unknownTokens ? ` · ${trace.unknownTokens} 次请求 unknown` : undefined, 'ac.warn');
+      kv('费用', formatCostTotals(trace.cost), trace.cost.unknownRequests || trace.cost.partial ? 'ac.warn' : 'fg.body', ' · 估算 · 非账单');
       if (trace.costError) kv('费用错误', trace.costError, 'ac.err');
       return lines;
     }
@@ -367,9 +382,10 @@ export class TraceView {
       const tool = span.tool!;
       title(`tool · ${tool.name}`, `${tool.call !== null ? this.index.toolCall(trace.runId, tool.call) : 'tc 未记录'} · attempt ${tool.attempt}`);
       pinned();
-      if (tool.target) kv(tool.name === 'bash' ? '命令' : '路径', tool.target, tool.name === 'bash' ? 'ac.warn' : 'ac.path');
+      if (tool.target) kv(tool.name === 'bash' ? '命令' : '路径', tool.target, 'ac.path');
       kv('起止', offsets(span));
-      kv(tool.denied ? '结果' : '退出', this.exitText(span), span.outcome === 'failed' || tool.denied ? 'ac.err' : 'fg.body');
+      const [exit, ...why] = this.exitText(span).split(' · ');
+      kv(tool.denied ? '结果' : '退出', exit, span.outcome === 'failed' || tool.denied || (tool.exit ?? 0) !== 0 ? 'ac.err' : 'fg.body', why.map(part => ` · ${part}`).join('') || undefined);
       if (tool.env) {
         const env = `${tool.env.version ?? '环境版本未记录'} · ${tool.env.names} 变量名 · `;
         lines.push(...wrapTextWithAnsi(`${env}${tool.env.apiKey ? '含 DEEPSEEK_API_KEY' : '不含 DEEPSEEK_API_KEY'}`, Math.max(4, width - 9)).map((part, i) => [{ text: i ? ' '.repeat(9) : '环境     ', fg: 'fg.label' as TokenName }, { text: part, fg: (tool.env!.apiKey ? 'ac.err' : 'fg.body') as TokenName }]));
@@ -402,7 +418,7 @@ export class TraceView {
     raws(span.raws);
     const previous = llm.retryOf !== null ? trace.spans.find(s => s.llm?.number === llm.retryOf) : undefined;
     if (previous) {
-      lines.push([], [{ text: '─'.repeat(width), fg: 'line.inner' }]);
+      lines.push([], [{ text: '─'.repeat(width), fg: 'line.inner' }], []);
       title(`llm · #${previous.llm!.number}`, '同一逻辑请求的上一次 attempt');
       llmBlock(previous, previous.llm!);
     }

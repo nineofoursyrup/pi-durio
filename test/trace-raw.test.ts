@@ -123,7 +123,7 @@ test('raw layer: Tab switches items, n/p pages, y copies the current page, contr
     for (const line of plain(narrow)) assert.ok(visibleWidth(line) <= width, `${width}: ${line}`);
   }
   // 宽度小于 100：没有详情栏，原文层顶部先显示完整详情。
-  assert.match(plain(withTier('none', () => raw.render(99, 40, 'Esc 返回上层'))).join('\n'), /tool · bash .*\n.*命令/);
+  assert.match(plain(withTier('none', () => raw.render(99, 40, 'Esc 返回上层'))).join('\n'), /tool · bash .*\n\s*\n.*命令/);
   assert.equal(visibleControls('a\tb\r\nc'), 'a    b\nc');
 });
 
@@ -231,7 +231,7 @@ test('/details and 分页查看 open 2a directly in the raw layer; Esc returns t
     assert.match(copied[0], /^case 0\n/);
     key('\x1b');
     assert.match(screen(), /↑↓ span · Enter 原文 · p 固定为证据 · Esc 返回会话/, 'Esc returns to the list layer');
-    assert.match(screen(), /│ tool · bash/, 'the tool span stays selected');
+    assert.match(screen(), /│  tool · bash/, 'the tool span stays selected');
     key('\x1b');
     assert.doesNotMatch(screen(), /◆ trace/, 'second Esc returns to the session');
     // “分页查看”：点击该行进入原文层。
