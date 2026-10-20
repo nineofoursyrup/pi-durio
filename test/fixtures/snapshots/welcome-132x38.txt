@@ -13,12 +13,12 @@
    0-131 -/bg.base
 06|                                                                                                                                    |
    0-131 -/bg.base
-07|                                                                                                                                    |
+07|      ◢◣  █▀█ █ ▄ █▀▄ █ █ █▀█ █ █▀█                                                                                                 |
+   0-5 -/bg.base ; 6-7 ac.brand/bg.base ; 8-9 -/bg.base ; 10-14 fg.primary/bg.base ; 15-15 -/bg.base ; 16-16 fg.faint/bg.base ; 17-17 -/bg.base ; 18-34 fg.primary/bg.base ; 35-131 -/bg.base
+08|      ◥◤  █▀▀ █   █▄▀ █▄█ █▀▄ █ █▄█                                                                                                 |
+   0-5 -/bg.base ; 6-7 ac.brand/bg.base ; 8-9 -/bg.base ; 10-14 fg.primary/bg.base ; 15-15 -/bg.base ; 16-16 fg.faint/bg.base ; 17-17 -/bg.base ; 18-34 fg.primary/bg.base ; 35-131 -/bg.base
+09|                                                                                                                                    |
    0-131 -/bg.base
-08|                                                                                                                                    |
-   0-131 -/bg.base
-09|      ◆ pi·durio                                                                                                                    |
-   0-5 -/bg.base ; 6-6 ac.brand/bg.base/b ; 7-9 fg.primary/bg.base/b ; 10-10 fg.faint/bg.base/b ; 11-15 fg.primary/bg.base/b ; 16-131 -/bg.base
 10|      本机 coding agent · v0.1.0 · f26ae8f                                                                                          |
    0-5 -/bg.base ; 6-22 fg.primary/bg.base ; 23-25 fg.faint/bg.base ; 26-41 fg.label/bg.base ; 42-131 -/bg.base
 11|                                                                                                                                    |
@@ -33,16 +33,16 @@
    0-5 -/bg.base ; 6-17 fg.label/bg.base ; 18-55 fg.muted/bg.base ; 56-131 -/bg.base
 16|                                                                                                                                    |
    0-131 -/bg.base
-17|      最近会话 · 点击只读打开，不会调用模型或工具                                                                                   |
-   0-5 -/bg.base ; 6-13 fg.label/bg.base ; 14-48 fg.gutter/bg.base ; 49-131 -/bg.base
-18|      s-7f3a · 修复购物车满减金额四舍五入                                        ✓ 完成       · 今天 10:12                          |
-   0-5 -/bg.base ; 6-11 fg.primary/bg.base ; 12-14 fg.faint/bg.base ; 15-40 fg.body/bg.base ; 41-80 -/bg.base ; 81-92 ac.ok/bg.base ; 93-105 fg.faint/bg.base ; 106-131 -/bg.base
-19|      s-6c01 · 订单导出 CSV 增加时区列                                           ◈ 待恢复核对 · 昨天 22:40                          |
-   0-5 -/bg.base ; 6-11 fg.primary/bg.base ; 12-14 fg.faint/bg.base ; 15-37 fg.body/bg.base ; 38-80 -/bg.base ; 81-92 ac.warn/bg.base ; 93-105 fg.faint/bg.base ; 106-131 -/bg.base
-20|      s-5e9b · improve · 测试重复运行成本                                        ◇ 已中止     ·      10-09                          |
-   0-5 -/bg.base ; 6-11 fg.primary/bg.base ; 12-14 fg.faint/bg.base ; 15-24 ac.improve/bg.base ; 25-40 fg.body/bg.base ; 41-80 -/bg.base ; 81-92 fg.muted/bg.base ; 93-105 fg.faint/bg.base ; 106-131 -/bg.base
-21|                                                                                                                                    |
+17|      最近会话 · ↑↓ 选择，Enter 或点击只读打开，不会调用模型或工具                                                                  |
+   0-5 -/bg.base ; 6-13 fg.label/bg.base ; 14-65 fg.gutter/bg.base ; 66-131 -/bg.base
+18|                                                                                                                                    |
    0-131 -/bg.base
+19|         s-7f3a    修复购物车满减金额四舍五入                                          ✓ 完成  今天 10:12                           |
+   0-6 -/bg.base ; 7-7 ac.brand/bg.base ; 8-8 -/bg.base ; 9-44 fg.body/bg.base ; 45-80 -/bg.base ; 81-92 ac.ok/bg.base ; 93-94 -/bg.base ; 95-104 fg.faint/bg.base ; 105-131 -/bg.base
+20|         s-6c01    订单导出 CSV 增加时区列                                       ◈ 待恢复核对  昨天 22:40                           |
+   0-6 -/bg.base ; 7-7 ac.brand/bg.base ; 8-8 -/bg.base ; 9-41 fg.body/bg.base ; 42-80 -/bg.base ; 81-92 ac.warn/bg.base ; 93-94 -/bg.base ; 95-104 fg.faint/bg.base ; 105-131 -/bg.base
+21|         s-5e9b    improve · 测试重复运行成本                                        ◇ 已中止       10-09                           |
+   0-6 -/bg.base ; 7-7 ac.brand/bg.base ; 8-8 -/bg.base ; 9-18 fg.body/bg.base ; 19-28 ac.improve/bg.base ; 29-44 fg.body/bg.base ; 45-80 -/bg.base ; 81-92 fg.muted/bg.base ; 93-94 -/bg.base ; 95-104 fg.faint/bg.base ; 105-131 -/bg.base
 22|                                                                                                                                    |
    0-131 -/bg.base
 23|                                                                                                                                    |

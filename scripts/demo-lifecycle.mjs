@@ -165,11 +165,12 @@ if (process.argv[2] === '--crash-worker') {
     assert.equal(sessions.length, 1); const runId = sessions[0].tailRunId;
     const exited = once(worker, 'exit'); worker.kill('SIGTERM'); const [code] = await exited;
     assert.equal(code, 75, stderr); assert.ok(Buffer.byteLength(stdout) < 2048);
-    const summary = stdout.trimEnd().split('\n');
-    assert.ok(summary.length > 0 && summary.length <= 8); assert.ok(summary.every(line => visibleWidth(line) <= 80));
-    assert.match(summary[0], /^◆ pi-durio 已退出/); assert.match(stdout, /清理未确认/);
-    assert.match(stdout, /恢复核对  pi-durio resume s-/); assert.match(stdout, /原文  pi-durio show s-/);
-    assert.doesNotMatch(stdout, /[\x1b\x07]|Read back:|"tui"|"runId"/);
+    // The summary is colored with SGR only (U6); strip it and the left ┃ bar, then no other sequence may remain.
+    const plain = stdout.replace(/\x1b\[[0-9;]*m/g, ''), summary = plain.trimEnd().split('\n').map(line => line.replace(/^┃ ?/, '')).filter(Boolean);
+    assert.ok(summary.length > 0 && summary.length <= 8); assert.ok(stdout.trimEnd().split('\n').every(line => visibleWidth(line) <= 80));
+    assert.match(summary[0], /^◆ pi-durio 已退出/); assert.match(plain, /清理未确认/);
+    assert.match(plain, /恢复核对  pi-durio resume s-/); assert.match(plain, /原文  pi-durio show s-/);
+    assert.doesNotMatch(plain, /[\x1b\x07]|Read back:|"tui"|"runId"/);
     const terminal = JSON.parse(await readFile(`${paths.dataRoot}-terminal-cleanup.json`, 'utf8'));
     const view = await allRecords(paths.dataRoot, runId); assert.equal(view.result.lifecycle.owner, 'retained');
     await save(join(root, 'tui-cleanup-timeout', 'view.json'), { ...view, summary, terminal, exitCode: code, stderr });

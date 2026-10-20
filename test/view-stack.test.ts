@@ -6,6 +6,7 @@ import { stripTerminalSequences, visibleWidth } from '@earendil-works/pi-tui';
 import {
   ConfirmDialog, LoadingState, PresetFilter, SingleLineInput, TOO_SMALL_TO_CONFIRM,
   fixedFrame, hintLine, statusEmpty, statusError, truncateMiddle, viewKey, widthTier, wrapAuthorized, escHint,
+  SPACER, settleSpacers, sideMargin, bottomMargin, inset, rule, footerLines,
 } from '../src/tui/view-stack.js';
 import { captureSnapshot, snapshotText, type SnapshotGrid } from '../src/tui/snapshot.js';
 
@@ -214,4 +215,38 @@ test('single-line limits preserve complete Unicode code points on initial value 
   input.setValue('a'); input.handleInput('😀'); assert.equal(input.getValue(), 'a😀');
   input.setValue('ab'); input.handleInput('😀'); assert.equal(input.getValue(), 'ab');
 
+});
+
+test('U10 spacing: spacers become blank rows when the frame fits and all collapse before scrolling when it does not', () => {
+  assert.deepEqual(settleSpacers(['a', SPACER, 'b'], true), ['a', '', 'b']);
+  assert.deepEqual(settleSpacers(['a', SPACER, 'b'], false), ['a', 'b']);
+  assert.deepEqual(fixedFrame(['h', SPACER], ['a', SPACER, 'b'], ['f'], 6, 0).lines, ['h', '', 'a', '', 'b', 'f']);
+  // One row short: every spacer goes, nothing scrolls.
+  assert.deepEqual(fixedFrame(['h', SPACER], ['a', SPACER, 'b'], ['f'], 5, 0).lines, ['h', 'a', 'b', '', 'f']);
+  assert.deepEqual(fixedFrame(['h', SPACER], ['a', SPACER, 'b'], ['f'], 3, 0).lines, ['h', 'a', 'f']);
+});
+
+test('U10 margins: 2 columns each side while the inner width stays wide; 1 bottom row from 30 rows', () => {
+  assert.deepEqual([132, 104, 103, 100, 80, 40].map(sideMargin), [2, 2, 0, 0, 0, 0]);
+  assert.deepEqual([38, 30, 29, 24, 12].map(bottomMargin), [1, 1, 0, 0, 0]);
+  const lines = inset(['ab', ''], 10, 2, 'none');
+  assert.deepEqual(plain(lines), ['  ab      ', '          ']);
+  assert.ok(lines.every(line => visibleWidth(line) === 10));
+  assert.deepEqual(plain([rule(5, 'line.subtle', 'none')]), ['─────']);
+});
+
+test('U10 footer: usage left and hints right share one row, falling back to two rows without losing either', () => {
+  const left = [{ text: 'deepseek-flash · ctx ≈863 / 1M' }];
+  const hints = ['Enter 提交', '/ 命令', 'Ctrl+R 历史', '? 帮助'];
+  const wide = plain(footerLines(left, hints, 100, { keepLast: '? 帮助', tier: 'none' }));
+  assert.equal(wide.length, 1);
+  assert.match(wide[0], /^deepseek-flash · ctx ≈863 \/ 1M +Enter 提交 · \/ 命令 · Ctrl\+R 历史 · \? 帮助$/);
+  const narrow = plain(footerLines(left, hints, 56, { keepLast: '? 帮助', tier: 'none' }));
+  assert.equal(narrow.length, 2);
+  assert.match(narrow[0], /^deepseek-flash · ctx ≈863 \/ 1M +$/);
+  assert.match(narrow[1], /^Enter 提交 · \/ 命令 · Ctrl\+R 历史 · \? 帮助 *$/);
+  // Feedback replaces the hints, never the usage.
+  assert.match(plain(footerLines(left, hints, 100, { feedback: '已复制', tier: 'none' }))[0], /^deepseek-flash · ctx ≈863 \/ 1M +已复制$/);
+  // Full views keep Esc at the far right.
+  assert.match(plain(footerLines(left, ['↑↓ 滚动'], 100, { esc: 'Esc 返回会话', tier: 'none' }))[0], /↑↓ 滚动 · Esc 返回会话$/);
 });

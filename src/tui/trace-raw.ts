@@ -4,7 +4,7 @@ import { RAW_STATE_LABEL, type TraceRaw, type TraceSpan } from '../trace.js';
 import { RawContent, type RawPage } from '../trace-raw.js';
 import { COLOR_TIER, styledLine, type TextSegment } from './theme.js';
 import { clean, hintLine, truncateEnd } from './view-stack.js';
-import type { TraceView } from './trace.js';
+import { rawStateGlyph, type TraceView } from './trace.js';
 
 /** 原文层需要宿主（app.ts）提供的：复制与即时反馈。 */
 export interface TraceRawHost {
@@ -126,9 +126,8 @@ export class TraceRawView {
     return rows.map(row => styledLine(row, width));
   }
   private statusLine(raw: TraceRaw, page: RawPage, width: number) {
-    const ok = page.state === 'complete';
     const parts = [RAW_STATE_LABEL[page.state], ...(raw.note ? [raw.note] : []), `第 ${page.page + 1}/${page.pages} 页`, ...(raw.bytes !== undefined ? [`共 ${raw.bytes} B`] : []), ...(page.note ? [page.note] : [])];
-    return styledLine([{ text: ok && !raw.note ? '●' : '◐', fg: ok && !raw.note ? 'ac.ok' : 'ac.warn' }, { text: truncateEnd(` ${parts.join(' · ')}`, width - 1), fg: 'fg.body' }], width);
+    return styledLine([rawStateGlyph(page.state, raw.note), { text: truncateEnd(` ${parts.join(' · ')}`, width - 1), fg: 'fg.body' }], width);
   }
   private contentLines(raw: TraceRaw, page: RawPage, width: number): string[] {
     if (page.error) return [styledLine([{ text: truncateEnd(clean(page.error), width), fg: 'fg.muted' }], width)];

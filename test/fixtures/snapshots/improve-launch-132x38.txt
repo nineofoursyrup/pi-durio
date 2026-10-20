@@ -1,17 +1,17 @@
 132x38 truecolor
-00|◆ improve  ~/project                                                                                                  分析不执行候选|
+00|  ◆ improve  ~/project                                                                                              分析不执行候选  |
    0-131 fg.gutter/-
 01|                                                                                                                                    |
    0-131 fg.gutter/-
-02|  ir-xxxx · 00-00 00:00 · 来自 s-xxxx · 候选 3 · 未决 2                                                                             |
+02|    ir-xxxx · 00-00 00:00 · 来自 s-xxxx · 候选 3 · 未决 2                                                                           |
    0-131 fg.gutter/-
 03|                                                                                                                                    |
    0-131 fg.gutter/-
-04|› 新建分析                                                                                                                          |
+04|  › 新建分析                                                                                                                        |
    0-131 fg.gutter/-
-05|  历史报告 · 2 份                                                                                                                   |
+05|    历史报告 · 2 份                                                                                                                 |
    0-131 fg.gutter/-
-06|  建议抑制 · 没有生效的抑制                                                                                                         |
+06|    建议抑制 · 没有生效的抑制                                                                                                       |
    0-131 fg.gutter/-
 07|                                                                                                                                    |
    0-131 fg.gutter/-
@@ -71,7 +71,7 @@
    0-131 fg.gutter/-
 35|                                                                                                                                    |
    0-131 fg.gutter/-
-36|                                                                                                                                    |
+36|  ↑↓ 选择 · Enter 打开 · Esc 返回会话                                                                                               |
    0-131 fg.gutter/-
-37|↑↓ 选择 · Enter 打开 · Esc 返回会话                                                                                                 |
+37|                                                                                                                                    |
    0-131 fg.gutter/-

@@ -71,11 +71,11 @@ test('2a golden at 132x38 and the <100 / <60 layouts', () => {
       for (const line of lines) assert.ok(visibleWidth(line) <= width, `${width}: ${line}`);
       const text = lines.join('\n');
       assert.match(text.split('\n').at(-1)!, /Esc 返回会话$/);
-      if (width >= 100) { assert.match(text, /│ tool · read/); assert.doesNotMatch(text, /✓ 完成.*\n.*✓ 完成/); }
+      if (width >= 100) { assert.match(text, /│  tool · read/); assert.doesNotMatch(text, /✓ 完成.*\n.*✓ 完成/); }
       else {
         assert.doesNotMatch(text, /│/, 'detail pane collapses below 100');
         assert.match(lines[1], /✓ 完成/, 'header facts move to the second line');
-        assert.match(lines.at(-2)!, /^tool read · 已返回 · /, 'selected span summary above the footer');
+        assert.match(lines.at(-2)!, /^tool read · 已返回 · /, 'selected span summary directly above the footer');
       }
       if (width < 60) assert.doesNotMatch(text, /█/, 'bar column removed below 60');
       else assert.match(text, /█/);
@@ -148,7 +148,7 @@ test('bash exit 1: predeclared check vs tool failure; environment names checked 
     assert.match(text, /HTTP 429 · error · 未返回 usage/);
     assert.match(text, /unknown — 不记为 0/);
     assert.match(text, /5 次模型请求（重试 1）/);
-    assert.match(at('t2').split('\n').at(-2)!, /│/);
+    assert.match(at('t2').split('\n').at(-3)!, /│/);
     view.select('t2');
     assert.match(plain(view.render(80, 24, 'Esc 返回会话')).at(-2)!, /^tool bash · exit 1 · 计入工具失败 · /);
   });

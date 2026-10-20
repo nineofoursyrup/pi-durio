@@ -256,7 +256,7 @@ test('app commands validate before opening, preserve draft on reopen, and backgr
   const accepted=readAcceptedTasks(f.dataRoot).tasks.length;
   key('/improve selection-report --execute C-99');assert.doesNotThrow(()=>key('\r'));assert.match(screen(),/候选号无效/);assert.doesNotMatch(screen(),/提交汇总/);assert.equal(app.improveBatch.running,false);
   key('\x15');key('/improve selection-report --validate C-01');key('\r');assert.match(screen(),/提交汇总/);assert.equal(improveFacts(f.dataRoot).filter(f=>f.kind==='improve.decision').length,0);
-  key('\x1b');key('\x1b');key('\x1b');key('/improve selection-report');key('\r');assert.match(screen(),/修复加法.*仅验证/);
+  key('\x1b');key('\x1b');key('\x1b');key('/improve selection-report');key('\r');assert.match(screen(),/修复加法/);assert.match(screen(),/◉ 2 仅验证/);
   key('\r');assert.match(screen(),/提交汇总/);key('\r');await untilSelection(()=>app.improveBatch.running);assert.match(screen(),/执行进度/);
   key('\x1b');key('\x1b');key('\x1b');assert.match(screen(),/improve 执行/);assert.match(screen(),/原会话任务/);
   key('/improve history');key('\r');assert.match(screen(),/improve 历史/);key('\x03');await new Promise<void>(resolve=>setImmediate(resolve));if(batchSignal?.aborted)await batchDone;

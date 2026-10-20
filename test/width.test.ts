@@ -142,7 +142,8 @@ test('product first paste is measured before paint, keeps later keys ordered and
     key('\x1b[200~A👩‍💻é中B\x1b[201~');
     await until(()=>f.painted()&&f.terminal.samples.includes('👩‍💻'));
     assert.equal(visibleWidth('A👩‍💻é中B'),10);
-    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;11H\x1b\[\?25h/);
+    // 输入框左右各留 2 列（U10）：插入点在第 13 列。
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[21;13H\x1b\[\?25h/);
     assert.equal(f.transport.calls.length,0);
     key('\x03');await until(f.painted);
     key('e');key('\u0301');await until(()=>f.painted()&&f.terminal.samples.includes('é'));

@@ -48,7 +48,7 @@ test('real app navigates three history layers and trace/raw without losing posit
   const before = readFileSync(join(f.dataRoot, 'host.sqlite')), through = watermark(f.dataRoot), t = open(f);
   try {
     await new Promise(resolve => setImmediate(resolve));
-    t.press(key.ctrlR, key.down); const list = t.screen(); assert.match(list, /^◆ history/);
+    t.press(key.ctrlR, key.down); const list = t.screen(); assert.match(list, /^ {2}◆ history/);
     t.press(key.enter, key.down); const session = t.screen(); assert.match(session, /任务 2.*Second task/);
     t.press(key.enter); const body = t.screen(); assert.match(body, /只读 · 不能提交/); assert.doesNotMatch(body, /second original result/);
     assert.doesNotMatch(body, /◆ pi-durio|offline-demo|Enter 提交/, 'a short history transcript covers the underlying session screen');
@@ -61,8 +61,8 @@ test('real app navigates three history layers and trace/raw without losing posit
     t.press(key.esc); assert.equal(t.screen(), session);
     t.press(key.esc); assert.equal(t.screen(), list);
     t.press('c', key.up); await new Promise(resolve => setImmediate(resolve));
-    assert.match(t.screen(), /^◆ history/, 'changing the selection must invalidate a pending continuation probe');
-    assert.match(t.screen().split('\n').find(line => line.startsWith('›'))!, /Other session/);
+    assert.match(t.screen(), /^ {2}◆ history/, 'changing the selection must invalidate a pending continuation probe');
+    assert.match(t.screen().split('\n').find(line => line.trimStart().startsWith('›'))!, /Other session/);
     assert.equal(t.calls(), 0); assert.equal(watermark(f.dataRoot), through); assert.deepEqual(readFileSync(join(f.dataRoot, 'host.sqlite')), before);
   } finally { await t.app.exit(); }
 });
@@ -179,7 +179,7 @@ test('c on an original v1 session selects its tail without dispatch, then the ne
   try {
     t.press(`/history ${index.label('session', sessionId)}`, key.enter, 'c', key.esc);
     await new Promise(resolve => setImmediate(resolve));
-    assert.match(t.screen(), /^◆ history/, 'Esc back to the list must invalidate the session-layer continuation probe');
+    assert.match(t.screen(), /^ {2}◆ history/, 'Esc back to the list must invalidate the session-layer continuation probe');
     t.press(key.enter, 'c');
     await until(() => t.screen().includes(VERSION_CHANGED_HINT), t.screen);
     assert.equal(transport.calls.length, 0); assert.equal(readSessionChains(dataRoot).session(sessionId)!.tasks, 1);
@@ -208,7 +208,7 @@ test('body window navigation and mouse paging keep the readonly task when return
   e.append('tool.summary', { attemptId: 'large', resultSeq: result, isError: false }); e.append('run.closed', { status: 'completed', cleanup: 'confirmed' }); e.close();
   const t = open(f, { show: { run: 'paged' } });
   try {
-    const current = t.screen(); assert.match(current, /^◆ history/); assert.match(current, /Answer \d+/); assert.doesNotMatch(current, /┃ Window one/);
+    const current = t.screen(); assert.match(current, /^ {2}◆ history/); assert.match(current, /Answer \d+/); assert.doesNotMatch(current, /┃ Window one/);
     t.press('p'); assert.match(t.screen(), /┃ Window one/);
     t.press('n'); assert.equal(t.screen(), current);
     // Scroll to the final tool and click its row, then the shared renderer's paging link.
@@ -238,7 +238,7 @@ test('c probes a ready coding session owner without taking the lock or switching
   try {
     await until(() => entered, t.screen);
     t.press(`/history ${label}`, key.enter, 'c'); await until(() => t.screen().includes('工作区被其他进程占用'), t.screen);
-    assert.match(t.screen(), /^◆ history/); assert.equal(t.calls(), 0); assert.equal(readSessionChains(f.dataRoot).session(done.sessionId)!.tasks, 1);
+    assert.match(t.screen(), /^ {2}◆ history/); assert.equal(t.calls(), 0); assert.equal(readSessionChains(f.dataRoot).session(done.sessionId)!.tasks, 1);
   } finally { controller.abort(); await running; await t.app.exit(); }
 });
 
@@ -253,7 +253,7 @@ test('c opens recovery for an uncertain tail, and a pending recovery prevents se
     assert.equal(t.calls(), 0);
     t.press(key.ctrlR);
     // The interrupted run is latest; the completed session is the next row.
-    t.press(key.down, 'c'); assert.match(t.screen(), /不能接续 · 有待处理的恢复核对/); assert.match(t.screen(), /^◆ history/);
+    t.press(key.down, 'c'); assert.match(t.screen(), /不能接续 · 有待处理的恢复核对/); assert.match(t.screen(), /^ {2}◆ history/);
     assert.equal(readSessionChains(f.dataRoot).session(ready.sessionId)!.tasks, 1); assert.equal(t.calls(), 0);
   } finally { await t.app.exit(); }
 });

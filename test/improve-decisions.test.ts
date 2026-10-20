@@ -19,7 +19,7 @@ async function fixture(){
  const target={workspace,sessionId:'session-1',taskId:'task-1',runId:'coding-1'};
  const sources=captureImproveSources(e,workspace,[{id:'project',kind:'project',paths:['math.mjs']}],'test-version');
  const candidate={id:'candidate:first',revision:'candidate-rev-1',display:'R1',title:'Correct addition',problem:'Subtraction used for addition',problemKey:'math.add.operator',conditionKey:'initial',objective:'bug',target:sources.targets[0],facts:[],hypotheses:[],successCounterexamples:[],gaps:[],mechanismsReviewed:['math.mjs'],steps:['Replace subtraction with addition'],scope:['math.mjs'],validation:{method:'regression',checks:['Positive and signed addition'],budget:'one restricted check',protections:['No project writes']},risks:['Numeric inputs only'],rollback:'Preserved baseline',activation:{writeback:true,enable:false,conditions:['regression pass'],timing:'new task'},dependencies:[],conflicts:[],suggestionOnly:false,replacements:[],structuredChecks:[]};
- const report={selectionContract:'declared-v1',id:'report-1',revision:'report-rev-1',runId:e.runId,target,candidates:[candidate],selected:[],targets:sources.targets,state:'complete',evidence:[]};
+ const report={selectionContract:'declared-v1',id:'report-1',revision:'report-rev-1',runId:e.runId,target,request:{id:'report-1',purpose:'test',limits:{maxRequests:16,maxTokens:100000,maxRequestTokens:50000,maxDurationMs:600000,maxOutputTokens:4096}},startedAt:'2099-01-01T00:00:00.000Z',candidates:[candidate],selected:[],targets:sources.targets,state:'complete',evidence:[]};
  e.append('improve.started',{request:{id:report.id},target});e.append('improve.report',report);e.close();
  return {directory,workspace,dataRoot,report,candidate};
 }

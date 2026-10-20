@@ -60,7 +60,8 @@ test('1c at 132×38 (golden); at 80×24 and 40×12 the always-kept elements stay
     const shown = screen();
     assert.match(shown, /工作 +订单导出 CSV 增加时区列，并迁移历史数据 · 任务 1 · 第 2 轮/);
     assert.match(shown, /最后确认点 +✓ write export\.csv · \d\d:\d\d:\d\d 已提交结果/);
-    assert.match(shown, /◈ bash printf 'migrating orders 1200\/4810\\n' · intent 已记录 \d\d:\d\d:\d\d，结果未提交 · 可能已产生影响/);
+    // 浮层框不超过 100 列（设计稿 1c），这条长命令的行尾截断；影响行仍完整。
+    assert.match(shown, /◈ bash printf 'migrating orders 1200\/4810\\n' · intent 已记录 \d\d:\d\d:\d\d，结果未提交/);
     assert.match(shown, /证据 +已收输出 27 B：“migrating orders 1200\/4810”/);
     assert.match(shown, /影响 +可能重复命令已产生的影响/);
     assert.match(shown, /result persistence failure/);

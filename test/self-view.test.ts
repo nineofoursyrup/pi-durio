@@ -109,6 +109,35 @@ test('2c layout golden has two columns at 132x38 and wraps the fixed label colum
   }
 });
 
+test('2c model cost keeps the amount fg.primary and unknown ac.warn in both layouts and when wrapped', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'durio-self-cost-'));
+  const existing = new Evidence(root, 'empty'); existing.close();
+  const view = new SelfView(root, host, { samples: new ProcessMeasurements(() => 12), now: () => now });
+  await view.ready;
+  const cost = view.snapshot.cost.value!;
+  for (const [amounts, amount, amountColor] of [[{ CNY: 1.2 }, '≈ ¥1.20', 'fg.primary'], [{}, 'unknown', 'ac.warn']] as const) {
+    cost.spend = { ...cost.spend, total: { totals: { amounts, unknownRequests: 3, partial: false }, tokens: 500 } };
+    // 40 columns wrap the 合计 value onto continuation rows.
+    for (const width of [132, 80, 40]) {
+      const grid = captureSnapshot(view.render(width, 80, 'truecolor'), width, 80, 'truecolor');
+      // Foreground tokens of the visible cells under `needle` in the 合计 row and its continuation rows.
+      const colors = (needle: string) => {
+        const first = grid.rows.findIndex(cells => cells.map(c => c.char).join('').startsWith('合计'));
+        let end = first + 1;
+        while (grid.rows[end]?.map(c => c.char).join('').startsWith(' '.repeat(21))) end++;
+        const row = grid.rows.slice(first, end).flat();
+        let shown = ''; const starts = row.map(c => { const at = shown.length; shown += c.char; return at; });
+        const at = shown.indexOf(needle);
+        assert.ok(at >= 0, `${needle} at ${width}`);
+        return [...new Set(row.filter((c, i) => starts[i] >= at && starts[i] < at + needle.length && c.char.trim()).map(c => c.fg))];
+      };
+      assert.deepEqual(colors(amount), [amountColor], `amount at ${width}`);
+      assert.deepEqual(colors('+3 unknown'), ['ac.warn'], `unknown at ${width}`);
+      assert.deepEqual(colors('500 tok'), ['fg.faint'], `tokens at ${width}`);
+    }
+  }
+});
+
 class SelfTerminal implements Terminal {
   columns = 132; rows = 38; kittyProtocolActive = false; writes: string[] = [];
   input: (data: string) => void = () => {}; resize = () => {};

@@ -9,7 +9,13 @@ import type { QueueItemFact } from '../evidence.js';
 import { readSessionChains } from '../session-chain.js';
 import { readDisplayIndex } from '../display-number.js';
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { SingleLineInput, fitSegments, clean, fixedFrame, hintLine, truncateEnd, wrapSegments } from './view-stack.js';
+import { SingleLineInput, fitSegments, clean, fixedFrame, footerLines, hintLine, rule, truncateEnd, wrapSegments } from './view-stack.js';
+
+/**
+ * 面板排布：`wide` 按终端宽度判定处置说明是否与名称同行（U3，浮层里面板比终端窄）；
+ * `airy` 为浮层加框内分隔线与空行（U10），放不下时最先去掉。
+ */
+export interface PanelLayout { wide?: boolean; airy?: boolean }
 
 /** 原因码中文对照（#59 第 4 节）；表外原因码原样显示。 */
 export const REASON_TEXT: Record<string, string> = {
@@ -267,24 +273,28 @@ export class RecoveryPanel {
   }
 
   /** 完整高度（不收起）。 */
-  fullHeight(width: number) { return this.ownerStage ? this.ownerLines(width).length + this.dispositionLines(width, 0).length : this.lines(width, 0).length; }
+  fullHeight(width: number, layout: PanelLayout = {}) { return this.ownerStage ? this.ownerLines(width).length + this.dispositionLines(width, 0, COLOR_TIER, false, layout).length : this.lines(width, 0, COLOR_TIER, layout).length; }
   /** 收起后的最小高度：工作、未知、检查、四项名称、选中项说明与面板底栏。 */
   minHeight(width: number) { return this.ownerStage ? this.dispositionLines(width, 4).length + 4 : this.lines(width, 4).length; }
 
-  render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
+  render(width: number, height: number, tier: ColorTier = COLOR_TIER, layout: PanelLayout = {}): string[] {
+    const wide = layout.wide ?? width >= 100;
     if (this.ownerStage) {
-      const body = this.ownerLines(width, tier), full = this.dispositionLines(width, 0, tier);
-      const footer = body.length + full.length <= height ? full : this.dispositionLines(width, 4, tier);
+      const body = this.ownerLines(width, tier), airy = this.dispositionLines(width, 0, tier, false, layout), full = this.dispositionLines(width, 0, tier, false, { wide });
+      const footer = layout.airy && body.length + airy.length <= height ? airy : body.length + full.length <= height ? full : this.dispositionLines(width, 4, tier, false, { wide });
       this.ownerPageSize = Math.max(1, height - footer.length);
       const frame = fixedFrame([], body, footer, Math.min(height, body.length + footer.length), this.ownerOffset);
       this.ownerOffset = frame.offset;
       return frame.lines;
     }
     this.compactPages = 1;
+    const descriptionWidth = wide ? width - 30 : width - 5;
+    const fits = (lines: string[]) => lines.length <= height && (!wide || visibleWidth(this.selectedDescription()) <= descriptionWidth);
+    // 框内分隔线与空行最先收起（U10），再按 U3 的级别收起。
+    if (layout.airy) { const lines = this.lines(width, 0, tier, layout); if (fits(lines)) return lines; }
     for (let level = 0; level <= 4; level++) {
-      const lines = this.lines(width, level, tier);
-      const descriptionWidth = width >= 100 ? width - 30 : width - 5;
-      if (lines.length <= height && (width < 100 || visibleWidth(this.selectedDescription()) <= descriptionWidth)) return lines;
+      const lines = this.lines(width, level, tier, { wide });
+      if (fits(lines)) return lines;
       if (level === 4) return this.compactLines(width, height, tier);
     }
     return [];
@@ -294,12 +304,13 @@ export class RecoveryPanel {
    * 收起级别：0 全部；1 证据行与已冻结行各收成一行；2 只显示选中处置的说明；
    * 3 收起最后确认点、证据行与已冻结行；4 再收起标题、影响、你的决定、处置标题与“需先处理”行。
    */
-  private lines(width: number, level: number, tier: ColorTier = COLOR_TIER): string[] {
+  private lines(width: number, level: number, tier: ColorTier = COLOR_TIER, layout: PanelLayout = {}): string[] {
     const facts = this.facts, labelWidth = width >= 60 ? 12 : 11, valueWidth = Math.max(1, width - labelWidth);
-    const out: string[] = [];
+    const out: string[] = [], airy = !!layout.airy && level === 0, blank = () => out.push(styledLine([], width, undefined, tier));
     const row = (label: string, segments: TextSegment[]) => out.push(styledLine([{ text: pad(label, labelWidth), fg: 'fg.label' }, ...fitSegments(segments, valueWidth)], width, undefined, tier));
     const more = (segments: TextSegment[]) => out.push(styledLine([{ text: ' '.repeat(labelWidth) }, ...fitSegments(segments, valueWidth)], width, undefined, tier));
-    if (level < 4) out.push(styledLine([{ text: '恢复核对', fg: 'fg.primary', bold: true }, { text: ' · 只读 · 未打开可写存储', fg: 'fg.muted' }, ...rightAlign(width, '恢复核对 · 只读 · 未打开可写存储', 'Esc 返回查看')], width, undefined, tier));
+    if (level < 4) out.push(styledLine([{ text: '恢复核对', fg: 'ac.warn', bold: true }, { text: ' · 只读 · 未打开可写存储', fg: 'fg.muted' }, ...rightAlign(width, '恢复核对 · 只读 · 未打开可写存储', 'Esc 返回查看')], width, undefined, tier));
+    if (airy) { out.push(rule(width, 'line.inner', tier)); blank(); }
     const work = facts.work;
     row('工作', [{ text: work.title, fg: 'fg.body' }, { text: `${work.task ? ` · 任务 ${work.task}` : ''}${work.round ? ` · 第 ${work.round} 轮` : ''}`, fg: 'fg.faint' }]);
     if (level < 3) row('最后确认点', facts.lastConfirmed
@@ -328,9 +339,10 @@ export class RecoveryPanel {
       if (decided.length) row('你的决定', decided);
       facts.prior.slice(0, level < 1 ? 3 : 1).forEach((prior, i) => (i || decided.length ? more : (s: TextSegment[]) => row('你的决定', s))([
         { text: `此前 · ${prior.tool} ${prior.target} · `, fg: 'fg.faint' }, { text: CHOICE_TEXT[prior.choice] ?? prior.choice, fg: 'fg.body' }, ...(prior.reason ? [{ text: ` · ${clean(prior.reason)}`, fg: 'fg.muted' as TokenName }] : [])]));
+      if (airy) { blank(); out.push(rule(width, 'line.inner', tier)); }
       out.push(styledLine([{ text: '处置', fg: 'fg.label' }, { text: ' · 原 interrupted/unknown 记录不会被改写', fg: 'fg.faint' }], width, undefined, tier));
     }
-    out.push(...this.dispositionLines(width, level, tier));
+    out.push(...this.dispositionLines(width, level, tier, false, layout));
     return out;
   }
 
@@ -406,8 +418,8 @@ export class RecoveryPanel {
     return out;
   }
 
-  private dispositionLines(width: number, level: number, tier: ColorTier = COLOR_TIER, namesOnly = false): string[] {
-    const out: string[] = [], wide = width >= 100, nameWidth = this.ownerStage ? 40 : 28;
+  private dispositionLines(width: number, level: number, tier: ColorTier = COLOR_TIER, namesOnly = false, layout: PanelLayout = {}): string[] {
+    const out: string[] = [], wide = layout.wide ?? width >= 100, nameWidth = this.ownerStage ? 40 : 28;
     this.dispositions.forEach((option, i) => {
       const selected = i === this.cursor, off = this.disabled(i), bg: TokenName | undefined = selected ? 'bg.selected' : undefined;
       const name = `${i + 1}  ${option.name}`, description = off ? `不可选 · ${off}` : option.text;
@@ -425,7 +437,10 @@ export class RecoveryPanel {
         }
       }
     });
-    out.push(hintLine(this.ownerStage ? width < 60 ? ['↑↓选', 'PgUp/Dn', 'Enter'] : ['↑↓ 选择', 'Enter 确认', 'PgUp/PgDn 详情'] : ['↑↓ 选择', 'Enter 确认'], width, { esc: 'Esc 返回查看', tier }));
+    const hints = this.ownerStage ? width < 60 ? ['↑↓选', 'PgUp/Dn', 'Enter'] : ['↑↓ 选择', 'Enter 确认', 'PgUp/PgDn 详情'] : ['↑↓ 选择', 'Enter 确认'];
+    // 浮层的框底栏：左侧说明，右侧键位（设计稿 1c）。
+    if (layout.airy && level === 0) out.push(rule(width, 'line.inner', tier), ...footerLines([{ text: '关闭面板只返回查看，不解除限制', fg: 'fg.label' }], hints, width, { esc: 'Esc 返回查看', tier }));
+    else out.push(hintLine(hints, width, { esc: 'Esc 返回查看', tier }));
     return out;
   }
 }

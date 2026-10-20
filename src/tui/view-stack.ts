@@ -6,6 +6,7 @@
  * - ConfirmDialog：居中确认框 / 选择框（单选 ◉/○ 数字键，多选 [✓]/[ ] 空格）
  * - statusError / statusEmpty / LoadingState：通用状态写法
  * - widthTier / truncateMiddle / truncateEnd / wrapAuthorized / fixedFrame：窄终端与矮终端
+ * - SPACER / sideMargin / bottomMargin / inset / rule / footerLines：U10 间距（视觉修正 r1）
  * - PresetFilter：预设选项筛选层（1e 与历史视图复用）
  */
 
@@ -15,6 +16,8 @@ import {
   GLYPHS, spinnerFrame, SPINNER_FRAMES, SPINNER_INTERVAL_MS,
   type ColorTier, COLOR_TIER, type TextSegment, type TokenName,
 } from './theme.js';
+
+const graphemes = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
 /** 显示前去掉控制字符与终端序列（原因码、路径、用户内容都经过这里）。 */
 export function clean(text: string): string {
@@ -99,6 +102,88 @@ export function hintLine(
   return styledLine(segments, width, undefined, tier);
 }
 
+/**
+ * 底栏：左侧状态或用量，右侧键位提示（设计稿为一行）。
+ * 两边连同至少 2 列间隔放得下时合成一行，否则退回两行：左侧一行，键位提示按 hintLine 另起一行，信息不丢。
+ */
+export function footerLines(
+  left: TextSegment[],
+  items: string[],
+  width: number,
+  opts: { esc?: string; feedback?: string; keepLast?: string; tier?: ColorTier } = {},
+): string[] {
+  const tier = opts.tier ?? COLOR_TIER;
+  const right = [...(opts.feedback !== undefined ? [clean(opts.feedback)] : items), ...(opts.esc ? [opts.esc] : [])].join(' · ');
+  const leftWidth = left.reduce((sum, s) => sum + visibleWidth(s.text), 0);
+  if (!left.length) return [hintLine(items, width, opts)];
+  if (leftWidth + 2 + visibleWidth(right) <= width) {
+    const gap = ' '.repeat(width - leftWidth - visibleWidth(right));
+    return [styledLine([...left, { text: gap }, { text: right, fg: opts.feedback !== undefined ? 'fg.body' : 'fg.label' }], width, undefined, tier)];
+  }
+  return [styledLine(left, width, undefined, tier), hintLine(items, width, opts)];
+}
+
+// ─── 间距（U10，视觉修正 r1） ────────────────────────────────────────────────
+
+/**
+ * 可收起的空行。固定版式的屏在区块之间放它：放得下时画成空行，放不下时最先去掉。
+ * 会滚动的正文（1b 主区等）用普通空行，不用它。
+ */
+export const SPACER = '\u0000spacer';
+/** 放得下时把 SPACER 换成空行，否则全部去掉，整屏退回紧凑排布。 */
+export function settleSpacers(lines: string[], fits: boolean): string[] {
+  return fits ? lines.map(line => line === SPACER ? '' : line) : lines.filter(line => line !== SPACER);
+}
+/** 左右边距：留边距后内宽仍不小于 100 列时各留 2 列；更窄时不留，内容不为边距让位。 */
+export function sideMargin(width: number): number {
+  return widthTier(width - 4) === 'wide' ? 2 : 0;
+}
+/** 底部留白：不矮于 30 行时留 1 行；更矮时不留，内容不为留白让位。 */
+export function bottomMargin(rows: number): number {
+  return rows >= 30 ? 1 : 0;
+}
+/** 给按内宽（width − 2 × margin）渲染的行加左右边距；短行与空串用 `bg.base` 补满。 */
+export function inset(lines: string[], width: number, margin: number, tier: ColorTier = COLOR_TIER): string[] {
+  const pad = margin ? styledLine([], margin, undefined, tier) : '';
+  return lines.map(line => {
+    const fill = width - 2 * margin - visibleWidth(line);
+    return pad + line + (fill > 0 ? styledLine([], fill, undefined, tier) : '') + pad;
+  });
+}
+/** 圆角整框（U10）：`lines` 按 width − 4 渲染，框线用 `border.input`，短行用 `bg.base` 补满。 */
+export function frameBox(lines: string[], width: number, tier: ColorTier = COLOR_TIER): string[] {
+  const inner = width - 4, border = (text: string) => styledLine([{ text, fg: 'border.input' }], visibleWidth(text), undefined, tier);
+  return [border(`╭${'─'.repeat(width - 2)}╮`),
+    ...lines.map(line => border('│ ') + line + (visibleWidth(line) < inner ? styledLine([], inner - visibleWidth(line), undefined, tier) : '') + border(' │')),
+    border(`╰${'─'.repeat(width - 2)}╯`)];
+}
+/** 按显示列截取 [from, to)，跨边界的宽字符换成空格，不足补空格。 */
+function sliceColumns(text: string, from: number, to: number): string {
+  let out = '', column = 0;
+  for (const { segment } of graphemes.segment(text)) {
+    const w = visibleWidth(segment), end = column + w;
+    if (end <= from) { column = end; continue; }
+    if (column >= to) break;
+    out += column < from || end > to ? ' '.repeat(Math.min(end, to) - Math.max(column, from)) : segment;
+    column = end;
+  }
+  return out + ' '.repeat(Math.max(0, to - Math.max(column, from)));
+}
+/** 浮层（U10）：底层内容改用 `fg.gutter` 并去掉底色，框水平、垂直居中盖在上面；返回行数同底层。 */
+export function composeOverlay(base: string[], box: string[], width: number, tier: ColorTier = COLOR_TIER): string[] {
+  const boxWidth = Math.max(0, ...box.map(line => visibleWidth(line)));
+  const left = Math.max(0, Math.floor((width - boxWidth) / 2)), top = Math.max(0, Math.floor((base.length - box.length) / 2));
+  const dim = (text: string) => resetSgr() + (tier === 'none' ? '\x1b[2m' : fgSgr('fg.gutter', tier)) + text + resetSgr();
+  return base.map((line, row) => {
+    const plain = stripTerminalSequences(line), over = box[row - top];
+    return over === undefined ? dim(sliceColumns(plain, 0, width)) : dim(sliceColumns(plain, 0, left)) + over + dim(sliceColumns(plain, left + boxWidth, width));
+  });
+}
+/** 区块分隔线：整行 `─`，默认 `line.subtle`；框内分隔用 `line.inner`。 */
+export function rule(width: number, token: TokenName = 'line.subtle', tier: ColorTier = COLOR_TIER): string {
+  return styledLine([{ text: '─'.repeat(Math.max(0, width)), fg: token }], width, undefined, tier);
+}
+
 // ─── 窄终端（U12） ───────────────────────────────────────────────────────────
 
 /** 两档断点：≥100 wide，60–99 medium，<60 narrow。 */
@@ -151,8 +236,11 @@ export function wrapAuthorized(text: string, width: number): string[] {
 /**
  * 高度不够时头部与底栏固定、主体滚动。
  * 返回恰好 `height` 行（主体不足时补空串）和夹紧后的主体偏移；连头部与底栏都放不下时先保留底栏。
+ * 三段里的 SPACER 在整屏放得下时画成空行，放不下时先全部去掉（U10）。
  */
 export function fixedFrame(header: string[], body: string[], footer: string[], height: number, offset: number): { lines: string[]; offset: number } {
+  const fits = header.length + body.length + footer.length <= height;
+  [header, body, footer] = [header, body, footer].map(part => settleSpacers(part, fits));
   const foot = footer.slice(Math.max(0, footer.length - height));
   const head = header.slice(0, Math.max(0, height - foot.length));
   const bodyHeight = Math.max(0, height - head.length - foot.length);

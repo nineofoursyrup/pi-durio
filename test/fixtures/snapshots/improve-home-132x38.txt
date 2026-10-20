@@ -1,18 +1,18 @@
 132x38 truecolor
-00|◆ improve  ~/project                                                                                                  分析不执行候选|
-   0-1 ac.brand/bg.base ; 2-8 fg.primary/bg.base/b ; 9-19 fg.body/bg.base ; 20-117 -/bg.base ; 118-131 fg.muted/bg.base
+00|  ◆ improve  ~/project                                                                                              分析不执行候选  |
+   0-1 -/bg.base ; 2-3 ac.brand/bg.base ; 4-10 fg.primary/bg.base/b ; 11-21 fg.body/bg.base ; 22-115 -/bg.base ; 116-129 fg.muted/bg.base ; 130-131 -/bg.base
 01|                                                                                                                                    |
    0-131 -/bg.base
-02|› ir-xxxx · 00-00 00:00 · 来自 s-xxxx · 候选 3 · 未决 2                                                                             |
-   0-54 fg.body/bg.selected ; 55-131 -/bg.selected
+02|  › ir-xxxx · 00-00 00:00 · 来自 s-xxxx · 候选 3 · 未决 2                                                                           |
+   0-1 -/bg.base ; 2-56 fg.body/bg.selected ; 57-129 -/bg.selected ; 130-131 -/bg.base
 03|                                                                                                                                    |
    0-131 -/bg.base
-04|  新建分析                                                                                                                          |
-   0-9 fg.primary/bg.base ; 10-131 -/bg.base
-05|  历史报告 · 2 份                                                                                                                   |
-   0-16 fg.body/bg.base ; 17-131 -/bg.base
-06|  建议抑制 · 没有生效的抑制                                                                                                         |
-   0-12 fg.body/bg.base ; 13-26 fg.muted/bg.base ; 27-131 -/bg.base
+04|    新建分析                                                                                                                        |
+   0-1 -/bg.base ; 2-11 fg.primary/bg.base ; 12-131 -/bg.base
+05|    历史报告 · 2 份                                                                                                                 |
+   0-1 -/bg.base ; 2-18 fg.body/bg.base ; 19-131 -/bg.base
+06|    建议抑制 · 没有生效的抑制                                                                                                       |
+   0-1 -/bg.base ; 2-14 fg.body/bg.base ; 15-28 fg.muted/bg.base ; 29-131 -/bg.base
 07|                                                                                                                                    |
    0-131 -/bg.base
 08|                                                                                                                                    |
@@ -71,7 +71,7 @@
    0-131 -/bg.base
 35|                                                                                                                                    |
    0-131 -/bg.base
-36|                                                                                                                                    |
+36|  ↑↓ 选择 · Enter 打开 · Esc 返回会话                                                                                               |
+   0-1 -/bg.base ; 2-36 fg.label/bg.base ; 37-131 -/bg.base
+37|                                                                                                                                    |
    0-131 -/bg.base
-37|↑↓ 选择 · Enter 打开 · Esc 返回会话                                                                                                 |
-   0-34 fg.label/bg.base ; 35-131 -/bg.base

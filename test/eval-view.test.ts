@@ -223,6 +223,18 @@ test('narrow terminals: every trial stays selectable and opens with Enter; nothi
   assert.match(narrow, /A ✓✓ +B ✓✓/);
 });
 
+test('compact layout keeps the selected last case visible', async () => {
+  const { root, id, plan } = await goldenPlan();
+  const last = plan.cases.at(-1)!.id;
+  for (const [w, h] of [[132, 24], [132, 16], [80, 16], [40, 12]] as const) {
+    const view = new EvalPlanView(ownPlanSource(root, id), noHost);
+    for (let i = 0; i < plan.cases.length; i++) view.handleInput('\x1b[B');
+    const lines = plain(withTier('none', () => view.render(w, h, 'none')));
+    assert.equal(lines.length, h, `${w}x${h} height`);
+    assert.ok(lines.some(l => l.startsWith(`›${last}`)), `${w}x${h}: selected ${last} visible\n${lines.join('\n')}`);
+  }
+});
+
 test('v1 fixture: list, plan and trial trace layers read the first-version plan without writes', async () => {
   const before = readFileSync(join(fixtureData, 'host.sqlite'));
   const sources = listPlanSources(fixtureData);
