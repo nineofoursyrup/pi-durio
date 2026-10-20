@@ -8,7 +8,7 @@ import { verifiedImage } from '../eval/plan.js';
 import { BASELINE_ZERO, type Metric } from '../eval/comparison.js';
 import { listPlanSources, planState, readPlanReport, PLAN_STATE_LABEL, type EvalReport, type EvalReportTrial, type PlanSource, type PlanState } from '../eval/overview.js';
 import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { SPACER, clean, escHint, fixedFrame, fitSegments as fit, hintLine, statusError, truncateEnd, widthTier } from './view-stack.js';
+import { SPACER, clean, escHint, fixedFrame, fitSegments as fit, hintLine, settleSpacers, statusError, truncateEnd, widthTier } from './view-stack.js';
 import { formatDuration, formatTokens } from './trace.js';
 import { clock } from './session-screen.js';
 
@@ -313,7 +313,6 @@ export class EvalPlanView {
       for (let i = 0; i < 4; i += 2) body.push(line([cells[i], cells[i + 1]].flatMap(c => fit([{ text: `${c.label}  `, fg: 'fg.label' }, { text: c.value, fg: cellFg(c.value) }], w))));
     } else for (const c of cells) body.push(line([{ text: `${c.label}  `, fg: 'fg.label' }, { text: c.value, fg: cellFg(c.value) }]));
     body.push(line([]));
-    const matrixTop = body.length;
     const LEGEND: Record<TrialGlyph, string> = { pass: '通过', fail: '失败', invalid: '无效 / 污染', running: '运行中', 'not-run': '未运行', unknown: '无法评分 / 未取得结果' };
     const legend = line([{ text: ' ' }, ...(['pass', 'fail', 'invalid', 'running', 'not-run', 'unknown'] as TrialGlyph[]).flatMap(g => [{ text: GLYPH[g].text, fg: GLYPH[g].fg }, { text: ` ${LEGEND[g]}   `, fg: 'fg.faint' as TokenName }])]);
     // 宽屏时预算与四格的第三格对齐（设计稿 2b）。
@@ -334,13 +333,15 @@ export class EvalPlanView {
     const selectedRow = rows[this.caseIndex];
     const summary = tierW === 'wide' ? [] : [line([{ text: truncateEnd(clean(`${selectedRow?.id ?? ''} · ${this.trialLabel(rows)}${selectedRow?.note ? ` · ${selectedRow.note}` : ''}`), width), fg: 'fg.body' }])];
     // 高度不够时依次：收空行（矩阵行间、块间）、收图例与计数公式行（含预算说明行）、判定框收成一行、主体滚动且选中案例始终可见。
+    // SPACER 的去留与 fixedFrame 同一规则（settleSpacers）；紧凑时先去掉，再逐级收起。
     let matrix = this.matrix(report, rows, width, tier, true), full = [...body, ...matrix.lines, legend, line([]), ...lower(true)], foot = [SPACER, ...box, status, ...summary, hint];
-    const fits = () => head.length + full.length + foot.length <= height;
-    if (!fits()) { matrix = this.matrix(report, rows, width, tier, false); full = [...body, ...matrix.lines, legend, line([]), ...lower(true)].filter(l => l !== SPACER); foot = foot.filter(l => l !== SPACER); }
-    if (!fits()) full = [...body, ...matrix.lines, line([]), ...lower(false)].filter(l => l !== SPACER);
+    const fits = () => head.length + full.length + foot.length <= height, airy = fits();
+    if (!airy) { matrix = this.matrix(report, rows, width, tier, false); full = settleSpacers([...body, ...matrix.lines, legend, line([]), ...lower(true)], false); foot = settleSpacers(foot, false); }
+    if (!fits()) full = settleSpacers([...body, ...matrix.lines, line([]), ...lower(false)], false);
     if (!fits()) foot = [...oneLine, status, ...summary, hint];
     const room = Math.max(0, height - head.length - foot.length);
-    const top = matrixTop + matrix.selectedTop - (full[0] === SPACER ? 0 : 1), bottom = top + matrix.selectedBottom - matrix.selectedTop;
+    // 选中案例的位置按实际进入 frame 的行计：矩阵之前是收起后的 body。
+    const top = settleSpacers(body, airy).length + matrix.selectedTop, bottom = top + matrix.selectedBottom - matrix.selectedTop;
     if (top < this.offset) this.offset = top; else if (bottom >= this.offset + room) this.offset = bottom - room + 1;
     const frame = fixedFrame(head, full, foot, height, this.offset);
     this.offset = frame.offset;
@@ -372,7 +373,7 @@ export class EvalPlanView {
   }
 
   /** 案例 × trial 矩阵。返回选中案例在矩阵内的起止行，用于滚动时保持可见。 */
-  /** `airy`：表头下一条分隔线，数据行之间与图例之前空一行，斑马底色只铺数据行（U10）。 */
+  /** `airy`：表头下一条分隔线，数据行之间空一行（U10）。斑马底色只铺数据行，不随 `airy` 收起。 */
   private matrix(report: EvalReport, rows: CaseRow[], width: number, tier: ColorTier, airy: boolean) {
     const tierW = widthTier(width), plan = report.plan.comparison, metric = plan?.objective.metric;
     const reps = Math.max(1, ...rows.map(r => Math.max(r.trials.filter(t => t.side === 'A').length, r.trials.filter(t => t.side !== 'A').length)));
@@ -405,7 +406,7 @@ export class EvalPlanView {
     let selectedTop = 0, selectedBottom = 0;
     rows.forEach((row, ci) => {
       if (airy && ci) lines.push(styledLine([], width, undefined, tier));
-      const selected = ci === this.caseIndex, zebra: TokenName | undefined = airy && ci % 2 ? 'bg.zebra' : undefined;
+      const selected = ci === this.caseIndex, zebra: TokenName | undefined = ci % 2 ? 'bg.zebra' : undefined;
       const name: TextSegment = { text: row.id, fg: selected ? 'fg.primary' : 'fg.body', bold: selected };
       const marker: TextSegment = { text: selected ? '›' : ' ', fg: 'ac.brand' };
       const a = glyphs(row, sided ? 'A' : '', ci), b = sided ? glyphs(row, 'B', ci) : [];
@@ -419,7 +420,6 @@ export class EvalPlanView {
       }
       if (selected) selectedBottom = lines.length - 1;
     });
-    if (airy) lines.push(styledLine([], width, undefined, tier));
     return { lines, selectedTop, selectedBottom };
   }
 

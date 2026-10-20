@@ -25,22 +25,22 @@
    0-131 -/bg.base
 12| no-change                反例 · 仅保护    A ✓  ✓    B ✓  !    —          B r2 无效                                                 |
    0-0 ac.brand/bg.base ; 1-9 fg.body/bg.base ; 10-25 -/bg.base ; 26-38 fg.muted/bg.base ; 39-42 -/bg.base ; 43-44 fg.faint/bg.base ; 45-45 ac.ok/bg.base ; 46-47 -/bg.base ; 48-48 ac.ok/bg.base ; 49-52 -/bg.base ; 53-54 fg.faint/bg.base ; 55-55 ac.ok/bg.base ; 56-57 -/bg.base ; 58-58 ac.warn/bg.base ; 59-62 -/bg.base ; 63-63 fg.faint/bg.base ; 64-73 -/bg.base ; 74-82 fg.muted/bg.base ; 83-131 -/bg.base
-13|                                                                                                                                    |
-   0-131 -/bg.base
-14| ✓ 通过   ✗ 失败   ! 无效 / 污染   ⠹ 运行中   · 未运行   ? 无法评分 / 未取得结果                                                    |
+13| ✓ 通过   ✗ 失败   ! 无效 / 污染   ⠹ 运行中   · 未运行   ? 无法评分 / 未取得结果                                                    |
    0-0 -/bg.base ; 1-1 ac.ok/bg.base ; 2-9 fg.faint/bg.base ; 10-10 ac.err/bg.base ; 11-18 fg.faint/bg.base ; 19-19 ac.warn/bg.base ; 20-34 fg.faint/bg.base ; 35-35 ac.brand/bg.base ; 36-45 fg.faint/bg.base ; 46-46 fg.gutter/bg.base ; 47-56 fg.faint/bg.base ; 57-57 ac.info/bg.base ; 58-82 fg.faint/bg.base ; 83-131 -/bg.base
-15|                                                                                                                                    |
+14|                                                                                                                                    |
    0-131 -/bg.base
-16|两侧计数                                                          预算                                                              |
+15|两侧计数                                                          预算                                                              |
    0-7 fg.label/bg.base ; 8-65 -/bg.base ; 66-69 fg.label/bg.base ; 70-131 -/bg.base
-17|       计划   启动   完成 可评分   通过 通过率 完成率 覆盖率      ████████████████████████  18 / 100 请求                           |
+16|       计划   启动   完成 可评分   通过 通过率 完成率 覆盖率      ████████████████████████  18 / 100 请求                           |
    0-3 -/bg.base ; 4-59 fg.faint/bg.base ; 60-65 -/bg.base ; 66-69 ac.info/bg.base ; 70-89 line.track/bg.base ; 90-104 fg.body/bg.base ; 105-131 -/bg.base
-18|A         6      6      6      6      6   100%   100%   100%      ████████████████████████  ≈ $0.18 / $64.00 · 含两侧、失败与压缩   |
+17|A         6      6      6      6      6   100%   100%   100%      ████████████████████████  ≈ $0.18 / $64.00 · 含两侧、失败与压缩   |
    0-3 fg.faint/bg.base ; 4-38 fg.body/bg.base ; 39-59 fg.primary/bg.base ; 60-65 -/bg.base ; 66-89 line.track/bg.base ; 90-107 fg.body/bg.base ; 108-128 fg.faint/bg.base ; 129-131 -/bg.base
-19|B         6      6      4      4      4   100%  66.7%  66.7%      重启不重置额度 · 未知用量按在途上界占额 · 上限按高峰价            |
+18|B         6      6      4      4      4   100%  66.7%  66.7%      重启不重置额度 · 未知用量按在途上界占额 · 上限按高峰价            |
    0-3 fg.faint/bg.base ; 4-38 fg.body/bg.base ; 39-59 fg.primary/bg.base ; 60-65 -/bg.base ; 66-119 fg.muted/bg.base ; 120-131 -/bg.base
-20|通过率 = 通过/可评分 · 完成率 = 完成/计划 · 覆盖率 = 可评分/计划                                                                    |
+19|通过率 = 通过/可评分 · 完成率 = 完成/计划 · 覆盖率 = 可评分/计划                                                                    |
    0-63 fg.muted/bg.base ; 64-131 -/bg.base
+20|                                                                                                                                    |
+   0-131 -/-
 21|                                                                                                                                    |
    0-131 -/-
 22|                                                                                                                                    |
