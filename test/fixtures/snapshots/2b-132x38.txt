@@ -1,46 +1,46 @@
 132x38 truecolor
-00| ◆ eval  计划 ep-55e8 · core-v1 fixture · A = f2c834e · B = 29c35aa                       离线受控 · 不判模型质量 · 按案例 2 个版本 |
-   0-2 ac.info/bg.base ; 3-6 fg.primary/bg.base/b ; 7-66 fg.faint/bg.base ; 67-89 -/bg.base ; 90-112 fg.muted/bg.base ; 113-131 fg.faint/bg.base
+00|◆ eval  计划 ep-55e8 · core-v1 fixture · A = f2c834e · B = 29c35aa                        离线受控 · 不判模型质量 · 按案例 2 个版本 |
+   0-1 ac.info/bg.base ; 2-5 fg.primary/bg.base/b ; 6-65 fg.faint/bg.base ; 66-89 -/bg.base ; 90-112 fg.muted/bg.base ; 113-131 fg.faint/bg.base
 01|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
    0-131 line.subtle/bg.base
-02| 主目标                          门槛                            保护                            预算                               |
-   0-0 -/bg.base ; 1-6 fg.label/bg.base ; 7-32 -/bg.base ; 33-36 fg.label/bg.base ; 37-64 -/bg.base ; 65-68 fg.label/bg.base ; 69-96 -/bg.base ; 97-100 fg.label/bg.base ; 101-131 -/bg.base
-03| 请求数 ↓                        每配对 d ≥ δ = 10%              硬约束 1 · 软约束 0 · 3 案例    100 请求 · ≈ $64.00                |
-   0-0 -/bg.base ; 1-8 fg.primary/bg.base ; 9-32 -/bg.base ; 33-50 fg.primary/bg.base ; 51-64 -/bg.base ; 65-92 fg.primary/bg.base ; 93-96 -/bg.base ; 97-115 fg.primary/bg.base ; 116-131 -/bg.base
-04|                                                                                                                                    |
+02|                                                                                                                                    |
+   0-131 -/-
+03|主目标                           门槛                             保护                             预算                             |
+   0-5 fg.label/bg.base ; 6-32 -/bg.base ; 33-36 fg.label/bg.base ; 37-65 -/bg.base ; 66-69 fg.label/bg.base ; 70-98 -/bg.base ; 99-102 fg.label/bg.base ; 103-131 -/bg.base
+04|请求数 ↓                         每配对 d ≥ δ = 10%               硬约束 1 · 软约束 0 · 3 案例     100 请求 · ≈ $64.00              |
+   0-7 fg.primary/bg.base ; 8-32 -/bg.base ; 33-50 fg.primary/bg.base ; 51-65 -/bg.base ; 66-93 fg.primary/bg.base ; 94-98 -/bg.base ; 99-117 fg.primary/bg.base ; 118-131 -/bg.base
+05|                                                                                                                                    |
    0-131 -/bg.base
-05| case                    类型            A r1 r2  B r1 r2  d 请求数  说明                                                           |
-   0-72 fg.faint/bg.base ; 73-131 -/bg.base
-06|›local-fix               局部修复        A ✓  ✓   B ✓  ✓   +50%      2/2 配对 ≥ δ                                                   |
-   0-0 ac.brand/bg.base ; 1-9 fg.primary/bg.base/b ; 10-24 -/bg.base ; 25-32 fg.muted/bg.base ; 33-40 -/bg.base ; 41-42 fg.faint/bg.base ; 43-43 ac.ok/bg.selected/b ; 44-45 -/bg.base ; 46-46 ac.ok/bg.base ; 47-49 -/bg.base ; 50-51 fg.faint/bg.base ; 52-52 ac.ok/bg.base ; 53-54 -/bg.base ; 55-55 ac.ok/bg.base ; 56-58 -/bg.base ; 59-62 ac.ok/bg.base ; 63-68 -/bg.base ; 69-80 fg.muted/bg.base ; 81-131 -/bg.base
-07| multi-file              多文件小改      A ✓  ✓   B ✓  ?   +50%      1/2 配对 ≥ δ · B r2 取消                                       |
-   0-0 ac.brand/bg.base ; 1-10 fg.body/bg.base ; 11-24 -/bg.base ; 25-34 fg.muted/bg.base ; 35-40 -/bg.base ; 41-42 fg.faint/bg.base ; 43-43 ac.ok/bg.base ; 44-45 -/bg.base ; 46-46 ac.ok/bg.base ; 47-49 -/bg.base ; 50-51 fg.faint/bg.base ; 52-52 ac.ok/bg.base ; 53-54 -/bg.base ; 55-55 ac.info/bg.base ; 56-58 -/bg.base ; 59-62 ac.ok/bg.base ; 63-68 -/bg.base ; 69-92 fg.muted/bg.base ; 93-131 -/bg.base
-08| no-change               反例 · 仅保护   A ✓  ✓   B ✓  !   —         B r2 无效                                                      |
-   0-0 ac.brand/bg.base ; 1-9 fg.body/bg.base ; 10-24 -/bg.base ; 25-37 fg.muted/bg.base ; 38-40 -/bg.base ; 41-42 fg.faint/bg.base ; 43-43 ac.ok/bg.base ; 44-45 -/bg.base ; 46-46 ac.ok/bg.base ; 47-49 -/bg.base ; 50-51 fg.faint/bg.base ; 52-52 ac.ok/bg.base ; 53-54 -/bg.base ; 55-55 ac.warn/bg.base ; 56-58 -/bg.base ; 59-59 fg.faint/bg.base ; 60-68 -/bg.base ; 69-77 fg.muted/bg.base ; 78-131 -/bg.base
-09| ✓ 通过   ✗ 失败   ! 无效 / 污染   ⠹ 运行中   · 未运行   ? 无法评分 / 未取得结果                                                    |
+06| case                     类型             A r1 r2   B r1 r2   d 请求数   说明                                                      |
+   0-77 fg.faint/bg.base ; 78-131 -/bg.base
+07|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
+   0-131 line.subtle/bg.base
+08|›local-fix                局部修复         A ✓  ✓    B ✓  ✓    +50%       2/2 配对 ≥ δ                                              |
+   0-0 ac.brand/bg.base ; 1-9 fg.primary/bg.base/b ; 10-25 -/bg.base ; 26-33 fg.muted/bg.base ; 34-42 -/bg.base ; 43-44 fg.faint/bg.base ; 45-45 ac.ok/bg.selected/b ; 46-47 -/bg.base ; 48-48 ac.ok/bg.base ; 49-52 -/bg.base ; 53-54 fg.faint/bg.base ; 55-55 ac.ok/bg.base ; 56-57 -/bg.base ; 58-58 ac.ok/bg.base ; 59-62 -/bg.base ; 63-66 ac.ok/bg.base ; 67-73 -/bg.base ; 74-85 fg.muted/bg.base ; 86-131 -/bg.base
+09|                                                                                                                                    |
+   0-131 -/bg.base
+10| multi-file               多文件小改       A ✓  ✓    B ✓  ?    +50%       1/2 配对 ≥ δ · B r2 取消                                  |
+   0-0 ac.brand/bg.zebra ; 1-10 fg.body/bg.zebra ; 11-25 -/bg.zebra ; 26-35 fg.muted/bg.zebra ; 36-42 -/bg.zebra ; 43-44 fg.faint/bg.zebra ; 45-45 ac.ok/bg.zebra ; 46-47 -/bg.zebra ; 48-48 ac.ok/bg.zebra ; 49-52 -/bg.zebra ; 53-54 fg.faint/bg.zebra ; 55-55 ac.ok/bg.zebra ; 56-57 -/bg.zebra ; 58-58 ac.info/bg.zebra ; 59-62 -/bg.zebra ; 63-66 ac.ok/bg.zebra ; 67-73 -/bg.zebra ; 74-97 fg.muted/bg.zebra ; 98-131 -/bg.zebra
+11|                                                                                                                                    |
+   0-131 -/bg.base
+12| no-change                反例 · 仅保护    A ✓  ✓    B ✓  !    —          B r2 无效                                                 |
+   0-0 ac.brand/bg.base ; 1-9 fg.body/bg.base ; 10-25 -/bg.base ; 26-38 fg.muted/bg.base ; 39-42 -/bg.base ; 43-44 fg.faint/bg.base ; 45-45 ac.ok/bg.base ; 46-47 -/bg.base ; 48-48 ac.ok/bg.base ; 49-52 -/bg.base ; 53-54 fg.faint/bg.base ; 55-55 ac.ok/bg.base ; 56-57 -/bg.base ; 58-58 ac.warn/bg.base ; 59-62 -/bg.base ; 63-63 fg.faint/bg.base ; 64-73 -/bg.base ; 74-82 fg.muted/bg.base ; 83-131 -/bg.base
+13|                                                                                                                                    |
+   0-131 -/bg.base
+14| ✓ 通过   ✗ 失败   ! 无效 / 污染   ⠹ 运行中   · 未运行   ? 无法评分 / 未取得结果                                                    |
    0-0 -/bg.base ; 1-1 ac.ok/bg.base ; 2-9 fg.faint/bg.base ; 10-10 ac.err/bg.base ; 11-18 fg.faint/bg.base ; 19-19 ac.warn/bg.base ; 20-34 fg.faint/bg.base ; 35-35 ac.brand/bg.base ; 36-45 fg.faint/bg.base ; 46-46 fg.gutter/bg.base ; 47-56 fg.faint/bg.base ; 57-57 ac.info/bg.base ; 58-82 fg.faint/bg.base ; 83-131 -/bg.base
-10|                                                                                                                                    |
+15|                                                                                                                                    |
    0-131 -/bg.base
-11| 两侧计数                                                          预算                                                             |
-   0-8 fg.label/bg.base ; 9-65 -/bg.base ; 66-70 fg.label/bg.base ; 71-131 -/bg.base
-12|     计划 启动 完成 可评分 通过 通过率 完成率 覆盖率               ████████████████████████  18 / 100 请求                          |
-   0-3 -/bg.base ; 4-51 fg.faint/bg.base ; 52-66 -/bg.base ; 67-70 ac.info/bg.base ; 71-90 line.track/bg.base ; 91-105 fg.body/bg.base ; 106-131 -/bg.base
-13| A      6    6    6      6    6   100%   100%   100%               ████████████████████████  ≈ $0.18 / $64.00 · 含两侧、失败与压缩  |
-   0-3 fg.faint/bg.base ; 4-30 fg.body/bg.base ; 31-51 fg.primary/bg.base ; 52-66 -/bg.base ; 67-90 line.track/bg.base ; 91-108 fg.body/bg.base ; 109-129 fg.faint/bg.base ; 130-131 -/bg.base
-14| B      6    6    4      4    4   100%  66.7%  66.7%               重启不重置额度 · 未知用量按在途上界占额 · 上限按高峰价           |
-   0-3 fg.faint/bg.base ; 4-30 fg.body/bg.base ; 31-51 fg.primary/bg.base ; 52-65 -/bg.base ; 66-120 fg.muted/bg.base ; 121-131 -/bg.base
-15| 通过率 = 通过/可评分 · 完成率 = 完成/计划 · 覆盖率 = 可评分/计划                                                                   |
-   0-64 fg.muted/bg.base ; 65-131 -/bg.base
-16|                                                                                                                                    |
-   0-131 -/-
-17|                                                                                                                                    |
-   0-131 -/-
-18|                                                                                                                                    |
-   0-131 -/-
-19|                                                                                                                                    |
-   0-131 -/-
-20|                                                                                                                                    |
-   0-131 -/-
+16|两侧计数                                                          预算                                                              |
+   0-7 fg.label/bg.base ; 8-65 -/bg.base ; 66-69 fg.label/bg.base ; 70-131 -/bg.base
+17|       计划   启动   完成 可评分   通过 通过率 完成率 覆盖率      ████████████████████████  18 / 100 请求                           |
+   0-3 -/bg.base ; 4-59 fg.faint/bg.base ; 60-65 -/bg.base ; 66-69 ac.info/bg.base ; 70-89 line.track/bg.base ; 90-104 fg.body/bg.base ; 105-131 -/bg.base
+18|A         6      6      6      6      6   100%   100%   100%      ████████████████████████  ≈ $0.18 / $64.00 · 含两侧、失败与压缩   |
+   0-3 fg.faint/bg.base ; 4-38 fg.body/bg.base ; 39-59 fg.primary/bg.base ; 60-65 -/bg.base ; 66-89 line.track/bg.base ; 90-107 fg.body/bg.base ; 108-128 fg.faint/bg.base ; 129-131 -/bg.base
+19|B         6      6      4      4      4   100%  66.7%  66.7%      重启不重置额度 · 未知用量按在途上界占额 · 上限按高峰价            |
+   0-3 fg.faint/bg.base ; 4-38 fg.body/bg.base ; 39-59 fg.primary/bg.base ; 60-65 -/bg.base ; 66-119 fg.muted/bg.base ; 120-131 -/bg.base
+20|通过率 = 通过/可评分 · 完成率 = 完成/计划 · 覆盖率 = 可评分/计划                                                                    |
+   0-63 fg.muted/bg.base ; 64-131 -/bg.base
 21|                                                                                                                                    |
    0-131 -/-
 22|                                                                                                                                    |
@@ -63,15 +63,15 @@
    0-131 -/-
 31|                                                                                                                                    |
    0-131 -/-
-32| ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮ |
-   0-0 -/bg.base ; 1-130 border.input/bg.base ; 131-131 -/bg.base
-33| │ 当前判定  证据不足  计划未完成 · 1 个 trial 无效 · 1 个 trial 无法评分                                                         │ |
-   0-0 -/bg.base ; 1-1 border.input/bg.base ; 2-12 fg.label/bg.base ; 13-20 ac.warn/bg.base/b ; 21-72 fg.muted/bg.base ; 73-129 -/bg.base ; 130-130 border.input/bg.base ; 131-131 -/bg.base
-34| │ 改善需全部计划有效且每配对 d ≥ δ                                                                                               │ |
-   0-0 -/bg.base ; 1-1 border.input/bg.base ; 2-34 fg.faint/bg.base ; 35-129 -/bg.base ; 130-130 border.input/bg.base ; 131-131 -/bg.base
-35| ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ |
-   0-0 -/bg.base ; 1-130 border.input/bg.base ; 131-131 -/bg.base
-36| ◇ 已停止于 trial 12/12 · ≈ $0.18 · 不续跑                                                              eval 费用单列，不计入 /stats|
-   0-0 -/bg.base ; 1-22 fg.muted/bg.base ; 23-41 fg.body/bg.base ; 42-103 -/bg.base ; 104-131 fg.faint/bg.base
+32|                                                                                                                                    |
+   0-131 -/-
+33|╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮|
+   0-131 border.input/bg.base
+34|│ 当前判定  证据不足  计划未完成 · 1 个 trial 无效 · 1 个 trial 无法评分                          改善需全部计划有效且每配对 d ≥ δ │|
+   0-0 border.input/bg.base ; 1-11 fg.label/bg.base ; 12-19 ac.warn/bg.base/b ; 20-71 fg.muted/bg.base ; 72-97 -/bg.base ; 98-129 fg.faint/bg.base ; 130-130 -/bg.base ; 131-131 border.input/bg.base
+35|╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯|
+   0-131 border.input/bg.base
+36|◇ 已停止于 trial 12/12 · ≈ $0.18 · 不续跑                                                               eval 费用单列，不计入 /stats|
+   0-21 fg.muted/bg.base ; 22-40 fg.body/bg.base ; 41-103 -/bg.base ; 104-131 fg.faint/bg.base
 37|↑↓ 案例 · ←→ trial · Enter trial trace · r 重评分 · Esc 返回上层                                                                    |
    0-63 fg.label/bg.base ; 64-131 -/bg.base
