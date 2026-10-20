@@ -18,7 +18,7 @@ import { clock } from './session-screen.js';
 export type TrialGlyph = 'pass' | 'fail' | 'unknown' | 'invalid' | 'running' | 'not-run';
 export const GLYPH: Record<TrialGlyph, { text: string; fg: TokenName }> = {
   pass: { text: '✓', fg: 'ac.ok' }, fail: { text: '✗', fg: 'ac.err' }, unknown: { text: '?', fg: 'ac.info' },
-  invalid: { text: '!', fg: 'ac.warn' }, running: { text: '⠹', fg: 'ac.brand' }, 'not-run': { text: '·', fg: 'fg.gutter' },
+  invalid: { text: '!', fg: 'ac.warn' }, running: { text: '⠹', fg: 'ac.brand' }, 'not-run': { text: '·', fg: 'fg.faint' },
 };
 export function trialGlyph(t: EvalReportTrial, runningHere = false): TrialGlyph {
   if (!t.outcome.started && t.outcome.status === 'not-run') return 'not-run';
@@ -211,7 +211,7 @@ export class EvalListView {
       const tail: TextSegment[] = row.error
         ? [{ text: ` · 不可读取 · ${row.error}`, fg: 'ac.err' }]
         : [{ text: ` · ${PLAN_STATE_LABEL[row.state!]}`, fg: row.state === 'running' ? 'ac.brand' : 'fg.muted' }, { text: ` · ${row.verdict}`, fg: CONCLUSION_FG[(row.verdict === '—' ? '未开始' : row.verdict) as Conclusion] ?? 'fg.body' }];
-      const head: TextSegment[] = [{ text: selected ? ' › ' : '   ', fg: 'ac.brand' }, { text: row.source.label, fg: 'fg.primary' }, ...row.source.origin ? [{ text: ` · ${row.source.origin.label}`, fg: 'ac.improve' as TokenName }] : []];
+      const head: TextSegment[] = [{ text: selected ? '▏ ' : '  ', fg: 'ac.brand' }, { text: row.source.label, fg: 'fg.primary' }, ...row.source.origin ? [{ text: ` · ${row.source.origin.label}`, fg: 'ac.improve' as TokenName }] : []];
       const room = width - width$(head) - width$(tail) - 3;
       const purpose: TextSegment[] = !narrow && room > 6 ? [{ text: ` · ${truncateEnd(clean(row.purpose), room)}`, fg: 'fg.body' }] : [];
       return line(fit([...head, ...purpose, ...tail], width).map(s => ({ ...s, bg })), bg);
@@ -248,6 +248,7 @@ export class EvalPlanView {
   private caseIndex = 0;
   private trialIndex = 0;
   private offset = 0;
+  private manualScroll = false;
   private lastRead = 0;
   /** 旧报告修订：undefined 为最新；其余为截止序号 */
   private revisions: (number | undefined)[] = [undefined];
@@ -271,8 +272,8 @@ export class EvalPlanView {
   get selectedTrial() { return this.rows()[this.caseIndex]?.trials[this.trialIndex]?.trial; }
   handleInput(data: string): boolean {
     const rows = this.rows();
-    if (matchesKey(data, 'up')) { this.caseIndex = Math.max(0, this.caseIndex - 1); this.clampTrial(rows); return true; }
-    if (matchesKey(data, 'down')) { this.caseIndex = Math.min(Math.max(0, rows.length - 1), this.caseIndex + 1); this.clampTrial(rows); return true; }
+    if (matchesKey(data, 'up')) { this.caseIndex = Math.max(0, this.caseIndex - 1); this.manualScroll = false; this.clampTrial(rows); return true; }
+    if (matchesKey(data, 'down')) { this.caseIndex = Math.min(Math.max(0, rows.length - 1), this.caseIndex + 1); this.manualScroll = false; this.clampTrial(rows); return true; }
     if (matchesKey(data, 'left')) { this.trialIndex = Math.max(0, this.trialIndex - 1); return true; }
     if (matchesKey(data, 'right')) { this.trialIndex = Math.min(Math.max(0, (rows[this.caseIndex]?.trials.length ?? 1) - 1), this.trialIndex + 1); return true; }
     if (matchesKey(data, 'enter')) { const trial = this.selectedTrial; if (trial && this.current) this.host.openTrial(this.source, this.current, trial.id); return true; }
@@ -280,10 +281,11 @@ export class EvalPlanView {
     return false;
   }
   private clampTrial(rows: CaseRow[]) { this.trialIndex = Math.min(this.trialIndex, Math.max(0, (rows[this.caseIndex]?.trials.length ?? 1) - 1)); }
-  scroll(delta: number) { this.offset = Math.max(0, this.offset + delta); }
+  scroll(delta: number) { this.offset = Math.max(0, this.offset + delta); this.manualScroll = true; }
   /** 选中某个 trial（1e 下钻、测试）。 */
   select(trialId: string) {
     this.rows().forEach((row, ci) => row.trials.forEach((t, ti) => { if (t.trial.id === trialId) { this.caseIndex = ci; this.trialIndex = ti; } }));
+    this.manualScroll = false;
   }
 
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
@@ -334,16 +336,25 @@ export class EvalPlanView {
     const summary = tierW === 'wide' ? [] : [line([{ text: truncateEnd(clean(`${selectedRow?.id ?? ''} · ${this.trialLabel(rows)}${selectedRow?.note ? ` · ${selectedRow.note}` : ''}`), width), fg: 'fg.body' }])];
     // 高度不够时依次：收空行（矩阵行间、块间）、收图例与计数公式行（含预算说明行）、判定框收成一行、主体滚动且选中案例始终可见。
     // SPACER 的去留与 fixedFrame 同一规则（settleSpacers）；紧凑时先去掉，再逐级收起。
-    let matrix = this.matrix(report, rows, width, tier, true), full = [...body, ...matrix.lines, legend, line([]), ...lower(true)], foot = [SPACER, ...box, status, ...summary, hint];
+    let matrix = this.matrix(report, rows, width, tier, true), full = [...body, ...matrix.lines, SPACER, legend, line([]), ...lower(true)], foot = [SPACER, ...box, status, ...summary, hint];
     const fits = () => head.length + full.length + foot.length <= height, airy = fits();
-    if (!airy) { matrix = this.matrix(report, rows, width, tier, false); full = settleSpacers([...body, ...matrix.lines, legend, line([]), ...lower(true)], false); foot = settleSpacers(foot, false); }
+    if (!airy) { matrix = this.matrix(report, rows, width, tier, false); full = settleSpacers([...body, ...matrix.lines, SPACER, legend, line([]), ...lower(true)], false); foot = settleSpacers(foot, false); }
     if (!fits()) full = settleSpacers([...body, ...matrix.lines, line([]), ...lower(false)], false);
     if (!fits()) foot = [...oneLine, status, ...summary, hint];
     const room = Math.max(0, height - head.length - foot.length);
     // 选中案例的位置按实际进入 frame 的行计：矩阵之前是收起后的 body。
     const top = settleSpacers(body, airy).length + matrix.selectedTop, bottom = top + matrix.selectedBottom - matrix.selectedTop;
-    if (top < this.offset) this.offset = top; else if (bottom >= this.offset + room) this.offset = bottom - room + 1;
-    const frame = fixedFrame(head, full, foot, height, this.offset);
+    let selected: string[] = [];
+    if (this.manualScroll) {
+      const requested = this.offset;
+      this.offset = Math.min(requested, Math.max(0, full.length - room));
+      // 看矩阵下方的计数/预算时仍保留所选案例，不能让“始终可见”把下方事实锁在屏外。
+      if (top < this.offset || bottom >= this.offset + room) {
+        selected = full.slice(top, bottom + 1);
+        this.offset = Math.min(requested, Math.max(0, full.length - room + selected.length));
+      }
+    } else if (top < this.offset) this.offset = top; else if (bottom >= this.offset + room) this.offset = bottom - room + 1;
+    const frame = fixedFrame([...head, ...selected], full, foot, height, this.offset);
     this.offset = frame.offset;
     return frame.lines;
   }
@@ -379,19 +390,18 @@ export class EvalPlanView {
     const reps = Math.max(1, ...rows.map(r => Math.max(r.trials.filter(t => t.side === 'A').length, r.trials.filter(t => t.side !== 'A').length)));
     const slot = tierW === 'narrow' ? 1 : 3, sided = !!plan;
     const groupW = (sided ? 2 : 0) + (slot > 1 ? reps * slot - 1 : reps);
-    const caseW = tierW === 'wide' ? 22 : tierW === 'medium' ? 20 : Math.max(8, Math.min(16, width - 2 * groupW - 14));
-    const typeW = tierW === 'wide' ? 14 : 0, dW = 8, gap = tierW === 'narrow' ? '  ' : '   ';
-    const noteW = tierW === 'wide' ? Math.max(8, width - 1 - caseW - typeW - groupW * (sided ? 2 : 1) - dW - gap.length * (sided ? 5 : 4)) : 0;
+    const typeW = tierW === 'wide' ? 14 : 0, dW = 8, gap = '   ';
+    const caseW = tierW === 'wide' ? 22 : tierW === 'medium' ? 20 : Math.max(8, Math.min(16, width - 2 - groupW * (sided ? 2 : 1) - dW - gap.length * (sided ? 3 : 2)));
+    const noteW = tierW === 'wide' ? Math.max(8, width - 2 - caseW - typeW - groupW * (sided ? 2 : 1) - dW - gap.length * (sided ? 5 : 4)) : 0;
     const dName = metric ? `d ${METRIC_LABEL[metric]}` : 'd';
     const lines: string[] = [];
     const glyphs = (row: CaseRow, side: 'A' | 'B' | '', ci: number): TextSegment[] => {
       const own = row.trials.map((t, ti) => ({ ...t, ti })).filter(t => !sided || t.side === side);
-      const segs: TextSegment[] = sided ? [{ text: `${side} `, fg: 'fg.faint' }] : [];
+      const segs: TextSegment[] = sided ? [{ text: `${side} `, fg: 'fg.label' }] : [];
       own.forEach((t, k) => {
         const selected = ci === this.caseIndex && t.ti === this.trialIndex, g = GLYPH[t.glyph];
-        // 无色档不画底色：选中的 trial 用反显（U10）。
-        const text = tier === 'none' && selected ? `\x1b[7m${g.text}\x1b[27m` : g.text;
-        segs.push({ text, fg: g.fg, bg: selected ? 'bg.selected' : undefined, bold: selected });
+        // 整行选中底色/反显由行承担，当前 trial 用粗体区分，不插入会提前结束反显的 27m。
+        segs.push({ text: g.text, fg: g.fg, bold: selected });
         if (slot > 1 && k < own.length - 1) segs.push({ text: ' '.repeat(slot - 1) });
       });
       return fit(segs, groupW);
@@ -399,24 +409,27 @@ export class EvalPlanView {
     const delta = plan?.objective.delta ?? null, threshold = !!report.comparison?.thresholdValid && delta !== null;
     const dText = (row: CaseRow): TextSegment => row.worst === null || !metric ? { text: '—', fg: 'fg.faint' }
       : { text: formatDelta(report, metric, row.worst), fg: !threshold ? 'fg.body' : row.worst >= delta! ? 'ac.ok' : row.worst <= -delta! ? 'ac.err' : 'ac.warn' };
+    const right = (segment: TextSegment) => fit([{ text: ' '.repeat(Math.max(0, dW - visibleWidth(segment.text))) }, segment], dW);
     const repsHead = (side: string) => fit([{ text: sided ? `${side} ` : '' }, { text: slot > 1 ? Array.from({ length: reps }, (_, i) => `r${i + 1}`.padEnd(slot)).join('').trimEnd() : '' }], groupW);
-    const headSegs: TextSegment[] = [{ text: ' ' }, ...fit([{ text: 'case' }], caseW), ...typeW ? [{ text: gap }, ...fit([{ text: '类型' }], typeW)] : [], { text: gap }, ...repsHead('A'), ...sided ? [{ text: gap }, ...repsHead('B')] : [], { text: gap }, ...fit([{ text: dName }], dW), ...noteW ? [{ text: gap }, { text: '说明' }] : []];
-    lines.push(styledLine(headSegs.map(s => ({ ...s, fg: 'fg.faint' as TokenName })), width, undefined, tier));
+    const headSegs: TextSegment[] = [{ text: '  ' }, ...fit([{ text: 'case' }], caseW), ...typeW ? [{ text: gap }, ...fit([{ text: '类型' }], typeW)] : [], { text: gap }, ...repsHead('A'), ...sided ? [{ text: gap }, ...repsHead('B')] : [], { text: gap }, ...right({ text: dName }), ...noteW ? [{ text: gap }, { text: '说明' }] : []];
+    lines.push(styledLine(headSegs.map(s => ({ ...s, fg: 'fg.label' as TokenName })), width, undefined, tier));
     if (airy) lines.push(styledLine([{ text: '─'.repeat(width), fg: 'line.subtle' }], width, undefined, tier));
     let selectedTop = 0, selectedBottom = 0;
     rows.forEach((row, ci) => {
       if (airy && ci) lines.push(styledLine([], width, undefined, tier));
-      const selected = ci === this.caseIndex, zebra: TokenName | undefined = ci % 2 ? 'bg.zebra' : undefined;
-      const name: TextSegment = { text: row.id, fg: selected ? 'fg.primary' : 'fg.body', bold: selected };
-      const marker: TextSegment = { text: selected ? '›' : ' ', fg: 'ac.brand' };
+      const selected = ci === this.caseIndex, background: TokenName | undefined = selected ? 'bg.selected' : ci % 2 ? 'bg.zebra' : undefined;
+      const name: TextSegment = { text: row.id, fg: 'fg.primary', bold: selected };
+      const marker: TextSegment = { text: selected ? '▏ ' : '  ', fg: 'ac.brand' };
       const a = glyphs(row, sided ? 'A' : '', ci), b = sided ? glyphs(row, 'B', ci) : [];
-      const one: TextSegment[] = [marker, ...fit([name], caseW), ...typeW ? [{ text: gap }, ...fit([{ text: row.category, fg: 'fg.muted' as TokenName }], typeW)] : [], { text: gap }, ...a, ...sided ? [{ text: gap }, ...b] : [], { text: gap }, ...fit([dText(row)], dW), ...noteW ? [{ text: gap }, ...fit([{ text: row.note, fg: 'fg.muted' as TokenName }], noteW)] : []];
+      const one: TextSegment[] = [marker, ...fit([name], caseW), ...typeW ? [{ text: gap }, ...fit([{ text: row.category, fg: 'fg.body' as TokenName }], typeW)] : [], { text: gap }, ...a, ...sided ? [{ text: gap }, ...b] : [], { text: gap }, ...right(dText(row)), ...noteW ? [{ text: gap }, ...fit([{ text: row.note, fg: 'fg.body' as TokenName }], noteW)] : []];
       if (selected) selectedTop = lines.length;
-      if (width$(one) <= width) lines.push(styledLine(one, width, zebra, tier));
+      if (width$(one) <= width) lines.push(styledLine(one, width, background, tier));
       else {
         // 宽度小于 60 仍放不下：该案例折成两行（名称与 d / 两侧字形），每个 trial 仍能单独选中。
-        lines.push(styledLine([marker, ...fit([name], Math.max(1, width - dW - 3)), { text: ' ' }, dText(row)], width, zebra, tier));
-        lines.push(styledLine([{ text: '   ' }, ...a, ...sided ? [{ text: ' ' }, ...b] : []], width, zebra, tier));
+        lines.push(styledLine([marker, ...fit([name], Math.max(1, width - dW - 3)), { text: ' ' }, ...right(dText(row))], width, background, tier));
+        const trials = [...a, ...sided ? [{ text: gap }, ...b] : []];
+        const indent = Math.min(3, Math.max(0, width - width$(trials)));
+        lines.push(styledLine([{ text: ' '.repeat(indent) }, ...trials], width, background, tier));
       }
       if (selected) selectedBottom = lines.length - 1;
     });
@@ -426,17 +439,23 @@ export class EvalPlanView {
   private counts(report: EvalReport, width: number, tier: ColorTier): string[] {
     const line = (segments: TextSegment[]) => styledLine(segments, width, undefined, tier);
     const rate = (n: number | null) => n === null ? 'N/A' : `${trimNumber(n * 100)}%`;
-    const narrow = width < 60;
-    const heads = ['计划', '启动', '完成', '可评分', '通过', ...narrow ? [] : ['通过率', '完成率', '覆盖率']];
-    // 列宽按可用宽度均分，每列至多 12 列（设计稿 2b）；放不下时按内容宽度。
-    const even = Math.min(12, Math.floor((width - 4) / heads.length)), widths = heads.map(h => Math.max(even, Math.max(visibleWidth(h), h.endsWith('率') ? 6 : 4) + 1));
+    const heads = ['计划', '启动', '完成', '可评分', '通过', '通过率', '完成率', '覆盖率'];
     const sides: [string, EvalReport['counts'] | undefined][] = report.plan.comparison ? [['A', report.sides.baseline], ['B', report.sides.candidate]] : [['计', report.counts]];
-    const out = [line([{ text: '两侧计数', fg: 'fg.label' }]), line([{ text: '    ' }, ...heads.map((h, i) => ({ text: ' '.repeat(widths[i] - visibleWidth(h)) + h, fg: 'fg.faint' as TokenName }))])];
-    for (const [label, c] of sides) {
-      if (!c) continue;
-      const values = [c.planned, c.started, c.completed, c.gradable, c.passed].map(String);
-      const rates = narrow ? [] : [rate(c.passRate), rate(c.completionRate), rate(c.coverageRate)];
-      out.push(line([{ text: `${label}   `, fg: 'fg.faint' }, ...[...values, ...rates].map((v, i): TextSegment => ({ text: v.padStart(widths[i]), fg: v === 'N/A' ? 'fg.faint' : i >= 5 ? 'fg.primary' : 'fg.body' }))]));
+    const values = sides.flatMap(([label, c]) => c ? [{ label, cells: [...[c.planned, c.started, c.completed, c.gradable, c.passed].map(String), rate(c.passRate), rate(c.completionRate), rate(c.coverageRate)] }] : []);
+    const minWidths = heads.map((h, i) => Math.max(visibleWidth(h), ...values.map(row => visibleWidth(row.cells[i]))) + 1);
+    const even = Math.min(12, Math.floor((width - 7) / heads.length)), roomy = minWidths.map(w => Math.max(even, w));
+    const widths = roomy.reduce((sum, w) => sum + w, 7) <= width ? roomy : minWidths;
+    const together = widths.reduce((sum, w) => sum + w, 7) <= width;
+    const out = [line([{ text: '两侧计数', fg: 'fg.label' }])];
+    // 计数与三率分组；并排放不下时三率另起表头/数值行，不能因窄屏删掉指标。
+    for (const indices of together ? [heads.map((_, i) => i)] : [[0, 1, 2, 3, 4], [5, 6, 7]]) {
+      const columns = indices.map(i => together ? widths[i] : Math.max(minWidths[i], Math.min(12, Math.floor((width - 4) / indices.length))));
+      const cells = (texts: string[], header: boolean): TextSegment[] => indices.flatMap((i, ci) => [
+        ...together && i === 5 ? [{ text: '   ' }] : [],
+        { text: ' '.repeat(Math.max(0, columns[ci] - visibleWidth(texts[i]))) + texts[i], fg: header ? 'fg.label' as const : texts[i] === 'N/A' ? 'fg.faint' as const : i >= 5 ? 'fg.primary' as const : 'fg.body' as const },
+      ]);
+      out.push(line([{ text: '    ' }, ...cells(heads, true)]));
+      for (const row of values) out.push(line([{ text: row.label + ' '.repeat(4 - visibleWidth(row.label)), fg: 'fg.label' }, ...cells(row.cells, false)]));
     }
     out.push(line([{ text: '通过率 = 通过/可评分 · 完成率 = 完成/计划 · 覆盖率 = 可评分/计划', fg: 'fg.muted' }]));
     return out;
