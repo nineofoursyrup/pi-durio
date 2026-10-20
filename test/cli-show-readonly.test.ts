@@ -4,7 +4,6 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { stripTerminalSequences } from '@earendil-works/pi-tui';
 import { Evidence } from '../src/evidence.js';
 import { readDisplayIndex } from '../src/display-number.js';
 
@@ -71,7 +70,8 @@ test('actual CLI show --trace keeps read-only capability while raw navigation an
     const child = spawnSync(process.execPath, ['--experimental-test-module-mocks', harness, dataRoot, target, runId], { encoding: 'utf8' });
     assert.equal(child.status, 0, child.stderr + child.stdout);
     // U6：至多 8 行内容，另在“继续 / 原文”一行前空一行；各行左侧 `┃`，按启动时判定的档位上色。
-    const shown = stripTerminalSequences(child.stdout), lines = shown.trimEnd().split('\n');
+    // 只去掉 SGR：其余控制序列（OSC、光标、备用屏）不得混进退出摘要。
+    const shown = child.stdout.replace(/\x1b\[[0-9;]*m/g, ''), lines = shown.trimEnd().split('\n');
     assert.ok(lines.length <= 9);
     assert.match(lines[0], /^┃ ◆ pi-durio 已退出/);
     assert.match(shown, /原文  pi-durio show s-/);
