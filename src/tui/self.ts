@@ -16,10 +16,11 @@ export interface SelfOptions {
   storage?: typeof selfStorage;
 }
 type Storage = Awaited<ReturnType<typeof selfStorage>>;
-const unmeasured = '产品内不测 · 见 A2 报告';
+const unmeasured = ['产品内不测', ' · 见 A2 报告'] as const;
 const ms = (value: number) => `${value.toFixed(1).replace(/\.0$/, '')} ms`;
 const bytes = (value: number | null | undefined) => value === null || value === undefined ? '未记录' : formatBytes(value);
-const absent = (value: SelfValue<unknown>) => value.reason ? `未取得 · ${clean(value.reason).split(':')[0]}` : '未记录';
+/** 主值与说明（含分隔符）。 */
+const absent = (value: SelfValue<unknown>): [string, string] => value.reason ? ['未取得', ` · ${clean(value.reason).split(':')[0]}`] : ['未记录', ''];
 
 /** 2c owns a read-only snapshot; b refreshes facts but never resets the process's in-memory input samples. */
 export class SelfView {
@@ -80,49 +81,50 @@ export class SelfView {
     const headerLine = styledLine([...brand, { text: shown, fg: 'fg.faint' }, ...wide ? [{ text: ' '.repeat(Math.max(2, room - visibleWidth(shown) + 2)) }, { text: note, fg: 'fg.faint' as const }] : []], width, undefined, tier);
     const section = (title: string, w: number) => [line(title, w, true)];
     // Labels keep 20 cells below 60 columns. Values wrap instead of losing their units or unknown qualifiers.
-    // As in the design, labels and the leading value are fg.body; a one-line value's ` · ` qualifiers are fg.muted.
-    const row = (label: string, value: string, w: number, color: TextSegment['fg'] = 'fg.body') => {
+    // As in the design, labels are fg.body, the value fg.primary and its note (with separator) fg.faint.
+    // `shown` is [value, note] or pre-styled segments; a value that wraps is drawn whole in `color`.
+    const row = (label: string, shown: readonly [string, string] | TextSegment[], w: number, color: TextSegment['fg'] = 'fg.primary') => {
       const labelText = truncateEnd(clean(label), 20), prefix = `${labelText}${' '.repeat(Math.max(0, 20 - visibleWidth(labelText)))} `;
-      const available = Math.max(1, w - 21), chunks = wrapTextWithAnsi(clean(value), available), cut = chunks.length === 1 && color === 'fg.body' ? chunks[0].indexOf(' · ') : -1;
-      const valueSegments = (chunk: string): TextSegment[] => cut < 0 ? [{ text: chunk, fg: color }] : [{ text: chunk.slice(0, cut), fg: color }, { text: chunk.slice(cut), fg: 'fg.muted' }];
-      return (chunks.length ? chunks : ['']).map((chunk, i) => styledLine([{ text: i ? ' '.repeat(21) : prefix, fg: 'fg.body' }, ...valueSegments(chunk)], w, undefined, tier));
+      const segments: TextSegment[] = typeof shown[0] === 'string' ? [{ text: clean(shown[0]), fg: color }, { text: clean(shown[1] as string), fg: 'fg.faint' }] : shown as TextSegment[];
+      const available = Math.max(1, w - 21), chunks = wrapTextWithAnsi(segments.map(s => s.text).join(''), available);
+      return (chunks.length > 1 ? chunks.map(chunk => [{ text: chunk, fg: color }]) : [segments]).map((parts, i) => styledLine([{ text: i ? ' '.repeat(21) : prefix, fg: 'fg.body' }, ...parts], w, undefined, tier));
     };
     const code = (w: number) => {
       const own = snapshot.code.product, body = section('自有维护代码', w), max = Math.max(1, ...(own.value?.groups.map(g => g.lines) ?? []));
-      // 路径 ac.path；行数之后是 ac.brand 的实心条（设计稿 2c）。
+      // 路径 ac.path；行数之后是 ac.improve 的实心条（#104 票面；设计稿为紫色 #bb9af7）。
       if (own.value) for (const group of own.value.groups) {
         const count = `${group.lines.toLocaleString('en-US')} 行`.padStart(9), cells = w >= 60 ? Math.min(16, w - 33) : 0, bar = cells >= 4 ? '█'.repeat(Math.max(1, Math.round(group.lines / max * cells))) : '';
         const path = truncateEnd(clean(group.directory), 20);
-        body.push(styledLine(fitSegments([{ text: `${path}${' '.repeat(Math.max(0, 20 - visibleWidth(path)))} `, fg: 'ac.path' }, { text: count, fg: 'fg.body' }, { text: bar ? '  ' : '' }, { text: bar, fg: 'ac.brand' }], w), w, undefined, tier));
+        body.push(styledLine(fitSegments([{ text: `${path}${' '.repeat(Math.max(0, 20 - visibleWidth(path)))} `, fg: 'ac.path' }, { text: count, fg: 'fg.body' }, { text: bar ? '  ' : '' }, { text: bar, fg: 'ac.improve' }], w), w, undefined, tier));
       } else body.push(...row('产品源码', absent(own), w));
-      // 合计行上方一条 line.inner 分隔线（设计稿 2c）。
-      if (own.value) body.push(rule(w, 'line.inner', tier), ...row('产品源码合计', `${own.value.files} 文件 · ${own.value.lines.toLocaleString('en-US')} 行`, w));
+      // 合计行上方一条 line.inner 分隔线；文件数与行数 fg.primary，行数粗体（设计稿 2c）。
+      if (own.value) body.push(rule(w, 'line.inner', tier), ...row('产品源码合计', [{ text: `${own.value.files} 文件 · `, fg: 'fg.primary' }, { text: `${own.value.lines.toLocaleString('en-US')} 行`, fg: 'fg.primary', bold: true }], w));
       const deps = snapshot.code.dependencies.value;
-      body.push(...row('直接依赖', deps ? `${deps.count} · ${deps.exact ? '精确固定' : '非全部精确固定'}` : '未记录', w));
-      for (const [label, item] of [['随包脚本', snapshot.code.scripts], ['pi-tui 宽度补丁', snapshot.code.patch], ['测试（不随包）', snapshot.code.tests]] as const) body.push(...row(label, item.value ? `${item.value.lines.toLocaleString('en-US')} 行` : '未记录', w));
+      body.push(...row('直接依赖', deps ? [`${deps.count}`, ` · ${deps.exact ? '精确固定' : '非全部精确固定'}`] : ['未记录', ''], w));
+      for (const [label, item] of [['随包脚本', snapshot.code.scripts], ['pi-tui 宽度补丁', snapshot.code.patch], ['测试（不随包）', snapshot.code.tests]] as const) body.push(...row(label, [item.value ? `${item.value.lines.toLocaleString('en-US')} 行` : '未记录', ''], w));
       return body;
     };
-    const volume = (w: number) => [...section('体积', w), ...row('生产安装', snapshot.installation.value === null ? absent(snapshot.installation) : `${bytes(snapshot.installation.value)} · 含 provider SDK`, w), ...row('分发', unmeasured, w)];
+    const volume = (w: number) => [...section('体积', w), ...row('生产安装', snapshot.installation.value === null ? absent(snapshot.installation) : [bytes(snapshot.installation.value), ' · 含 provider SDK'] as const, w), ...row('分发', unmeasured, w)];
     const running = (w: number) => {
       const keys = this.samples.snapshot().keys, memory = snapshot.memory.value, peak = snapshot.peak.value;
       return [...section('运行开销', w),
-        ...row('本次启动到首帧', snapshot.firstFrame.value === null ? '尚未取得首帧' : `${ms(snapshot.firstFrame.value)} · 1 样本`, w),
+        ...row('本次启动到首帧', snapshot.firstFrame.value === null ? ['尚未取得首帧', ''] as const : [ms(snapshot.firstFrame.value), ' · 1 样本'] as const, w),
         ...row('冷启动 p50/p95', unmeasured, w),
-        ...row('当前 RSS', memory ? `${bytes(memory.bytes)} · ${memory.state}` : absent(snapshot.memory), w),
-        ...row('本进程峰值 RSS', peak ? `${bytes(peak.bytes)} · ${peak.tasks ?? '未记录'} 个任务 · ${bytes(peak.toolOutputBytes)} 工具输出` : absent(snapshot.peak), w),
+        ...row('当前 RSS', memory ? [bytes(memory.bytes), ` · ${memory.state}`] as const : absent(snapshot.memory), w),
+        ...row('本进程峰值 RSS', peak ? [bytes(peak.bytes), ` · ${peak.tasks ?? '未记录'} 个任务 · ${bytes(peak.toolOutputBytes)} 工具输出`] as const : absent(snapshot.peak), w),
         ...row('受控空闲 / 长会话', unmeasured, w),
-        ...row('按键到重绘', keys.samples ? `p50 ${ms(keys.p50!)}${keys.p95 === null ? '' : ` / p95 ${ms(keys.p95)}`} · ${keys.samples} 样本` : '尚无样本', w, 'ac.info'),
-        ...row('', keys.samples < 20 && keys.samples > 0 ? '样本不足 20，不计 p95 · 不含终端绘制' : '进程内 · 不含终端绘制', w),
+        ...row('按键到重绘', [keys.samples ? `p50 ${ms(keys.p50!)}${keys.p95 === null ? '' : ` / p95 ${ms(keys.p95)}`} · ${keys.samples} 样本` : '尚无样本', ''], w, 'ac.info'),
+        ...row('', [keys.samples < 20 && keys.samples > 0 ? '样本不足 20，不计 p95' : '进程内', ' · 不含终端绘制'], w),
       ];
     };
     const observation = (w: number) => {
       const storage = this.storageResult, value = storage?.value, query = snapshot.query.value;
-      const summary = this.loading ? '' : !storage || !value ? storage ? absent(storage) : '未取得' : value.tasks === 0 ? `尚无任务 · 数据根总量 ${bytes(value.total)}` : `每任务均值 ${bytes(value.perTask)} · 数据根总量 ${bytes(value.total)}`;
+      const summary: readonly [string, string] = this.loading ? ['', ''] : !storage || !value ? storage ? absent(storage) : ['未取得', ''] : value.tasks === 0 ? ['尚无任务', ` · 数据根总量 ${bytes(value.total)}`] : [`每任务均值 ${bytes(value.perTask)}`, ` · 数据根总量 ${bytes(value.total)}`];
       return [...section('观测开销', w), ...row('记录增长', summary, w), ...this.loading?.isShowing ? [this.loading.renderLine(w, tier)] : [],
-        ...value && value.tasks !== 0 ? row('完整原文（现存）', bytes(value.originals), w) : [],
-        ...row('查询摘要', query ? `${ms(query.ms)} · ${query.runs} run${query.more ? ' · 仅首 50 项' : ''}${query.coverage.missing ? ' · 来源有缺失' : ''}` : absent(snapshot.query), w),
-        ...(snapshot.facts.value?.gaps ?? []).flatMap(gap => row('统计范围', gap, w, 'ac.warn')),
-        ...row('输出取得写入耗时', unmeasured, w), ...row('导出队列', '外部导出 无 · 观测仅本机', w),
+        ...value && value.tasks !== 0 ? row('完整原文（现存）', [bytes(value.originals), ''], w) : [],
+        ...row('查询摘要', query ? [ms(query.ms), ` · ${query.runs} run${query.more ? ' · 仅首 50 项' : ''}${query.coverage.missing ? ' · 来源有缺失' : ''}`] as const : absent(snapshot.query), w),
+        ...(snapshot.facts.value?.gaps ?? []).flatMap(gap => row('统计范围', [gap, ''], w, 'ac.warn')),
+        ...row('输出取得写入耗时', unmeasured, w), ...row('导出队列', ['外部导出 无', ' · 观测仅本机'], w),
       ];
     };
     let body: string[];
@@ -140,10 +142,10 @@ export class SelfView {
         // 第二列与上方右栏对齐。
         const w = leftWidth + 3;
         for (let i = 0; i < values.length; i += 2) {
-          const a = row(values[i].label, values[i].text.map(s => s.text).join(''), w), b = values[i + 1] ? row(values[i + 1].label, values[i + 1].text.map(s => s.text).join(''), width - w) : [];
+          const a = row(values[i].label, [values[i].text[0].text, values[i].text.slice(1).map(s => s.text).join('')], w), b = values[i + 1] ? row(values[i + 1].label, [values[i + 1].text[0].text, values[i + 1].text.slice(1).map(s => s.text).join('')], width - w) : [];
           for (let j = 0; j < Math.max(a.length, b.length); j++) body.push(`${a[j] ?? line('', w)}${b[j] ?? line('', width - w)}`);
         }
-      } else for (const value of values) body.push(...row(value.label, value.text.map(s => s.text).join(''), width));
+      } else for (const value of values) body.push(...row(value.label, [value.text[0].text, value.text.slice(1).map(s => s.text).join('')], width));
     } else body.push(...row('期间开销', absent(snapshot.cost), width));
     // 头部下方与底栏上方各一条分隔线、头部后空一行（U10）；放不下时先收它们，再收底栏说明。
     const hints = ['b 重新测量', 'e 导出', 'Tab 页签', '↑↓ 滚动'], esc = 'Esc 返回会话';

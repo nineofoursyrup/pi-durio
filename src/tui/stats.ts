@@ -318,7 +318,8 @@ export function spendRows(f: Pick<StatsFigures, 'spend'>): SpendRow[] {
     label: SPEND[row.kind].label,
     kind: row.kind,
     known: row.totals.amounts.CNY ?? 0,
-    text: [{ text: `${knownAmounts(row.totals) || (incomplete(row.totals) ? 'unknown' : formatAmount(0, 'CNY'))} · ${formatTokens(row.tokens)}` }, ...gapText(row.totals), { text: ` · ${SPEND[row.kind].note}`, fg: 'fg.faint' }],
+    // 金额与 tok 分两段：2c 以金额为主值，其余为说明。
+    text: [{ text: knownAmounts(row.totals) || (incomplete(row.totals) ? 'unknown' : formatAmount(0, 'CNY')) }, { text: ` · ${formatTokens(row.tokens)}` }, ...gapText(row.totals), { text: ` · ${SPEND[row.kind].note}`, fg: 'fg.faint' }],
   }));
 }
 
