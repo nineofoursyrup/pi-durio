@@ -67,11 +67,11 @@
    0-131 -/-
 33|                                                                                                                                    |
    0-131 -/-
-34|                                                                                                                                    |
-   0-131 -/-
-35|                                                                                                                                    |
-   0-131 -/-
-36|❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                       |
-   0-1 ac.brand/bg.base ; 2-108 fg.body/bg.base ; 109-131 -/bg.base
+34|╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮|
+   0-131 border.input/bg.base
+35|│❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                     │|
+   0-0 border.input/bg.base ; 1-2 ac.brand/bg.base ; 3-109 fg.body/bg.base ; 110-130 -/bg.base ; 131-131 border.input/bg.base
+36|╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯|
+   0-131 border.input/bg.base
 37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                                                                                               |
-   0-36 fg.label/bg.base ; 37-131 -/bg.base
+   0-2 fg.body/bg.base ; 3-14 fg.label/bg.base ; 15-16 fg.body/bg.base ; 17-24 fg.label/bg.base ; 25-27 fg.body/bg.base ; 28-36 fg.label/bg.base ; 37-131 -/bg.base

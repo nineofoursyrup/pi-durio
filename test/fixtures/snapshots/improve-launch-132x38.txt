@@ -1,77 +1,77 @@
 132x38 truecolor
-00|  ◆ improve  ~/project                                                                                              分析不执行候选  |
-   0-131 fg.gutter/-
-01|                                                                                                                                    |
-   0-131 fg.gutter/-
-02|    ir-xxxx · 00-00 00:00 · 来自 s-xxxx · 候选 3 · 未决 2                                                                           |
-   0-131 fg.gutter/-
-03|                                                                                                                                    |
-   0-131 fg.gutter/-
-04|  › 新建分析                                                                                                                        |
-   0-131 fg.gutter/-
-05|    历史报告 · 2 份                                                                                                                 |
-   0-131 fg.gutter/-
-06|    建议抑制 · 没有生效的抑制                                                                                                       |
-   0-131 fg.gutter/-
-07|                                                                                                                                    |
-   0-131 fg.gutter/-
+00|                                                                                                                                    |
+   0-131 fg.gutter/bg.base
+01|  ◆ improve  ~/project                                                                                              分析不执行候选  |
+   0-131 fg.gutter/bg.base
+02|                                                                                                                                    |
+   0-131 fg.gutter/bg.base
+03|    ir-xxxx · 00-00 00:00 · 来自 s-xxxx · 候选 3 · 未决 2                                                                           |
+   0-131 fg.gutter/bg.base
+04|                                                                                                                                    |
+   0-131 fg.gutter/bg.base
+05|  › 新建分析                                                                                                                        |
+   0-131 fg.gutter/bg.base
+06|    历史报告 · 2 份                                                                                                                 |
+   0-131 fg.gutter/bg.base
+07|    建议抑制 · 没有生效的抑制                                                                                                       |
+   0-131 fg.gutter/bg.base
 08|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 09|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 10|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 11|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 12|                      ╭──────────────────────────────────────────────────────────────────────────────────────╮                      |
-   0-21 fg.gutter/- ; 22-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 13|                      │ 新建 improve 分析                                                                    │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-40 fg.primary/bg.block/b ; 41-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-40 fg.primary/bg.block/b ; 41-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 14|                      │ 分析不执行任何候选 · 可看文件 1（省略 0）                                            │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-64 fg.body/bg.block ; 65-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-64 fg.body/bg.block ; 65-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 15|                      │                                                                                      │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 16|                      │ › 取证范围  ○ 1 仅本会话  ◉ 2 本会话 + 近 7 天同类  ○ 3 本会话 + 近 30 天同类        │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-35 fg.primary/bg.selected ; 36-47 fg.body/bg.selected ; 48-73 fg.primary/bg.selected ; 74-100 fg.body/bg.selected ; 101-107 -/bg.selected ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-35 fg.primary/bg.selected ; 36-47 fg.body/bg.selected ; 48-73 fg.primary/bg.selected ; 74-100 fg.body/bg.selected ; 101-107 -/bg.selected ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 17|                      │   预算上限  ◉ 1 标准  ○ 2 加大                                                       │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-35 fg.label/bg.block ; 36-43 fg.primary/bg.block ; 44-53 fg.body/bg.block ; 54-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-35 fg.label/bg.block ; 36-43 fg.primary/bg.block ; 44-53 fg.body/bg.block ; 54-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 18|                      │   附加来源  + 登记新路径                                                             │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-35 fg.label/bg.block ; 36-47 fg.body/bg.block ; 48-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-35 fg.label/bg.block ; 36-47 fg.body/bg.block ; 48-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 19|                      │   分析重点  找出本会话中可改进之处（选填）                                           │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-35 fg.label/bg.block ; 36-65 fg.faint/bg.block ; 66-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-35 fg.label/bg.block ; 36-65 fg.faint/bg.block ; 66-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 20|                      │                                                                                      │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 21|                      │ ↑↓ 换行 · 数字键选择 · 空格勾选来源 · Delete 移除登记                                │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-76 fg.muted/bg.block ; 77-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-76 fg.muted/bg.block ; 77-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 22|                      │ 上限约 ¥17.30（按最坏情况预留） · ≤16 请求 · ≤10 分钟                                │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-76 fg.label/bg.block ; 77-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-76 fg.label/bg.block ; 77-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 23|                      │ Enter 开始分析 · Esc 取消                                                            │                      |
-   0-21 fg.gutter/- ; 22-23 border.input/bg.block ; 24-48 fg.label/bg.block ; 49-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-23 border.input/bg.block ; 24-28 fg.body/bg.block ; 29-40 fg.label/bg.block ; 41-43 fg.body/bg.block ; 44-48 fg.label/bg.block ; 49-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 24|                      ╰──────────────────────────────────────────────────────────────────────────────────────╯                      |
-   0-21 fg.gutter/- ; 22-109 border.input/bg.block ; 110-131 fg.gutter/-
+   0-21 fg.gutter/bg.base ; 22-109 border.input/bg.block ; 110-131 fg.gutter/bg.base
 25|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 26|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 27|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 28|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 29|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 30|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 31|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 32|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 33|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 34|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 35|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 36|  ↑↓ 选择 · Enter 打开 · Esc 返回会话                                                                                               |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base
 37|                                                                                                                                    |
-   0-131 fg.gutter/-
+   0-131 fg.gutter/bg.base

@@ -74,4 +74,4 @@
 36|零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈旧… |
    0-53 fg.label/bg.base ; 54-54 -/- ; 55-55 -/bg.base
 37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                   |
-   0-36 fg.label/bg.base ; 37-55 -/bg.base
+   0-2 fg.body/bg.base ; 3-14 fg.label/bg.base ; 15-16 fg.body/bg.base ; 17-24 fg.label/bg.base ; 25-27 fg.body/bg.base ; 28-36 fg.label/bg.base ; 37-55 -/bg.base

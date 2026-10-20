@@ -7,7 +7,7 @@ import { formatAmount, sumCostEstimates, type CostTotals } from '../cost-estimat
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
 import { CommandError } from './commands.js';
 import { resolveProjectFilter, canonicalProject } from './project-filter.js';
-import { fitSegments, clean, escHint, fixedFrame, footerLines, hintLine, rule, statusError, truncateEnd, widthTier } from './view-stack.js';
+import { fitSegments, clean, escHint, fixedFrame, footerLines, hintLine, inputBox, rule, statusError, truncateEnd, widthTier } from './view-stack.js';
 
 // ─── 范围（M0、U5） ───────────────────────────────────────────────────────────
 
@@ -371,11 +371,13 @@ export class StatsView {
     const tierW = widthTier(width), scope = this.request.scope;
     const head = [tabs, ...this.header(width, tier)];
     const command = line([{ text: `${GLYPHS.prompt} `, fg: 'ac.brand' }, { text: truncateEnd(clean(this.request.command), width - 2), fg: 'fg.body' }]);
+    const commandBox = inputBox([styledLine([{ text: `${GLYPHS.prompt} `, fg: 'ac.brand' }, { text: truncateEnd(clean(this.request.command), width - 4), fg: 'fg.body' }], width - 2, undefined, tier)], width, tier);
     const footer = footerLines([{ text: truncateEnd(NOTE, width), fg: 'fg.label' }], hints, width, { esc: escHint(1), tier });
 
     if (!this.data) {
       const error = statusError(SCOPE_LIMITS[this.limit!], this.limit!, '/ 缩小时间或项目范围', width, tier);
-      return fixedFrame(head, ['', ...error], [command, hint], height, 0).lines;
+      const boxed = head.length + error.length + 1 + commandBox.length + 1 <= height;
+      return fixedFrame(head, ['', ...error], [...(boxed ? commandBox : [command]), hint], height, 0).lines;
     }
 
     const f = this.data.figures, rows = metricRows(f), spend = spendRows(f);
@@ -435,9 +437,11 @@ export class StatsView {
 
     // 高度不够时依次收起：分隔线与空行、底部说明、等价命令行、期间开销（只剩合计）、表格滚动。页签行与底栏键位始终保留。
     const bodyOf = (parts: ReturnType<typeof layout>, spendPart: string[]) => [...parts.table, ...parts.spendHead, ...spendPart];
-    const airy = layout(true), parts = airy.head.length + bodyOf(airy, spendLines).length + 1 + footer.length <= height ? airy : layout(false);
+    const airy = layout(true), airyRows = airy.head.length + bodyOf(airy, spendLines).length + footer.length;
+    // 圆角命令框先退成一行，再按 U5 收起空行与其他内容；不为框线把仍放得下的表格压紧。
+    const boxed = airyRows + commandBox.length <= height, parts = airyRows + 1 <= height ? airy : layout(false);
     const fits = (body: number, foot: number) => parts.head.length + body + foot <= height;
-    let body = bodyOf(parts, spendLines), foot = [command, ...footer];
+    let body = bodyOf(parts, spendLines), foot = [...(boxed ? commandBox : [command]), ...footer];
     if (!fits(body.length, foot.length)) foot = [command, hint];
     if (!fits(body.length, foot.length)) foot = [hint];
     if (!fits(body.length, foot.length) && (this.selectedRow === undefined || this.selectedRow < 7)) body = bodyOf(parts, totalOnly);

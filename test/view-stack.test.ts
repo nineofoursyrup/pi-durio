@@ -250,3 +250,24 @@ test('U10 footer: usage left and hints right share one row, falling back to two 
   // Full views keep Esc at the far right.
   assert.match(plain(footerLines(left, ['↑↓ 滚动'], 100, { esc: 'Esc 返回会话', tier: 'none' }))[0], /↑↓ 滚动 · Esc 返回会话$/);
 });
+
+test('footer keys remain brighter than descriptions, including consecutive and key-only hints', () => {
+  const items = ['Ctrl+X Enter follow-up', 'PgUp/Dn', 'b 重新测量', '空格 多选'];
+  for (const render of [
+    () => hintLine(items, 90, { esc: 'Esc 返回会话', tier: 'truecolor' }),
+    () => footerLines([{ text: '状态' }], items, 110, { esc: 'Esc 返回会话', tier: 'truecolor' })[0],
+  ]) {
+    const line = render(), width = visibleWidth(line), grid = captureSnapshot([line], width, 1, 'truecolor').rows[0];
+    const text = grid.map(cell => cell.char || ' ').join('');
+    for (const key of ['Ctrl+X Enter', 'PgUp/Dn', 'b', 'Esc']) {
+      const start = text.indexOf(key);
+      assert.ok(start >= 0, key);
+      assert.ok(grid.slice(start, start + key.length).every(cell => cell.fg === 'fg.body'), key);
+    }
+    const start = text.indexOf('follow-up');
+    assert.ok(grid.slice(start, start + 9).every(cell => cell.fg === 'fg.label'));
+    assert.ok(grid.filter(cell => cell.char === '·').every(cell => cell.fg === 'fg.label'));
+  }
+  const feedback = captureSnapshot([hintLine([], 50, { feedback: 'Enter 已复制', esc: 'Esc 返回会话', tier: 'truecolor' })], 50, 1, 'truecolor').rows[0];
+  assert.ok(feedback.slice(0, 9).every(cell => cell.fg === 'fg.body'), 'status feedback keeps its existing color');
+});

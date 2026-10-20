@@ -74,4 +74,4 @@
 36|◇ 已停止于 trial 12/12 · ≈ $0.18 · 不续跑                                                               eval 费用单列，不计入 /stats|
    0-21 fg.muted/bg.base ; 22-40 fg.body/bg.base ; 41-103 -/bg.base ; 104-131 fg.faint/bg.base
 37|↑↓ 案例 · ←→ trial · Enter trial trace · r 重评分 · Esc 返回上层                                                                    |
-   0-63 fg.label/bg.base ; 64-131 -/bg.base
+   0-1 fg.body/bg.base ; 2-9 fg.label/bg.base ; 10-11 fg.body/bg.base ; 12-20 fg.label/bg.base ; 21-25 fg.body/bg.base ; 26-40 fg.label/bg.base ; 41-41 fg.body/bg.base ; 42-51 fg.label/bg.base ; 52-54 fg.body/bg.base ; 55-63 fg.label/bg.base ; 64-131 -/bg.base
