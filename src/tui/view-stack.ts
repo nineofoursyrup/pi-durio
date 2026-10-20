@@ -155,7 +155,7 @@ export function sideMargin(width: number): number {
 export function bottomMargin(rows: number): number {
   return rows >= 30 ? 1 : 0;
 }
-/** 顶部留白与底部同条件；先于视图的内容收起项消失。 */
+/** 顶部留白与底部同条件：不矮于 30 行时留 1 行，更矮时不留。 */
 export function topMargin(rows: number): number { return bottomMargin(rows); }
 /** 给按内宽（width − 2 × margin）渲染的行加左右边距；短行与空串用 `bg.base` 补满。 */
 export function inset(lines: string[], width: number, margin: number, tier: ColorTier = COLOR_TIER): string[] {
