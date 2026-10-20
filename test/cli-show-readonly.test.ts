@@ -4,6 +4,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { stripTerminalSequences } from '@earendil-works/pi-tui';
 import { Evidence } from '../src/evidence.js';
 import { readDisplayIndex } from '../src/display-number.js';
 
@@ -69,11 +70,12 @@ test('actual CLI show --trace keeps read-only capability while raw navigation an
   for (const target of [display.label('run', runId), display.label('session', sessionId)]) {
     const child = spawnSync(process.execPath, ['--experimental-test-module-mocks', harness, dataRoot, target, runId], { encoding: 'utf8' });
     assert.equal(child.status, 0, child.stderr + child.stdout);
-    const lines = child.stdout.trimEnd().split('\n');
-    assert.ok(lines.length <= 8);
-    assert.match(lines[0], /^◆ pi-durio 已退出/);
-    assert.match(child.stdout, /原文  pi-durio show s-/);
-    assert.doesNotMatch(child.stdout, /Read back:|"tui"|[\x1b\x07]/);
+    // U6：至多 8 行内容，另在“继续 / 原文”一行前空一行；各行左侧 `┃`，按启动时判定的档位上色。
+    const shown = stripTerminalSequences(child.stdout), lines = shown.trimEnd().split('\n');
+    assert.ok(lines.length <= 9);
+    assert.match(lines[0], /^┃ ◆ pi-durio 已退出/);
+    assert.match(shown, /原文  pi-durio show s-/);
+    assert.doesNotMatch(shown, /Read back:|"tui"|[\x1b\x07]/);
     assert.deepEqual(readFileSync(join(dataRoot, 'host.sqlite')), before, 'viewing cannot append pins or analysis records');
   }
 });
