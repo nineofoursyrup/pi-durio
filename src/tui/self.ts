@@ -4,7 +4,7 @@ import { spendRows } from './stats.js';
 import { statsDate } from './stats-filter.js';
 import { formatBytes } from './storage.js';
 import { COLOR_TIER, styledLine, type ColorTier, type TextSegment } from './theme.js';
-import { LoadingState, clean, fixedFrame, hintLine, truncateEnd } from './view-stack.js';
+import { LoadingState, SPACER, clean, fitSegments, fixedFrame, footerLines, hintLine, rule, truncateEnd } from './view-stack.js';
 
 export interface SelfHost { changed(): void; feedback(text: string): void; export(value: unknown): void }
 export interface SelfOptions {
@@ -71,25 +71,32 @@ export class SelfView {
 
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
     const snapshot = this.snapshot, env = snapshot.environment, wide = width >= 100;
-    const line = (text: string, w = width, heading = false) => styledLine([{ text: clean(text), fg: heading ? 'fg.primary' : 'fg.body', bold: heading }], w, undefined, tier);
-    const tabs = styledLine([{ text: ' 指标', fg: 'fg.label' }, { text: ' · ', fg: 'fg.faint' }, { text: '本机实测', fg: 'fg.primary', bold: true }], width, undefined, tier);
-    const header = `◆ self ${env.build?.slice(0, 7) ?? '未知'} · ${env.chip} · macOS ${env.system} · Node ${env.node} · ${env.terminal} · 本进程 ${Math.floor(env.uptimeMs / 60000)}m`;
-    const note = '无预设硬阈值 · 只报告实测';
-    const headerLine = wide ? `${truncateEnd(clean(header), width - visibleWidth(note) - 3)}${' '.repeat(Math.max(1, width - visibleWidth(truncateEnd(clean(header), width - visibleWidth(note) - 3)) - visibleWidth(note)))}${note}` : truncateEnd(clean(header), width);
-    const section = (title: string, w: number) => [line(` ${title}`, w, true)];
+    // 节标题保持粗体、颜色 fg.label（视觉修正 r1）。
+    const line = (text: string, w = width, heading = false) => styledLine([{ text: clean(text), fg: heading ? 'fg.label' : 'fg.body', bold: heading }], w, undefined, tier);
+    const tabs = styledLine([{ text: '指标', fg: 'fg.label' }, { text: ' · ', fg: 'fg.faint' }, { text: '本机实测', fg: 'fg.primary', bold: true }], width, undefined, tier);
+    const facts = ` ${env.build?.slice(0, 7) ?? '未知'} · ${env.chip} · macOS ${env.system} · Node ${env.node} · ${env.terminal} · 本进程 ${Math.floor(env.uptimeMs / 60000)}m`;
+    const note = '无预设硬阈值 · 只报告实测', brand: TextSegment[] = [{ text: '◆ ', fg: 'ac.model' }, { text: 'self', fg: 'fg.primary', bold: true }];
+    const room = width - 6 - (wide ? visibleWidth(note) + 2 : 0), shown = truncateEnd(clean(facts), Math.max(0, room));
+    const headerLine = styledLine([...brand, { text: shown, fg: 'fg.faint' }, ...wide ? [{ text: ' '.repeat(Math.max(2, room - visibleWidth(shown) + 2)) }, { text: note, fg: 'fg.faint' as const }] : []], width, undefined, tier);
+    const section = (title: string, w: number) => [line(title, w, true)];
     // Labels keep 20 cells below 60 columns. Values wrap instead of losing their units or unknown qualifiers.
+    // As in the design, labels and the leading value are fg.body; a one-line value's ` · ` qualifiers are fg.muted.
     const row = (label: string, value: string, w: number, color: TextSegment['fg'] = 'fg.body') => {
-      const labelText = truncateEnd(clean(label), 20), prefix = ` ${labelText}${' '.repeat(Math.max(0, 20 - visibleWidth(labelText)))} `;
-      const available = Math.max(1, w - 22), chunks = wrapTextWithAnsi(clean(value), available);
-      return (chunks.length ? chunks : ['']).map((chunk, i) => styledLine([{ text: i ? ' '.repeat(22) : prefix, fg: 'fg.label' }, { text: chunk, fg: color }], w, undefined, tier));
+      const labelText = truncateEnd(clean(label), 20), prefix = `${labelText}${' '.repeat(Math.max(0, 20 - visibleWidth(labelText)))} `;
+      const available = Math.max(1, w - 21), chunks = wrapTextWithAnsi(clean(value), available), cut = chunks.length === 1 && color === 'fg.body' ? chunks[0].indexOf(' · ') : -1;
+      const valueSegments = (chunk: string): TextSegment[] => cut < 0 ? [{ text: chunk, fg: color }] : [{ text: chunk.slice(0, cut), fg: color }, { text: chunk.slice(cut), fg: 'fg.muted' }];
+      return (chunks.length ? chunks : ['']).map((chunk, i) => styledLine([{ text: i ? ' '.repeat(21) : prefix, fg: 'fg.body' }, ...valueSegments(chunk)], w, undefined, tier));
     };
     const code = (w: number) => {
       const own = snapshot.code.product, body = section('自有维护代码', w), max = Math.max(1, ...(own.value?.groups.map(g => g.lines) ?? []));
+      // 路径 ac.path；行数之后是 ac.brand 的实心条（设计稿 2c）。
       if (own.value) for (const group of own.value.groups) {
-        const count = `${group.lines.toLocaleString('en-US')} 行`, bar = w >= 60 ? `${'━'.repeat(Math.max(1, Math.round(group.lines / max * 10)))} ` : '';
-        body.push(...row(group.directory, `${bar}${count}`, w, 'ac.info'));
+        const count = `${group.lines.toLocaleString('en-US')} 行`.padStart(9), cells = w >= 60 ? Math.min(16, w - 33) : 0, bar = cells >= 4 ? '█'.repeat(Math.max(1, Math.round(group.lines / max * cells))) : '';
+        const path = truncateEnd(clean(group.directory), 20);
+        body.push(styledLine(fitSegments([{ text: `${path}${' '.repeat(Math.max(0, 20 - visibleWidth(path)))} `, fg: 'ac.path' }, { text: count, fg: 'fg.body' }, { text: bar ? '  ' : '' }, { text: bar, fg: 'ac.brand' }], w), w, undefined, tier));
       } else body.push(...row('产品源码', absent(own), w));
-      if (own.value) body.push(...row('产品源码合计', `${own.value.files} 文件 · ${own.value.lines.toLocaleString('en-US')} 行`, w));
+      // 合计行上方一条 line.inner 分隔线（设计稿 2c）。
+      if (own.value) body.push(rule(w, 'line.inner', tier), ...row('产品源码合计', `${own.value.files} 文件 · ${own.value.lines.toLocaleString('en-US')} 行`, w));
       const deps = snapshot.code.dependencies.value;
       body.push(...row('直接依赖', deps ? `${deps.count} · ${deps.exact ? '精确固定' : '非全部精确固定'}` : '未记录', w));
       for (const [label, item] of [['随包脚本', snapshot.code.scripts], ['pi-tui 宽度补丁', snapshot.code.patch], ['测试（不随包）', snapshot.code.tests]] as const) body.push(...row(label, item.value ? `${item.value.lines.toLocaleString('en-US')} 行` : '未记录', w));
@@ -119,27 +126,32 @@ export class SelfView {
       ];
     };
     let body: string[];
+    const leftWidth = Math.floor((width - 3) / 2), rightWidth = width - leftWidth - 3;
     if (wide) {
-      const leftWidth = Math.floor((width - 3) / 2), rightWidth = width - leftWidth - 3;
       const left = [...code(leftWidth), '', ...volume(leftWidth)], right = [...running(rightWidth), '', ...observation(rightWidth)];
-      body = Array.from({ length: Math.max(left.length, right.length) }, (_, i) => `${left[i] || line('', leftWidth)}${line(' │ ', 3)}${right[i] || line('', rightWidth)}`);
+      body = Array.from({ length: Math.max(left.length, right.length) }, (_, i) => `${left[i] || line('', leftWidth)}${line('', 3)}${right[i] || line('', rightWidth)}`);
     } else body = [...code(width), '', ...volume(width), '', ...running(width), '', ...observation(width)];
     body.push('', ...section('模型成本 · 近 7 天整日 · 全部项目 · 日常 · 估算非账单', width));
     if (snapshot.cost.value) {
       const { scope, spend } = snapshot.cost.value;
-      body.push(line(` [${statsDate(scope.from)}, ${statsDate(scope.to)}) · 按请求发生时间去重`));
+      body.push(line(`[${statsDate(scope.from)}, ${statsDate(scope.to)}) · 按请求发生时间去重`));
       const values = spendRows({ spend });
       if (wide) {
-        const w = Math.floor(width / 2);
+        // 第二列与上方右栏对齐。
+        const w = leftWidth + 3;
         for (let i = 0; i < values.length; i += 2) {
           const a = row(values[i].label, values[i].text.map(s => s.text).join(''), w), b = values[i + 1] ? row(values[i + 1].label, values[i + 1].text.map(s => s.text).join(''), width - w) : [];
           for (let j = 0; j < Math.max(a.length, b.length); j++) body.push(`${a[j] ?? line('', w)}${b[j] ?? line('', width - w)}`);
         }
       } else for (const value of values) body.push(...row(value.label, value.text.map(s => s.text).join(''), width));
     } else body.push(...row('期间开销', absent(snapshot.cost), width));
-    const footer = [hintLine(['b 重新测量', 'e 导出', 'Tab 页签', '↑↓ 滚动'], width, { esc: 'Esc 返回会话', tier })];
-    if (body.length + 4 <= height) footer.unshift(line(' 本地时间与网络/模型时间分开 · 磁盘增长不等于上下文变短'));
-    const frame = fixedFrame([tabs, line(headerLine)], body, footer, height, this.offset); this.offset = frame.offset;
+    // 头部下方与底栏上方各一条分隔线、头部后空一行（U10）；放不下时先收它们，再收底栏说明。
+    const hints = ['b 重新测量', 'e 导出', 'Tab 页签', '↑↓ 滚动'], esc = 'Esc 返回会话';
+    const footer = footerLines([{ text: '本地时间与网络/模型时间分开 · 磁盘增长不等于上下文变短', fg: 'fg.label' }], hints, width, { esc, tier });
+    const airy = 2 + 2 + body.length + 1 + footer.length <= height;
+    const frame = airy ? fixedFrame([tabs, headerLine, rule(width, 'line.subtle', tier), SPACER], body, [rule(width, 'line.subtle', tier), ...footer], height, this.offset)
+      : fixedFrame([tabs, headerLine], body, body.length + 2 + footer.length <= height ? footer : [hintLine(hints, width, { esc, tier })], height, this.offset);
+    this.offset = frame.offset;
     return frame.lines;
   }
 }
