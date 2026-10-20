@@ -82,12 +82,21 @@ export class SelfView {
     const section = (title: string, w: number) => [line(title, w, true)];
     // Labels keep 20 cells below 60 columns. Values wrap instead of losing their units or unknown qualifiers.
     // As in the design, labels are fg.body, the value fg.primary and its note (with separator) fg.faint.
-    // `shown` is [value, note] or pre-styled segments; a value that wraps is drawn whole in `color`.
+    // `shown` is [value, note] or pre-styled segments; a value that wraps keeps each segment's color.
     const row = (label: string, shown: readonly [string, string] | TextSegment[], w: number, color: TextSegment['fg'] = 'fg.primary') => {
       const labelText = truncateEnd(clean(label), 20), prefix = `${labelText}${' '.repeat(Math.max(0, 20 - visibleWidth(labelText)))} `;
       const segments: TextSegment[] = typeof shown[0] === 'string' ? [{ text: clean(shown[0]), fg: color }, { text: clean(shown[1] as string), fg: 'fg.faint' }] : shown as TextSegment[];
       const available = Math.max(1, w - 21), chunks = wrapTextWithAnsi(segments.map(s => s.text).join(''), available);
-      return (chunks.length > 1 ? chunks.map(chunk => [{ text: chunk, fg: color }]) : [segments]).map((parts, i) => styledLine([{ text: i ? ' '.repeat(21) : prefix, fg: 'fg.body' }, ...parts], w, undefined, tier));
+      // 按词折行只会去掉断行处的空格，逐字对回原片段即可还原各段样式。
+      const chars = segments.flatMap(s => Array.from(s.text, char => ({ char, s })));
+      let at = 0;
+      const wrapped = chunks.map(chunk => Array.from(chunk).reduce<TextSegment[]>((parts, char) => {
+        while (chars[at].char !== char) at++;
+        const { s } = chars[at++], last = parts.at(-1);
+        if (last && last.fg === s.fg && last.bold === s.bold) last.text += char; else parts.push({ ...s, text: char });
+        return parts;
+      }, []));
+      return (chunks.length > 1 ? wrapped : [segments]).map((parts, i) => styledLine([{ text: i ? ' '.repeat(21) : prefix, fg: 'fg.body' }, ...parts], w, undefined, tier));
     };
     const code = (w: number) => {
       const own = snapshot.code.product, body = section('自有维护代码', w), max = Math.max(1, ...(own.value?.groups.map(g => g.lines) ?? []));
@@ -137,8 +146,8 @@ export class SelfView {
     if (snapshot.cost.value) {
       const { scope, spend } = snapshot.cost.value;
       body.push(line(`[${statsDate(scope.from)}, ${statsDate(scope.to)}) · 按请求发生时间去重`));
-      // 金额 fg.primary；其余段保留自带颜色（unknown / partial 为 ac.warn），无色的补 fg.faint。
-      const values = spendRows({ spend }).map(value => ({ label: value.label, text: value.text.map((s, i): TextSegment => ({ ...s, text: clean(s.text), fg: i ? s.fg ?? 'fg.faint' : 'fg.primary' })) }));
+      // 金额 fg.primary，没有已知金额时的 unknown 为 ac.warn；其余段保留自带颜色（unknown / partial 为 ac.warn），无色的补 fg.faint。
+      const values = spendRows({ spend }).map(value => ({ label: value.label, text: value.text.map((s, i): TextSegment => ({ ...s, text: clean(s.text), fg: i ? s.fg ?? 'fg.faint' : s.text === 'unknown' ? 'ac.warn' : 'fg.primary' })) }));
       if (wide) {
         // 第二列与上方右栏对齐。
         const w = leftWidth + 3;
