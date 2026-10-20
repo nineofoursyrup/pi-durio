@@ -29,20 +29,20 @@
    0-25 fg.body/bg.base ; 26-131 -/bg.base
 14|完整范围  /xxxxxxx/xxx/xxxxxxxxxxxxxxxxxxxxxx/project/math.mjs                                                                      |
    0-61 ac.path/bg.base ; 62-131 -/bg.base
-15|--- math.mjs（基线 577b3f8de17b）                                                                                                   |
-   0-32 ac.path/bg.base ; 33-131 -/bg.base
-16|+++ math.mjs（候选）                                                                                                                |
-   0-19 ac.path/bg.base ; 20-131 -/bg.base
-17|-export const add=(a,b)=>a-b;                                                                                                       |
-   0-28 ac.err/bg.base ; 29-131 -/bg.base
-18|+export const add=(a,b)=>a+b;                                                                                                       |
-   0-28 ac.ok/bg.base ; 29-131 -/bg.base
+15| --- math.mjs（基线 577b3f8de17b）                                                                                                  |
+   0-33 ac.path/bg.block ; 34-105 -/bg.block ; 106-131 -/bg.base
+16| +++ math.mjs（候选）                                                                                                               |
+   0-20 ac.path/bg.block ; 21-105 -/bg.block ; 106-131 -/bg.base
+17| -export const add=(a,b)=>a-b;                                                                                                      |
+   0-29 ac.err/bg.block ; 30-105 -/bg.block ; 106-131 -/bg.base
+18| +export const add=(a,b)=>a+b;                                                                                                      |
+   0-29 ac.ok/bg.block ; 30-105 -/bg.block ; 106-131 -/bg.base
 19|                                                                                                                                    |
-   0-0 fg.body/bg.base ; 1-131 -/bg.base
+   0-1 fg.body/bg.block ; 2-105 -/bg.block ; 106-131 -/bg.base
 20|检查 1  regression · ≤ 30000 ms                                                                                                     |
    0-30 fg.body/bg.base ; 31-131 -/bg.base
-21|console.log("regression")                                                                                                           |
-   0-24 ac.code/bg.base ; 25-131 -/bg.base
+21| console.log("regression")                                                                                                          |
+   0-25 ac.code/bg.block ; 26-105 -/bg.block ; 106-131 -/bg.base
 22|必要保护  不更改其他文件                                                                                                            |
    0-23 fg.body/bg.base ; 24-131 -/bg.base
 23|风险  只覆盖数值输入                                                                                                                |

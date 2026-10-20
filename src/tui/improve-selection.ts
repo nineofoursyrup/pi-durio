@@ -177,7 +177,11 @@ export class ImproveSelectionView {
     return row;
    },[]));
   };
-  const text=rows.flatMap(row=>row.segments?wrapStyled(row.segments).map(segments=>styledLine(segments,textWidth)):wrapTextWithAnsi(clean(row.text),Math.max(1,textWidth)).map(line=>styledLine([{text:line,fg:row.fg??'fg.body'}],textWidth)));
+  const text=rows.flatMap(row=>{
+   // 代码块只占内容列；内边距参与换行宽度，续行也铺满灰底。历史卡片忽略此标记。
+   if(row.codeBlock)return wrapTextWithAnsi(clean(row.text),Math.max(1,textWidth-1)).map(line=>styledLine([{text:' '+line,fg:row.fg??'fg.body'}],textWidth,'bg.block'));
+   return row.segments?wrapStyled(row.segments).map(segments=>styledLine(segments,textWidth)):wrapTextWithAnsi(clean(row.text),Math.max(1,textWidth)).map(line=>styledLine([{text:line,fg:row.fg??'fg.body'}],textWidth));
+  });
   if(readOnly)return text;
   const choices=IMPROVE_MODES.map((m,i)=>{const on=mode===m,off=i<2&&!candidateExecutable(c)||!!decision&&!(i===0&&decision.canExecute);return {on,segments:[{text:on?'◉':'○',fg:on?MODE_COLOR[m]:'fg.faint'},{text:` ${i+1} ${MODE_LABEL[m]}`,fg:off?'fg.faint':on?'fg.primary':'fg.label'}] as TextSegment[]};});
   if(side) {
