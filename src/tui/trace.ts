@@ -179,7 +179,7 @@ export class TraceView {
       body = list.map((row, i) => row + bar + styledLine([{ text: '  ' }, ...(detail[i] ?? [])], detailWidth));
     }
     const rule = styledLine([{ text: '─'.repeat(width), fg: 'line.subtle' }], width);
-    return [...header, rule, ...body, ...summary, ...(rules ? [rule] : []), this.footer(trace, width, esc)];
+    return [...header, rule, ...body, ...(rules ? [rule] : []), ...summary, this.footer(trace, width, esc)];
   }
 
   private header(trace: Trace, width: number, wide: boolean): string[] {
@@ -267,7 +267,7 @@ export class TraceView {
       return [tree, { text: 'compaction', fg: 'ac.model' }, { text: ` ${c.trigger === 'automatic' ? '自动' : '手动'}` }, { text: ` · ${requestRange(c.requests)}`, fg: 'fg.faint' }, ...(span.outcome === 'failed' ? [{ text: ' ✗', fg: 'ac.err' as TokenName }] : []), ...spin];
     }
     const tool = span.tool!, suffix: TextSegment[] = [];
-    if (tool.denied) suffix.push({ text: ` ✗ ${deniedText(tool)}`, fg: 'ac.err' });
+    if (tool.denied) suffix.push({ text: ` ✗ ${deniedText(tool).join(' · ')}`, fg: 'ac.err' });
     else if (span.outcome === 'failed') suffix.push({ text: ' ✗', fg: 'ac.err' });
     else if (tool.exit === 0) suffix.push({ text: ' ✓', fg: 'ac.ok' });
     if (tool.recoveryRetry) suffix.push({ text: ' 恢复后重试', fg: 'ac.warn' });
@@ -277,7 +277,7 @@ export class TraceView {
     const room = width - fixed.reduce((w, s) => w + visibleWidth(s.text), 0) - 1;
     const isPath = tool.name !== 'bash' && !!tool.target;
     const shown = room <= 1 ? '' : isPath ? truncateMiddle(target, room) : truncateEnd(target, room);
-    return [tree, { text: 'tool', fg: 'fg.muted' }, { text: ` ${tool.name}` }, ...(shown ? [{ text: ` ${shown}`, fg: 'ac.path' as TokenName }] : []), ...suffix, ...spin];
+    return [tree, { text: 'tool', fg: 'fg.muted' }, { text: ` ${tool.name}` }, ...(shown ? [{ text: ` ${shown}`, fg: (isPath ? 'ac.path' : 'ac.warn') as TokenName }] : []), ...suffix, ...spin];
   }
   private rowLine(row: Row | undefined, c: ReturnType<TraceView['columns']>, total: number, width: number, trace: Trace) {
     if (!row) return styledLine([], width);
@@ -307,22 +307,24 @@ export class TraceView {
     const trace = this.current;
     if (!span) return `run ${this.index.label('run', trace.runId)} · ${this.statusSegment(trace.status).text} · ${formatDuration(trace.duration)}`;
     const length = formatDuration(span.end - span.start);
-    if (span.kind === 'llm') return [`llm #${span.llm!.number}`, span.llm!.purpose, this.llmResult(span.llm!), length].join(' · ');
+    if (span.kind === 'llm') { const result = this.llmResult(span.llm!); return [`llm #${span.llm!.number}`, span.llm!.purpose, result.value, ...result.notes, length].join(' · '); }
     if (span.kind === 'compaction') return [`compaction ${span.compaction!.trigger === 'automatic' ? '自动' : '手动'}`, COMPACTION_STATE[span.compaction!.state ?? ''] ?? '未记录', length].join(' · ');
     const tool = span.tool!;
-    return [`tool ${tool.name}`, this.exitText(span), length].filter(Boolean).join(' · ');
+    const exit = this.exitText(span);
+    return [`tool ${tool.name}`, exit.value, ...exit.notes, length].filter(Boolean).join(' · ');
   }
-  private llmResult(llm: TraceLlm) {
-    return [llm.http !== null ? `HTTP ${llm.http}` : '未记录 HTTP', llm.stopReason ?? '未返回结果', ...(llm.usage ? [] : ['未返回 usage'])].join(' · ');
+  /** 主值与说明分开给出：详情栏分别上色，摘要行用 ` · ` 拼接。 */
+  private llmResult(llm: TraceLlm): { value: string; notes: string[] } {
+    return { value: llm.http !== null ? `HTTP ${llm.http}` : '未记录 HTTP', notes: [llm.stopReason ?? '未返回结果', ...(llm.usage ? [] : ['未返回 usage'])] };
   }
-  private exitText(span: TraceSpan) {
+  private exitText(span: TraceSpan): { value: string; notes: string[] } {
     const tool = span.tool!;
-    if (tool.denied) return `✗ ${deniedText(tool)}`;
-    if (tool.exit !== null && tool.exit !== 0) return `exit ${tool.exit} · ${tool.check ? '预先声明的检查，不计运行故障' : '计入工具失败'}`;
-    if (tool.exit === 0) return 'exit 0';
-    if (span.running) return '运行中';
-    if (span.outcome === 'failed') return `✗ ${clean(tool.error ?? '工具返回错误').split('\n')[0]} · 计入工具失败`;
-    return span.outcome === 'ok' ? '已返回' : '未返回结果';
+    if (tool.denied) { const [value, ...notes] = deniedText(tool); return { value: `✗ ${value}`, notes }; }
+    if (tool.exit !== null && tool.exit !== 0) return { value: `exit ${tool.exit}`, notes: [tool.check ? '预先声明的检查，不计运行故障' : '计入工具失败'] };
+    if (tool.exit === 0) return { value: 'exit 0', notes: [] };
+    if (span.running) return { value: '运行中', notes: [] };
+    if (span.outcome === 'failed') return { value: `✗ ${clean(tool.error ?? '工具返回错误').split('\n')[0]}`, notes: ['计入工具失败'] };
+    return { value: span.outcome === 'ok' ? '已返回' : '未返回结果', notes: [] };
   }
 
   /** 选中项的完整详情，渲染成整行（宽度小于 100 时原文层顶部显示）。 */
@@ -331,8 +333,8 @@ export class TraceView {
     const lines: TextSegment[][] = [];
     // 标题与各分节之间空一行（U10、设计稿 2a）。
     const title = (bold: string, rest = '') => lines.push([{ text: truncateEnd(bold, width), fg: 'fg.primary', bold: true }, { text: truncateEnd(rest ? `  ${rest}` : '', Math.max(0, width - visibleWidth(bold))), fg: 'fg.faint' }], []);
-    /** 标签 `fg.label`，值按语义上色；`note`（含分隔符）为 `fg.muted` 的说明，与值同行放不下时另起一行。 */
-    const kv = (label: string, value: string, fg: TokenName = 'fg.body', note?: string, noteFg: TokenName = 'fg.muted') => {
+    /** 标签 `fg.label`，值按语义上色；`note`（含分隔符）为 `fg.faint` 的说明，与值同行放不下时另起一行。 */
+    const kv = (label: string, value: string, fg: TokenName = 'fg.body', note?: string, noteFg: TokenName = 'fg.faint') => {
       const labelWidth = 9, text = clean(value), room = Math.max(4, width - labelWidth), extra = note ? clean(note) : '';
       const head = (i: number) => ({ text: i ? ' '.repeat(labelWidth) : label + ' '.repeat(Math.max(1, labelWidth - visibleWidth(label))), fg: 'fg.label' as TokenName });
       if (extra && visibleWidth(text + extra) <= room) { lines.push([head(0), { text, fg }, { text: extra, fg: noteFg }]); return; }
@@ -344,17 +346,17 @@ export class TraceView {
       if (!items.length) return;
       lines.push([]); lines.push([{ text: '原文', fg: 'fg.label' }]);
       for (const item of items) {
-        // 取得状态圆点：完整取得 ac.ok；截断、部分或暂不可读 ac.warn；缺口、损坏或已清理 ac.err。状态文字靠右。
+        // 取得状态：完整取得 `●` ac.ok；截断、部分或暂不可读 `◐` ac.warn；缺口、损坏或已清理 `✗` ac.err（无色档靠字形区分）。状态文字靠右。
         const ok = item.state === 'complete' && !item.note, partial = ['complete', 'partial', 'archived', 'temporarily-unreadable'].includes(item.state);
         const size = item.bytes !== undefined ? ` · ${item.bytes} B` : '', state = RAW_STATE_LABEL[item.state], name = truncateEnd(` ${item.label}${size}`, Math.max(1, width - 1 - visibleWidth(state) - 2));
-        lines.push([{ text: ok ? '●' : partial ? '◐' : '●', fg: ok ? 'ac.ok' : partial ? 'ac.warn' : 'ac.err' }, { text: name }, { text: ' '.repeat(Math.max(2, width - 1 - visibleWidth(name) - visibleWidth(state))) }, { text: state, fg: 'fg.faint' }]);
+        lines.push([{ text: ok ? '●' : partial ? '◐' : '✗', fg: ok ? 'ac.ok' : partial ? 'ac.warn' : 'ac.err' }, { text: name }, { text: ' '.repeat(Math.max(2, width - 1 - visibleWidth(name) - visibleWidth(state))) }, { text: state, fg: 'fg.faint' }]);
         if (item.note) lines.push([{ text: `  ${item.note}`, fg: 'fg.faint' }]);
       }
     };
     const llmBlock = (span: TraceSpan, llm: TraceLlm) => {
       kv('请求模型', llm.model ?? '未记录', 'ac.model');
-      const [result, ...detail] = this.llmResult(llm).split(' · ');
-      kv('结果', result, span.outcome === 'failed' ? 'ac.warn' : 'fg.body', [...detail, ...(llm.error ? [clean(llm.error).split('\n')[0]] : [])].map(part => ` · ${part}`).join(''));
+      const result = this.llmResult(llm);
+      kv('结果', result.value, span.outcome === 'failed' ? 'ac.warn' : 'fg.body', [...result.notes, ...(llm.error ? [clean(llm.error).split('\n')[0]] : [])].map(part => ` · ${part}`).join(''));
       if (llm.usage) kv('用量', `输入 ${llm.usage.input} · 缓存 ${llm.usage.cacheRead} · 输出 ${llm.usage.output}`);
       else kv('用量', 'unknown', 'ac.warn', ' — 不记为 0');
       const cost = requestCostView(llm.cost ?? undefined);
@@ -384,8 +386,8 @@ export class TraceView {
       pinned();
       if (tool.target) kv(tool.name === 'bash' ? '命令' : '路径', tool.target, 'ac.path');
       kv('起止', offsets(span));
-      const [exit, ...why] = this.exitText(span).split(' · ');
-      kv(tool.denied ? '结果' : '退出', exit, span.outcome === 'failed' || tool.denied || (tool.exit ?? 0) !== 0 ? 'ac.err' : 'fg.body', why.map(part => ` · ${part}`).join('') || undefined);
+      const exit = this.exitText(span);
+      kv(tool.denied ? '结果' : '退出', exit.value, span.outcome === 'failed' || tool.denied || (tool.exit ?? 0) !== 0 ? 'ac.err' : 'fg.body', exit.notes.map(part => ` · ${part}`).join('') || undefined);
       if (tool.env) {
         const env = `${tool.env.version ?? '环境版本未记录'} · ${tool.env.names} 变量名 · `;
         lines.push(...wrapTextWithAnsi(`${env}${tool.env.apiKey ? '含 DEEPSEEK_API_KEY' : '不含 DEEPSEEK_API_KEY'}`, Math.max(4, width - 9)).map((part, i) => [{ text: i ? ' '.repeat(9) : '环境     ', fg: 'fg.label' as TokenName }, { text: part, fg: (tool.env!.apiKey ? 'ac.err' : 'fg.body') as TokenName }]));
@@ -426,4 +428,5 @@ export class TraceView {
   }
 }
 
-function deniedText(tool: NonNullable<TraceSpan['tool']>) { return tool.duplicate ? '已拦截 · 该操作已完成，不重做' : `被拒 · 只读续跑不允许 ${tool.name}`; }
+/** 主值与说明：`[被拒, 只读续跑不允许 <工具>]`。 */
+function deniedText(tool: NonNullable<TraceSpan['tool']>): [string, string] { return tool.duplicate ? ['已拦截', '该操作已完成，不重做'] : ['被拒', `只读续跑不允许 ${tool.name}`]; }

@@ -75,7 +75,7 @@ test('2a golden at 132x38 and the <100 / <60 layouts', () => {
       else {
         assert.doesNotMatch(text, /│/, 'detail pane collapses below 100');
         assert.match(lines[1], /✓ 完成/, 'header facts move to the second line');
-        assert.match(lines.slice(-3, -1).join('\n'), /^tool read · 已返回 · /m, 'selected span summary above the footer');
+        assert.match(lines.at(-2)!, /^tool read · 已返回 · /, 'selected span summary directly above the footer');
       }
       if (width < 60) assert.doesNotMatch(text, /█/, 'bar column removed below 60');
       else assert.match(text, /█/);
@@ -150,7 +150,7 @@ test('bash exit 1: predeclared check vs tool failure; environment names checked 
     assert.match(text, /5 次模型请求（重试 1）/);
     assert.match(at('t2').split('\n').at(-3)!, /│/);
     view.select('t2');
-    assert.match(plain(view.render(80, 24, 'Esc 返回会话')).at(-3)!, /^tool bash · exit 1 · 计入工具失败 · /);
+    assert.match(plain(view.render(80, 24, 'Esc 返回会话')).at(-2)!, /^tool bash · exit 1 · 计入工具失败 · /);
   });
 });
 
