@@ -6,7 +6,7 @@ import type {ContentFile} from './eval/store.js';
 
 // Fixed expanded bytes per complete artifact, including every dependency/input
 // path. Identical contents still count separately even when the CAS shares them.
-const contentBytesLimit=160*1024*1024,fileBytesLimit=16*1024*1024,fileCountLimit=20000;
+const contentBytesLimit=192*1024*1024,fileBytesLimit=16*1024*1024,fileCountLimit=20000;
 function checkFileCount(count:number){if(count>fileCountLimit)throw Error('IMPROVE_BUILD_FILE_LIMIT');}
 function contentBudget(){
  let total=0;
