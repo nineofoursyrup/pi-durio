@@ -91,6 +91,12 @@ test('2c layout golden has two columns at 132x38 and wraps the fixed label colum
   if (snapshot.query.value) snapshot.query.value.ms = 3;
   const lines = view.render(132, 38, 'truecolor');
   const grid = captureSnapshot(lines, 132, 38, 'truecolor');
+  for (const tier of ['truecolor', '256color', 'none'] as const) {
+    const rendered = view.render(132, 38, tier), cells = captureSnapshot(rendered, 132, 38, tier).rows.flat().filter(cell => cell.char === '█');
+    assert.ok(cells.length > 0, 'own-code bars retain their solid glyph');
+    if (tier === 'none') assert.doesNotMatch(rendered.join(''), /\x1b\[(?:38|48);/);
+    else assert.ok(cells.every(cell => cell.fg === 'ac.brand'), `${tier} own-code bars use the brand color`);
+  }
   // Mask numerical values: only layout and color-token positions are contractual for 2c.
   const value = grid.rows.map((row, index) => {
     const style = (c: typeof row[number]) => `${c.fg ?? '-'}/${c.bg ?? '-'}${c.bold ? '/b' : ''}`;
