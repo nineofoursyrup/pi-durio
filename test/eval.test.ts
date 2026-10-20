@@ -90,7 +90,7 @@ test('same per-trial limit blocks a noisy side without consuming the next side a
  test('wrapped eval plan selection remains visible in a narrow viewport',()=>{
  const root=mkdtempSync(join(tmpdir(),'durio-eval-view-'));
  for(let index=0;index<8;index++){const e=new Evidence(root,`plan-${index}`),p=plan(e);p.id=`plan-${index}`;p.purpose='长目的说明 '.repeat(50);appendFact(e,'eval.plan',p);e.close();}
- const view=new EvalListView(root,{openPlan(){}});view.render(40,12);for(let index=0;index<7;index++){view.handleInput('\x1b[B');view.render(40,12);}assert.ok(stripTerminalSequences(view.render(40,12).join('\n')).includes(`› ${readDisplayIndex(root).label('eval-plan','plan-0')} · `));
+ const view=new EvalListView(root,{openPlan(){}});view.render(40,12);for(let index=0;index<7;index++){view.handleInput('\x1b[B');view.render(40,12);}assert.ok(stripTerminalSequences(view.render(40,12).join('\n')).includes(`▏ ${readDisplayIndex(root).label('eval-plan','plan-0')} · `));
  });
 
 test('plan prices are fixed in CNY or USD; live plans need a non-zero fixed price',()=>{
