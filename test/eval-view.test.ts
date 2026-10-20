@@ -43,7 +43,7 @@ const noHost = { openTrial() {} };
 // ─── 合成计划（已知结果，不运行 VM） ─────────────────────────────────────────
 
 type Outcome = { status: string; valid?: boolean; judgment?: 'PASS' | 'FAIL' | 'unknown'; requests?: number; artifacts?: { path: string; ref: any }[] } | null;
-interface Spec { cases: Record<string, 'objective' | 'protection'>; reps: number; metric?: ComparisonPlan['objective']['metric']; delta?: number; scale?: 'relative'; outcome: (t: { caseId: string; side: string; repeat: number }) => Outcome; stopReason?: string | null; started?: boolean; single?: boolean }
+interface Spec { cases: Record<string, 'objective' | 'protection'>; reps: number; metric?: ComparisonPlan['objective']['metric']; delta?: number; scale?: 'relative'; outcome: (t: { caseId: string; side: string; repeat: number }) => Outcome; stopReason?: string | null; started?: boolean; single?: boolean; trialRequests?: number }
 async function planRoot(spec: Spec, root = mkdtempSync(join(tmpdir(), 'durio-2b-'))) {
   const id = 'plan-2b', e = new Evidence(root, id);
   const runtime = { id: 'fixed-runtime', manifest: e.blob('[]'), bytes: 2 };
@@ -51,7 +51,7 @@ async function planRoot(spec: Spec, root = mkdtempSync(join(tmpdir(), 'durio-2b-
   const comparison: ComparisonPlan | undefined = spec.single ? undefined : {
     kind: 'deterministic', repetitions: spec.reps, repetitionBasis: 'controlled known-result fixture', change: 'instructions', hypothesis: 'fewer requests',
     roles: spec.cases, objective: { metric: spec.metric ?? 'requests', direction: 'lower', delta: spec.delta ?? 0.1, basis: 'fixture threshold' },
-    protections: [{ id: 'scope', kind: 'hard', check: 'scope', cases: caseIds }], trialBudget: { maxRequests: 4, maxTokens: 1000 },
+    protections: [{ id: 'scope', kind: 'hard', check: 'scope', cases: caseIds }], trialBudget: { maxRequests: spec.trialRequests ?? 4, maxTokens: 1000 },
     ...(spec.scale ? { scale: spec.scale } : {}),
     sides: { baseline: { runtime, instructions: 'A' }, candidate: { runtime, instructions: 'B' } },
   };
@@ -154,6 +154,11 @@ test('verdict reasons are composed from facts; glyphs carry validity and grading
   assert.deepEqual(rows[1].trials.map(t => t.glyph), ['not-run', 'not-run']);
   assert.match(rows[0].note, /B r1 无效/); assert.equal(rows[1].note, '未运行');
   assert.match(rows[1].category, /仅保护/);
+  const rendered = withTier('truecolor', () => new EvalPlanView(ownPlanSource(root, id), noHost).render(132, 38, 'truecolor'));
+  const notRunRow = plain(rendered).findIndex(line => line.startsWith('  no-change'));
+  const notRun = captureSnapshot(rendered, 132, 38, 'truecolor').rows[notRunRow].filter(cell => cell.char === '·');
+  assert.equal(notRun.length, 3, 'the row keeps its category separator and two unrun trial glyphs');
+  assert.ok(notRun.slice(1).every(cell => cell.fg === 'fg.faint'));
   // 执行状态写在说明里：超时是 FAIL 字形 + “超时”，取消且无评分是 ? + “取消”。
   const timed = await planRoot({ cases: { 'local-fix': 'objective' }, reps: 2, scale: 'relative', stopReason: null, outcome: t => t.side === 'candidate' && t.repeat === 2 ? { status: 'cancelled', judgment: 'unknown' } : t.side === 'candidate' ? { status: 'timeout', judgment: 'FAIL' } : { status: 'completed', judgment: 'PASS' } });
   const row = caseRows(evalReport(timed.root, timed.id))[0];
@@ -196,6 +201,86 @@ test('2b plan layer golden at 132x38', async () => {
   assert.deepEqual(readFileSync(join(root, 'host.sqlite')), before, 'viewing is read-only');
 });
 
+test('2b matrix separates selection from zebra rows and aligns trial groups, deltas and count rates', async () => {
+  const { root, id } = await goldenPlan();
+  const column = (line: string, text: string) => visibleWidth(line.slice(0, line.indexOf(text)));
+  for (const tier of ['truecolor', '256color', 'none'] as const) {
+    const view = new EvalPlanView(ownPlanSource(root, id), noHost);
+    const lines = withTier(tier, () => view.render(132, 38, tier)), text = plain(lines);
+    const grid = captureSnapshot(lines, 132, 38, tier);
+    const selected = text.findIndex(row => row.startsWith('▏ local-fix'));
+    const zebra = text.findIndex(row => row.startsWith('  multi-file'));
+    const header = text.findIndex(row => row.includes('case') && row.includes('A r1'));
+    assert.ok(selected >= 0 && zebra >= 0 && header >= 0);
+    if (tier === 'none') {
+      assert.ok(grid.rows[selected].every(cell => cell.reverse), 'whole selected row, including trailing spaces, remains reversed');
+      assert.ok(grid.rows[zebra].every(cell => !cell.reverse));
+      assert.doesNotMatch(lines.join(''), /\x1b\[(?:38|48);/);
+    } else {
+      assert.ok(grid.rows[selected].every(cell => cell.bg === 'bg.selected'));
+      assert.ok(grid.rows[zebra].every(cell => cell.bg === 'bg.zebra'));
+      assert.equal(grid.rows[selected][0].fg, 'ac.brand');
+      assert.equal(grid.rows[zebra][2].fg, 'fg.primary');
+      assert.equal(grid.rows[selected][column(text[selected], '局部修复')].fg, 'fg.body');
+      assert.equal(grid.rows[selected][column(text[selected], '2/2 配对')].fg, 'fg.body');
+      assert.equal(grid.rows[header][column(text[header], 'case')].fg, 'fg.label');
+    }
+    const trials = grid.rows[header].flatMap((cell, i, row) => cell.char === 'r' && /[12]/.test(row[i + 1]?.char ?? '') ? [i] : []);
+    assert.equal(trials.length, 4);
+    for (const x of trials) assert.equal(grid.rows[selected][x].char, '✓', 'trial glyph starts below its repeat label');
+    assert.equal(grid.rows[selected][trials[0]].bold, true);
+    assert.ok(trials.slice(1).every(x => !grid.rows[selected][x].bold));
+    view.handleInput('\x1b[C');
+    const moved = captureSnapshot(withTier(tier, () => view.render(132, 38, tier)), 132, 38, tier).rows[selected];
+    assert.ok(!moved[trials[0]].bold && moved[trials[1]].bold, 'current trial remains visually distinct within the selected row');
+    assert.ok(trials[2] - 2 - (trials[1] + 2) >= 3, 'at least three columns separate A and B groups');
+    const dRight = column(text[header], 'd 请求数') + visibleWidth('d 请求数') - 1;
+    assert.equal(grid.rows[selected][dRight].char, '%', 'delta ends at the right edge of its column');
+    const lastCase = text.findIndex(row => row.startsWith('  no-change'));
+    assert.equal(text[lastCase + 1].trim(), '', 'matrix and legend have one blank row');
+    assert.ok(grid.rows[lastCase + 2].every(cell => cell.bg !== 'bg.zebra' && cell.bg !== 'bg.selected'));
+    const countHead = text.findIndex(row => row.includes('计划') && row.includes('通过率'));
+    const countA = countHead + 1, countB = countHead + 2;
+    for (const name of ['计划', '启动', '完成', '可评分', '通过']) {
+      const right = column(text[countHead], name) + visibleWidth(name) - 1;
+      assert.equal(grid.rows[countA][right].char, '6');
+    }
+    for (const name of ['通过率', '完成率', '覆盖率']) {
+      const right = column(text[countHead], name) + visibleWidth(name) - 1;
+      assert.equal(grid.rows[countA][right].char, '%');
+      assert.equal(grid.rows[countB][right].char, '%');
+    }
+    assert.ok(column(text[countHead], '通过率') - (column(text[countHead], '通过') + visibleWidth('通过')) >= 3);
+  }
+});
+
+test('narrow count groups retain all three rates, including when scrolling below the selected case', async () => {
+  const { root, id } = await goldenPlan();
+  for (const width of [56, 40]) {
+    const view = new EvalPlanView(ownPlanSource(root, id), noHost);
+    const lines = withTier('none', () => view.render(width, 60, 'none'));
+    const text = plain(lines).join('\n');
+    for (const name of ['计划', '启动', '完成', '可评分', '通过率', '完成率', '覆盖率']) assert.ok(text.includes(name), `${width}: missing ${name}`);
+    assert.match(text, /100% +66\.7% +66\.7%/);
+    assert.ok(lines.every(line => visibleWidth(line) <= width));
+  }
+  let opened: string | undefined;
+  const view = new EvalPlanView(ownPlanSource(root, id), { openTrial: (_source, _report, trialId) => { opened = trialId; } }), seen = new Set<string>();
+  view.handleInput('\x1b[B'); view.handleInput('\x1b[B');
+  for (let step = 0; step < 30; step++) {
+    const lines = plain(withTier('none', () => view.render(40, 12, 'none')));
+    assert.ok(lines.some(line => line.startsWith('▏ no-change')), 'selected case stays visible while lower facts scroll');
+    for (const line of lines) seen.add(line);
+    view.scroll(1);
+  }
+  const text = [...seen].join('\n');
+  for (const part of ['通过率', '完成率', '覆盖率', '66.7%']) assert.ok(text.includes(part), `scroll must reach ${part}\n${text}`);
+  const selected = view.selectedTrial?.id;
+  view.handleInput('\r'); assert.equal(opened, selected, 'pinned selection still opens the same trial');
+  view.handleInput('\x1b[A');
+  assert.ok(plain(withTier('none', () => view.render(40, 12, 'none'))).some(line => line.startsWith('▏ multi-file')), 'keyboard selection returns to the matrix');
+});
+
 test('narrow terminals: every trial stays selectable and opens with Enter; nothing overflows', async () => {
   const { root, id, plan } = await goldenPlan();
   for (const [w, h] of [[99, 38], [80, 24], [56, 30], [40, 12]] as const) {
@@ -221,6 +306,19 @@ test('narrow terminals: every trial stays selectable and opens with Enter; nothi
   assert.match(medium, /主目标 {2}请求数 ↓/); assert.doesNotMatch(medium, /类型/); assert.match(medium, /local-fix · A r1 ✓ · 2\/2 配对 ≥ δ/);
   const narrow = plain(withTier('none', () => view.render(50, 38, 'none'))).join('\n');
   assert.match(narrow, /A ✓✓ +B ✓✓/);
+  // 计划允许最多 32 个 trial；40 列折行时先收缩缩进，不能让组间距挤掉末尾 trial。
+  const maximum = await planRoot({ cases: { 'local-fix': 'objective' }, reps: 16, started: false, outcome: () => null, trialRequests: 1 });
+  const opened = new Set<string>();
+  const many = new EvalPlanView(ownPlanSource(maximum.root, maximum.id), { openTrial: (_s, _r, trialId) => opened.add(trialId) });
+  for (let ti = 0; ti < 32; ti++) {
+    const lines = withTier('none', () => many.render(40, 12, 'none'));
+    assert.equal(lines.length, 12);
+    assert.ok(lines.every(line => visibleWidth(line) <= 40));
+    const cells = captureSnapshot(lines, 40, 12, 'none').rows.flat();
+    assert.equal(cells.filter(cell => cell.char === '·' && cell.bold).length, 1, 'current trial remains visible at the maximum trial count');
+    many.handleInput('\r'); many.handleInput('\x1b[C');
+  }
+  assert.deepEqual([...opened].sort(), maximum.plan.trials.map(t => t.id).sort());
 });
 
 test('compact layout keeps the selected last case visible', async () => {
@@ -231,7 +329,7 @@ test('compact layout keeps the selected last case visible', async () => {
     for (let i = 0; i < plan.cases.length; i++) view.handleInput('\x1b[B');
     const lines = plain(withTier('none', () => view.render(w, h, 'none')));
     assert.equal(lines.length, h, `${w}x${h} height`);
-    assert.ok(lines.some(l => l.startsWith(`›${last}`)), `${w}x${h}: selected ${last} visible\n${lines.join('\n')}`);
+    assert.ok(lines.some(l => l.startsWith(`▏ ${last}`)), `${w}x${h}: selected ${last} visible\n${lines.join('\n')}`);
   }
 });
 
@@ -242,7 +340,7 @@ test('v1 fixture: list, plan and trial trace layers read the first-version plan 
   let opened: string | undefined;
   const list = new EvalListView(fixtureData, { openPlan: s => { opened = s.id; } });
   const text = plain(withTier('none', () => list.render(132, 38, 'none'))).join('\n');
-  assert.match(text, new RegExp(`› ${sources[0].label} · v1 fixture eval plan.* · 已结束 · 证据不足`));
+  assert.match(text, new RegExp(`▏ ${sources[0].label} · v1 fixture eval plan.* · 已结束 · 证据不足`));
   list.handleInput('\r'); assert.equal(opened, 'fixture-eval-plan-1');
   let trial: TrialTraceView | undefined;
   const planView = new EvalPlanView(sources[0], { openTrial: (source, report, id) => { trial = new TrialTraceView(source, report, id); } });
