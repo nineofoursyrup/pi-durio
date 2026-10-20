@@ -58,12 +58,16 @@ test('1a golden at 132×38 truecolor: welcome body above the input box, then the
   const body = renderWelcome(facts, 132, 32, now, 'truecolor').lines;
   assertGolden(captureSnapshot([...body, welcomeStatus('deepseek-flash', 'ctx ≈863 / 1M', 132, 'truecolor')], 132, 33, 'truecolor'), 'welcome-132x38');
   const text = plain(body).join('\n');
-  assert.match(text, /◆ pi·durio/);
+  assert.match(text, /◢◣  █▀█ █ ▄ █▀▄ █ █ █▀█ █ █▀█/, 'two-row block mark, first row');
+  assert.match(text, /◥◤  █▀▀ █   █▄▀ █▄█ █▀▄ █ █▄█/, 'two-row block mark, second row');
   assert.match(text, /本机 coding agent · v0\.1\.0 · f26ae8f/);
   assert.match(text, /工作区 +~\/code\/shop-api · ✓ 写入者锁可取得/);
-  assert.match(text, /s-7f3a · 修复购物车满减金额四舍五入 +✓ 完成 +· +今天 10:12/);
-  assert.match(text, /s-6c01 · 订单导出 CSV 增加时区列 +◈ 待恢复核对 · +昨天 22:40/);
-  assert.match(text, /s-5e9b · improve · 测试重复运行成本 +◇ 已中止 +· +10-09/);
+  // Four aligned columns: number, first input line, status (right-aligned), time (right-aligned).
+  assert.match(text, /s-7f3a {4}修复购物车满减金额四舍五入 +✓ 完成  今天 10:12 *$/m);
+  assert.match(text, /s-6c01 {4}订单导出 CSV 增加时区列 +◈ 待恢复核对  昨天 22:40 *$/m);
+  assert.match(text, /s-5e9b {4}improve · 测试重复运行成本 +◇ 已中止 +10-09 *$/m);
+  const columns = (label: string) => { const line = plain(body).find(l => l.includes(label))!; return [line.indexOf(label), line.indexOf('完成') >= 0 ? line.indexOf('完成') + 2 : -1]; };
+  assert.equal(columns('s-7f3a')[0], columns('s-6c01')[0], 'numbers share one column');
   assert.match(text, /Tip: 空闲时 Enter 提交新任务/);
   assert.match(stripTerminalSequences(welcomeStatus('deepseek-flash', 'ctx ≈863 / 1M', 132)), /^○ 空闲 · deepseek-flash · ctx ≈863 \/ 1M · 本会话 0 tok ≈ ¥0\.00 *$/);
 });
@@ -72,14 +76,16 @@ test('1a collapses Tip, then recent sessions 3→1→hidden, then version detail
   const seen: string[] = [];
   for (let height = 24; height >= 3; height--) {
     const text = plain(renderWelcome(facts, 80, height, now).lines).join('\n');
-    const rows = (text.match(/s-[0-9a-f]{4} · /g) ?? []).length;
-    const state = [text.includes('Tip:') ? 'tip' : '', `sessions:${rows}`, text.includes('执行版本') ? 'details' : '', text.includes('本机 coding agent') ? 'version' : ''].filter(Boolean).join(' ');
+    const rows = (text.match(/s-[0-9a-f]{4} {4}/g) ?? []).length;
+    const state = [text.includes('◢◣') ? 'block' : '', text.includes('Tip:') ? 'tip' : '', `sessions:${rows}`, text.includes('执行版本') ? 'details' : '', text.includes('本机 coding agent') ? 'version' : ''].filter(Boolean).join(' ');
     if (seen.at(-1) !== state) seen.push(state);
-    // Always kept, whatever the height.
-    for (const kept of ['◆ pi·durio', '工作区', '模型']) assert.ok(text.includes(kept), `${kept} at height ${height}`);
+    // Always kept, whatever the height: the mark (two-row or one-row), workspace and model.
+    assert.ok(text.includes('◢◣') || text.includes('◆ pi·durio'), `mark at height ${height}`);
+    for (const kept of ['工作区', '模型']) assert.ok(text.includes(kept), `${kept} at height ${height}`);
     assert.equal(text.includes('执行版本'), text.includes('数据根'), `execution and data root collapse together at ${height}`);
   }
-  assert.deepEqual(seen, ['tip sessions:3 details version', 'sessions:3 details version', 'sessions:1 details version', 'sessions:0 details version', 'sessions:0 version', 'sessions:0']);
+  // The block mark goes first (U1), then blank rows (U10, not visible in this summary), then the U1 order.
+  assert.deepEqual(seen, ['block tip sessions:3 details version', 'tip sessions:3 details version', 'sessions:3 details version', 'sessions:1 details version', 'sessions:0 details version', 'sessions:0 version', 'sessions:0']);
 });
 
 test('a held writer lock shows the holder and the recovery method; read-only mode does not probe', () => {
@@ -104,6 +110,29 @@ test('clicking a recent session row opens that session; other rows do nothing', 
   assert.deepEqual(opened, ['s-6c01']);
 });
 
+test('with an empty input Up/Down select a recent session, Enter opens it, Esc or typing clears the selection', () => {
+  const opened: string[] = [];
+  const screen = new WelcomeScreen({ read: () => facts, coding: false, height: () => 30, open: session => opened.push(session), changed: () => {}, inspect: () => {} });
+  const selectedRow = () => plain(screen.render(132)).find(line => line.includes('▏'));
+  assert.equal(selectedRow(), undefined, 'nothing is selected at start');
+  assert.equal(screen.key('\r'), false, 'Enter without a selection stays with the input (no submit of empty text)');
+  assert.equal(screen.key('\x1b[B'), true); assert.match(selectedRow()!, /▏ s-7f3a/, 'Down selects the most recent session');
+  assert.equal(screen.key('\x1b[B'), true); assert.match(selectedRow()!, /▏ s-6c01/);
+  assert.equal(screen.key('\x1b[A'), true); assert.match(selectedRow()!, /▏ s-7f3a/);
+  assert.equal(screen.key('\x1b[A'), true); assert.match(selectedRow()!, /▏ s-7f3a/, 'Up stops at the first row');
+  assert.equal(screen.key('a'), false, 'a typed character goes to the input'); assert.equal(selectedRow(), undefined, 'and clears the selection');
+  screen.key('\x1b[A'); assert.match(selectedRow()!, /▏ s-5e9b/, 'Up from no selection selects the last row');
+  assert.equal(screen.key('\x1b'), true); assert.equal(selectedRow(), undefined, 'Esc clears the selection');
+  screen.key('\x1b[B'); assert.equal(screen.key('\r'), true);
+  assert.deepEqual(opened, ['s-7f3a']); assert.equal(selectedRow(), undefined);
+  // The selected row carries bg.selected in colour tiers and reverse video without colour.
+  screen.key('\x1b[B');
+  const grid = captureSnapshot(renderWelcome(facts, 132, 30, now, 'truecolor', 's-7f3a').lines, 132, 30, 'truecolor');
+  const row = grid.rows.find(cells => cells.map(c => c.char).join('').includes('s-7f3a'))!;
+  assert.ok(row.filter(c => c.char !== ' ').every(c => c.bg === 'bg.selected'));
+  assert.ok(captureSnapshot(renderWelcome(facts, 132, 30, now, 'none', 's-7f3a').lines, 132, 30, 'none').rows.some(cells => cells.some(c => c.char === '▏' && c.reverse)));
+});
+
 function project() {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'durio-welcome-'))), workspace = join(root, 'project');
   mkdirSync(workspace); writeFileSync(join(workspace, 'README.md'), 'Fixture\n');
@@ -126,8 +155,8 @@ test('recent sessions come from session derivation: status of the last run, the 
     [index.label('session', first.sessionId), 'First task line', 'failed'],
   ]);
   const text = plain(renderWelcome({ ...read, lock: { state: 'readonly' } }, 132, 30).lines).join('\n');
-  assert.match(text, new RegExp(`${index.label('session', first.sessionId)} · First task line +✗ 失败`));
-  assert.match(text, new RegExp(`${index.label('session', branch.sessionId)} · Alternative continuation +✓ 完成`));
+  assert.match(text, new RegExp(`${index.label('session', first.sessionId)} +First task line +✗ 失败`));
+  assert.match(text, new RegExp(`${index.label('session', branch.sessionId)} +Alternative continuation +✓ 完成`));
   assert.match(read.execution, /^build [0-9a-f]{7} · deps [0-9a-f]{4} · 指令 [0-9a-f]{4} · 1 tool$/);
   // Other workspaces' sessions are not listed.
   assert.deepEqual(readWelcomeFacts({ ...base, workspace: join(f.root, 'elsewhere'), coding: false }, id => id, TIPS[1]).sessions, []);
@@ -147,7 +176,8 @@ test('80×24 and 40×12 do not overflow and keep the elements U1 always retains'
       assert.equal(screen.length, rows);
       for (const line of screen) assert.ok(visibleWidth(line) <= columns, `${columns}×${rows} overflow: ${line}`);
       const text = screen.join('\n');
-      for (const kept of ['◆ pi·durio', '工作区', '写入者锁可取得', '模型', 'deepseek-flash', '○ 空闲', '? 帮助']) assert.ok(text.includes(kept), `${kept} at ${columns}×${rows}\n${text}`);
+      assert.ok(text.includes('◢◣') || text.includes('◆ pi·durio'), `mark at ${columns}×${rows}\n${text}`);
+      for (const kept of ['工作区', '写入者锁可取得', '模型', 'deepseek-flash', '○ 空闲', '? 帮助']) assert.ok(text.includes(kept), `${kept} at ${columns}×${rows}\n${text}`);
       // Input box: the two rules with the placeholder between them.
       assert.ok(screen.filter(line => /^ *─+ *$/.test(line)).length >= 2, text);
       assert.match(text, /描述要完成的修改/);
@@ -175,16 +205,31 @@ test('the probe takes no lock; a held writer lock shows its holder', async () =>
   try { assert.match(plain(readonly.screen()).join('\n'), /只读 · 不取写入者锁/); } finally { await readonly.exit(); }
 });
 
+test('in the app, Up/Down reach the recent sessions only while the input is empty; Enter opens the session layer', async () => {
+  const f = project();
+  await runReadTask({ workspace: f.workspace, dataRoot: f.dataRoot, mode: 'offline', input: 'Earlier task', transport: demoTransport().fetch });
+  const terminal = new TestTerminal(132, 38), tui = app(f, terminal, false);
+  try {
+    await until(() => plain(tui.screen()).some(line => line.includes('Earlier task')), 'recent session listed');
+    terminal.input('x'); terminal.input('\x1b[B');
+    assert.ok(!plain(tui.screen()).some(line => line.includes('▏')), 'a draft keeps Up/Down in the input');
+    terminal.input('\x7f'); terminal.input('\x1b[B');
+    assert.ok(plain(tui.screen()).some(line => /▏ s-[0-9a-f]{4,} +Earlier task/.test(line)), plain(tui.screen()).join('\n'));
+    terminal.input('\r');
+    await until(() => plain(tui.screen()).some(line => /◆ history {2}s-/.test(line)), 'session layer opened');
+  } finally { await tui.exit(); }
+});
+
 test('after the first task is accepted the welcome screen does not come back', async () => {
   const f = project(), terminal = new TestTerminal(), tui = app(f, terminal, false);
   try {
-    assert.ok(plain(tui.screen()).some(line => line.includes('◆ pi·durio')));
+    assert.ok(plain(tui.screen()).some(line => line.includes('◢◣')));
     terminal.input('Read README.md'); terminal.input('\r');
-    await until(() => !tui.screen().some(line => line.includes('pi·durio')), 'welcome gone');
+    await until(() => !tui.screen().some(line => line.includes('◢◣') || line.includes('pi·durio')), 'welcome gone');
     await until(() => plain(tui.screen()).some(line => line.includes('✓ 完成')), 'task completed', 120000);
     await wait(200);
     const text = plain(tui.screen()).join('\n');
-    assert.doesNotMatch(text, /pi·durio|最近会话|Tip:/);
+    assert.doesNotMatch(text, /◢◣|pi·durio|最近会话|Tip:/);
     assert.match(text, /◆ pi-durio .* 只读 · 任务 1 · ✓ 完成/);
   } finally { await tui.exit(); }
 });

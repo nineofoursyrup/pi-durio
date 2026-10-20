@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { visibleWidth, wrapTextWithAnsi, type Component, type TuiMouseEvent } from '@earendil-works/pi-tui';
+import { matchesKey, visibleWidth, wrapTextWithAnsi, type Component, type TuiMouseEvent } from '@earendil-works/pi-tui';
 import { digest } from '../evidence.js';
 import { executionConfig } from '../execution-config.js';
 import { applyTaskProfile } from '../task-profile.js';
@@ -107,11 +107,15 @@ function lockSegments(lock: WelcomeLock, now: Date): TextSegment[] {
 
 type Row = { segments: TextSegment[]; session?: string };
 
+/** 两行高的标识（U1，视觉修正 r1）：`◢◣`/`◥◤` 拼成的 ◆，加半格方块字 pi·durio。 */
+const LOGO = { diamond: ['◢◣', '◥◤'], pi: ['█▀█ █', '█▀▀ █'], dot: ['▄', ' '], durio: ['█▀▄ █ █ █▀█ █ █▀█', '█▄▀ █▄█ █▀▄ █ █▄█'] };
+
 /**
- * 1a 主体（输入框以上）。高度不够时依次收起 Tip、最近会话（3→1→隐藏）、执行版本与数据根、版本行，最后去掉空行；
- * 标识、工作区（含锁）、模型始终保留。返回恰好 `height` 行，`sessions` 是可点击行号 → 会话显示号。
+ * 1a 主体（输入框以上）。高度不够时先把方块字标识退回一行，再去掉空行（U10），
+ * 再依次收起 Tip、最近会话（3→1→隐藏）、执行版本与数据根、版本行；标识、工作区（含锁）、模型始终保留。
+ * 返回恰好 `height` 行，`sessions` 是可点击行号 → 会话显示号；`selected` 的会话行带 `▏` 与 `bg.selected`。
  */
-export function renderWelcome(facts: WelcomeFacts, width: number, height: number, now = new Date(), tier: ColorTier = COLOR_TIER) {
+export function renderWelcome(facts: WelcomeFacts, width: number, height: number, now = new Date(), tier: ColorTier = COLOR_TIER, selected?: string) {
   const indent = width >= 100 ? 6 : width >= 60 ? 3 : 1, labelWidth = width >= 60 ? 12 : 9;
   const inner = Math.max(1, width - indent), valueWidth = Math.max(1, inner - labelWidth);
   const label = (text: string): TextSegment => ({ text: text + ' '.repeat(Math.max(1, labelWidth - visibleWidth(text))), fg: 'fg.label' });
@@ -119,6 +123,7 @@ export function renderWelcome(facts: WelcomeFacts, width: number, height: number
   const blank: Row = { segments: [] };
 
   const logo: Row = { segments: [{ text: GLYPHS.brand, fg: 'ac.brand', bold: true }, { text: ' pi', fg: 'fg.primary', bold: true }, { text: '·', fg: 'fg.faint', bold: true }, { text: 'durio', fg: 'fg.primary', bold: true }] };
+  const logoBlock: Row[] = [0, 1].map(i => ({ segments: [{ text: LOGO.diamond[i], fg: 'ac.brand' }, { text: '  ' }, { text: LOGO.pi[i], fg: 'fg.primary' }, { text: ' ' }, { text: LOGO.dot[i], fg: 'fg.faint' }, { text: ' ' }, { text: LOGO.durio[i], fg: 'fg.primary' }] }));
   const version: Row = { segments: [{ text: '本机 coding agent', fg: 'fg.primary' }, { text: ' · ', fg: 'fg.faint' }, { text: `v${facts.version} · ${facts.build}`, fg: 'fg.label' }] };
 
   // 工作区与锁：放得下时同一行；被占用时持有者与恢复方法各占一行（宽终端恢复方法可换行）。
@@ -141,41 +146,48 @@ export function renderWelcome(facts: WelcomeFacts, width: number, height: number
   const model: Row = { segments: [label('模型'), { text: facts.model.id, fg: 'ac.model' }, { text: truncateEnd(` · ${facts.model.api} · ${facts.model.host}`, Math.max(0, valueWidth - visibleWidth(facts.model.id))), fg: 'fg.faint' }] };
   const execution = field('执行版本', facts.execution, 'fg.muted'), dataRoot = field('数据根', home(facts.dataRoot), 'fg.muted', true);
 
-  // 最近会话：s-号 · [improve ·] 首任务输入首行 · 状态 · 时间；状态与时间右对齐成列。
+  // 最近会话四列：选中标记、号、[improve ·] 首任务输入首行、状态（右对齐）、时间（右对齐）；宽度小于 60 时去掉时间列。
   const rowWidth = Math.min(inner, 100);
-  const sessionRows = (Array.isArray(facts.sessions) ? facts.sessions : []).map((session): Row => {
+  const all = Array.isArray(facts.sessions) ? facts.sessions : [];
+  const idWidth = Math.max(0, ...all.map(session => visibleWidth(session.label))) + 4;
+  const sessionRows = all.map((session): Row => {
     const status = STATUS[session.status], time = sessionTime(session.at, now), state = `${status.glyph} ${status.text}`;
-    // 状态列宽按最长的“◈ 待恢复核对”，时间列宽按“今天 10:12”/“2025-10-09”；宽度小于 60 时去掉时间列。
-    const right = width >= 60 ? 12 + 3 + 10 : 12, prefix = session.improve ? 'improve · ' : '';
-    const room = Math.max(0, rowWidth - visibleWidth(session.label) - 3 - right - 1);
-    const input = truncateEnd(clean(session.input), Math.max(0, room - (prefix ? visibleWidth(prefix) : 0)));
-    const gap = Math.max(1, rowWidth - visibleWidth(session.label) - 3 - visibleWidth(prefix) - visibleWidth(input) - right);
+    const on = session.label === selected, bg: TokenName | undefined = on ? 'bg.selected' : undefined;
+    // 状态列宽按最长的“◈ 待恢复核对”，时间列宽按“今天 10:12”/“2025-10-09”。
+    const right = width >= 60 ? 12 + 2 + 10 + 1 : 12 + 1, prefix = session.improve ? 'improve · ' : '';
+    const room = Math.max(0, rowWidth - 3 - idWidth - right);
+    const input = truncateEnd(clean(session.input), Math.max(0, room - visibleWidth(prefix)));
+    const gap = Math.max(1, room - visibleWidth(prefix) - visibleWidth(input));
     return { session: session.label, segments: [
-      { text: session.label, fg: 'fg.primary' }, { text: ' · ', fg: 'fg.faint' },
-      { text: prefix, fg: 'ac.improve' }, { text: input, fg: 'fg.body' }, { text: ' '.repeat(gap) },
-      { text: state + ' '.repeat(Math.max(0, 12 - visibleWidth(state))), fg: status.fg },
-      ...(width >= 60 ? [{ text: ' · ', fg: 'fg.faint' as TokenName }, { text: ' '.repeat(Math.max(0, 10 - visibleWidth(time))) + time, fg: 'fg.faint' as TokenName }] : []),
+      { text: ' ', bg }, { text: on ? '▏' : ' ', fg: 'ac.brand', bg }, { text: ' ', bg },
+      { text: session.label + ' '.repeat(idWidth - visibleWidth(session.label)), fg: on ? 'fg.primary' : 'fg.body', bg },
+      { text: prefix, fg: 'ac.improve', bg }, { text: input, fg: on ? 'fg.primary' : 'fg.body', bg }, { text: ' '.repeat(gap), bg },
+      { text: ' '.repeat(Math.max(0, 12 - visibleWidth(state))) + state, fg: status.fg, bg },
+      ...(width >= 60 ? [{ text: '  ', bg }, { text: ' '.repeat(Math.max(0, 10 - visibleWidth(time))) + time, fg: 'fg.faint' as TokenName, bg }] : []),
+      { text: ' ', bg },
     ] };
   });
-  const sessionsHeader: Row = { segments: [{ text: '最近会话', fg: 'fg.label' }, { text: truncateEnd(' · 点击只读打开，不会调用模型或工具', Math.max(0, inner - 8)), fg: 'fg.gutter' }] };
+  const sessionsHeader: Row = { segments: [{ text: '最近会话', fg: 'fg.label' }, { text: truncateEnd(' · ↑↓ 选择，Enter 或点击只读打开，不会调用模型或工具', Math.max(0, inner - 8)), fg: 'fg.gutter' }] };
   const noSessions: Row = Array.isArray(facts.sessions)
     ? { segments: [{ text: truncateEnd('当前工作区还没有会话 · 在下方输入框提交第一个任务', inner), fg: 'fg.muted' }] }
     : { segments: [{ text: GLYPHS.err, fg: 'ac.err' }, { text: truncateEnd(` 最近会话不可读取 · ${facts.sessions.error}`, Math.max(0, inner - 1)), fg: 'fg.muted' }] };
   const tip: Row = { segments: [{ text: 'Tip: ', fg: 'fg.label', bold: true }, { text: truncateEnd(facts.tip, Math.max(0, width - 2 - 5)), fg: 'fg.label' }] };
 
   const levels = [
-    { tip: true, sessions: 3, details: true, version: true, blanks: true },
-    { tip: false, sessions: 3, details: true, version: true, blanks: true },
-    { tip: false, sessions: 1, details: true, version: true, blanks: true },
-    { tip: false, sessions: 0, details: true, version: true, blanks: true },
-    { tip: false, sessions: 0, details: false, version: true, blanks: true },
-    { tip: false, sessions: 0, details: false, version: false, blanks: true },
-    { tip: false, sessions: 0, details: false, version: false, blanks: false },
+    ...(width >= 60 ? [{ block: true, tip: true, sessions: 3, details: true, version: true, blanks: true }] : []),
+    { block: false, tip: true, sessions: 3, details: true, version: true, blanks: true },
+    { block: false, tip: true, sessions: 3, details: true, version: true, blanks: false },
+    { block: false, tip: false, sessions: 3, details: true, version: true, blanks: false },
+    { block: false, tip: false, sessions: 1, details: true, version: true, blanks: false },
+    { block: false, tip: false, sessions: 0, details: true, version: true, blanks: false },
+    { block: false, tip: false, sessions: 0, details: false, version: true, blanks: false },
+    { block: false, tip: false, sessions: 0, details: false, version: false, blanks: false },
   ];
   let block: Row[] = [], tail: Row[] = [];
   for (const level of levels) {
-    block = [logo, ...(level.version ? [version] : []), ...(level.blanks ? [blank] : []), ...workspaceRows, model, ...(level.details ? [execution, dataRoot] : [])];
-    if (level.sessions) block.push(...(level.blanks ? [blank] : []), sessionsHeader, ...(sessionRows.length ? sessionRows.slice(0, level.sessions) : [noSessions]));
+    const gap = level.blanks ? [blank] : [];
+    block = [...(level.block ? logoBlock : [logo]), ...(level.version ? [...gap, version] : []), ...gap, ...workspaceRows, model, ...(level.details ? [execution, dataRoot] : [])];
+    if (level.sessions) block.push(...gap, sessionsHeader, ...gap, ...(sessionRows.length ? sessionRows.slice(0, level.sessions) : [noSessions]));
     tail = level.tip ? [blank, tip] : [];
     if (block.length + tail.length <= height) break;
   }
@@ -209,10 +221,12 @@ export interface WelcomeHost {
   open: (session: string) => void;
   changed: () => void; inspect: (lines: string[]) => void;
 }
-/** 欢迎屏组件：只在本进程尚未受理任务时由宿主放进布局。不做键盘导航（U1）。 */
+/** 欢迎屏组件：只在本进程尚未受理任务时由宿主放进布局。输入框为空时 ↑↓ 选择最近会话（U1）。 */
 export class WelcomeScreen implements Component {
   facts: WelcomeFacts;
   private rows = new Map<number, string>();
+  /** 选中的会话显示号；初始不选中（U1）。 */
+  private selected?: string;
   private probe = 0;
   constructor(private readonly host: WelcomeHost) {
     this.facts = { ...host.read(), lock: host.coding ? { state: 'probing' } : { state: 'readonly' } };
@@ -227,8 +241,26 @@ export class WelcomeScreen implements Component {
     this.facts = { ...this.host.read(), lock: this.facts.lock };
     return this.probeLock();
   }
+  /**
+   * 输入框为空时的按键（U1）：↑↓ 移动选中行，有选中行时 Enter 打开、Esc 取消选中；
+   * 其他键只取消选中，交还宿主照常处理。返回是否已处理。
+   */
+  key(data: string): boolean {
+    const labels = [...this.rows.values()];
+    if (matchesKey(data, 'up') || matchesKey(data, 'down')) {
+      if (!labels.length) return false;
+      const index = this.selected === undefined ? -1 : labels.indexOf(this.selected), down = matchesKey(data, 'down');
+      this.selected = labels[index < 0 ? (down ? 0 : labels.length - 1) : Math.max(0, Math.min(labels.length - 1, index + (down ? 1 : -1)))];
+      return true;
+    }
+    if (this.selected === undefined) return false;
+    const session = this.selected;
+    this.selected = undefined;
+    if (matchesKey(data, 'enter')) { this.host.open(session); return true; }
+    return matchesKey(data, 'escape');
+  }
   render(width: number) {
-    const { lines, sessions } = renderWelcome(this.facts, width, Math.max(0, this.host.height(width)));
+    const { lines, sessions } = renderWelcome(this.facts, width, Math.max(0, this.host.height(width)), new Date(), COLOR_TIER, this.selected);
     this.rows = sessions; this.host.inspect(lines);
     return lines;
   }

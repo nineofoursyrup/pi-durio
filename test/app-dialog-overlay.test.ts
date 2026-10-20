@@ -33,8 +33,9 @@ test('app dialog dims session and full-view backgrounds, and yields to the small
     for (const cell of cells) { assert.equal(cell.fg, 'fg.gutter'); assert.equal(cell.bg, undefined); assert.equal(cell.bold, undefined); }
   }
   try {
-    app.start(); assert.match(text(), /pi·durio/);
-    open(); assert.match(text(), /确认测试动作/); assertDimmedHeader('pi·durio');
+    // 132×38 的欢迎屏标识是两行方块字（U1），用版本行检查变灰。
+    app.start(); assert.match(text(), /本机 coding agent/);
+    open(); assert.match(text(), /确认测试动作/); assertDimmedHeader('本机 coding agent');
     terminal.input('\x1b'); terminal.input('/help'); terminal.input('\r');
     assert.match(text(), /^ {2}帮助/);
     open(); assertDimmedHeader('帮助');

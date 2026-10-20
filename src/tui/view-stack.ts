@@ -17,6 +17,8 @@ import {
   type ColorTier, COLOR_TIER, type TextSegment, type TokenName,
 } from './theme.js';
 
+const graphemes = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+
 /** 显示前去掉控制字符与终端序列（原因码、路径、用户内容都经过这里）。 */
 export function clean(text: string): string {
   return stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g, '');
@@ -146,6 +148,35 @@ export function inset(lines: string[], width: number, margin: number, tier: Colo
   return lines.map(line => {
     const fill = width - 2 * margin - visibleWidth(line);
     return pad + line + (fill > 0 ? styledLine([], fill, undefined, tier) : '') + pad;
+  });
+}
+/** 圆角整框（U10）：`lines` 按 width − 4 渲染，框线用 `border.input`，短行用 `bg.base` 补满。 */
+export function frameBox(lines: string[], width: number, tier: ColorTier = COLOR_TIER): string[] {
+  const inner = width - 4, border = (text: string) => styledLine([{ text, fg: 'border.input' }], visibleWidth(text), undefined, tier);
+  return [border(`╭${'─'.repeat(width - 2)}╮`),
+    ...lines.map(line => border('│ ') + line + (visibleWidth(line) < inner ? styledLine([], inner - visibleWidth(line), undefined, tier) : '') + border(' │')),
+    border(`╰${'─'.repeat(width - 2)}╯`)];
+}
+/** 按显示列截取 [from, to)，跨边界的宽字符换成空格，不足补空格。 */
+function sliceColumns(text: string, from: number, to: number): string {
+  let out = '', column = 0;
+  for (const { segment } of graphemes.segment(text)) {
+    const w = visibleWidth(segment), end = column + w;
+    if (end <= from) { column = end; continue; }
+    if (column >= to) break;
+    out += column < from || end > to ? ' '.repeat(Math.min(end, to) - Math.max(column, from)) : segment;
+    column = end;
+  }
+  return out + ' '.repeat(Math.max(0, to - Math.max(column, from)));
+}
+/** 浮层（U10）：底层内容改用 `fg.gutter` 并去掉底色，框水平、垂直居中盖在上面；返回行数同底层。 */
+export function composeOverlay(base: string[], box: string[], width: number, tier: ColorTier = COLOR_TIER): string[] {
+  const boxWidth = Math.max(0, ...box.map(line => visibleWidth(line)));
+  const left = Math.max(0, Math.floor((width - boxWidth) / 2)), top = Math.max(0, Math.floor((base.length - box.length) / 2));
+  const dim = (text: string) => resetSgr() + (tier === 'none' ? '\x1b[2m' : fgSgr('fg.gutter', tier)) + text + resetSgr();
+  return base.map((line, row) => {
+    const plain = stripTerminalSequences(line), over = box[row - top];
+    return over === undefined ? dim(sliceColumns(plain, 0, width)) : dim(sliceColumns(plain, 0, left)) + over + dim(sliceColumns(plain, left + boxWidth, width));
   });
 }
 /** 区块分隔线：整行 `─`，默认 `line.subtle`；框内分隔用 `line.inner`。 */

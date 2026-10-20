@@ -253,7 +253,9 @@ test('1b running and idle at 132×38 (golden); 80×24 and 40×12 never overflow'
     assertGolden(captureSnapshot(lines(), 132, 38, 'truecolor'), '1b-idle-132x38');
     fits(80, 24); fits(40, 12);
     // Ctrl+O expands every tool row (a successful write shows its lines; failed output shows more than 6), again folds them.
-    terminal.input('\x0f'); assert.match(screen(), /^ {6}case 1 ok/m); assert.match(screen(), /^ {6}\+2 改为以分为单位/m);
+    terminal.input('\x0f'); assert.match(screen(), /^ {6}case 1 ok/m);
+    // 宽敞窗口的分隔线、主区顶部空行与底部留白（U10）少占了几行：展开的 write 在上一页。
+    terminal.input('\x1b[5~'); assert.match(screen(), /^ {6}\+2 改为以分为单位/m); terminal.input('\x1b[6~');
     terminal.input('\x0f'); assert.doesNotMatch(screen(), /^ {6}case 1 ok/m);
     // A follow-up task continues the chain: task 2, with the preceding-task line opening the session layer.
     terminal.input('再检查 0 元订单'); terminal.input('\r');

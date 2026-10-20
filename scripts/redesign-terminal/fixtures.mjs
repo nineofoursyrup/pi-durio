@@ -88,6 +88,8 @@ export async function renderers(packageRoot, fixture) {
   const { HardwareCursorEditor } = await load(packageRoot, 'dist/src/tui/cursor.js');
   const pi = await load(packageRoot, 'node_modules/@earendil-works/pi-tui/dist/index.js');
   const { RecoveryPanel, disabledInputLines } = await load(packageRoot, 'dist/src/tui/recovery.js');
+  const { QueueStrip } = await load(packageRoot, 'dist/src/tui/queue.js');
+  const queueStrip = new QueueStrip();
   const { ImproveSelectionView } = await load(packageRoot, 'dist/src/tui/improve-selection.js');
   const { StatsView } = await load(packageRoot, 'dist/src/tui/stats.js');
   const { SelfView } = await load(packageRoot, 'dist/src/tui/self.js');
@@ -98,7 +100,7 @@ export async function renderers(packageRoot, fixture) {
   const fakeTerminal = { columns: 132, rows: 38, kittyProtocolActive: false, start() {}, stop() {}, async drainInput() {}, write() {}, moveBy() {}, hideCursor() {}, showCursor() {}, clearLine() {}, clearFromCursor() {}, clearScreen() {}, setTitle() {}, setProgress() {}, setProgramStatus() {} };
   const tui = new pi.TuiAltScreen(fakeTerminal), editor = new HardwareCursorEditor(tui, { borderColor: theme.makeBorderColor('border.input'), selectList: { selectedPrefix: s => s, selectedText: s => s, description: s => s, scrollInfo: s => s, noMatch: s => s } });
   editor.placeholder = () => '描述要完成的修改…   / 命令  @ 文件  Shift+Enter 换行';
-  const welcomeFacts = { version: '0.1.0', build: 'synthetic', workspace: '/synthetic/shop-api', lock: { state: 'free' }, model: { id: 'deepseek-flash', api: 'openai-completions', host: 'api.deepseek.com' }, execution: '合成显示输入 · 不代表验收', dataRoot: '/synthetic/data', sessions: [{ label: 's-6666', improve: false, input: '修复购物车舍入', status: 'completed', at }], tip: welcome.TIPS[0] };
+  const welcomeFacts = { version: '0.1.0', build: 'synthetic', workspace: '/synthetic/shop-api', lock: { state: 'free' }, model: { id: 'deepseek-flash', api: 'openai-completions', host: 'api.deepseek.com' }, execution: '合成显示输入 · 不代表验收', dataRoot: '/synthetic/data', sessions: [{ label: 's-6666', improve: false, input: '修复购物车舍入', status: 'completed', at }, { label: 's-6c01', improve: false, input: '订单导出 CSV 增加时区列', status: 'unknown', at: '2026-10-16T14:40:00.000Z' }, { label: 's-5e9b', improve: true, input: '测试重复运行成本', status: 'aborted', at: '2026-10-09T09:00:00.000Z' }], tip: welcome.TIPS[0] };
   const recovery = new RecoveryPanel({ runId: 'r-1111', snapshotId: 'synthetic', status: 'blocked', options: ['inspect', 'continue', 'end'], work: { title: '迁移（合成未知）', task: 1, round: 3 }, items: [{ taskId: 1, tool: 'bash', target: 'npm run migrate', dispatched: true }], prior: [], checks: [{ ok: true, text: '合成宿主检查' }], frozen: { count: 2, first: { kind: 'follow-up', text: '检查剩余项' } }, otherSessions: [], unknownModelAttempts: 0 });
   const refusal = () => { throw Error('DISPLAY_FIXTURE_CANNOT_EXECUTE'); };
   const selection = new ImproveSelectionView(fixture.dataRoot, fixture.report.id, refusal, () => {}, { now: () => Date.parse(at), submitBlocked: () => 'PREP fixture 不执行' });
@@ -115,19 +117,60 @@ export async function renderers(packageRoot, fixture) {
     const margin = frame.sideMargin(width), bottom = frame.bottomMargin(height);
     return [...frame.inset(build(width - 2 * margin, height - bottom), width, margin, tier), ...Array.from({ length: bottom }, () => empty(width, tier))];
   };
+  /** The 1b transcript: one blank row between blocks, adjacent tool rows grouped (as ReadOnlyTui.rebuild). */
+  const transcript = (w, roomy, tier) => {
+    const blank = empty(w, tier);
+    const tool = entry => { const t = session.toolLines({ kind: 'tool', startedAt: at, ...entry }, w, false, Date.parse(at) + 3000, 0, tier); return [t.row, ...t.body, ...(t.paging ? [t.paging] : [])]; };
+    return [...(roomy ? [blank] : []),
+      ...session.userLines('满减后金额出现 0.01 误差，修复 src/cart/total.ts 并跑相关测试（合成显示）', w, false, tier), blank,
+      ...session.assistantLines('问题来自先按行四舍五入再求和。改为以「分」为单位整数累加，最后一次性格式化。', w, tier), blank,
+      ...tool({ tool: 'read', args: 'src/cart/total.ts', argKind: 'path', state: 'ok', summary: '142 行' }),
+      ...tool({ tool: 'bash', args: 'rg -n "toFixed" src/cart', argKind: 'command', state: 'ok', summary: 'exit 0 · 3 行' }),
+      ...tool({ tool: 'edit', args: 'src/cart/total.ts', argKind: 'path', state: 'ok', summary: '+6 −4' }),
+      ...tool({ tool: 'bash', args: 'npm test -- cart', argKind: 'command', state: 'error', summary: 'exit 1 · 20 行', output: { lines: ['FAIL test/cart/total.test.ts › applies 满100减20 to mixed lines', 'Expected: 80.00 Received: 80.01'], total: 20, end: 'tail' } }), blank,
+      ...session.assistantLines('测试仍用旧的 `discount()` 期望值，正在更新 fixture 并重跑。', w, tier), blank,
+      ...tool({ tool: 'edit', args: 'test/cart/total.test.ts', argKind: 'path', state: 'running', summary: '' })];
+  };
   async function render(id, width, height, tier = 'truecolor', state = 'six-oracles') {
     theme.overrideColorTierForTest(tier);
     if (id === '1a') return sessionScreen(width, height, tier, (w, h) => {
       const footer = frame.footerLines(welcome.welcomeStatusSegments('deepseek-flash', 'ctx ≈863 / 1M'), ['Enter 提交', '/ 命令', 'Ctrl+R 历史', '? 帮助'], w, { keepLast: '? 帮助', tier }), input = editor.render(w);
-      return [...welcome.renderWelcome(welcomeFacts, w, h - input.length - footer.length, new Date(at), tier).lines, ...input, ...footer];
+      // The first recent session is selected, as in the design (Up/Down on an empty input).
+      return [...welcome.renderWelcome(welcomeFacts, w, h - input.length - footer.length, new Date(at), tier, 's-6666').lines, ...input, ...footer];
     });
     if (id === '1b') return sessionScreen(width, height, tier, (w, h) => {
+      // Mirrors ReadOnlyTui: separators and the top blank row only in roomy windows; one blank row
+      // between transcript blocks, adjacent tool rows grouped (U2, U10).
+      const roomy = frame.bottomMargin(height) > 0, blank = empty(w, tier), separator = () => frame.rule(w, 'line.subtle', tier);
       const header = { workspace: '/synthetic/shop-api', readOnly: false, session: 's-6666', run: 'r-1111', task: 1, round: 3 }, status = session.statusParts({ phase: 'running', recovery: false, round: 3, retry: false, elapsedMs: 42000, frame: 0 }), narrow = session.narrowing(w, header, status);
-      const tool = session.toolLines({ kind: 'tool', tool: 'bash', args: 'npm test', argKind: 'command', state: 'error', startedAt: at, summary: 'exit 1 · 20 行', output: { lines: ['FAIL expected 80.00 received 80.01'], total: 20, end: 'tail' } }, w, false, Date.parse(at), 0, tier);
-      const body = [...session.userLines('修复购物车舍入（合成显示）', w, false, tier), ...session.assistantLines('改为以分为单位，检查仍有一项失败。', w, tier), tool.row, ...tool.body, ...(tool.paging ? [tool.paging] : [])];
-      const footer = frame.footerLines(session.usageSegments('deepseek-flash', 'ctx ≈863 / 1M', '本任务', 1800, '≈¥0.01'), ['Enter steer', 'Ctrl+X Enter follow-up', 'Ctrl+C 中止', 'Ctrl+O 展开'], w, { tier }), input = editor.render(w), rows = h - 2 - input.length - footer.length;
-      return [session.headerLine(header, w, narrow.headerRight, tier), ...pad(body.slice(0, rows), w, rows, tier), session.statusLine(status, w, narrow.statusHint, tier), ...input, ...footer];
+      const body = transcript(w, roomy, tier);
+      const queue = queueStrip.render([
+        { item: { requestId: 'q-0001', kind: 'steer', status: 'pending', input: '别动 src/cart/types.ts，类型保持不变', acceptedSeq: 1 } },
+        { item: { requestId: 'q-0002', kind: 'follow-up', status: 'pending', input: '给 checkout 页加同样的金额回归测试', acceptedSeq: 2 } }], w, height, tier);
+      const footer = frame.footerLines(session.usageSegments('deepseek-flash', 'ctx ≈863 / 1M', '本任务', 1800, '≈¥0.01'), ['Enter steer', 'Ctrl+X Enter follow-up', 'Ctrl+C 中止', 'Ctrl+O 展开'], w, { tier }), input = editor.render(w);
+      const head = [session.headerLine(header, w, narrow.headerRight, tier), ...(roomy ? [separator()] : [])];
+      const state = [...(roomy ? [separator()] : []), session.statusLine(status, w, narrow.statusHint, tier)];
+      const rows = h - head.length - state.length - queue.length - input.length - footer.length;
+      return [...head, ...pad(body.slice(0, rows), w, rows, tier), ...state, ...queue, ...input, ...footer];
     });
+    if (id === '1c' && frame.bottomMargin(height) > 0 && width >= 100) {
+      // ReadOnlyTui.recoveryPlan overlay: a centred rounded box over the dimmed session (U3, U10).
+      const margin = frame.sideMargin(width), w = width - 2 * margin, side = lines => frame.inset(lines, width, margin, tier);
+      const header = { workspace: '/synthetic/shop-api', readOnly: false, session: 's-6666', run: 'r-1111', task: 1, round: 3 };
+      const status = session.statusParts({ phase: 'idle', recovery: true, round: 3, retry: false, elapsedMs: 42000, frame: 0 }), narrow = session.narrowing(w, header, status);
+      const usageSegments = session.usageSegments('deepseek-flash', 'ctx ≈863 / 1M', '本任务', 1800, '≈¥0.01'), hintItems = ['Ctrl+R 历史', 'Ctrl+T trace', '? 帮助'];
+      const foot = frame.footerLines(usageSegments, hintItems, w, { tier }).length, separator = frame.rule(w, 'line.subtle', tier);
+      const rows = height - 4 - frame.bottomMargin(height), boxWidth = Math.min(w - 8, 100), inner = boxWidth - 4;
+      const airy = recovery.fullHeight(inner, { wide: true, airy: true }) + 2, full = recovery.fullHeight(inner, { wide: true }) + 2;
+      const [input, usage, hints, box, airyBox] = rows >= airy + 3 + foot ? [true, true, true, airy, true] : rows >= full + 3 + foot ? [true, true, true, full, false]
+        : rows >= full + foot ? [false, true, true, full, false] : rows >= full + 1 ? [false, false, true, full, false] : [false, false, false, full, false];
+      const area = rows - (input ? 3 : 0) - (hints ? (usage ? foot : 1) : 0);
+      const content = recovery.render(inner, Math.max(1, Math.min(area, box) - 2), tier, { wide: true, airy: airyBox });
+      const base = side(transcript(w, true, tier)).slice(0, area);
+      while (base.length < area) base.push('');
+      return [...side([session.headerLine(header, w, narrow.headerRight, tier), separator]), ...frame.composeOverlay(base, frame.frameBox(content, boxWidth, tier), width, tier),
+        ...side([separator, session.statusLine(status, w, narrow.statusHint, tier), ...(input ? disabledInputLines('', w, tier) : []), ...(hints ? frame.footerLines(usage ? usageSegments : [], hintItems, w, { tier }) : [])]), empty(width, tier)];
+    }
     if (id === '1c') return sessionScreen(width, height, tier, (w, h) => {
       // Current ReadOnlyTui.recoveryPlan: preserve header/status, then collapse
       // transcript, disabled editor, usage, hints in that order. No missing chrome is padded away.

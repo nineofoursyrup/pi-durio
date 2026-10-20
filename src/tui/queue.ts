@@ -2,12 +2,14 @@ import { matchesKey, visibleWidth } from '@earendil-works/pi-tui';
 import { readDisplayIndex, isUserChosenId, type DisplayIndex } from '../display-number.js';
 import type { QueueItemFact } from '../evidence.js';
 import { latestPending, queueBudget, type QueueEntry, type QueueReattachment } from '../queue.js';
-import { styledLine, COLOR_TIER, type ColorTier } from './theme.js';
+import { styledLine, COLOR_TIER, type ColorTier, type TextSegment } from './theme.js';
 import { clean, truncateEnd, truncateMiddle, wrapAuthorized, fixedFrame, hintLine, statusEmpty, type ConfirmConfig } from './view-stack.js';
 import { mayWrite, type WriteAccess } from './write-access.js';
 
 export const QUEUE_STATUS = { pending: '待接入', dispatching: '接入待核对', frozen: '已冻结', applied: '已接入', withdrawn: '已撤回' };
 export const QUEUE_KIND = { steer: 'steer', 'follow-up': 'follow-up', compact: '手动压缩', improve: 'improve 分析' };
+/** 1b 队列行的类型字形（设计稿 1b）：steer 接入当前任务，follow-up 等当前任务结束。 */
+const QUEUE_GLYPH = { steer: '↳', 'follow-up': '⧗', compact: '·', improve: '·' };
 export function queueContent(item: QueueItemFact): string {
   if (item.kind === 'improve') try { const request = JSON.parse(item.input); if (typeof request.purpose === 'string') return request.purpose; } catch { /* Retain unparseable original content. */ }
   return item.input;
@@ -24,11 +26,15 @@ export class QueueStrip {
     let shown = entries.length > 3 ? entries.slice(-2) : [...entries];
     if (entries.length > 3 && latest && !shown.some(entry => entry.item.requestId === latest.requestId)) shown = [entries.find(entry => entry.item.requestId === latest.requestId)!, shown[1]];
     const rows = shown.map(({ item }, row) => {
+      // 设计稿 1b：字形、类型（ac.info）与状态分色，内容在中间，撤回提示靠右对齐。
       const action = item.status === 'pending' ? item.requestId === latest?.requestId ? 'Backspace 撤回' : '撤回' : '';
-      const left = truncateEnd(`${QUEUE_KIND[item.kind]} · ${QUEUE_STATUS[item.status]} · 「${clean(queueContent(item)).split('\n')[0]}」`, Math.max(1, width - visibleWidth(action) - (action ? 3 : 0)));
-      const start = visibleWidth(left) + 3;
+      const head: TextSegment[] = [{ text: `${QUEUE_GLYPH[item.kind]} `, fg: 'ac.info' }, { text: `${QUEUE_KIND[item.kind]} `, fg: 'ac.info' }, { text: QUEUE_STATUS[item.status], fg: item.status === 'frozen' || item.status === 'pending' ? 'ac.warn' : 'fg.muted' }, { text: ' · ', fg: 'fg.faint' }];
+      const used = head.reduce((sum, s) => sum + visibleWidth(s.text), 0), reserve = action ? visibleWidth(action) + 2 : 0;
+      const content = truncateEnd(`「${clean(queueContent(item)).split('\n')[0]}」`, Math.max(1, width - used - reserve));
+      const gap = Math.max(action ? 2 : 0, width - used - visibleWidth(content) - visibleWidth(action));
+      const start = used + visibleWidth(content) + gap;
       if (action) this.hits.push({ row, start, end: start + visibleWidth(action), id: item.requestId });
-      return styledLine([{ text: left, fg: item.status === 'frozen' ? 'ac.warn' : 'fg.muted' }, ...(action ? [{ text: ` · ${action}`, fg: 'fg.label' as const }] : [])], width, undefined, tier);
+      return styledLine([...head, { text: content, fg: 'fg.body' }, ...(action ? [{ text: ' '.repeat(gap) }, { text: action, fg: 'fg.faint' as const }] : [])], width, undefined, tier);
     });
     if (shown.length < entries.length) rows.push(styledLine([{ text: `+${entries.length - shown.length} 项 · /queue`, fg: 'fg.muted' }], width, undefined, tier));
     return rows;
