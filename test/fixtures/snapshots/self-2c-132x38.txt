@@ -19,7 +19,7 @@
 09|────────────────────────────────────────────────────────────────   受控空闲 / 长会话    产品内不测 · 见 A# 报告                     |
    0-63 line.inner/bg.base ; 64-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-97 fg.primary/bg.base ; 98-110 fg.faint/bg.base ; 111-131 -/bg.base
 10|产品源码合计         ## 文件 · ### 行                              按键到重绘           尚无样本                                    |
-   0-20 fg.body/bg.base ; 21-30 fg.primary/bg.base ; 31-36 fg.primary/bg.base/b ; 37-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-95 ac.info/bg.base ; 96-131 -/bg.base
+   0-20 fg.body/bg.base ; 21-30 fg.primary/bg.base ; 31-36 fg.primary/bg.base/b ; 37-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-95 fg.primary/bg.base ; 96-131 -/bg.base
 11|直接依赖             # · 精确固定                                                       进程内 · 不含终端绘制                       |
    0-20 fg.body/bg.base ; 21-21 fg.primary/bg.base ; 22-32 fg.faint/bg.base ; 33-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-93 fg.primary/bg.base ; 94-108 fg.faint/bg.base ; 109-131 -/bg.base
 12|随包脚本             ### 行                                                                                                         |

@@ -113,7 +113,7 @@ export class SelfView {
         ...row('当前 RSS', memory ? [bytes(memory.bytes), ` · ${memory.state}`] as const : absent(snapshot.memory), w),
         ...row('本进程峰值 RSS', peak ? [bytes(peak.bytes), ` · ${peak.tasks ?? '未记录'} 个任务 · ${bytes(peak.toolOutputBytes)} 工具输出`] as const : absent(snapshot.peak), w),
         ...row('受控空闲 / 长会话', unmeasured, w),
-        ...row('按键到重绘', [keys.samples ? `p50 ${ms(keys.p50!)}${keys.p95 === null ? '' : ` / p95 ${ms(keys.p95)}`} · ${keys.samples} 样本` : '尚无样本', ''], w, 'ac.info'),
+        ...row('按键到重绘', keys.samples ? [`p50 ${ms(keys.p50!)}`, `${keys.p95 === null ? '' : ` / p95 ${ms(keys.p95)}`} · ${keys.samples} 样本`] : ['尚无样本', ''], w),
         ...row('', [keys.samples < 20 && keys.samples > 0 ? '样本不足 20，不计 p95' : '进程内', ' · 不含终端绘制'], w),
       ];
     };
@@ -137,15 +137,16 @@ export class SelfView {
     if (snapshot.cost.value) {
       const { scope, spend } = snapshot.cost.value;
       body.push(line(`[${statsDate(scope.from)}, ${statsDate(scope.to)}) · 按请求发生时间去重`));
-      const values = spendRows({ spend });
+      // 金额 fg.primary；其余段保留自带颜色（unknown / partial 为 ac.warn），无色的补 fg.faint。
+      const values = spendRows({ spend }).map(value => ({ label: value.label, text: value.text.map((s, i): TextSegment => ({ ...s, text: clean(s.text), fg: i ? s.fg ?? 'fg.faint' : 'fg.primary' })) }));
       if (wide) {
         // 第二列与上方右栏对齐。
         const w = leftWidth + 3;
         for (let i = 0; i < values.length; i += 2) {
-          const a = row(values[i].label, [values[i].text[0].text, values[i].text.slice(1).map(s => s.text).join('')], w), b = values[i + 1] ? row(values[i + 1].label, [values[i + 1].text[0].text, values[i + 1].text.slice(1).map(s => s.text).join('')], width - w) : [];
+          const a = row(values[i].label, values[i].text, w), b = values[i + 1] ? row(values[i + 1].label, values[i + 1].text, width - w) : [];
           for (let j = 0; j < Math.max(a.length, b.length); j++) body.push(`${a[j] ?? line('', w)}${b[j] ?? line('', width - w)}`);
         }
-      } else for (const value of values) body.push(...row(value.label, [value.text[0].text, value.text.slice(1).map(s => s.text).join('')], width));
+      } else for (const value of values) body.push(...row(value.label, value.text, width));
     } else body.push(...row('期间开销', absent(snapshot.cost), width));
     // 头部下方与底栏上方各一条分隔线、头部后空一行（U10）；放不下时先收它们，再收底栏说明。
     const hints = ['b 重新测量', 'e 导出', 'Tab 页签', '↑↓ 滚动'], esc = 'Esc 返回会话';
