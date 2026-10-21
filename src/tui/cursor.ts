@@ -1,5 +1,6 @@
 import { CURSOR_MARKER, Editor, truncateToWidth, visibleWidth, type Component, type EditorOptions, type EditorTheme, type Terminal, type TUI, type TuiMouseEvent } from '@earendil-works/pi-tui';
-import { GLYPHS, fgSgr, bgSgr, resetSgr } from './theme.js';
+import { GLYPHS, fgSgr, bgSgr, resetSgr, horizontalLine } from './theme.js';
+import { boxInnerWidth } from './view-stack.js';
 
 /**
  * pi-tui 1.1.0 paints a software caret even when hardware cursor display is on.
@@ -22,10 +23,18 @@ export class HardwareCursorEditor extends Editor {
     this.menuRender=menuRender;
   }
   protected override renderTopBorder(width:number,hidden:number):string {
-    return this.borderColor('╭')+super.renderTopBorder(width,hidden)+this.borderColor('╮');
+    const span=width+visibleWidth('││')-visibleWidth('╭╮');
+    return this.borderColor('╭')+(visibleWidth('─')===1?super.renderTopBorder(span,hidden):this.measuredBorder(span,hidden,'↑'))+this.borderColor('╮');
   }
   protected override renderBottomBorder(width:number,hidden:number):string {
-    return this.frameBottomBorder=this.borderColor('╰')+super.renderBottomBorder(width,hidden)+this.borderColor('╯');
+    const span=width+visibleWidth('││')-visibleWidth('╰╯');
+    return this.frameBottomBorder=this.borderColor('╰')+(visibleWidth('─')===1?super.renderBottomBorder(span,hidden):this.measuredBorder(span,hidden,'↓'))+this.borderColor('╯');
+  }
+  private measuredBorder(width:number,hidden:number,direction:string):string {
+    if(!hidden)return this.borderColor(horizontalLine(width));
+    const label=truncateToWidth(` ${direction} ${hidden} more `,width,''),remaining=Math.max(0,width-visibleWidth(label));
+    const left=Math.floor(remaining/2);
+    return this.borderColor(horizontalLine(left)+label+horizontalLine(remaining-left));
   }
   /** 会话屏把菜单放在状态/队列区之前，输入框本身仍作为焦点与鼠标目标。 */
   separateAutocomplete(availableRows:()=>number):Component {
@@ -42,7 +51,7 @@ export class HardwareCursorEditor extends Editor {
     this.autocompleteHitRows=[];
     if(!autocomplete.length||height===0)return [];
     if(height<2){
-      const pad=Math.min(this.getPaddingX(),Math.max(0,Math.floor((width-3)/2))),left=1+pad;
+      const pad=Math.min(this.getPaddingX(),Math.max(0,Math.floor((boxInnerWidth(width)-1)/2))),left=visibleWidth('│')+pad;
       const line=' '.repeat(left)+truncateToWidth(fgSgr('ac.warn')+'补全空间不足 · 请扩大窗口'+resetSgr(),Math.max(0,width-left),'');
       return [this.baseLine(line+' '.repeat(Math.max(0,width-visibleWidth(line))))];
     }
@@ -56,7 +65,7 @@ export class HardwareCursorEditor extends Editor {
     return [...items.slice(start,start+count).map(row=>autocomplete[row]),autocomplete[counter]];
   }
   private baseLine(line:string) {const base=bgSgr('bg.base');return base+line.replaceAll(resetSgr(),resetSgr()+base)+resetSgr();}
-  private handleEditorMouse(event:TuiMouseEvent) {return super.handleMouse({...event,x:event.x-1,width:Math.max(1,event.width-2)});}
+  private handleEditorMouse(event:TuiMouseEvent) {return super.handleMouse({...event,x:event.x-visibleWidth('│'),width:boxInnerWidth(event.width)});}
   override handleMouse(event:TuiMouseEvent) {
     return this.handleEditorMouse(event);
   }
@@ -64,7 +73,7 @@ export class HardwareCursorEditor extends Editor {
     return this.renderParts(width).input;
   }
   private renderParts(width:number) {
-    const inner=Math.max(1,width-2);
+    const inner=boxInnerWidth(width);
     const focused=this.focused;
     let lines:string[];
     // Request the public marker even when blurred so only the caret's style can
@@ -89,13 +98,13 @@ export class HardwareCursorEditor extends Editor {
       lines[1]=`${' '.repeat(pad)}${focused?CURSOR_MARKER:''}${fgSgr('fg.faint')}${text}${resetSgr()}${' '.repeat(Math.max(0,inner-pad-visibleWidth(text)))}`;
     }
     if(pad>=2&&lines.length>=3)lines[1]=`${fgSgr('ac.brand')}${GLYPHS.prompt}${resetSgr()} ${lines[1].slice(2)}`;
-    // Only input rows gain side borders; menus retain the same one-column left inset.
+    // Only input rows gain side borders; menus align with the measured left border.
     // The upstream scroll borders keep their ↑/↓ counts.
     // Editor resets must restore bg.base so cursor and padding never expose the terminal background.
     lines=lines.map((line,row)=>{
       let boxed=line;
       if(row>0&&row<bottomBorder)boxed=this.borderColor('│')+line+this.borderColor('│');
-      else if(row>bottomBorder)boxed=' '+line+' '.repeat(Math.max(0,width-1-visibleWidth(line)));
+      else if(row>bottomBorder)boxed=' '.repeat(visibleWidth('│'))+line+' '.repeat(Math.max(0,width-visibleWidth('│')-visibleWidth(line)));
       return this.baseLine(boxed);
     });
     return {input:lines.slice(0,this.inputRows),autocomplete:lines.slice(this.inputRows),selected,counter};

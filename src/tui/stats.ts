@@ -7,7 +7,7 @@ import { formatAmount, sumCostEstimates, type CostTotals } from '../cost-estimat
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
 import { CommandError } from './commands.js';
 import { resolveProjectFilter, canonicalProject } from './project-filter.js';
-import { fitSegments, clean, escHint, fixedFrame, footerLines, hintLine, inputBox, rule, statusError, truncateEnd, widthTier } from './view-stack.js';
+import { fitSegments, clean, escHint, fixedFrame, footerLines, hintLine, inputBox, boxInnerWidth, rule, statusError, truncateEnd, widthTier } from './view-stack.js';
 
 // ─── 范围（M0、U5） ───────────────────────────────────────────────────────────
 
@@ -371,7 +371,7 @@ export class StatsView {
     const tierW = widthTier(width), scope = this.request.scope;
     const head = [tabs, ...this.header(width, tier)];
     const command = line([{ text: `${GLYPHS.prompt} `, fg: 'ac.brand' }, { text: truncateEnd(clean(this.request.command), width - 2), fg: 'fg.body' }]);
-    const commandBox = inputBox([styledLine([{ text: `${GLYPHS.prompt} `, fg: 'ac.brand' }, { text: truncateEnd(clean(this.request.command), width - 4), fg: 'fg.body' }], width - 2, undefined, tier)], width, tier);
+    const commandBox = inputBox([styledLine([{ text: `${GLYPHS.prompt} `, fg: 'ac.brand' }, { text: truncateEnd(clean(this.request.command), boxInnerWidth(width) - 2), fg: 'fg.body' }], boxInnerWidth(width), undefined, tier)], width, tier);
     const footer = footerLines([{ text: truncateEnd(NOTE, width), fg: 'fg.label' }], hints, width, { esc: escHint(1), tier });
 
     if (!this.data) {

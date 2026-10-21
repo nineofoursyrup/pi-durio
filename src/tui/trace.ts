@@ -7,7 +7,7 @@ import { fixEvidence, verifyFixed } from '../fixed-evidence.js';
 import { TraceReader, RAW_STATE_LABEL, type Trace, type TraceSpan, type TraceLlm, type TraceRaw } from '../trace.js';
 import { readDisplayIndex, type DisplayIndex } from '../display-number.js';
 import { formatCostTotals, requestCostView } from '../cost-estimate.js';
-import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, type TextSegment, type TokenName } from './theme.js';
+import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, horizontalLine, type TextSegment, type TokenName } from './theme.js';
 import { fitSegments, errorCode, clean, hintLine, statusEmpty, truncateEnd, truncateMiddle, type ConfirmConfig } from './view-stack.js';
 import { mayWrite, type WriteAccess } from './write-access.js';
 
@@ -159,7 +159,7 @@ export class TraceView {
     const trace = this.current, wide = width >= 100, narrow = width < 60;
     const header = this.header(trace, width, wide);
     if (trace.empty) return [...header, statusEmpty(`run ${this.index.label('run', this.runId)}`, '已取得的记录', width), ...Array(Math.max(0, height - header.length - 2)).fill(styledLine([], width)), this.footer(trace, width, esc)];
-    const detailWidth = wide ? Math.round(width * 380 / 1180) : 0, listWidth = wide ? width - detailWidth - 1 : width;
+    const detailWidth = wide ? Math.round(width * 380 / 1180) : 0, listWidth = wide ? width - detailWidth - visibleWidth('│') : width;
     this.rows = this.buildRows(trace);
     const summary = wide ? [] : [styledLine([{ text: clean(this.summaryLine()), fg: 'fg.body' }], width)];
     const fixed = header.length + 2 + summary.length + 1;
@@ -174,16 +174,16 @@ export class TraceView {
     const columns = this.columns(listWidth, narrow);
     const total = Math.max(1, ...trace.segments.map(s => s.end));
     const list = [this.columnHeader(columns, total, listWidth), ...Array.from({ length: bodyHeight }, (_, i) => this.rowLine(this.rows[this.offset + i], columns, total, listWidth, trace))];
-    if (rules) list.push(styledLine([{ text: '─'.repeat(listWidth), fg: 'line.subtle' }], listWidth));
+    if (rules) list.push(styledLine([{ text: horizontalLine(listWidth), fg: 'line.subtle' }], listWidth));
     if (legend) list.push(styledLine([{ text: '■', fg: 'ac.brand' }, { text: ' llm  ', fg: 'fg.faint' }, { text: '■', fg: 'fg.muted' }, { text: ' tool  ', fg: 'fg.faint' }, { text: '■', fg: 'ac.model' }, { text: ' compaction  ', fg: 'fg.faint' }, { text: '■', fg: 'ac.warn' }, { text: ' 重试 / unknown  ', fg: 'fg.faint' }, { text: '■', fg: 'ac.err' }, { text: ' 失败', fg: 'fg.faint' }], listWidth));
     let body = list;
     if (wide) {
       // 详情栏左右各留 2 列（设计稿 2a）。
       const detail = this.detail(trace, detailWidth - 4);
-      const bar = styledLine([{ text: '│', fg: 'line.subtle' }], 1);
+      const bar = styledLine([{ text: '│', fg: 'line.subtle' }], visibleWidth('│'));
       body = list.map((row, i) => row + bar + styledLine([{ text: '  ' }, ...(detail[i] ?? [])], detailWidth));
     }
-    const rule = styledLine([{ text: '─'.repeat(width), fg: 'line.subtle' }], width);
+    const rule = styledLine([{ text: horizontalLine(width), fg: 'line.subtle' }], width);
     return [...header, rule, ...body, ...(rules ? [rule] : []), ...summary, this.footer(trace, width, esc)];
   }
 
@@ -424,7 +424,7 @@ export class TraceView {
     raws(span.raws);
     const previous = llm.retryOf !== null ? trace.spans.find(s => s.llm?.number === llm.retryOf) : undefined;
     if (previous) {
-      lines.push([], [{ text: '─'.repeat(width), fg: 'line.inner' }], []);
+      lines.push([], [{ text: horizontalLine(width), fg: 'line.inner' }], []);
       title(`llm · #${previous.llm!.number}`, '同一逻辑请求的上一次 attempt');
       llmBlock(previous, previous.llm!);
     }

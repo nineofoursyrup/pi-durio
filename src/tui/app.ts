@@ -50,7 +50,7 @@ export { exitCostSummary } from './exit-summary.js';
 import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor, dimForOverlay } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageSegments, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
-import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, footerLines, inset, sideMargin, bottomMargin, topMargin, rule, frameBox, composeOverlay, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
+import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, footerLines, inset, sideMargin, bottomMargin, topMargin, rule, frameBox, boxInnerWidth, composeOverlay, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
 import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatusSegments } from './welcome.js';
 import { COMPACT_VERSION_CHANGED, CONTINUE_TAIL_UNFINISHED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
@@ -270,7 +270,7 @@ export class ReadOnlyTui {
     const recoveryPanel:Component={invalidate(){},render:width=>{const lines=this.recoveryLoading?.isShowing?[this.recoveryLoading.renderLine(width),hintLine([],width,{esc:'Esc 返回查看'})]:this.recoveryPanel?.render(width,this.recoveryPlan(width).panel)??[];this.widths?.inspect(lines);return lines;}};
     // 1c 浮层（U3、U10）：恢复面板为居中圆角框，盖在变灰的主区上；只在宽敞窗口使用。
     const recoveryArea:Component={invalidate(){},render:width=>{
-      const plan=this.recoveryPlan(width),boxWidth=this.recoveryBoxWidth(),inner=boxWidth-4;
+      const plan=this.recoveryPlan(width),boxWidth=this.recoveryBoxWidth(),inner=boxInnerWidth(boxWidth,1);
       const content=this.recoveryLoading?.isShowing?[this.recoveryLoading.renderLine(inner),hintLine([],inner,{esc:'Esc 返回查看'})]:this.recoveryPanel?.render(inner,plan.panel,undefined,{wide:true,airy:plan.airy})??[];
       this.widths?.inspect(content);
       const transcript=this.transcript.render(width),base=transcript.slice(Math.max(0,transcript.length-plan.area));
@@ -1106,7 +1106,7 @@ export class ReadOnlyTui {
   private recoveryPlan(width:number):{main:boolean;input:boolean;usage:boolean;hints:boolean;panel:number;airy:boolean;area:number} {
     const rows=this.terminal.rows-(this.roomy()?4:2)-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows),foot=this.footerRows(width);
     if(this.recoveryOverlay()){
-      const inner=this.recoveryBoxWidth()-4,panel=this.recoveryLoading?.isShowing?undefined:this.recoveryPanel;
+      const inner=boxInnerWidth(this.recoveryBoxWidth(),1),panel=this.recoveryLoading?.isShowing?undefined:this.recoveryPanel;
       const airy=panel?panel.fullHeight(inner,{wide:true,airy:true})+2:4,full=panel?panel.fullHeight(inner,{wide:true})+2:4;
       const plan=(input:boolean,usage:boolean,hints:boolean,box:number,airyBox:boolean)=>{const area=rows-(input?3:0)-(hints?(usage?foot:1):0);return {main:false,input,usage,hints,airy:airyBox,area,panel:Math.max(1,Math.min(area,box)-2)};};
       if(rows>=airy+3+foot)return plan(true,true,true,airy,true);

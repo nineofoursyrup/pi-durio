@@ -139,6 +139,17 @@ export function dimSgr(): string { return '\x1b[2m'; }
 /** 重置 SGR。 */
 export function resetSgr(): string { return '\x1b[0m'; }
 
+/** Fill display columns with measured horizontal strokes; an odd remainder stays blank. */
+export function horizontalLine(columns: number): string {
+  const width = Math.max(0, Math.floor(columns)), stroke = Math.max(1, visibleWidth('─'));
+  return '─'.repeat(Math.floor(width / stroke)) + ' '.repeat(width % stroke);
+}
+
+/** A rounded edge reserves the measured columns of both corners. */
+export function boxEdge(width: number, left: string, right: string): string {
+  return left + horizontalLine(width - visibleWidth(left + right)) + right;
+}
+
 // ─── 行构建 ──────────────────────────────────────────────────────────────────
 
 export interface TextSegment {

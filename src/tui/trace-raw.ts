@@ -2,7 +2,7 @@
 import { matchesKey, visibleWidth, wrapTextWithAnsi } from '@earendil-works/pi-tui';
 import { RAW_STATE_LABEL, type TraceRaw, type TraceSpan } from '../trace.js';
 import { RawContent, type RawPage } from '../trace-raw.js';
-import { COLOR_TIER, styledLine, type TextSegment } from './theme.js';
+import { COLOR_TIER, styledLine, horizontalLine, type TextSegment } from './theme.js';
 import { clean, hintLine, truncateEnd } from './view-stack.js';
 import { rawStateGlyph, type TraceView } from './trace.js';
 
@@ -98,7 +98,7 @@ export class TraceRawView {
     const current = this.current();
     const tabs = this.tabs(raws, width);
     const status = current ? this.statusLine(current.raw, current.page, width) : styledLine([{ text: '这一行没有原文项', fg: 'fg.muted' }], width);
-    const fixed = [header, ...tabs, status, styledLine([{ text: '─'.repeat(width), fg: 'line.subtle' }], width)];
+    const fixed = [header, ...tabs, status, styledLine([{ text: horizontalLine(width), fg: 'line.subtle' }], width)];
     this.bodyHeight = Math.max(1, height - fixed.length - 1);
     // 宽度小于 100 时没有详情栏：原文层顶部先显示完整详情（#59 第 7 节）。
     const detail = !wide && span ? [...this.view.detailRows(width), styledLine([], width)] : [];

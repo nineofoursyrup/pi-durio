@@ -7,8 +7,8 @@ import { formatAmount } from '../cost-estimate.js';
 import { verifiedImage } from '../eval/plan.js';
 import { BASELINE_ZERO, type Metric } from '../eval/comparison.js';
 import { listPlanSources, planState, readPlanReport, PLAN_STATE_LABEL, type EvalReport, type EvalReportTrial, type PlanSource, type PlanState } from '../eval/overview.js';
-import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { SPACER, clean, escHint, fixedFrame, fitSegments as fit, hintLine, settleSpacers, statusError, truncateEnd, widthTier } from './view-stack.js';
+import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, horizontalLine, boxEdge, type ColorTier, type TextSegment, type TokenName } from './theme.js';
+import { SPACER, boxInnerWidth, clean, escHint, fixedFrame, fitSegments as fit, hintLine, settleSpacers, statusError, truncateEnd, widthTier } from './view-stack.js';
 import { formatDuration, formatTokens } from './trace.js';
 import { clock } from './session-screen.js';
 
@@ -202,7 +202,7 @@ export class EvalListView {
   scroll(delta: number) { this.selected = Math.max(0, Math.min(this.rows.length - 1, this.selected + Math.sign(delta))); }
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
     const line = (segments: TextSegment[], bg?: TokenName) => styledLine(segments, width, bg, tier);
-    const header = [line([{ text: ' ◆ ', fg: 'ac.info' }, { text: 'eval', fg: 'fg.primary', bold: true }, { text: `  计划 ${this.rows.length} 份 · 本数据根与 improve 发起`, fg: 'fg.faint' }]), line([{ text: '─'.repeat(width), fg: 'line.subtle' }])];
+    const header = [line([{ text: ' ◆ ', fg: 'ac.info' }, { text: 'eval', fg: 'fg.primary', bold: true }, { text: `  计划 ${this.rows.length} 份 · 本数据根与 improve 发起`, fg: 'fg.faint' }]), line([{ text: horizontalLine(width), fg: 'line.subtle' }])];
     const footer = [hintLine(this.rows.length ? ['↑↓ 选择', 'Enter 打开'] : [], width, { esc: escHint(1), tier })];
     if (!this.rows.length) return fixedFrame(header, [line([{ text: ` ${EMPTY}`, fg: 'fg.muted' }])], footer, height, 0).lines;
     const narrow = width < 60;
@@ -291,7 +291,7 @@ export class EvalPlanView {
   render(width: number, height: number, tier: ColorTier = COLOR_TIER): string[] {
     if ((this.live||this.runningHere()) && Date.now() - this.lastRead >= 1000) this.read();
     const line = (segments: TextSegment[], bg?: TokenName) => styledLine(segments, width, bg, tier);
-    const rule = line([{ text: '─'.repeat(width), fg: 'line.subtle' }]);
+    const rule = line([{ text: horizontalLine(width), fg: 'line.subtle' }]);
     const esc = escHint(this.options.depth ?? 2);
     const hints = ['↑↓ 案例', '←→ trial', 'Enter trial trace', 'r 重评分',...this.runningHere()?['Ctrl+C 停止批次']:[],...this.revisions.length > 1 ? ['v 旧报告修订'] : []];
     if (!this.current) {
@@ -413,7 +413,7 @@ export class EvalPlanView {
     const repsHead = (side: string) => fit([{ text: sided ? `${side} ` : '' }, { text: slot > 1 ? Array.from({ length: reps }, (_, i) => `r${i + 1}`.padEnd(slot)).join('').trimEnd() : '' }], groupW);
     const headSegs: TextSegment[] = [{ text: '  ' }, ...fit([{ text: 'case' }], caseW), ...typeW ? [{ text: gap }, ...fit([{ text: '类型' }], typeW)] : [], { text: gap }, ...repsHead('A'), ...sided ? [{ text: gap }, ...repsHead('B')] : [], { text: gap }, ...right({ text: dName }), ...noteW ? [{ text: gap }, { text: '说明' }] : []];
     lines.push(styledLine(headSegs.map(s => ({ ...s, fg: 'fg.label' as TokenName })), width, undefined, tier));
-    if (airy) lines.push(styledLine([{ text: '─'.repeat(width), fg: 'line.subtle' }], width, undefined, tier));
+    if (airy) lines.push(styledLine([{ text: horizontalLine(width), fg: 'line.subtle' }], width, undefined, tier));
     let selectedTop = 0, selectedBottom = 0;
     rows.forEach((row, ci) => {
       if (airy && ci) lines.push(styledLine([], width, undefined, tier));
@@ -479,8 +479,8 @@ export class EvalPlanView {
   }
 
   private verdictBox(v: ReturnType<typeof verdict>, width: number, tier: ColorTier): string[] {
-    const inner = Math.max(4, width - 2);
-    const edge = (l: string, r: string) => styledLine([{ text: `${l}${'─'.repeat(inner)}${r}`, fg: 'border.input' }], width, undefined, tier);
+    const inner = boxInnerWidth(width);
+    const edge = (l: string, r: string) => styledLine([{ text: boxEdge(width, l, r), fg: 'border.input' }], width, undefined, tier);
     const row = (segments: TextSegment[]) => styledLine([{ text: '│', fg: 'border.input' }, ...fit(segments, inner), { text: '│', fg: 'border.input' }], width, undefined, tier);
     const judged: TextSegment[] = [{ text: ' 当前判定  ', fg: 'fg.label' }, { text: v.conclusion, fg: CONCLUSION_FG[v.conclusion], bold: true }, { text: `  ${v.reasons.join(' · ')}`, fg: 'fg.muted' }];
     // 判定规则放得下时靠右与判定同行（设计稿 2b），否则另起一行。
