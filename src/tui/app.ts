@@ -1346,7 +1346,7 @@ export class ReadOnlyTui {
   /** 帮助视图：会话屏键位与命令清单（同一张命令表），正文在固定头尾之间滚动。 */
   private helpLines(width:number) {
     const panel=this.panel!;
-    const frame=fixedFrame([styledLine([{text:'帮助',fg:'fg.primary',bold:true}],width)],helpBody(width),[hintLine(['↑↓ 滚动','n/p 翻页'],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),panel.line);
+    const frame=fixedFrame([styledLine([{text:'帮助',fg:'fg.primary',bold:true}],width)],helpBody(width).map(text=>styledLine([{text}],width)),[hintLine(['↑↓ 滚动','n/p 翻页'],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),panel.line);
     panel.line=frame.offset;this.widths?.inspect(frame.lines);
     return frame.lines;
   }
@@ -1376,7 +1376,7 @@ export class ReadOnlyTui {
     if(panel.kind==='improve'){const lines=this.improveView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='improve-home'){const lines=this.improveHome?.render(width,this.overlayHeight(),this.viewStack.length)??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval'){const lines=this.evalList?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
-    if(panel.kind==='eval-plan'){const loading=this.evaluation?.preparing&&this.evalPlan&&samePlan(this.evalPlan.source,this.evaluation.source)?this.evaluation.loading:undefined;const lines=loading?.isShowing?fixedFrame([` ◆ eval ${this.evaluation!.source.label}`],[loading.renderLine(width)],[hintLine([],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),0).lines:this.evalPlan?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='eval-plan'){const loading=this.evaluation?.preparing&&this.evalPlan&&samePlan(this.evalPlan.source,this.evaluation.source)?this.evaluation.loading:undefined;const lines=loading?.isShowing?fixedFrame([styledLine([{text:` ◆ eval ${this.evaluation!.source.label}`}],width)],[loading.renderLine(width)],[hintLine([],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),0).lines:this.evalPlan?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval-trial'){const lines=this.evalTrial?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='storage') {const lines=this.storageView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='metrics') {const lines=this.metricsView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
@@ -1391,7 +1391,7 @@ export class ReadOnlyTui {
     const lines=wrapTextWithAnsi(text,Math.max(1,width-2));
     const height=Math.max(2,Math.floor(this.terminal.rows*0.9)-2);
     const maxLine=Math.max(0,lines.length-height);panel.line=Math.min(panel.line,maxLine);
-    return [...lines.slice(panel.line,panel.line+height),truncateToWidth('↑↓滚动 Esc返回',width)];
+    return [...lines.slice(panel.line,panel.line+height),truncateToWidth('↑↓滚动 Esc返回',width)].map(text=>styledLine([{text}],width));
   }
   private panelInput(data:string) {
     const panel=this.panel;if(!panel)return;

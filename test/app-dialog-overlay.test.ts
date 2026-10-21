@@ -118,9 +118,17 @@ test('the exit draft panel yields to the undersized-window notice and returns af
   try {
     app.start(); terminal.input('draft'); terminal.input('\x03'); terminal.input('/exit'); terminal.input('\r');
     assert.match(text(), /退出并保留草稿/);
+    for (const tier of ['truecolor', '256color', 'none'] as const) for (const [columns, rows] of [[132, 38], [80, 24], [40, 12]]) {
+      overrideColorTierForTest(tier); terminal.columns = columns; terminal.rows = rows; terminal.resize();
+      const lines = app.screen(), grid = captureSnapshot(lines, columns, rows, tier);
+      assert.match(lines.map(stripTerminalSequences).join('\n'), /退出并保留草稿/);
+      for (const [y, row] of grid.rows.entries()) for (const [x, cell] of row.entries())
+        assert.equal(cell.bg, tier === 'none' ? undefined : 'bg.base', `${tier} ${columns}×${rows} cell ${x},${y}`);
+      if (tier === 'none') assert.doesNotMatch(lines.join(''), /\x1b\[(?:38|48);/);
+    }
     terminal.columns = 39; terminal.rows = 11; terminal.resize();
     assert.match(text(), /窗口过小/); assert.doesNotMatch(text(), /退出并保留草稿/);
     terminal.columns = 132; terminal.rows = 38; terminal.resize();
     assert.match(text(), /退出并保留草稿/);
-  } finally { await app.exit(); }
+  } finally { await app.exit(); overrideColorTierForTest('truecolor'); }
 });

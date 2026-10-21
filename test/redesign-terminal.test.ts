@@ -103,20 +103,51 @@ test('native assessment keeps missing facts unrun, the first failure and the rea
   assert.equal(item({events:[{kind:'key-attempt',key:'page-up',completed:false,received:false}]},'page-up').status,'NOT_RUN');
   assert.equal(item({events:[{kind:'key-attempt',key:'page-down',completed:true,received:true}]},'page-down').status,'PASS');
   assert.equal(item({events:[{kind:'key-attempt',key:'page-up',completed:true,received:false},{kind:'received',data:'\x1b[5~'}]},'page-up').status,'FAIL');
-  const screen = (editor: string) => ['header', editor, 'border', 'usage', 'keys'];
-  const before = { screen: screen('补充当前任务…'), queue: ['q-first', 'q-last'] }, after = { screen: screen('补充当前任务…'), queue: ['q-first'] };
+  const { screens } = JSON.parse(readFileSync(join(process.cwd(), 'test/fixtures/redesign-terminal/native-input-screens.json'), 'utf8'));
+  const before = { screen: screens.running, queue: ['q-first', 'q-last'] }, after = { screen: screens.running, queue: ['q-first'] };
   const pair = [{ kind: 'input', data: '\x7f', ms: 1000, settled: true, before, after }, { kind: 'input', data: '\x7f', ms: 1300, settled: true, before: after, after }];
   assert.equal(item({ events: pair }, 'backspace').status, 'PASS');
   assert.equal(item({ events: [pair[0], { ...pair[1], ms: 1500 }] }, 'backspace').status, 'NOT_RUN');
+  assert.equal(item({ events: [{ ...pair[0], settled: false }, pair[1]] }, 'backspace').status, 'NOT_RUN');
+  assert.equal(item({ events: [pair[0], { ...pair[1], settled: false }] }, 'backspace').status, 'NOT_RUN');
   const failed = { ...pair[1], after: { ...after, queue: [] } };
   assert.equal(item({ events: [pair[0], failed, ...pair.map(e => ({ ...e, ms: e.ms + 2000 }))] }, 'backspace').status, 'FAIL');
-  const help = { kind: 'input', data: '?', settled: true, before: { screen: screen('描述要完成的修改…') }, after: { screen: ['帮助'] } };
+  const help = { kind: 'input', data: '?', settled: true, before: { screen: screens.idle }, after: { screen: screens.help } };
   assert.equal(item({ events: [help] }, 'help-empty').status, 'PASS');
+  assert.equal(item({ events: [{ ...help, settled: false }] }, 'help-empty').status, 'NOT_RUN');
   assert.equal(item({ events: [{ ...help, after: { screen: [] } }, help] }, 'help-empty').status, 'FAIL');
-  assert.equal(item({ events: [{ ...help, before: { screen: screen('probe') }, after: { screen: screen('probe?') } }] }, 'help-nonempty').status, 'PASS');
+  assert.equal(item({ events: [{ ...help, before: { screen: screens.probe }, after: { screen: screens.probeQuestion } }] }, 'help-nonempty').status, 'PASS');
   assert.equal(item({ expectedTier: 'none', environment: { tier: 'none' }, output: '\x1b[1;31mwrong color' }, 'color').status, 'FAIL');
   assert.equal(item({ expectedTier: '256color', environment: { tier: '256color' }, output: '\x1b[1;38;5;233mtest' }, 'color').status, 'PASS');
   assert.equal(item({ result: { widthCalibration: { status: 'measured', observations: [] } } }, 'width').status, 'FAIL');
+});
+
+test('native assessment locates the closed input frame around menus and keeps incomplete input observations unrun', async () => {
+  const { assessNative } = await import(pathToFileURL(join(scripts, 'assess.mjs')).href);
+  const { screens } = JSON.parse(readFileSync(join(process.cwd(), 'test/fixtures/redesign-terminal/native-input-screens.json'), 'utf8'));
+  const status = (before: string[], after: string[], id = 'help-nonempty') => assessNative({ events: [{
+    kind: 'input', data: '?', settled: true, before: { screen: before }, after: { screen: after },
+  }] }).items.find((item: any) => item.id === id).status;
+  // Structural variants of captured screens exercise both the r3 menu location
+  // and the historical location. They are not new native acceptance evidence.
+  const menu = ['     → /help        打开帮助', '       /exit        退出并保留草稿'];
+  for (const side of ['above', 'below']) {
+    const withMenu = (screen: string[]) => {
+      const edge = screen.findIndex(line => line.trim().startsWith(side === 'above' ? '╭' : '╰')) + (side === 'below' ? 1 : 0);
+      return [...screen.slice(0, edge), ...menu, ...screen.slice(edge)];
+    };
+    assert.equal(status(withMenu(screens.probe), withMenu(screens.probeQuestion)), 'PASS', side);
+  }
+  const withoutTop = screens.probe.filter((line: string) => !line.trim().startsWith('╭'));
+  const withoutBottom = screens.probe.filter((line: string) => !line.trim().startsWith('╰'));
+  assert.equal(status(withoutTop, screens.probeQuestion), 'NOT_RUN');
+  assert.equal(status(withoutBottom, screens.probeQuestion), 'NOT_RUN');
+  assert.equal(status(['probe'], screens.probeQuestion), 'NOT_RUN');
+  const moreInput = [...screens.probe];
+  moreInput.splice(moreInput.findIndex(line => line.trim().startsWith('╰')), 0, '  │  second line                                                                                                                 │  ');
+  assert.equal(status(moreInput, screens.probeQuestion), 'NOT_RUN', 'a probe prefix in multiline input is not the single probe');
+  assert.equal(status(screens.probe, screens.help), 'FAIL');
+  assert.equal(status(screens.idle.map((line: string) => line.replace('描述要查看或分析的内容…', '描述要完成的修改…')), screens.help, 'help-empty'), 'PASS');
 });
 
 test('offline grid retains wide Chinese and emoji graphemes with token coordinates', async () => {
