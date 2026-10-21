@@ -133,6 +133,20 @@ test('stop while execution capture waits for calibration prevents capture and pr
   } finally {f.terminal.release();await f.app.exit();}
 });
 
+test('an empty Backspace held by width calibration is retained instead of bypassing the gate or replaying',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);f.terminal.hold='A';f.terminal.key('\x0c');
+    await until(()=>f.terminal.held.length===1);
+    const writes=f.terminal.writes.length;f.terminal.key('\x7f');await new Promise(resolve=>setTimeout(resolve,30));
+    assert.equal(f.terminal.writes.length,writes,'an input-row repair must not paint while a width reply is pending');
+    f.terminal.release();await until(f.painted);
+    const retained=readdirSync(join(f.draftRoot,'pending-input')).map(name=>JSON.parse(readFileSync(join(f.draftRoot,'pending-input',name),'utf8')));
+    assert.ok(retained.some(record=>record.reason==='action-needs-current-frame'&&record.automaticReplay===false&&record.inputs.some((event:{data:string})=>event.data==='\x7f')));
+    assert.equal(f.transport.calls.length,0);
+  } finally {f.terminal.release();await f.app.exit();}
+});
+
 for(const [label,key,draft] of [['Ctrl+D','\x04',''],['Ctrl+C','\x03','keep this draft']] as const) {
   test(`calibration replies between the first two ${label} presses do not cancel exit confirmation`,async()=>{
     const f=calibratedFixture();
