@@ -49,9 +49,14 @@ test('resizing a paused viewport to the end keeps following paused until /bottom
     // A paused viewport retains its projection; verify arrival through the runtime's saved event.
     const runId=readAcceptedTasks(dataRoot).tasks[0].runId!;
     await until(()=>readRunRecords(dataRoot,runId,{tail:true,limit:1,kinds:['model.provider-event']}).records.some(record=>readObject(dataRoot,record.ref).includes('output 79')));
-    assert.equal(lines().find(line=>line.includes('output ')),first,'new output keeps the paused top row');
-    assert.doesNotMatch(lines().join('\n'),/output 79/);
-    assert.match(lines().join('\n'),/↓ 回到底部/);
+    // Wait across TUI refresh cycles to prove the viewport still does not jump after refresh.
+    for(let i=0;i<15;i++) {
+      await wait();
+      const sampled=lines();
+      assert.equal(sampled.find(line=>line.includes('output ')),first,'new output keeps the paused top row');
+      assert.doesNotMatch(sampled.join('\n'),/output 79/);
+      assert.match(sampled.join('\n'),/↓ 回到底部/);
+    }
     key('/bottom');key('\r');
     await until(()=>lines().some(line=>line.includes('output 79')));
     assert.doesNotMatch(lines().join('\n'),/↓ 回到底部/);
