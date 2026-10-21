@@ -41,6 +41,35 @@ test('actual full-view entries fill 80×24 and 40×12 and Esc returns to the ses
   } finally {await app.exit();}
 });
 
+test('every help page paints its text and padding with bg.base in colored tiers and emits no color in the plain tier',async()=>{
+  const root=mkdtempSync(join(tmpdir(),'durio-help-background-')),workspace=join(root,'project');mkdirSync(workspace);
+  const terminal=new TestTerminal(),app=new ReadOnlyTui({workspace,dataRoot:join(root,'data'),draftRoot:join(root,'drafts'),mode:'offline',terminal,widthCalibration:false});
+  try {
+    app.start();
+    for(const tier of ['truecolor','256color','none'] as const)for(const [width,height] of [[132,38],[80,24],[40,12]]) {
+      overrideColorTierForTest(tier);
+      terminal.columns=width;terminal.rows=height;terminal.resize();
+      terminal.input('/help');terminal.input('\r');
+      let previous='';const pages:string[]=[];
+      for(let page=0;page<100;page++) {
+        const lines=app.screen(),text=lines.map(stripTerminalSequences).join('\n');
+        if(text===previous)break;
+        previous=text;pages.push(text);
+        assert.equal(lines.length,height);assert.ok(lines.every(line=>visibleWidth(line)===width));
+        const grid=captureSnapshot(lines,width,height,tier);
+        for(const [y,row]of grid.rows.entries())for(const [x,cell]of row.entries())
+          assert.equal(cell.bg,tier==='none'?undefined:'bg.base',`${tier} ${width}×${height} page ${page} cell ${x},${y}`);
+        if(tier==='none')for(const match of lines.join('').matchAll(/\x1b\[([\d;]*)m/g))
+          assert.ok(match[1].split(';').map(Number).every(code=>!(code>=30&&code<=49||code>=90&&code<=107)),'plain help must not emit color SGR');
+        terminal.input('n');
+      }
+      assert.ok(pages.length>1,'help is scrollable');
+      assert.match(pages[0],/会话屏键位/);assert.match(pages.join('\n'),/命令/);assert.match(pages.at(-1)!,/Esc 返回会话/);
+      terminal.input('\x1b');
+    }
+  } finally {await app.exit();overrideColorTierForTest('truecolor');}
+});
+
 test('full-screen margin clicks leave a scrolled queue selection unchanged while body clicks select the visible entry',()=>{
   const root=mkdtempSync(join(tmpdir(),'durio-fullscreen-queue-')),workspace=join(root,'project'),dataRoot=join(root,'data');mkdirSync(workspace);
   const evidence=new Evidence(dataRoot,'scroll-queue-fixture');

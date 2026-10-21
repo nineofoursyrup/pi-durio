@@ -141,6 +141,23 @@ test('narrow cards and summaries retain every authorization byte; undersized sum
  }
 });
 
+test('improve summary paints its centering space without adding color in the plain tier',async()=>{
+ const f=fixture(),previousTier=COLOR_TIER;
+ try {
+  for(const tier of ['truecolor','256color','none'] as const)for(const [width,height]of [[132,38],[80,24],[40,12]]) {
+   overrideColorTierForTest(tier);
+   const view=new ImproveSelectionView(f.dataRoot,f.report.id,async()=>{throw Error('rendering cannot submit');});
+   await view.handleInput('3');await view.handleInput('\r');
+   const lines=view.render(width,height);
+   assert.match(plain(lines),/improve 提交汇总/);
+   const left=stripTerminalSequences(lines[0]).indexOf('╭');assert.ok(left>0,'the dialog is horizontally centered');
+   for(const [y,line]of lines.entries())for(const [x,cell]of captureSnapshot([line],visibleWidth(line),1,tier).rows[0].entries())
+    assert.equal(cell.bg,tier==='none'?undefined:x<left?'bg.base':'bg.block',`${tier} ${width}×${height} cell ${x},${y}`);
+   if(tier==='none')assert.doesNotMatch(lines.join(''),/\x1b\[(?:38|48);/);
+  }
+ }finally{overrideColorTierForTest(previousTier);}
+});
+
 test('1d code blocks keep wrapped diff and commands inside the content column in every color tier',async()=>{
  const f=fixture(),program='console.log("'+('LONG_COMMAND_'.repeat(24))+'TAIL_COMMAND")',addition='//'+('LONG_DIFF_'.repeat(18))+'TAIL_DIFF';
  f.candidate.structuredChecks![0]={kind:'regression',timeoutMs:30000,program};
