@@ -233,7 +233,14 @@ export class ReadOnlyTui {
     this.copy=options.copy??copyToMacClipboard;
     this.drafts=new Drafts(options.draftRoot??join(homedir(),'Library','Application Support','pi-durio','ui-drafts'),options.workspace,options.dataRoot);
     this.closed=new Promise(resolve=>{this.resolveClosed=resolve;});
-    this.tui=new TuiAltScreen(this.terminal,true,undefined,{copySelection:this.copy,copyOnSelect:true,scrollToEndIndicator:()=> ' ↓ 回到底部 · /bottom '});
+    this.tui=new class extends TuiAltScreen {
+      protected override applyLineResets(lines:string[]) {
+        // The viewport can contain empty rows outside every leaf component when
+        // a transcript is short. Paint those final layout rows without adding
+        // transcript content or changing ScrollView's height/follow semantics.
+        return super.applyLineResets(lines.map(line=>line||styledLine([],this.terminal.columns)));
+      }
+    }(this.terminal,true,undefined,{copySelection:this.copy,copyOnSelect:true,scrollToEndIndicator:()=> ' ↓ 回到底部 · /bottom '});
     this.editor=new HardwareCursorEditor(this.tui,theme,{autocompleteMaxVisible:2});
     this.editor.setAutocompleteProvider(commandCompletion(options.workspace));
     this.editor.placeholder=()=>this.placeholder();
