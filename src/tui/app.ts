@@ -245,7 +245,14 @@ export class ReadOnlyTui {
       this.tui.requestRender();
     };
     this.editor.onSubmit=text=>this.submit(text);
-    this.scroll=new ScrollView(this.transcript,{follow:'end',primary:true});
+    this.scroll=new class extends ScrollView {
+      override updateLayout(contentHeight:number,viewportHeight:number,requestRender:()=>void) {
+        const following=this.isFollowingEnd;
+        super.updateLayout(contentHeight,viewportHeight,requestRender);
+        // 菜单开关改变视口高度；回到末尾的同一行不等于用户重新开启了跟随。
+        if(!following&&this.isFollowingEnd)this.scrollTo(this.scrollTop,{disableFollow:true});
+      }
+    }(this.transcript,{follow:'end',primary:true});
     // 1b（U2）：头部一行；主区；状态行；输入框；底栏用量与键位提示（状态反馈替换键位提示行）。
     // 窗口宽敞时（U10）头部下方、运行状态行上方各一条区块分隔线；矮窗口先收它们。
     const header:Component={invalidate(){},render:width=>{const state=this.headerState();return [headerLine(state,width,narrowing(width,state,this.statusParts()).headerRight),...(this.roomy()?[rule(width)]:[])];}};
@@ -274,11 +281,17 @@ export class ReadOnlyTui {
       if(event.type==='click'&&this.viewingRecovery&&!this.recoveryOpen&&this.runId){void this.openRecovery(this.runId);return {handled:true};}
       return undefined;
     });
+    // 菜单只使用主区剩余行；窄屏不让默认 stack shrink 挤掉头部、状态或输入。
+    const autocomplete=this.editor.separateAutocomplete(()=>{
+      const width=this.terminal.columns,rows=this.terminal.rows;
+      const fixed=topMargin(rows)+bottomMargin(rows)+footer.render(width).length+Math.min(6,Math.max(3,this.editor.render(width).length));
+      return rows-fixed-(this.welcome?0:header.render(width).length+statusRegion.render(width).length+queue.render(width).length);
+    });
     if(!options.runId&&!options.show){
       const tip=TIPS[Math.floor(Math.random()*TIPS.length)];
       this.welcome=new WelcomeScreen({coding:!!options.coding,
         read:()=>readWelcomeFacts({workspace:options.workspace,dataRoot:options.dataRoot,coding:!!options.coding,mode:options.mode,toolEnvironment:options.toolEnvironment},id=>this.shown('session',id),tip),
-        height:width=>this.terminal.rows-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows)-this.footerRows(width)-Math.min(6,Math.max(3,this.editor.render(width).length)),
+        height:width=>this.terminal.rows-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows)-this.footerRows(width)-Math.min(6,Math.max(3,this.editor.render(width).length))-autocomplete.render(width).length,
         open:session=>{try{this.command(parseCommand(`/history ${session}`));}catch(error){this.notice=error instanceof CommandError?error.line:safe(String(error));}this.tui.requestRender();},
         changed:()=>this.tui.requestRender(),inspect:lines=>this.widths?.inspect(lines)});
     }
@@ -286,9 +299,10 @@ export class ReadOnlyTui {
     // 1c 时：头部 → 主区 → 恢复面板 → 状态行 → 已禁用的输入框 → 底栏；高度不够时按 recoveryPlan 依次收起。
     const topPad:Component={invalidate(){},render:width=>[styledLine([],width)]};
     const layout=new VStack([{component:topPad,basis:1,visible:()=>topMargin(this.terminal.rows)>0},{component:header,basis:'auto',visible:()=>!this.welcome},...welcome,
-      {component:this.scroll,basis:0,grow:1,minSize:1,visible:view=>!this.welcome&&!this.recoveryOverlay()&&this.recoveryPlan(view.width).main},
+      {component:this.scroll,basis:0,grow:1,visible:view=>!this.welcome&&!this.recoveryOverlay()&&this.recoveryPlan(view.width).main},
       {component:recoveryArea,basis:0,grow:1,minSize:1,visible:()=>this.recoveryOverlay()},
       {component:recoveryPanel,basis:'auto',visible:()=>!this.welcome&&!this.recoveryOverlay()&&this.viewingRecovery&&(!!this.recoveryLoading?.isShowing||this.recoveryOpen&&!!this.recoveryPanel)},
+      {component:autocomplete,basis:'auto',visible:()=>!this.viewingRecovery},
       {component:statusRegion,basis:'auto',visible:()=>!this.welcome},
       {component:queue,basis:'auto',visible:()=>!this.welcome&&!this.viewingRecovery&&this.queueEntries.length>0},
       {component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6,visible:()=>!this.viewingRecovery},
@@ -302,9 +316,13 @@ export class ReadOnlyTui {
     // Viewport layout renders the leaf components directly, bypassing VStack.render.
     // Keep each component identity so focus, scrolling, mouse regions and sizing remain intact.
     // Side margins (U10) are painted here: each component renders at the inner width.
-    for(const component of [header,this.transcript,recoveryPanel,statusRegion,queue,this.editor,disabledInput,footer,...welcome.map(entry=>entry.component)]){
+    for(const component of [header,this.transcript,recoveryPanel,statusRegion,queue,autocomplete,this.editor,disabledInput,footer,...welcome.map(entry=>entry.component)]){
       const render=component.render.bind(component);
       component.render=width=>{const margin=sideMargin(width),lines=inset(render(width-2*margin),width,margin);return this.dialog?lines.map(line=>dimForOverlay(line)):lines;};
+      if(component===this.editor||component===autocomplete){
+        const mouse=component.handleMouse!.bind(component);
+        component.handleMouse=event=>{const margin=sideMargin(event.width);return mouse({...event,x:event.x-margin,width:event.width-2*margin});};
+      }
     }
     // Preserve upstream layout-node behavior by selecting the appropriate layout on resize.
     const resizeLayout=()=>this.tui.setLayoutRoot(this.terminal.columns<40||this.terminal.rows<12?root:layout);

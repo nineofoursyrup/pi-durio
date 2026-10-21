@@ -369,7 +369,7 @@ test('input frames stay closed and keep their base background around text and th
   } finally { overrideColorTierForTest(saved); }
 });
 
-test('autocomplete stays below the closed input frame with aligned menu rows, base backgrounds and mouse selection', async () => {
+test('autocomplete stays above the closed input frame with aligned menu rows, base backgrounds and mouse selection', async () => {
   const saved = COLOR_TIER, terminal = new TestTerminal(), tui = new TuiAltScreen(terminal, true);
   terminal.rows = 38; terminal.columns = 60;
   const identity = (text: string) => text;
@@ -393,28 +393,50 @@ test('autocomplete stays below the closed input frame with aligned menu rows, ba
         if (prefix) editor.handleInput('\t');
         await new Promise<void>(resolve => setImmediate(resolve));
         assert.equal(editor.isShowingAutocomplete(), true, 'the public provider opens the real two-item menu');
-        const lines = editor.render(40), plain = lines.map(stripTerminalSequences), bottom = lines.length - 3;
-        assert.match(plain[0], /^╭.*╮$/);
+        const lines = editor.render(40), plain = lines.map(stripTerminalSequences), top = 2, bottom = lines.length - 1;
+        assert.match(plain[top], /^╭.*╮$/);
         assert.match(plain[bottom], /^╰.*╯$/);
-        assert.ok(plain.slice(1, bottom).every(line => line.startsWith('│') && line.endsWith('│')));
-        if (!prefix) assert.equal(bottom, 2, 'single-line input keeps exactly three frame rows');
-        if (prefix.split('\n').length > 20) assert.match(plain[0], /↑/, 'the scroll count remains in the frame');
-        assert.ok(plain.slice(bottom + 1).every(line => !line.startsWith('│') && !line.endsWith('│')), 'menu rows stay outside the closed frame');
+        assert.ok(plain.slice(top + 1, bottom).every(line => line.startsWith('│') && line.endsWith('│')));
+        if (!prefix) assert.equal(bottom - top, 2, 'single-line input keeps exactly three frame rows');
+        if (prefix.split('\n').length > 20) assert.match(plain[top], /↑/, 'the scroll count remains in the frame');
+        assert.ok(plain.slice(0, top).every(line => !line.startsWith('│') && !line.endsWith('│')), 'menu rows stay outside the closed frame');
         assert.ok(lines.every(line => visibleWidth(line) === 40));
-        assert.match(plain[bottom + 1], /^   → history/, 'the menu shares the input content column after the new left margin');
-        assert.match(plain[bottom + 2], /^     stats/);
+        assert.match(plain[0], /^   → history/, 'the menu shares the input content column after the new left margin');
+        assert.match(plain[1], /^     stats/);
         const grid = captureSnapshot(lines, 40, lines.length, tier);
-        assert.ok(grid.rows.slice(bottom + 1).every(row => row.every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base'))));
-        assert.equal(grid.rows[bottom + 1][3].reverse, true, 'menu selection retains its independent reverse style');
+        assert.ok(grid.rows.slice(0, top).every(row => row.every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base'))));
+        assert.equal(grid.rows[0][3].reverse, true, 'menu selection retains its independent reverse style');
         assert.equal(lines.join('').split(CURSOR_MARKER).length - 1, 1, 'the focused editor retains one hardware cursor marker');
-        assert.ok(grid.rows.slice(1, bottom).every(row => row.every(cell => !cell.reverse)), 'the input has no competing painted caret');
+        assert.ok(grid.rows.slice(top + 1, bottom).every(row => row.every(cell => !cell.reverse)), 'the input has no competing painted caret');
         if (tier === 'none') assert.doesNotMatch(lines.join(''), /\x1b\[(?:[0-9;]*;)?(?:38|48);/);
-        editor.handleMouse({ type: 'click', button: 'left', x: 5, y: bottom + 2, screenX: 5, screenY: bottom + 2, width: 40, height: lines.length, shift: false, alt: false, ctrl: false });
+        editor.handleMouse({ type: 'click', button: 'left', x: 5, y: 1, screenX: 5, screenY: 1, width: 40, height: lines.length, shift: false, alt: false, ctrl: false });
         assert.equal(editor.getText(), prefix ? prefix + './stats' : '/stats ', 'clicking the second displayed item applies that completion');
         assert.equal(editor.isShowingAutocomplete(), false);
       }
     }
   } finally { overrideColorTierForTest(saved); rmSync(root, { recursive: true, force: true }); }
+});
+
+test('a compact menu adds the count when a previously unscrolled list is clipped and maps only candidate rows to clicks', async () => {
+  const saved=COLOR_TIER,terminal=new TestTerminal(),tui=new TuiAltScreen(terminal,true),identity=(text:string)=>text;
+  try {
+    for(const tier of ['truecolor','256color','none'] as const){
+      overrideColorTierForTest(tier);
+      const editor=new HardwareCursorEditor(tui,{borderColor:identity,selectList:{selectedPrefix:identity,selectedText:text=>`\x1b[7m${text}\x1b[27m`,description:identity,scrollInfo:identity,noMatch:identity}});
+      editor.focused=true;
+      const menu=editor.separateAutocomplete(()=>2);
+      editor.setAutocompleteProvider(new CombinedAutocompleteProvider([{name:'alpha'},{name:'bravo'},{name:'delta'}],process.cwd(),null));
+      editor.handleInput('/');await new Promise<void>(resolve=>setImmediate(resolve));
+      editor.handleInput('\x1b[B');
+      const lines=menu.render(40),plain=lines.map(stripTerminalSequences),grid=captureSnapshot(lines,40,lines.length,tier);
+      assert.equal(lines.length,2);assert.match(plain[0],/^   → bravo/);assert.match(plain[1],/^     \(2\/3\)/);
+      assert.equal(grid.rows[0][3].reverse,true);
+      assert.ok(grid.rows.every(row=>row.every(cell=>cell.bg===(tier==='none'?undefined:'bg.base'))));
+      const mouse={type:'click' as const,button:'left' as const,x:5,y:1,screenX:5,screenY:1,width:40,height:2,shift:false,alt:false,ctrl:false};
+      menu.handleMouse!(mouse);assert.equal(editor.getText(),'/','the count is not a completion target');
+      menu.handleMouse!({...mouse,y:0,screenY:0});assert.equal(editor.getText(),'/bravo ','the compact row maps to the displayed candidate');
+    }
+  } finally {overrideColorTierForTest(saved);}
 });
 
 test('snapshots place Chinese and emoji in terminal columns and resolve quantized foreground tokens', () => {
