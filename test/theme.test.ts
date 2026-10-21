@@ -420,12 +420,16 @@ test('autocomplete stays above the closed input frame with aligned menu rows, ba
   } finally { overrideColorTierForTest(saved); rmSync(root, { recursive: true, force: true }); }
 });
 
-test('a compact menu adds the count for three unscrolled candidates at the product visibility setting and maps only candidate rows to clicks', async () => {
+test('a compact menu keeps the selected candidate and upstream count at the product visibility setting and maps only candidate rows to clicks', async () => {
   const saved=COLOR_TIER,terminal=new TestTerminal(),tui=new TuiAltScreen(terminal,true),identity=(text:string)=>text;
   try {
     for(const tier of ['truecolor','256color','none'] as const){
       overrideColorTierForTest(tier);
-      const editor=new HardwareCursorEditor(tui,{borderColor:identity,selectList:{selectedPrefix:identity,selectedText:text=>`\x1b[7m${text}\x1b[27m`,description:identity,scrollInfo:identity,noMatch:identity}},{autocompleteMaxVisible:2});
+      let upstreamCount:string|undefined;
+      const editor=new HardwareCursorEditor(tui,{borderColor:identity,selectList:{selectedPrefix:identity,selectedText:text=>`\x1b[7m${text}\x1b[27m`,description:identity,scrollInfo:text=>upstreamCount=text,noMatch:identity}},{autocompleteMaxVisible:2});
+      assert.equal(editor.getAutocompleteMaxVisible(),2,'the upstream constructor accepts the product two-item limit');
+      editor.setAutocompleteMaxVisible(5);editor.setAutocompleteMaxVisible(2);
+      assert.equal(editor.getAutocompleteMaxVisible(),2,'the upstream setter also accepts the two-item limit');
       editor.focused=true;
       const menu=editor.separateAutocomplete(()=>2);
       editor.setAutocompleteProvider(new CombinedAutocompleteProvider([{name:'alpha'},{name:'bravo'},{name:'delta'}],process.cwd(),null));
@@ -433,6 +437,9 @@ test('a compact menu adds the count for three unscrolled candidates at the produ
       editor.handleInput('\x1b[B');
       const lines=menu.render(40),plain=lines.map(stripTerminalSequences),grid=captureSnapshot(lines,40,lines.length,tier);
       assert.equal(lines.length,2);assert.match(plain[0],/^   → bravo/);assert.match(plain[1],/^     \(2\/3\)/);
+      assert.equal(upstreamCount,'  (2/3)','three candidates already have the upstream count before layout clipping');
+      assert.equal(plain[1].trim(),upstreamCount.trim(),'the compact menu preserves the upstream count');
+      assert.ok(lines.every(line=>visibleWidth(line)===40));
       assert.equal(grid.rows[0][3].reverse,true);
       assert.ok(grid.rows.every(row=>row.every(cell=>cell.bg===(tier==='none'?undefined:'bg.base'))));
       const mouse={type:'click' as const,button:'left' as const,x:5,y:1,screenX:5,screenY:1,width:40,height:2,shift:false,alt:false,ctrl:false};

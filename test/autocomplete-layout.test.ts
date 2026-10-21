@@ -91,6 +91,7 @@ test('session completion borrows only main rows and preserves fixed regions, scr
         assert.deepEqual(anchors(opened),fixed,`${width}x${height} ${tier} ${trigger}: fixed regions`);
         assert.ok(menu>=0&&menu<fixed.status,'menu occupies the main area above status and queue');
         assert.ok(opened.some(line=>/\(1\/\d+\)/.test(line)),'the menu scroll counter stays visible');
+        if(width===40&&height===12&&trigger==='@')assert.equal(opened.filter(line=>/\b(?:alpha|bravo|delta|omega)\.txt\b/.test(line)).length,2,'one input line shows the complete two-candidate menu plus its counter');
         assert.equal(opened.length,height);assert.ok(app.screen().every(line=>visibleWidth(line)<=width));
         key('\x1b');key('\x15');
         assert.deepEqual(anchors(lines()),fixed,'closing completion restores the same fixed regions');
@@ -103,6 +104,7 @@ test('session completion borrows only main rows and preserves fixed regions, scr
       key('\x1b[200~'+draft+'\x1b[201~');const fixed=anchors(lines());
       key('@');await until(()=>lines().some(line=>/→ |补全空间不足/.test(line)));
       assert.deepEqual(anchors(lines()),fixed,`${count} input lines keep every fixed region`);
+      assert.equal(lines().filter(line=>/\b(?:alpha|bravo|delta|omega)\.txt\b/.test(line)).length,count===2?2:count===3?1:0,`${count} input lines preserve the required candidate count`);
       if(count<4){assert.match(lines().join('\n'),/→ alpha\.txt/);assert.match(lines().join('\n'),/\(1\/4\)/);}
       else {assert.match(lines().join('\n'),/补全空间不足 · 请扩大窗口/);assert.doesNotMatch(lines().join('\n'),/→ /);}
       key('\x1b[B');key('\x1b[B');

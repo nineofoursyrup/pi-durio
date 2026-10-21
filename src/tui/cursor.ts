@@ -10,7 +10,6 @@ export class HardwareCursorEditor extends Editor {
   private inputRows=0;
   private autocompleteHitRows:Array<number|undefined>=[];
   private readonly menuRender:{selected?:string;counter?:string};
-  private readonly menuTheme:EditorTheme['selectList'];
   /** 输入为空时显示在插入点之后的占位文案（fg.faint）；pi-tui 1.1.0 的 Editor 没有占位。 */
   placeholder?:()=>string;
   constructor(tui:TUI,theme:EditorTheme,options:EditorOptions={}) {
@@ -20,7 +19,7 @@ export class HardwareCursorEditor extends Editor {
       selectedText:text=>menuRender.selected=theme.selectList.selectedText(text),
       scrollInfo:text=>menuRender.counter=theme.selectList.scrollInfo(text),
     }},{paddingX:2,...options});
-    this.menuRender=menuRender;this.menuTheme=theme.selectList;
+    this.menuRender=menuRender;
   }
   protected override renderTopBorder(width:number,hidden:number):string {
     return this.borderColor('╭')+super.renderTopBorder(width,hidden)+this.borderColor('╮');
@@ -42,7 +41,11 @@ export class HardwareCursorEditor extends Editor {
     const {autocomplete,selected,counter}=this.renderParts(width),height=Math.max(0,Math.floor(availableRows));
     this.autocompleteHitRows=[];
     if(!autocomplete.length||height===0)return [];
-    if(height<2)return [this.menuLine(fgSgr('ac.warn')+'补全空间不足 · 请扩大窗口'+resetSgr(),width)];
+    if(height<2){
+      const pad=Math.min(this.getPaddingX(),Math.max(0,Math.floor((width-3)/2))),left=1+pad;
+      const line=' '.repeat(left)+truncateToWidth(fgSgr('ac.warn')+'补全空间不足 · 请扩大窗口'+resetSgr(),Math.max(0,width-left),'');
+      return [this.baseLine(line+' '.repeat(Math.max(0,width-visibleWidth(line))))];
+    }
     if(autocomplete.length<=height){
       this.autocompleteHitRows=autocomplete.map((_,row)=>row===counter?undefined:row);
       return autocomplete;
@@ -50,15 +53,9 @@ export class HardwareCursorEditor extends Editor {
     const items=autocomplete.map((_,row)=>row).filter(row=>row!==counter),chosen=Math.max(0,items.indexOf(selected));
     const count=height-1,start=Math.max(0,Math.min(chosen-Math.floor(count/2),items.length-count));
     this.autocompleteHitRows=[...items.slice(start,start+count),undefined];
-    const scroll=counter>=0?autocomplete[counter]:this.menuLine(this.menuTheme.scrollInfo(`  (${chosen+1}/${items.length})`),width);
-    return [...items.slice(start,start+count).map(row=>autocomplete[row]),scroll];
+    return [...items.slice(start,start+count).map(row=>autocomplete[row]),autocomplete[counter]];
   }
   private baseLine(line:string) {const base=bgSgr('bg.base');return base+line.replaceAll(resetSgr(),resetSgr()+base)+resetSgr();}
-  private menuLine(text:string,width:number) {
-    const pad=Math.min(this.getPaddingX(),Math.max(0,Math.floor((width-3)/2))),left=1+pad;
-    const line=' '.repeat(left)+truncateToWidth(text,Math.max(0,width-left),'');
-    return this.baseLine(line+' '.repeat(Math.max(0,width-visibleWidth(line))));
-  }
   private handleEditorMouse(event:TuiMouseEvent) {return super.handleMouse({...event,x:event.x-1,width:Math.max(1,event.width-2)});}
   override handleMouse(event:TuiMouseEvent) {
     return this.handleEditorMouse(event);
