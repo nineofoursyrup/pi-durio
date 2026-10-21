@@ -63,7 +63,8 @@ test('session completion borrows only main rows and preserves fixed regions, scr
     assert.ok(shortened.length<paused.length);assert.deepEqual(shortened.map(line=>line.match(/output \d+/)?.[0]),paused.slice(0,shortened.length).map(line=>line.match(/output \d+/)?.[0]),'opening keeps the paused top row');
     emit(60);await wait();key('\x1b');key('\x15');
     assert.deepEqual(lines().filter(line=>line.includes('output ')),paused,'closing does not move a paused viewport or enable following');
-    key('/bottom');key('\r');lines();
+    key('/bottom');key('\r');key(' ');key('\x15');lines();
+    assert.ok(lines().some(line=>line.includes('output 60')),'the explicit bottom action reaches the latest output before pausing');
     const outputRow=lines().findIndex(line=>line.includes('output '));
     key(`\x1b[<0;9;${outputRow+1}M`);key(`\x1b[<0;9;${outputRow+1}m`);
     assert.match(lines().join('\n'),/↓ 回到底部/,'selecting transcript text pauses following even at the latest output');

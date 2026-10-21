@@ -246,7 +246,14 @@ export class ReadOnlyTui {
       this.tui.requestRender();
     };
     this.editor.onSubmit=text=>this.submit(text);
-    this.scroll=new ScrollView(this.transcript,{follow:'end',primary:true});
+    this.scroll=new class extends ScrollView {
+      override updateLayout(contentHeight:number,viewportHeight:number,requestRender:()=>void) {
+        const following=this.isFollowingEnd;
+        super.updateLayout(contentHeight,viewportHeight,requestRender);
+        // 菜单开关改变视口高度；回到末尾的同一行不等于用户重新开启了跟随。
+        if(!following&&this.isFollowingEnd)this.scrollTo(this.scrollTop,{disableFollow:true});
+      }
+    }(this.transcript,{follow:'end',primary:true});
     // 1b（U2）：头部一行；主区；状态行；输入框；底栏用量与键位提示（状态反馈替换键位提示行）。
     // 窗口宽敞时（U10）头部下方、运行状态行上方各一条区块分隔线；矮窗口先收它们。
     const header:Component={invalidate(){},render:width=>{const state=this.headerState();return [headerLine(state,width,narrowing(width,state,this.statusParts()).headerRight),...(this.roomy()?[rule(width)]:[])];}};
