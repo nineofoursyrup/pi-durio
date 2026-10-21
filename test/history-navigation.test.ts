@@ -232,11 +232,14 @@ test('body window navigation and mouse paging keep the readonly task when return
 
 test('c probes a ready coding session owner without taking the lock or switching away from history', async () => {
   const f = fixture(), done = await runCodingTask({ ...f, input: 'Ready coding session', mode: 'offline', transport: demoTransport().fetch });
-  const controller = new AbortController(); let entered = false;
-  const running = runCodingTask({ ...f, dataRoot: join(f.root, 'other-data'), input: 'Owner held', mode: 'offline', signal: controller.signal, cancellation: 'stop', transport: async (_url, init) => { entered = true; return new Promise((_resolve, reject) => init!.signal!.addEventListener('abort', () => reject(Error('stopped')))); } });
+  const controller = new AbortController(); let owned = false;
+  const running = runCodingTask({ ...f, dataRoot: join(f.root, 'other-data'), input: 'Owner held', mode: 'offline', signal: controller.signal, cancellation: 'stop',
+    onObservation: event => { if (event.kind === 'ownership.acquired') owned = true; },
+    transport: async (_url, init) => new Promise((_resolve, reject) => init!.signal!.addEventListener('abort', () => reject(Error('stopped')))) });
   const t = open(f), label = readDisplayIndex(f.dataRoot).label('session', done.sessionId);
   try {
-    await until(() => entered, t.screen);
+    // This view probes ownership; provider entry follows the independent artifact capture.
+    await until(() => owned, t.screen);
     t.press(`/history ${label}`, key.enter, 'c'); await until(() => t.screen().includes('工作区被其他进程占用'), t.screen);
     assert.match(t.screen(), /^ {132}\n {2}◆ history/); assert.equal(t.calls(), 0); assert.equal(readSessionChains(f.dataRoot).session(done.sessionId)!.tasks, 1);
   } finally { controller.abort(); await running; await t.app.exit(); }
