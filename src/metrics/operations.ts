@@ -13,7 +13,7 @@ const excludedKinds=new Set(['model.payload','model.provider-event','model.fetch
 /** Read bounded original facts. There is no writable store, execution or classifier. */
 export function operationRuns(root:string,through:number) {
  const runs=new Map<string,OperationRun>();let count=0,bytes=0;
- for(const ref of records(root,{through})){
+ for(const ref of through?records(root,{through}):[]){
   if(excludedKinds.has(ref.kind))continue;bytes+=ref.ref.bytes;if(++count>30000||bytes>32*1024*1024)throw Error('OPERATIONS_SCOPE_TOO_LARGE');
   let run=runs.get(ref.runId);if(!run){run={root,id:ref.runId,facts:[],kind:'unknown',source:null,project:null};runs.set(ref.runId,run);}
   let f:OperationFact;try{f={ref,data:decode(root,ref)};}catch(error){f={ref,data:{},missing:String(error)};}

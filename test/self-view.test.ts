@@ -172,7 +172,7 @@ test('the app opens --self on a fresh data root, measures actual frames and expo
     key('b'); await until(() => screen().includes('尚无任务'));
     copied = ''; key('e'); key('\r'); await until(() => !!copied);
     assert.ok(JSON.parse(copied).keys.samples > first.keys.samples, 'remeasurement keeps and advances the current process samples');
-    key('\t'); assert.match(screen(), /统计不可读取/);
+    key('\t'); assert.match(screen(), /窗口内没有日常受理样本 · \/ 调整范围/); assert.match(screen(), /样本 0/);
     key('\x1b[Z'); await until(() => screen().includes('尚无任务'));
     key('\x1b'); key('/stats --self --source diagnostic'); key('\r');
     assert.match(screen(), /--self 固定近 7 天/);
