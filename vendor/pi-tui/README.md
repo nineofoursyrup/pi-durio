@@ -1,23 +1,30 @@
-# Pi TUI measured-width derivative
+# Pi TUI measured-width and autocomplete derivative
 
 This is the explicitly authorized #16 dependency exception, recorded in
 `docs/implementation/pi-durio-v1/issue-16/width-exception-authorization.json`.
-The installed version is **1.1.0-durio-width.1**, not an unmodified official release.
+The installed version is **1.1.0-durio-width.2**, not an unmodified official release.
+The visual-fix-r3 review repair also explicitly authorizes the autocomplete minimum
+change described below; the original #16 authorization remains unchanged.
 
 `upstream/earendil-works-pi-tui-1.1.0.tgz` is the immutable official npm 1.1.0 archive.
-`manifest.json` binds its npm integrity, the two-source-file patch, the build script,
+`manifest.json` binds its npm integrity, both patches, the build script,
 TypeScript 5.9.3, and the resulting derivative archive. Original TypeScript sources
-are retained in the upstream source maps. Only the width setter, its shared lookup,
-and its export change; Editor, selection, wrapping and input code remain upstream.
+are retained in the upstream source maps. `width-overrides.patch` changes only the
+width setter, its shared lookup, and its export. `autocomplete-min-visible.patch`
+changes the Editor constructor and setter minimum from 3 to 2 so the product's
+`autocompleteMaxVisible:2` is honored. Its default, upper limit and other Editor,
+selection, wrapping and input behavior remain upstream.
 Generated JavaScript/source maps, declaration exports and derivative metadata are
 regenerated. Existing native helpers are copied unchanged.
 
-To rebuild from the checked-in original and patch, with development dependencies
+To rebuild from the checked-in original and patches, with development dependencies
 installed, run `node scripts/build-pi-tui-width.mjs` from the repository root.
 It works in a temporary package tree, validates the original SHA-512 integrity,
 and writes the archive and manifest here. It never patches installed modules.
 `npm ci` installs the exact local archive identified by the lock; `npm pack` bundles
-that installed dependency and this recipe. Two builds produced identical archive
+that installed dependency and this recipe. Two builds produced identical `.2` archive
+SHA-256 `655821a0cc3134646bd0281a0f200cd05b801ba6537ce6f09af225f4958c63e9`.
+The original `.1` derivative archive remains unchanged for existing evidence:
 SHA-256 `90a1f855d1e5f30d9b97c8733ca0a1c3a05ce07d5e95af4e2fed6f553e34f62a`.
 
 The added API is process-wide. The host permits one active renderer and resets the
