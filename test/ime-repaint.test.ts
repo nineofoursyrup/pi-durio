@@ -12,10 +12,14 @@ import { captureSnapshot } from '../src/tui/snapshot.js';
 // external preedit drawing can damage this display without changing app.screen().
 class PaintedTerminal implements Terminal {
   columns=132;rows=38;kittyProtocolActive=false;painted=new Map<number,string>();
+  private runningFrameReady!:()=>void;
+  readonly runningFrame=new Promise<void>(resolve=>{this.runningFrameReady=resolve;});
   input:(data:string)=>void=()=>{};resize:()=>void=()=>{};
   start(input:(data:string)=>void,resize:()=>void){this.input=input;this.resize=resize;}
   write(data:string){
     for(const match of data.matchAll(/\x1b\[(\d+);1H\x1b\[2K([\s\S]*?)(?=\x1b\[\d+;\d+H|\x1b\[\?2026l|$)/g))this.painted.set(Number(match[1]),match[2]);
+    // Provider entry precedes the UI's periodic refresh of execution facts.
+    if([...this.painted.values()].some(line=>/deepseek-flash · offline.*本任务 0 tok \+1 unknown/.test(stripTerminalSequences(line))))this.runningFrameReady();
   }
   stop(){}async drainInput(){}moveBy(){}hideCursor(){}showCursor(){}clearLine(){}clearFromCursor(){}clearScreen(){}setTitle(){}setProgress(){}setProgramStatus(){}
 }
@@ -28,11 +32,13 @@ test('a delivered empty Backspace repaints terminal-damaged input without changi
   const transport:typeof fetch=async(_url,init)=>{calls++;started();return await new Promise<Response>((_resolve,reject)=>{const abort=()=>reject(Error('fixture stream cancelled'));init!.signal!.addEventListener('abort',abort,{once:true});if(init!.signal!.aborted)abort();});};
   const app=new ReadOnlyTui({workspace,dataRoot:join(root,'data'),draftRoot:join(root,'drafts'),mode:'offline',transport,terminal,widthCalibration:false});
   try {
-    app.start();terminal.input('probe');terminal.input('\r');await dispatched;
+    app.start();terminal.input('probe');terminal.input('\r');await dispatched;await terminal.runningFrame;
     for(const tier of ['truecolor','256color','none'] as const){
-      overrideColorTierForTest(tier);const screen=app.screen(),row=screen.findIndex(line=>stripTerminalSequences(line).includes('补充当前任务'))+1;
-      assert.ok(row>0);await turn();
+      overrideColorTierForTest(tier);await turn();
+      const screen=app.screen(),row=screen.findIndex(line=>stripTerminalSequences(line).includes('补充当前任务'))+1;
+      assert.ok(row>0);
       const expected=stripTerminalSequences(screen[row-1]);assert.match(expected,/^\s*│❯ .*│\s*$/);
+      assert.equal(stripTerminalSequences(terminal.painted.get(row)!),expected,'erase the actual current input row, with no asynchronous gap after locating it');
       terminal.painted.set(row,' '.repeat(terminal.columns)); // Model external erase; no invented composition input event.
       terminal.input('\x7f');await turn();
       const repainted=terminal.painted.get(row)!;
