@@ -249,7 +249,7 @@ export class ReadOnlyTui {
       override updateLayout(contentHeight:number,viewportHeight:number,requestRender:()=>void) {
         const following=this.isFollowingEnd;
         super.updateLayout(contentHeight,viewportHeight,requestRender);
-        // 菜单开关改变视口高度；回到末尾的同一行不等于用户重新开启了跟随。
+        // T2：菜单开关、窗口大小或内容变化使视图到达末尾，都不恢复跟随；只有用户显式操作才会恢复。
         if(!following&&this.isFollowingEnd)this.scrollTo(this.scrollTop,{disableFollow:true});
       }
     }(this.transcript,{follow:'end',primary:true});
