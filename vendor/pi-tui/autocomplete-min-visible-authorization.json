@@ -1,0 +1,19 @@
+{
+  "issue": "visual-fix-r3 review 修复",
+  "type": "explicit-user-limited-A5-exception",
+  "status": "AUTHORIZED",
+  "at": "2026-10-21",
+  "timezone": "Asia/Shanghai",
+  "answer": "扩展范围修正 vendored pi-tui 的最小值，使 maxVisible:2 真正生效，再完成原要求",
+  "source": "/Users/nineofour/pi-durio-redesign-run/visual-fix-r3/review-fix/scope-expansion-20261021.md",
+  "scope": [
+    "packages/tui/src/components/editor.ts 中 constructor 与 setter 两处最小值 3→2",
+    "补丁 autocomplete-min-visible.patch；sha256 1476c0db7b2d1bc58b036b41040e7e7e7e6853651123783c8693b23a2b0f5016",
+    "产物 pi-tui-1.1.0-durio-width.2.tgz；sha256 655821a0cc3134646bd0281a0f200cd05b801ba6537ce6f09af225f4958c63e9"
+  ],
+  "limits": [
+    "默认 5、上限 20、有限数判断、取整和其他 Editor 行为不变",
+    "#16 的 width-exception-authorization.json 记录不变",
+    "不构成 #92 或原生 Terminal 验收"
+  ]
+}

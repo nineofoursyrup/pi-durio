@@ -110,7 +110,7 @@ export class SelfView {
       if (own.value) body.push(rule(w, 'line.inner', tier), ...row('产品源码合计', [{ text: `${own.value.files} 文件 · `, fg: 'fg.primary' }, { text: `${own.value.lines.toLocaleString('en-US')} 行`, fg: 'fg.primary', bold: true }], w));
       const deps = snapshot.code.dependencies.value;
       body.push(...row('直接依赖', deps ? [`${deps.count}`, ` · ${deps.exact ? '精确固定' : '非全部精确固定'}`] : ['未记录', ''], w));
-      for (const [label, item] of [['随包脚本', snapshot.code.scripts], ['pi-tui 宽度补丁', snapshot.code.patch], ['测试（不随包）', snapshot.code.tests]] as const) body.push(...row(label, [item.value ? `${item.value.lines.toLocaleString('en-US')} 行` : '未记录', ''], w));
+      for (const [label, item] of [['随包脚本', snapshot.code.scripts], ['pi-tui 补丁', snapshot.code.patch], ['测试（不随包）', snapshot.code.tests]] as const) body.push(...row(label, [item.value ? `${item.value.lines.toLocaleString('en-US')} 行` : '未记录', ''], w));
       return body;
     };
     const volume = (w: number) => [...section('体积', w), ...row('生产安装', snapshot.installation.value === null ? absent(snapshot.installation) : [bytes(snapshot.installation.value), ' · 含 provider SDK'] as const, w), ...row('分发', unmeasured, w)];
