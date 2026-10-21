@@ -14,13 +14,16 @@ test('self source counts use physical src lines, separate shipped scripts/patch/
     { path: 'src/tui/view.ts', physicalLines: 5 }, { path: 'scripts/eval/run.mjs', physicalLines: 4 },
     { path: 'scripts/isolation/run.py', physicalLines: 6 }, { path: 'scripts/development.mjs', physicalLines: 400 },
     { path: 'vendor/pi-tui/width-overrides.patch', physicalLines: 53 },
+    { path: 'vendor/pi-tui/autocomplete-min-visible.patch', physicalLines: 8 },
+    { path: 'vendor/other/ignored.patch', physicalLines: 900 },
     { path: 'test/example.test.ts', physicalLines: 9 }, { path: 'test/fixtures/raw.json', physicalLines: 1000 },
     { path: 'vendor/pi-tui/pinned.tgz', physicalLines: 99, sha256: 'fixed' },
   ];
   const totals = sourceCodeTotals({ inputs }, { dependencies: { a: '1.2.3', tui: 'file:vendor/pi-tui/pinned.tgz' } });
   assert.deepEqual(totals.product.value, { files: 3, lines: 15, groups: [{ directory: 'src/eval/', files: 1, lines: 7 }, { directory: 'src/tui/', files: 1, lines: 5 }, { directory: 'src/', files: 1, lines: 3 }] });
   assert.deepEqual(totals.scripts.value, { files: 2, lines: 10 });
-  assert.equal(totals.patch.value?.lines, 53);
+  assert.deepEqual(totals.patch.value, { files: 2, lines: 61 });
+  assert.equal(totals.patch.basis, 'pi-tui 补丁文件（宽度、补全最小值）的物理行（含 diff 上下文）');
   assert.equal(totals.tests.value?.lines, 9);
   assert.deepEqual(totals.dependencies.value, { count: 2, exact: true });
   assert.equal(sourceCodeTotals({ inputs: [{ path: 'src/old.ts' }] }, {}).product.value, null);

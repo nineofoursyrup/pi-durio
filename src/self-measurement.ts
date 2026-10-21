@@ -29,7 +29,7 @@ export function sourceCodeTotals(manifest: { inputs?: SourceInput[] }, metadata:
   return {
     product: { ...product, value: product.value ? { ...product.value, groups } : null },
     scripts: count(inputs.filter(f => /^scripts\/(eval|isolation)\//.test(f.path)), '随包 scripts/eval/** 与 scripts/isolation/**；与产品源码分开'),
-    patch: count(inputs.filter(f => f.path === 'vendor/pi-tui/width-overrides.patch'), 'pi-tui 宽度补丁文件的物理行（含 diff 上下文）'),
+    patch: count(inputs.filter(f => f.path.startsWith('vendor/pi-tui/') && f.path.endsWith('.patch')), 'pi-tui 补丁文件（宽度、补全最小值）的物理行（含 diff 上下文）'),
     tests: count(inputs.filter(f => f.path.startsWith('test/') && !f.path.startsWith('test/fixtures/') && /\.[cm]?[jt]sx?$/.test(f.path)), '测试维护代码；不含 fixture、快照；不随包'),
     dependencies: measured(metadata.dependencies ? { count: dependencies.length, exact: dependencies.every(([, version]) => /^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/.test(version) || version.startsWith('file:') && inputs.some(f => f.path === version.slice(5) && !!f.sha256)) } : null, 'build-manifest', 'package.json 直接生产依赖：精确版本或已绑定内容的本地包；不含 devDependencies'),
   };

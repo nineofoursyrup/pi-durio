@@ -24,7 +24,7 @@
    0-20 fg.body/bg.base ; 21-21 fg.primary/bg.base ; 22-32 fg.faint/bg.base ; 33-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-93 fg.primary/bg.base ; 94-108 fg.faint/bg.base ; 109-131 -/bg.base
 12|随包脚本             ### 行                                                                                                         |
    0-20 fg.body/bg.base ; 21-26 fg.primary/bg.base ; 27-131 -/bg.base
-13|pi-tui 宽度补丁      ## 行                                         观测开销                                                         |
+13|pi-tui 补丁          ## 行                                         观测开销                                                         |
    0-20 fg.body/bg.base ; 21-25 fg.primary/bg.base ; 26-66 -/bg.base ; 67-74 fg.label/bg.base/b ; 75-131 -/bg.base
 14|测试（不随包）       ### 行                                        记录增长             尚无任务 · 数据根总量 ## KB                 |
    0-20 fg.body/bg.base ; 21-26 fg.primary/bg.base ; 27-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-95 fg.primary/bg.base ; 96-114 fg.faint/bg.base ; 115-131 -/bg.base
