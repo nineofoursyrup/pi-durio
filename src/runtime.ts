@@ -60,6 +60,8 @@ export interface ReadTaskOptions {
   /** Host cleanup waiting policy, not a claim that work stops at the deadline. */
   cleanupTimeoutMs?: number;
   onObservation?: (event: { kind: string; runId: string }) => void;
+  /** Caller boundary around synchronous execution capture (for example, timed terminal queries). */
+  beforeArtifactCapture?: () => Promise<() => void>;
   /** Display only: current to-model context after each committed entry. Never recorded as a fact. */
   onContextUsage?: (usage: ContextUsage) => void;
   fault?: FaultInjector;
@@ -558,7 +560,12 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     }
     record('ownership.acquired', { dataRoot: {path:owner.path,claim:owner.claim}, ...(workspaceOwner ? {workspace:{path:workspaceOwner.path,claim:workspaceOwner.claim}}:{}) });
     if (workspaceOwner && !recovery) record('workspace.owner', { root: workspaceOwner.root, workspace, scope: 'protocol participants only; external editors, shared Git metadata and external resources are not isolated' });
-    const artifact=maintenance?maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:captureArtifact(evidence,workspace);
+    const releaseCapture=!maintenance&&!recovery&&options.beforeArtifactCapture?await options.beforeArtifactCapture():undefined;
+    let artifact:ReturnType<typeof captureArtifact>;
+    try {
+      guard(); // Cancellation/ownership can change while the caller waits for its boundary.
+      artifact=maintenance?maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:captureArtifact(evidence,workspace);
+    } finally {releaseCapture?.();}
     const artifactSeq=maintenance?maintenanceRecords.find(r=>r.kind==='execution.artifact')!.seq:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.seq:record('execution.artifact',artifact);
     const models = createModels({ authContext: { env: async name => name === 'DEEPSEEK_API_KEY' ? apiKey : undefined, fileExists: async () => false } });
     models.setProvider(deepseekProvider());

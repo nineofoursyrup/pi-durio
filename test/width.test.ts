@@ -2,13 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StdinBuffer } from '@earendil-works/pi-tui';
 import { TerminalWidthProbe } from '../src/tui/width-probe.js';
-import { mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { type Terminal, visibleWidth } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
 import { demoTransport } from '../src/offline.js';
 import { processMeasurements } from '../src/self-measurement.js';
+import { records } from '../src/history.js';
 
 test('native width query survives split/batched replies and preserves ordinary input and pasted CPR text', async()=>{
   const ordinary:string[]=[],writes:string[]=[];
@@ -89,6 +90,47 @@ test('self timing includes input waiting for calibration and ignores blocked fra
     await until(() => processMeasurements.snapshot().keys.samples === before + 1);
     assert.equal(processMeasurements.snapshot().keys.samples, before + 1, 'protocol replies are not additional key samples');
   } finally { terminal.release(); await app.exit(); }
+});
+
+test('starting a task leaves no timed width query across synchronous execution capture', async () => {
+  const f=calibratedFixture();
+  const artifacts=()=>existsSync(join(f.root,'data/host.sqlite'))?[...records(join(f.root,'data'),{kinds:['execution.artifact']})]:[];
+  try {
+    await until(f.painted);
+    f.terminal.hold='◆';f.terminal.key('probe');f.terminal.key('\r');f.app.screen();
+    await until(()=>f.terminal.held.length===1);
+    // Give ordinary asynchronous startup a turn while the controlled terminal has
+    // an outstanding reply. Artifact capture must wait for that reply boundary.
+    await new Promise(resolve=>setTimeout(resolve,300));
+    // A terminal reply can be dispatched after overdue timers when host work has
+    // blocked the loop. Preserve that ordering instead of replying in a microtask.
+    await new Promise<void>(resolve=>setImmediate(resolve));
+    assert.equal(artifacts().length,0,'execution capture waits for the terminal reply, even on a fast filesystem');
+    assert.equal(f.transport.calls.length,0,'runtime must not pass execution capture while a CPR is still in flight');
+    assert.equal(f.terminal.writes.some(data=>data.includes('Display unverified')),false,'host preparation must not expire the terminal query');
+    f.terminal.release();
+    await until(()=>f.transport.calls.length>0);
+    assert.equal(artifacts().length,1,'execution capture still precedes the provider request');
+  } finally {
+    f.terminal.release();
+    const result=await f.app.exit();
+    assert.equal(result.widthCalibration?.error,null);
+  }
+});
+
+test('stop while execution capture waits for calibration prevents capture and provider dispatch', async () => {
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);
+    f.terminal.hold='◆';f.terminal.key('probe');f.terminal.key('\r');f.app.screen();
+    await until(()=>f.terminal.held.length===1);
+    await new Promise(resolve=>setTimeout(resolve,300));
+    f.terminal.key('\x1b');f.terminal.release();
+    const result=await f.app.exit();
+    assert.equal(f.transport.calls.length,0);
+    assert.equal(result.result?.status,'aborted');assert.equal(result.result?.cleanup,'confirmed');
+    assert.equal([...records(join(f.root,'data'),{kinds:['execution.artifact']})].length,0,'the post-wait guard preserves cancellation');
+  } finally {f.terminal.release();await f.app.exit();}
 });
 
 for(const [label,key,draft] of [['Ctrl+D','\x04',''],['Ctrl+C','\x03','keep this draft']] as const) {
