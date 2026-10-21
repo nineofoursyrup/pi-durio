@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, join, relative, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -6,15 +7,15 @@ import { digest, readObject, type Evidence } from './evidence.js';
 
 const artifactRoot = fileURLToPath(new URL('../../', import.meta.url));
 /** Original installed bytes must still be available and match; a lock hash alone never passes recovery. */
-function installationInventory() {
+function installationFiles() {
   const lock = JSON.parse(readFileSync(join(artifactRoot, 'dist/execution/package-lock.json'), 'utf8'));
-  const files: { path: string; sha256: string; bytes: number }[] = [];
+  const files: string[] = [];
   const walk = (path: string) => {
     for (const entry of readdirSync(path, { withFileTypes: true }).sort((a,b) => a.name.localeCompare(b.name))) {
       if (entry.name === 'node_modules') continue; // Nested packages have their own lock entry.
       const child = join(path, entry.name);
       if (entry.isDirectory()) walk(child);
-      else if (entry.isFile()) { const bytes = readFileSync(child); files.push({ path: relative(artifactRoot, child), sha256: digest(bytes), bytes: bytes.length }); }
+      else if (entry.isFile()) files.push(child);
       else throw new Error('EXECUTION_INSTALLATION_ALIAS: unsupported package file alias');
     }
   };
@@ -24,6 +25,22 @@ function installationInventory() {
     walk(join(artifactRoot,path));
   }
   return files;
+}
+function installationInventory() {
+  return installationFiles().map(path=>{const bytes=readFileSync(path);return {path:relative(artifactRoot,path),sha256:digest(bytes),bytes:bytes.length};});
+}
+
+/** Preserve manifest order and bound open files/buffers; settle all in-flight writes before releasing ownership on failure. */
+async function captureFiles<T,R>(items:readonly T[],read:(item:T)=>Promise<R>):Promise<R[]> {
+  const result:R[]=[];let next=0,failed=false,failure:unknown;
+  await Promise.all(Array.from({length:Math.min(4,items.length)},async()=>{
+    while(!failed) {
+      const index=next++;if(index>=items.length)return;
+      try {result[index]=await read(items[index]);} catch(error){failed=true;failure=error;}
+    }
+  }));
+  if(failed)throw failure;
+  return result;
 }
 
 /** Own build, exact lock and direct dependency manifests, in recording order; `save` captures each file. */
@@ -44,19 +61,21 @@ function collectBuild(save: (path: string, label: string) => void) {
   });
 }
 
-export function captureArtifact(evidence: Evidence, workspace: string) {
-  const files: { path: string; sha256: string; bytes: number }[] = [];
-  const dependencies = collectBuild((path, label) => files.push({ path: label, ...evidence.blob(readFileSync(path)) }));
+export async function captureArtifact(evidence: Evidence, workspace: string) {
+  const buildFiles:{path:string;label:string}[]=[];
+  const dependencies = collectBuild((path,label)=>buildFiles.push({path,label}));
+  const files=await captureFiles(buildFiles,async({path,label})=>({path:label,...await evidence.blobAsync(await readFile(path))}));
   let git: unknown;
   try {
     const command = (args: string[]) => execFileSync('git', ['-C', workspace, '-c', 'core.fsmonitor=false', ...args], { encoding: 'utf8', maxBuffer: 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'], env: { PATH: process.env.PATH, HOME: process.env.HOME, LANG: 'C', GIT_OPTIONAL_LOCKS: '0', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' } });
     git = { head: command(['rev-parse', 'HEAD']).trim(), status: command(['status', '--porcelain=v1', '--untracked-files=all', '--', '.']), diff: evidence.blob(command(['diff', 'HEAD', '--binary', '--no-ext-diff', '--no-textconv', '--', '.'])), completeness: 'tracked diff acquired; untracked and unread file content not snapshotted' };
   } catch { git = { completeness: 'unavailable or not a Git workspace' }; }
-  const installation = evidence.blob(JSON.stringify(installationInventory()));
+  const inventory=await captureFiles(installationFiles(),async path=>{const bytes=await readFile(path);return {path:relative(artifactRoot,path),sha256:digest(bytes),bytes:bytes.length};});
+  const installation = await evidence.blobAsync(JSON.stringify(inventory));
   return { id: digest(JSON.stringify(files)), files, installation, dependencies, node: process.version, platform: process.platform, arch: process.arch, workspace: resolve(workspace), git, dependencyContent: 'Own build and exact lock content retained. Recovery also reacquires every installed production package byte and verifies it against the original inventory; missing or changed bytes block. Inventory alone cannot reconstruct an absent installation.' };
 }
 
-export function verifyArtifact(root: string, artifact: ReturnType<typeof captureArtifact>) {
+export function verifyArtifact(root: string, artifact: Awaited<ReturnType<typeof captureArtifact>>) {
   if (!artifact?.installation || !Array.isArray(artifact.files)) throw new Error('EXECUTION_CONTENT_UNAVAILABLE: original installation inventory missing');
   if (artifact.node !== process.version || artifact.platform !== process.platform || artifact.arch !== process.arch) throw new Error('EXECUTION_PLATFORM_CHANGED');
   for (const file of artifact.files) {
