@@ -491,6 +491,9 @@ export class ReadOnlyTui {
     if(matchesKey(data,'backspace')){
       const now=Date.now(),previous=this.lastBackspace;this.lastBackspace=now;
       if(this.editor.focused&&!this.editor.getExpandedText()){
+        // Terminal-local IME preedit can erase an unchanged input row; restore it
+        // when a Backspace actually reaches this handler after the width gate.
+        this.tui.requestRender(true);
         if(now-previous>=500){const item=latestPending(this.sessionQueue());if(item)void this.queueDecision(item.requestId,'withdraw');}
         return {consume:true};
       }
