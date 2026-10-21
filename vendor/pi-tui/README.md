@@ -3,8 +3,9 @@
 This is the explicitly authorized #16 dependency exception, recorded in
 `docs/implementation/pi-durio-v1/issue-16/width-exception-authorization.json`.
 The installed version is **1.1.0-durio-width.2**, not an unmodified official release.
-The visual-fix-r3 review repair also explicitly authorizes the autocomplete minimum
-change described below; the original #16 authorization remains unchanged.
+The autocomplete minimum change described below is separately authorized in
+[autocomplete-min-visible-authorization.json](autocomplete-min-visible-authorization.json);
+the original #16 authorization remains unchanged.
 
 `upstream/earendil-works-pi-tui-1.1.0.tgz` is the immutable official npm 1.1.0 archive.
 `manifest.json` binds its npm integrity, both patches, the build script,
