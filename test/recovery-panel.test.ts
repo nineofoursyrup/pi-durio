@@ -92,6 +92,8 @@ test('unavailable dispositions show the reason and code; ↑↓ skip them; exter
   const shown = text(blocked, 200);
   assert.match(shown, /检查 +✗ 执行版本的文件已变化 · ✗ 授权的工具与原任务不同 · ✓ 写入者锁可取得  EXECUTION_VERSION_CHANGED CURRENT_PERMISSION_CHANGED/, '✗ first, codes at the end');
   assert.match(shown, /2 {2}视为已完成 +不可选 · 执行版本的文件已变化/); assert.match(shown, /3 {2}从中断处继续 +不可选 · 执行版本的文件已变化/);
+  const disabledRow = captureSnapshot(blocked.render(200, 60, 'truecolor'), 200, 60, 'truecolor').rows.find(row => row.map(cell => cell.char).join('').includes('3  从中断处继续'))!;
+  assert.equal(disabledRow[disabledRow.findIndex(cell => cell.char === '不')].fg, 'fg.gutter', 'unavailable retry remains muted instead of warning-colored');
   assert.match(shown, /4 {2}结束旧工作，开新任务 +旧 run 标记已结束/);
   blocked.handleInput('\x1b[B'); assert.equal(blocked.cursor, 3, '↓ skips the unavailable items');
   blocked.handleInput('2'); assert.equal(blocked.cursor, 3);
@@ -108,6 +110,21 @@ test('unavailable dispositions show the reason and code; ↑↓ skip them; exter
   const narrow = external.render(60, 60).map(plain);
   assert.ok(narrow.some(line => /^ {5}不可选 · /.test(line)));
   assert.ok(narrow.every(line => visibleWidth(line) <= 60));
+});
+
+test('retry risk stays warning-colored in wide and compact recovery layouts across color tiers', () => {
+  for (const tier of ['truecolor', '256color', 'none'] as const) for (const [width, height] of [[132, 38], [40, 10]]) {
+    const panel = new RecoveryPanel(facts({ status: 'needs-decision', options: ['inspect', 'continue', 'end'], checks: recoveryChecks([]) }));
+    panel.handleInput('3');
+    const lines = panel.render(width, height, tier), grid = captureSnapshot(lines, width, height, tier);
+    assert.ok(lines.every(line => visibleWidth(line) <= width));
+    assert.match(lines.map(plain).join('\n'), /允许重新运行该操作/);
+    if (tier === 'none') assert.doesNotMatch(lines.join(''), /\x1b\[(?:38|48);/);
+    else {
+      const risk = grid.rows.flatMap(row => row.filter(cell => cell.fg === 'ac.warn')).map(cell => cell.char).join('');
+      assert.match(risk, /允许重新运行该操作/, `${width}x${height} ${tier}`);
+    }
+  }
 });
 
 test('zero unknowns offer continuing; height collapse keeps the always-kept rows down to 40×12', () => {

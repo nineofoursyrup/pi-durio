@@ -1,17 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { TuiAltScreen, stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
+import { CombinedAutocompleteProvider, CURSOR_MARKER, TuiAltScreen, stripTerminalSequences, truncateToWidth, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
 import { HardwareCursorEditor } from '../src/tui/cursor.js';
+import { disabledInputLines } from '../src/tui/recovery.js';
 import { demoTransport } from '../src/offline.js';
 import {
   detectColorTier, overrideColorTierForTest,
   fgSgr, bgSgr, styledLine, SPINNER_FRAMES, SPINNER_INTERVAL_MS,
   dimForOverlay, GLYPHS, COLOR_TIER,
-  type ColorTier,
+  type ColorTier, type TokenName,
 } from '../src/tui/theme.js';
 import {
   captureSnapshot, snapshotContains, linesContainSgr,
@@ -287,15 +288,133 @@ test('styledLine keeps bold and dim local to each segment and clears both for pa
   }
 });
 
+test('truncation ellipses retain the segment background, including wide-character boundaries and explicit overrides', () => {
+  const cases: { text: string; width: number; expected: string; background: TokenName }[] = [
+    { text: 'ABCDEFGH', width: 6, expected: 'ABC...', background: 'bg.base' },
+    { text: truncateToWidth('ABCDEFGH', 6, '…'), width: 6, expected: 'ABCDE…', background: 'bg.block' },
+    { text: '中中中中', width: 6, expected: '中... ', background: 'bg.base' },
+    { text: truncateToWidth('中中中中', 4, '…'), width: 4, expected: '中… ', background: 'bg.block' },
+  ];
+  for (const tier of ['truecolor', '256color'] as const) {
+    for (const entry of cases) {
+      const line = styledLine([{ text: entry.text, fg: 'fg.body' }], entry.width, entry.background, tier);
+      assert.equal(stripTerminalSequences(line), entry.expected);
+      assert.equal(visibleWidth(line), entry.width);
+      const cells = captureSnapshot([line], entry.width, 1, tier).rows[0];
+      assert.ok(cells.every(cell => cell.bg === entry.background), `${tier}: ${entry.expected}`);
+    }
+    const line = styledLine([{ text: truncateToWidth('ABCDEFGH', 6, '…'), bg: 'bg.block' }, { text: 'Z' }], 8, 'bg.selected', tier);
+    const cells = captureSnapshot([line], 8, 1, tier).rows[0];
+    assert.equal(stripTerminalSequences(line), 'ABCDE…Z ');
+    assert.ok(cells.slice(0, 6).every(cell => cell.bg === 'bg.block'), 'explicit code background includes the ellipsis');
+    assert.ok(cells.slice(6).every(cell => cell.bg === 'bg.selected'), 'following segment and padding return to the line background');
+  }
+});
+
+test('truncation background recovery leaves the no-color tier color-free and preserves its visible text', () => {
+  for (const [text, width, expected] of [
+    ['ABCDEFGH', 6, 'ABC...'],
+    [truncateToWidth('中中中中', 4, '…'), 4, '中… '],
+  ] as const) {
+    const line = styledLine([{ text, fg: 'fg.body', bg: 'bg.block' }], width, 'bg.selected', 'none');
+    assert.equal(stripTerminalSequences(line), expected);
+    assert.equal(visibleWidth(line), width);
+    assert.doesNotMatch(line, /\x1b\[(?:[0-9;]*;)?(?:38|48);/);
+    assert.ok(captureSnapshot([line], width, 1, 'none').rows[0].every(cell => cell.bg === undefined));
+  }
+});
+
 test('overlay dim removes selected background and original colors in every color tier', () => {
   for (const tier of ['truecolor', '256color', 'none'] as const) {
     const original = styledLine([{ text: '中文 A', fg: 'ac.err', bold: true }], 8, 'bg.selected', tier);
     const dimmed = dimForOverlay(original, tier), grid = captureSnapshot([dimmed], 8, 1, tier);
     assert.equal(stripTerminalSequences(dimmed), stripTerminalSequences(original));
-    for (const cell of grid.rows[0]) { assert.equal(cell.bg, undefined); assert.equal(cell.bold, undefined); assert.equal(cell.reverse, undefined); }
+    for (const cell of grid.rows[0]) { assert.equal(cell.bg, tier === 'none' ? undefined : 'bg.base'); assert.equal(cell.bold, undefined); assert.equal(cell.reverse, undefined); }
     if (tier === 'none') assert.ok(grid.rows[0].every(cell => cell.dim));
     else assert.ok(grid.rows[0].every(cell => cell.fg === 'fg.gutter'));
   }
+});
+
+test('input frames stay closed and keep their base background around text and the hardware caret', () => {
+  const saved = COLOR_TIER, terminal = new TestTerminal(), tui = new TuiAltScreen(terminal, true);
+  const identity = (text: string) => text;
+  try {
+    for (const tier of ['truecolor', '256color', 'none'] as const) {
+      overrideColorTierForTest(tier);
+      const editor = new HardwareCursorEditor(tui, { borderColor: text => fgSgr('border.input') + text + '\x1b[0m', selectList: { selectedPrefix: identity, selectedText: identity, description: identity, scrollInfo: identity, noMatch: identity } });
+      editor.focused = true;
+      for (const text of ['', '中é', '第一行\n第二行']) {
+        editor.setText(text);
+        const lines = editor.render(40), plain = lines.map(stripTerminalSequences);
+        assert.match(plain[0], /^╭─+╮$/);
+        assert.match(plain.at(-1)!, /^╰─+╯$/);
+        assert.ok(plain.slice(1, -1).every(line => line.startsWith('│') && line.endsWith('│')));
+        const grid = captureSnapshot(lines, 40, lines.length, tier);
+        assert.ok(grid.rows.every(row => row.every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base'))));
+      }
+      editor.setText(Array.from({ length: 20 }, (_, i) => `第 ${i + 1} 行`).join('\n'));
+      assert.match(stripTerminalSequences(editor.render(40)[0]), /^╭.*↑.*╮$/, 'hidden-line counts remain inside the rounded border');
+      editor.setText('中éX'); editor.render(40);
+      editor.handleMouse({ type: 'click', button: 'left', x: 5, y: 1, screenX: 5, screenY: 1, width: 40, height: 3, shift: false, alt: false, ctrl: false });
+      editor.handleInput('!');
+      assert.equal(editor.getText(), '中!éX', 'the new left border does not shift mouse insertion into the next grapheme');
+      const disabled = disabledInputLines('保留草稿', 40, tier), grid = captureSnapshot(disabled, 40, 3, tier);
+      assert.match(stripTerminalSequences(disabled[0]), /^╭─+╮$/);
+      assert.match(stripTerminalSequences(disabled[2]), /^╰─+╯$/);
+      if (tier === 'truecolor') {
+        assert.equal(grid.rows[0][0].fg, 'border.off');
+        assert.equal(grid.rows[1][1].fg, 'ac.brand');
+      }
+    }
+  } finally { overrideColorTierForTest(saved); }
+});
+
+test('autocomplete stays below the closed input frame with aligned menu rows, base backgrounds and mouse selection', async () => {
+  const saved = COLOR_TIER, terminal = new TestTerminal(), tui = new TuiAltScreen(terminal, true);
+  terminal.rows = 38; terminal.columns = 60;
+  const identity = (text: string) => text;
+  const root = mkdtempSync(join(tmpdir(), 'durio-theme-completion-'));
+  writeFileSync(join(root, 'history'), ''); writeFileSync(join(root, 'stats'), '');
+  try {
+    for (const tier of ['truecolor', '256color', 'none'] as const) {
+      overrideColorTierForTest(tier);
+      for (const prefix of ['', '第一行\n', Array.from({ length: 20 }, (_, i) => `第 ${i + 1} 行\n`).join('')]) {
+        const editor = new HardwareCursorEditor(tui, {
+          borderColor: text => fgSgr('border.input') + text + '\x1b[0m',
+          selectList: { selectedPrefix: identity, selectedText: text => `\x1b[7m${text}\x1b[27m`, description: identity, scrollInfo: identity, noMatch: identity },
+        });
+        editor.focused = true;
+        editor.setAutocompleteProvider(new CombinedAutocompleteProvider([
+          { name: 'history', description: '浏览历史' }, { name: 'stats', description: '统计' },
+        ], root, null));
+        editor.setText(prefix);
+        // Slash completion is first-line only; explicit file completion also works after scrolling.
+        editor.handleInput(prefix ? './' : '/');
+        if (prefix) editor.handleInput('\t');
+        await new Promise<void>(resolve => setImmediate(resolve));
+        assert.equal(editor.isShowingAutocomplete(), true, 'the public provider opens the real two-item menu');
+        const lines = editor.render(40), plain = lines.map(stripTerminalSequences), bottom = lines.length - 3;
+        assert.match(plain[0], /^╭.*╮$/);
+        assert.match(plain[bottom], /^╰.*╯$/);
+        assert.ok(plain.slice(1, bottom).every(line => line.startsWith('│') && line.endsWith('│')));
+        if (!prefix) assert.equal(bottom, 2, 'single-line input keeps exactly three frame rows');
+        if (prefix.split('\n').length > 20) assert.match(plain[0], /↑/, 'the scroll count remains in the frame');
+        assert.ok(plain.slice(bottom + 1).every(line => !line.startsWith('│') && !line.endsWith('│')), 'menu rows stay outside the closed frame');
+        assert.ok(lines.every(line => visibleWidth(line) === 40));
+        assert.match(plain[bottom + 1], /^   → history/, 'the menu shares the input content column after the new left margin');
+        assert.match(plain[bottom + 2], /^     stats/);
+        const grid = captureSnapshot(lines, 40, lines.length, tier);
+        assert.ok(grid.rows.slice(bottom + 1).every(row => row.every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base'))));
+        assert.equal(grid.rows[bottom + 1][3].reverse, true, 'menu selection retains its independent reverse style');
+        assert.equal(lines.join('').split(CURSOR_MARKER).length - 1, 1, 'the focused editor retains one hardware cursor marker');
+        assert.ok(grid.rows.slice(1, bottom).every(row => row.every(cell => !cell.reverse)), 'the input has no competing painted caret');
+        if (tier === 'none') assert.doesNotMatch(lines.join(''), /\x1b\[(?:[0-9;]*;)?(?:38|48);/);
+        editor.handleMouse({ type: 'click', button: 'left', x: 5, y: bottom + 2, screenX: 5, screenY: bottom + 2, width: 40, height: lines.length, shift: false, alt: false, ctrl: false });
+        assert.equal(editor.getText(), prefix ? prefix + './stats' : '/stats ', 'clicking the second displayed item applies that completion');
+        assert.equal(editor.isShowingAutocomplete(), false);
+      }
+    }
+  } finally { overrideColorTierForTest(saved); rmSync(root, { recursive: true, force: true }); }
 });
 
 test('snapshots place Chinese and emoji in terminal columns and resolve quantized foreground tokens', () => {

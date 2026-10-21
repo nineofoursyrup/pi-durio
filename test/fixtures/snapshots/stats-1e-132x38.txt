@@ -1,8 +1,8 @@
 132x38 truecolor
 00|指标 · 本机实测                                                                                                                     |
    0-3 fg.primary/bg.base/b ; 4-6 fg.faint/bg.base ; 7-14 fg.label/bg.base ; 15-131 -/bg.base
-01|◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api · f26ae8f · 样本 10（筛除 3）     只读 · 不调用模型 · 不重记费用 |
-   0-1 ac.model/bg.base ; 2-6 fg.primary/bg.base/b ; 7-8 -/bg.base ; 9-95 fg.faint/bg.base ; 96-100 -/bg.base ; 101-130 fg.faint/bg.base ; 131-131 -/bg.base
+01|◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api · f26ae8f · 样本 10（筛除 3）      只读 · 不调用模型 · 不重记费用|
+   0-1 ac.model/bg.base ; 2-6 fg.primary/bg.base/b ; 7-8 -/bg.base ; 9-95 fg.faint/bg.base ; 96-101 -/bg.base ; 102-131 fg.faint/bg.base
 02|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
    0-131 line.subtle/bg.base
 03|                                                                                                                                    |
@@ -67,11 +67,11 @@
    0-131 -/-
 33|                                                                                                                                    |
    0-131 -/-
-34|                                                                                                                                    |
-   0-131 -/-
-35|                                                                                                                                    |
-   0-131 -/-
-36|❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                       |
-   0-1 ac.brand/bg.base ; 2-108 fg.body/bg.base ; 109-131 -/bg.base
+34|╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮|
+   0-131 border.input/bg.base
+35|│❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                     │|
+   0-0 border.input/bg.base ; 1-2 ac.brand/bg.base ; 3-109 fg.body/bg.base ; 110-130 -/bg.base ; 131-131 border.input/bg.base
+36|╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯|
+   0-131 border.input/bg.base
 37|零分母显示 N/A · 缺依据显示 unknown/partial · 索引陈旧不写成「没有发生」                       Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话|
-   0-71 fg.label/bg.base ; 72-94 -/bg.base ; 95-131 fg.label/bg.base
+   0-71 fg.label/bg.base ; 72-94 -/bg.base ; 95-97 fg.body/bg.base ; 98-109 fg.label/bg.base ; 110-111 fg.body/bg.base ; 112-119 fg.label/bg.base ; 120-122 fg.body/bg.base ; 123-131 fg.label/bg.base

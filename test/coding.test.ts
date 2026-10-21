@@ -47,7 +47,8 @@ test('public runtime repairs a real project with read/edit/write/bash and preser
   assert.equal(summaries.length, 4);
   assert.ok(summaries.every(s => s.isError === false && page.records.some(r => r.seq === s.resultSeq && r.kind === 'tool.result')));
   const exit = await exitSummary(paths.dataRoot, { workspace: paths.workspace, runId: result.runId, cleanup: result, elapsedMs: 0, draftLines: 0, terminalRestored: true }, 200);
-  assert.match(stripTerminalSequences(exit[1]), /2 文件 \+2 −1$/);
+  assert.equal(exit[0], '');
+  assert.match(stripTerminalSequences(exit[2]), /2 文件 \+2 −1$/);
   assert.doesNotMatch(exit.join('\n'), /sum check passed|检查.*通过/);
 });
 

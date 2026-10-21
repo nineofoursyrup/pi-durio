@@ -73,11 +73,15 @@ test('offline grids render all nine screens, complete 1a/1f and the stats states
     const text = readFileSync(join(output, path), 'utf8');
     assert.match(text, title, `${path} keeps its header`);
     assert.match(text, /Esc/, `${path} keeps its exit hint`);
-    assert.match(text, new RegExp('00\\|[^\\n]*' + (screen === '2c' ? '指标 · 本机实测' : title.source)), `${path} starts the view in terminal row zero`);
+    assert.match(text, new RegExp((size === '132x38' ? '01' : '00') + '\\|[^\\n]*' + (screen === '2c' ? '指标 · 本机实测' : title.source)), `${path} keeps the header after the collapsible top margin`);
     assert.doesNotMatch(text, /◆ pi-durio|Enter steer|Ctrl\+X Enter follow-up|检查已保留的合成事实/, `${path} covers the underlying session`);
   }
   const stats = readFileSync(join(output, '1e-132x38-truecolor-six-oracles.txt'), 'utf8');
   assert.match(stats, /80\.0%/); assert.match(stats, /25\.0%/); assert.match(stats, /1\/3/); assert.match(stats, /62\.5%/);
+  assert.match(stats, /只读 · 不调用模型 · 不重记费用/, 'six-oracle header keeps its read-only note at the product inner width');
+  const trace = readFileSync(join(output, '2a-132x38-truecolor-default.txt'), 'utf8');
+  assert.match(trace, /Enter 原文/);
+  assert.match(trace, /p 固定为证据/);
   const rerun = command('goldens.mjs', ['--development', '--package', process.cwd(), '--output', join(root, 'repeat'), '--baseline', output]);
   assert.equal(rerun.status, 0, rerun.stderr);
   const repeated = JSON.parse(readFileSync(join(root, 'repeat/golden-index.json'), 'utf8'));

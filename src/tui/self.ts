@@ -100,11 +100,11 @@ export class SelfView {
     };
     const code = (w: number) => {
       const own = snapshot.code.product, body = section('自有维护代码', w), max = Math.max(1, ...(own.value?.groups.map(g => g.lines) ?? []));
-      // 路径 ac.path；行数之后是 ac.improve 的实心条（#104 票面；设计稿为紫色 #bb9af7）。
+      // 路径 ac.path；行数之后是 ac.brand 的实心条（设计稿为紫色 #bb9af7）。
       if (own.value) for (const group of own.value.groups) {
         const count = `${group.lines.toLocaleString('en-US')} 行`.padStart(9), cells = w >= 60 ? Math.min(16, w - 33) : 0, bar = cells >= 4 ? '█'.repeat(Math.max(1, Math.round(group.lines / max * cells))) : '';
         const path = truncateEnd(clean(group.directory), 20);
-        body.push(styledLine(fitSegments([{ text: `${path}${' '.repeat(Math.max(0, 20 - visibleWidth(path)))} `, fg: 'ac.path' }, { text: count, fg: 'fg.body' }, { text: bar ? '  ' : '' }, { text: bar, fg: 'ac.improve' }], w), w, undefined, tier));
+        body.push(styledLine(fitSegments([{ text: `${path}${' '.repeat(Math.max(0, 20 - visibleWidth(path)))} `, fg: 'ac.path' }, { text: count, fg: 'fg.body' }, { text: bar ? '  ' : '' }, { text: bar, fg: 'ac.brand' }], w), w, undefined, tier));
       } else body.push(...row('产品源码', absent(own), w));
       // 合计行上方一条 line.inner 分隔线；文件数与行数 fg.primary，行数粗体（设计稿 2c）。
       if (own.value) body.push(rule(w, 'line.inner', tier), ...row('产品源码合计', [{ text: `${own.value.files} 文件 · `, fg: 'fg.primary' }, { text: `${own.value.lines.toLocaleString('en-US')} 行`, fg: 'fg.primary', bold: true }], w));

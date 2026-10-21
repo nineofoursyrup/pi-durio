@@ -6,13 +6,13 @@
  * - ConfirmDialog：居中确认框 / 选择框（单选 ◉/○ 数字键，多选 [✓]/[ ] 空格）
  * - statusError / statusEmpty / LoadingState：通用状态写法
  * - widthTier / truncateMiddle / truncateEnd / wrapAuthorized / fixedFrame：窄终端与矮终端
- * - SPACER / sideMargin / bottomMargin / inset / rule / footerLines：U10 间距（视觉修正 r1）
+ * - SPACER / sideMargin / topMargin / bottomMargin / inset / rule / footerLines：U10 间距（视觉修正 r1）
  * - PresetFilter：预设选项筛选层（1e 与历史视图复用）
  */
 
 import { Input, matchesKey, truncateToWidth, visibleWidth, wrapTextWithAnsi, stripTerminalSequences } from '@earendil-works/pi-tui';
 import {
-  styledLine, fgSgr, bgSgr, resetSgr,
+  styledLine, fgSgr, bgSgr, resetSgr, dimForOverlay,
   GLYPHS, spinnerFrame, SPINNER_FRAMES, SPINNER_INTERVAL_MS,
   type ColorTier, COLOR_TIER, type TextSegment, type TokenName,
 } from './theme.js';
@@ -69,6 +69,16 @@ export function escHint(depth: number): string {
 
 // ─── 底栏键位提示与即时反馈 ──────────────────────────────────────────────────
 
+/** 键名可以连续出现（Ctrl+X Enter），说明与分隔符仍为 fg.label。 */
+export function hintSegments(text: string): TextSegment[] {
+  return text.split(' · ').flatMap((item, index) => {
+    const key = item.match(/^(?:(?:Ctrl\+[A-Za-z]|Shift\+(?:Tab|Enter)|PgUp(?:\/(?:Pg)?Dn)?|PgDn|Backspace|空格|Enter|Tab|Esc|[↑↓←→]+|[0-9]+(?:[–/-][0-9]+)*|[A-Za-z?/@](?:\/[A-Za-z])?)(?:\s+|$))+/)?.[0] ?? item.match(/^[↑↓←→]+/)?.[0] ?? '';
+    return [...(index ? [{ text: ' · ', fg: 'fg.label' as const }] : []),
+      ...(key ? [{ text: key.trimEnd(), fg: 'fg.body' as const }] : []),
+      { text: item.slice(key.trimEnd().length), fg: 'fg.label' as const }];
+  });
+}
+
 /**
  * 底栏键位提示行。
  *
@@ -97,8 +107,8 @@ export function hintLine(
     }
     text = kept.join(sep);
   }
-  const segments: TextSegment[] = [{ text, fg: opts.feedback !== undefined ? 'fg.body' : 'fg.label' }];
-  if (opts.esc) segments.push({ text: text ? escPart : opts.esc, fg: 'fg.label' });
+  const segments: TextSegment[] = opts.feedback !== undefined ? [{ text, fg: 'fg.body' }] : hintSegments(text);
+  if (opts.esc) segments.push(...(text ? [{ text: sep, fg: 'fg.label' as const }] : []), ...hintSegments(opts.esc));
   return styledLine(segments, width, undefined, tier);
 }
 
@@ -118,7 +128,10 @@ export function footerLines(
   if (!left.length) return [hintLine(items, width, opts)];
   if (leftWidth + 2 + visibleWidth(right) <= width) {
     const gap = ' '.repeat(width - leftWidth - visibleWidth(right));
-    return [styledLine([...left, { text: gap }, { text: right, fg: opts.feedback !== undefined ? 'fg.body' : 'fg.label' }], width, undefined, tier)];
+    const hints: TextSegment[] = opts.feedback !== undefined
+      ? [{ text: clean(opts.feedback), fg: 'fg.body' }, ...(opts.esc ? [{ text: ' · ', fg: 'fg.label' as const }, ...hintSegments(opts.esc)] : [])]
+      : hintSegments(right);
+    return [styledLine([...left, { text: gap }, ...hints], width, undefined, tier)];
   }
   return [styledLine(left, width, undefined, tier), hintLine(items, width, opts)];
 }
@@ -142,6 +155,8 @@ export function sideMargin(width: number): number {
 export function bottomMargin(rows: number): number {
   return rows >= 30 ? 1 : 0;
 }
+/** 顶部留白与底部同条件：不矮于 30 行时留 1 行，更矮时不留。 */
+export function topMargin(rows: number): number { return bottomMargin(rows); }
 /** 给按内宽（width − 2 × margin）渲染的行加左右边距；短行与空串用 `bg.base` 补满。 */
 export function inset(lines: string[], width: number, margin: number, tier: ColorTier = COLOR_TIER): string[] {
   const pad = margin ? styledLine([], margin, undefined, tier) : '';
@@ -157,6 +172,13 @@ export function frameBox(lines: string[], width: number, tier: ColorTier = COLOR
     ...lines.map(line => border('│ ') + line + (visibleWidth(line) < inner ? styledLine([], inner - visibleWidth(line), undefined, tier) : '') + border(' │')),
     border(`╰${'─'.repeat(width - 2)}╯`)];
 }
+/** 输入框与只读等价命令：内容按 width − 2 渲染，左右各一列闭合框线。 */
+export function inputBox(lines: string[], width: number, tier: ColorTier = COLOR_TIER, token: TokenName = 'border.input'): string[] {
+  const border = (text: string) => styledLine([{ text, fg: token }], visibleWidth(text), undefined, tier);
+  return [border(`╭${'─'.repeat(Math.max(0, width - 2))}╮`),
+    ...lines.map(line => border('│') + line + styledLine([], Math.max(0, width - 2 - visibleWidth(line)), undefined, tier) + border('│')),
+    border(`╰${'─'.repeat(Math.max(0, width - 2))}╯`)];
+}
 /** 按显示列截取 [from, to)，跨边界的宽字符换成空格，不足补空格。 */
 function sliceColumns(text: string, from: number, to: number): string {
   let out = '', column = 0;
@@ -169,11 +191,11 @@ function sliceColumns(text: string, from: number, to: number): string {
   }
   return out + ' '.repeat(Math.max(0, to - Math.max(column, from)));
 }
-/** 浮层（U10）：底层内容改用 `fg.gutter` 并去掉底色，框水平、垂直居中盖在上面；返回行数同底层。 */
+/** 浮层（U10）：底层改用 `fg.gutter` / `bg.base`，框水平、垂直居中；返回行数同底层。 */
 export function composeOverlay(base: string[], box: string[], width: number, tier: ColorTier = COLOR_TIER): string[] {
   const boxWidth = Math.max(0, ...box.map(line => visibleWidth(line)));
   const left = Math.max(0, Math.floor((width - boxWidth) / 2)), top = Math.max(0, Math.floor((base.length - box.length) / 2));
-  const dim = (text: string) => resetSgr() + (tier === 'none' ? '\x1b[2m' : fgSgr('fg.gutter', tier)) + text + resetSgr();
+  const dim = (text: string) => dimForOverlay(text, tier);
   return base.map((line, row) => {
     const plain = stripTerminalSequences(line), over = box[row - top];
     return over === undefined ? dim(sliceColumns(plain, 0, width)) : dim(sliceColumns(plain, 0, left)) + over + dim(sliceColumns(plain, left + boxWidth, width));
@@ -407,8 +429,8 @@ export class ConfirmDialog {
     const fixed = [...(this.config.fixed ?? []).flatMap(text => wrapAuthorized(text, inner)), ...(this.config.fixedRows?.(inner) ?? []).flatMap(text => wrapTextWithAnsi(text, inner))];
     // 末行放不下时换行（原因不截断，Esc 不去掉）；当前提示和“窗口过小”的提示都必须完整容纳。
     const footer = (reason: string | undefined) => wrapSegments(this.config.footer ? this.config.footer(reason) : reason
-      ? [{ text: 'Enter ', fg: 'fg.gutter' }, { text: clean(reason), fg: 'fg.muted' }, { text: ' · Esc 取消', fg: 'fg.label' }]
-      : [{ text: `Enter ${clean(this.config.action)}`, fg: 'fg.body' }, { text: ' · Esc 取消', fg: 'fg.label' }], inner);
+      ? [{ text: 'Enter ', fg: 'fg.gutter' }, { text: clean(reason), fg: 'fg.muted' }, { text: ' · ', fg: 'fg.label' }, ...hintSegments('Esc 取消')]
+      : hintSegments(`Enter ${clean(this.config.action)} · Esc 取消`), inner);
     const disabled = this.config.disabled;
     const reason = typeof disabled === 'function' ? disabled(this.selected) : disabled;
     const chrome = 3 + Math.max(footer(TOO_SMALL_TO_CONFIRM).length, footer(reason).length); // 上框线、标题、末行、下框线

@@ -116,7 +116,10 @@ export async function renderers(packageRoot, fixture) {
   // As in the design: C-01 execute, C-02 validate only, C-03 unselected; the current card is C-01. Nothing is submitted.
   for (const key of ['1', '\t', '2', '\x1b[Z']) await selection.handleInput(key);
   // As in the design, 2a shows a selected tool span with its detail and raw sections.
-  const trace = new TraceView(fixture.dataRoot, fixture.runId); for (const key of ['\x1b[B', '\x1b[B']) trace.handleInput(key);
+  // Show the product host's normal action hints, but reject every action in this display-only fixture.
+  const trace = new TraceView(fixture.dataRoot, fixture.runId, () => false, {
+    writeBlocked: () => undefined, busy: () => false, feedback() {}, changed() {}, confirm: refusal, openRaw: refusal,
+  }); for (const key of ['\x1b[B', '\x1b[B']) trace.handleInput(key);
   const evaluation = new EvalPlanView(ownPlanSource(fixture.dataRoot, fixture.plan.id), { openTrial() {} }, { now: () => Date.parse(at) });
   const request = { scope: { from: '2026-09-17T16:00:00.000Z', to: '2026-10-17T16:00:00.000Z', asOf: at, source: 'ordinary', project: '/synthetic/shop-api' }, command: '/stats' };
   const samples = { snapshot: () => ({ firstFrameMs: null, keys: { samples: 0, p50: null, p95: null } }) };
@@ -125,10 +128,10 @@ export async function renderers(packageRoot, fixture) {
   const empty = (width, tier) => theme.styledLine([], width, undefined, tier);
   const pad = (lines, width, height, tier) => { if (lines.length > height) throw Error('FIXTURE_FRAME_OVERFLOW'); return [...lines, ...Array.from({ length: height - lines.length }, () => empty(width, tier))]; };
   // Session screens (1a/1b/1c) mirror ReadOnlyTui: components render at the inner width,
-  // the side margins and the bottom margin are painted around them (U10).
+  // the side, top and bottom margins are painted around them (U10).
   const sessionScreen = (width, height, tier, build) => {
-    const margin = frame.sideMargin(width), bottom = frame.bottomMargin(height);
-    return [...frame.inset(build(width - 2 * margin, height - bottom), width, margin, tier), ...Array.from({ length: bottom }, () => empty(width, tier))];
+    const margin = frame.sideMargin(width), top = frame.topMargin(height), bottom = frame.bottomMargin(height);
+    return [...Array.from({ length: top }, () => empty(width, tier)), ...frame.inset(build(width - 2 * margin, height - top - bottom), width, margin, tier), ...Array.from({ length: bottom }, () => empty(width, tier))];
   };
   /** The 1b transcript: one blank row between blocks, adjacent tool rows grouped (as ReadOnlyTui.rebuild). */
   const transcript = (w, roomy, tier) => {
@@ -173,7 +176,7 @@ export async function renderers(packageRoot, fixture) {
       const status = session.statusParts({ phase: 'idle', recovery: true, round: 3, retry: false, elapsedMs: 42000, frame: 0 }), narrow = session.narrowing(w, header, status);
       const usageSegments = session.usageSegments('deepseek-flash', 'ctx ≈863 / 1M', '本任务', 1800, '≈¥0.01'), hintItems = ['Ctrl+R 历史', 'Ctrl+T trace', '? 帮助'];
       const foot = frame.footerLines(usageSegments, hintItems, w, { tier }).length, separator = frame.rule(w, 'line.subtle', tier);
-      const rows = height - 4 - frame.bottomMargin(height), boxWidth = Math.min(w - 8, 100), inner = boxWidth - 4;
+      const rows = height - 4 - frame.topMargin(height) - frame.bottomMargin(height), boxWidth = Math.min(w - 8, 100), inner = boxWidth - 4;
       const airy = recovery.fullHeight(inner, { wide: true, airy: true }) + 2, full = recovery.fullHeight(inner, { wide: true }) + 2;
       const [input, usage, hints, box, airyBox] = rows >= airy + 3 + foot ? [true, true, true, airy, true] : rows >= full + 3 + foot ? [true, true, true, full, false]
         : rows >= full + foot ? [false, true, true, full, false] : rows >= full + 1 ? [false, false, true, full, false] : [false, false, false, full, false];
@@ -181,7 +184,7 @@ export async function renderers(packageRoot, fixture) {
       const content = recovery.render(inner, Math.max(1, Math.min(area, box) - 2), tier, { wide: true, airy: airyBox });
       const base = side(transcript(w, true, tier)).slice(0, area);
       while (base.length < area) base.push('');
-      return [...side([session.headerLine(header, w, narrow.headerRight, tier), separator]), ...frame.composeOverlay(base, frame.frameBox(content, boxWidth, tier), width, tier),
+      return [...Array.from({ length: frame.topMargin(height) }, () => empty(width, tier)), ...side([session.headerLine(header, w, narrow.headerRight, tier), separator]), ...frame.composeOverlay(base, frame.frameBox(content, boxWidth, tier), width, tier),
         ...side([separator, session.statusLine(status, w, narrow.statusHint, tier), ...(input ? disabledInputLines('', w, tier) : []), ...(hints ? frame.footerLines(usage ? usageSegments : [], hintItems, w, { tier }) : [])]), empty(width, tier)];
     }
     if (id === '1c') return sessionScreen(width, height, tier, (w, h) => {

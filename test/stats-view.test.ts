@@ -169,6 +169,15 @@ test('132x38 golden with the six oracle examples', () => {
   assertGolden(captureSnapshot(lines, 132, 38, 'truecolor'), 'stats-1e-132x38');
 });
 
+test('header shows the read-only note at an exact two-column gap and preserves facts when one column short', () => {
+  const left = '◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api · f26ae8f · 样本 10（筛除 3）';
+  const fits = view().render(128, 38, 'truecolor').map(stripTerminalSequences);
+  assert.equal(fits[1], left + '  只读 · 不调用模型 · 不重记费用');
+  const tight = view().render(127, 38, 'truecolor').map(stripTerminalSequences);
+  assert.equal(tight[1].trimEnd(), left);
+  assert.doesNotMatch(tight[1], /只读 · 不调用模型/);
+});
+
 test('width below 100: two lines per metric sharing the zebra background, two-line header without the right note', () => {
   const lines = view().render(80, 38, 'truecolor'), screen = text(lines);
   assert.ok(!screen.includes('只读 · 不调用模型'));
@@ -200,7 +209,12 @@ test('short heights collapse note, command, spend (total only), then scroll the 
     assert.match(plain[0], /指标 · 本机实测/, `${w}x${h} tabs`);
     assert.match(plain.at(-1)!, /Esc 返回会话/, `${w}x${h} esc`);
   }
+  const boxed = text(view().render(132, 38, 'truecolor'));
+  assert.match(boxed, /╭─+╮\n│❯ \/stats/);
+  const airyWithoutBox = text(view().render(80, 38, 'truecolor'));
+  assert.ok(!airyWithoutBox.includes('╭') && airyWithoutBox.includes('❯ /stats'), 'the box gives way before the table spacing');
   const noNote = text(view().render(80, 28, 'truecolor'));
+  assert.ok(!noNote.includes('╭'), 'the command first falls back to a single unframed line');
   assert.ok(!noNote.includes('零分母显示') && noNote.includes('❯ /stats') && noNote.includes('improve '), 'the note goes first');
   const noCommand = text(view().render(80, 27, 'truecolor'));
   assert.ok(!noCommand.includes('❯ /stats') && noCommand.includes('improve '), 'then the equivalent command');

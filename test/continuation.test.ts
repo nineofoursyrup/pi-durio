@@ -217,7 +217,9 @@ test('history continuation keeps tail authorization local and a fresh session re
     const continued = readSessionChains(f.dataRoot).session(first.sessionId)!.tailRunId;
     const authorization = (runId: string) => JSON.parse(readObject(f.dataRoot, readRunRecords(f.dataRoot, runId, { kinds: ['task.accepted'], limit: 1 }).records[0].ref).toString()).authorization.tools;
     assert.deepEqual(authorization(continued), ['read', 'write', 'edit', 'bash']);
-    assert.match(t.screen().split('\n')[0], /只读/);
+    const lines = t.screen().split('\n');
+    assert.equal(lines[0].trim(), '');
+    assert.match(lines[1], /只读/);
     assert.match(t.screen(), /描述要查看或分析的内容/);
     assert.doesNotMatch(t.screen(), /描述要完成的修改/);
     assert.ok(t.screen().split('\n').some(line => line.trim() === '不能接续 · 链尾任务未完成 · 新任务将开启新会话'), t.screen());

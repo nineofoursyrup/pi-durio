@@ -178,8 +178,11 @@ test('80×24 and 40×12 do not overflow and keep the elements U1 always retains'
       const text = screen.join('\n');
       assert.ok(text.includes('◢◣') || text.includes('◆ pi·durio'), `mark at ${columns}×${rows}\n${text}`);
       for (const kept of ['工作区', '写入者锁可取得', '模型', 'deepseek-flash', '○ 空闲', '? 帮助']) assert.ok(text.includes(kept), `${kept} at ${columns}×${rows}\n${text}`);
-      // Input box: the two rules with the placeholder between them.
-      assert.ok(screen.filter(line => /^ *─+ *$/.test(line)).length >= 2, text);
+      // Input box: closed rounded borders with the same placeholder between them.
+      const input = screen.findIndex(line => /^ *╭─+╮ *$/.test(line));
+      assert.ok(input >= 0, text);
+      assert.match(screen[input + 1], /^ *│❯ .*│ *$/);
+      assert.match(screen[input + 2], /^ *╰─+╯ *$/);
       assert.match(text, /描述要完成的修改/);
     } finally { await tui.exit(); }
   }

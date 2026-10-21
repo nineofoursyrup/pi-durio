@@ -20,7 +20,8 @@ test('1f exit summary golden occupies terminal columns at 132x38 in every color 
   // 真彩、256 色、无色三档各一份快照（U6）：只有前景色、粗体与 dim，没有底色。
   for (const [tier, name] of [['truecolor', '1f-132x38'], ['256color', '1f-132x38-256color'], ['none', '1f-132x38-none']] as const) {
     const lines = await exitSummary(root, { workspace, runId, elapsedMs: 848_000, draftLines: 3, terminalRestored: true }, 132, tier);
-    assert.ok(lines.length <= 9);
+    assert.ok(lines.length <= 10);
+    assert.equal(lines[0], '');
     assert.ok(lines.every(line => visibleWidth(line) <= 132));
     assert.match(lines.join('\n'), /完成中文与 emoji 😀 显示修正/);
     assert.doesNotMatch(lines.join(''), /\x1b\[(?:[0-9;]*;)?48[;m]/, `${tier}: no background`);

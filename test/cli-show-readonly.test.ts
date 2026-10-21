@@ -69,11 +69,12 @@ test('actual CLI show --trace keeps read-only capability while raw navigation an
   for (const target of [display.label('run', runId), display.label('session', sessionId)]) {
     const child = spawnSync(process.execPath, ['--experimental-test-module-mocks', harness, dataRoot, target, runId], { encoding: 'utf8' });
     assert.equal(child.status, 0, child.stderr + child.stdout);
-    // U6：至多 8 行内容，另在“继续 / 原文”一行前空一行；各行左侧 `┃`，按启动时判定的档位上色。
+    // U6：至多 8 行内容，首行及“继续 / 原文”一行前各空一行；各行左侧 `┃`，按启动时判定的档位上色。
     // 只去掉 SGR：其余控制序列（OSC、光标、备用屏）不得混进退出摘要。
     const shown = child.stdout.replace(/\x1b\[[0-9;]*m/g, ''), lines = shown.trimEnd().split('\n');
-    assert.ok(lines.length <= 9);
-    assert.match(lines[0], /^┃ ◆ pi-durio 已退出/);
+    assert.ok(lines.length <= 10);
+    assert.equal(lines[0], '');
+    assert.match(lines[1], /^┃ ◆ pi-durio 已退出/);
     assert.match(shown, /原文  pi-durio show s-/);
     assert.doesNotMatch(shown, /Read back:|"tui"|[\x1b\x07]/);
     assert.deepEqual(readFileSync(join(dataRoot, 'host.sqlite')), before, 'viewing cannot append pins or analysis records');

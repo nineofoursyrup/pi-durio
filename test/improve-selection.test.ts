@@ -141,6 +141,41 @@ test('narrow cards and summaries retain every authorization byte; undersized sum
  }
 });
 
+test('1d code blocks keep wrapped diff and commands inside the content column in every color tier',async()=>{
+ const f=fixture(),program='console.log("'+('LONG_COMMAND_'.repeat(24))+'TAIL_COMMAND")',addition='//'+('LONG_DIFF_'.repeat(18))+'TAIL_DIFF';
+ f.candidate.structuredChecks![0]={kind:'regression',timeoutMs:30000,program};
+ f.candidate.replacements![0].content='export const add=(a,b)=>a+b;\n'+addition+'\n';f.save();
+ const previousTier=COLOR_TIER;
+ try {
+  for(const tier of ['truecolor','256color','none'] as const)for(const width of [132,80,40]) {
+   overrideColorTierForTest(tier);
+   const view=new ImproveSelectionView(f.dataRoot,f.report.id,async()=>{throw Error('rendering cannot submit');});
+   await view.handleInput('2');
+   const lines=view.render(width,160),rows=captureSnapshot(lines,width,160,tier).rows,text=rows.map(row=>row.map(cell=>cell.char).join(''));
+   assert.ok(lines.every(line=>visibleWidth(line)<=width));
+   const diffStart=text.findIndex(line=>line.startsWith(' --- math.mjs')),checkHeader=text.findIndex(line=>line.startsWith('检查 1  regression'));
+   const commandStart=text.findIndex(line=>line.startsWith(' console.log(')),commandEnd=text.findIndex(line=>line.includes('TAIL_COMMAND'));
+   assert.ok(diffStart>=0&&checkHeader>diffStart&&commandStart>checkHeader&&commandEnd>commandStart);
+   const contentWidth=width===132?106:width,codeRows=[...rows.slice(diffStart,checkHeader),...rows.slice(commandStart,commandEnd+1)];
+   for(const row of codeRows) {
+    assert.equal(row[0].char,' ','code and continuation lines have one padding column');
+    assert.ok(row.slice(0,contentWidth).every(cell=>cell.bg===(tier==='none'?undefined:'bg.block')));
+    assert.ok(row.slice(contentWidth).every(cell=>cell.bg!=='bg.block'),'gray block must stop before the options column');
+   }
+   assert.ok(rows[checkHeader].slice(0,contentWidth).every(cell=>cell.bg===(tier==='none'?undefined:'bg.base')),'check explanation stays on the body background');
+   assert.equal(text.slice(commandStart,commandEnd+1).map(line=>line.slice(1,contentWidth).trimEnd()).join(''),program,'wrapped command remains complete');
+   assert.ok(text.slice(diffStart,checkHeader).map(line=>line.slice(1,contentWidth).trimEnd()).join('').includes('+'+addition),'wrapped diff remains complete');
+   const removed=rows[text.findIndex(line=>line.startsWith(' -export const add='))],added=rows[text.findIndex(line=>line.startsWith(' +export const add='))];
+   assert.equal(removed[1].char,'-');assert.equal(added[1].char,'+');
+   if(tier==='none') {
+    assert.doesNotMatch(lines.join(''),/\x1b\[(?:38|48);/);
+    const selected=rows[text.findIndex(line=>line.includes('◉ 2 仅验证'))];
+    assert.ok(selected.some(cell=>cell.reverse),'selected mode retains reverse video');
+   } else {assert.equal(removed[1].fg,'ac.err');assert.equal(added[1].fg,'ac.ok');}
+  }
+ }finally{overrideColorTierForTest(previousTier);}
+});
+
 test('running view can leave without cancellation; prefill cannot replace the submitted batch',async()=>{
  const f=fixture();let finish!:()=>void,started=false;
  const view=new ImproveSelectionView(f.dataRoot,f.report.id,async()=>{started=true;await new Promise<void>(r=>finish=r);});
@@ -162,6 +197,14 @@ test('fresh declarations keep relative thresholds and require still-registered e
  f.report.targets.push(...captureImproveSources(e,f.workspace,[{id:'cases',kind:'eval-asset',root:assets,paths:['cases.json']}],'fixture-version').targets);e.close();
  const caseId=representativeCases[0].id,check:CandidateFreshCheck={kind:'fresh',assets:[{targetId:'cases',path:'cases.json',caseIds:[caseId]}],mode:'offline',comparison:{kind:'deterministic',repetitions:1,repetitionBasis:'fixed input',change:'one arithmetic operator',hypothesis:'fewer requests',roles:{[caseId]:'objective'},objective:{metric:'requests',direction:'lower',delta:0.1,basis:'one tenth fewer'},protections:[{id:'correct',kind:'hard',check:'requirements',cases:[caseId]}],trialBudget:{maxRequests:2,maxTokens:1000}},budget:{maxRequests:4,maxTokens:2000,maxRequestTokens:1000,maxDurationMs:60000},trialTimeoutMs:10000,gradingTimeoutMs:10000,maxOutputTokens:32};
  assert.doesNotThrow(()=>validateCandidateChecks([check],f.report.targets));f.candidate.objective='performance';f.candidate.structuredChecks=[check];f.save();assert.match(candidateValidation(f.candidate),/δ ≥ 10%/);
+ const previousTier=COLOR_TIER;overrideColorTierForTest('truecolor');
+ try {
+  const lines=new ImproveSelectionView(f.dataRoot,f.report.id,async()=>{}).render(132,160),rows=captureSnapshot(lines,132,160,'truecolor').rows;
+  for(const marker of ['"kind": "fresh"','"maxOutputTokens": 32']) {
+   const row=rows.find(row=>row.map(cell=>cell.char).join('').includes(marker));assert.ok(row,marker);
+   assert.equal(row[0].char,' ');assert.ok(row.slice(0,106).every(cell=>cell.bg==='bg.block'));assert.ok(row.slice(106).every(cell=>cell.bg!=='bg.block'));
+  }
+ }finally{overrideColorTierForTest(previousTier);}
  const bind=()=>bindCandidateCheck(f.dataRoot,f.report,[f.candidate],check,new Date(Date.now()+60000).toISOString());
  assert.throws(bind,/FRESH_RUNTIME_NOT_PREPARED/);unregisterImproveSource(f.dataRoot,reg.id);assert.throws(bind,/REGISTERED_CASES_REQUIRED/);
  registerImproveSource(f.dataRoot,f.workspace,{kind:'eval-asset',root:assets,paths:['cases.json']});writeFileSync(join(assets,'cases.json'),'changed cases');assert.throws(bind,/CASE_BASELINE_DRIFT/);

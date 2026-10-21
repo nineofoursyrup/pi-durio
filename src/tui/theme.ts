@@ -185,7 +185,10 @@ export function styledLine(
     const clipped = truncateToWidth(seg.text, width - col);
     const w = visibleWidth(clipped);
     if (w <= 0) continue;
-    out += sgr + clipped;
+    // Truncation resets SGR around its ellipsis, including in pre-truncated text.
+    // Restore only this segment's background; foreground and attributes keep their existing semantics.
+    const segmentBg = tier === 'none' ? '' : bgSgr(seg.bg ?? bg, tier);
+    out += sgr + (segmentBg ? clipped.replaceAll(resetSgr(), resetSgr() + segmentBg) : clipped);
     col += w;
     if (col >= width) break;
   }
@@ -202,13 +205,13 @@ export function styledLine(
 // ─── 弹层内容暗化（宿主实现） ─────────────────────────────────────────────────
 
 /**
- * 在弹层打开时，将底层内容行转换为 fg.gutter 无底色风格。
+ * 在弹层打开时，底层去掉局部底色，保留 bg.base 并统一使用 fg.gutter。
  * 宿主（app.ts）负责在需要时调用此函数处理底层行。
  */
 export function dimForOverlay(line: string, tier: ColorTier = COLOR_TIER): string {
-  // Strip existing SGR color codes and re-paint with fg.gutter (no background)
+  // Remove local highlights, including selected rows, while keeping the full-screen base.
   const plain = line.replace(/\x1b\[\d+(?:;\d+)*m/g, '');
-  return resetSgr() + (tier === 'none' ? dimSgr() : fgSgr('fg.gutter', tier)) + plain + resetSgr();
+  return resetSgr() + (tier === 'none' ? dimSgr() : bgSgr('bg.base', tier) + fgSgr('fg.gutter', tier)) + plain + resetSgr();
 }
 
 // ─── Spinner ─────────────────────────────────────────────────────────────────
