@@ -1,4 +1,4 @@
-import { CURSOR_MARKER, Editor, truncateToWidth, visibleWidth, type EditorOptions, type EditorTheme, type Terminal, type TUI, type TuiMouseEvent } from '@earendil-works/pi-tui';
+import { CURSOR_MARKER, Editor, truncateToWidth, visibleWidth, type Component, type EditorOptions, type EditorTheme, type Terminal, type TUI, type TuiMouseEvent } from '@earendil-works/pi-tui';
 import { GLYPHS, fgSgr, bgSgr, resetSgr } from './theme.js';
 
 /**
@@ -7,6 +7,9 @@ import { GLYPHS, fgSgr, bgSgr, resetSgr } from './theme.js';
  */
 export class HardwareCursorEditor extends Editor {
   private frameBottomBorder='';
+  private inputRows=0;
+  private autocompleteRows=0;
+  private autocompleteSeparated=false;
   /** 输入为空时显示在插入点之后的占位文案（fg.faint）；pi-tui 1.1.0 的 Editor 没有占位。 */
   placeholder?:()=>string;
   constructor(tui:TUI,theme:EditorTheme,options:EditorOptions={}) {super(tui,theme,{paddingX:2,...options});}
@@ -16,8 +19,25 @@ export class HardwareCursorEditor extends Editor {
   protected override renderBottomBorder(width:number,hidden:number):string {
     return this.frameBottomBorder=this.borderColor('╰')+super.renderBottomBorder(width,hidden)+this.borderColor('╯');
   }
-  override handleMouse(event:TuiMouseEvent) { return super.handleMouse({...event,x:event.x-1,width:Math.max(1,event.width-2)}); }
+  /** 会话屏把菜单放在状态/队列区之前，输入框本身仍作为焦点与鼠标目标。 */
+  separateAutocomplete():Component {
+    this.autocompleteSeparated=true;
+    return {invalidate:()=>this.invalidate(),render:width=>this.renderParts(width).autocomplete,handleMouse:event=>{
+      const result=this.handleEditorMouse({...event,y:event.y+this.inputRows});
+      if(result?.focus)this.tui.setFocus(this);
+      return result?{...result,focus:false}:undefined;
+    }};
+  }
+  private handleEditorMouse(event:TuiMouseEvent) {return super.handleMouse({...event,x:event.x-1,width:Math.max(1,event.width-2)});}
+  override handleMouse(event:TuiMouseEvent) {
+    const y=this.autocompleteSeparated?event.y:event.y<this.autocompleteRows?event.y+this.inputRows:event.y-this.autocompleteRows;
+    return this.handleEditorMouse({...event,y});
+  }
   override render(width:number):string[] {
+    const {input,autocomplete}=this.renderParts(width);
+    return this.autocompleteSeparated?input:[...autocomplete,...input];
+  }
+  private renderParts(width:number) {
     const inner=Math.max(1,width-2);
     const focused=this.focused;
     let lines:string[];
@@ -28,6 +48,8 @@ export class HardwareCursorEditor extends Editor {
     // Locate the line emitted by our protected hook before adapting its contents.
     // Upstream appends autocomplete after it; no private render state or width guessing is needed.
     const bottomBorder=lines.indexOf(this.frameBottomBorder);
+    this.inputRows=bottomBorder+1;
+    this.autocompleteRows=lines.length-this.inputRows;
     lines=lines.map(line=>{
       const unpainted=line.replace(CURSOR_MARKER+'\x1b[7m',CURSOR_MARKER);
       return focused?unpainted:unpainted.replaceAll(CURSOR_MARKER,'');
@@ -44,12 +66,13 @@ export class HardwareCursorEditor extends Editor {
     // The upstream scroll borders keep their ↑/↓ counts.
     // Editor resets must restore bg.base so cursor and padding never expose the terminal background.
     const base=bgSgr('bg.base');
-    return lines.map((line,row)=>{
+    lines=lines.map((line,row)=>{
       let boxed=line;
       if(row>0&&row<bottomBorder)boxed=this.borderColor('│')+line+this.borderColor('│');
       else if(row>bottomBorder)boxed=' '+line+' '.repeat(Math.max(0,width-1-visibleWidth(line)));
       return base+boxed.replaceAll(resetSgr(),resetSgr()+base)+resetSgr();
     });
+    return {input:lines.slice(0,this.inputRows),autocomplete:lines.slice(this.inputRows)};
   }
 }
 
