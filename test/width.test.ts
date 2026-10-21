@@ -68,10 +68,12 @@ class MeasuringTerminal implements Terminal {
   moveBy(){}hideCursor(){this.write('\x1b[?25l');}showCursor(){this.write('\x1b[?25h');}clearLine(){}clearFromCursor(){}clearScreen(){}setTitle(){}setProgress(){}setProgramStatus(){}
 }
 async function until(predicate:()=>boolean){for(let i=0;i<300;i++){if(predicate())return;await new Promise(r=>setTimeout(r,10));}throw Error('condition timed out');}
-function calibratedFixture(transportOverride?:typeof fetch){
+function calibratedFixture(transportOverride?:typeof fetch,onProviderEntered?:()=>void){
   const root=mkdtempSync(join(tmpdir(),'durio-calibrated-')),workspace=join(root,'project');mkdirSync(workspace);writeFileSync(join(workspace,'README.md'),'Fixture');
   const terminal=new MeasuringTerminal(),transport=demoTransport(),draftRoot=join(root,'drafts');
-  const app=new ReadOnlyTui({workspace,dataRoot:join(root,'data'),draftRoot,mode:'offline',transport:transportOverride??transport.fetch,terminal,copy:async()=>true});app.start();
+  const dispatch=transportOverride??transport.fetch;
+  const observed:typeof fetch=onProviderEntered?(...args)=>{const response=dispatch(...args);onProviderEntered();return response;}:dispatch;
+  const app=new ReadOnlyTui({workspace,dataRoot:join(root,'data'),draftRoot,mode:'offline',transport:observed,terminal,copy:async()=>true});app.start();
   const painted=()=>/\x1b\[\d+;\d+H\x1b\[\?25h\x1b\[\?2026l$/.test(terminal.writes.at(-1)??'');
   return {root,terminal,transport,app,draftRoot,painted};
 }
@@ -93,7 +95,8 @@ test('self timing includes input waiting for calibration and ignores blocked fra
 });
 
 test('starting a task leaves no timed width query across synchronous execution capture', async () => {
-  const f=calibratedFixture();
+  let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
+  const f=calibratedFixture(undefined,entered);
   const artifacts=()=>existsSync(join(f.root,'data/host.sqlite'))?[...records(join(f.root,'data'),{kinds:['execution.artifact']})]:[];
   try {
     await until(f.painted);
@@ -109,7 +112,9 @@ test('starting a task leaves no timed width query across synchronous execution c
     assert.equal(f.transport.calls.length,0,'runtime must not pass execution capture while a CPR is still in flight');
     assert.equal(f.terminal.writes.some(data=>data.includes('Display unverified')),false,'host preparation must not expire the terminal query');
     f.terminal.release();
-    await until(()=>f.transport.calls.length>0);
+    // The query is released; wait for the real transport boundary, not a wall-clock budget for artifact I/O.
+    await providerEntered;
+    assert.ok(f.transport.calls.length>0);
     assert.equal(artifacts().length,1,'execution capture still precedes the provider request');
   } finally {
     f.terminal.release();
