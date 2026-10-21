@@ -1,42 +1,42 @@
 132x38 truecolor
 00|                      ╭──────────────────────────────────────────────────────────────────────────────────────╮                      |
-   0-21 -/- ; 22-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-109 border.input/bg.block ; 110-131 -/-
 01|                      │ ◆ improve 提交汇总                                                                   │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-41 fg.primary/bg.block/b ; 42-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-41 fg.primary/bg.block/b ; 42-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 02|                      │ 执行声明范围 1 · 仅验证 0 · 暂缓 0 · 不再建议 0                                      │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-70 fg.body/bg.block ; 71-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-70 fg.body/bg.block ; 71-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 03|                      │ 执行计划                                                                             │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-31 fg.label/bg.block ; 32-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-31 fg.label/bg.block ; 32-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 04|                      │ 1. C-01@r1 · 执行声明范围 · 写回                                                     │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-55 fg.body/bg.block ; 56-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-55 fg.body/bg.block ; 56-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 05|                      │ /xxxxxxx/xxx/xxxxxxxxxxxxxxxxxxxxxx/project/math.mjs · 后续任务读取新文件            │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-96 fg.body/bg.block ; 97-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-96 fg.body/bg.block ; 97-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 06|                      │ 总预算 ≤ 0 请求 · ≈¥0.00（在途请求按高峰价）· 检查 1 项 · 提交后开始计时，预计最晚   │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-105 fg.label/bg.block ; 106-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-105 fg.label/bg.block ; 106-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 07|                      │ 09:00 结束                                                                           │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-33 fg.label/bg.block ; 34-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-33 fg.label/bg.block ; 34-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 08|                      │ 价目 deepseek-cny-v1 · 临时目录                                                      │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-54 fg.label/bg.block ; 55-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-54 fg.label/bg.block ; 55-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 09|                      │ /xxxxxxx/xxx/xxxxxxx/xx/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/x/xxxxxxxxxxxxxxxxxxxxxxxxxxx │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-107 fg.label/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-107 fg.label/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 10|                      │ xxxxxxxxxxxxxxxxxxxxxxxxxx                                                           │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-49 fg.label/bg.block ; 50-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-49 fg.label/bg.block ; 50-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 11|                      │ 绑定 ir-a35b · 报告 revision report-rev-1                                            │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-64 fg.label/bg.block ; 65-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-64 fg.label/bg.block ; 65-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 12|                      │ C-01@r1 · 执行声明范围 · 基线 xxxxxxxxxxxx ·                                         │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-67 fg.label/bg.block ; 68-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-67 fg.label/bg.block ; 68-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 13|                      │ /xxxxxxx/xxx/xxxxxxxxxxxxxxxxxxxxxx/project                                          │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-66 fg.label/bg.block ; 67-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-66 fg.label/bg.block ; 67-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 14|                      │ 失败、取消或出现未知副作用时，剩余项不启动                                           │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-65 fg.label/bg.block ; 66-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-65 fg.label/bg.block ; 66-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 15|                      │ 选择不包含提交、推送、发布或清理数据                                                 │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-59 fg.label/bg.block ; 60-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-59 fg.label/bg.block ; 60-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 16|                      │ 在会话里输入的文字不算选择                                                           │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-49 fg.label/bg.block ; 50-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-49 fg.label/bg.block ; 50-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 17|                      │ ↑↓ 核对 · Enter 提交 · Esc 返回调整                                                  │                      |
-   0-21 -/- ; 22-23 border.input/bg.block ; 24-25 fg.body/bg.block ; 26-33 fg.label/bg.block ; 34-38 fg.body/bg.block ; 39-46 fg.label/bg.block ; 47-49 fg.body/bg.block ; 50-58 fg.label/bg.block ; 59-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-23 border.input/bg.block ; 24-25 fg.body/bg.block ; 26-33 fg.label/bg.block ; 34-38 fg.body/bg.block ; 39-46 fg.label/bg.block ; 47-49 fg.body/bg.block ; 50-58 fg.label/bg.block ; 59-107 -/bg.block ; 108-109 border.input/bg.block ; 110-131 -/-
 18|                      ╰──────────────────────────────────────────────────────────────────────────────────────╯                      |
-   0-21 -/- ; 22-109 border.input/bg.block ; 110-131 -/-
+   0-21 -/bg.base ; 22-109 border.input/bg.block ; 110-131 -/-
 19|                                                                                                                                    |
    0-131 -/-
 20|                                                                                                                                    |

@@ -22,6 +22,8 @@ import {exitSummary,tuiExitCode} from '../src/tui/exit-summary.js';
 import {evalFacts,appendFact} from '../src/eval/store.js';
 import {verifyEvalBeforeStart} from '../src/eval/preflight.js';
 import {evalReport,runEval} from '../src/eval/runner.js';
+import {captureSnapshot} from '../src/tui/snapshot.js';
+import {COLOR_TIER,overrideColorTierForTest} from '../src/tui/theme.js';
 
 function fixture(ended=false,id='eval-confirm'){
  const base=mkdtempSync(join(tmpdir(),'durio-eval-operation-')),root=join(base,'data'),workspace=join(base,'project');mkdirSync(workspace);
@@ -33,6 +35,24 @@ class TestTerminal implements Terminal {
  columns=132;rows=38;kittyProtocolActive=false;input:(text:string)=>void=()=>{};
  start(input:(text:string)=>void){this.input=input;}stop(){}async drainInput(){}write(){}moveBy(){}hideCursor(){}showCursor(){}clearLine(){}clearFromCursor(){}clearScreen(){}setTitle(){}setProgress(){}setProgramStatus(){}
 }
+
+test('eval preparation paints the full loading view in every color tier',async t=>{
+ const f=fixture(),terminal=new TestTerminal(),previousTier=COLOR_TIER;
+ const app=new ReadOnlyTui({dataRoot:f.root,workspace:f.workspace,mode:'offline',terminal,widthCalibration:false,draftRoot:join(f.base,'drafts')});
+ try {
+  app.start();t.mock.timers.enable({apis:['setTimeout','setInterval']});
+  terminal.input(`/eval run ${f.source.label}`);terminal.input('\r');terminal.input('\r');
+  // Advance the loading delay before the async runner can start a VM.
+  t.mock.timers.tick(200);
+  for(const tier of ['truecolor','256color','none'] as const)for(const [width,height]of [[132,38],[80,24],[40,12]]) {
+   overrideColorTierForTest(tier);terminal.columns=width;terminal.rows=height;
+   const lines=app.screen();assert.match(plain(lines),/核对内容中/);
+   for(const [y,row]of captureSnapshot(lines,width,height,tier).rows.entries())for(const [x,cell]of row.entries())
+    assert.equal(cell.bg,tier==='none'?undefined:'bg.base',`${tier} ${width}×${height} cell ${x},${y}`);
+   if(tier==='none')assert.doesNotMatch(lines.join(''),/\x1b\[(?:38|48);/);
+  }
+ } finally {t.mock.timers.reset();await app.exit();overrideColorTierForTest(previousTier);}
+});
 
 test('eval status redraws follow durable trial progress without rereading fixed execution payloads',async t=>{
  const f=fixture(),e=new Evidence(f.root,f.plan.id),payload=e.blob(Buffer.alloc(65536,7));e.append('eval.content',{files:[{path:'runtime-fixture',ref:payload}]});e.close();

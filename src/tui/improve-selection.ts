@@ -235,7 +235,7 @@ export class ImproveSelectionView {
   if(!this.confirmation||this.confirmationSummary!==summary){this.confirmation=new ConfirmDialog(config);this.confirmationSummary=summary;}
   else this.confirmation.update(config);
   if(this.reveal){this.confirmation.revealCursor();this.reveal=false;}
-  const lines=this.confirmation.render(width,height),padding=' '.repeat(Math.max(0,Math.floor((width-ConfirmDialog.width(width))/2)));
+  const lines=this.confirmation.render(width,height),padding=styledLine([],Math.max(0,Math.floor((width-ConfirmDialog.width(width))/2)));
   this.tooSmall=this.confirmation.disabledReason===TOO_SMALL_TO_CONFIRM;this.shown=summary&&!this.tooSmall;
   return lines.map(line=>padding+line);
  }
