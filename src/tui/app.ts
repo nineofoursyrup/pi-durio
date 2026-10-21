@@ -281,17 +281,18 @@ export class ReadOnlyTui {
       if(event.type==='click'&&this.viewingRecovery&&!this.recoveryOpen&&this.runId){void this.openRecovery(this.runId);return {handled:true};}
       return undefined;
     });
+    // 1a/1b 固定行：上下边距、完整底栏和输入框；恢复屏不使用这两个高度预算。
+    const fixedRows=(width:number)=>topMargin(this.terminal.rows)+bottomMargin(this.terminal.rows)+this.footerRows(width)+Math.min(6,Math.max(3,this.editor.render(width).length));
     // 菜单只使用主区剩余行；窄屏不让默认 stack shrink 挤掉头部、状态或输入。
     const autocomplete=this.editor.separateAutocomplete(()=>{
       const width=this.terminal.columns,rows=this.terminal.rows;
-      const fixed=topMargin(rows)+bottomMargin(rows)+footer.render(width).length+Math.min(6,Math.max(3,this.editor.render(width).length));
-      return rows-fixed-(this.welcome?0:header.render(width).length+statusRegion.render(width).length+queue.render(width).length);
+      return rows-fixedRows(width)-(this.welcome?0:header.render(width).length+statusRegion.render(width).length+queue.render(width).length);
     });
     if(!options.runId&&!options.show){
       const tip=TIPS[Math.floor(Math.random()*TIPS.length)];
       this.welcome=new WelcomeScreen({coding:!!options.coding,
         read:()=>readWelcomeFacts({workspace:options.workspace,dataRoot:options.dataRoot,coding:!!options.coding,mode:options.mode,toolEnvironment:options.toolEnvironment},id=>this.shown('session',id),tip),
-        height:width=>this.terminal.rows-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows)-this.footerRows(width)-Math.min(6,Math.max(3,this.editor.render(width).length))-autocomplete.render(width).length,
+        height:width=>this.terminal.rows-fixedRows(width)-autocomplete.render(width).length,
         open:session=>{try{this.command(parseCommand(`/history ${session}`));}catch(error){this.notice=error instanceof CommandError?error.line:safe(String(error));}this.tui.requestRender();},
         changed:()=>this.tui.requestRender(),inspect:lines=>this.widths?.inspect(lines)});
     }
