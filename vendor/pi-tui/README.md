@@ -27,6 +27,7 @@ that installed dependency and this recipe. Two builds produced identical `.2` ar
 SHA-256 `655821a0cc3134646bd0281a0f200cd05b801ba6537ce6f09af225f4958c63e9`.
 The original `.1` derivative archive remains unchanged for existing evidence:
 SHA-256 `90a1f855d1e5f30d9b97c8733ca0a1c3a05ce07d5e95af4e2fed6f553e34f62a`.
+It is retained only in the repository and is not included in the published package.
 
 The added API is process-wide. The host permits one active renderer and resets the
 profile on exit. Every upstream upgrade must recheck the patch and the geometry,
