@@ -29,7 +29,7 @@ test('session completion borrows only main rows and preserves fixed regions, scr
   }}),{headers:{'content-type':'text/event-stream'}});
   const terminal=new TestTerminal(),app=new ReadOnlyTui({workspace,dataRoot,draftRoot:join(root,'drafts'),mode:'offline',transport,terminal,widthCalibration:false});
   const key=(data:string)=>terminal.input(data),lines=()=>app.screen().map(stripTerminalSequences);
-  const anchors=(shown:string[])=>({top:shown.findIndex(line=>line.includes('╭')),bottom:shown.findIndex(line=>line.includes('╰')),status:shown.findIndex(line=>/运行 · 第/.test(line)),queue:shown.findIndex(line=>/^\s*(?:↳ steer|队列 \d+ 项)/.test(line)),footer:shown.findIndex(line=>line.includes('ctx '))});
+  const anchors=(shown:string[])=>({header:shown.findIndex(line=>line.includes('pi-durio')),top:shown.findIndex(line=>line.includes('╭')),bottom:shown.findIndex(line=>line.includes('╰')),status:shown.findIndex(line=>/运行 · 第/.test(line)),queue:shown.findIndex(line=>/^\s*(?:↳ steer|队列 \d+ 项)/.test(line)),footer:shown.findIndex(line=>line.includes('ctx '))});
   const emit=(number:number)=>stream!.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({id:'completion',model:'deepseek-flash',choices:[{index:0,delta:{content:`output ${number}\n`},finish_reason:null}]})}\n\n`));
   const saved=COLOR_TIER;
   app.start();
@@ -55,6 +55,34 @@ test('session completion borrows only main rows and preserves fixed regions, scr
         assert.deepEqual(anchors(lines()),fixed,'closing completion restores the same fixed regions');
         assert.deepEqual(lines().filter(line=>line.includes('output ')),closed.filter(line=>line.includes('output ')),'following resumes at the same latest output');
       }
+    }
+    // User-confirmed compact rule: preserve the selected item and count, or a resize hint below two rows.
+    for(const count of [2,3,4]){
+      const draft=Array.from({length:count-1},(_,i)=>`line ${i+1}`).join('\n')+'\n';
+      key('\x1b[200~'+draft+'\x1b[201~');const fixed=anchors(lines());
+      key('@');await until(()=>lines().some(line=>/→ |补全空间不足/.test(line)));
+      assert.deepEqual(anchors(lines()),fixed,`${count} input lines keep every fixed region`);
+      if(count<4){assert.match(lines().join('\n'),/→ alpha\.txt/);assert.match(lines().join('\n'),/\(1\/4\)/);}
+      else {assert.match(lines().join('\n'),/补全空间不足 · 请扩大窗口/);assert.doesNotMatch(lines().join('\n'),/→ /);}
+      key('\x1b[B');key('\x1b[B');
+      if(count<4){assert.match(lines().join('\n'),/→ delta\.txt/);assert.match(lines().join('\n'),/\(3\/4\)/);}
+      terminal.columns=132;terminal.rows=38;terminal.resize();
+      assert.match(lines().join('\n'),/→ delta\.txt/,'expanding the window keeps the selected item');
+      assert.match(lines().join('\n'),/\(3\/4\)/);assert.doesNotMatch(lines().join('\n'),/补全空间不足/);
+      terminal.columns=40;terminal.rows=12;terminal.resize();
+      assert.deepEqual(anchors(lines()),fixed,'returning to the compact window preserves the input and fixed regions');
+      if(count<4){
+        const selected=lines().findIndex(line=>line.includes('→ delta.txt'));
+        key(`\x1b[<0;7;${selected+1}M`);key(`\x1b[<0;7;${selected+1}m`);key('!');
+        assert.match(lines().join('\n'),/@delta\.txt !/,'a compact menu click applies its displayed item and keeps editor focus');
+      }else{
+        const hint=lines().findIndex(line=>line.includes('补全空间不足'));
+        key(`\x1b[<0;7;${hint+1}M`);key(`\x1b[<0;7;${hint+1}m`);key('a');
+        assert.match(lines().join('\n'),/│  @a /,'the resize hint is not a clickable completion and input remains editable');
+        key('\x1b');
+      }
+      assert.equal(lines().length,12);assert.ok(app.screen().every(line=>visibleWidth(line)<=40));
+      for(let i=0;i<count;i++){key('\x15');if(i<count-1)key('\x7f');}
     }
     terminal.columns=132;terminal.rows=38;terminal.resize();lines();key('\x1b[5~');
     const paused=lines().filter(line=>line.includes('output '));

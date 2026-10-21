@@ -235,7 +235,6 @@ export class ReadOnlyTui {
     this.closed=new Promise(resolve=>{this.resolveClosed=resolve;});
     this.tui=new TuiAltScreen(this.terminal,true,undefined,{copySelection:this.copy,copyOnSelect:true,scrollToEndIndicator:()=> ' ↓ 回到底部 · /bottom '});
     this.editor=new HardwareCursorEditor(this.tui,theme,{autocompleteMaxVisible:2});
-    const autocomplete=this.editor.separateAutocomplete();
     this.editor.setAutocompleteProvider(commandCompletion(options.workspace));
     this.editor.placeholder=()=>this.placeholder();
     this.editor.onChange=()=>{
@@ -281,6 +280,12 @@ export class ReadOnlyTui {
     const statusRegion=new MouseRegion(status,event=>{
       if(event.type==='click'&&this.viewingRecovery&&!this.recoveryOpen&&this.runId){void this.openRecovery(this.runId);return {handled:true};}
       return undefined;
+    });
+    // 菜单只使用主区剩余行；窄屏不让默认 stack shrink 挤掉头部、状态或输入。
+    const autocomplete=this.editor.separateAutocomplete(()=>{
+      const width=this.terminal.columns,rows=this.terminal.rows;
+      const fixed=topMargin(rows)+bottomMargin(rows)+footer.render(width).length+Math.min(6,Math.max(3,this.editor.render(width).length));
+      return rows-fixed-(this.welcome?0:header.render(width).length+statusRegion.render(width).length+queue.render(width).length);
     });
     if(!options.runId&&!options.show){
       const tip=TIPS[Math.floor(Math.random()*TIPS.length)];

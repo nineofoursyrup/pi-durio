@@ -417,6 +417,28 @@ test('autocomplete stays above the closed input frame with aligned menu rows, ba
   } finally { overrideColorTierForTest(saved); rmSync(root, { recursive: true, force: true }); }
 });
 
+test('a compact menu adds the count when a previously unscrolled list is clipped and maps only candidate rows to clicks', async () => {
+  const saved=COLOR_TIER,terminal=new TestTerminal(),tui=new TuiAltScreen(terminal,true),identity=(text:string)=>text;
+  try {
+    for(const tier of ['truecolor','256color','none'] as const){
+      overrideColorTierForTest(tier);
+      const editor=new HardwareCursorEditor(tui,{borderColor:identity,selectList:{selectedPrefix:identity,selectedText:text=>`\x1b[7m${text}\x1b[27m`,description:identity,scrollInfo:identity,noMatch:identity}});
+      editor.focused=true;
+      const menu=editor.separateAutocomplete(()=>2);
+      editor.setAutocompleteProvider(new CombinedAutocompleteProvider([{name:'alpha'},{name:'bravo'},{name:'delta'}],process.cwd(),null));
+      editor.handleInput('/');await new Promise<void>(resolve=>setImmediate(resolve));
+      editor.handleInput('\x1b[B');
+      const lines=menu.render(40),plain=lines.map(stripTerminalSequences),grid=captureSnapshot(lines,40,lines.length,tier);
+      assert.equal(lines.length,2);assert.match(plain[0],/^   → bravo/);assert.match(plain[1],/^     \(2\/3\)/);
+      assert.equal(grid.rows[0][3].reverse,true);
+      assert.ok(grid.rows.every(row=>row.every(cell=>cell.bg===(tier==='none'?undefined:'bg.base'))));
+      const mouse={type:'click' as const,button:'left' as const,x:5,y:1,screenX:5,screenY:1,width:40,height:2,shift:false,alt:false,ctrl:false};
+      menu.handleMouse!(mouse);assert.equal(editor.getText(),'/','the count is not a completion target');
+      menu.handleMouse!({...mouse,y:0,screenY:0});assert.equal(editor.getText(),'/bravo ','the compact row maps to the displayed candidate');
+    }
+  } finally {overrideColorTierForTest(saved);}
+});
+
 test('snapshots place Chinese and emoji in terminal columns and resolve quantized foreground tokens', () => {
   const grid = captureSnapshot([styledLine([{ text: '中😀e\u0301X', fg: 'ac.brand' }], 7, undefined, '256color')], 7, 1, '256color');
   assert.deepEqual(grid.rows[0].map(cell => cell.char), ['中', '', '😀', '', 'e\u0301', 'X', ' ']);
