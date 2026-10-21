@@ -1,6 +1,7 @@
 /** Preset filters shared by the 1e command and keyboard entry points. */
 import { decode, records } from '../history.js';
 import { taskTypeOf } from '../task-type.js';
+import { metricsWatermark } from '../metrics/report.js';
 import { CommandError, parseDate } from './commands.js';
 import { PresetFilter, type FilterValues } from './view-stack.js';
 import { statsCommand, statsRequest, type StatsRequest, type StatsSource } from './stats.js';
@@ -12,8 +13,8 @@ export class StatsChoicesLimitError extends CommandError {
 /** Only selection metadata is read, so shrinking a rejected metrics query remains possible. */
 export function statsChoices(root: string, workspace: string): StatsChoices {
   const projects = new Set([workspace]), types = new Set<string>(), versions = new Set<string>();
-  let count = 0, bytes = 0;
-  for (const ref of records(root, { kinds: ['task.accepted', 'control.accepted', 'execution.artifact'] })) {
+  let count = 0, bytes = 0; const through = metricsWatermark(root);
+  for (const ref of through ? records(root, { through, kinds: ['task.accepted', 'control.accepted', 'execution.artifact'] }) : []) {
     bytes += ref.ref.bytes;
     if (++count > 10000 || bytes > 32 * 1024 * 1024) throw new StatsChoicesLimitError();
     try {
