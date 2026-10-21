@@ -1,6 +1,6 @@
 {
   "name": "@earendil-works/pi-tui",
-  "version": "1.1.0-durio-width.1",
+  "version": "1.1.0-durio-width.2",
   "upstream": {
     "filename": "upstream/earendil-works-pi-tui-1.1.0.tgz",
     "integrity": "sha512-v7wkS0y2ErZvZkSfemqd9RrBZJ5x6p8Ujsv7NdJj01IXJyFM0kNL6rMdcKcvTe7EVTd6ugvDB9VPZSoaBF9QxQ==",
@@ -10,17 +10,22 @@
     "filename": "width-overrides.patch",
     "sha256": "4af10fd879dd0ec955f711d7b2605df567cd9d89c34270ce56d596f009bcbc1e"
   },
+  "autocompletePatch": {
+    "filename": "autocomplete-min-visible.patch",
+    "sha256": "1476c0db7b2d1bc58b036b41040e7e7e7e6853651123783c8693b23a2b0f5016"
+  },
   "build": {
     "typescript": "5.9.3",
-    "scriptSha256": "257b74eafb80cf0f326503ce5a4f5a30e67f169a96400345a202bd6f7597d166"
+    "scriptSha256": "654c1694a3a9d78551aef5aea1fde3599cc29b3255f616ac946eb41a62282794"
   },
   "artifact": {
-    "filename": "pi-tui-1.1.0-durio-width.1.tgz",
-    "integrity": "sha512-U1OWa0IMjVbFAiitcrNOH+QJzT9zb+EkbZSu3DL3lSHnnRHJSrkP6IX5KAreMPsJvXzcBWvG0u/dq0jJs0pGaQ==",
-    "sha256": "90a1f855d1e5f30d9b97c8733ca0a1c3a05ce07d5e95af4e2fed6f553e34f62a"
+    "filename": "pi-tui-1.1.0-durio-width.2.tgz",
+    "integrity": "sha512-UO5E3zEeMJkXQVpPtstYr7Uz+UWk2YcNiru0q9KIDw4btiRoRAp1FYkLBEagdyQBsjlHqS1poXAZsYfmvbeILQ==",
+    "sha256": "655821a0cc3134646bd0281a0f200cd05b801ba6537ce6f09af225f4958c63e9"
   },
   "modifiedUpstreamSources": [
     "packages/tui/src/utils.ts",
-    "packages/tui/src/index.ts"
+    "packages/tui/src/index.ts",
+    "packages/tui/src/components/editor.ts"
   ]
 }

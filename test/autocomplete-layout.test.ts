@@ -5,7 +5,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { stripTerminalSequences, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
-import { readQueue } from '../src/runtime.js';
+import { readAcceptedTasks, readQueue } from '../src/runtime.js';
+import { readRunRecords } from '../src/query.js';
+import { readObject } from '../src/evidence.js';
 import { COLOR_TIER, overrideColorTierForTest } from '../src/tui/theme.js';
 
 class TestTerminal implements Terminal {
@@ -17,6 +19,45 @@ class TestTerminal implements Terminal {
 }
 const wait=()=>new Promise(resolve=>setTimeout(resolve,20));
 async function until(check:()=>boolean,detail?:()=>string){for(let i=0;i<200;i++){if(check())return;await wait();}throw Error(`completion fixture timed out${detail?'\n'+detail():''}`);}
+
+test('resizing a paused viewport to the end keeps following paused until /bottom',async()=>{
+  const root=mkdtempSync(join(tmpdir(),'durio-completion-resize-')),workspace=join(root,'project'),dataRoot=join(root,'data');
+  mkdirSync(workspace);
+  let stream:ReadableStreamDefaultController<Uint8Array>|undefined;
+  const transport:typeof fetch=async(_url,init)=>new Response(new ReadableStream({start(controller){
+    stream=controller;
+    init?.signal?.addEventListener('abort',()=>controller.error(Error('fixture stopped')),{once:true});
+  }}),{headers:{'content-type':'text/event-stream'}});
+  const terminal=new TestTerminal();terminal.columns=80;terminal.rows=12;
+  const app=new ReadOnlyTui({workspace,dataRoot,draftRoot:join(root,'drafts'),mode:'offline',transport,terminal,widthCalibration:false});
+  const key=(data:string)=>terminal.input(data),lines=()=>app.screen().map(stripTerminalSequences);
+  const emit=(number:number)=>stream!.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({id:'resize',model:'deepseek-flash',choices:[{index:0,delta:{content:`output ${number}\n`},finish_reason:null}]})}\n\n`));
+  app.start();
+  try {
+    key('Read');key('\r');await until(()=>!!stream);
+    for(let i=0;i<20;i++)emit(i);
+    await until(()=>lines().some(line=>line.includes('output 19')));
+    key('\x1b[5~');key('\x1b[5~');
+    assert.match(lines().join('\n'),/↓ 回到底部/);
+    assert.doesNotMatch(lines().join('\n'),/output 19/,'scrolling up leaves the latest output');
+    terminal.rows=38;terminal.resize();
+    assert.match(lines().join('\n'),/output 0\s*\n/);
+    assert.match(lines().join('\n'),/output 19/,'the enlarged viewport reaches the end');
+    assert.match(lines().join('\n'),/↓ 回到底部/,'T2: layout reaching the end cannot resume following');
+    const first=lines().find(line=>line.includes('output '));
+    for(let i=20;i<80;i++)emit(i);
+    // A paused viewport retains its projection; verify arrival through the runtime's saved event.
+    const runId=readAcceptedTasks(dataRoot).tasks[0].runId!;
+    await until(()=>readRunRecords(dataRoot,runId,{tail:true,limit:1,kinds:['model.provider-event']}).records.some(record=>readObject(dataRoot,record.ref).includes('output 79')));
+    assert.equal(lines().find(line=>line.includes('output ')),first,'new output keeps the paused top row');
+    assert.doesNotMatch(lines().join('\n'),/output 79/);
+    assert.match(lines().join('\n'),/↓ 回到底部/);
+    key('/bottom');key('\r');
+    await until(()=>lines().some(line=>line.includes('output 79')));
+    assert.doesNotMatch(lines().join('\n'),/↓ 回到底部/);
+    emit(80);await until(()=>lines().some(line=>line.includes('output 80')));
+  } finally {await app.exit();}
+});
 
 test('session completion borrows only main rows and preserves fixed regions, scrolling and keyboard/mouse input',async()=>{
   const root=mkdtempSync(join(tmpdir(),'durio-completion-layout-')),workspace=join(root,'project'),dataRoot=join(root,'data');
@@ -50,6 +91,7 @@ test('session completion borrows only main rows and preserves fixed regions, scr
         assert.deepEqual(anchors(opened),fixed,`${width}x${height} ${tier} ${trigger}: fixed regions`);
         assert.ok(menu>=0&&menu<fixed.status,'menu occupies the main area above status and queue');
         assert.ok(opened.some(line=>/\(1\/\d+\)/.test(line)),'the menu scroll counter stays visible');
+        if(width===40&&height===12&&trigger==='@')assert.equal(opened.filter(line=>/\b(?:alpha|bravo|delta|omega)\.txt\b/.test(line)).length,2,'one input line shows the complete two-candidate menu plus its counter');
         assert.equal(opened.length,height);assert.ok(app.screen().every(line=>visibleWidth(line)<=width));
         key('\x1b');key('\x15');
         assert.deepEqual(anchors(lines()),fixed,'closing completion restores the same fixed regions');
@@ -62,6 +104,7 @@ test('session completion borrows only main rows and preserves fixed regions, scr
       key('\x1b[200~'+draft+'\x1b[201~');const fixed=anchors(lines());
       key('@');await until(()=>lines().some(line=>/→ |补全空间不足/.test(line)));
       assert.deepEqual(anchors(lines()),fixed,`${count} input lines keep every fixed region`);
+      assert.equal(lines().filter(line=>/\b(?:alpha|bravo|delta|omega)\.txt\b/.test(line)).length,count===2?2:count===3?1:0,`${count} input lines preserve the required candidate count`);
       if(count<4){assert.match(lines().join('\n'),/→ alpha\.txt/);assert.match(lines().join('\n'),/\(1\/4\)/);}
       else {assert.match(lines().join('\n'),/补全空间不足 · 请扩大窗口/);assert.doesNotMatch(lines().join('\n'),/→ /);}
       key('\x1b[B');key('\x1b[B');

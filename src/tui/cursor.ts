@@ -8,11 +8,8 @@ import { GLYPHS, fgSgr, bgSgr, resetSgr } from './theme.js';
 export class HardwareCursorEditor extends Editor {
   private frameBottomBorder='';
   private inputRows=0;
-  private autocompleteRows=0;
-  private autocompleteSeparated=false;
   private autocompleteHitRows:Array<number|undefined>=[];
   private readonly menuRender:{selected?:string;counter?:string};
-  private readonly menuTheme:EditorTheme['selectList'];
   /** 输入为空时显示在插入点之后的占位文案（fg.faint）；pi-tui 1.1.0 的 Editor 没有占位。 */
   placeholder?:()=>string;
   constructor(tui:TUI,theme:EditorTheme,options:EditorOptions={}) {
@@ -22,7 +19,7 @@ export class HardwareCursorEditor extends Editor {
       selectedText:text=>menuRender.selected=theme.selectList.selectedText(text),
       scrollInfo:text=>menuRender.counter=theme.selectList.scrollInfo(text),
     }},{paddingX:2,...options});
-    this.menuRender=menuRender;this.menuTheme=theme.selectList;
+    this.menuRender=menuRender;
   }
   protected override renderTopBorder(width:number,hidden:number):string {
     return this.borderColor('╭')+super.renderTopBorder(width,hidden)+this.borderColor('╮');
@@ -31,8 +28,7 @@ export class HardwareCursorEditor extends Editor {
     return this.frameBottomBorder=this.borderColor('╰')+super.renderBottomBorder(width,hidden)+this.borderColor('╯');
   }
   /** 会话屏把菜单放在状态/队列区之前，输入框本身仍作为焦点与鼠标目标。 */
-  separateAutocomplete(availableRows:()=>number=()=>Infinity):Component {
-    this.autocompleteSeparated=true;
+  separateAutocomplete(availableRows:()=>number):Component {
     return {invalidate:()=>this.invalidate(),render:width=>this.renderAutocomplete(width,availableRows()),handleMouse:event=>{
       const row=event.type==='wheel'?this.autocompleteHitRows.find(row=>row!==undefined):this.autocompleteHitRows[event.y];
       if(row===undefined)return {handled:true};
@@ -45,7 +41,11 @@ export class HardwareCursorEditor extends Editor {
     const {autocomplete,selected,counter}=this.renderParts(width),height=Math.max(0,Math.floor(availableRows));
     this.autocompleteHitRows=[];
     if(!autocomplete.length||height===0)return [];
-    if(height<2)return [this.menuLine(fgSgr('ac.warn')+'补全空间不足 · 请扩大窗口'+resetSgr(),width)];
+    if(height<2){
+      const pad=Math.min(this.getPaddingX(),Math.max(0,Math.floor((width-3)/2))),left=1+pad;
+      const line=' '.repeat(left)+truncateToWidth(fgSgr('ac.warn')+'补全空间不足 · 请扩大窗口'+resetSgr(),Math.max(0,width-left),'');
+      return [this.baseLine(line+' '.repeat(Math.max(0,width-visibleWidth(line))))];
+    }
     if(autocomplete.length<=height){
       this.autocompleteHitRows=autocomplete.map((_,row)=>row===counter?undefined:row);
       return autocomplete;
@@ -53,23 +53,15 @@ export class HardwareCursorEditor extends Editor {
     const items=autocomplete.map((_,row)=>row).filter(row=>row!==counter),chosen=Math.max(0,items.indexOf(selected));
     const count=height-1,start=Math.max(0,Math.min(chosen-Math.floor(count/2),items.length-count));
     this.autocompleteHitRows=[...items.slice(start,start+count),undefined];
-    const scroll=counter>=0?autocomplete[counter]:this.menuLine(this.menuTheme.scrollInfo(`  (${chosen+1}/${items.length})`),width);
-    return [...items.slice(start,start+count).map(row=>autocomplete[row]),scroll];
+    return [...items.slice(start,start+count).map(row=>autocomplete[row]),autocomplete[counter]];
   }
   private baseLine(line:string) {const base=bgSgr('bg.base');return base+line.replaceAll(resetSgr(),resetSgr()+base)+resetSgr();}
-  private menuLine(text:string,width:number) {
-    const pad=Math.min(this.getPaddingX(),Math.max(0,Math.floor((width-3)/2))),left=1+pad;
-    const line=' '.repeat(left)+truncateToWidth(text,Math.max(0,width-left),'');
-    return this.baseLine(line+' '.repeat(Math.max(0,width-visibleWidth(line))));
-  }
   private handleEditorMouse(event:TuiMouseEvent) {return super.handleMouse({...event,x:event.x-1,width:Math.max(1,event.width-2)});}
   override handleMouse(event:TuiMouseEvent) {
-    const y=this.autocompleteSeparated?event.y:event.y<this.autocompleteRows?event.y+this.inputRows:event.y-this.autocompleteRows;
-    return this.handleEditorMouse({...event,y});
+    return this.handleEditorMouse(event);
   }
   override render(width:number):string[] {
-    const {input,autocomplete}=this.renderParts(width);
-    return this.autocompleteSeparated?input:[...autocomplete,...input];
+    return this.renderParts(width).input;
   }
   private renderParts(width:number) {
     const inner=Math.max(1,width-2);
@@ -84,7 +76,6 @@ export class HardwareCursorEditor extends Editor {
     // Upstream appends autocomplete after it; no private render state or width guessing is needed.
     const bottomBorder=lines.indexOf(this.frameBottomBorder);
     this.inputRows=bottomBorder+1;
-    this.autocompleteRows=lines.length-this.inputRows;
     const menu=lines.slice(this.inputRows),selected=this.menuRender.selected?menu.findIndex(line=>line.includes(this.menuRender.selected!)):-1,counter=this.menuRender.counter?menu.findIndex(line=>line.includes(this.menuRender.counter!)):-1;
     lines=lines.map(line=>{
       const unpainted=line.replace(CURSOR_MARKER+'\x1b[7m',CURSOR_MARKER);
