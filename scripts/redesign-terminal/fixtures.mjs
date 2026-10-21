@@ -100,7 +100,7 @@ export async function renderers(packageRoot, fixture) {
   const { QueueStrip } = await load(packageRoot, 'dist/src/tui/queue.js');
   const queueStrip = new QueueStrip();
   const { ImproveSelectionView } = await load(packageRoot, 'dist/src/tui/improve-selection.js');
-  const { StatsView } = await load(packageRoot, 'dist/src/tui/stats.js');
+  const { StatsBrowser } = await load(packageRoot, 'dist/src/tui/stats-browser.js');
   const { SelfView } = await load(packageRoot, 'dist/src/tui/self.js');
   const { TraceView } = await load(packageRoot, 'dist/src/tui/trace.js');
   const { EvalPlanView } = await load(packageRoot, 'dist/src/tui/eval.js');
@@ -210,7 +210,11 @@ export async function renderers(packageRoot, fixture) {
       const component = { invalidate() {}, render: w => {
         const h = fullScreenHeight(height);
         if (id === '1d') return selection.render(w, h);
-        if (id === '1e') { const figures = statsFigures(state); return new StatsView(request, () => ({ scope: request.scope, sample: { N: figures.acceptance.N, excluded: 3 }, versions: { ids: ['synthetic'], unknown: 0 }, figures })).render(w, h, tier); }
+        // As in the product, StatsBrowser owns the 1e table: its hints, default row and the command from the read scope.
+        // Only the read is synthetic; the snapshot carries what the table layer uses, so drilldown is not reachable here.
+        if (id === '1e') { const figures = statsFigures(state); return new StatsBrowser(fixture.dataRoot, request.scope.project, request, { open: refusal, copy: refusal, feedback() {}, changed() {} }, {
+          read: (root, scope) => ({ scope: { ...scope, through: 1 }, root, sample: { N: figures.acceptance.N, excluded: 3 }, versions: { ids: ['synthetic'], unknown: 0 }, figures, revisions: [1] }),
+        }).render(w, h, tier); }
         if (id === '2c') return self.render(w, h, tier);
         const overlayHeight = fullScreenHeight(height);
         return id === '2a' ? trace.render(w, overlayHeight, 'Esc 返回会话') : evaluation.render(w, overlayHeight, tier);

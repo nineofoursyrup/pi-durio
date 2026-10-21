@@ -79,6 +79,9 @@ test('offline grids render all nine screens, complete 1a/1f and the stats states
   const stats = readFileSync(join(output, '1e-132x38-truecolor-six-oracles.txt'), 'utf8');
   assert.match(stats, /80\.0%/); assert.match(stats, /25\.0%/); assert.match(stats, /1\/3/); assert.match(stats, /62\.5%/);
   assert.match(stats, /只读 · 不调用模型 · 不重记费用/, 'six-oracle header keeps its read-only note at the product inner width');
+  assert.match(stats, /› 任务验收/, '1e opens with the product default row selected');
+  assert.match(stats, /↑↓ 选行 · Enter 成员 · \/ 筛选 · e 导出 · Tab 页签 · Esc 返回会话/, '1e shows the product browser hints');
+  assert.match(stats, /❯ \/stats --from \S+ --to \S+ --as-of 2026-10-17T02:00:00\.000Z --project \/synthetic\/shop-api --snapshot 1/, '1e shows the command for the read scope');
   const trace = readFileSync(join(output, '2a-132x38-truecolor-default.txt'), 'utf8');
   assert.match(trace, /Enter 原文/);
   assert.match(trace, /p 固定为证据/);
