@@ -13,7 +13,7 @@ import {estimateRunRequests,formatCostTotals,formatAmount,hostPlanPrice,upperBou
 import type {ImproveDecisionState} from '../improve-batch.js';
 import type {PlanSource} from '../eval/overview.js';
 import {mayWrite,type WriteAccess} from './write-access.js';
-import {clean,hintLine,hintSegments,footerLines,fitSegments,frameBox,rule,ConfirmDialog,TOO_SMALL_TO_CONFIRM,wrapAuthorized} from './view-stack.js';
+import {clean,hintLine,hintSegments,footerLines,fitSegments,frameBox,boxInnerWidth,rule,ConfirmDialog,TOO_SMALL_TO_CONFIRM,wrapAuthorized} from './view-stack.js';
 import {styledLine,type TextSegment,type TokenName} from './theme.js';
 import {improveCandidateRows,IMPROVE_MODES,MODE_LABEL,suggestionReason} from './improve-card.js';
 import {reportTime} from './improve-home.js';
@@ -195,7 +195,7 @@ export class ImproveSelectionView {
   * 只是预览，提交以 Enter 进入的汇总框为准；放不下的部分截断。
   */
  private batch(width:number):string[] {
-  const inner=width-4,modes=[...this.modes.values()],count=(mode:ImproveMode)=>modes.filter(m=>m===mode).length;
+  const inner=boxInnerWidth(width,1),modes=[...this.modes.values()],count=(mode:ImproveMode)=>modes.filter(m=>m===mode).length;
   const checks=this.report.candidates.filter(c=>IMPROVE_MODES.indexOf(this.modes.get(c.id)??'defer')<2).flatMap(c=>c.structuredChecks??[]);
   const requests=checks.reduce((n,ch)=>n+(ch.kind==='fresh'?ch.budget.maxRequests:0),0),tokens=checks.reduce((n,ch)=>n+(ch.kind==='fresh'?ch.budget.maxTokens:0),0);
   const counts=`提交批次 执行 ${count('execute-declared-scope')} · 仅验证 ${count('validate-only')} · 暂缓 ${count('defer')} · 不再建议 ${count('do-not-suggest')} · 未选 ${this.report.candidates.length-this.modes.size}`;

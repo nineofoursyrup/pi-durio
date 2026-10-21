@@ -12,7 +12,7 @@
 
 import { Input, matchesKey, truncateToWidth, visibleWidth, wrapTextWithAnsi, stripTerminalSequences } from '@earendil-works/pi-tui';
 import {
-  styledLine, fgSgr, bgSgr, resetSgr, dimForOverlay,
+  styledLine, fgSgr, bgSgr, resetSgr, dimForOverlay, horizontalLine, boxEdge,
   GLYPHS, spinnerFrame, SPINNER_FRAMES, SPINNER_INTERVAL_MS,
   type ColorTier, COLOR_TIER, type TextSegment, type TokenName,
 } from './theme.js';
@@ -165,19 +165,23 @@ export function inset(lines: string[], width: number, margin: number, tier: Colo
     return pad + line + (fill > 0 ? styledLine([], fill, undefined, tier) : '') + pad;
   });
 }
-/** 圆角整框（U10）：`lines` 按 width − 4 渲染，框线用 `border.input`，短行用 `bg.base` 补满。 */
-export function frameBox(lines: string[], width: number, tier: ColorTier = COLOR_TIER): string[] {
-  const inner = width - 4, border = (text: string) => styledLine([{ text, fg: 'border.input' }], visibleWidth(text), undefined, tier);
-  return [border(`╭${'─'.repeat(width - 2)}╮`),
-    ...lines.map(line => border('│ ') + line + (visibleWidth(line) < inner ? styledLine([], inner - visibleWidth(line), undefined, tier) : '') + border(' │')),
-    border(`╰${'─'.repeat(width - 2)}╯`)];
+/** Content columns after measured side borders and optional padding on each side. */
+export function boxInnerWidth(width: number, padding = 0): number {
+  return Math.max(1, width - visibleWidth('││') - 2 * padding);
 }
-/** 输入框与只读等价命令：内容按 width − 2 渲染，左右各一列闭合框线。 */
+/** 圆角整框（U10）：`lines` 按 boxInnerWidth(width, 1) 渲染，短行用 `bg.base` 补满。 */
+export function frameBox(lines: string[], width: number, tier: ColorTier = COLOR_TIER): string[] {
+  const inner = boxInnerWidth(width, 1), border = (text: string) => styledLine([{ text, fg: 'border.input' }], visibleWidth(text), undefined, tier);
+  return [border(boxEdge(width, '╭', '╮')),
+    ...lines.map(line => border('│ ') + line + (visibleWidth(line) < inner ? styledLine([], inner - visibleWidth(line), undefined, tier) : '') + border(' │')),
+    border(boxEdge(width, '╰', '╯'))];
+}
+/** 输入框与只读等价命令：内容按 boxInnerWidth(width) 渲染，左右闭合框线。 */
 export function inputBox(lines: string[], width: number, tier: ColorTier = COLOR_TIER, token: TokenName = 'border.input'): string[] {
   const border = (text: string) => styledLine([{ text, fg: token }], visibleWidth(text), undefined, tier);
-  return [border(`╭${'─'.repeat(Math.max(0, width - 2))}╮`),
-    ...lines.map(line => border('│') + line + styledLine([], Math.max(0, width - 2 - visibleWidth(line)), undefined, tier) + border('│')),
-    border(`╰${'─'.repeat(Math.max(0, width - 2))}╯`)];
+  return [border(boxEdge(width, '╭', '╮')),
+    ...lines.map(line => border('│') + line + styledLine([], Math.max(0, boxInnerWidth(width) - visibleWidth(line)), undefined, tier) + border('│')),
+    border(boxEdge(width, '╰', '╯'))];
 }
 /** 按显示列截取 [from, to)，跨边界的宽字符换成空格，不足补空格。 */
 function sliceColumns(text: string, from: number, to: number): string {
@@ -203,7 +207,7 @@ export function composeOverlay(base: string[], box: string[], width: number, tie
 }
 /** 区块分隔线：整行 `─`，默认 `line.subtle`；框内分隔用 `line.inner`。 */
 export function rule(width: number, token: TokenName = 'line.subtle', tier: ColorTier = COLOR_TIER): string {
-  return styledLine([{ text: '─'.repeat(Math.max(0, width)), fg: token }], width, undefined, tier);
+  return styledLine([{ text: horizontalLine(width), fg: token }], width, undefined, tier);
 }
 
 // ─── 窄终端（U12） ───────────────────────────────────────────────────────────
@@ -425,7 +429,7 @@ export class ConfirmDialog {
   revealCursor(): void { this.followCursor = true; }
 
   render(columns: number, rows: number, tier: ColorTier = COLOR_TIER): string[] {
-    const width = ConfirmDialog.width(columns), inner = Math.max(1, width - 4);
+    const width = ConfirmDialog.width(columns), inner = boxInnerWidth(width, 1);
     const fixed = [...(this.config.fixed ?? []).flatMap(text => wrapAuthorized(text, inner)), ...(this.config.fixedRows?.(inner) ?? []).flatMap(text => wrapTextWithAnsi(text, inner))];
     // 末行放不下时换行（原因不截断，Esc 不去掉）；当前提示和“窗口过小”的提示都必须完整容纳。
     const footer = (reason: string | undefined) => wrapSegments(this.config.footer ? this.config.footer(reason) : reason
@@ -438,7 +442,7 @@ export class ConfirmDialog {
     const border = (text: string) => (tier === 'none' ? '' : bgSgr('bg.block', tier) + fgSgr('border.input', tier)) + text + resetSgr();
     const row = (segments: TextSegment[], lineBg: TokenName = 'bg.block') =>
       border('│ ') + styledLine(segments.map(s => ({ bg: lineBg, ...s })), inner, lineBg, tier) + border(' │');
-    const lines = [border(`╭${'─'.repeat(Math.max(0, width - 2))}╮`), row([{ text: truncateEnd(clean(this.config.title), inner), fg: 'fg.primary', bold: true }])];
+    const lines = [border(boxEdge(width, '╭', '╮')), row([{ text: truncateEnd(clean(this.config.title), inner), fg: 'fg.primary', bold: true }])];
     if (!this.tooSmall) {
       const scrollable = this.scrollable(inner);
       const height = Math.min(scrollable.length, rows - chrome - fixed.length);
@@ -450,7 +454,7 @@ export class ConfirmDialog {
       for (const text of fixed) lines.push(row([{ text, fg: 'fg.label' }]));
     }
     for (const segments of footer(this.disabledReason)) lines.push(row(segments));
-    lines.push(border(`╰${'─'.repeat(Math.max(0, width - 2))}╯`));
+    lines.push(border(boxEdge(width, '╰', '╯')));
     return lines.slice(0, Math.max(0, rows));
   }
 
