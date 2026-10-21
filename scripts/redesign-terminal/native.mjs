@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { parseArgs } from 'node:util';
+import { pathToFileURL } from 'node:url';
 import { mkdirSync, readFileSync, writeFileSync, appendFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -7,6 +8,59 @@ import { verifyManifest } from './verify.mjs';
 import { save, sha256, templates, newOutputPath } from './common.mjs';
 import { load } from './fixtures.mjs';
 import { assessNative } from './assess.mjs';
+/** Raw inputs stay lossless; expensive observations are bounded independently of input rate. */
+export function createNativeInputObserver({ snapshot, append }) {
+  let sequence = 0, keyAttempt, timer, pending, burst;
+  const interrupted = (reason, after) => {
+    if (pending) append({ ...pending, settled: false, ...(after ? { after } : {}), observation: reason });
+    pending = undefined;
+  };
+  const schedule = ordinal => {
+    burst ??= { firstOrdinal: ordinal, count: 0 };
+    burst.lastOrdinal = ordinal; burst.count++;
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = undefined;
+      const after = snapshot();
+      if (pending) append({ ...pending, settled: pending.ordinal === sequence, after });
+      else append({ kind: 'input-observation', ...burst, settled: burst.lastOrdinal === sequence, after });
+      pending = undefined; burst = undefined;
+    }, 120);
+  };
+  return {
+    input(data, input) {
+      // Harness-only markers retain the physical PgUp/PgDn attempt semantics.
+      const probeKey = data === '\x07' ? 'page-up' : data === '\x0e' ? 'page-down' : null;
+      if (probeKey) {
+        if (keyAttempt?.key === probeKey) { append({ kind: 'key-attempt', ...keyAttempt, completed: true, endedAt: new Date().toISOString() }); keyAttempt = null; }
+        else keyAttempt = { key: probeKey, startedAt: new Date().toISOString(), received: false };
+        return;
+      }
+      if (keyAttempt && data === (keyAttempt.key === 'page-up' ? '\x1b[5~' : '\x1b[6~')) keyAttempt.received = true;
+      const ordinal = ++sequence, at = new Date().toISOString(), ms = performance.now();
+      append({ kind: 'received', ordinal, at, ms, data });
+      const mouse = /^\x1b\[<\d+;\d+;\d+[Mm]$|^\x1b\[M[\s\S]{3}$/.test(data);
+      const cpr = /^\x1b\[(\d+);\d+R$/.exec(data);
+      // Row 1 CPR-shaped input can be modified F3; bracketed paste stays opaque.
+      const protocol = cpr && Number(cpr[1]) !== 1 || /^\x1b\[\?[\d;]*c$/.test(data);
+      if (mouse || protocol) interrupted('coalesced-by-high-frequency-input');
+      else {
+        const before = snapshot();
+        interrupted('superseded-before-settle', before);
+        pending = { kind: 'input', ordinal, at, ms, data, before, settled: false };
+      }
+      input(data);
+      schedule(ordinal);
+    },
+    resize(event, resize) { sequence++; append({ kind: 'resize', ...event, at: new Date().toISOString() }); resize(); },
+    close() {
+      if (timer) clearTimeout(timer);
+      timer = undefined; interrupted('closed-before-settle'); burst = undefined;
+    },
+  };
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
 const { values } = parseArgs({ options: { manifest: { type: 'string' }, output: { type: 'string' }, 'verify-only': { type: 'boolean' }, tier: { type: 'string' }, screen: { type: 'string' } } });
 if (!values.manifest) throw Error('MANIFEST_REQUIRED');
 const manifest = verifyManifest(values.manifest);
@@ -41,7 +95,7 @@ const before = { raw: !!process.stdin.isRaw, stty: stty(), columns: process.stdo
 save(join(output, 'before.json'), before);
 writeFileSync(join(output, 'events.jsonl'), '', { flag: 'wx', mode: 0o600 });
 writeFileSync(join(output, 'terminal-output.ansi'), '', { flag: 'wx', mode: 0o600 });
-const events = [], timers = new Set(); let keyAttempt, app, sequence = 0, terminalOutput = '', result, failure, during;
+const events = [], timers = new Set(); let app, terminalOutput = '', result, failure, during;
 const append = event => { events.push(event); appendFileSync(join(output, 'events.jsonl'), JSON.stringify(event) + '\n'); };
 const snapshot = () => {
   let screen = [], queue = null; const errors = [];
@@ -51,21 +105,8 @@ const snapshot = () => {
   return { screen, queue, errors };
 };
 const terminal = new ProcessTerminal(), originalStart = terminal.start.bind(terminal);
-terminal.start = (input, resize) => originalStart(data => {
-  // Harness-only markers: Ctrl+G opens/closes PgUp; Ctrl+N opens/closes PgDn.
-  // The closing marker is the operator's confirmation that the physical key was tried.
-  const probeKey = data === '\x07' ? 'page-up' : data === '\x0e' ? 'page-down' : null;
-  if (probeKey) {
-    if (keyAttempt?.key === probeKey) { append({kind:'key-attempt',...keyAttempt,completed:true,endedAt:new Date().toISOString()}); keyAttempt = null; }
-    else keyAttempt = {key:probeKey,startedAt:new Date().toISOString(),received:false};
-    return;
-  }
-  if (keyAttempt && data === (keyAttempt.key === 'page-up' ? '\x1b[5~' : '\x1b[6~')) keyAttempt.received = true;
-  const ordinal = ++sequence, event = { kind: 'input', ordinal, at: new Date().toISOString(), ms: performance.now(), data, before: snapshot(), settled: false };
-  append({ kind: 'received', ordinal, at: event.at, ms: event.ms, data });
-  input(data);
-  const timer = setTimeout(() => { timers.delete(timer); event.settled = ordinal === sequence; event.after = snapshot(); append(event); }, 120); timers.add(timer);
-}, () => { sequence++; append({ kind: 'resize', columns: terminal.columns, rows: terminal.rows, at: new Date().toISOString() }); resize(); });
+const observer = createNativeInputObserver({ snapshot, append });
+terminal.start = (input, resize) => originalStart(data => observer.input(data, input), () => observer.resize({ columns: terminal.columns, rows: terminal.rows }, resize));
 const transport = async (_url, init) => new Response(new ReadableStream({ start(stream) {
   let counter = 0, ended = false;
   const finish = () => { if (ended) return; ended = true; clearInterval(timer); timers.delete(timer); stream.error(Error('synthetic native stream cancelled')); };
@@ -76,9 +117,10 @@ const originalWrite = process.stdout.write;
 process.stdout.write = function (...args) { const bytes = typeof args[0] === 'string' ? args[0] : Buffer.from(args[0]).toString('utf8'); terminalOutput += bytes; appendFileSync(join(output, 'terminal-output.ansi'), bytes); return originalWrite.apply(this, args); };
 try { app = new ReadOnlyTui({ workspace, dataRoot, mode: 'offline', coding: false, transport, terminal, draftRoot: join(output, 'drafts') }); app.start(); during = { raw: !!process.stdin.isRaw }; result = await app.closed; failure = result?.error; if (result?.summary) process.stdout.write(result.summary.join('\n') + '\n'); }
 catch (error) { failure = String(error); }
-finally { try { if (app) await app.exit(); } catch (error) { failure ??= String(error); } for (const timer of timers) { clearTimeout(timer); clearInterval(timer); } process.stdout.write = originalWrite; }
+finally { try { if (app) await app.exit(); } catch (error) { failure ??= String(error); } observer.close(); for (const timer of timers) { clearTimeout(timer); clearInterval(timer); } process.stdout.write = originalWrite; }
 const after = { raw: !!process.stdin.isRaw, stty: stty(), columns: process.stdout.columns, rows: process.stdout.rows };
 save(join(output, 'after.json'), after); save(join(output, 'result.json'), { ...binding, result: result ?? null, during: during ?? null, failure: failure ?? null, paidProvider: 'NOT_RUN' });
 save(join(output, 'machine-checklist.json'), { ...binding, firstFailure: failure ?? null, ...assessNative({ environment, expectedTier: values.tier, events: events.sort((a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0)), before, during, after, result, output: terminalOutput }) });
 console.log(`证据：${output}\n机器结果与人工观察分别记录；没有观察的项目保持 NOT_RUN。`);
 if (failure) process.exitCode = 1;
+}
