@@ -2,6 +2,7 @@ import {stampFact} from './fact-clock.js';
 import { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync, chmodSync, openSync, closeSync, writeFileSync, fsyncSync, renameSync, existsSync, readFileSync, readSync } from 'node:fs';
+import { open, readFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 
 export const digest = (bytes: string | Uint8Array) => createHash('sha256').update(bytes).digest('hex');
@@ -128,6 +129,23 @@ export class Evidence {
       try { fsyncSync(dir); } finally { closeSync(dir); }
     } else if (digest(readFileSync(path)) !== sha256) { throw new Error('EVIDENCE_CORRUPT'); }
     return { sha256, bytes: value.byteLength };
+  }
+  /** Same verified, durable object boundary as blob; independent capture files may await I/O together. */
+  async blobAsync(bytes: string | Uint8Array): Promise<BlobRef> {
+    const value=Buffer.from(bytes),sha256=digest(value),path=join(this.root,'objects',sha256);
+    let original:Buffer|undefined;
+    try { original=await readFile(path); }
+    catch(error) { if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error; }
+    if(original) {
+      if(digest(original)!==sha256)throw Error('EVIDENCE_CORRUPT');
+    } else {
+      const temporary=`${path}.${randomUUID()}`,file=await open(temporary,'wx',0o600);
+      try { await file.writeFile(value);await file.sync(); } finally { await file.close(); }
+      await rename(temporary,path);
+      const directory=await open(join(this.root,'objects'),'r');
+      try { await directory.sync(); } finally { await directory.close(); }
+    }
+    return {sha256,bytes:value.byteLength};
   }
   append(kind: string, data: unknown): number { return this.appendFor(this.runId, kind, data); }
   /** Related host facts become visible together; content-addressed blobs may precede the transaction. */

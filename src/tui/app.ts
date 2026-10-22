@@ -47,10 +47,10 @@ import { readSessionChains } from '../session-chain.js';
 import { formatCostTotals } from '../cost-estimate.js';
 import { exitSummary, ProcessCleanupReceipts, type EvalExitFact } from './exit-summary.js';
 export { exitCostSummary } from './exit-summary.js';
-import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor, dimForOverlay } from './theme.js';
+import { COLOR_TIER, SPINNER_INTERVAL_MS, styledLine, makeBorderColor, dimForOverlay } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageSegments, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
-import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, footerLines, inset, sideMargin, bottomMargin, topMargin, rule, frameBox, composeOverlay, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
+import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, footerLines, inset, sideMargin, bottomMargin, topMargin, rule, frameBox, boxInnerWidth, composeOverlay, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
 import { CommandError, commandCompletion, helpBody, parseCommand, resolveArgument, type ParsedCommand } from './commands.js';
 import { TIPS, WelcomeScreen, probeWelcomeLock, readWelcomeFacts, welcomeStatusSegments } from './welcome.js';
 import { COMPACT_VERSION_CHANGED, CONTINUE_TAIL_UNFINISHED, VERSION_CHANGED_HINT, readContinuation, type Continuation } from '../continuation.js';
@@ -66,6 +66,7 @@ type PanelKind='help'|'exit'|'trace-raw'|'queue'|'history'|'eval'|'eval-plan'|'e
 type ViewEntry={kind:PanelKind;offset:number;line:number};
 /** 主区窗口：每次读取当前任务最近的记录条数（查询上限）。 */
 const WINDOW=50;
+const INPUT_HEIGHT={minSize:3,maxSize:6};
 const identity=(s:string)=>s;
 const theme={borderColor:makeBorderColor('border.input'), selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
 function safe(text:string) { return stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,'�'); }
@@ -245,7 +246,14 @@ export class ReadOnlyTui {
       this.tui.requestRender();
     };
     this.editor.onSubmit=text=>this.submit(text);
-    this.scroll=new ScrollView(this.transcript,{follow:'end',primary:true});
+    this.scroll=new class extends ScrollView {
+      override updateLayout(contentHeight:number,viewportHeight:number,requestRender:()=>void) {
+        const following=this.isFollowingEnd;
+        super.updateLayout(contentHeight,viewportHeight,requestRender);
+        // T2：菜单开关、窗口大小或内容变化使视图到达末尾，都不恢复跟随；只有用户显式操作才会恢复。
+        if(!following&&this.isFollowingEnd)this.scrollTo(this.scrollTop,{disableFollow:true});
+      }
+    }(this.transcript,{follow:'end',primary:true});
     // 1b（U2）：头部一行；主区；状态行；输入框；底栏用量与键位提示（状态反馈替换键位提示行）。
     // 窗口宽敞时（U10）头部下方、运行状态行上方各一条区块分隔线；矮窗口先收它们。
     const header:Component={invalidate(){},render:width=>{const state=this.headerState();return [headerLine(state,width,narrowing(width,state,this.statusParts()).headerRight),...(this.roomy()?[rule(width)]:[])];}};
@@ -256,12 +264,12 @@ export class ReadOnlyTui {
     const recoveryPanel:Component={invalidate(){},render:width=>{const lines=this.recoveryLoading?.isShowing?[this.recoveryLoading.renderLine(width),hintLine([],width,{esc:'Esc 返回查看'})]:this.recoveryPanel?.render(width,this.recoveryPlan(width).panel)??[];this.widths?.inspect(lines);return lines;}};
     // 1c 浮层（U3、U10）：恢复面板为居中圆角框，盖在变灰的主区上；只在宽敞窗口使用。
     const recoveryArea:Component={invalidate(){},render:width=>{
-      const plan=this.recoveryPlan(width),boxWidth=this.recoveryBoxWidth(),inner=boxWidth-4;
+      const plan=this.recoveryPlan(width),boxWidth=this.recoveryBoxWidth(),inner=boxInnerWidth(boxWidth,1);
       const content=this.recoveryLoading?.isShowing?[this.recoveryLoading.renderLine(inner),hintLine([],inner,{esc:'Esc 返回查看'})]:this.recoveryPanel?.render(inner,plan.panel,undefined,{wide:true,airy:plan.airy})??[];
       this.widths?.inspect(content);
       const transcript=this.transcript.render(width),base=transcript.slice(Math.max(0,transcript.length-plan.area));
       while(base.length<plan.area)base.unshift('');
-      const lines=composeOverlay(base,frameBox(content,boxWidth),width);
+      const lines=composeOverlay(base,frameBox(content,boxWidth,COLOR_TIER,'bg.base'),width);
       return this.dialog?lines.map(line=>dimForOverlay(line)):lines;
     }};
     const disabledInput:Component={invalidate(){},render:width=>disabledInputLines(this.editor.getExpandedText(),width)};
@@ -274,11 +282,25 @@ export class ReadOnlyTui {
       if(event.type==='click'&&this.viewingRecovery&&!this.recoveryOpen&&this.runId){void this.openRecovery(this.runId);return {handled:true};}
       return undefined;
     });
+    // Give the adapter the same bounded height as the host, so generic leaf clipping
+    // cannot remove either rule or shift the editor's mouse coordinates.
+    const sessionRows=(width:number)=>this.welcome?0:header.render(width).length+statusRegion.render(width).length+queue.render(width).length;
+    this.editor.setInputHeightLimit(()=>{
+      const width=this.terminal.columns,other=sessionRows(width);
+      return Math.max(INPUT_HEIGHT.minSize,Math.min(INPUT_HEIGHT.maxSize,this.terminal.rows-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows)-this.footerRows(width)-other));
+    });
+    // 1a/1b 固定行：上下边距、完整底栏和输入框；恢复屏不使用这两个高度预算。
+    const fixedRows=(width:number)=>topMargin(this.terminal.rows)+bottomMargin(this.terminal.rows)+this.footerRows(width)+Math.min(INPUT_HEIGHT.maxSize,Math.max(INPUT_HEIGHT.minSize,this.editor.render(width).length));
+    // 菜单只使用主区剩余行；窄屏不让默认 stack shrink 挤掉头部、状态或输入。
+    const autocomplete=this.editor.separateAutocomplete(()=>{
+      const width=this.terminal.columns,rows=this.terminal.rows;
+      return rows-fixedRows(width)-sessionRows(width);
+    });
     if(!options.runId&&!options.show){
       const tip=TIPS[Math.floor(Math.random()*TIPS.length)];
       this.welcome=new WelcomeScreen({coding:!!options.coding,
         read:()=>readWelcomeFacts({workspace:options.workspace,dataRoot:options.dataRoot,coding:!!options.coding,mode:options.mode,toolEnvironment:options.toolEnvironment},id=>this.shown('session',id),tip),
-        height:width=>this.terminal.rows-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows)-this.footerRows(width)-Math.min(6,Math.max(3,this.editor.render(width).length)),
+        height:width=>this.terminal.rows-fixedRows(width)-autocomplete.render(width).length,
         open:session=>{try{this.command(parseCommand(`/history ${session}`));}catch(error){this.notice=error instanceof CommandError?error.line:safe(String(error));}this.tui.requestRender();},
         changed:()=>this.tui.requestRender(),inspect:lines=>this.widths?.inspect(lines)});
     }
@@ -286,12 +308,13 @@ export class ReadOnlyTui {
     // 1c 时：头部 → 主区 → 恢复面板 → 状态行 → 已禁用的输入框 → 底栏；高度不够时按 recoveryPlan 依次收起。
     const topPad:Component={invalidate(){},render:width=>[styledLine([],width)]};
     const layout=new VStack([{component:topPad,basis:1,visible:()=>topMargin(this.terminal.rows)>0},{component:header,basis:'auto',visible:()=>!this.welcome},...welcome,
-      {component:this.scroll,basis:0,grow:1,minSize:1,visible:view=>!this.welcome&&!this.recoveryOverlay()&&this.recoveryPlan(view.width).main},
+      {component:this.scroll,basis:0,grow:1,visible:view=>!this.welcome&&!this.recoveryOverlay()&&this.recoveryPlan(view.width).main},
       {component:recoveryArea,basis:0,grow:1,minSize:1,visible:()=>this.recoveryOverlay()},
       {component:recoveryPanel,basis:'auto',visible:()=>!this.welcome&&!this.recoveryOverlay()&&this.viewingRecovery&&(!!this.recoveryLoading?.isShowing||this.recoveryOpen&&!!this.recoveryPanel)},
+      {component:autocomplete,basis:'auto',visible:()=>!this.viewingRecovery},
       {component:statusRegion,basis:'auto',visible:()=>!this.welcome},
       {component:queue,basis:'auto',visible:()=>!this.welcome&&!this.viewingRecovery&&this.queueEntries.length>0},
-      {component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6,visible:()=>!this.viewingRecovery},
+      {component:this.editor,basis:'auto',shrink:1,...INPUT_HEIGHT,visible:()=>!this.viewingRecovery},
       {component:disabledInput,basis:3,visible:view=>this.viewingRecovery&&this.recoveryPlan(view.width).input},
       {component:footer,basis:'auto',visible:view=>this.recoveryPlan(view.width).hints},
       {component:bottomPad,basis:1,visible:()=>bottomMargin(this.terminal.rows)>0}]);
@@ -302,9 +325,13 @@ export class ReadOnlyTui {
     // Viewport layout renders the leaf components directly, bypassing VStack.render.
     // Keep each component identity so focus, scrolling, mouse regions and sizing remain intact.
     // Side margins (U10) are painted here: each component renders at the inner width.
-    for(const component of [header,this.transcript,recoveryPanel,statusRegion,queue,this.editor,disabledInput,footer,...welcome.map(entry=>entry.component)]){
+    for(const component of [header,this.transcript,recoveryPanel,statusRegion,queue,autocomplete,this.editor,disabledInput,footer,...welcome.map(entry=>entry.component)]){
       const render=component.render.bind(component);
       component.render=width=>{const margin=sideMargin(width),lines=inset(render(width-2*margin),width,margin);return this.dialog?lines.map(line=>dimForOverlay(line)):lines;};
+      if(component===this.editor||component===autocomplete){
+        const mouse=component.handleMouse!.bind(component);
+        component.handleMouse=event=>{const margin=sideMargin(event.width);return mouse({...event,x:event.x-margin,width:event.width-2*margin});};
+      }
     }
     // Preserve upstream layout-node behavior by selecting the appropriate layout on resize.
     const resizeLayout=()=>this.tui.setLayoutRoot(this.terminal.columns<40||this.terminal.rows<12?root:layout);
@@ -472,6 +499,9 @@ export class ReadOnlyTui {
     if(matchesKey(data,'backspace')){
       const now=Date.now(),previous=this.lastBackspace;this.lastBackspace=now;
       if(this.editor.focused&&!this.editor.getExpandedText()){
+        // Terminal-local IME preedit can erase an unchanged input row; restore it
+        // when a Backspace actually reaches this handler after the width gate.
+        this.tui.requestRender(true);
         if(now-previous>=500){const item=latestPending(this.sessionQueue());if(item)void this.queueDecision(item.requestId,'withdraw');}
         return {consume:true};
       }
@@ -548,7 +578,7 @@ export class ReadOnlyTui {
     this.welcome=undefined;this.phase='running';this.result=undefined;this.runId=undefined;this.records=[];this.toggled.clear();this.events=[];this.historyWindow=false;this.scroll.scrollToEnd();
     this.confirmation=undefined;this.controller=new AbortController();this.cancellation='exit';this.rebuild();
     const self=this;
-    const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe};
+    const options:CodingTaskOptions={contextRunId,workspace:this.options.workspace,dataRoot:this.options.dataRoot,input:text,mode:this.options.mode,toolEnvironment:this.options.toolEnvironment,transport:this.options.transport,control:this.control,signal:this.controller.signal,get cancellation(){return self.cancellation;},onContextUsage:this.showContext,onObservation:this.observe,beforeArtifactCapture:this.widths?()=>this.widths!.holdQueries():undefined};
     const run=this.coding?runCodingTask:runReadTask;
     this.beginCleanupAttempt();
     this.active=run(options).then(result=>this.applyResult(result)).catch(error=>{this.failure=String(error);this.notice=`未完成：${safe(String(error))}`;}).finally(()=>this.finished());
@@ -1080,7 +1110,7 @@ export class ReadOnlyTui {
   private recoveryPlan(width:number):{main:boolean;input:boolean;usage:boolean;hints:boolean;panel:number;airy:boolean;area:number} {
     const rows=this.terminal.rows-(this.roomy()?4:2)-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows),foot=this.footerRows(width);
     if(this.recoveryOverlay()){
-      const inner=this.recoveryBoxWidth()-4,panel=this.recoveryLoading?.isShowing?undefined:this.recoveryPanel;
+      const inner=boxInnerWidth(this.recoveryBoxWidth(),1),panel=this.recoveryLoading?.isShowing?undefined:this.recoveryPanel;
       const airy=panel?panel.fullHeight(inner,{wide:true,airy:true})+2:4,full=panel?panel.fullHeight(inner,{wide:true})+2:4;
       const plan=(input:boolean,usage:boolean,hints:boolean,box:number,airyBox:boolean)=>{const area=rows-(input?3:0)-(hints?(usage?foot:1):0);return {main:false,input,usage,hints,airy:airyBox,area,panel:Math.max(1,Math.min(area,box)-2)};};
       if(rows>=airy+3+foot)return plan(true,true,true,airy,true);
@@ -1346,7 +1376,7 @@ export class ReadOnlyTui {
   /** 帮助视图：会话屏键位与命令清单（同一张命令表），正文在固定头尾之间滚动。 */
   private helpLines(width:number) {
     const panel=this.panel!;
-    const frame=fixedFrame([styledLine([{text:'帮助',fg:'fg.primary',bold:true}],width)],helpBody(width),[hintLine(['↑↓ 滚动','n/p 翻页'],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),panel.line);
+    const frame=fixedFrame([styledLine([{text:'帮助',fg:'fg.primary',bold:true}],width)],helpBody(width).map(text=>styledLine([{text}],width)),[hintLine(['↑↓ 滚动','n/p 翻页'],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),panel.line);
     panel.line=frame.offset;this.widths?.inspect(frame.lines);
     return frame.lines;
   }
@@ -1376,7 +1406,7 @@ export class ReadOnlyTui {
     if(panel.kind==='improve'){const lines=this.improveView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='improve-home'){const lines=this.improveHome?.render(width,this.overlayHeight(),this.viewStack.length)??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval'){const lines=this.evalList?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
-    if(panel.kind==='eval-plan'){const loading=this.evaluation?.preparing&&this.evalPlan&&samePlan(this.evalPlan.source,this.evaluation.source)?this.evaluation.loading:undefined;const lines=loading?.isShowing?fixedFrame([` ◆ eval ${this.evaluation!.source.label}`],[loading.renderLine(width)],[hintLine([],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),0).lines:this.evalPlan?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
+    if(panel.kind==='eval-plan'){const loading=this.evaluation?.preparing&&this.evalPlan&&samePlan(this.evalPlan.source,this.evaluation.source)?this.evaluation.loading:undefined;const lines=loading?.isShowing?fixedFrame([styledLine([{text:` ◆ eval ${this.evaluation!.source.label}`}],width)],[loading.renderLine(width)],[hintLine([],width,{esc:escHint(this.viewStack.length)})],this.overlayHeight(),0).lines:this.evalPlan?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='eval-trial'){const lines=this.evalTrial?.render(width,this.overlayHeight(),escHint(this.viewStack.length))??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='storage') {const lines=this.storageView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
     if(panel.kind==='metrics') {const lines=this.metricsView?.render(width,this.overlayHeight())??[];this.widths?.inspect(lines);return lines;}
@@ -1391,7 +1421,7 @@ export class ReadOnlyTui {
     const lines=wrapTextWithAnsi(text,Math.max(1,width-2));
     const height=Math.max(2,Math.floor(this.terminal.rows*0.9)-2);
     const maxLine=Math.max(0,lines.length-height);panel.line=Math.min(panel.line,maxLine);
-    return [...lines.slice(panel.line,panel.line+height),truncateToWidth('↑↓滚动 Esc返回',width)];
+    return [...lines.slice(panel.line,panel.line+height),truncateToWidth('↑↓滚动 Esc返回',width)].map(text=>styledLine([{text}],width));
   }
   private panelInput(data:string) {
     const panel=this.panel;if(!panel)return;

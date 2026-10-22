@@ -9,7 +9,7 @@ import type { QueueItemFact } from '../evidence.js';
 import { readSessionChains } from '../session-chain.js';
 import { readDisplayIndex } from '../display-number.js';
 import { COLOR_TIER, GLYPHS, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
-import { SingleLineInput, fitSegments, clean, fixedFrame, footerLines, hintLine, hintSegments, inputBox, rule, truncateEnd, wrapSegments } from './view-stack.js';
+import { SingleLineInput, fitSegments, clean, fixedFrame, footerLines, hintLine, hintSegments, inputBox, inputInnerWidth, rule, truncateEnd, wrapSegments } from './view-stack.js';
 
 /**
  * 面板排布：`wide` 按终端宽度判定处置说明是否与名称同行（U3，浮层里面板比终端窄）；
@@ -450,7 +450,7 @@ export class RecoveryPanel {
 
 /** 恢复期间禁用的输入框（U3）：草稿灰显保留；没有草稿时写占位。 */
 export function disabledInputLines(draft: string, width: number, tier: ColorTier = COLOR_TIER) {
-  const inner = Math.max(1, width - 2);
+  const inner = inputInnerWidth(width);
   const text = firstLine(draft);
   const body: TextSegment[] = text
     ? [{ text: `${GLYPHS.prompt} `, fg: 'ac.brand' }, ...fitSegments([{ text, fg: 'fg.faint' }, { text: '  草稿已保留，不会提交', fg: 'fg.muted' }], Math.max(1, inner - 2))]

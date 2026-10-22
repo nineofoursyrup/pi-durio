@@ -139,6 +139,17 @@ export function dimSgr(): string { return '\x1b[2m'; }
 /** 重置 SGR。 */
 export function resetSgr(): string { return '\x1b[0m'; }
 
+/** Fill display columns with measured horizontal strokes; an odd remainder stays blank. */
+export function horizontalLine(columns: number): string {
+  const width = Math.max(0, Math.floor(columns)), stroke = Math.max(1, visibleWidth('─'));
+  return '─'.repeat(Math.floor(width / stroke)) + ' '.repeat(width % stroke);
+}
+
+/** A rounded edge reserves the measured columns of both corners. */
+export function boxEdge(width: number, left: string, right: string): string {
+  return left + horizontalLine(width - visibleWidth(left + right)) + right;
+}
+
 // ─── 行构建 ──────────────────────────────────────────────────────────────────
 
 export interface TextSegment {
@@ -150,7 +161,7 @@ export interface TextSegment {
 }
 
 /**
- * 构建一行带颜色的文本字符串，按指定档位输出 SGR，并在末尾用 lineBg 底色（或 bg.base）填满 width。
+ * 构建一行带颜色的文本字符串，按指定档位输出 SGR，并在末尾用显式 lineBg 底色（默认沿用终端背景）填满 width。
  * 无色档用 token 的属性替代底色；选中行的反显包含尾部空白。
  */
 export function styledLine(
@@ -159,8 +170,8 @@ export function styledLine(
   lineBg?: TokenName,
   tier: ColorTier = COLOR_TIER
 ): string {
-  const bg = lineBg ?? 'bg.base';
-  const fillBg = tier !== 'none' ? bgSgr(bg, tier) : fgSgr(bg, tier);
+  const bg = lineBg;
+  const fillBg = bg ? (tier !== 'none' ? bgSgr(bg, tier) : fgSgr(bg, tier)) : '';
   let out = resetSgr() + fillBg;
   let col = 0;
 
@@ -175,7 +186,7 @@ export function styledLine(
     } else {
       // Attributes are segment-local, including an explicit background override.
       // Reset first so dim/bold/reverse from the previous segment cannot leak.
-      sgr += resetSgr() + fgSgr(seg.bg ?? bg, tier);
+      sgr += resetSgr() + ((seg.bg ?? bg) ? fgSgr((seg.bg ?? bg)!, tier) : '');
       if (seg.fg) sgr += fgSgr(seg.fg, tier);
     }
     if (seg.bold) sgr += boldSgr();
@@ -187,7 +198,7 @@ export function styledLine(
     if (w <= 0) continue;
     // Truncation resets SGR around its ellipsis, including in pre-truncated text.
     // Restore only this segment's background; foreground and attributes keep their existing semantics.
-    const segmentBg = tier === 'none' ? '' : bgSgr(seg.bg ?? bg, tier);
+    const segmentBg = tier === 'none' || !(seg.bg ?? bg) ? '' : bgSgr((seg.bg ?? bg)!, tier);
     out += sgr + (segmentBg ? clipped.replaceAll(resetSgr(), resetSgr() + segmentBg) : clipped);
     col += w;
     if (col >= width) break;
@@ -205,13 +216,13 @@ export function styledLine(
 // ─── 弹层内容暗化（宿主实现） ─────────────────────────────────────────────────
 
 /**
- * 在弹层打开时，底层去掉局部底色，保留 bg.base 并统一使用 fg.gutter。
+ * 在弹层打开时，底层去掉全部底色，沿用终端背景并统一使用 fg.gutter。
  * 宿主（app.ts）负责在需要时调用此函数处理底层行。
  */
 export function dimForOverlay(line: string, tier: ColorTier = COLOR_TIER): string {
-  // Remove local highlights, including selected rows, while keeping the full-screen base.
+  // Remove local highlights, including selected rows, while exposing the terminal background.
   const plain = line.replace(/\x1b\[\d+(?:;\d+)*m/g, '');
-  return resetSgr() + (tier === 'none' ? dimSgr() : bgSgr('bg.base', tier) + fgSgr('fg.gutter', tier)) + plain + resetSgr();
+  return resetSgr() + (tier === 'none' ? dimSgr() : fgSgr('fg.gutter', tier)) + plain + resetSgr();
 }
 
 // ─── Spinner ─────────────────────────────────────────────────────────────────

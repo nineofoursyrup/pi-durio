@@ -1,3 +1,3 @@
 60x1 truecolor
 00|在 近 7 天 · 当前项目 内没有 日常受理样本 · / 调整范围      |
-   0-53 fg.muted/bg.base ; 54-59 -/bg.base
+   0-53 fg.muted/- ; 54-59 -/-

@@ -1,14 +1,14 @@
 132x38 truecolor
 00|指标 · 本机实测                                                                                                                     |
-   0-3 fg.primary/bg.base/b ; 4-6 fg.faint/bg.base ; 7-14 fg.label/bg.base ; 15-131 -/bg.base
+   0-3 fg.primary/-/b ; 4-6 fg.faint/- ; 7-14 fg.label/- ; 15-131 -/-
 01|◆ stats  日常 · 受理 [09-16, 10-16) · as_of 10-15 14:05 · shop-api                                    只读 · 不调用模型 · 不重记费用|
-   0-1 ac.model/bg.base ; 2-6 fg.primary/bg.base/b ; 7-8 -/bg.base ; 9-65 fg.faint/bg.base ; 66-101 -/bg.base ; 102-131 fg.faint/bg.base
+   0-1 ac.model/- ; 2-6 fg.primary/-/b ; 7-8 -/- ; 9-65 fg.faint/- ; 66-101 -/- ; 102-131 fg.faint/-
 02|                                                                                                                                    |
    0-131 -/-
 03|✗ 范围过大 · 受理任务超过 10000 个 · METRICS_SCOPE_TOO_LARGE                                                                        |
-   0-1 ac.err/bg.base ; 2-36 fg.body/bg.base ; 37-59 fg.muted/bg.base ; 60-131 -/bg.base
+   0-1 ac.err/- ; 2-36 fg.body/- ; 37-59 fg.muted/- ; 60-131 -/-
 04|  / 缩小时间或项目范围                                                                                                              |
-   0-21 fg.label/bg.base ; 22-131 -/bg.base
+   0-21 fg.label/- ; 22-131 -/-
 05|                                                                                                                                    |
    0-131 -/-
 06|                                                                                                                                    |
@@ -67,11 +67,11 @@
    0-131 -/-
 33|                                                                                                                                    |
    0-131 -/-
-34|╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮|
-   0-131 border.input/bg.base
-35|│❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                     │|
-   0-0 border.input/bg.base ; 1-2 ac.brand/bg.base ; 3-109 fg.body/bg.base ; 110-130 -/bg.base ; 131-131 border.input/bg.base
-36|╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯|
-   0-131 border.input/bg.base
+34|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
+   0-131 border.input/-
+35| ❯ /stats --from 2026-09-16 --to 2026-10-16 --as-of 2026-10-15T06:05:00.000Z --project /Users/me/code/shop-api                      |
+   0-0 -/- ; 1-2 ac.brand/- ; 3-109 fg.body/- ; 110-131 -/-
+36|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
+   0-131 border.input/-
 37|Tab 切换页签 · ↑↓ 滚动 · Esc 返回会话                                                                                               |
-   0-2 fg.body/bg.base ; 3-14 fg.label/bg.base ; 15-16 fg.body/bg.base ; 17-24 fg.label/bg.base ; 25-27 fg.body/bg.base ; 28-36 fg.label/bg.base ; 37-131 -/bg.base
+   0-2 fg.body/- ; 3-14 fg.label/- ; 15-16 fg.body/- ; 17-24 fg.label/- ; 25-27 fg.body/- ; 28-36 fg.label/- ; 37-131 -/-

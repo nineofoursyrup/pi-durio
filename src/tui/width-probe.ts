@@ -4,6 +4,10 @@ type ProbeTerminal=Pick<Terminal,'write'|'columns'|'rows'>;
 type Query={column?:number;error?:string;expired:boolean;timer:ReturnType<typeof setTimeout>;complete:(error?:Error)=>void};
 const segmenter=new Intl.Segmenter(undefined,{granularity:'grapheme'});
 
+export class WidthWindowChangedError extends Error {
+  constructor(){super('WIDTH_WINDOW_CHANGED: resized');}
+}
+
 /** One ordered CPR + DA1 exchange at a time. A timed-out exchange retains its tombstone until DA1. */
 export class TerminalWidthProbe {
   private pending?:Query;
@@ -48,7 +52,7 @@ export class TerminalWidthProbe {
       const pending:Query={expired:false,timer:setTimeout(()=>fail('WIDTH_CPR_TIMEOUT'),this.timeoutMs),complete:error=>{
         signal.removeEventListener('abort',abort);
         if(error)return reject(error);
-        if(columns!==this.terminal.columns||rows!==this.terminal.rows)return reject(new Error('WIDTH_WINDOW_CHANGED'));
+        if(columns!==this.terminal.columns||rows!==this.terminal.rows)return reject(new WidthWindowChangedError());
         const column=pending.column;
         if(column===undefined||column<1||column>=this.terminal.columns-1)return reject(new Error('WIDTH_CPR_MISSING_OR_OUT_OF_BOUNDS'));
         resolve(column);

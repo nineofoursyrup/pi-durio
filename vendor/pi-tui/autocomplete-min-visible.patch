@@ -1,0 +1,8 @@
+--- a/packages/tui/src/components/editor.ts
++++ b/packages/tui/src/components/editor.ts
+@@ -380 +380 @@
+-		this.autocompleteMaxVisible = Number.isFinite(maxVisible) ? Math.max(3, Math.min(20, Math.floor(maxVisible))) : 5;
++		this.autocompleteMaxVisible = Number.isFinite(maxVisible) ? Math.max(2, Math.min(20, Math.floor(maxVisible))) : 5;
+@@ -410 +410 @@
+-		const newMaxVisible = Number.isFinite(maxVisible) ? Math.max(3, Math.min(20, Math.floor(maxVisible))) : 5;
++		const newMaxVisible = Number.isFinite(maxVisible) ? Math.max(2, Math.min(20, Math.floor(maxVisible))) : 5;

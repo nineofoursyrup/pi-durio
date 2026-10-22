@@ -1,52 +1,52 @@
 132x38 truecolor
 00|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 01|  ◆ pi-durio  ~/project  · 会话 s-xxxx · run r-xxxx                                                               任务 1 · 第 5 轮  |
-   0-1 -/bg.base ; 2-2 ac.brand/bg.base ; 3-11 fg.primary/bg.base/b ; 12-13 -/bg.base ; 14-22 ac.path/bg.base ; 23-50 fg.faint/bg.base ; 51-113 -/bg.base ; 114-129 fg.faint/bg.base ; 130-131 -/bg.base
+   0-1 -/- ; 2-2 ac.brand/- ; 3-11 fg.primary/-/b ; 12-13 -/- ; 14-22 ac.path/- ; 23-50 fg.faint/- ; 51-113 -/- ; 114-129 fg.faint/- ; 130-131 -/-
 02|  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  |
-   0-1 -/bg.base ; 2-129 line.subtle/bg.base ; 130-131 -/bg.base
+   0-1 -/- ; 2-129 line.subtle/- ; 130-131 -/-
 03|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 04|  ┃ 修复满减后 0.01 的金额误差并跑相关测试                                                                                          |
-   0-1 -/bg.base ; 2-3 fg.muted/bg.block ; 4-41 fg.primary/bg.block ; 42-129 -/bg.block ; 130-131 -/bg.base
+   0-1 -/- ; 2-3 fg.muted/bg.block ; 4-41 fg.primary/bg.block ; 42-129 -/bg.block ; 130-131 -/-
 05|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 06|  先读一下 total.ts。                                                                                                               |
-   0-1 -/bg.base ; 2-10 fg.body/bg.base ; 11-18 ac.code/bg.base ; 19-20 fg.body/bg.base ; 21-131 -/bg.base
+   0-1 -/- ; 2-10 fg.body/- ; 11-18 ac.code/- ; 19-20 fg.body/- ; 21-131 -/-
 07|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 08|  ✓ read total.ts 2 行                                                                                                              |
-   0-1 -/bg.base ; 2-2 ac.ok/bg.base ; 3-7 fg.muted/bg.base ; 8-16 ac.path/bg.base ; 17-17 -/bg.base ; 18-21 fg.faint/bg.base ; 22-131 -/bg.base
+   0-1 -/- ; 2-2 ac.ok/- ; 3-7 fg.muted/- ; 8-16 ac.path/- ; 17-17 -/- ; 18-21 fg.faint/- ; 22-131 -/-
 09|  ✓ edit total.ts +1 −0                                                                                                             |
-   0-1 -/bg.base ; 2-2 ac.ok/bg.base ; 3-7 fg.muted/bg.base ; 8-16 ac.path/bg.base ; 17-17 -/bg.base ; 18-19 ac.ok/bg.base ; 20-22 ac.err/bg.base ; 23-131 -/bg.base
+   0-1 -/- ; 2-2 ac.ok/- ; 3-7 fg.muted/- ; 8-16 ac.path/- ; 17-17 -/- ; 18-19 ac.ok/- ; 20-22 ac.err/- ; 23-131 -/-
 10|  ✓ write notes.md +2 −0                                                                                                            |
-   0-1 -/bg.base ; 2-2 ac.ok/bg.base ; 3-8 fg.muted/bg.base ; 9-17 ac.path/bg.base ; 18-18 -/bg.base ; 19-20 ac.ok/bg.base ; 21-23 ac.err/bg.base ; 24-131 -/bg.base
+   0-1 -/- ; 2-2 ac.ok/- ; 3-8 fg.muted/- ; 9-17 ac.path/- ; 18-18 -/- ; 19-20 ac.ok/- ; 21-23 ac.err/- ; 24-131 -/-
 11|  ✗ bash node cart.test.cjs exit 1 · 20 行                                                                                          |
-   0-1 -/bg.base ; 2-2 ac.err/bg.base ; 3-7 fg.muted/bg.base ; 8-26 ac.warn/bg.base ; 27-27 -/bg.base ; 28-33 ac.err/bg.base ; 34-41 fg.faint/bg.base ; 42-131 -/bg.base
+   0-1 -/- ; 2-2 ac.err/- ; 3-7 fg.muted/- ; 8-26 ac.warn/- ; 27-27 -/- ; 28-33 ac.err/- ; 34-41 fg.faint/- ; 42-131 -/-
 12|      case 15 ok                                                                                                                    |
-   0-5 -/bg.base ; 6-15 fg.muted/bg.base ; 16-131 -/bg.base
+   0-5 -/- ; 6-15 fg.muted/- ; 16-131 -/-
 13|      case 16 ok                                                                                                                    |
-   0-5 -/bg.base ; 6-15 fg.muted/bg.base ; 16-131 -/bg.base
+   0-5 -/- ; 6-15 fg.muted/- ; 16-131 -/-
 14|      case 17 ok                                                                                                                    |
-   0-5 -/bg.base ; 6-15 fg.muted/bg.base ; 16-131 -/bg.base
+   0-5 -/- ; 6-15 fg.muted/- ; 16-131 -/-
 15|      case 18 FAIL expected 80.00 received 80.01                                                                                    |
-   0-5 -/bg.base ; 6-47 fg.muted/bg.base ; 48-131 -/bg.base
+   0-5 -/- ; 6-47 fg.muted/- ; 48-131 -/-
 16|      case 19 ok                                                                                                                    |
-   0-5 -/bg.base ; 6-15 fg.muted/bg.base ; 16-131 -/bg.base
+   0-5 -/- ; 6-15 fg.muted/- ; 16-131 -/-
 17|      case 20 ok                                                                                                                    |
-   0-5 -/bg.base ; 6-15 fg.muted/bg.base ; 16-131 -/bg.base
+   0-5 -/- ; 6-15 fg.muted/- ; 16-131 -/-
 18|      Command exited with code 1                                                                                                    |
-   0-5 -/bg.base ; 6-31 ac.err/bg.base ; 32-131 -/bg.base
+   0-5 -/- ; 6-31 ac.err/- ; 32-131 -/-
 19|      显示 6/20 行 ⋯ 截断 · 原文完整保存 · 分页查看 14 行                                                                           |
-   0-5 -/bg.base ; 6-18 fg.faint/bg.base ; 19-24 ac.warn/bg.base ; 25-56 fg.faint/bg.base ; 57-131 -/bg.base
+   0-5 -/- ; 6-18 fg.faint/- ; 19-24 ac.warn/- ; 25-56 fg.faint/- ; 57-131 -/-
 20|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 21|  测试仍用旧的 discount() 期望值，正在更新并重跑。                                                                                  |
-   0-1 -/bg.base ; 2-14 fg.body/bg.base ; 15-24 ac.code/bg.base ; 25-49 fg.body/bg.base ; 50-131 -/bg.base
+   0-1 -/- ; 2-14 fg.body/- ; 15-24 ac.code/- ; 25-49 fg.body/- ; 50-131 -/-
 22|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 23|  ⠋ bash node hold.cjs 运行中 · 00:00                                                                                               |
-   0-1 -/bg.base ; 2-2 ac.brand/bg.base ; 3-7 fg.muted/bg.base ; 8-21 ac.warn/bg.base ; 22-22 -/bg.base ; 23-36 fg.faint/bg.base ; 37-131 -/bg.base
+   0-1 -/- ; 2-2 ac.brand/- ; 3-7 fg.muted/- ; 8-21 ac.warn/- ; 22-22 -/- ; 23-36 fg.faint/- ; 37-131 -/-
 24|                                                                                                                                    |
    0-131 -/-
 25|                                                                                                                                    |
@@ -60,18 +60,18 @@
 29|                                                                                                                                    |
    0-131 -/-
 30|  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  |
-   0-1 -/bg.base ; 2-129 line.subtle/bg.base ; 130-131 -/bg.base
+   0-1 -/- ; 2-129 line.subtle/- ; 130-131 -/-
 31|  ⠋ 运行 · 第 5 轮 · 00:00                                                                                        Esc 中止当前任务  |
-   0-1 -/bg.base ; 2-2 ac.brand/bg.base ; 3-25 fg.body/bg.base ; 26-113 -/bg.base ; 114-129 fg.faint/bg.base ; 130-131 -/bg.base
-32|  ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮  |
-   0-1 -/bg.base ; 2-129 border.input/bg.base ; 130-131 -/bg.base
-33|  │❯ 补充当前任务…   Ctrl+X Enter 排到下一任务                                                                                   │  |
-   0-1 -/bg.base ; 2-2 border.input/bg.base ; 3-3 ac.brand/bg.base ; 4-4 -/bg.base ; 5-45 fg.faint/bg.base ; 46-128 -/bg.base ; 129-129 border.input/bg.base ; 130-131 -/bg.base
-34|  ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯  |
-   0-1 -/bg.base ; 2-129 border.input/bg.base ; 130-131 -/bg.base
+   0-1 -/- ; 2-2 ac.brand/- ; 3-25 fg.body/- ; 26-113 -/- ; 114-129 fg.faint/- ; 130-131 -/-
+32|  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  |
+   0-1 -/- ; 2-129 border.input/- ; 130-131 -/-
+33|   ❯ 补充当前任务…   Ctrl+X Enter 排到下一任务                                                                                      |
+   0-2 -/- ; 3-3 ac.brand/- ; 4-4 -/- ; 5-45 fg.faint/- ; 46-131 -/-
+34|  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  |
+   0-1 -/- ; 2-129 border.input/- ; 130-131 -/-
 35|  deepseek-flash · offline · ctx ≈9.9k / 1M · 本任务 6k tok < ¥0.01                                                                 |
-   0-1 -/bg.base ; 2-25 ac.model/bg.base ; 26-58 fg.label/bg.base ; 59-59 -/bg.base ; 60-66 fg.label/bg.base ; 67-131 -/bg.base
+   0-1 -/- ; 2-25 ac.model/- ; 26-58 fg.label/- ; 59-59 -/- ; 60-66 fg.label/- ; 67-131 -/-
 36|  Enter steer · Ctrl+X Enter follow-up · Ctrl+C 中止 · Ctrl+O 展开                                                                  |
-   0-1 -/bg.base ; 2-6 fg.body/bg.base ; 7-15 fg.label/bg.base ; 16-27 fg.body/bg.base ; 28-40 fg.label/bg.base ; 41-46 fg.body/bg.base ; 47-54 fg.label/bg.base ; 55-60 fg.body/bg.base ; 61-65 fg.label/bg.base ; 66-131 -/bg.base
+   0-1 -/- ; 2-6 fg.body/- ; 7-15 fg.label/- ; 16-27 fg.body/- ; 28-40 fg.label/- ; 41-46 fg.body/- ; 47-54 fg.label/- ; 55-60 fg.body/- ; 61-65 fg.label/- ; 66-131 -/-
 37|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-

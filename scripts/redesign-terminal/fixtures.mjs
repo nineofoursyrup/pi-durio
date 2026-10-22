@@ -176,7 +176,7 @@ export async function renderers(packageRoot, fixture) {
       const status = session.statusParts({ phase: 'idle', recovery: true, round: 3, retry: false, elapsedMs: 42000, frame: 0 }), narrow = session.narrowing(w, header, status);
       const usageSegments = session.usageSegments('deepseek-flash', 'ctx ≈863 / 1M', '本任务', 1800, '≈¥0.01'), hintItems = ['Ctrl+R 历史', 'Ctrl+T trace', '? 帮助'];
       const foot = frame.footerLines(usageSegments, hintItems, w, { tier }).length, separator = frame.rule(w, 'line.subtle', tier);
-      const rows = height - 4 - frame.topMargin(height) - frame.bottomMargin(height), boxWidth = Math.min(w - 8, 100), inner = boxWidth - 4;
+      const rows = height - 4 - frame.topMargin(height) - frame.bottomMargin(height), boxWidth = Math.min(w - 8, 100), inner = frame.boxInnerWidth(boxWidth, 1);
       const airy = recovery.fullHeight(inner, { wide: true, airy: true }) + 2, full = recovery.fullHeight(inner, { wide: true }) + 2;
       const [input, usage, hints, box, airyBox] = rows >= airy + 3 + foot ? [true, true, true, airy, true] : rows >= full + 3 + foot ? [true, true, true, full, false]
         : rows >= full + foot ? [false, true, true, full, false] : rows >= full + 1 ? [false, false, true, full, false] : [false, false, false, full, false];
@@ -184,7 +184,7 @@ export async function renderers(packageRoot, fixture) {
       const content = recovery.render(inner, Math.max(1, Math.min(area, box) - 2), tier, { wide: true, airy: airyBox });
       const base = side(transcript(w, true, tier)).slice(0, area);
       while (base.length < area) base.push('');
-      return [...Array.from({ length: frame.topMargin(height) }, () => empty(width, tier)), ...side([session.headerLine(header, w, narrow.headerRight, tier), separator]), ...frame.composeOverlay(base, frame.frameBox(content, boxWidth, tier), width, tier),
+      return [...Array.from({ length: frame.topMargin(height) }, () => empty(width, tier)), ...side([session.headerLine(header, w, narrow.headerRight, tier), separator]), ...frame.composeOverlay(base, frame.frameBox(content, boxWidth, tier, 'bg.base'), width, tier),
         ...side([separator, session.statusLine(status, w, narrow.statusHint, tier), ...(input ? disabledInputLines('', w, tier) : []), ...(hints ? frame.footerLines(usage ? usageSegments : [], hintItems, w, { tier }) : [])]), empty(width, tier)];
     }
     if (id === '1c') return sessionScreen(width, height, tier, (w, h) => {

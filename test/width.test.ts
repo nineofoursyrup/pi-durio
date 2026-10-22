@@ -1,14 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StdinBuffer } from '@earendil-works/pi-tui';
+import { StdinBuffer, stripTerminalSequences } from '@earendil-works/pi-tui';
 import { TerminalWidthProbe } from '../src/tui/width-probe.js';
-import { mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { type Terminal, visibleWidth } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
 import { demoTransport } from '../src/offline.js';
 import { processMeasurements } from '../src/self-measurement.js';
+import { records } from '../src/history.js';
 
 test('native width query survives split/batched replies and preserves ordinary input and pasted CPR text', async()=>{
   const ordinary:string[]=[],writes:string[]=[];
@@ -67,13 +68,86 @@ class MeasuringTerminal implements Terminal {
   moveBy(){}hideCursor(){this.write('\x1b[?25l');}showCursor(){this.write('\x1b[?25h');}clearLine(){}clearFromCursor(){}clearScreen(){}setTitle(){}setProgress(){}setProgramStatus(){}
 }
 async function until(predicate:()=>boolean){for(let i=0;i<300;i++){if(predicate())return;await new Promise(r=>setTimeout(r,10));}throw Error('condition timed out');}
-function calibratedFixture(transportOverride?:typeof fetch){
+function calibratedFixture(transportOverride?:typeof fetch,onProviderEntered?:()=>void){
   const root=mkdtempSync(join(tmpdir(),'durio-calibrated-')),workspace=join(root,'project');mkdirSync(workspace);writeFileSync(join(workspace,'README.md'),'Fixture');
   const terminal=new MeasuringTerminal(),transport=demoTransport(),draftRoot=join(root,'drafts');
-  const app=new ReadOnlyTui({workspace,dataRoot:join(root,'data'),draftRoot,mode:'offline',transport:transportOverride??transport.fetch,terminal,copy:async()=>true});app.start();
+  const dispatch=transportOverride??transport.fetch;
+  const observed:typeof fetch=onProviderEntered?(...args)=>{const response=dispatch(...args);onProviderEntered();return response;}:dispatch;
+  const app=new ReadOnlyTui({workspace,dataRoot:join(root,'data'),draftRoot,mode:'offline',transport:observed,terminal,copy:async()=>true});app.start();
   const painted=()=>/\x1b\[\d+;\d+H\x1b\[\?25h\x1b\[\?2026l$/.test(terminal.writes.at(-1)??'');
   return {root,terminal,transport,app,draftRoot,painted};
 }
+
+test('resize during an outstanding width query automatically remeasures and paints the new size',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);
+    f.terminal.columns=40;f.terminal.rows=12;f.terminal.resize();await until(f.painted);
+    f.terminal.hold='Ω';f.terminal.key('Ω');await until(()=>f.terminal.held.length===1);
+    const before=f.terminal.writes.length;
+    f.terminal.columns=244;f.terminal.rows=68;f.terminal.resize();
+    f.terminal.release();
+    await until(()=>f.painted()||f.terminal.writes.slice(before).some(data=>data.includes('Display unverified')));
+    assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,'the late window-change result must not wait for another resize or Ctrl+L');
+    assert.ok(f.painted(),'measurement completion repaints at the new dimensions');
+    assert.equal(f.terminal.samples.filter(sample=>sample==='Ω').length,2,'the interrupted grapheme is measured again after the reply boundary');
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[65;\d+H\x1b\[\?25h/);
+  } finally {
+    f.terminal.release();await f.app.exit();
+  }
+});
+
+test('repeated in-flight resizes bound each calibration while later resize and Ctrl+L can recover',async()=>{
+  for(const recovery of ['resize','Ctrl+L']) {
+    const f=calibratedFixture();
+    try {
+      await until(f.painted);f.terminal.hold='Ω';f.terminal.key('Ω');
+      const exhaust=async()=>{
+        const before=f.terminal.writes.length;
+        const attempts=f.terminal.samples.filter(sample=>sample==='Ω').length-f.terminal.held.length;
+        for(let attempt=0;attempt<3;attempt++) {
+          await until(()=>f.terminal.held.length===1);
+          f.terminal.columns++;f.terminal.resize();f.terminal.held.shift()!();
+        }
+        await until(()=>f.terminal.writes.slice(before).some(data=>data.includes('Display unverified: Error: WIDTH_WINDOW_CHANGED')));
+        const queries=f.terminal.samples.length;
+        await new Promise(resolve=>setTimeout(resolve,30));
+        assert.equal(f.terminal.samples.length,queries,'without another resize, exhausted calibration must not issue another query');
+        assert.equal(f.terminal.samples.filter(sample=>sample==='Ω').length-attempts,3,'each calibration stops after three resize-interrupted measurements');
+        assert.equal(f.terminal.held.length,0,'every failed attempt consumed its DA1 boundary');
+      };
+      await exhaust();
+      f.terminal.columns++;f.terminal.resize();
+      await new Promise(resolve=>setTimeout(resolve,30));
+      assert.equal(f.terminal.held.length,1,'a later resize starts a fresh calibration without Ctrl+L');
+      await exhaust();
+      f.terminal.release();const before=f.terminal.writes.length;
+      if(recovery==='resize'){f.terminal.columns++;f.terminal.resize();}
+      else f.terminal.key('\x0c');
+      await until(f.painted);
+      assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,`${recovery} completes an uninterrupted calibration after exhaustion`);
+      assert.ok(f.app.screen().join('\n').includes('Ω'),'retry preserves the entered draft');
+    } finally {
+      f.terminal.release();await f.app.exit();
+    }
+  }
+});
+
+test('WINDOW error keeps the complete Ctrl+L retry hint visible at 80 columns',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);f.terminal.hold='Ω';f.terminal.key('Ω');
+    for(const columns of [79,78,80]) {
+      await until(()=>f.terminal.held.length===1);
+      f.terminal.columns=columns;f.terminal.resize();f.terminal.held.shift()!();
+    }
+    await until(()=>f.terminal.writes.some(data=>data.includes('Display unverified: Error: WIDTH_WINDOW_CHANGED')));
+    const status=stripTerminalSequences(f.terminal.writes.findLast(data=>data.includes('Display unverified'))!);
+    assert.ok(status.includes('Ctrl+L retry'),'the retry action is fully visible in the 80×24 status line');
+  } finally {
+    f.terminal.release();await f.app.exit();
+  }
+});
 
 test('self timing includes input waiting for calibration and ignores blocked frames and width-query replies', async () => {
   const root = mkdtempSync(join(tmpdir(), 'durio-self-width-'));
@@ -89,6 +163,65 @@ test('self timing includes input waiting for calibration and ignores blocked fra
     await until(() => processMeasurements.snapshot().keys.samples === before + 1);
     assert.equal(processMeasurements.snapshot().keys.samples, before + 1, 'protocol replies are not additional key samples');
   } finally { terminal.release(); await app.exit(); }
+});
+
+for(const resizeDuringQuery of [false,true])test(`starting a task leaves no timed width query across synchronous execution capture${resizeDuringQuery?' after an in-flight resize':''}`, async () => {
+  let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
+  const f=calibratedFixture(undefined,entered);
+  const artifacts=()=>existsSync(join(f.root,'data/host.sqlite'))?[...records(join(f.root,'data'),{kinds:['execution.artifact']})]:[];
+  try {
+    await until(f.painted);
+    f.terminal.hold='◆';f.terminal.key('probe');f.terminal.key('\r');f.app.screen();
+    await until(()=>f.terminal.held.length===1);
+    if(resizeDuringQuery){f.terminal.columns++;f.terminal.resize();}
+    // Give ordinary asynchronous startup a turn while the controlled terminal has
+    // an outstanding reply. Artifact capture must wait for that reply boundary.
+    await new Promise(resolve=>setTimeout(resolve,300));
+    // A terminal reply can be dispatched after overdue timers when host work has
+    // blocked the loop. Preserve that ordering instead of replying in a microtask.
+    await new Promise<void>(resolve=>setImmediate(resolve));
+    assert.equal(artifacts().length,0,'execution capture waits for the terminal reply, even on a fast filesystem');
+    assert.equal(f.transport.calls.length,0,'runtime must not pass execution capture while a CPR is still in flight');
+    assert.equal(f.terminal.writes.some(data=>data.includes('Display unverified')),false,'host preparation must not expire the terminal query');
+    f.terminal.release();
+    // The query is released; wait for the real transport boundary, not a wall-clock budget for artifact I/O.
+    await providerEntered;
+    assert.ok(f.transport.calls.length>0);
+    assert.equal(artifacts().length,1,'execution capture still precedes the provider request');
+  } finally {
+    f.terminal.release();
+    const result=await f.app.exit();
+    assert.equal(result.widthCalibration?.error,null);
+  }
+});
+
+test('stop while execution capture waits for calibration prevents capture and provider dispatch', async () => {
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);
+    f.terminal.hold='◆';f.terminal.key('probe');f.terminal.key('\r');f.app.screen();
+    await until(()=>f.terminal.held.length===1);
+    await new Promise(resolve=>setTimeout(resolve,300));
+    f.terminal.key('\x1b');f.terminal.release();
+    const result=await f.app.exit();
+    assert.equal(f.transport.calls.length,0);
+    assert.equal(result.result?.status,'aborted');assert.equal(result.result?.cleanup,'confirmed');
+    assert.equal([...records(join(f.root,'data'),{kinds:['execution.artifact']})].length,0,'the post-wait guard preserves cancellation');
+  } finally {f.terminal.release();await f.app.exit();}
+});
+
+test('an empty Backspace held by width calibration is retained instead of bypassing the gate or replaying',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);f.terminal.hold='A';f.terminal.key('\x0c');
+    await until(()=>f.terminal.held.length===1);
+    const writes=f.terminal.writes.length;f.terminal.key('\x7f');await new Promise(resolve=>setTimeout(resolve,30));
+    assert.equal(f.terminal.writes.length,writes,'an input-row repair must not paint while a width reply is pending');
+    f.terminal.release();await until(f.painted);
+    const retained=readdirSync(join(f.draftRoot,'pending-input')).map(name=>JSON.parse(readFileSync(join(f.draftRoot,'pending-input',name),'utf8')));
+    assert.ok(retained.some(record=>record.reason==='action-needs-current-frame'&&record.automaticReplay===false&&record.inputs.some((event:{data:string})=>event.data==='\x7f')));
+    assert.equal(f.transport.calls.length,0);
+  } finally {f.terminal.release();await f.app.exit();}
 });
 
 for(const [label,key,draft] of [['Ctrl+D','\x04',''],['Ctrl+C','\x03','keep this draft']] as const) {
@@ -136,7 +269,8 @@ test('late inactive CPR and fragmented DA1 stay protocol events, while the 800ms
 });
 
 test('product first paste is measured before paint, keeps later keys ordered and discovers combined graphemes',async()=>{
-  const f=calibratedFixture(),key=(data:string)=>f.terminal.key(data);
+  let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
+  const f=calibratedFixture(undefined,entered),key=(data:string)=>f.terminal.key(data);
   try {
     // Arrival during the first frame's asynchronous calibration is retained, including the first key.
     key('\x1b[200~A👩‍💻é中B\x1b[201~');
@@ -155,7 +289,7 @@ test('product first paste is measured before paint, keeps later keys ordered and
     assert.equal(f.terminal.writes.some(data=>data.includes('ΩZ')&&!data.includes('\x1b[6n')),false);
     f.terminal.release();await until(f.painted);
     assert.equal(f.transport.calls.length,0,'queued actions require a fresh action against the current frame');
-    key('\r');await until(()=>f.transport.calls.length>0);
+    key('\r');await providerEntered;assert.ok(f.transport.calls.length>0);
   }finally{await f.app.exit();}
 });
 
@@ -196,14 +330,15 @@ test('SIGTERM during a pending measurement saves the draft and receipts, then re
 
 test('Enter arriving while a run is busy cannot become a new task after that run finishes during calibration',async()=>{
   const fixture=demoTransport();let calls=0,releaseRun!:()=>void;
+  let held!:()=>void;const providerHeld=new Promise<void>(resolve=>{held=resolve;});
   const transport:typeof fetch=async(url,init)=>{
     calls++;const response=await fixture.fetch(url,init);
-    if(calls===1)await new Promise<void>(resolve=>{releaseRun=resolve;});
+    if(calls===1)await new Promise<void>(resolve=>{releaseRun=resolve;held();});
     return response;
   };
   const f=calibratedFixture(transport),key=(data:string)=>f.terminal.key(data);
   try {
-    await until(f.painted);key('Read README');key('\r');await until(()=>calls===1);
+    await until(f.painted);key('Read README');key('\r');await providerHeld;
     f.terminal.hold='Ω';key('Ω');key('next');key('\r');await until(()=>f.terminal.held.length===1);
     releaseRun();await until(()=>f.app.screen().join('\n').replace(/\x1b\[[0-9;]*m/g,'').includes('✓ 完成'));
     f.terminal.release();key('\x0c');await until(f.painted);await new Promise(r=>setTimeout(r,50));
@@ -215,13 +350,14 @@ test('Enter arriving while a run is busy cannot become a new task after that run
 });
 
 test('stop remains responsive while new output widths are waiting, without leaking Esc through a modal',async()=>{
-  let started=false,aborted=false;
+  let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
+  let aborted=false;
   const transport:typeof fetch=async(_url,init)=>new Promise((_resolve,reject)=>{
-    started=true;init!.signal!.addEventListener('abort',()=>{aborted=true;reject(new Error('cancelled'));},{once:true});
+    init!.signal!.addEventListener('abort',()=>{aborted=true;reject(new Error('cancelled'));},{once:true});
   });
-  const f=calibratedFixture(transport),key=(data:string)=>f.terminal.key(data);
+  const f=calibratedFixture(transport,entered),key=(data:string)=>f.terminal.key(data);
   try {
-    await until(f.painted);key('Read');key('\r');await until(()=>started);
+    await until(f.painted);key('Read');key('\r');await providerEntered;
     key('?');key('\x1b');assert.equal(aborted,false,'first Esc closes the help view');await until(f.painted);
     f.terminal.hold='Ω';key('Ω');key('\r');await until(()=>f.terminal.held.length===1);
     key('\x1b');await until(()=>aborted);assert.equal(f.terminal.stopped,false);

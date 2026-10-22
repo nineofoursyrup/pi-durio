@@ -1,5 +1,5 @@
 import { setGraphemeWidthOverrides, stripTerminalSequences, type Terminal, type TuiAltScreen } from '@earendil-works/pi-tui';
-import { TerminalWidthProbe } from './width-probe.js';
+import { TerminalWidthProbe, WidthWindowChangedError } from './width-probe.js';
 
 const segmenter=new Intl.Segmenter(undefined,{granularity:'grapheme'});
 let owner:TerminalWidthGate|undefined;
@@ -35,6 +35,7 @@ export class TerminalWidthGate {
   private blockedFrames=0;
   private retainedInputs=0;
   private cursorVisible=false;
+  private resizeVersion=0;
   constructor(private readonly options:WidthGateOptions) {
     if(owner)throw Error('WIDTH_PROFILE_IN_USE');
     owner=this;
@@ -70,6 +71,7 @@ export class TerminalWidthGate {
         }
         input(data);this.inspect();
       },()=>{
+        this.resizeVersion++;
         resize();
         if(this.error?.includes('WINDOW')&&this.probe.canRetry)this.retry();
       });
@@ -111,11 +113,23 @@ export class TerminalWidthGate {
   }
   private async calibrate(epoch:number,controller:AbortController) {
     const next=new Map(this.profile);
+    let resizeRetries=0;
     try {
       this.message('Measuring display widths; input retained. Ctrl+C / Esc available.');
       while(this.wanted.size) {
         const grapheme=this.wanted.values().next().value!;this.wanted.delete(grapheme);
-        if(!next.has(grapheme))next.set(grapheme,await this.probe.measure(grapheme,controller.signal));
+        while(!next.has(grapheme)) {
+          const resizeVersion=this.resizeVersion;
+          try {next.set(grapheme,await this.probe.measure(grapheme,controller.signal));}
+          catch(error) {
+            // A resize can precede the DA1 that reports the stale geometry. Retry
+            // only after that boundary, within this calibration's existing hold.
+            // Two retries bound work even if every exchange overlaps a resize.
+            if(!(error instanceof WidthWindowChangedError)||resizeVersion===this.resizeVersion||!this.probe.canRetry)throw error;
+            if(resizeRetries>=2)throw error;
+            resizeRetries++;
+          }
+        }
         if(this.closing||epoch!==this.epoch)return;
       }
       setGraphemeWidthOverrides(next);this.profile=next;this.busy=false;

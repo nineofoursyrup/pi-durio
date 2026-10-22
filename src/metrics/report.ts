@@ -1,4 +1,6 @@
 import {taskTypeOf} from '../task-type.js';
+import {lstatSync} from 'node:fs';
+import {join} from 'node:path';
 import {digest,readAcceptedTasks,type AcceptedTaskFact} from '../evidence.js';
 import {records,decode,watermark,type EvidenceReference} from '../history.js';
 import {selectAcceptance} from './acceptance.js';
@@ -23,13 +25,22 @@ function validate(input:MetricsScope) {
  for(const key of ['project','taskType','version','revisionOf'] as const)if(input[key]!==undefined&&(typeof input[key]!=='string'||!input[key]!.length))throw Error('INVALID_METRICS_SCOPE');
  return{...input,from,to,asOf,source:input.source??'ordinary'};
 }
+/** A new data root has no host DB yet. Only that absent source is an empty
+ * metrics prefix; unreadable/corrupt databases and dangling links still fail. */
+export function metricsWatermark(root:string):number {
+ try{return watermark(root);}catch(error){
+  const missing=error as NodeJS.ErrnoException,path=join(root,'host.sqlite');
+  if(missing.code!=='ENOENT'||missing.path!==path||lstatSync(path,{throwIfNoEntry:false}))throw error;
+  return 0;
+ }
+}
 /** Snapshot is a received-evidence prefix. A wall-clock rollback never lets a
  * later append leak behind a historical cutoff. Exact seq can reproduce a report. */
 function snapshotAt(root:string,asOf:string,requested?:number) {
- const current=watermark(root),maximum=requested??current;
+ const current=metricsWatermark(root),maximum=requested??current;
  if(!Number.isSafeInteger(maximum)||maximum<0||maximum>current)throw Error('INVALID_METRICS_SNAPSHOT');
  let through=0,previous=-Infinity,rollback=false,blockedAt:string|null=null;
- for(const ref of records(root,{through:maximum})){
+ for(const ref of maximum?records(root,{through:maximum}):[]){
   const at=Date.parse(ref.at);if(!Number.isFinite(at)||at>Date.parse(asOf)){blockedAt=ref.id;break;}
   if(at<previous)rollback=true;previous=at;through=ref.seq;
  }
@@ -51,11 +62,11 @@ function taskState(facts:MetricFact[],admission:MetricFact,task:AcceptedTaskFact
 export function queryTaskMetrics(root:string,input:MetricsScope={}) {
  const scope=validate(input),snapshot=snapshotAt(root,scope.asOf,scope.through),through=snapshot.through;
  const admissions:AcceptedTaskFact[]=[];let after:number|undefined;
- do {const page=readAcceptedTasks(root,{through,after,limit:200});admissions.push(...page.tasks.filter(t=>Date.parse(t.acceptedAt)>=Date.parse(scope.from)&&Date.parse(t.acceptedAt)<Date.parse(scope.to)));after=page.next??undefined;if(admissions.length>10000)throw Error('METRICS_SCOPE_TOO_LARGE: narrow the admission window');}while(after);
+ if(through)do {const page=readAcceptedTasks(root,{through,after,limit:200});admissions.push(...page.tasks.filter(t=>Date.parse(t.acceptedAt)>=Date.parse(scope.from)&&Date.parse(t.acceptedAt)<Date.parse(scope.to)));after=page.next??undefined;if(admissions.length>10000)throw Error('METRICS_SCOPE_TOO_LARGE: narrow the admission window');}while(after);
  const neededSequences=new Set(admissions.map(t=>t.acceptedSeq)),followups=new Set(admissions.filter(t=>t.kind==='follow-up').map(t=>t.requestId));
  const neededSourceRuns=new Set(admissions.flatMap(t=>t.target?[t.target.runId]:[])),admissionFacts:MetricFact[]=[];
- for(const ref of records(root,{through,kinds:['task.accepted','control.accepted']})){if(neededSequences.has(ref.seq)||ref.kind==='task.accepted'){const fact=safeDecode(root,ref);if(neededSequences.has(ref.seq)||neededSourceRuns.has(ref.runId)||followups.has(fact.data.queueRequestId))admissionFacts.push(fact);}}
- const receipts=[...records(root,{through,kinds:['control.receipt']})].map(ref=>safeDecode(root,ref));
+ for(const ref of through?records(root,{through,kinds:['task.accepted','control.accepted']}):[]){if(neededSequences.has(ref.seq)||ref.kind==='task.accepted'){const fact=safeDecode(root,ref);if(neededSequences.has(ref.seq)||neededSourceRuns.has(ref.runId)||followups.has(fact.data.queueRequestId))admissionFacts.push(fact);}}
+ const receipts=[...through?records(root,{through,kinds:['control.receipt']}):[]].map(ref=>safeDecode(root,ref));
  const excluded:{taskId:string;source:string;reasons:string[];kind:string|null;sourceClass:string|null;version:string|null;taskType:string|null}[]=[];
  const duplicates:{taskId:string;source:string;reason:string}[]=[];
  const tasks:ReturnType<typeof member>[]=[];

@@ -111,16 +111,16 @@ test('bg.diffDel 和 bg.diffAdd 在 256 色档不输出颜色', () => {
 
 // ─── styledLine ────────────────────────────────────────────────────────────────
 
-test('styledLine truecolor 输出含 38;2 和 48;2', () => {
+test('styledLine truecolor 输出前景并沿用终端背景', () => {
   const line = styledLine([{text:'pi-durio',fg:'fg.primary'}], 20, undefined, 'truecolor');
   assert.match(line, /38;2/, 'styledLine truecolor 应含 38;2 前景');
-  assert.match(line, /48;2/, 'styledLine truecolor 应含 48;2 背景（bg.base fill）');
+  assert.doesNotMatch(line, /48;2/, '默认沿用终端背景');
 });
 
-test('styledLine 256color 输出含 38;5 和 48;5', () => {
+test('styledLine 256color 输出前景并沿用终端背景', () => {
   const line = styledLine([{text:'pi-durio',fg:'fg.primary'}], 20, undefined, '256color');
   assert.match(line, /38;5/, 'styledLine 256color 应含 38;5 前景');
-  assert.match(line, /48;5/, 'styledLine 256color 应含 48;5 背景');
+  assert.doesNotMatch(line, /48;5/, '默认沿用终端背景');
 });
 
 test('styledLine none 不输出颜色 SGR', () => {
@@ -164,7 +164,7 @@ test('SPINNER_FRAMES 包含 braille 字符', () => {
 
 // ─── 会话屏快照（SGR 验证） ────────────────────────────────────────────────────
 
-test('会话屏 truecolor 档快照包含 38;2 和 48;2', async () => {
+test('会话屏 truecolor 档快照包含前景且不铺 bg.base', async () => {
   const saved = COLOR_TIER;
   overrideColorTierForTest('truecolor');
   try {
@@ -172,12 +172,12 @@ test('会话屏 truecolor 档快照包含 38;2 和 48;2', async () => {
     try {
       const lines = f.app.screen();
       assert.ok(linesContainSgr(lines, /38;2/), '真彩色档应含 38;2（前景）');
-      assert.ok(linesContainSgr(lines, /48;2/), '真彩色档应含 48;2（背景）');
+      assert.ok(!linesContainSgr(lines, /48;2;20;20;20/), '欢迎屏不铺 bg.base');
     } finally { await f.app.exit(); }
   } finally { overrideColorTierForTest(saved); }
 });
 
-test('会话屏 256color 档快照包含 38;5 和 48;5，背景层编号正确', async () => {
+test('会话屏 256color 档快照包含前景且不铺 bg.base', async () => {
   const saved = COLOR_TIER;
   overrideColorTierForTest('256color');
   try {
@@ -185,9 +185,7 @@ test('会话屏 256color 档快照包含 38;5 和 48;5，背景层编号正确',
     try {
       const lines = f.app.screen();
       assert.ok(linesContainSgr(lines, /38;5/), '256色档应含 38;5（前景）');
-      assert.ok(linesContainSgr(lines, /48;5/), '256色档应含 48;5（背景）');
-      // bg.base 应为 233
-      assert.ok(linesContainSgr(lines, /48;5;233/), '256色档背景层基础应为 233（bg.base）');
+      assert.ok(!linesContainSgr(lines, /48;5;233/), '欢迎屏不铺 bg.base');
     } finally { await f.app.exit(); }
   } finally { overrideColorTierForTest(saved); }
 });
@@ -329,13 +327,13 @@ test('overlay dim removes selected background and original colors in every color
     const original = styledLine([{ text: '中文 A', fg: 'ac.err', bold: true }], 8, 'bg.selected', tier);
     const dimmed = dimForOverlay(original, tier), grid = captureSnapshot([dimmed], 8, 1, tier);
     assert.equal(stripTerminalSequences(dimmed), stripTerminalSequences(original));
-    for (const cell of grid.rows[0]) { assert.equal(cell.bg, tier === 'none' ? undefined : 'bg.base'); assert.equal(cell.bold, undefined); assert.equal(cell.reverse, undefined); }
+    for (const cell of grid.rows[0]) { assert.equal(cell.bg, undefined); assert.equal(cell.bold, undefined); assert.equal(cell.reverse, undefined); }
     if (tier === 'none') assert.ok(grid.rows[0].every(cell => cell.dim));
     else assert.ok(grid.rows[0].every(cell => cell.fg === 'fg.gutter'));
   }
 });
 
-test('input frames stay closed and keep their base background around text and the hardware caret', () => {
+test('input frames retain both rules and text on the terminal background without side borders or background SGR', () => {
   const saved = COLOR_TIER, terminal = new TestTerminal(), tui = new TuiAltScreen(terminal, true);
   const identity = (text: string) => text;
   try {
@@ -346,21 +344,24 @@ test('input frames stay closed and keep their base background around text and th
       for (const text of ['', '中é', '第一行\n第二行']) {
         editor.setText(text);
         const lines = editor.render(40), plain = lines.map(stripTerminalSequences);
-        assert.match(plain[0], /^╭─+╮$/);
-        assert.match(plain.at(-1)!, /^╰─+╯$/);
-        assert.ok(plain.slice(1, -1).every(line => line.startsWith('│') && line.endsWith('│')));
+        assert.equal(lines.length, text.includes('\n') ? 4 : 3, 'both rules and every content row stay in the input component');
+        assert.ok(plain[1].includes('❯ '));
+        assert.match(plain[0], /^─+$/);
+        assert.match(plain.at(-1)!, /^─+$/);
+        assert.ok(plain.slice(1, -1).every(line => line.startsWith(' ') && line.endsWith(' ')));
         const grid = captureSnapshot(lines, 40, lines.length, tier);
-        assert.ok(grid.rows.every(row => row.every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base'))));
+        assert.ok(grid.rows.every(row => row.every(cell => cell.bg === undefined)));
+        assert.doesNotMatch(lines.slice(1, -1).join(''), /\x1b\[48;|[│╭╮╰╯]/);
       }
       editor.setText(Array.from({ length: 20 }, (_, i) => `第 ${i + 1} 行`).join('\n'));
-      assert.match(stripTerminalSequences(editor.render(40)[0]), /^╭.*↑.*╮$/, 'hidden-line counts remain inside the rounded border');
+      assert.match(stripTerminalSequences(editor.render(40)[0]), /^─.*↑.*─$/, 'hidden-line counts remain on the horizontal rule');
       editor.setText('中éX'); editor.render(40);
       editor.handleMouse({ type: 'click', button: 'left', x: 5, y: 1, screenX: 5, screenY: 1, width: 40, height: 3, shift: false, alt: false, ctrl: false });
       editor.handleInput('!');
       assert.equal(editor.getText(), '中!éX', 'the new left border does not shift mouse insertion into the next grapheme');
       const disabled = disabledInputLines('保留草稿', 40, tier), grid = captureSnapshot(disabled, 40, 3, tier);
-      assert.match(stripTerminalSequences(disabled[0]), /^╭─+╮$/);
-      assert.match(stripTerminalSequences(disabled[2]), /^╰─+╯$/);
+      assert.match(stripTerminalSequences(disabled[0]), /^─+$/);
+      assert.match(stripTerminalSequences(disabled[2]), /^─+$/);
       if (tier === 'truecolor') {
         assert.equal(grid.rows[0][0].fg, 'border.off');
         assert.equal(grid.rows[1][1].fg, 'ac.brand');
@@ -369,7 +370,7 @@ test('input frames stay closed and keep their base background around text and th
   } finally { overrideColorTierForTest(saved); }
 });
 
-test('autocomplete stays below the closed input frame with aligned menu rows, base backgrounds and mouse selection', async () => {
+test('autocomplete stays above the input rules with aligned menu rows, its own panel background and mouse selection', async () => {
   const saved = COLOR_TIER, terminal = new TestTerminal(), tui = new TuiAltScreen(terminal, true);
   terminal.rows = 38; terminal.columns = 60;
   const identity = (text: string) => text;
@@ -382,7 +383,9 @@ test('autocomplete stays below the closed input frame with aligned menu rows, ba
         const editor = new HardwareCursorEditor(tui, {
           borderColor: text => fgSgr('border.input') + text + '\x1b[0m',
           selectList: { selectedPrefix: identity, selectedText: text => `\x1b[7m${text}\x1b[27m`, description: identity, scrollInfo: identity, noMatch: identity },
-        });
+        }, { autocompleteMaxVisible: 2 });
+        editor.setInputHeightLimit(() => 6);
+        const menu = editor.separateAutocomplete(() => 3);
         editor.focused = true;
         editor.setAutocompleteProvider(new CombinedAutocompleteProvider([
           { name: 'history', description: '浏览历史' }, { name: 'stats', description: '统计' },
@@ -393,23 +396,25 @@ test('autocomplete stays below the closed input frame with aligned menu rows, ba
         if (prefix) editor.handleInput('\t');
         await new Promise<void>(resolve => setImmediate(resolve));
         assert.equal(editor.isShowingAutocomplete(), true, 'the public provider opens the real two-item menu');
-        const lines = editor.render(40), plain = lines.map(stripTerminalSequences), bottom = lines.length - 3;
-        assert.match(plain[0], /^╭.*╮$/);
-        assert.match(plain[bottom], /^╰.*╯$/);
-        assert.ok(plain.slice(1, bottom).every(line => line.startsWith('│') && line.endsWith('│')));
-        if (!prefix) assert.equal(bottom, 2, 'single-line input keeps exactly three frame rows');
-        if (prefix.split('\n').length > 20) assert.match(plain[0], /↑/, 'the scroll count remains in the frame');
-        assert.ok(plain.slice(bottom + 1).every(line => !line.startsWith('│') && !line.endsWith('│')), 'menu rows stay outside the closed frame');
+        const menuLines = menu.render(40), inputLines = editor.render(40), lines = [...menuLines, ...inputLines];
+        const plain = lines.map(stripTerminalSequences), top = menuLines.length, bottom = lines.length - 1;
+        assert.equal(top, 2, 'the menu component renders both candidates separately from the input frame');
+        assert.match(plain[top], /^─.*─$/);
+        assert.match(plain[bottom], /^─.*─$/);
+        assert.ok(plain.slice(top + 1, bottom).every(line => line.startsWith(' ') && line.endsWith(' ')));
+        if (!prefix) assert.equal(bottom - top, 2, 'single-line input keeps exactly three frame rows');
+        if (prefix.split('\n').length > 20) assert.match(plain[top], /↑/, 'the scroll count remains in the frame');
+        assert.ok(plain.slice(0, top).every(line => !line.startsWith('│') && !line.endsWith('│')), 'menu rows stay outside the closed frame');
         assert.ok(lines.every(line => visibleWidth(line) === 40));
-        assert.match(plain[bottom + 1], /^   → history/, 'the menu shares the input content column after the new left margin');
-        assert.match(plain[bottom + 2], /^     stats/);
+        assert.match(plain[0], /^   → history/, 'the menu shares the input content column after the new left margin');
+        assert.match(plain[1], /^     stats/);
         const grid = captureSnapshot(lines, 40, lines.length, tier);
-        assert.ok(grid.rows.slice(bottom + 1).every(row => row.every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base'))));
-        assert.equal(grid.rows[bottom + 1][3].reverse, true, 'menu selection retains its independent reverse style');
+        assert.ok(grid.rows.slice(0, top).every(row => row.every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base'))));
+        assert.equal(grid.rows[0][3].reverse, true, 'menu selection retains its independent reverse style');
         assert.equal(lines.join('').split(CURSOR_MARKER).length - 1, 1, 'the focused editor retains one hardware cursor marker');
-        assert.ok(grid.rows.slice(1, bottom).every(row => row.every(cell => !cell.reverse)), 'the input has no competing painted caret');
+        assert.ok(grid.rows.slice(top + 1, bottom).every(row => row.every(cell => !cell.reverse)), 'the input has no competing painted caret');
         if (tier === 'none') assert.doesNotMatch(lines.join(''), /\x1b\[(?:[0-9;]*;)?(?:38|48);/);
-        editor.handleMouse({ type: 'click', button: 'left', x: 5, y: bottom + 2, screenX: 5, screenY: bottom + 2, width: 40, height: lines.length, shift: false, alt: false, ctrl: false });
+        menu.handleMouse!({ type: 'click', button: 'left', x: 5, y: 1, screenX: 5, screenY: 1, width: 40, height: menuLines.length, shift: false, alt: false, ctrl: false });
         assert.equal(editor.getText(), prefix ? prefix + './stats' : '/stats ', 'clicking the second displayed item applies that completion');
         assert.equal(editor.isShowingAutocomplete(), false);
       }
@@ -417,11 +422,40 @@ test('autocomplete stays below the closed input frame with aligned menu rows, ba
   } finally { overrideColorTierForTest(saved); rmSync(root, { recursive: true, force: true }); }
 });
 
+test('a compact menu keeps the selected candidate and upstream count at the product visibility setting and maps only candidate rows to clicks', async () => {
+  const saved=COLOR_TIER,terminal=new TestTerminal(),tui=new TuiAltScreen(terminal,true),identity=(text:string)=>text;
+  try {
+    for(const tier of ['truecolor','256color','none'] as const){
+      overrideColorTierForTest(tier);
+      let upstreamCount:string|undefined;
+      const editor=new HardwareCursorEditor(tui,{borderColor:identity,selectList:{selectedPrefix:identity,selectedText:text=>`\x1b[7m${text}\x1b[27m`,description:identity,scrollInfo:text=>upstreamCount=text,noMatch:identity}},{autocompleteMaxVisible:2});
+      assert.equal(editor.getAutocompleteMaxVisible(),2,'the upstream constructor accepts the product two-item limit');
+      editor.setAutocompleteMaxVisible(5);editor.setAutocompleteMaxVisible(2);
+      assert.equal(editor.getAutocompleteMaxVisible(),2,'the upstream setter also accepts the two-item limit');
+      editor.focused=true;
+      const menu=editor.separateAutocomplete(()=>2);
+      editor.setAutocompleteProvider(new CombinedAutocompleteProvider([{name:'alpha'},{name:'bravo'},{name:'delta'}],process.cwd(),null));
+      editor.handleInput('/');await new Promise<void>(resolve=>setImmediate(resolve));
+      editor.handleInput('\x1b[B');
+      const lines=menu.render(40),plain=lines.map(stripTerminalSequences),grid=captureSnapshot(lines,40,lines.length,tier);
+      assert.equal(lines.length,2);assert.match(plain[0],/^   → bravo/);assert.match(plain[1],/^     \(2\/3\)/);
+      assert.equal(upstreamCount,'  (2/3)','three candidates already have the upstream count before layout clipping');
+      assert.equal(plain[1].trim(),upstreamCount.trim(),'the compact menu preserves the upstream count');
+      assert.ok(lines.every(line=>visibleWidth(line)===40));
+      assert.equal(grid.rows[0][3].reverse,true);
+      assert.ok(grid.rows.every(row=>row.every(cell=>cell.bg===(tier==='none'?undefined:'bg.base'))));
+      const mouse={type:'click' as const,button:'left' as const,x:5,y:1,screenX:5,screenY:1,width:40,height:2,shift:false,alt:false,ctrl:false};
+      menu.handleMouse!(mouse);assert.equal(editor.getText(),'/','the count is not a completion target');
+      menu.handleMouse!({...mouse,y:0,screenY:0});assert.equal(editor.getText(),'/bravo ','the compact row maps to the displayed candidate');
+    }
+  } finally {overrideColorTierForTest(saved);}
+});
+
 test('snapshots place Chinese and emoji in terminal columns and resolve quantized foreground tokens', () => {
   const grid = captureSnapshot([styledLine([{ text: '中😀e\u0301X', fg: 'ac.brand' }], 7, undefined, '256color')], 7, 1, '256color');
   assert.deepEqual(grid.rows[0].map(cell => cell.char), ['中', '', '😀', '', 'e\u0301', 'X', ' ']);
   assert.equal(grid.rows[0][0].fg, 'ac.brand'); assert.equal(grid.rows[0][5].fg, 'ac.brand');
-  assert.equal(grid.rows[0][0].bg, 'bg.base');
+  assert.equal(grid.rows[0][0].bg, undefined);
   assert.deepEqual(captureSnapshot(['中中'], 3, 1, 'none').rows[0].map(cell => cell.char), ['中', '', ' ']);
   assert.deepEqual(captureSnapshot(['中中\x1b[0mX'], 3, 1, 'none').rows[0].map(cell => cell.char), ['中', '', ' '], 'later ANSI chunks cannot fill a clipped wide glyph');
   const framed = captureSnapshot(['\x1b_pi:c\x07\x1b[1;0m\x1b]8;;https://example.test\x07字\x1b]8;;\x07'], 2, 1, 'none').rows[0];

@@ -1,6 +1,34 @@
 import { dimensions, machineItems } from './common.mjs';
 import { colorModes } from './grid.mjs';
 
+/** Read a complete input frame; menus can precede/follow it. Historical rounded frames remain readable. */
+function editor(screen) {
+  if (!Array.isArray(screen)) return undefined;
+  for (let bottom = screen.length - 1; bottom >= 2; bottom--) {
+    const rounded = /^╰─+╯$/.test(screen[bottom].trim());
+    const rule = line => /^─+(?: *[↑↓] \d+ more *─+)? *$/.test(line.trim());
+    if (!rounded && !rule(screen[bottom])) continue;
+    let top = bottom - 1;
+    if (rounded) {
+      while (top >= 0 && /^│.*│$/.test(screen[top].trim())) top--;
+      if (!/^╭─+╮$/.test(screen[top]?.trim() ?? '')) continue;
+    } else {
+      while (top >= 0 && !rule(screen[top])) top--;
+      if (top < 0) continue;
+    }
+    const rows = screen.slice(top + 1, bottom).map(line => rounded ? line.trim().slice(1, -1).trim() : line.trim());
+    if (!rows[0]?.startsWith('❯ ')) continue;
+    const text = [rows[0].slice(2), ...rows.slice(1)].join('\n');
+    // The placeholder identifies an observed empty idle/running editor. A missing
+    // frame must stay unknown; multiple input lines are never an empty editor.
+    const placeholder = rows.length !== 1 ? null
+      : /^描述要(完成的修改|查看或分析的内容)…/.test(text) ? 'idle'
+      : /^补充当前任务…/.test(text) ? 'running' : null;
+    return { text: placeholder ? '' : text, placeholder };
+  }
+  return undefined;
+}
+
 /** Pure assessment of acquired native observations. Missing facts are never a PASS. */
 export function assessNative(record) {
   const items = machineItems.map(([id, label]) => ({ id, label, status: 'NOT_RUN', evidence: [] }));
@@ -24,18 +52,17 @@ export function assessNative(record) {
     if (events.some(e => ['received', 'input'].includes(e.kind) && e.data === key)) set(id, true, ['events.jsonl']);
   }
   const help = screen => screen?.some(line => line.trim() === '帮助');
-  const editor = screen => screen?.at(-4)?.trim() ?? '';
   for (const e of events.filter(e => e.kind === 'input' && e.data === '?' && e.settled && !help(e.before?.screen))) {
-    const text = editor(e.before?.screen);
-    if (/^描述要(完成的修改|查看或分析的内容)…/.test(text)) set('help-empty', help(e.after?.screen), ['events.jsonl']);
-    else if (text === 'probe') set('help-nonempty', !help(e.after?.screen) && editor(e.after?.screen) === 'probe?', ['events.jsonl']);
+    const input = editor(e.before?.screen);
+    if (input?.placeholder === 'idle') set('help-empty', help(e.after?.screen), ['events.jsonl']);
+    else if (input?.text === 'probe') set('help-nonempty', !help(e.after?.screen) && editor(e.after?.screen)?.text === 'probe?', ['events.jsonl']);
   }
   const backs = events.filter(e => e.kind === 'input' && ['\x7f', '\x08'].includes(e.data));
   for (let i = 1; i < backs.length; i++) {
     const first = backs[i - 1], second = backs[i], interval = second.ms - first.ms;
     if (!first.settled || !second.settled || interval <= 0 || interval >= 500 || !Array.isArray(first.before?.queue) || first.before.queue.length < 2 || !Array.isArray(first.after?.queue) || !Array.isArray(second.before?.queue) || !Array.isArray(second.after?.queue)) continue;
     const a = first.before.queue, b = first.after.queue, c = second.after.queue;
-    if (!/^补充当前任务…/.test(editor(first.before.screen)) || !/^补充当前任务…/.test(editor(second.before.screen))) continue;
+    if (editor(first.before.screen)?.placeholder !== 'running' || editor(second.before.screen)?.placeholder !== 'running') continue;
     set('backspace', b.length === a.length - 1 && !b.includes(a.at(-1)) && a.slice(0, -1).every(id => b.includes(id)) && JSON.stringify(second.before.queue) === JSON.stringify(b) && JSON.stringify(c) === JSON.stringify(b), ['events.jsonl']);
     break; // The first eligible pair stays the evidence, even if a later pair succeeds.
   }

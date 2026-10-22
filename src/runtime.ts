@@ -60,6 +60,8 @@ export interface ReadTaskOptions {
   /** Host cleanup waiting policy, not a claim that work stops at the deadline. */
   cleanupTimeoutMs?: number;
   onObservation?: (event: { kind: string; runId: string }) => void;
+  /** Caller boundary around the entire execution capture (for example, timed terminal queries). */
+  beforeArtifactCapture?: () => Promise<() => void>;
   /** Display only: current to-model context after each committed entry. Never recorded as a fact. */
   onContextUsage?: (usage: ContextUsage) => void;
   fault?: FaultInjector;
@@ -322,7 +324,7 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
         if(source.some(record=>record.kind==='task.accepted'&&(record.data as any).queueRequestId===item.requestId))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
         // Search every execution identity: a missing linking receipt never permits duplicate work.
         if(recoveryRecords(owner.path).some(record=>record.kind==='task.accepted'&&(record.data as any).queueRequestId===item.requestId))throw Error('QUEUE_PREVIOUS_DISPATCH_UNKNOWN');
-        verifyArtifact(owner.path,source.find(record=>record.seq===item.executionVersion.artifactSeq)!.data as ReturnType<typeof captureArtifact>);
+        verifyArtifact(owner.path,source.find(record=>record.seq===item.executionVersion.artifactSeq)!.data as Awaited<ReturnType<typeof captureArtifact>>);
         const accepted=source.find(record=>record.kind==='task.accepted')!.data as any;
         const auth=options.authorization;
         if(await realpath(auth.workspace)!==item.target.workspace||auth.mode!==accepted.mode||JSON.stringify([...auth.tools].sort())!==JSON.stringify([...accepted.authorization.tools].sort()))throw Error('QUEUE_AUTHORIZATION_CHANGED');
@@ -502,7 +504,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       continued={...(snapshot.data as Omit<ContextSnapshot,'receiptSeq'>),receiptSeq:snapshot.seq};readObject(dataRoot,continued.messages);
     }
     if(maintenance){
-      verifyArtifact(dataRoot,maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>);
+      verifyArtifact(dataRoot,maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as Awaited<ReturnType<typeof captureArtifact>>);
       const config=maintenanceRecords.find(r=>r.kind==='execution.config')?.data as any;
       const expected=retainedExecutionConfig(dataRoot,coding,options.mode,options.toolEnvironment,config);
       if(maintenanceRecords.some(r=>r.kind==='recovery.ended'))throw Error('COMPACTION_SOURCE_ENDED');
@@ -517,7 +519,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     }
     if(queued) {
       const source=recoveryRecords(dataRoot,queued.item.target.runId);
-      const artifact=source.find(record=>record.seq===queued.item.executionVersion.artifactSeq)?.data as ReturnType<typeof captureArtifact>;
+      const artifact=source.find(record=>record.seq===queued.item.executionVersion.artifactSeq)?.data as Awaited<ReturnType<typeof captureArtifact>>;
       const config=source.find(record=>record.seq===queued.item.executionVersion.configSeq)?.data as Record<string,unknown>;
       verifyArtifact(dataRoot,artifact);
       const expected=retainedExecutionConfig(dataRoot,coding,options.mode,options.toolEnvironment,config);
@@ -531,7 +533,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       if(priorImprove(dataRoot,improve.request.id))throw Error('IMPROVE_ALREADY_DISPATCHED');
       const source=recoveryRecords(dataRoot,improve.target.runId),accepted=source.find(r=>r.kind==='task.accepted')?.data as any;
       if(!accepted||accepted.workspace!==workspace||accepted.sessionId!==improve.target.sessionId||accepted.taskId!==improve.target.taskId)throw Error('IMPROVE_TARGET_MISMATCH');
-      if(improve.item){const current=findQueueItem(dataRoot,improve.item.requestId);if(current?.status!=='pending'||JSON.stringify(current.target)!==JSON.stringify(improve.target))throw Error('QUEUE_NOT_PENDING');verifyArtifact(dataRoot,source.find(r=>r.seq===current.executionVersion.artifactSeq)!.data as ReturnType<typeof captureArtifact>);
+      if(improve.item){const current=findQueueItem(dataRoot,improve.item.requestId);if(current?.status!=='pending'||JSON.stringify(current.target)!==JSON.stringify(improve.target))throw Error('QUEUE_NOT_PENDING');verifyArtifact(dataRoot,source.find(r=>r.seq===current.executionVersion.artifactSeq)!.data as Awaited<ReturnType<typeof captureArtifact>>);
         const receipt=new Evidence(dataRoot,improve.target.runId,options.fault);try{receipt.append('control.receipt',{requestId:improve.request.id,status:'dispatching',reason:'Independent scoped analysis started after preceding coding; original target retained',execution:{runId,sessionId}});}finally{receipt.close();}
       }
     }
@@ -558,7 +560,13 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     }
     record('ownership.acquired', { dataRoot: {path:owner.path,claim:owner.claim}, ...(workspaceOwner ? {workspace:{path:workspaceOwner.path,claim:workspaceOwner.claim}}:{}) });
     if (workspaceOwner && !recovery) record('workspace.owner', { root: workspaceOwner.root, workspace, scope: 'protocol participants only; external editors, shared Git metadata and external resources are not isolated' });
-    const artifact=maintenance?maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.data as ReturnType<typeof captureArtifact>:captureArtifact(evidence,workspace);
+    const releaseCapture=!maintenance&&!recovery&&options.beforeArtifactCapture?await options.beforeArtifactCapture():undefined;
+    let artifact:Awaited<ReturnType<typeof captureArtifact>>;
+    try {
+      guard(); // Cancellation/ownership can change while the caller waits for its boundary.
+      artifact=maintenance?maintenanceRecords.find(r=>r.kind==='execution.artifact')!.data as Awaited<ReturnType<typeof captureArtifact>>:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.data as Awaited<ReturnType<typeof captureArtifact>>:await captureArtifact(evidence,workspace);
+      guard(); // Async capture must finish before cancellation or ownership loss can release its writes.
+    } finally {releaseCapture?.();}
     const artifactSeq=maintenance?maintenanceRecords.find(r=>r.kind==='execution.artifact')!.seq:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.artifact')!.seq:record('execution.artifact',artifact);
     const models = createModels({ authContext: { env: async name => name === 'DEEPSEEK_API_KEY' ? apiKey : undefined, fileExists: async () => false } });
     models.setProvider(deepseekProvider());

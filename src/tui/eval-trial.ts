@@ -7,7 +7,7 @@ import { matchesKey, visibleWidth } from '@earendil-works/pi-tui';
 import { formatAmount, sumCostEstimates } from '../cost-estimate.js';
 import type { Trace } from '../trace.js';
 import { hostRequests, hostTiming, openRestrictedCopy, type EvalReport, type HostRequest, type HostTiming, type PlanSource, type RestrictedCopy } from '../eval/overview.js';
-import { COLOR_TIER, styledLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
+import { COLOR_TIER, styledLine, horizontalLine, type ColorTier, type TextSegment, type TokenName } from './theme.js';
 import { TraceView, formatDuration, formatTokens, type TraceHost } from './trace.js';
 import { TraceRawView, type TraceRawHost } from './trace-raw.js';
 import { clean, fixedFrame, hintLine, LoadingState, statusError, truncateEnd } from './view-stack.js';
@@ -127,11 +127,11 @@ export class TrialTraceView {
       const f = this.failure ?? { message: '原文不可取得', code: 'RESTRICTED_RAW_UNAVAILABLE' };
       const rows = this.requests.map(r => line([{ text: `   ${r.ordinal === null ? '#?' : `#${r.ordinal}`}`, fg: 'fg.primary' }, { text: ` · ${r.dispatched ? '已派发' : '只预留未派发'} · ${r.tokens === null ? 'unknown tok' : `${formatTokens(r.tokens)} tok`} · ${r.amount === null || !r.currency ? 'unknown' : formatAmount(r.amount, r.currency)}`, fg: r.tokens === null ? 'ac.warn' : 'fg.body' }]));
       const body = ['', ...statusError(f.message, f.code, '只列宿主记录：中介请求与三段计时', width, tier), '', line([{ text: ' 宿主中介请求', fg: 'fg.label' }]), ...rows.length ? rows : [line([{ text: '   本 trial 没有宿主中介的模型请求', fg: 'fg.muted' }])]];
-      return fixedFrame([title, timing, line([{ text: '─'.repeat(width), fg: 'line.subtle' }])], body, [hintLine([], width, { esc, tier })], height, 0).lines;
+      return fixedFrame([title, timing, line([{ text: horizontalLine(width), fg: 'line.subtle' }])], body, [hintLine([], width, { esc, tier })], height, 0).lines;
     }
     if (!this.trace) {
       const body = this.loading.isShowing ? [this.loading.renderLine(width, tier)] : [];
-      return fixedFrame([title, timing, line([{ text: '─'.repeat(width), fg: 'line.subtle' }])], body, [hintLine([], width, { esc, tier })], height, 0).lines;
+      return fixedFrame([title, timing, line([{ text: horizontalLine(width), fg: 'line.subtle' }])], body, [hintLine([], width, { esc, tier })], height, 0).lines;
     }
     const back = this.raw ? 'Esc 返回上层' : esc;
     const lines = this.raw ? this.raw.render(width, Math.max(4, height - 3), back) : this.trace.render(width, Math.max(4, height - 3), back);

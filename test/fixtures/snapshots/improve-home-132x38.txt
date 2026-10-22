@@ -1,77 +1,77 @@
 132x38 truecolor
 00|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 01|  ◆ improve  ~/project                                                                                              分析不执行候选  |
-   0-1 -/bg.base ; 2-3 ac.brand/bg.base ; 4-10 fg.primary/bg.base/b ; 11-21 fg.body/bg.base ; 22-115 -/bg.base ; 116-129 fg.muted/bg.base ; 130-131 -/bg.base
+   0-1 -/- ; 2-3 ac.brand/- ; 4-10 fg.primary/-/b ; 11-21 fg.body/- ; 22-115 -/- ; 116-129 fg.muted/- ; 130-131 -/-
 02|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 03|  › ir-xxxx · 00-00 00:00 · 来自 s-xxxx · 候选 3 · 未决 2                                                                           |
-   0-1 -/bg.base ; 2-56 fg.body/bg.selected ; 57-129 -/bg.selected ; 130-131 -/bg.base
+   0-1 -/- ; 2-56 fg.body/bg.selected ; 57-129 -/bg.selected ; 130-131 -/-
 04|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 05|    新建分析                                                                                                                        |
-   0-1 -/bg.base ; 2-11 fg.primary/bg.base ; 12-131 -/bg.base
+   0-1 -/- ; 2-11 fg.primary/- ; 12-131 -/-
 06|    历史报告 · 2 份                                                                                                                 |
-   0-1 -/bg.base ; 2-18 fg.body/bg.base ; 19-131 -/bg.base
+   0-1 -/- ; 2-18 fg.body/- ; 19-131 -/-
 07|    建议抑制 · 没有生效的抑制                                                                                                       |
-   0-1 -/bg.base ; 2-14 fg.body/bg.base ; 15-28 fg.muted/bg.base ; 29-131 -/bg.base
+   0-1 -/- ; 2-14 fg.body/- ; 15-28 fg.muted/- ; 29-131 -/-
 08|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 09|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 10|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 11|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 12|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 13|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 14|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 15|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 16|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 17|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 18|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 19|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 20|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 21|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 22|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 23|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 24|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 25|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 26|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 27|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 28|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 29|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 30|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 31|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 32|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 33|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 34|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 35|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 36|  ↑↓ 选择 · Enter 打开 · Esc 返回会话                                                                                               |
-   0-1 -/bg.base ; 2-3 fg.body/bg.base ; 4-11 fg.label/bg.base ; 12-16 fg.body/bg.base ; 17-24 fg.label/bg.base ; 25-27 fg.body/bg.base ; 28-36 fg.label/bg.base ; 37-131 -/bg.base
+   0-1 -/- ; 2-3 fg.body/- ; 4-11 fg.label/- ; 12-16 fg.body/- ; 17-24 fg.label/- ; 25-27 fg.body/- ; 28-36 fg.label/- ; 37-131 -/-
 37|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
