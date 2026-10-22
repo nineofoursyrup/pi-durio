@@ -150,6 +150,29 @@ test('native assessment locates the closed input frame around menus and keeps in
   assert.equal(status(screens.idle.map((line: string) => line.replace('描述要查看或分析的内容…', '描述要完成的修改…')), screens.help, 'help-empty'), 'PASS');
 });
 
+test('native assessment recognizes horizontal input rules without accepting missing rules or multiline input as empty', async () => {
+  const { assessNative } = await import(pathToFileURL(join(scripts, 'assess.mjs')).href);
+  const captured = JSON.parse(readFileSync(join(process.cwd(), 'test/fixtures/redesign-terminal/native-input-screens.json'), 'utf8')).screens;
+  // Derived structural fixtures, not native observations; retain the historical captured originals.
+  const rules = (screen: string[]) => screen.map(line => line.replace(/[╭╮╰╯]/g, '─').replace(/│/g, ' '));
+  const screens = Object.fromEntries(Object.entries(captured).map(([key, lines]) => [key, rules(lines as string[])]));
+  const status = (before: string[], after: string[], id = 'help-nonempty') => assessNative({ events: [{
+    kind: 'input', data: '?', settled: true, before: { screen: before }, after: { screen: after },
+  }] }).items.find((item: any) => item.id === id).status;
+  assert.equal(status(screens.probe, screens.probeQuestion), 'PASS');
+  assert.equal(status(screens.idle, screens.help, 'help-empty'), 'PASS');
+  const input = screens.probe.findIndex(line => line.trim().startsWith('❯ '));
+  for (const row of [input - 1, input + 1]) {
+    const incomplete = [...screens.probe]; incomplete[row] = '';
+    assert.equal(status(incomplete, screens.probeQuestion), 'NOT_RUN', 'both complete rules are required');
+  }
+  const multiline = [...screens.probe]; multiline.splice(input + 1, 0, '   second line   ');
+  assert.equal(status(multiline, screens.probeQuestion), 'NOT_RUN');
+  const menu = ['     → /help        打开帮助', '       /exit        退出并保留草稿'];
+  const withMenu = (screen: string[]) => [...screen.slice(0, input - 1), ...menu, ...screen.slice(input - 1)];
+  assert.equal(status(withMenu(screens.probe), withMenu(screens.probeQuestion)), 'PASS');
+});
+
 test('offline grid retains wide Chinese and emoji graphemes with token coordinates', async () => {
   const { characterGrid } = await import(pathToFileURL(join(scripts, 'grid.mjs')).href);
   const theme = await import('../src/tui/theme.js'), { visibleWidth } = await import('@earendil-works/pi-tui');

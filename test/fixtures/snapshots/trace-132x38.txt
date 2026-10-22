@@ -1,77 +1,77 @@
 132x38 truecolor
 00|◆ trace  run r-0c98 · coding · 任务 t-93da · 执行版本 build f320da6                          ✓ 完成 · 0.39s · 28 tok < ¥0.01 partial|
-   0-0 ac.info/bg.base ; 1-6 fg.primary/bg.base/b ; 7-66 fg.faint/bg.base ; 67-92 -/bg.base ; 93-98 ac.ok/bg.base ; 99-131 fg.faint/bg.base
+   0-0 ac.info/- ; 1-6 fg.primary/-/b ; 7-66 fg.faint/- ; 67-92 -/- ; 93-98 ac.ok/- ; 99-131 fg.faint/-
 01|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
-   0-131 line.subtle/bg.base
+   0-131 line.subtle/-
 02|span                                  0s          0.19s           0.39s    耗时    tok  │  tool · write  tc-0c98-01 · attempt 1     |
-   0-3 fg.faint/bg.base ; 4-37 -/bg.base ; 38-70 fg.faint/bg.base ; 71-71 -/bg.base ; 72-78 fg.faint/bg.base ; 79-79 -/bg.base ; 80-85 fg.faint/bg.base ; 86-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-102 fg.primary/bg.base/b ; 103-126 fg.faint/bg.base ; 127-131 -/bg.base
+   0-3 fg.faint/- ; 4-37 -/- ; 38-70 fg.faint/- ; 71-71 -/- ; 72-78 fg.faint/- ; 79-79 -/- ; 80-85 fg.faint/- ; 86-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-102 fg.primary/-/b ; 103-126 fg.faint/- ; 127-131 -/-
 03|▾ run r-0c98                          █████████████████████████████████   0.39s     28  │                                           |
-   0-1 fg.faint/bg.base ; 2-4 fg.primary/bg.base ; 5-11 fg.faint/bg.base ; 12-37 -/bg.base ; 38-70 line.track/bg.base ; 71-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-1 fg.faint/- ; 2-4 fg.primary/- ; 5-11 fg.faint/- ; 12-37 -/- ; 38-70 line.track/- ; 71-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 04|├─ llm generation #1                     ███████                          0.07s     14  │  路径     uncertain.txt                   |
-   0-2 fg.gutter/bg.base ; 3-5 ac.brand/bg.base ; 6-17 -/bg.base ; 18-19 fg.faint/bg.base ; 20-37 -/bg.base ; 38-40 line.track/bg.base ; 41-47 ac.brand/bg.base ; 48-70 line.track/bg.base ; 71-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-112 ac.path/bg.base ; 113-131 -/bg.base
+   0-2 fg.gutter/- ; 3-5 ac.brand/- ; 6-17 -/- ; 18-19 fg.faint/- ; 20-37 -/- ; 38-40 line.track/- ; 41-47 ac.brand/- ; 48-70 line.track/- ; 71-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-99 fg.label/- ; 100-112 ac.path/- ; 113-131 -/-
 05|├─ tool write unc…xt 跳过（首版处置）           █                         0.00s      —  │  起止     +0.13s → +0.13s                 |
-   0-2 fg.gutter/bg.selected ; 3-6 fg.muted/bg.selected ; 7-12 -/bg.selected ; 13-19 ac.path/bg.selected ; 20-36 fg.faint/bg.selected ; 37-37 -/bg.selected ; 38-47 line.track/bg.selected ; 48-48 fg.muted/bg.selected ; 49-70 line.track/bg.selected ; 71-79 -/bg.selected ; 80-85 fg.faint/bg.selected ; 86-87 -/bg.selected ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-114 fg.body/bg.base ; 115-131 -/bg.base
+   0-2 fg.gutter/bg.selected ; 3-6 fg.muted/bg.selected ; 7-12 -/bg.selected ; 13-19 ac.path/bg.selected ; 20-36 fg.faint/bg.selected ; 37-37 -/bg.selected ; 38-47 line.track/bg.selected ; 48-48 fg.muted/bg.selected ; 49-70 line.track/bg.selected ; 71-79 -/bg.selected ; 80-85 fg.faint/bg.selected ; 86-87 -/bg.selected ; 88-88 line.subtle/- ; 89-90 -/- ; 91-99 fg.label/- ; 100-114 fg.body/- ; 115-131 -/-
 06|┄ 中断 1.6s · 恢复核对 · 只读续跑（首版） ┄                                             │  退出     未返回结果                      |
-   0-42 fg.faint/bg.base ; 43-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-109 fg.body/bg.base ; 110-131 -/bg.base
+   0-42 fg.faint/- ; 43-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-99 fg.label/- ; 100-109 fg.body/- ; 110-131 -/-
 07|└─ llm generation #2                                      ███████         0.07s     14  │  重新执行 中断后不自动重新执行            |
-   0-2 fg.gutter/bg.base ; 3-5 ac.brand/bg.base ; 6-17 -/bg.base ; 18-19 fg.faint/bg.base ; 20-37 -/bg.base ; 38-57 line.track/bg.base ; 58-64 ac.brand/bg.base ; 65-70 line.track/bg.base ; 71-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-119 fg.body/bg.base ; 120-131 -/bg.base
+   0-2 fg.gutter/- ; 3-5 ac.brand/- ; 6-17 -/- ; 18-19 fg.faint/- ; 20-37 -/- ; 38-57 line.track/- ; 58-64 ac.brand/- ; 65-70 line.track/- ; 71-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-99 fg.label/- ; 100-119 fg.body/- ; 120-131 -/-
 08|                                                                                        │  恢复     跳过（首版处置） · Fixture      |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-125 fg.body/bg.base ; 126-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-99 fg.label/- ; 100-125 fg.body/- ; 126-131 -/-
 09|                                                                                        │           skip decision after an actual   |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-128 fg.body/bg.base ; 129-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-99 fg.label/- ; 100-128 fg.body/- ; 129-131 -/-
 10|                                                                                        │           unsafe write with unavailable   |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-128 fg.body/bg.base ; 129-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-99 fg.label/- ; 100-128 fg.body/- ; 129-131 -/-
 11|                                                                                        │           result                          |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-99 fg.label/bg.base ; 100-105 fg.body/bg.base ; 106-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-99 fg.label/- ; 100-105 fg.body/- ; 106-131 -/-
 12|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 13|                                                                                        │  原文                                     |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-94 fg.label/bg.base ; 95-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-94 fg.label/- ; 95-131 -/-
 14|                                                                                        │  ● 参数                         完整取得  |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-90 -/bg.base ; 91-91 ac.ok/bg.base ; 92-121 -/bg.base ; 122-129 fg.faint/bg.base ; 130-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-90 -/- ; 91-91 ac.ok/- ; 92-121 -/- ; 122-129 fg.faint/- ; 130-131 -/-
 15|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 16|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 17|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 18|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 19|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 20|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 21|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 22|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 23|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 24|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 25|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 26|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 27|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 28|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 29|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 30|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 31|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 32|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 33|                                                                                        │                                           |
-   0-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 34|────────────────────────────────────────────────────────────────────────────────────────│                                           |
-   0-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-88 line.subtle/- ; 89-131 -/-
 35|■ llm  ■ tool  ■ compaction  ■ 重试 / unknown  ■ 失败                                   │                                           |
-   0-0 ac.brand/bg.base ; 1-6 fg.faint/bg.base ; 7-7 fg.muted/bg.base ; 8-14 fg.faint/bg.base ; 15-15 ac.model/bg.base ; 16-28 fg.faint/bg.base ; 29-29 ac.warn/bg.base ; 30-46 fg.faint/bg.base ; 47-47 ac.err/bg.base ; 48-52 fg.faint/bg.base ; 53-87 -/bg.base ; 88-88 line.subtle/bg.base ; 89-131 -/bg.base
+   0-0 ac.brand/- ; 1-6 fg.faint/- ; 7-7 fg.muted/- ; 8-14 fg.faint/- ; 15-15 ac.model/- ; 16-28 fg.faint/- ; 29-29 ac.warn/- ; 30-46 fg.faint/- ; 47-47 ac.err/- ; 48-52 fg.faint/- ; 53-87 -/- ; 88-88 line.subtle/- ; 89-131 -/-
 36|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
-   0-131 line.subtle/bg.base
+   0-131 line.subtle/-
 37|2 次模型请求（重试 0）· 1 次工具调用（恢复后重试 0）· 只读，查看不调用模型、不新增用量                        ↑↓ span · Esc 返回会话|
-   0-85 fg.label/bg.base ; 86-109 -/bg.base ; 110-111 fg.body/bg.base ; 112-119 fg.label/bg.base ; 120-122 fg.body/bg.base ; 123-131 fg.label/bg.base
+   0-85 fg.label/- ; 86-109 -/- ; 110-111 fg.body/- ; 112-119 fg.label/- ; 120-122 fg.body/- ; 123-131 fg.label/-

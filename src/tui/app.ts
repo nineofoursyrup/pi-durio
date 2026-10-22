@@ -47,7 +47,7 @@ import { readSessionChains } from '../session-chain.js';
 import { formatCostTotals } from '../cost-estimate.js';
 import { exitSummary, ProcessCleanupReceipts, type EvalExitFact } from './exit-summary.js';
 export { exitCostSummary } from './exit-summary.js';
-import { SPINNER_INTERVAL_MS, styledLine, makeBorderColor, dimForOverlay } from './theme.js';
+import { COLOR_TIER, SPINNER_INTERVAL_MS, styledLine, makeBorderColor, dimForOverlay } from './theme.js';
 import { RunView, VISIBLE_KINDS, sumUsage } from './run-view.js';
 import { assistantLines, headerLine, narrowing, plainLines, precedingText, statusLine, statusParts, tokenCount, toolLines, usageSegments, userLines, type Activity, type HeaderState, type RunStatus } from './session-screen.js';
 import { ConfirmDialog, LoadingState, escHint, hintLine, viewKey, fixedFrame, footerLines, inset, sideMargin, bottomMargin, topMargin, rule, frameBox, boxInnerWidth, composeOverlay, type ConfirmConfig, type ConfirmResult } from './view-stack.js';
@@ -233,14 +233,7 @@ export class ReadOnlyTui {
     this.copy=options.copy??copyToMacClipboard;
     this.drafts=new Drafts(options.draftRoot??join(homedir(),'Library','Application Support','pi-durio','ui-drafts'),options.workspace,options.dataRoot);
     this.closed=new Promise(resolve=>{this.resolveClosed=resolve;});
-    this.tui=new class extends TuiAltScreen {
-      protected override applyLineResets(lines:string[]) {
-        // The viewport can contain empty rows outside every leaf component when
-        // a transcript is short. Paint those final layout rows without adding
-        // transcript content or changing ScrollView's height/follow semantics.
-        return super.applyLineResets(lines.map(line=>line||styledLine([],this.terminal.columns)));
-      }
-    }(this.terminal,true,undefined,{copySelection:this.copy,copyOnSelect:true,scrollToEndIndicator:()=> ' ↓ 回到底部 · /bottom '});
+    this.tui=new TuiAltScreen(this.terminal,true,undefined,{copySelection:this.copy,copyOnSelect:true,scrollToEndIndicator:()=> ' ↓ 回到底部 · /bottom '});
     this.editor=new HardwareCursorEditor(this.tui,theme,{autocompleteMaxVisible:2});
     this.editor.setAutocompleteProvider(commandCompletion(options.workspace));
     this.editor.placeholder=()=>this.placeholder();
@@ -275,7 +268,7 @@ export class ReadOnlyTui {
       this.widths?.inspect(content);
       const transcript=this.transcript.render(width),base=transcript.slice(Math.max(0,transcript.length-plan.area));
       while(base.length<plan.area)base.unshift('');
-      const lines=composeOverlay(base,frameBox(content,boxWidth),width);
+      const lines=composeOverlay(base,frameBox(content,boxWidth,COLOR_TIER,'bg.base'),width);
       return this.dialog?lines.map(line=>dimForOverlay(line)):lines;
     }};
     const disabledInput:Component={invalidate(){},render:width=>disabledInputLines(this.editor.getExpandedText(),width)};

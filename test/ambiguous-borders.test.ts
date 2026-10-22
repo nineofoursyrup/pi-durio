@@ -20,7 +20,7 @@ class TestTerminal implements Terminal {
 }
 async function until(predicate:()=>boolean){for(let i=0;i<300;i++){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,20));}throw Error('running frame timed out');}
 
-test('a running session keeps measured two-column rules and four input corners inside every supported size',async()=>{
+test('a running session keeps measured two-column rules and both input rules inside every supported size',async()=>{
   const root=mkdtempSync(join(tmpdir(),'durio-ambiguous-borders-')),workspace=join(root,'project');mkdirSync(workspace);
   let stream:ReadableStreamDefaultController<Uint8Array>|undefined;
   const transport:typeof fetch=async(_url,init)=>new Response(new ReadableStream({start(controller){
@@ -39,11 +39,11 @@ test('a running session keeps measured two-column rules and four input corners i
       const lines=app.screen().map(stripTerminalSequences);
       assert.equal(lines.length,height);
       assert.ok(lines.every(line=>visibleWidth(line)<=width),'no line wraps outside the terminal');
-      const top=lines.findIndex(line=>line.includes('╭')),bottom=lines.findIndex(line=>line.includes('╰'));
+      const content=lines.findIndex(line=>line.includes('补充当前任务')),top=content-1,bottom=content+1;
       assert.ok(top>=0&&bottom>top,'input frame is present');
-      assert.match(lines[top].trim(),/^╭─+ ?╮$/,'top border keeps its right corner without an ellipsis');
-      assert.match(lines[bottom].trim(),/^╰─+ ?╯$/,'bottom border keeps its right corner without an ellipsis');
-      assert.ok(lines.slice(top+1,bottom).every(line=>/^│.*│$/.test(line.trim())),'both input sides stay visible');
+      assert.match(lines[top].trim(),/^─+ ?$/,'top rule stays complete without an ellipsis');
+      assert.match(lines[bottom].trim(),/^─+ ?$/,'bottom rule stays complete without an ellipsis');
+      assert.ok(lines.slice(top+1,bottom).every(line=>!/[│╭╮╰╯]/.test(line)),'input has no visible side borders');
       for(const line of lines.filter(line=>line.includes('─')))assert.doesNotMatch(line,/\.\.\.|…/,'rules and borders cannot be ellipsized');
       assert.equal(visibleWidth(lines.find(line=>line.includes('pi-durio'))!),width,'truncated header still fills exactly one row');
     }
@@ -82,7 +82,12 @@ test('wide borders reserve both sides, pad odd columns, retain scroll counts and
   setGraphemeWidthOverrides(new Map(Array.from('─│╭╮╰╯↑↓…',glyph=>[glyph,2])));
   try {
     assert.equal(stripTerminalSequences(rule(9)),'──── ','a spare column is a space, never an ellipsis');
-    const boxed=[inputBox([styledLine([{text:'command'}],37)],41),frameBox([styledLine([{text:'content'}],35)],41),disabledInputLines('saved draft',41)];
+    const boxed=[frameBox([styledLine([{text:'content'}],35)],41)];
+    for(const lines of [inputBox([styledLine([{text:'command'}],37)],41),disabledInputLines('saved draft',41)]) {
+      assert.equal(stripTerminalSequences(lines[0]),'─'.repeat(20)+' ');
+      assert.equal(stripTerminalSequences(lines.at(-1)!),'─'.repeat(20)+' ');
+      assert.ok(lines.every(line=>visibleWidth(line)===41));
+    }
     for(const lines of boxed) {
       const plain=lines.map(stripTerminalSequences);
       assert.equal(plain[0],'╭'+'─'.repeat(18)+' ╮');
@@ -98,10 +103,10 @@ test('wide borders reserve both sides, pad odd columns, retain scroll counts and
     editor.focused=true;editor.setText(Array.from({length:20},(_,i)=>`line ${i+1}`).join('\n'));
     const scrolled=editor.render(41).map(stripTerminalSequences);
     assert.ok(scrolled.every(line=>visibleWidth(line)===41));
-    assert.match(scrolled[0],/^╭.*↑ \d+ more .*╮$/,'scroll count stays inside the complete border');
+    assert.match(scrolled[0],/^─.*↑ \d+ more .*─ *$/,'scroll count stays inside the complete border');
     assert.doesNotMatch(scrolled[0],/\.\.\.|…/);
     editor.setText('中éX');editor.render(41);
-    editor.handleMouse({type:'click',button:'left',x:6,y:1,screenX:6,screenY:1,width:41,height:3,shift:false,alt:false,ctrl:false});
-    editor.handleInput('!');assert.equal(editor.getText(),'中!éX','the two-column side does not shift click insertion');
+    editor.handleMouse({type:'click',button:'left',x:5,y:1,screenX:5,screenY:1,width:41,height:3,shift:false,alt:false,ctrl:false});
+    editor.handleInput('!');assert.equal(editor.getText(),'中!éX','removing a measured side keeps click insertion aligned with the visible content');
   } finally {setGraphemeWidthOverrides();}
 });

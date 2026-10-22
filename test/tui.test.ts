@@ -302,12 +302,12 @@ test('caret adaptation preserves independent reverse-video component styles', ()
   for(const focused of [true,false]) {
     editor.focused=focused;
     const lines=editor.render(20);
-    assert.match(lines[0],/\x1b\[7m╭/,'the border theme keeps its independent reverse-video style');
+    assert.match(lines[0],/\x1b\[7m─/,'the border theme keeps its independent reverse-video style');
     const interior = captureSnapshot([lines[1]], 20, 1, 'none').rows[0].slice(1, -1);
     assert.ok(interior.every(cell => !cell.reverse), 'only the editor caret loses reverse-video styling; border styles remain');
     assert.equal(lines[1].includes(CURSOR_MARKER),focused,'only focused input provides the IME insertion marker');
     assert.equal(editor.focused,focused,'rendering does not change input focus');
-    assert.match(lines[1],/^(\x1b\[[0-9;]*m)*│(\x1b\[[0-9;]*m)*❯(\x1b\[[0-9;]*m)* /,'the first content row starts with the ❯ prompt (U10)');
+    assert.match(lines[1],/^ (\x1b\[[0-9;]*m)*❯(\x1b\[[0-9;]*m)* /,'the first content row starts with the ❯ prompt (U10)');
   }
 });
 

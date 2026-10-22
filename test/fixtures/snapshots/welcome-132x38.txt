@@ -1,67 +1,67 @@
 132x33 truecolor
 00|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 01|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 02|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 03|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 04|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 05|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 06|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 07|      ◢◣  █▀█ █ ▄ █▀▄ █ █ █▀█ █ █▀█                                                                                                 |
-   0-5 -/bg.base ; 6-7 ac.brand/bg.base ; 8-9 -/bg.base ; 10-14 fg.primary/bg.base ; 15-15 -/bg.base ; 16-16 fg.faint/bg.base ; 17-17 -/bg.base ; 18-34 fg.primary/bg.base ; 35-131 -/bg.base
+   0-5 -/- ; 6-7 ac.brand/- ; 8-9 -/- ; 10-14 fg.primary/- ; 15-15 -/- ; 16-16 fg.faint/- ; 17-17 -/- ; 18-34 fg.primary/- ; 35-131 -/-
 08|      ◥◤  █▀▀ █   █▄▀ █▄█ █▀▄ █ █▄█                                                                                                 |
-   0-5 -/bg.base ; 6-7 ac.brand/bg.base ; 8-9 -/bg.base ; 10-14 fg.primary/bg.base ; 15-15 -/bg.base ; 16-16 fg.faint/bg.base ; 17-17 -/bg.base ; 18-34 fg.primary/bg.base ; 35-131 -/bg.base
+   0-5 -/- ; 6-7 ac.brand/- ; 8-9 -/- ; 10-14 fg.primary/- ; 15-15 -/- ; 16-16 fg.faint/- ; 17-17 -/- ; 18-34 fg.primary/- ; 35-131 -/-
 09|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 10|      本机 coding agent · v0.1.0 · f26ae8f                                                                                          |
-   0-5 -/bg.base ; 6-22 fg.primary/bg.base ; 23-25 fg.faint/bg.base ; 26-41 fg.label/bg.base ; 42-131 -/bg.base
+   0-5 -/- ; 6-22 fg.primary/- ; 23-25 fg.faint/- ; 26-41 fg.label/- ; 42-131 -/-
 11|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 12|      工作区      ~/code/shop-api · ✓ 写入者锁可取得                                                                                |
-   0-5 -/bg.base ; 6-17 fg.label/bg.base ; 18-32 ac.path/bg.base ; 33-35 fg.faint/bg.base ; 36-36 ac.ok/bg.base ; 37-51 fg.muted/bg.base ; 52-131 -/bg.base
+   0-5 -/- ; 6-17 fg.label/- ; 18-32 ac.path/- ; 33-35 fg.faint/- ; 36-36 ac.ok/- ; 37-51 fg.muted/- ; 52-131 -/-
 13|      模型        deepseek-flash · openai-completions · api.deepseek.com                                                            |
-   0-5 -/bg.base ; 6-17 fg.label/bg.base ; 18-31 ac.model/bg.base ; 32-71 fg.faint/bg.base ; 72-131 -/bg.base
+   0-5 -/- ; 6-17 fg.label/- ; 18-31 ac.model/- ; 32-71 fg.faint/- ; 72-131 -/-
 14|      执行版本    build f26ae8f · deps 9c1e · 指令 3f2a · 4 tools · improve 默认 1 项                                               |
-   0-5 -/bg.base ; 6-17 fg.label/bg.base ; 18-84 fg.muted/bg.base ; 85-131 -/bg.base
+   0-5 -/- ; 6-17 fg.label/- ; 18-84 fg.muted/- ; 85-131 -/-
 15|      数据根      ~/Library/Application Support/pi-durio                                                                            |
-   0-5 -/bg.base ; 6-17 fg.label/bg.base ; 18-55 fg.muted/bg.base ; 56-131 -/bg.base
+   0-5 -/- ; 6-17 fg.label/- ; 18-55 fg.muted/- ; 56-131 -/-
 16|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 17|      最近会话 · ↑↓ 选择，Enter 或点击只读打开，不会调用模型或工具                                                                  |
-   0-5 -/bg.base ; 6-13 fg.label/bg.base ; 14-65 fg.gutter/bg.base ; 66-131 -/bg.base
+   0-5 -/- ; 6-13 fg.label/- ; 14-65 fg.gutter/- ; 66-131 -/-
 18|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 19|         s-7f3a    修复购物车满减金额四舍五入                                          ✓ 完成  今天 10:12                           |
-   0-6 -/bg.base ; 7-7 ac.brand/bg.base ; 8-8 -/bg.base ; 9-44 fg.body/bg.base ; 45-80 -/bg.base ; 81-92 ac.ok/bg.base ; 93-94 -/bg.base ; 95-104 fg.faint/bg.base ; 105-131 -/bg.base
+   0-6 -/- ; 7-7 ac.brand/- ; 8-8 -/- ; 9-44 fg.body/- ; 45-80 -/- ; 81-92 ac.ok/- ; 93-94 -/- ; 95-104 fg.faint/- ; 105-131 -/-
 20|         s-6c01    订单导出 CSV 增加时区列                                       ◈ 待恢复核对  昨天 22:40                           |
-   0-6 -/bg.base ; 7-7 ac.brand/bg.base ; 8-8 -/bg.base ; 9-41 fg.body/bg.base ; 42-80 -/bg.base ; 81-92 ac.warn/bg.base ; 93-94 -/bg.base ; 95-104 fg.faint/bg.base ; 105-131 -/bg.base
+   0-6 -/- ; 7-7 ac.brand/- ; 8-8 -/- ; 9-41 fg.body/- ; 42-80 -/- ; 81-92 ac.warn/- ; 93-94 -/- ; 95-104 fg.faint/- ; 105-131 -/-
 21|         s-5e9b    improve · 测试重复运行成本                                        ◇ 已中止       10-09                           |
-   0-6 -/bg.base ; 7-7 ac.brand/bg.base ; 8-8 -/bg.base ; 9-18 fg.body/bg.base ; 19-28 ac.improve/bg.base ; 29-44 fg.body/bg.base ; 45-80 -/bg.base ; 81-92 fg.muted/bg.base ; 93-94 -/bg.base ; 95-104 fg.faint/bg.base ; 105-131 -/bg.base
+   0-6 -/- ; 7-7 ac.brand/- ; 8-8 -/- ; 9-18 fg.body/- ; 19-28 ac.improve/- ; 29-44 fg.body/- ; 45-80 -/- ; 81-92 fg.muted/- ; 93-94 -/- ; 95-104 fg.faint/- ; 105-131 -/-
 22|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 23|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 24|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 25|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 26|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 27|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 28|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 29|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 30|                                                                                                                                    |
-   0-131 -/bg.base
+   0-131 -/-
 31| Tip: 空闲时 Enter 提交新任务；运行中 Enter 变为 steer，在当前工具轮次边界接入。                                                    |
-   0-0 -/bg.base ; 1-5 fg.label/bg.base/b ; 6-79 fg.label/bg.base ; 80-131 -/bg.base
+   0-0 -/- ; 1-5 fg.label/-/b ; 6-79 fg.label/- ; 80-131 -/-
 32|○ 空闲 · deepseek-flash · ctx ≈863 / 1M · 本会话 0 tok ≈ ¥0.00                                                                      |
-   0-5 ac.ok/bg.base ; 6-8 fg.faint/bg.base ; 9-22 ac.model/bg.base ; 23-25 fg.faint/bg.base ; 26-61 fg.label/bg.base ; 62-131 -/bg.base
+   0-5 ac.ok/- ; 6-8 fg.faint/- ; 9-22 ac.model/- ; 23-25 fg.faint/- ; 26-61 fg.label/- ; 62-131 -/-

@@ -18,7 +18,7 @@ async function until(predicate:()=>boolean) {
   throw Error('session background fixture timed out');
 }
 
-test('short and overflowing running transcripts paint unused viewport rows without changing their content or no-color mode',async()=>{
+test('short and overflowing running transcripts leave unused viewport rows on the terminal background while keeping local blocks',async()=>{
   const root=mkdtempSync(join(tmpdir(),'durio-session-background-')),workspace=join(root,'project');mkdirSync(workspace);
   let stream:ReadableStreamDefaultController<Uint8Array>|undefined;
   const transport:typeof fetch=async(_url,init)=>new Response(new ReadableStream({start(controller){
@@ -37,17 +37,17 @@ test('short and overflowing running transcripts paint unused viewport rows witho
       for(const tier of ['truecolor','256color','none'] as const)for(const [width,height] of [[132,38],[80,24],[40,12]]) {
         overrideColorTierForTest(tier);terminal.columns=width;terminal.rows=height;terminal.resize();
         const lines=app.screen(),text=lines.map(stripTerminalSequences),grid=captureSnapshot(lines,width,height,tier);
-        assert.equal(lines.length,height);assert.ok(lines.every(line=>visibleWidth(line)===width),'every physical row fills the viewport');
+        assert.equal(lines.length,height);assert.ok(lines.every(line=>visibleWidth(line)<=width),'every physical row stays inside the viewport');
         assert.match(text.join('\n'),/运行/,'fixture remains running');
-        assert.ok(text.some(line=>line.includes('╭'))&&text.some(line=>line.includes('╰')),'the complete input frame stays visible');
+        const input=text.findIndex(line=>line.includes('补充当前任务'));assert.ok(input>0);assert.match(text[input-1].trim(),/^─+$/);assert.match(text[input+1].trim(),/^─+$/);
         if(count)assert.ok(text.some(line=>line.includes(`output ${count}`)),'following keeps the latest output visible');
         let holes=0;
         for(const [y,row]of grid.rows.entries())for(const [x,cell]of row.entries()) {
-          // U2 deliberately keeps the user message block; all other cells use U10 base.
-          const expected=tier==='none'?undefined:text[y].trimStart().startsWith('┃ ')&&cell.bg==='bg.block'?'bg.block':'bg.base';
+          // U2 deliberately keeps the user message block; all other cells use the terminal background.
+          const expected=tier==='none'?undefined:text[y].trimStart().startsWith('┃ ')&&cell.bg==='bg.block'?'bg.block':undefined;
           if(cell.bg!==expected)holes++;
         }
-        if(holes)failures.push(`${tier} ${width}×${height}, ${count} output lines: ${holes} unpainted cells`);
+        if(holes)failures.push(`${tier} ${width}×${height}, ${count} output lines: ${holes} unexpectedly painted cells`);
         if(tier==='none')assert.doesNotMatch(lines.join(''),/\x1b\[(?:38|48);/,'no-color mode emits no color SGR');
       }
       terminal.columns=132;terminal.rows=38;terminal.resize();

@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { createFixtures, renderers, load } from './fixtures.mjs';
 import { save, screens } from './common.mjs';
 
-/** Human-run native display of the same synthetic renderer inputs as the grids. */
+/** Human-run display of the grid renderers: terminal background, with only local panel/content fills. */
 export async function gallery(root, output, screen, tier) {
   if (!screens.includes(screen)) throw Error('UNKNOWN_SCREEN');
   if (process.stdout.columns !== 132 || process.stdout.rows !== 38) throw Error('SCREENSHOT_REQUIRES_132x38');

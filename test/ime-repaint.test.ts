@@ -37,14 +37,14 @@ test('a delivered empty Backspace repaints terminal-damaged input without changi
       overrideColorTierForTest(tier);await turn();
       const screen=app.screen(),row=screen.findIndex(line=>stripTerminalSequences(line).includes('补充当前任务'))+1;
       assert.ok(row>0);
-      const expected=stripTerminalSequences(screen[row-1]);assert.match(expected,/^\s*│❯ .*│\s*$/);
+      const expected=stripTerminalSequences(screen[row-1]);assert.match(expected,/^\s*❯ .*\s*$/);
       assert.equal(stripTerminalSequences(terminal.painted.get(row)!),expected,'erase the actual current input row, with no asynchronous gap after locating it');
       terminal.painted.set(row,' '.repeat(terminal.columns)); // Model external erase; no invented composition input event.
       terminal.input('\x7f');await turn();
       const repainted=terminal.painted.get(row)!;
       assert.equal(stripTerminalSequences(repainted),expected,'the physical input row must be restored even when editor text is unchanged');
       const grid=captureSnapshot([repainted],terminal.columns,1,tier);
-      assert.ok(grid.rows[0].every(cell=>cell.bg===(tier==='none'?undefined:'bg.base')));
+      assert.ok(grid.rows[0].every(cell=>cell.bg===(undefined)));
       assert.equal(calls,1,'repairing the display cannot submit a task');
       assert.ok(app.screen().some(line=>stripTerminalSequences(line).includes('补充当前任务')),'the input remains empty with the original placeholder');
     }
