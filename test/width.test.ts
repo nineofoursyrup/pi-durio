@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StdinBuffer } from '@earendil-works/pi-tui';
+import { StdinBuffer, stripTerminalSequences } from '@earendil-works/pi-tui';
 import { TerminalWidthProbe } from '../src/tui/width-probe.js';
 import { existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -97,26 +97,53 @@ test('resize during an outstanding width query automatically remeasures and pain
   }
 });
 
-test('repeated in-flight resizes exhaust a bounded retry budget and Ctrl+L can start a fresh measurement',async()=>{
+test('repeated in-flight resizes bound each calibration while later resize and Ctrl+L can recover',async()=>{
+  for(const recovery of ['resize','Ctrl+L']) {
+    const f=calibratedFixture();
+    try {
+      await until(f.painted);f.terminal.hold='Ω';f.terminal.key('Ω');
+      const exhaust=async()=>{
+        const before=f.terminal.writes.length;
+        const attempts=f.terminal.samples.filter(sample=>sample==='Ω').length-f.terminal.held.length;
+        for(let attempt=0;attempt<3;attempt++) {
+          await until(()=>f.terminal.held.length===1);
+          f.terminal.columns++;f.terminal.resize();f.terminal.held.shift()!();
+        }
+        await until(()=>f.terminal.writes.slice(before).some(data=>data.includes('Display unverified: Error: WIDTH_WINDOW_CHANGED')));
+        const queries=f.terminal.samples.length;
+        await new Promise(resolve=>setTimeout(resolve,30));
+        assert.equal(f.terminal.samples.length,queries,'without another resize, exhausted calibration must not issue another query');
+        assert.equal(f.terminal.samples.filter(sample=>sample==='Ω').length-attempts,3,'each calibration stops after three resize-interrupted measurements');
+        assert.equal(f.terminal.held.length,0,'every failed attempt consumed its DA1 boundary');
+      };
+      await exhaust();
+      f.terminal.columns++;f.terminal.resize();
+      await new Promise(resolve=>setTimeout(resolve,30));
+      assert.equal(f.terminal.held.length,1,'a later resize starts a fresh calibration without Ctrl+L');
+      await exhaust();
+      f.terminal.release();const before=f.terminal.writes.length;
+      if(recovery==='resize'){f.terminal.columns++;f.terminal.resize();}
+      else f.terminal.key('\x0c');
+      await until(f.painted);
+      assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,`${recovery} completes an uninterrupted calibration after exhaustion`);
+      assert.ok(f.app.screen().join('\n').includes('Ω'),'retry preserves the entered draft');
+    } finally {
+      f.terminal.release();await f.app.exit();
+    }
+  }
+});
+
+test('WINDOW error keeps the complete Ctrl+L retry hint visible at 80 columns',async()=>{
   const f=calibratedFixture();
   try {
     await until(f.painted);f.terminal.hold='Ω';f.terminal.key('Ω');
-    for(let attempt=0;attempt<3;attempt++) {
+    for(const columns of [79,78,80]) {
       await until(()=>f.terminal.held.length===1);
-      f.terminal.columns++;f.terminal.resize();f.terminal.held.shift()!();
+      f.terminal.columns=columns;f.terminal.resize();f.terminal.held.shift()!();
     }
     await until(()=>f.terminal.writes.some(data=>data.includes('Display unverified: Error: WIDTH_WINDOW_CHANGED')));
-    const queries=f.terminal.samples.length;
-    await new Promise(resolve=>setTimeout(resolve,30));
-    assert.equal(f.terminal.samples.length,queries,'no unbounded automatic exchange follows the third interrupted attempt');
-    assert.equal(f.terminal.samples.filter(sample=>sample==='Ω').length,3);
-    assert.equal(f.terminal.held.length,0,'every failed attempt consumed its DA1 boundary');
-    for(let resize=0;resize<4;resize++){f.terminal.columns++;f.terminal.resize();}
-    await new Promise(resolve=>setTimeout(resolve,30));
-    assert.equal(f.terminal.samples.length,queries,'continued dragging cannot reset an exhausted automatic retry budget');
-    f.terminal.release();const before=f.terminal.writes.length;f.terminal.key('\x0c');await until(f.painted);
-    assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,'explicit Ctrl+L gets a fresh bounded calibration');
-    assert.ok(f.app.screen().join('\n').includes('Ω'),'retry preserves the entered draft');
+    const status=stripTerminalSequences(f.terminal.writes.findLast(data=>data.includes('Display unverified'))!);
+    assert.ok(status.includes('Ctrl+L retry'),'the retry action is fully visible in the 80×24 status line');
   } finally {
     f.terminal.release();await f.app.exit();
   }

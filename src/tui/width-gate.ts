@@ -36,7 +36,6 @@ export class TerminalWidthGate {
   private retainedInputs=0;
   private cursorVisible=false;
   private resizeVersion=0;
-  private resizeRetryExhausted=false;
   constructor(private readonly options:WidthGateOptions) {
     if(owner)throw Error('WIDTH_PROFILE_IN_USE');
     owner=this;
@@ -74,7 +73,7 @@ export class TerminalWidthGate {
       },()=>{
         this.resizeVersion++;
         resize();
-        if(!this.resizeRetryExhausted&&this.error?.includes('WINDOW')&&this.probe.canRetry)this.retry();
+        if(this.error?.includes('WINDOW')&&this.probe.canRetry)this.retry();
       });
     };
   }
@@ -127,13 +126,13 @@ export class TerminalWidthGate {
             // only after that boundary, within this calibration's existing hold.
             // Two retries bound work even if every exchange overlaps a resize.
             if(!(error instanceof WidthWindowChangedError)||resizeVersion===this.resizeVersion||!this.probe.canRetry)throw error;
-            if(resizeRetries>=2){this.resizeRetryExhausted=true;throw error;}
+            if(resizeRetries>=2)throw error;
             resizeRetries++;
           }
         }
         if(this.closing||epoch!==this.epoch)return;
       }
-      setGraphemeWidthOverrides(next);this.profile=next;this.busy=false;this.resizeRetryExhausted=false;
+      setGraphemeWidthOverrides(next);this.profile=next;this.busy=false;
       this.options.tui.resetTextSelection();this.options.tui.invalidate();
       this.options.ready();this.options.tui.renderNow(true);
       this.drain();
@@ -161,7 +160,7 @@ export class TerminalWidthGate {
     if(this.busy){this.message('Display measurement in progress; Ctrl+C / Esc remain available.');return;}
     if(!this.probe.canRetry){this.message('Prior terminal reply incomplete. Exit and reopen; inputs retained.');return;}
     this.error=undefined;this.wanted.clear();
-    if(reset){this.profile.clear();this.resizeRetryExhausted=false;}
+    if(reset)this.profile.clear();
     this.inspect([this.lastFrame]);
     if(!this.blocked){this.options.tui.invalidate();this.options.tui.renderNow(true);this.drain();}
   }
