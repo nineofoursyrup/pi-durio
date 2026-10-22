@@ -78,6 +78,47 @@ function calibratedFixture(transportOverride?:typeof fetch,onProviderEntered?:()
   return {root,terminal,transport,app,draftRoot,painted};
 }
 
+test('resize during an outstanding width query automatically remeasures and paints the new size',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);
+    f.terminal.columns=40;f.terminal.rows=12;f.terminal.resize();await until(f.painted);
+    f.terminal.hold='Ω';f.terminal.key('Ω');await until(()=>f.terminal.held.length===1);
+    const before=f.terminal.writes.length;
+    f.terminal.columns=244;f.terminal.rows=68;f.terminal.resize();
+    f.terminal.release();
+    await until(()=>f.painted()||f.terminal.writes.slice(before).some(data=>data.includes('Display unverified')));
+    assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,'the late window-change result must not wait for another resize or Ctrl+L');
+    assert.ok(f.painted(),'measurement completion repaints at the new dimensions');
+    assert.equal(f.terminal.samples.filter(sample=>sample==='Ω').length,2,'the interrupted grapheme is measured again after the reply boundary');
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[65;\d+H\x1b\[\?25h/);
+  } finally {
+    f.terminal.release();await f.app.exit();
+  }
+});
+
+test('repeated in-flight resizes exhaust a bounded retry budget and Ctrl+L can start a fresh measurement',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);f.terminal.hold='Ω';f.terminal.key('Ω');
+    for(let attempt=0;attempt<3;attempt++) {
+      await until(()=>f.terminal.held.length===1);
+      f.terminal.columns++;f.terminal.resize();f.terminal.held.shift()!();
+    }
+    await until(()=>f.terminal.writes.some(data=>data.includes('Display unverified: Error: WIDTH_WINDOW_CHANGED')));
+    const queries=f.terminal.samples.length;
+    await new Promise(resolve=>setTimeout(resolve,30));
+    assert.equal(f.terminal.samples.length,queries,'no unbounded automatic exchange follows the third interrupted attempt');
+    assert.equal(f.terminal.samples.filter(sample=>sample==='Ω').length,3);
+    assert.equal(f.terminal.held.length,0,'every failed attempt consumed its DA1 boundary');
+    f.terminal.release();const before=f.terminal.writes.length;f.terminal.key('\x0c');await until(f.painted);
+    assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,'explicit Ctrl+L gets a fresh bounded calibration');
+    assert.ok(f.app.screen().join('\n').includes('Ω'),'retry preserves the entered draft');
+  } finally {
+    f.terminal.release();await f.app.exit();
+  }
+});
+
 test('self timing includes input waiting for calibration and ignores blocked frames and width-query replies', async () => {
   const root = mkdtempSync(join(tmpdir(), 'durio-self-width-'));
   const terminal = new MeasuringTerminal(); terminal.hold = 'A';
@@ -94,7 +135,7 @@ test('self timing includes input waiting for calibration and ignores blocked fra
   } finally { terminal.release(); await app.exit(); }
 });
 
-test('starting a task leaves no timed width query across synchronous execution capture', async () => {
+for(const resizeDuringQuery of [false,true])test(`starting a task leaves no timed width query across synchronous execution capture${resizeDuringQuery?' after an in-flight resize':''}`, async () => {
   let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
   const f=calibratedFixture(undefined,entered);
   const artifacts=()=>existsSync(join(f.root,'data/host.sqlite'))?[...records(join(f.root,'data'),{kinds:['execution.artifact']})]:[];
@@ -102,6 +143,7 @@ test('starting a task leaves no timed width query across synchronous execution c
     await until(f.painted);
     f.terminal.hold='◆';f.terminal.key('probe');f.terminal.key('\r');f.app.screen();
     await until(()=>f.terminal.held.length===1);
+    if(resizeDuringQuery){f.terminal.columns++;f.terminal.resize();}
     // Give ordinary asynchronous startup a turn while the controlled terminal has
     // an outstanding reply. Artifact capture must wait for that reply boundary.
     await new Promise(resolve=>setTimeout(resolve,300));
