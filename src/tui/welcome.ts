@@ -167,7 +167,7 @@ export function renderWelcome(facts: WelcomeFacts, width: number, height: number
       { text: ' ', bg },
     ] };
   });
-  const sessionsHeader: Row = { segments: [{ text: '最近会话', fg: 'fg.label' }, { text: truncateEnd(' · ↑↓ 选择，Enter 或点击只读打开，不会调用模型或工具', Math.max(0, inner - 8)), fg: 'fg.gutter' }] };
+  const sessionsHeader: Row = { segments: [{ text: '最近会话', fg: 'fg.label' }, { text: truncateEnd(' · ↑↓ 选择，Enter 或点击只读打开，不会调用模型或工具', Math.max(0, inner - 8)), fg: 'fg.faint' }] };
   const noSessions: Row = Array.isArray(facts.sessions)
     ? { segments: [{ text: truncateEnd('当前工作区还没有会话 · 在下方输入框提交第一个任务', inner), fg: 'fg.muted' }] }
     : { segments: [{ text: GLYPHS.err, fg: 'ac.err' }, { text: truncateEnd(` 最近会话不可读取 · ${facts.sessions.error}`, Math.max(0, inner - 1)), fg: 'fg.muted' }] };
