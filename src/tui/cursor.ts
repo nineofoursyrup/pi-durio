@@ -9,6 +9,12 @@ import { inputInnerWidth } from './view-stack.js';
 export class HardwareCursorEditor extends Editor {
   private frameBottomBorder='';
   private inputRows=0;
+  private sourceInputRows=0;
+  private sourceHiddenAbove=0;
+  private sourceHiddenBelow=0;
+  private firstVisibleLine=0;
+  private inputOffset=0;
+  private inputHeightLimit?:()=>number;
   private autocompleteHitRows:Array<number|undefined>=[];
   private readonly menuRender:{selected?:string;counter?:string};
   /** 输入为空时显示在插入点之后的占位文案（fg.faint）；pi-tui 1.1.0 的 Editor 没有占位。 */
@@ -22,11 +28,15 @@ export class HardwareCursorEditor extends Editor {
     }},{paddingX:2,...options});
     this.menuRender=menuRender;
   }
+  /** Host height includes both rules; content is windowed here before the layout can clip it. */
+  setInputHeightLimit(limit:()=>number) {this.inputHeightLimit=limit;}
   protected override renderTopBorder(width:number,hidden:number):string {
+    this.sourceHiddenAbove=hidden;
     const span=width+2;
     return visibleWidth('─')===1?super.renderTopBorder(span,hidden):this.measuredBorder(span,hidden,'↑');
   }
   protected override renderBottomBorder(width:number,hidden:number):string {
+    this.sourceHiddenBelow=hidden;
     const span=width+2;
     return this.frameBottomBorder=visibleWidth('─')===1?super.renderBottomBorder(span,hidden):this.measuredBorder(span,hidden,'↓');
   }
@@ -41,7 +51,7 @@ export class HardwareCursorEditor extends Editor {
     return {invalidate:()=>this.invalidate(),render:width=>this.renderAutocomplete(width,availableRows()),handleMouse:event=>{
       const row=event.type==='wheel'?this.autocompleteHitRows.find(row=>row!==undefined):this.autocompleteHitRows[event.y];
       if(row===undefined)return {handled:true};
-      const result=this.handleEditorMouse({...event,y:row+this.inputRows});
+      const result=this.handleEditorMouse({...event,y:row+this.sourceInputRows});
       if(result?.focus)this.tui.setFocus(this);
       return result?{...result,focus:false}:undefined;
     }};
@@ -67,7 +77,9 @@ export class HardwareCursorEditor extends Editor {
   private menuLine(line:string) {const base=bgSgr('bg.base');return base+line.replaceAll(resetSgr(),resetSgr()+base)+resetSgr();}
   private handleEditorMouse(event:TuiMouseEvent) {return super.handleMouse({...event,x:event.x-1,width:inputInnerWidth(event.width)});}
   override handleMouse(event:TuiMouseEvent) {
-    return this.handleEditorMouse(event);
+    // Only content rows move inside our window; both visible rules remain non-editable.
+    const y=event.y===this.inputRows-1?this.sourceInputRows-1:event.y>0&&event.y<this.inputRows-1?event.y+this.inputOffset:event.y;
+    return this.handleEditorMouse({...event,y});
   }
   override render(width:number):string[] {
     return this.renderParts(width).input;
@@ -83,9 +95,22 @@ export class HardwareCursorEditor extends Editor {
     try {lines=super.render(inner);} finally {this.focused=focused;}
     // Locate the line emitted by our protected hook before adapting its contents.
     // Upstream appends autocomplete after it; no private render state or width guessing is needed.
-    const bottomBorder=lines.lastIndexOf(this.frameBottomBorder);
+    const sourceBottom=lines.lastIndexOf(this.frameBottomBorder);
+    this.sourceInputRows=sourceBottom+1;
+    const menu=lines.slice(this.sourceInputRows),selected=this.menuRender.selected?menu.findIndex(line=>line.includes(this.menuRender.selected!)):-1,counter=this.menuRender.counter?menu.findIndex(line=>line.includes(this.menuRender.counter!)):-1;
+    const body=lines.slice(1,sourceBottom),count=Math.max(1,Math.min(body.length,Math.floor(this.inputHeightLimit?.()??Infinity)-2));
+    const cursor=body.findIndex(line=>line.includes(CURSOR_MARKER)),above=this.sourceHiddenAbove;
+    let first=Math.max(above,Math.min(this.firstVisibleLine,above+body.length-count));
+    if(cursor>=0){
+      if(above+cursor<first)first=above+cursor;
+      else if(above+cursor>=first+count)first=above+cursor-count+1;
+    }
+    this.firstVisibleLine=first;this.inputOffset=first-above;
+    const below=this.sourceHiddenBelow+body.length-this.inputOffset-count,bottomBorder=count+1;
+    lines=[this.inputOffset?this.measuredBorder(width,first,'↑'):lines[0],
+      ...body.slice(this.inputOffset,this.inputOffset+count),
+      below!==this.sourceHiddenBelow?this.measuredBorder(width,below,'↓'):lines[sourceBottom],...menu];
     this.inputRows=bottomBorder+1;
-    const menu=lines.slice(this.inputRows),selected=this.menuRender.selected?menu.findIndex(line=>line.includes(this.menuRender.selected!)):-1,counter=this.menuRender.counter?menu.findIndex(line=>line.includes(this.menuRender.counter!)):-1;
     lines=lines.map(line=>{
       const unpainted=line.replace(CURSOR_MARKER+'\x1b[7m',CURSOR_MARKER);
       return focused?unpainted:unpainted.replaceAll(CURSOR_MARKER,'');

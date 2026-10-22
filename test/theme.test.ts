@@ -384,6 +384,7 @@ test('autocomplete stays above the input rules with aligned menu rows, its own p
           borderColor: text => fgSgr('border.input') + text + '\x1b[0m',
           selectList: { selectedPrefix: identity, selectedText: text => `\x1b[7m${text}\x1b[27m`, description: identity, scrollInfo: identity, noMatch: identity },
         }, { autocompleteMaxVisible: 2 });
+        editor.setInputHeightLimit(() => 6);
         const menu = editor.separateAutocomplete(() => 3);
         editor.focused = true;
         editor.setAutocompleteProvider(new CombinedAutocompleteProvider([

@@ -281,6 +281,12 @@ export class ReadOnlyTui {
       if(event.type==='click'&&this.viewingRecovery&&!this.recoveryOpen&&this.runId){void this.openRecovery(this.runId);return {handled:true};}
       return undefined;
     });
+    // Give the adapter the same bounded height as the host, so generic leaf clipping
+    // cannot remove either rule or shift the editor's mouse coordinates.
+    this.editor.setInputHeightLimit(()=>{
+      const width=this.terminal.columns,other=this.welcome?0:header.render(width).length+statusRegion.render(width).length+queue.render(width).length;
+      return Math.max(3,Math.min(6,this.terminal.rows-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows)-this.footerRows(width)-other));
+    });
     // 1a/1b 固定行：上下边距、完整底栏和输入框；恢复屏不使用这两个高度预算。
     const fixedRows=(width:number)=>topMargin(this.terminal.rows)+bottomMargin(this.terminal.rows)+this.footerRows(width)+Math.min(6,Math.max(3,this.editor.render(width).length));
     // 菜单只使用主区剩余行；窄屏不让默认 stack shrink 挤掉头部、状态或输入。
