@@ -239,7 +239,8 @@ test('late inactive CPR and fragmented DA1 stay protocol events, while the 800ms
 });
 
 test('product first paste is measured before paint, keeps later keys ordered and discovers combined graphemes',async()=>{
-  const f=calibratedFixture(),key=(data:string)=>f.terminal.key(data);
+  let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
+  const f=calibratedFixture(undefined,entered),key=(data:string)=>f.terminal.key(data);
   try {
     // Arrival during the first frame's asynchronous calibration is retained, including the first key.
     key('\x1b[200~A👩‍💻é中B\x1b[201~');
@@ -258,7 +259,7 @@ test('product first paste is measured before paint, keeps later keys ordered and
     assert.equal(f.terminal.writes.some(data=>data.includes('ΩZ')&&!data.includes('\x1b[6n')),false);
     f.terminal.release();await until(f.painted);
     assert.equal(f.transport.calls.length,0,'queued actions require a fresh action against the current frame');
-    key('\r');await until(()=>f.transport.calls.length>0);
+    key('\r');await providerEntered;assert.ok(f.transport.calls.length>0);
   }finally{await f.app.exit();}
 });
 
@@ -299,14 +300,15 @@ test('SIGTERM during a pending measurement saves the draft and receipts, then re
 
 test('Enter arriving while a run is busy cannot become a new task after that run finishes during calibration',async()=>{
   const fixture=demoTransport();let calls=0,releaseRun!:()=>void;
+  let held!:()=>void;const providerHeld=new Promise<void>(resolve=>{held=resolve;});
   const transport:typeof fetch=async(url,init)=>{
     calls++;const response=await fixture.fetch(url,init);
-    if(calls===1)await new Promise<void>(resolve=>{releaseRun=resolve;});
+    if(calls===1)await new Promise<void>(resolve=>{releaseRun=resolve;held();});
     return response;
   };
   const f=calibratedFixture(transport),key=(data:string)=>f.terminal.key(data);
   try {
-    await until(f.painted);key('Read README');key('\r');await until(()=>calls===1);
+    await until(f.painted);key('Read README');key('\r');await providerHeld;
     f.terminal.hold='Ω';key('Ω');key('next');key('\r');await until(()=>f.terminal.held.length===1);
     releaseRun();await until(()=>f.app.screen().join('\n').replace(/\x1b\[[0-9;]*m/g,'').includes('✓ 完成'));
     f.terminal.release();key('\x0c');await until(f.painted);await new Promise(r=>setTimeout(r,50));
@@ -318,13 +320,14 @@ test('Enter arriving while a run is busy cannot become a new task after that run
 });
 
 test('stop remains responsive while new output widths are waiting, without leaking Esc through a modal',async()=>{
-  let started=false,aborted=false;
+  let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
+  let aborted=false;
   const transport:typeof fetch=async(_url,init)=>new Promise((_resolve,reject)=>{
-    started=true;init!.signal!.addEventListener('abort',()=>{aborted=true;reject(new Error('cancelled'));},{once:true});
+    init!.signal!.addEventListener('abort',()=>{aborted=true;reject(new Error('cancelled'));},{once:true});
   });
-  const f=calibratedFixture(transport),key=(data:string)=>f.terminal.key(data);
+  const f=calibratedFixture(transport,entered),key=(data:string)=>f.terminal.key(data);
   try {
-    await until(f.painted);key('Read');key('\r');await until(()=>started);
+    await until(f.painted);key('Read');key('\r');await providerEntered;
     key('?');key('\x1b');assert.equal(aborted,false,'first Esc closes the help view');await until(f.painted);
     f.terminal.hold='Ω';key('Ω');key('\r');await until(()=>f.terminal.held.length===1);
     key('\x1b');await until(()=>aborted);assert.equal(f.terminal.stopped,false);
