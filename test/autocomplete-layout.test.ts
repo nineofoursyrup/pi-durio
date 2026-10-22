@@ -75,7 +75,7 @@ test('session completion borrows only main rows and preserves fixed regions, scr
   }}),{headers:{'content-type':'text/event-stream'}});
   const terminal=new TestTerminal(),app=new ReadOnlyTui({workspace,dataRoot,draftRoot:join(root,'drafts'),mode:'offline',transport,terminal,widthCalibration:false});
   const key=(data:string)=>terminal.input(data),lines=()=>app.screen().map(stripTerminalSequences);
-  const anchors=(shown:string[])=>({header:shown.findIndex(line=>line.includes('pi-durio')),top:shown.findIndex(line=>/^ *❯ /.test(line))-1,bottom:shown.findIndex(line=>/^ *❯ /.test(line))+1,status:shown.findIndex(line=>/运行 · 第/.test(line)),queue:shown.findIndex(line=>/^\s*(?:↳ steer|队列 \d+ 项)/.test(line)),footer:shown.findIndex(line=>line.includes('ctx '))});
+  const anchors=(shown:string[])=>{const input=shown.findIndex(line=>/^ *❯ /.test(line));return {header:shown.findIndex(line=>line.includes('pi-durio')),top:input-1,bottom:shown.findIndex((line,row)=>row>input&&/^ *─.*─ *$/.test(line)),status:shown.findIndex(line=>/运行 · 第/.test(line)),queue:shown.findIndex(line=>/^\s*(?:↳ steer|队列 \d+ 项)/.test(line)),footer:shown.findIndex(line=>line.includes('ctx '))};};
   const emit=(number:number)=>stream!.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({id:'completion',model:'deepseek-flash',choices:[{index:0,delta:{content:`output ${number}\n`},finish_reason:null}]})}\n\n`));
   const saved=COLOR_TIER;
   app.start();
