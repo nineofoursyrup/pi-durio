@@ -111,6 +111,9 @@ test('repeated in-flight resizes exhaust a bounded retry budget and Ctrl+L can s
     assert.equal(f.terminal.samples.length,queries,'no unbounded automatic exchange follows the third interrupted attempt');
     assert.equal(f.terminal.samples.filter(sample=>sample==='Ω').length,3);
     assert.equal(f.terminal.held.length,0,'every failed attempt consumed its DA1 boundary');
+    for(let resize=0;resize<4;resize++){f.terminal.columns++;f.terminal.resize();}
+    await new Promise(resolve=>setTimeout(resolve,30));
+    assert.equal(f.terminal.samples.length,queries,'continued dragging cannot reset an exhausted automatic retry budget');
     f.terminal.release();const before=f.terminal.writes.length;f.terminal.key('\x0c');await until(f.painted);
     assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,'explicit Ctrl+L gets a fresh bounded calibration');
     assert.ok(f.app.screen().join('\n').includes('Ω'),'retry preserves the entered draft');
