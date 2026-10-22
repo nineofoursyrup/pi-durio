@@ -48,7 +48,7 @@ test('eval preparation paints the full loading view in every color tier',async t
    overrideColorTierForTest(tier);terminal.columns=width;terminal.rows=height;
    const lines=app.screen();assert.match(plain(lines),/核对内容中/);
    for(const [y,row]of captureSnapshot(lines,width,height,tier).rows.entries())for(const [x,cell]of row.entries())
-    assert.equal(cell.bg,tier==='none'?undefined:'bg.base',`${tier} ${width}×${height} cell ${x},${y}`);
+    assert.equal(cell.bg,undefined,`${tier} ${width}×${height} cell ${x},${y}`);
    if(tier==='none')assert.doesNotMatch(lines.join(''),/\x1b\[(?:38|48);/);
   }
  } finally {t.mock.timers.reset();await app.exit();overrideColorTierForTest(previousTier);}

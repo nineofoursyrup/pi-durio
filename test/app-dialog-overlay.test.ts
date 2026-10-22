@@ -30,7 +30,7 @@ test('app dialog dims session and full-view backgrounds, and yields to the small
     assert.ok(row, `missing header ${title}`);
     const cells = captureSnapshot([row], terminal.columns, 1, 'truecolor').rows[0].filter(cell => cell.char.trim());
     assert.ok(cells.length);
-    for (const cell of cells) { assert.equal(cell.fg, 'fg.gutter'); assert.equal(cell.bg, 'bg.base'); assert.equal(cell.bold, undefined); }
+    for (const cell of cells) { assert.equal(cell.fg, 'fg.gutter'); assert.equal(cell.bg, undefined); assert.equal(cell.bold, undefined); }
   }
   try {
     // 132×38 的欢迎屏标识是两行方块字（U1），用版本行检查变灰。
@@ -97,7 +97,7 @@ for (const tier of ['truecolor', '256color', 'none'] as const) test(`full-screen
     for (let y = 0; y < grid.height; y++) for (let x = 0; x < grid.width; x++) {
       if (y >= top && y <= bottom && x >= left && x <= right) continue;
       const cell = grid.rows[y][x];
-      assert.equal(cell.bg, tier === 'none' ? undefined : 'bg.base', `background at ${x},${y}`);
+      assert.equal(cell.bg, undefined, `background at ${x},${y}`);
       if (cell.char.trim()) {
         textCells++;
         if (tier === 'none') assert.equal(cell.dim, true, `text dim at ${x},${y}`);
@@ -106,7 +106,7 @@ for (const tier of ['truecolor', '256color', 'none'] as const) test(`full-screen
     }
     assert.ok(textCells > 0);
     const padding = captureSnapshot([dimForOverlay(styledLine([], 8, 'bg.base', tier), tier)], 8, 1, tier);
-    assert.ok(padding.rows[0].every(cell => cell.bg === (tier === 'none' ? undefined : 'bg.base')));
+    assert.ok(padding.rows[0].every(cell => cell.bg === (undefined)));
   } finally { await app.exit(); overrideColorTierForTest('truecolor'); }
 });
 
@@ -123,7 +123,7 @@ test('the exit draft panel yields to the undersized-window notice and returns af
       const lines = app.screen(), grid = captureSnapshot(lines, columns, rows, tier);
       assert.match(lines.map(stripTerminalSequences).join('\n'), /退出并保留草稿/);
       for (const [y, row] of grid.rows.entries()) for (const [x, cell] of row.entries())
-        assert.equal(cell.bg, tier === 'none' ? undefined : 'bg.base', `${tier} ${columns}×${rows} cell ${x},${y}`);
+        assert.equal(cell.bg, undefined, `${tier} ${columns}×${rows} cell ${x},${y}`);
       if (tier === 'none') assert.doesNotMatch(lines.join(''), /\x1b\[(?:38|48);/);
     }
     terminal.columns = 39; terminal.rows = 11; terminal.resize();

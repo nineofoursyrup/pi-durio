@@ -75,7 +75,7 @@ test('session completion borrows only main rows and preserves fixed regions, scr
   }}),{headers:{'content-type':'text/event-stream'}});
   const terminal=new TestTerminal(),app=new ReadOnlyTui({workspace,dataRoot,draftRoot:join(root,'drafts'),mode:'offline',transport,terminal,widthCalibration:false});
   const key=(data:string)=>terminal.input(data),lines=()=>app.screen().map(stripTerminalSequences);
-  const anchors=(shown:string[])=>({header:shown.findIndex(line=>line.includes('pi-durio')),top:shown.findIndex(line=>line.includes('╭')),bottom:shown.findIndex(line=>line.includes('╰')),status:shown.findIndex(line=>/运行 · 第/.test(line)),queue:shown.findIndex(line=>/^\s*(?:↳ steer|队列 \d+ 项)/.test(line)),footer:shown.findIndex(line=>line.includes('ctx '))});
+  const anchors=(shown:string[])=>({header:shown.findIndex(line=>line.includes('pi-durio')),top:shown.findIndex(line=>/^ *❯ /.test(line))-1,bottom:shown.findIndex(line=>/^ *❯ /.test(line))+1,status:shown.findIndex(line=>/运行 · 第/.test(line)),queue:shown.findIndex(line=>/^\s*(?:↳ steer|队列 \d+ 项)/.test(line)),footer:shown.findIndex(line=>line.includes('ctx '))});
   const emit=(number:number)=>stream!.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({id:'completion',model:'deepseek-flash',choices:[{index:0,delta:{content:`output ${number}\n`},finish_reason:null}]})}\n\n`));
   const saved=COLOR_TIER;
   app.start();
@@ -126,7 +126,7 @@ test('session completion borrows only main rows and preserves fixed regions, scr
       }else{
         const hint=lines().findIndex(line=>line.includes('补全空间不足'));
         key(`\x1b[<0;7;${hint+1}M`);key(`\x1b[<0;7;${hint+1}m`);key('a');
-        assert.match(lines().join('\n'),/│  @a /,'the resize hint is not a clickable completion and input remains editable');
+        assert.match(lines().join('\n'),/   @a /,'the resize hint is not a clickable completion and input remains editable');
         key('\x1b');
       }
       assert.equal(lines().length,12);assert.ok(app.screen().every(line=>visibleWidth(line)<=40));

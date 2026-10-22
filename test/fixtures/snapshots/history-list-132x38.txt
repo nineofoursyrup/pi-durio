@@ -1,24 +1,24 @@
 132x38 truecolor
 00|◆ history · 历史 · 只读                                                                                                             |
-   0-22 fg.primary/bg.base ; 23-131 -/bg.base
+   0-22 fg.primary/- ; 23-131 -/-
 01|/history --project all                                                                                                              |
-   0-21 fg.label/bg.base ; 22-131 -/bg.base
+   0-21 fg.label/- ; 22-131 -/-
 02|› ◇ s-eb92 · Run a fixture task so queue items can be submitted before stop. · 1 个任务 · 2026-10-14 13:27 · 14 tok < ¥0.01 partial |
    0-12 fg.muted/bg.selected ; 13-75 fg.body/bg.selected ; 76-130 fg.label/bg.selected ; 131-131 -/bg.selected
 03|  ✓ s-a50b · improve · Controlled fixture improve analysis · 1 个任务 · 2026-10-14 13:27 · 42 tok < ¥0.01 partial                   |
-   0-22 ac.ok/bg.base ; 23-57 fg.body/bg.base ; 58-112 fg.label/bg.base ; 113-131 -/bg.base
+   0-22 ac.ok/- ; 23-57 fg.body/- ; 58-112 fg.label/- ; 113-131 -/-
 04|  ✓ s-bd99 · Read README.md only. · 1 个任务 · 2026-10-14 13:26 · 28 tok < ¥0.01 partial                                            |
-   0-12 ac.ok/bg.base ; 13-32 fg.body/bg.base ; 33-87 fg.label/bg.base ; 88-131 -/bg.base
+   0-12 ac.ok/- ; 13-32 fg.body/- ; 33-87 fg.label/- ; 88-131 -/-
 05|  ✓ s-25b3 · Fixture run to be interrupted for recovery. · 1 个任务 · 2026-10-14 13:26 · 14 tok < ¥0.01 +1 unknown partial          |
-   0-12 ac.ok/bg.base ; 13-55 fg.body/bg.base ; 56-121 fg.label/bg.base ; 122-131 -/bg.base
+   0-12 ac.ok/- ; 13-55 fg.body/- ; 56-121 fg.label/- ; 122-131 -/-
 06|  ◇ s-43fd · Should not reach context.imported. · 1 个任务 · 2026-10-14 13:26 · 0 tok ≈ ¥0.00                                       |
-   0-12 fg.muted/bg.base ; 13-46 fg.body/bg.base ; 47-92 fg.label/bg.base ; 93-131 -/bg.base
+   0-12 fg.muted/- ; 13-46 fg.body/- ; 47-92 fg.label/- ; 93-131 -/-
 07|  ✓ s-fb21 · Alternative continuation of the first coding session. · 1 个任务 · 2026-10-14 13:26 · 14 tok < ¥0.01                   |
-   0-12 ac.ok/bg.base ; 13-65 fg.body/bg.base ; 66-112 fg.label/bg.base ; 113-131 -/bg.base
+   0-12 ac.ok/- ; 13-65 fg.body/- ; 66-112 fg.label/- ; 113-131 -/-
 08|  ✓ s-3506 · Read README.md and describe the project. · 2 个任务 · 2026-10-14 13:25 · 42 tok < ¥0.01                                |
-   0-12 ac.ok/bg.base ; 13-52 fg.body/bg.base ; 53-99 fg.label/bg.base ; 100-131 -/bg.base
+   0-12 ac.ok/- ; 13-52 fg.body/- ; 53-99 fg.label/- ; 100-131 -/-
 09|  ✓ s-7b95 · Summarize the workspace contents. · 1 个任务 · 2026-10-14 13:25 · 14 tok < ¥0.01 partial                               |
-   0-12 ac.ok/bg.base ; 13-45 fg.body/bg.base ; 46-100 fg.label/bg.base ; 101-131 -/bg.base
+   0-12 ac.ok/- ; 13-45 fg.body/- ; 46-100 fg.label/- ; 101-131 -/-
 10|                                                                                                                                    |
    0-131 -/-
 11|                                                                                                                                    |
@@ -74,4 +74,4 @@
 36|                                                                                                                                    |
    0-131 -/-
 37|↑↓ 选择 · Enter 会话 · c 接续 · t trace · / 筛选 · n/p 翻页 · Esc 返回会话                                                          |
-   0-1 fg.body/bg.base ; 2-9 fg.label/bg.base ; 10-14 fg.body/bg.base ; 15-22 fg.label/bg.base ; 23-23 fg.body/bg.base ; 24-31 fg.label/bg.base ; 32-32 fg.body/bg.base ; 33-41 fg.label/bg.base ; 42-42 fg.body/bg.base ; 43-50 fg.label/bg.base ; 51-53 fg.body/bg.base ; 54-61 fg.label/bg.base ; 62-64 fg.body/bg.base ; 65-73 fg.label/bg.base ; 74-131 -/bg.base
+   0-1 fg.body/- ; 2-9 fg.label/- ; 10-14 fg.body/- ; 15-22 fg.label/- ; 23-23 fg.body/- ; 24-31 fg.label/- ; 32-32 fg.body/- ; 33-41 fg.label/- ; 42-42 fg.body/- ; 43-50 fg.label/- ; 51-53 fg.body/- ; 54-61 fg.label/- ; 62-64 fg.body/- ; 65-73 fg.label/- ; 74-131 -/-

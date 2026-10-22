@@ -1,8 +1,8 @@
 132x38 truecolor
 00|◆ history  s-fb21 · /private/var/folders/2z/sxns83r94vl0_5wj2vtzwf800000gn/T/durio-v1-fixture-RNGQle/project · 完成                 |
-   0-114 fg.primary/bg.base ; 115-131 -/bg.base
+   0-114 fg.primary/- ; 115-131 -/-
 01|分支自 s-3506 任务 1                                                                                                                |
-   0-19 fg.label/bg.base ; 20-131 -/bg.base
+   0-19 fg.label/- ; 20-131 -/-
 02|› 任务 2 · ✓ · Alternative continuation of the first coding session. · 1 轮 · 00:01 · 14 tok < ¥0.01                                |
    0-14 ac.ok/bg.selected ; 15-67 fg.body/bg.selected ; 68-99 fg.label/bg.selected ; 100-131 -/bg.selected
 03|                                                                                                                                    |
@@ -74,4 +74,4 @@
 36|                                                                                                                                    |
    0-131 -/-
 37|↑↓ 选择 · Enter 正文 · c 接续 · t trace · n/p 翻页 · Esc 返回上层                                                                   |
-   0-1 fg.body/bg.base ; 2-9 fg.label/bg.base ; 10-14 fg.body/bg.base ; 15-22 fg.label/bg.base ; 23-23 fg.body/bg.base ; 24-31 fg.label/bg.base ; 32-32 fg.body/bg.base ; 33-41 fg.label/bg.base ; 42-44 fg.body/bg.base ; 45-52 fg.label/bg.base ; 53-55 fg.body/bg.base ; 56-64 fg.label/bg.base ; 65-131 -/bg.base
+   0-1 fg.body/- ; 2-9 fg.label/- ; 10-14 fg.body/- ; 15-22 fg.label/- ; 23-23 fg.body/- ; 24-31 fg.label/- ; 32-32 fg.body/- ; 33-41 fg.label/- ; 42-44 fg.body/- ; 45-52 fg.label/- ; 53-55 fg.body/- ; 56-64 fg.label/- ; 65-131 -/-

@@ -1,53 +1,53 @@
 00|指标 · 本机实测                                                                                                                     |
-   0-3 fg.label/bg.base ; 4-6 fg.faint/bg.base ; 7-14 fg.primary/bg.base/b ; 15-131 -/bg.base
+   0-3 fg.label/- ; 4-6 fg.faint/- ; 7-14 fg.primary/-/b ; 15-131 -/-
 01|◆ self ####### · Example CPU · macOS ##.# · Node v##.#.# · Terminal.app · 本进程 #m                        无预设硬阈值 · 只报告实测|
-   0-1 ac.model/bg.base ; 2-5 fg.primary/bg.base/b ; 6-82 fg.faint/bg.base ; 83-106 -/bg.base ; 107-131 fg.faint/bg.base
+   0-1 ac.model/- ; 2-5 fg.primary/-/b ; 6-82 fg.faint/- ; 83-106 -/- ; 107-131 fg.faint/-
 02|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
-   0-131 line.subtle/bg.base
+   0-131 line.subtle/-
 03|                                                                                                                                    |
    0-131 -/-
 04|自有维护代码                                                       运行开销                                                         |
-   0-11 fg.label/bg.base/b ; 12-66 -/bg.base ; 67-74 fg.label/bg.base/b ; 75-131 -/bg.base
+   0-11 fg.label/-/b ; 12-66 -/- ; 67-74 fg.label/-/b ; 75-131 -/-
 05|src/tui/                 ### 行  ████████████████                  本次启动到首帧       尚未取得首帧                                |
-   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-48 ac.brand/bg.base ; 49-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-99 fg.primary/bg.base ; 100-131 -/bg.base
+   0-20 ac.path/- ; 21-30 fg.body/- ; 31-32 -/- ; 33-48 ac.brand/- ; 49-66 -/- ; 67-87 fg.body/- ; 88-99 fg.primary/- ; 100-131 -/-
 06|src/                     ### 行  ████████                          冷启动 p##/p##       产品内不测 · 见 A# 报告                     |
-   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-40 ac.brand/bg.base ; 41-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-97 fg.primary/bg.base ; 98-110 fg.faint/bg.base ; 111-131 -/bg.base
+   0-20 ac.path/- ; 21-30 fg.body/- ; 31-32 -/- ; 33-40 ac.brand/- ; 41-66 -/- ; 67-87 fg.body/- ; 88-97 fg.primary/- ; 98-110 fg.faint/- ; 111-131 -/-
 07|src/eval/                ### 行  █████                             当前 RSS             ## MB · 空闲                                |
-   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-37 ac.brand/bg.base ; 38-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-92 fg.primary/bg.base ; 93-99 fg.faint/bg.base ; 100-131 -/bg.base
+   0-20 ac.path/- ; 21-30 fg.body/- ; 31-32 -/- ; 33-37 ac.brand/- ; 38-66 -/- ; 67-87 fg.body/- ; 88-92 fg.primary/- ; 93-99 fg.faint/- ; 100-131 -/-
 08|src/metrics/              ## 行  ███                               本进程峰值 RSS       ## MB · # 个任务 · # KB 工具输出            |
-   0-20 ac.path/bg.base ; 21-30 fg.body/bg.base ; 31-32 -/bg.base ; 33-35 ac.brand/bg.base ; 36-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-92 fg.primary/bg.base ; 93-119 fg.faint/bg.base ; 120-131 -/bg.base
+   0-20 ac.path/- ; 21-30 fg.body/- ; 31-32 -/- ; 33-35 ac.brand/- ; 36-66 -/- ; 67-87 fg.body/- ; 88-92 fg.primary/- ; 93-119 fg.faint/- ; 120-131 -/-
 09|────────────────────────────────────────────────────────────────   受控空闲 / 长会话    产品内不测 · 见 A# 报告                     |
-   0-63 line.inner/bg.base ; 64-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-97 fg.primary/bg.base ; 98-110 fg.faint/bg.base ; 111-131 -/bg.base
+   0-63 line.inner/- ; 64-66 -/- ; 67-87 fg.body/- ; 88-97 fg.primary/- ; 98-110 fg.faint/- ; 111-131 -/-
 10|产品源码合计         ## 文件 · ### 行                              按键到重绘           尚无样本                                    |
-   0-20 fg.body/bg.base ; 21-30 fg.primary/bg.base ; 31-36 fg.primary/bg.base/b ; 37-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-95 fg.primary/bg.base ; 96-131 -/bg.base
+   0-20 fg.body/- ; 21-30 fg.primary/- ; 31-36 fg.primary/-/b ; 37-66 -/- ; 67-87 fg.body/- ; 88-95 fg.primary/- ; 96-131 -/-
 11|直接依赖             # · 精确固定                                                       进程内 · 不含终端绘制                       |
-   0-20 fg.body/bg.base ; 21-21 fg.primary/bg.base ; 22-32 fg.faint/bg.base ; 33-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-93 fg.primary/bg.base ; 94-108 fg.faint/bg.base ; 109-131 -/bg.base
+   0-20 fg.body/- ; 21-21 fg.primary/- ; 22-32 fg.faint/- ; 33-66 -/- ; 67-87 fg.body/- ; 88-93 fg.primary/- ; 94-108 fg.faint/- ; 109-131 -/-
 12|随包脚本             ### 行                                                                                                         |
-   0-20 fg.body/bg.base ; 21-26 fg.primary/bg.base ; 27-131 -/bg.base
+   0-20 fg.body/- ; 21-26 fg.primary/- ; 27-131 -/-
 13|pi-tui 补丁          ## 行                                         观测开销                                                         |
-   0-20 fg.body/bg.base ; 21-25 fg.primary/bg.base ; 26-66 -/bg.base ; 67-74 fg.label/bg.base/b ; 75-131 -/bg.base
+   0-20 fg.body/- ; 21-25 fg.primary/- ; 26-66 -/- ; 67-74 fg.label/-/b ; 75-131 -/-
 14|测试（不随包）       ### 行                                        记录增长             尚无任务 · 数据根总量 ## KB                 |
-   0-20 fg.body/bg.base ; 21-26 fg.primary/bg.base ; 27-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-95 fg.primary/bg.base ; 96-114 fg.faint/bg.base ; 115-131 -/bg.base
+   0-20 fg.body/- ; 21-26 fg.primary/- ; 27-66 -/- ; 67-87 fg.body/- ; 88-95 fg.primary/- ; 96-114 fg.faint/- ; 115-131 -/-
 15|                                                                   查询摘要             # ms · # run                                |
-   0-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-91 fg.primary/bg.base ; 92-99 fg.faint/bg.base ; 100-131 -/bg.base
+   0-66 -/- ; 67-87 fg.body/- ; 88-91 fg.primary/- ; 92-99 fg.faint/- ; 100-131 -/-
 16|体积                                                               输出取得写入耗时     产品内不测 · 见 A# 报告                     |
-   0-3 fg.label/bg.base/b ; 4-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-97 fg.primary/bg.base ; 98-110 fg.faint/bg.base ; 111-131 -/bg.base
+   0-3 fg.label/-/b ; 4-66 -/- ; 67-87 fg.body/- ; 88-97 fg.primary/- ; 98-110 fg.faint/- ; 111-131 -/-
 17|生产安装             ## MB · 含 provider SDK                       导出队列             外部导出 无 · 观测仅本机                    |
-   0-20 fg.body/bg.base ; 21-25 fg.primary/bg.base ; 26-43 fg.faint/bg.base ; 44-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-98 fg.primary/bg.base ; 99-111 fg.faint/bg.base ; 112-131 -/bg.base
+   0-20 fg.body/- ; 21-25 fg.primary/- ; 26-43 fg.faint/- ; 44-66 -/- ; 67-87 fg.body/- ; 88-98 fg.primary/- ; 99-111 fg.faint/- ; 112-131 -/-
 18|分发                 产品内不测 · 见 A# 报告                                                                                        |
-   0-20 fg.body/bg.base ; 21-30 fg.primary/bg.base ; 31-43 fg.faint/bg.base ; 44-131 -/bg.base
+   0-20 fg.body/- ; 21-30 fg.primary/- ; 31-43 fg.faint/- ; 44-131 -/-
 19|                                                                                                                                    |
    0-131 -/-
 20|模型成本 · 近 # 天整日 · 全部项目 · 日常 · 估算非账单                                                                               |
-   0-52 fg.label/bg.base/b ; 53-131 -/bg.base
+   0-52 fg.label/-/b ; 53-131 -/-
 21|[####-##-##, ####-##-##) · 按请求发生时间去重                                                                                       |
-   0-44 fg.body/bg.base ; 45-131 -/bg.base
+   0-44 fg.body/- ; 45-131 -/-
 22|coding               ≈ ¥#.## · # tok · 任务执行与自动压缩          eval                 ≈ ¥#.## · # tok · 两侧 + 评分               |
-   0-20 fg.body/bg.base ; 21-27 fg.primary/bg.base ; 28-56 fg.faint/bg.base ; 57-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-94 fg.primary/bg.base ; 95-116 fg.faint/bg.base ; 117-131 -/bg.base
+   0-20 fg.body/- ; 21-27 fg.primary/- ; 28-56 fg.faint/- ; 57-66 -/- ; 67-87 fg.body/- ; 88-94 fg.primary/- ; 95-116 fg.faint/- ; 117-131 -/-
 23|improve              ≈ ¥#.## · # tok · 分析 + 候选制作             维护                 ≈ ¥#.## · # tok · 空闲手动 /compact         |
-   0-20 fg.body/bg.base ; 21-27 fg.primary/bg.base ; 28-53 fg.faint/bg.base ; 54-66 -/bg.base ; 67-87 fg.body/bg.base ; 88-94 fg.primary/bg.base ; 95-122 fg.faint/bg.base ; 123-131 -/bg.base
+   0-20 fg.body/- ; 21-27 fg.primary/- ; 28-53 fg.faint/- ; 54-66 -/- ; 67-87 fg.body/- ; 88-94 fg.primary/- ; 95-122 fg.faint/- ; 123-131 -/-
 24|合计                 ≈ ¥#.## · # tok · 去重汇总                                                                                     |
-   0-20 fg.body/bg.base ; 21-27 fg.primary/bg.base ; 28-46 fg.faint/bg.base ; 47-131 -/bg.base
+   0-20 fg.body/- ; 21-27 fg.primary/- ; 28-46 fg.faint/- ; 47-131 -/-
 25|                                                                                                                                    |
    0-131 -/-
 26|                                                                                                                                    |
@@ -71,6 +71,6 @@
 35|                                                                                                                                    |
    0-131 -/-
 36|────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────|
-   0-131 line.subtle/bg.base
+   0-131 line.subtle/-
 37|本地时间与网络/模型时间分开 · 磁盘增长不等于上下文变短                       b 重新测量 · e 导出 · Tab 页签 · ↑↓ 滚动 · Esc 返回会话|
-   0-53 fg.label/bg.base ; 54-76 -/bg.base ; 77-77 fg.body/bg.base ; 78-89 fg.label/bg.base ; 90-90 fg.body/bg.base ; 91-98 fg.label/bg.base ; 99-101 fg.body/bg.base ; 102-109 fg.label/bg.base ; 110-111 fg.body/bg.base ; 112-119 fg.label/bg.base ; 120-122 fg.body/bg.base ; 123-131 fg.label/bg.base
+   0-53 fg.label/- ; 54-76 -/- ; 77-77 fg.body/- ; 78-89 fg.label/- ; 90-90 fg.body/- ; 91-98 fg.label/- ; 99-101 fg.body/- ; 102-109 fg.label/- ; 110-111 fg.body/- ; 112-119 fg.label/- ; 120-122 fg.body/- ; 123-131 fg.label/-

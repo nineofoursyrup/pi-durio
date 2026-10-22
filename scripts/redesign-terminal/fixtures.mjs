@@ -184,7 +184,7 @@ export async function renderers(packageRoot, fixture) {
       const content = recovery.render(inner, Math.max(1, Math.min(area, box) - 2), tier, { wide: true, airy: airyBox });
       const base = side(transcript(w, true, tier)).slice(0, area);
       while (base.length < area) base.push('');
-      return [...Array.from({ length: frame.topMargin(height) }, () => empty(width, tier)), ...side([session.headerLine(header, w, narrow.headerRight, tier), separator]), ...frame.composeOverlay(base, frame.frameBox(content, boxWidth, tier), width, tier),
+      return [...Array.from({ length: frame.topMargin(height) }, () => empty(width, tier)), ...side([session.headerLine(header, w, narrow.headerRight, tier), separator]), ...frame.composeOverlay(base, frame.frameBox(content, boxWidth, tier, 'bg.base'), width, tier),
         ...side([separator, session.statusLine(status, w, narrow.statusHint, tier), ...(input ? disabledInputLines('', w, tier) : []), ...(hints ? frame.footerLines(usage ? usageSegments : [], hintItems, w, { tier }) : [])]), empty(width, tier)];
     }
     if (id === '1c') return sessionScreen(width, height, tier, (w, h) => {

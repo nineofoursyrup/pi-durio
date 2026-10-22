@@ -1,15 +1,22 @@
 import { dimensions, machineItems } from './common.mjs';
 import { colorModes } from './grid.mjs';
 
-/** Read the closed input frame; menu rows can precede or follow it. */
+/** Read a complete input frame; menus can precede/follow it. Historical rounded frames remain readable. */
 function editor(screen) {
   if (!Array.isArray(screen)) return undefined;
   for (let bottom = screen.length - 1; bottom >= 2; bottom--) {
-    if (!/^╰─+╯$/.test(screen[bottom].trim())) continue;
+    const rounded = /^╰─+╯$/.test(screen[bottom].trim());
+    const rule = line => /^─+(?: *[↑↓] \d+ more *─+)? *$/.test(line.trim());
+    if (!rounded && !rule(screen[bottom])) continue;
     let top = bottom - 1;
-    while (top >= 0 && /^│.*│$/.test(screen[top].trim())) top--;
-    if (!/^╭─+╮$/.test(screen[top]?.trim() ?? '')) continue;
-    const rows = screen.slice(top + 1, bottom).map(line => line.trim().slice(1, -1).trim());
+    if (rounded) {
+      while (top >= 0 && /^│.*│$/.test(screen[top].trim())) top--;
+      if (!/^╭─+╮$/.test(screen[top]?.trim() ?? '')) continue;
+    } else {
+      while (top >= 0 && !rule(screen[top])) top--;
+      if (top < 0) continue;
+    }
+    const rows = screen.slice(top + 1, bottom).map(line => rounded ? line.trim().slice(1, -1).trim() : line.trim());
     if (!rows[0]?.startsWith('❯ ')) continue;
     const text = [rows[0].slice(2), ...rows.slice(1)].join('\n');
     // The placeholder identifies an observed empty idle/running editor. A missing

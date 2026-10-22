@@ -157,7 +157,7 @@ export function bottomMargin(rows: number): number {
 }
 /** 顶部留白与底部同条件：不矮于 30 行时留 1 行，更矮时不留。 */
 export function topMargin(rows: number): number { return bottomMargin(rows); }
-/** 给按内宽（width − 2 × margin）渲染的行加左右边距；短行与空串用 `bg.base` 补满。 */
+/** 给按内宽（width − 2 × margin）渲染的行加左右边距；短行与空串用终端背景空格补满。 */
 export function inset(lines: string[], width: number, margin: number, tier: ColorTier = COLOR_TIER): string[] {
   const pad = margin ? styledLine([], margin, undefined, tier) : '';
   return lines.map(line => {
@@ -169,19 +169,21 @@ export function inset(lines: string[], width: number, margin: number, tier: Colo
 export function boxInnerWidth(width: number, padding = 0): number {
   return Math.max(1, width - visibleWidth('││') - 2 * padding);
 }
-/** 圆角整框（U10）：`lines` 按 boxInnerWidth(width, 1) 渲染，短行用 `bg.base` 补满。 */
-export function frameBox(lines: string[], width: number, tier: ColorTier = COLOR_TIER): string[] {
-  const inner = boxInnerWidth(width, 1), border = (text: string) => styledLine([{ text, fg: 'border.input' }], visibleWidth(text), undefined, tier);
+/** 圆角整框（U10）：`lines` 按 boxInnerWidth(width, 1) 渲染，短行用终端背景空格补满。 */
+export function frameBox(lines: string[], width: number, tier: ColorTier = COLOR_TIER, background?: TokenName): string[] {
+  const inner = boxInnerWidth(width, 1), border = (text: string) => styledLine([{ text, fg: 'border.input' }], visibleWidth(text), background, tier);
+  const panel = (line: string) => { if (!background) return line; const bg = bgSgr(background, tier); return bg + line.replaceAll(resetSgr(), resetSgr() + bg) + resetSgr(); };
   return [border(boxEdge(width, '╭', '╮')),
-    ...lines.map(line => border('│ ') + line + (visibleWidth(line) < inner ? styledLine([], inner - visibleWidth(line), undefined, tier) : '') + border(' │')),
+    ...lines.map(line => border('│ ') + panel(line) + (visibleWidth(line) < inner ? styledLine([], inner - visibleWidth(line), background, tier) : '') + border(' │')),
     border(boxEdge(width, '╰', '╯'))];
 }
-/** 输入框与只读等价命令：内容按 boxInnerWidth(width) 渲染，左右闭合框线。 */
+/** 输入两侧各留一列空白；不依赖已移除竖边的实测宽度。 */
+export function inputInnerWidth(width: number): number { return Math.max(1, width - 2); }
+/** 输入框与只读等价命令：内容按 inputInnerWidth(width) 渲染，只有上下横线；保留单列配置内容位置。 */
 export function inputBox(lines: string[], width: number, tier: ColorTier = COLOR_TIER, token: TokenName = 'border.input'): string[] {
-  const border = (text: string) => styledLine([{ text, fg: token }], visibleWidth(text), undefined, tier);
-  return [border(boxEdge(width, '╭', '╮')),
-    ...lines.map(line => border('│') + line + styledLine([], Math.max(0, boxInnerWidth(width) - visibleWidth(line)), undefined, tier) + border('│')),
-    border(boxEdge(width, '╰', '╯'))];
+  const border = () => styledLine([{ text: horizontalLine(width), fg: token }], width, undefined, tier);
+  const side = styledLine([], 1, undefined, tier);
+  return [border(), ...lines.map(line => side + line + styledLine([], Math.max(0, inputInnerWidth(width) - visibleWidth(line)), undefined, tier) + side), border()];
 }
 /** 按显示列截取 [from, to)，跨边界的宽字符换成空格，不足补空格。 */
 function sliceColumns(text: string, from: number, to: number): string {
@@ -195,7 +197,7 @@ function sliceColumns(text: string, from: number, to: number): string {
   }
   return out + ' '.repeat(Math.max(0, to - Math.max(column, from)));
 }
-/** 浮层（U10）：底层改用 `fg.gutter` / `bg.base`，框水平、垂直居中；返回行数同底层。 */
+/** 浮层（U10）：底层改用 `fg.gutter` 并沿用终端背景，框水平、垂直居中；返回行数同底层。 */
 export function composeOverlay(base: string[], box: string[], width: number, tier: ColorTier = COLOR_TIER): string[] {
   const boxWidth = Math.max(0, ...box.map(line => visibleWidth(line)));
   const left = Math.max(0, Math.floor((width - boxWidth) / 2)), top = Math.max(0, Math.floor((base.length - box.length) / 2));
