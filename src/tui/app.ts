@@ -66,6 +66,7 @@ type PanelKind='help'|'exit'|'trace-raw'|'queue'|'history'|'eval'|'eval-plan'|'e
 type ViewEntry={kind:PanelKind;offset:number;line:number};
 /** 主区窗口：每次读取当前任务最近的记录条数（查询上限）。 */
 const WINDOW=50;
+const INPUT_HEIGHT={minSize:3,maxSize:6};
 const identity=(s:string)=>s;
 const theme={borderColor:makeBorderColor('border.input'), selectList:{selectedPrefix:identity,selectedText:identity,description:identity,scrollInfo:identity,noMatch:identity}};
 function safe(text:string) { return stripTerminalSequences(text).replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,'�'); }
@@ -283,16 +284,17 @@ export class ReadOnlyTui {
     });
     // Give the adapter the same bounded height as the host, so generic leaf clipping
     // cannot remove either rule or shift the editor's mouse coordinates.
+    const sessionRows=(width:number)=>this.welcome?0:header.render(width).length+statusRegion.render(width).length+queue.render(width).length;
     this.editor.setInputHeightLimit(()=>{
-      const width=this.terminal.columns,other=this.welcome?0:header.render(width).length+statusRegion.render(width).length+queue.render(width).length;
-      return Math.max(3,Math.min(6,this.terminal.rows-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows)-this.footerRows(width)-other));
+      const width=this.terminal.columns,other=sessionRows(width);
+      return Math.max(INPUT_HEIGHT.minSize,Math.min(INPUT_HEIGHT.maxSize,this.terminal.rows-topMargin(this.terminal.rows)-bottomMargin(this.terminal.rows)-this.footerRows(width)-other));
     });
     // 1a/1b 固定行：上下边距、完整底栏和输入框；恢复屏不使用这两个高度预算。
-    const fixedRows=(width:number)=>topMargin(this.terminal.rows)+bottomMargin(this.terminal.rows)+this.footerRows(width)+Math.min(6,Math.max(3,this.editor.render(width).length));
+    const fixedRows=(width:number)=>topMargin(this.terminal.rows)+bottomMargin(this.terminal.rows)+this.footerRows(width)+Math.min(INPUT_HEIGHT.maxSize,Math.max(INPUT_HEIGHT.minSize,this.editor.render(width).length));
     // 菜单只使用主区剩余行；窄屏不让默认 stack shrink 挤掉头部、状态或输入。
     const autocomplete=this.editor.separateAutocomplete(()=>{
       const width=this.terminal.columns,rows=this.terminal.rows;
-      return rows-fixedRows(width)-(this.welcome?0:header.render(width).length+statusRegion.render(width).length+queue.render(width).length);
+      return rows-fixedRows(width)-sessionRows(width);
     });
     if(!options.runId&&!options.show){
       const tip=TIPS[Math.floor(Math.random()*TIPS.length)];
@@ -312,7 +314,7 @@ export class ReadOnlyTui {
       {component:autocomplete,basis:'auto',visible:()=>!this.viewingRecovery},
       {component:statusRegion,basis:'auto',visible:()=>!this.welcome},
       {component:queue,basis:'auto',visible:()=>!this.welcome&&!this.viewingRecovery&&this.queueEntries.length>0},
-      {component:this.editor,basis:'auto',shrink:1,minSize:3,maxSize:6,visible:()=>!this.viewingRecovery},
+      {component:this.editor,basis:'auto',shrink:1,...INPUT_HEIGHT,visible:()=>!this.viewingRecovery},
       {component:disabledInput,basis:3,visible:view=>this.viewingRecovery&&this.recoveryPlan(view.width).input},
       {component:footer,basis:'auto',visible:view=>this.recoveryPlan(view.width).hints},
       {component:bottomPad,basis:1,visible:()=>bottomMargin(this.terminal.rows)>0}]);

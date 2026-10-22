@@ -7,13 +7,11 @@ import { inputInnerWidth } from './view-stack.js';
  * 输入框左右各留 2 列，首行左侧的 2 列画 `ac.brand` 的提示符 `❯`（U10）。
  */
 export class HardwareCursorEditor extends Editor {
-  private frameBottomBorder='';
-  private inputRows=0;
-  private sourceInputRows=0;
-  private sourceHiddenAbove=0;
-  private sourceHiddenBelow=0;
-  private firstVisibleLine=0;
-  private inputOffset=0;
+  private renderedSource={inputRows:0,hiddenAbove:0,hiddenBelow:0,bottomBorder:''};
+  private inputWindow={
+    source:this.renderedSource,
+    display:{inputRows:0,firstSourceLine:0,offsetInSourceBody:0},
+  };
   private inputHeightLimit?:()=>number;
   private autocompleteHitRows:Array<number|undefined>=[];
   private readonly menuRender:{selected?:string;counter?:string};
@@ -31,14 +29,14 @@ export class HardwareCursorEditor extends Editor {
   /** Host height includes both rules; content is windowed here before the layout can clip it. */
   setInputHeightLimit(limit:()=>number) {this.inputHeightLimit=limit;}
   protected override renderTopBorder(width:number,hidden:number):string {
-    this.sourceHiddenAbove=hidden;
+    this.renderedSource.hiddenAbove=hidden;
     const span=width+2;
     return visibleWidth('─')===1?super.renderTopBorder(span,hidden):this.measuredBorder(span,hidden,'↑');
   }
   protected override renderBottomBorder(width:number,hidden:number):string {
-    this.sourceHiddenBelow=hidden;
+    this.renderedSource.hiddenBelow=hidden;
     const span=width+2;
-    return this.frameBottomBorder=visibleWidth('─')===1?super.renderBottomBorder(span,hidden):this.measuredBorder(span,hidden,'↓');
+    return this.renderedSource.bottomBorder=visibleWidth('─')===1?super.renderBottomBorder(span,hidden):this.measuredBorder(span,hidden,'↓');
   }
   private measuredBorder(width:number,hidden:number,direction:string):string {
     if(!hidden)return this.borderColor(horizontalLine(width));
@@ -51,7 +49,7 @@ export class HardwareCursorEditor extends Editor {
     return {invalidate:()=>this.invalidate(),render:width=>this.renderAutocomplete(width,availableRows()),handleMouse:event=>{
       const row=event.type==='wheel'?this.autocompleteHitRows.find(row=>row!==undefined):this.autocompleteHitRows[event.y];
       if(row===undefined)return {handled:true};
-      const result=this.handleEditorMouse({...event,y:row+this.sourceInputRows});
+      const result=this.handleEditorMouse({...event,y:row+this.inputWindow.source.inputRows});
       if(result?.focus)this.tui.setFocus(this);
       return result?{...result,focus:false}:undefined;
     }};
@@ -78,7 +76,8 @@ export class HardwareCursorEditor extends Editor {
   private handleEditorMouse(event:TuiMouseEvent) {return super.handleMouse({...event,x:event.x-1,width:inputInnerWidth(event.width)});}
   override handleMouse(event:TuiMouseEvent) {
     // Only content rows move inside our window; both visible rules remain non-editable.
-    const y=event.y===this.inputRows-1?this.sourceInputRows-1:event.y>0&&event.y<this.inputRows-1?event.y+this.inputOffset:event.y;
+    const {source,display}=this.inputWindow;
+    const y=event.y===display.inputRows-1?source.inputRows-1:event.y>0&&event.y<display.inputRows-1?event.y+display.offsetInSourceBody:event.y;
     return this.handleEditorMouse({...event,y});
   }
   override render(width:number):string[] {
@@ -91,26 +90,29 @@ export class HardwareCursorEditor extends Editor {
     // Request the public marker even when blurred so only the caret's style can
     // be removed. Do not strip reverse-video styles from menus or selections.
     this.menuRender.selected=undefined;this.menuRender.counter=undefined;
+    // Border hooks collect this frame separately; mouse coordinates keep the last complete window.
+    const source=this.renderedSource={inputRows:0,hiddenAbove:0,hiddenBelow:0,bottomBorder:''};
     this.focused=true;
     try {lines=super.render(inner);} finally {this.focused=focused;}
     // Locate the line emitted by our protected hook before adapting its contents.
     // Upstream appends autocomplete after it; no private render state or width guessing is needed.
-    const sourceBottom=lines.lastIndexOf(this.frameBottomBorder);
-    this.sourceInputRows=sourceBottom+1;
-    const menu=lines.slice(this.sourceInputRows),selected=this.menuRender.selected?menu.findIndex(line=>line.includes(this.menuRender.selected!)):-1,counter=this.menuRender.counter?menu.findIndex(line=>line.includes(this.menuRender.counter!)):-1;
+    const sourceBottom=lines.lastIndexOf(source.bottomBorder);
+    source.inputRows=sourceBottom+1;
+    const menu=lines.slice(source.inputRows),selected=this.menuRender.selected?menu.findIndex(line=>line.includes(this.menuRender.selected!)):-1,counter=this.menuRender.counter?menu.findIndex(line=>line.includes(this.menuRender.counter!)):-1;
     const body=lines.slice(1,sourceBottom),count=Math.max(1,Math.min(body.length,Math.floor(this.inputHeightLimit?.()??Infinity)-2));
-    const cursor=body.findIndex(line=>line.includes(CURSOR_MARKER)),above=this.sourceHiddenAbove;
-    let first=Math.max(above,Math.min(this.firstVisibleLine,above+body.length-count));
+    const cursor=body.findIndex(line=>line.includes(CURSOR_MARKER)),above=source.hiddenAbove;
+    let first=Math.max(above,Math.min(this.inputWindow.display.firstSourceLine,above+body.length-count));
     if(cursor>=0){
       if(above+cursor<first)first=above+cursor;
       else if(above+cursor>=first+count)first=above+cursor-count+1;
     }
-    this.firstVisibleLine=first;this.inputOffset=first-above;
-    const below=this.sourceHiddenBelow+body.length-this.inputOffset-count,bottomBorder=count+1;
-    lines=[this.inputOffset?this.measuredBorder(width,first,'↑'):lines[0],
-      ...body.slice(this.inputOffset,this.inputOffset+count),
-      below!==this.sourceHiddenBelow?this.measuredBorder(width,below,'↓'):lines[sourceBottom],...menu];
-    this.inputRows=bottomBorder+1;
+    const offsetInSourceBody=first-above;
+    const below=source.hiddenBelow+body.length-offsetInSourceBody-count,bottomBorder=count+1;
+    lines=[offsetInSourceBody?this.measuredBorder(width,first,'↑'):lines[0],
+      ...body.slice(offsetInSourceBody,offsetInSourceBody+count),
+      below!==source.hiddenBelow?this.measuredBorder(width,below,'↓'):lines[sourceBottom],...menu];
+    const display={inputRows:bottomBorder+1,firstSourceLine:first,offsetInSourceBody};
+    this.inputWindow={source,display};
     lines=lines.map(line=>{
       const unpainted=line.replace(CURSOR_MARKER+'\x1b[7m',CURSOR_MARKER);
       return focused?unpainted:unpainted.replaceAll(CURSOR_MARKER,'');
@@ -127,11 +129,11 @@ export class HardwareCursorEditor extends Editor {
     // Only the completion menu retains its own panel background (U10 r4).
     lines=lines.map((line,row)=>{
       let boxed=line;
-      if(row>0&&row<bottomBorder)boxed=' '.repeat(1)+line+' '.repeat(1);
-      else if(row>bottomBorder)boxed=' '.repeat(1)+line+' '.repeat(Math.max(0,width-1-visibleWidth(line)));
+      if(row>0&&row<bottomBorder)boxed=' '+line+' ';
+      else if(row>bottomBorder)boxed=' '+line+' '.repeat(Math.max(0,width-1-visibleWidth(line)));
       return row>bottomBorder?this.menuLine(boxed):boxed;
     });
-    return {input:lines.slice(0,this.inputRows),autocomplete:lines.slice(this.inputRows),selected,counter};
+    return {input:lines.slice(0,display.inputRows),autocomplete:lines.slice(display.inputRows),selected,counter};
   }
 }
 
