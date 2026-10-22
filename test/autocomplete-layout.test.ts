@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { stripTerminalSequences, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
+import { setGraphemeWidthOverrides, stripTerminalSequences, visibleWidth, type Terminal } from '@earendil-works/pi-tui';
 import { ReadOnlyTui } from '../src/tui/app.js';
 import { readAcceptedTasks, readQueue } from '../src/runtime.js';
 import { readRunRecords } from '../src/query.js';
@@ -132,6 +132,23 @@ test('session completion borrows only main rows and preserves fixed regions, scr
       assert.equal(lines().length,12);assert.ok(app.screen().every(line=>visibleWidth(line)<=40));
       for(let i=0;i<count;i++){key('\x15');if(i<count-1)key('\x7f');}
     }
+    // A queued running session has only one menu row left at 40×12 with a six-row input.
+    // Window the overflowing draft before layout so the menu hint cannot remove its rules.
+    for(const ambiguity of [1,2]){
+      setGraphemeWidthOverrides(new Map(Array.from('─│╭╮╰╯↑↓…·◇◆≈',glyph=>[glyph,ambiguity])));terminal.resize();
+      for(let line=1;line<=8;line++){key(`OVER${String(line).padStart(2,'0')} abc`);if(line<8)key('\x1b[13;2u');}
+      const fixed=anchors(lines());
+      assert.match(lines()[fixed.top],/↑ 4 more/);assert.match(lines()[fixed.bottom].trim(),/^─+$/);
+      assert.equal(fixed.bottom-fixed.top,5,'six input rows retain four content rows between two rules');
+      assert.ok(fixed.status>=0&&fixed.queue>=0&&fixed.footer>=0,'running status, queue and footer remain visible');
+      key(' ');key('@');await until(()=>lines().some(line=>line.includes('补全空间不足')));
+      assert.deepEqual(anchors(lines()),fixed,`${ambiguity}-column profile keeps every fixed region while completion is open`);
+      assert.match(lines()[fixed.top],/↑ 4 more/);assert.match(lines()[fixed.bottom].trim(),/^─+$/);
+      assert.ok(app.screen().every(line=>visibleWidth(line)<=40));
+      key('\x1b');
+      for(let line=0;line<8;line++){key('\x15');if(line<7)key('\x7f');}
+    }
+    setGraphemeWidthOverrides();
     terminal.columns=132;terminal.rows=38;terminal.resize();lines();key('\x1b[5~');
     const paused=lines().filter(line=>line.includes('output '));
     key('/');await until(()=>lines().some(line=>line.includes('→ /')));
@@ -156,5 +173,5 @@ test('session completion borrows only main rows and preserves fixed regions, scr
     key('\x15');key('@');await until(()=>lines().some(line=>/→ .*alpha\.txt/.test(line)));key('\x1b[B');key('\r');
     assert.match(lines().join('\n'),/❯ @bravo\.txt /,'Enter completes a file without submitting');
     assert.equal(readQueue(dataRoot).items.length,1);
-  } finally {overrideColorTierForTest(saved);await app.exit();}
+  } finally {setGraphemeWidthOverrides();overrideColorTierForTest(saved);await app.exit();}
 });
