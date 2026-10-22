@@ -78,6 +78,50 @@ function calibratedFixture(transportOverride?:typeof fetch,onProviderEntered?:()
   return {root,terminal,transport,app,draftRoot,painted};
 }
 
+test('resize during an outstanding width query automatically remeasures and paints the new size',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);
+    f.terminal.columns=40;f.terminal.rows=12;f.terminal.resize();await until(f.painted);
+    f.terminal.hold='Ω';f.terminal.key('Ω');await until(()=>f.terminal.held.length===1);
+    const before=f.terminal.writes.length;
+    f.terminal.columns=244;f.terminal.rows=68;f.terminal.resize();
+    f.terminal.release();
+    await until(()=>f.painted()||f.terminal.writes.slice(before).some(data=>data.includes('Display unverified')));
+    assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,'the late window-change result must not wait for another resize or Ctrl+L');
+    assert.ok(f.painted(),'measurement completion repaints at the new dimensions');
+    assert.equal(f.terminal.samples.filter(sample=>sample==='Ω').length,2,'the interrupted grapheme is measured again after the reply boundary');
+    assert.match(f.terminal.writes.at(-1)!,/\x1b\[65;\d+H\x1b\[\?25h/);
+  } finally {
+    f.terminal.release();await f.app.exit();
+  }
+});
+
+test('repeated in-flight resizes exhaust a bounded retry budget and Ctrl+L can start a fresh measurement',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);f.terminal.hold='Ω';f.terminal.key('Ω');
+    for(let attempt=0;attempt<3;attempt++) {
+      await until(()=>f.terminal.held.length===1);
+      f.terminal.columns++;f.terminal.resize();f.terminal.held.shift()!();
+    }
+    await until(()=>f.terminal.writes.some(data=>data.includes('Display unverified: Error: WIDTH_WINDOW_CHANGED')));
+    const queries=f.terminal.samples.length;
+    await new Promise(resolve=>setTimeout(resolve,30));
+    assert.equal(f.terminal.samples.length,queries,'no unbounded automatic exchange follows the third interrupted attempt');
+    assert.equal(f.terminal.samples.filter(sample=>sample==='Ω').length,3);
+    assert.equal(f.terminal.held.length,0,'every failed attempt consumed its DA1 boundary');
+    for(let resize=0;resize<4;resize++){f.terminal.columns++;f.terminal.resize();}
+    await new Promise(resolve=>setTimeout(resolve,30));
+    assert.equal(f.terminal.samples.length,queries,'continued dragging cannot reset an exhausted automatic retry budget');
+    f.terminal.release();const before=f.terminal.writes.length;f.terminal.key('\x0c');await until(f.painted);
+    assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,'explicit Ctrl+L gets a fresh bounded calibration');
+    assert.ok(f.app.screen().join('\n').includes('Ω'),'retry preserves the entered draft');
+  } finally {
+    f.terminal.release();await f.app.exit();
+  }
+});
+
 test('self timing includes input waiting for calibration and ignores blocked frames and width-query replies', async () => {
   const root = mkdtempSync(join(tmpdir(), 'durio-self-width-'));
   const terminal = new MeasuringTerminal(); terminal.hold = 'A';
@@ -94,7 +138,7 @@ test('self timing includes input waiting for calibration and ignores blocked fra
   } finally { terminal.release(); await app.exit(); }
 });
 
-test('starting a task leaves no timed width query across synchronous execution capture', async () => {
+for(const resizeDuringQuery of [false,true])test(`starting a task leaves no timed width query across synchronous execution capture${resizeDuringQuery?' after an in-flight resize':''}`, async () => {
   let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
   const f=calibratedFixture(undefined,entered);
   const artifacts=()=>existsSync(join(f.root,'data/host.sqlite'))?[...records(join(f.root,'data'),{kinds:['execution.artifact']})]:[];
@@ -102,6 +146,7 @@ test('starting a task leaves no timed width query across synchronous execution c
     await until(f.painted);
     f.terminal.hold='◆';f.terminal.key('probe');f.terminal.key('\r');f.app.screen();
     await until(()=>f.terminal.held.length===1);
+    if(resizeDuringQuery){f.terminal.columns++;f.terminal.resize();}
     // Give ordinary asynchronous startup a turn while the controlled terminal has
     // an outstanding reply. Artifact capture must wait for that reply boundary.
     await new Promise(resolve=>setTimeout(resolve,300));
@@ -197,7 +242,8 @@ test('late inactive CPR and fragmented DA1 stay protocol events, while the 800ms
 });
 
 test('product first paste is measured before paint, keeps later keys ordered and discovers combined graphemes',async()=>{
-  const f=calibratedFixture(),key=(data:string)=>f.terminal.key(data);
+  let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
+  const f=calibratedFixture(undefined,entered),key=(data:string)=>f.terminal.key(data);
   try {
     // Arrival during the first frame's asynchronous calibration is retained, including the first key.
     key('\x1b[200~A👩‍💻é中B\x1b[201~');
@@ -216,7 +262,7 @@ test('product first paste is measured before paint, keeps later keys ordered and
     assert.equal(f.terminal.writes.some(data=>data.includes('ΩZ')&&!data.includes('\x1b[6n')),false);
     f.terminal.release();await until(f.painted);
     assert.equal(f.transport.calls.length,0,'queued actions require a fresh action against the current frame');
-    key('\r');await until(()=>f.transport.calls.length>0);
+    key('\r');await providerEntered;assert.ok(f.transport.calls.length>0);
   }finally{await f.app.exit();}
 });
 
@@ -257,14 +303,15 @@ test('SIGTERM during a pending measurement saves the draft and receipts, then re
 
 test('Enter arriving while a run is busy cannot become a new task after that run finishes during calibration',async()=>{
   const fixture=demoTransport();let calls=0,releaseRun!:()=>void;
+  let held!:()=>void;const providerHeld=new Promise<void>(resolve=>{held=resolve;});
   const transport:typeof fetch=async(url,init)=>{
     calls++;const response=await fixture.fetch(url,init);
-    if(calls===1)await new Promise<void>(resolve=>{releaseRun=resolve;});
+    if(calls===1)await new Promise<void>(resolve=>{releaseRun=resolve;held();});
     return response;
   };
   const f=calibratedFixture(transport),key=(data:string)=>f.terminal.key(data);
   try {
-    await until(f.painted);key('Read README');key('\r');await until(()=>calls===1);
+    await until(f.painted);key('Read README');key('\r');await providerHeld;
     f.terminal.hold='Ω';key('Ω');key('next');key('\r');await until(()=>f.terminal.held.length===1);
     releaseRun();await until(()=>f.app.screen().join('\n').replace(/\x1b\[[0-9;]*m/g,'').includes('✓ 完成'));
     f.terminal.release();key('\x0c');await until(f.painted);await new Promise(r=>setTimeout(r,50));
@@ -276,13 +323,14 @@ test('Enter arriving while a run is busy cannot become a new task after that run
 });
 
 test('stop remains responsive while new output widths are waiting, without leaking Esc through a modal',async()=>{
-  let started=false,aborted=false;
+  let entered!:()=>void;const providerEntered=new Promise<void>(resolve=>{entered=resolve;});
+  let aborted=false;
   const transport:typeof fetch=async(_url,init)=>new Promise((_resolve,reject)=>{
-    started=true;init!.signal!.addEventListener('abort',()=>{aborted=true;reject(new Error('cancelled'));},{once:true});
+    init!.signal!.addEventListener('abort',()=>{aborted=true;reject(new Error('cancelled'));},{once:true});
   });
-  const f=calibratedFixture(transport),key=(data:string)=>f.terminal.key(data);
+  const f=calibratedFixture(transport,entered),key=(data:string)=>f.terminal.key(data);
   try {
-    await until(f.painted);key('Read');key('\r');await until(()=>started);
+    await until(f.painted);key('Read');key('\r');await providerEntered;
     key('?');key('\x1b');assert.equal(aborted,false,'first Esc closes the help view');await until(f.painted);
     f.terminal.hold='Ω';key('Ω');key('\r');await until(()=>f.terminal.held.length===1);
     key('\x1b');await until(()=>aborted);assert.equal(f.terminal.stopped,false);
