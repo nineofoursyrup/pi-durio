@@ -129,8 +129,8 @@ export class HardwareCursorEditor extends Editor {
     // Only the completion menu retains its own panel background (U10 r4).
     lines=lines.map((line,row)=>{
       let boxed=line;
-      if(row>0&&row<bottomBorder)boxed=' '.repeat(1)+line+' '.repeat(1);
-      else if(row>bottomBorder)boxed=' '.repeat(1)+line+' '.repeat(Math.max(0,width-1-visibleWidth(line)));
+      if(row>0&&row<bottomBorder)boxed=' '+line+' ';
+      else if(row>bottomBorder)boxed=' '+line+' '.repeat(Math.max(0,width-1-visibleWidth(line)));
       return row>bottomBorder?this.menuLine(boxed):boxed;
     });
     return {input:lines.slice(0,display.inputRows),autocomplete:lines.slice(display.inputRows),selected,counter};
