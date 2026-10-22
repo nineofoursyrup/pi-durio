@@ -5,7 +5,7 @@ type Query={column?:number;error?:string;expired:boolean;timer:ReturnType<typeof
 const segmenter=new Intl.Segmenter(undefined,{granularity:'grapheme'});
 
 export class WidthWindowChangedError extends Error {
-  constructor(){super('WIDTH_WINDOW_CHANGED: terminal dimensions changed during measurement');}
+  constructor(){super('WIDTH_WINDOW_CHANGED: resized');}
 }
 
 /** One ordered CPR + DA1 exchange at a time. A timed-out exchange retains its tombstone until DA1. */

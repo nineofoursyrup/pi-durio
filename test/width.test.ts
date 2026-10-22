@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StdinBuffer } from '@earendil-works/pi-tui';
+import { StdinBuffer, stripTerminalSequences } from '@earendil-works/pi-tui';
 import { TerminalWidthProbe } from '../src/tui/width-probe.js';
 import { existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -130,6 +130,22 @@ test('repeated in-flight resizes bound each calibration while later resize and C
     } finally {
       f.terminal.release();await f.app.exit();
     }
+  }
+});
+
+test('WINDOW error keeps the complete Ctrl+L retry hint visible at 80 columns',async()=>{
+  const f=calibratedFixture();
+  try {
+    await until(f.painted);f.terminal.hold='Ω';f.terminal.key('Ω');
+    for(const columns of [79,78,80]) {
+      await until(()=>f.terminal.held.length===1);
+      f.terminal.columns=columns;f.terminal.resize();f.terminal.held.shift()!();
+    }
+    await until(()=>f.terminal.writes.some(data=>data.includes('Display unverified: Error: WIDTH_WINDOW_CHANGED')));
+    const status=stripTerminalSequences(f.terminal.writes.findLast(data=>data.includes('Display unverified'))!);
+    assert.ok(status.includes('Ctrl+L retry'),'the retry action is fully visible in the 80×24 status line');
+  } finally {
+    f.terminal.release();await f.app.exit();
   }
 });
 
