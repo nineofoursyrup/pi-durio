@@ -74,14 +74,14 @@ test('confirm dialog disables Enter with the reason on the last line when fixed 
 
   // Bind the style contract to explicit tiers instead of the shell's color environment.
   for (const [tier, enterStyle] of [
-    ['truecolor', /\x1b\[38;2;65;65;65mEnter /],
-    ['256color', /\x1b\[38;5;238mEnter /],
+    ['truecolor', /\x1b\[38;2;124;124;124mEnter /],
+    ['256color', /\x1b\[38;5;244mEnter /],
     ['none', /\x1b\[2mEnter /],
   ] as const) {
     const conflict = new ConfirmDialog({ title: '启动 eval', action: '启动', fixed: ['≤ 24 请求 · ≈¥0.40'], disabled: '截止时间已过' });
     const conflictLines = conflict.render(80, 24, tier);
     assert.match(plain(conflictLines).at(-2)!, /Enter 截止时间已过 · Esc 取消/);
-    assert.match(conflictLines.at(-2)!, enterStyle, `${tier}: disabled Enter uses fg.gutter`);
+    assert.match(conflictLines.at(-2)!, enterStyle, `${tier}: disabled Enter remains readable`);
     assert.equal(conflict.handleInput('\r').type, 'noop');
   }
 });
@@ -102,6 +102,15 @@ test('confirm dialog reserves the full current footer while scrolling a long bod
 test('single choice uses digits and ◉/○; multi choice uses space, ↑↓ and [✓]/[ ], skipping disabled options', () => {
   const single = new ConfirmDialog({ title: '恢复处置', action: '确认', choice: { mode: 'single', options: [{ label: '重新核对' }, { label: '释放锁', disabled: '持有者仍在运行' }, { label: '结束旧工作' }], selected: [0] } });
   assert.match(plain(single.render(80, 24)).join('\n'), /◉ 1 重新核对[\s\S]*○ 2 释放锁 · 不可选 · 持有者仍在运行[\s\S]*○ 3 结束旧工作/);
+  for (const tier of ['truecolor', '256color', 'none'] as const) {
+    const rows = captureSnapshot(single.render(80, 24, tier), 80, 24, tier).rows;
+    const disabled = rows.find(row => row.map(cell => cell.char).join('').includes('释放锁'))!;
+    const text = disabled.filter(cell => /[释放锁不可选持有者仍在运行]/.test(cell.char));
+    assert.ok(text.length > 0);
+    assert.ok(text.every(cell => tier === 'none' ? cell.dim : cell.fg === 'fg.faint' && !cell.dim), `${tier}: disabled option and reason remain readable`);
+    const enabled = rows.find(row => row.map(cell => cell.char).join('').includes('结束旧工作'))!;
+    assert.ok(enabled.filter(cell => /[结束旧工作]/.test(cell.char)).every(cell => tier === 'none' ? !cell.dim : cell.fg === 'fg.body'));
+  }
   assert.equal(single.handleInput('2').type, 'noop');
   assert.equal(single.handleInput('3').type, 'handled');
   assert.deepEqual(single.handleInput('\r'), { type: 'confirm', selected: [2] });

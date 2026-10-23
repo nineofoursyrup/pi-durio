@@ -137,7 +137,16 @@ test('narrow cards and summaries retain every authorization byte; undersized sum
   for(const token of ['TAIL_FACT','TAIL_REF','TAIL_COMMAND','TAIL_ROLLBACK','+exportconstadd=(a,b)=>a+b;'])assert.ok(card.includes(token),token);
   await view.handleInput('1');await view.handleInput('\r');const summary=allPages(view,width,34);
   for(const token of [f.workspace+'/math.mjs','报告revision','选择不包含提交、推送、发布或清理数据','在会话里输入的文字不算选择'])assert.ok(summary.includes(token.replace(/\s+/g,'')),token);
-  view.render(width,6);await view.handleInput('\r');assert.equal(submitted,0);assert.match(plain(view.render(width,6)),/窗口过小/);
+  const previousTier=COLOR_TIER;
+  try {
+   for(const tier of ['truecolor','256color','none'] as const) {
+    overrideColorTierForTest(tier);
+    const lines=view.render(width,6);await view.handleInput('\r');assert.equal(submitted,0);assert.match(plain(lines),/窗口过小/);
+    const footer=captureSnapshot(lines,width,lines.length,tier).rows.find(row=>row.map(cell=>cell.char).join('').includes('Enter'))!;
+    const enter=footer.find(cell=>cell.char==='E')!;
+    assert.ok(tier==='none'?enter.dim:enter.fg==='fg.faint'&&!enter.dim,`${tier}: disabled summary Enter remains readable`);
+   }
+  }finally{overrideColorTierForTest(previousTier);}
  }
 });
 

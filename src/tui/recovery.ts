@@ -351,7 +351,7 @@ export class RecoveryPanel {
     return this.note === undefined ? off ? `不可选 · ${off}` : this.dispositions[this.cursor].text : `说明（可选）：${this.noteEditor!.render(visibleWidth(this.note??'')+1)[0]}  Enter 确认 · Esc 取消`;
   }
   private descriptionTone(option: number): TokenName {
-    return this.disabled(option) ? 'fg.gutter' : !this.ownerStage && option === 2 ? 'ac.warn' : 'fg.muted';
+    return this.disabled(option) ? 'fg.faint' : !this.ownerStage && option === 2 ? 'ac.warn' : 'fg.muted';
   }
   private checkSegments(): TextSegment[] {
     const checks: TextSegment[] = [];
@@ -426,7 +426,7 @@ export class RecoveryPanel {
     this.dispositions.forEach((option, i) => {
       const selected = i === this.cursor, off = this.disabled(i), bg: TokenName | undefined = selected ? 'bg.selected' : undefined;
       const name = `${i + 1}  ${option.name}`, description = off ? `不可选 · ${off}` : option.text;
-      const head: TextSegment[] = [{ text: selected ? '▏ ' : '  ', fg: 'ac.brand' }, { text: wide ? pad(name, nameWidth) : name, fg: off ? 'fg.gutter' : selected ? 'fg.primary' : 'fg.body', bold: selected && !off }];
+      const head: TextSegment[] = [{ text: selected ? '▏ ' : '  ', fg: 'ac.brand' }, { text: wide ? pad(name, nameWidth) : name, fg: off ? 'fg.faint' : selected ? 'fg.primary' : 'fg.body', bold: selected && !off }];
       const showText = !namesOnly && (level < 2 || selected || (this.ownerStage && !!off));
       const note = selected && this.note !== undefined;
       const descSegments: TextSegment[] = note ? [{ text: `说明（可选）：${this.noteEditor!.render(visibleWidth(this.note??'')+1)[0]}`, fg: 'fg.primary' }, { text: '  ' }, ...hintSegments('Enter 确认 · Esc 取消')] : [{ text: description, fg: this.descriptionTone(i) }];

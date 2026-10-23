@@ -231,7 +231,7 @@ export class ImproveSelectionView {
  private dialog(width:number,height:number,rows:{text:string;fg?:TokenName;fixed?:boolean}[],summary:boolean,selectedStart=0) {
   const bodyRows=(inner:number)=>[...wrapAuthorized(rows[0].text,inner).slice(1).map(text=>({text,fg:rows[0].fg})),...rows.slice(1).filter(row=>!row.fixed)].flatMap(row=>wrapAuthorized(row.text,inner).map(text=>({segments:[{text,fg:row.fg??'fg.body'}],cursor:!summary&&text.startsWith('▸ ')})));
   const config={title:rows[0].text,action:summary?'提交':'检查原文',bodyRows,fixed:rows.filter(row=>row.fixed).map(row=>row.text),disabled:summary&&this.problems.length?'不可用 · ↑↓ 查看原因':undefined,
-   footer:(reason:string|undefined):TextSegment[]=>reason?[{text:'Enter ',fg:'fg.gutter'},{text:reason,fg:'fg.muted'},{text:' · ',fg:'fg.label'},...hintSegments('Esc 返回调整')]:this.feedback?[{text:this.feedback,fg:'fg.label'}]:hintSegments(summary?'↑↓ 核对 · Enter 提交 · Esc 返回调整':`↑↓ 选组 · Enter 检查原文${this.busy?' · Ctrl+C 停止':''} · Esc 返回选择`)};
+   footer:(reason:string|undefined):TextSegment[]=>reason?[{text:'Enter ',fg:'fg.faint'},{text:reason,fg:'fg.muted'},{text:' · ',fg:'fg.label'},...hintSegments('Esc 返回调整')]:this.feedback?[{text:this.feedback,fg:'fg.label'}]:hintSegments(summary?'↑↓ 核对 · Enter 提交 · Esc 返回调整':`↑↓ 选组 · Enter 检查原文${this.busy?' · Ctrl+C 停止':''} · Esc 返回选择`)};
   if(!this.confirmation||this.confirmationSummary!==summary){this.confirmation=new ConfirmDialog(config);this.confirmationSummary=summary;}
   else this.confirmation.update(config);
   if(this.reveal){this.confirmation.revealCursor();this.reveal=false;}
