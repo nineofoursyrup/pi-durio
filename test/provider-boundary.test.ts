@@ -6,6 +6,8 @@ import {join} from 'node:path';
 import {Evidence,readObject} from '../src/evidence.js';
 import {PersistentBudget,dispatchProvider} from '../src/provider-boundary.js';
 import OpenAI from 'openai';
+import {providerResponseBytes,RESPONSE_HARD_CAP_BYTES} from '../src/provider-response-budget.js';
+import {fragmentedResponse,chunkedResponse,responseText,issue124JSON} from './fixtures/provider-response.js';
 
 const usageFrame='data: {"usage":{"prompt_tokens":5,"completion_tokens":2,"total_tokens":7}}\n\n';
 async function checkSettlement(chunks:string[],ending:'eof'|'cancel'|'abort'|'abort-eof'|'reason'|'error'|'cancel-error'|'abort-during-cancel',known:number|null,status=200){
@@ -151,4 +153,47 @@ test('response limit preserves the acquired offending bytes and never refunds it
  const rows=e.db.prepare("SELECT body FROM records WHERE kind='provider.bytes'").all();assert.equal(rows.length,1);
  const {readObject}=await import('../src/evidence.js');const fact=JSON.parse(readObject(e.root,JSON.parse(String(rows[0].body))).toString());assert.equal(readObject(e.root,fact.bytes).toString(),original);
  assert.equal(budget.snapshot().requests,1);assert.equal(budget.snapshot().unknown,1);assert.throws(()=>budget.check(),/BUDGET_UNKNOWN_USAGE/);e.close();
+});
+
+test('output-derived response budgets reject illegal configurations before reserving or dispatching',async()=>{
+ assert.equal(providerResponseBytes(1),66048);assert.equal(providerResponseBytes(32768),16842752);assert.equal(providerResponseBytes(65536),33619968);
+ assert.equal(RESPONSE_HARD_CAP_BYTES,providerResponseBytes(65536));
+ const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-output-budget-')),'batch'),budget=new PersistentBudget(e,'budget',{maxRequests:2,maxTokens:100,maxRequestTokens:50,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null});let calls=0;
+ try{
+  for(const maxOutputTokens of [0,-1,0.5,65537,Infinity,NaN,Number.MAX_SAFE_INTEGER])await assert.rejects(dispatchProvider({budget,purpose:'compaction',operationId:'invalid',maxOutputTokens,transport:async()=>{calls++;return new Response('');}},'https://offline.invalid'),/INVALID_PROVIDER_OUTPUT_LIMIT/);
+  assert.equal(calls,0);assert.equal(budget.snapshot().requests,0);
+ }finally{e.close();}
+});
+
+test('#124 fragmented SSE delivers complete JSON regardless of network chunks, with unknown usage still reserved',async()=>{
+ assert.equal(fragmentedResponse().bytes.length,1444783);assert.equal(fragmentedResponse().events,5000);
+ for(const usage of [true,false])for(const width of [863,64003]){
+  const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-output-fragments-')),'batch'),budget=new PersistentBudget(e,'budget',{maxRequests:2,maxTokens:20000,maxRequestTokens:10000,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null});
+  try{
+   const {bytes}=fragmentedResponse(issue124JSON,{usage});
+   const response=await dispatchProvider({budget,purpose:'improve',operationId:'fragmented',maxOutputTokens:6000,transport:async()=>chunkedResponse(bytes,width)},'https://offline.invalid');
+   const raw=await response.text();assert.equal(raw,bytes.toString());assert.deepEqual(JSON.parse(responseText(raw)),JSON.parse(issue124JSON));
+   assert.equal(budget.snapshot().knownTokens,usage?6500:0);assert.equal(budget.snapshot().unknown,usage?0:1);assert.equal(budget.snapshot().reservedTokens,usage?0:10000);
+   assert.equal(e.db.prepare("SELECT count(*) AS n FROM records WHERE kind='budget.settle'").get()!.n,1);
+  }finally{e.close();}
+ }
+});
+
+test('output-derived overflow cancels, retains the offending raw block and settles error with unknown usage once',async()=>{
+ const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-output-overflow-')),'batch'),budget=new PersistentBudget(e,'budget',{maxRequests:2,maxTokens:20000,maxRequestTokens:10000,deadline:new Date(Date.now()+60000).toISOString(),unknownUpperBound:null});let cancelled=0;
+ try{
+  const {bytes}=fragmentedResponse(),response=await dispatchProvider({budget,purpose:'compaction',operationId:'overflow',maxOutputTokens:1,transport:async()=>chunkedResponse(bytes,10000,()=>cancelled++)},'https://offline.invalid');
+  await assert.rejects(response.text(),/PROVIDER_RESPONSE_LIMIT/);assert.equal(cancelled,1);
+  const facts=e.db.prepare('SELECT kind,body FROM records ORDER BY seq').all().map(r=>({kind:r.kind,data:JSON.parse(readObject(e.root,JSON.parse(String(r.body))).toString())}));
+  const retained=Buffer.concat(facts.filter(f=>f.kind==='provider.bytes').map(f=>readObject(e.root,f.data.bytes)));
+  assert.equal(retained.length,70000);assert.deepEqual(retained,bytes.subarray(0,70000));
+  const settled=facts.filter(f=>f.kind==='budget.settle');assert.equal(settled.length,1);assert.equal(settled[0].data.status,'error');assert.equal(settled[0].data.tokens,null);
+  assert.equal(budget.snapshot().reservedTokens,10000);assert.throws(()=>budget.check(),/BUDGET_UNKNOWN_USAGE/);
+ }finally{e.close();}
+});
+
+test('a larger total response budget preserves the independent single-frame limit',async()=>{
+ const raw='data: '+JSON.stringify({choices:[],content:'x'.repeat(262144)})+'\n\n';
+ const response=await dispatchProvider({purpose:'improve',operationId:'frame',maxOutputTokens:65536,transport:async()=>new Response(raw)},'https://offline.invalid');
+ await assert.rejects(response.text(),/PROVIDER_FRAME_LIMIT/);
 });

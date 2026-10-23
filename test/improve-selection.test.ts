@@ -223,6 +223,13 @@ test('fresh declarations keep relative thresholds and require still-registered e
  f.report.targets.push(...captureImproveSources(e,f.workspace,[{id:'cases',kind:'eval-asset',root:assets,paths:['cases.json']}],'fixture-version').targets);e.close();
  const caseId=representativeCases[0].id,check:CandidateFreshCheck={kind:'fresh',assets:[{targetId:'cases',path:'cases.json',caseIds:[caseId]}],mode:'offline',comparison:{kind:'deterministic',repetitions:1,repetitionBasis:'fixed input',change:'one arithmetic operator',hypothesis:'fewer requests',roles:{[caseId]:'objective'},objective:{metric:'requests',direction:'lower',delta:0.1,basis:'one tenth fewer'},protections:[{id:'correct',kind:'hard',check:'requirements',cases:[caseId]}],trialBudget:{maxRequests:2,maxTokens:1000}},budget:{maxRequests:4,maxTokens:2000,maxRequestTokens:1000,maxDurationMs:60000},trialTimeoutMs:10000,gradingTimeoutMs:10000,maxOutputTokens:32};
  assert.doesNotThrow(()=>validateCandidateChecks([check],f.report.targets));f.candidate.objective='performance';f.candidate.structuredChecks=[check];f.save();assert.match(candidateValidation(f.candidate),/δ ≥ 10%/);
+ assert.doesNotThrow(()=>validateCandidateChecks([{...check,maxOutputTokens:1572}],f.report.targets));
+ for(const maxOutputTokens of [1573,2048]){
+  const oversized={...check,maxOutputTokens};
+  assert.throws(()=>validateCandidateChecks([oversized],f.report.targets),{message:'IMPROVE_FRESH_DECLARATION_INVALID'});
+  // Declaration rejection precedes host runtime binding and prepareEval.
+  assert.throws(()=>bindCandidateCheck(f.dataRoot,f.report,[f.candidate],oversized,new Date(Date.now()+60000).toISOString()),{message:'IMPROVE_FRESH_DECLARATION_INVALID'});
+ }
  const previousTier=COLOR_TIER;overrideColorTierForTest('truecolor');
  try {
   const lines=new ImproveSelectionView(f.dataRoot,f.report.id,async()=>{}).render(132,160),rows=captureSnapshot(lines,132,160,'truecolor').rows;

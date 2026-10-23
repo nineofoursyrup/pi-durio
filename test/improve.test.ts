@@ -8,6 +8,7 @@ import {scriptedTransport} from '../src/offline.js';
 import {digest} from '../src/evidence.js';
 import {registerImproveSource} from '../src/improve-source.js';
 import {recoveryRecords} from '../src/recovery.js';
+import {fragmentedResponse,chunkedResponse} from './fixtures/provider-response.js';
 
 async function fixture(){const root=await realpath(await mkdtemp(join(tmpdir(),'durio-improve-'))),workspace=join(root,'project'),dataRoot=join(root,'data');await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Small fixture.\n');const source=await runtime.runCodingTask({workspace,dataRoot,input:'Inspect fixture',mode:'offline',transport:scriptedTransport([]).fetch});return {workspace,dataRoot,source};}
 const limits={maxRequests:8,maxTokens:2048,maxRequestTokens:256,maxDurationMs:30000,maxOutputTokens:128};
@@ -37,6 +38,18 @@ test('explicit improve uses the public restricted runtime and zero candidates re
  assert.equal(readImproveReport(f.dataRoot,'zero').report?.id,'zero');
  const repeated=await runtime.analyzeImprove({dataRoot:f.dataRoot,workspace:f.workspace,targetRunId:f.source.runId,request,mode:'offline',transport:streamTransport});
  assert.equal(repeated.runId,result.runId);assert.equal(provider.calls.length,2);assert.equal(digest(await readFile(join(f.dataRoot,'host.sqlite'))),before);
+});
+
+test('improve completes an i3-shaped fragmented report beyond 1 MiB without inventing missing usage',async()=>{
+ for(const usage of [true,false]){
+  const f=await fixture(),base=scriptedTransport([{name:'evidence_summary',args:{}}]);let calls=0;
+  const answer={...report,gaps:Array.from({length:5},()=> 'Synthetic evidence gap: '+ 'x'.repeat(3900))};
+  const {bytes}=fragmentedResponse(JSON.stringify(answer),{usage});assert.ok(bytes.length>1048576);
+  const fetcher:typeof fetch=async(url,init)=>{assert.equal(JSON.parse(String(init?.body)).max_tokens,6000);if(++calls===1)return base.fetch(url,init);return chunkedResponse(bytes,64003);};
+  const result=await runtime.analyzeImprove({dataRoot:f.dataRoot,workspace:f.workspace,targetRunId:f.source.runId,request:{id:'fragmented-report',purpose:'Offline response budget regression',limits:{...limits,maxRequests:2,maxRequestTokens:10000,maxTokens:20000,maxOutputTokens:6000}},mode:'offline',transport:fetcher});
+  assert.equal(result.status,'completed',JSON.stringify(result));assert.equal(result.improve?.state,'complete');assert.equal(result.improve?.summary,answer.summary);assert.deepEqual(result.improve?.gaps.slice(0,5),answer.gaps);
+  assert.equal(result.improve?.budget.unknown,usage?0:1);assert.equal(result.improve?.budget.reservedTokens,usage?0:10000);assert.equal(calls,2);
+ }
 });
 
 test('registered source plus acquired evidence produces an unselected candidate; shell/write/cross-scope and instruction-like evidence cannot grant capabilities',async()=>{
