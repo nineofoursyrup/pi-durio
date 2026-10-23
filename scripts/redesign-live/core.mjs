@@ -43,8 +43,8 @@ export const observationTemplate=()=>({schema:`${SCHEMA}-observations`,candidate
  rowTemplate:{id:null,planSha256:null,at:null,status:'NOT_RUN',conclusionBasis:null,evidence:[],cost:{scopeId:null,basis:null,through:null,knownCny:null,unknownRequests:null,complete:false,priceVersion:null},firstFailure:null},
  syntheticControls:{stop:{status:'NOT_RUN',evidence:[]},regrade:{status:'NOT_RUN',evidence:[]},exitStop:{status:'NOT_RUN',evidence:[]}},note:'Copy rowTemplate only for a supplied observation. Keep each unique id, original artifact and first failure; never replace an earlier observation.'});
 
-function ordinary(path){
- if(!isAbsolute(path)||/(?:^|\/)(?:api\.env|\.env(?:\.[^/]*)?|auth\.json|credentials[^/]*)$/i.test(path))throw Error('ORDINARY_NON_CREDENTIAL_FILE_REQUIRED');
+function ordinary(path,allowCredentialSourceNames=false){
+ if(!isAbsolute(path)||/(?:^|\/)(?:api\.env|\.env(?:\.[^/]*)?|auth\.json)$/i.test(path)||!allowCredentialSourceNames&&/(?:^|\/)credentials[^/]*$/i.test(path))throw Error('ORDINARY_NON_CREDENTIAL_FILE_REQUIRED');
  const info=lstatSync(path);if(!info.isFile()||info.isSymbolicLink())throw Error('REGULAR_FILE_REQUIRED');
  return path;
 }
@@ -61,25 +61,26 @@ export function readRef(ref){
 }
 export const save=(path,value)=>writeFileSync(resolve(path),JSON.stringify(value,null,2)+'\n',{flag:'wx',mode:0o600});
 function relativeFile(path){return typeof path==='string'&&path.length>0&&!isAbsolute(path)&&!path.split(/[\\/]/).some(p=>!p||p==='.'||p==='..');}
-function inventory(root,prefix=''){
+function inventory(root,prefix='',allowCredentialSourceNames=false){
  if(!isAbsolute(root)||lstatSync(root).isSymbolicLink())throw Error('MANIFEST_ROOT_REQUIRED');
  return readdirSync(join(root,prefix)).sort().flatMap(name=>{
   const path=prefix?`${prefix}/${name}`:name,full=join(root,path),info=lstatSync(full);
   if(info.isSymbolicLink())return[{path,sha256:`link:${readlinkSync(full)}`}];
-  if(info.isDirectory())return inventory(root,path);
+  if(info.isDirectory())return inventory(root,path,allowCredentialSourceNames);
   if(!info.isFile())throw Error('MANIFEST_FILE_TYPE');
-  return[{path,sha256:sha(readFileSync(ordinary(full)))}];
+  return[{path,sha256:sha(readFileSync(ordinary(full,allowCredentialSourceNames)))}];
  });
 }
-function verifyTree(tree){
+function verifyTree(tree,allowCredentialSourceNames=false){
  if(!tree||!Array.isArray(tree.files)||!tree.files.length||!tree.files.every(f=>relativeFile(f.path)&&typeof f.sha256==='string'))throw Error('MANIFEST_FILES_REQUIRED');
  const sort=items=>[...items].sort((a,b)=>a.path.localeCompare(b.path));
- if(!equal(sort(inventory(tree.root)),sort(tree.files.map(({path,sha256})=>({path,sha256})))))throw Error('MANIFEST_FILES_CHANGED');
+ if(!equal(sort(inventory(tree.root,'',allowCredentialSourceNames)),sort(tree.files.map(({path,sha256})=>({path,sha256})))))throw Error('MANIFEST_FILES_CHANGED');
 }
 export function candidate(ref,synthetic){
  const value=readRef(ref);
  if(value.schema!=='pi-durio-redesign-terminal-v1'||value.synthetic!==synthetic||!/^([a-f0-9]{40})$/.test(value.candidate?.commit)||!/^([a-f0-9]{40})$/.test(value.candidate?.tree)||!hex(value.source?.sourceBuildSha256))throw Error('SHARED_CANDIDATE_REQUIRED');
- verifyTree(value.installation);verifyTree(value.harness);
+ // SDK credentials* source names are allowed only during candidate tree hashing.
+ verifyTree(value.installation,true);verifyTree(value.harness,true);
  const buildPath=join(value.installation.root,'dist/execution/source-build.json'),build=readRef({path:buildPath,sha256:value.source.sourceBuildSha256});
  if(build.redesignLive?.schema!==INTERFACE_SCHEMA||!build.redesignLive.price||!['standard','large'].every(tier=>build.redesignLive.improveLimits?.[tier]))throw Error('LIVE_INTERFACE_CONTRACT_REQUIRED: rebuild the candidate');
  if(!synthetic&&(value.runtime?.node!==process.version||value.runtime?.platform!==process.platform||value.runtime?.arch!==process.arch))throw Error('PREP_NODE_OR_PLATFORM_CHANGED');

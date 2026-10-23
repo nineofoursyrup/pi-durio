@@ -18,7 +18,11 @@
 
 `validate` 仅读清单、完整安装/终端 harness 的普通文件与链接身份，以及 source-build 中的 `redesignLive` 接口数据（`pi-durio-redesign-live-interface-v1`）。构建从产品自身的 `improveLimits` 和 `HOST_PRICE_TABLE` 导出档位与价目，PREP 只读 JSON，不加载产品。缺少接口数据的旧构建返回 `LIVE_INTERFACE_CONTRACT_REQUIRED`，须重新构建候选。新源码不会被过期的整文件哈希误拒绝；冻结后 source-build 或安装文件变化仍使核验失败。#93 自身实际 `core.mjs`、`cli.mjs`、本 README 的绝对位置与 hash 另存入 `freeze` 输出；任何变化均使旧操作卡失效。可先把本目录复制到新的持久准备目录，再从该副本运行；不能覆盖历史冻结目录。
 
+用户在计划、grant 或证据中直接引用的文件仍拒绝 `api.env`、`.env`、`.env.*`、`auth.json` 和 `credentials*` 文件名（不区分大小写）。仅候选 installation/harness 的逐文件哈希核对放开 `credentials*` 名称，以容纳 SDK 的 `credentials.js`、`CredentialsProviderError.js` 等普通源码；这些文件仍须匹配清单原字节，不会被导入或执行。清单中的 `api.env`、`.env`、`.env.*`、`auth.json` 仍在读取前拒绝，以保持准备工具不读取凭据的约定；工作区核对也保留完整的原文件名拒绝规则。
+
 所有输出都以排他 `wx` 写入，已有文件拒绝覆盖。更正使用新的文件名和新的引用。准备脚本不会消费一次付费启动，也不保证用户不会手动重复运行；eval 的一次性由产品计划事实约束，coding/improve 的一次性须由执行记录核对。任何重跑须新计划、新关联和适用授权，不能重置原预算、截止点或首败。
+
+本目录的文件名边界回归可单独串行运行：`node --test --test-concurrency=1 scripts/redesign-live/credential-names.test.mjs`；仅使用临时 synthetic 文件，不运行模型或真实工作区。
 
 ## 建立未授权材料
 
