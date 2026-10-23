@@ -92,8 +92,14 @@ test('unavailable dispositions show the reason and code; ↑↓ skip them; exter
   const shown = text(blocked, 200);
   assert.match(shown, /检查 +✗ 执行版本的文件已变化 · ✗ 授权的工具与原任务不同 · ✓ 写入者锁可取得  EXECUTION_VERSION_CHANGED CURRENT_PERMISSION_CHANGED/, '✗ first, codes at the end');
   assert.match(shown, /2 {2}视为已完成 +不可选 · 执行版本的文件已变化/); assert.match(shown, /3 {2}从中断处继续 +不可选 · 执行版本的文件已变化/);
-  const disabledRow = captureSnapshot(blocked.render(200, 60, 'truecolor'), 200, 60, 'truecolor').rows.find(row => row.map(cell => cell.char).join('').includes('3  从中断处继续'))!;
-  assert.equal(disabledRow[disabledRow.findIndex(cell => cell.char === '不')].fg, 'fg.gutter', 'unavailable retry remains muted instead of warning-colored');
+  for (const tier of ['truecolor', '256color', 'none'] as const) for (const width of [200, 60]) {
+    const rows = captureSnapshot(blocked.render(width, 60, tier), width, 60, tier).rows;
+    const name = rows.find(row => row.map(cell => cell.char).join('').includes('3  从中断处继续'))!;
+    const reasons = rows.filter(row => row.map(cell => cell.char).join('').includes('不可选 ·'));
+    const cells = [...name.filter(cell => /[从中断处继续]/.test(cell.char)), ...reasons.flatMap(row => row.slice(row.findIndex(cell => cell.char === '不')).filter(cell => cell.char.trim()))];
+    assert.equal(reasons.length, 2);
+    assert.ok(cells.every(cell => tier === 'none' ? cell.dim : cell.fg === 'fg.faint' && !cell.dim), `${tier} ${width}: unavailable names and reasons remain readable`);
+  }
   assert.match(shown, /4 {2}结束旧工作，开新任务 +旧 run 标记已结束/);
   blocked.handleInput('\x1b[B'); assert.equal(blocked.cursor, 3, '↓ skips the unavailable items');
   blocked.handleInput('2'); assert.equal(blocked.cursor, 3);

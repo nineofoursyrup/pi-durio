@@ -435,7 +435,7 @@ export class ConfirmDialog {
     const fixed = [...(this.config.fixed ?? []).flatMap(text => wrapAuthorized(text, inner)), ...(this.config.fixedRows?.(inner) ?? []).flatMap(text => wrapTextWithAnsi(text, inner))];
     // 末行放不下时换行（原因不截断，Esc 不去掉）；当前提示和“窗口过小”的提示都必须完整容纳。
     const footer = (reason: string | undefined) => wrapSegments(this.config.footer ? this.config.footer(reason) : reason
-      ? [{ text: 'Enter ', fg: 'fg.gutter' }, { text: clean(reason), fg: 'fg.muted' }, { text: ' · ', fg: 'fg.label' }, ...hintSegments('Esc 取消')]
+      ? [{ text: 'Enter ', fg: 'fg.faint' }, { text: clean(reason), fg: 'fg.muted' }, { text: ' · ', fg: 'fg.label' }, ...hintSegments('Esc 取消')]
       : hintSegments(`Enter ${clean(this.config.action)} · Esc 取消`), inner);
     const disabled = this.config.disabled;
     const reason = typeof disabled === 'function' ? disabled(this.selected) : disabled;
@@ -496,7 +496,7 @@ export class ConfirmDialog {
       const on = this.chosen.has(index);
       const mark = choice.mode === 'single' ? `${on ? '◉' : '○'} ${index + 1} ` : `${on ? `[${GLYPHS.ok}]` : '[ ]'} `;
       const text = truncateEnd(`${mark}${clean(option.label)}${option.disabled ? ` · 不可选 · ${clean(option.disabled)}` : ''}`, inner);
-      lines.push({ segments: [{ text, fg: option.disabled ? 'fg.gutter' : on ? 'fg.primary' : 'fg.body' }], cursor: choice.mode === 'multi' && index === this.cursor });
+      lines.push({ segments: [{ text, fg: option.disabled ? 'fg.faint' : on ? 'fg.primary' : 'fg.body' }], cursor: choice.mode === 'multi' && index === this.cursor });
     });
     return lines;
   }

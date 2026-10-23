@@ -80,6 +80,25 @@ test('fgSgr 256color 包含 38;5', () => {
   assert.match(sgr, /\x1b\[38;5;\d+m/, '256color fg 应包含 38;5;n');
 });
 
+test('disabled text meets 3:1 contrast on Clear Dark in truecolor and 256color', () => {
+  const luminance = (rgb: number[]) => rgb.map(channel => {
+    const s = channel / 255;
+    return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  }).reduce((sum, linear, index) => sum + linear * [0.2126, 0.7152, 0.0722][index], 0);
+  const background = luminance([0x2a, 0x2f, 0x39]);
+  for (const tier of ['truecolor', '256color'] as const) {
+    const codes = fgSgr('fg.faint', tier).slice(2, -1).split(';').map(Number);
+    let rgb = codes.slice(2);
+    if (tier === '256color') {
+      const index = codes[2];
+      assert.ok(index >= 232 && index <= 255, 'disabled text uses the xterm grayscale palette');
+      rgb = Array(3).fill(8 + 10 * (index - 232));
+    }
+    const contrast = (luminance(rgb) + 0.05) / (background + 0.05);
+    assert.ok(contrast >= 3, `${tier}: contrast ${contrast.toFixed(2)}:1 must be at least 3:1`);
+  }
+});
+
 test('bgSgr 256color 背景层顺序正确', () => {
   assert.match(bgSgr('bg.base', '256color'), /\x1b\[48;5;233m/);
   assert.match(bgSgr('bg.zebra', '256color'), /\x1b\[48;5;234m/);

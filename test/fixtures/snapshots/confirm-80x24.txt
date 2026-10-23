@@ -14,7 +14,7 @@
 06|│ [✓] s-9c01                                                               │|
    0-1 border.input/bg.block ; 2-11 fg.primary/bg.block ; 12-73 -/bg.block ; 74-75 border.input/bg.block
 07|│ [ ] 未归属附件 · 不可选 · 仍被引用                                       │|
-   0-1 border.input/bg.block ; 2-35 fg.gutter/bg.block ; 36-73 -/bg.block ; 74-75 border.input/bg.block
+   0-1 border.input/bg.block ; 2-35 fg.faint/bg.block ; 36-73 -/bg.block ; 74-75 border.input/bg.block
 08|│ 影响：删除 3 个会话存储 · 不可撤销 · 宿主记录保留，trace 中对应原文标“已 │|
    0-1 border.input/bg.block ; 2-73 fg.label/bg.block ; 74-75 border.input/bg.block
 09|│ 清理”                                                                    │|

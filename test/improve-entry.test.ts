@@ -73,6 +73,12 @@ test('registering a new path: eval <dir> is fingerprinted once, Tab completes pa
   assert.throws(() => registerFromInput(p.data, p.workspace, 'evals'), /IMPROVE_REGISTER_INPUT/);
   // The launch box checks a new registration and counts its files.
   const dialog = new ImproveLaunchDialog({ visible: { project: [], enabled: [], files: 0, omitted: 0, taskType: 'read' }, registrations: [], queued: false, register: input => registerFromInput(p.data, p.workspace, input), remove:id=>unregisterImproveSource(p.data,id), complete: input => completePath(p.workspace, input) });
+  const cramped = dialog.render(40, 6);
+  assert.match(cramped.map(plain).join('\n'), /Enter 窗口过小，无法确认/);
+  const footer = captureSnapshot(cramped, 40, cramped.length, 'truecolor').rows.find(row => row.map(cell => cell.char).join('').includes('Enter'))!;
+  assert.equal(footer.find(cell => cell.char === 'E')!.fg, 'fg.faint', 'disabled launch Enter remains readable');
+  assert.equal(dialog.handleInput('\r').type, 'noop');
+  dialog.render(132, 38);
   for (const key of ['\x1b[B', '\x1b[B', '\r', ...'eval ev', '\t', '\r']) dialog.handleInput(key);
   assert.equal(dialog.choice.sources[0]?.id, registration.id); assert.equal(dialog.files, 1);
   assert.match(dialog.render(132, 38).map(plain).join('\n'), /\[✓\] eval 资产 .*case\.json/);
