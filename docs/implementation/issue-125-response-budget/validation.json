@@ -1,0 +1,116 @@
+{
+  "issue": 125,
+  "baseCommit": "0630c5fada520c1deefedcb03cb410168c39428b",
+  "branch": "codex/issue125-response-budget",
+  "verifiedAt": "2026-10-23T19:27:22.841180+00:00",
+  "timezone": "Asia/Shanghai",
+  "scope": "Offline implementation verification; no paid-model or native-user acceptance claim",
+  "distinctTests": 744,
+  "testFiles": 100,
+  "remaining": {
+    "tests": 687,
+    "pass": 687,
+    "fail": 0,
+    "skipped": 0
+  },
+  "affectedFinal": {
+    "tests": 26,
+    "pass": 26,
+    "fail": 0,
+    "skipped": 0
+  },
+  "manualCompactionFinal": {
+    "tests": 1,
+    "pass": 1,
+    "fail": 0,
+    "skipped": 0
+  },
+  "reused": [
+    {
+      "file": "test/provider-boundary.test.ts",
+      "tests": 15,
+      "log": "focused-1.log",
+      "note": "Reuse passing unaffected cases; first-failure log is retained in full."
+    },
+    {
+      "file": "test/compaction.test.ts",
+      "tests": 15,
+      "log": "focused-2.log",
+      "note": "Reuse passing unaffected cases; first-failure log is retained in full."
+    }
+  ],
+  "build": "npm run build passed; final script relocation only changed developer measurement imports, not product/test code",
+  "sourceBuildManifestSha256": "37e3b8e86386cf7f4af976aff124fa51d6f0da813878cae49eeacdc774681e2a",
+  "reviews": {
+    "standards": {
+      "independent": true,
+      "openFindings": 0
+    },
+    "spec": {
+      "independent": true,
+      "openFindings": 0,
+      "resolved": "Correct protocol counting direction and preserve smaller effective output limits through runtime/guest/mediator"
+    }
+  },
+  "changesSha256": {
+    "docs/implementation/issue-125-response-budget/README.md": "442246e4ae933e67cc80d932ae6fcfa50474ba5be2e8530fe6b1ed6f19ca4f8c",
+    "docs/implementation/issue-125-response-budget/measurement-1.json": "d30c5a9c190f29b7d8fc1a15b057fc2ad2ed4a9e4b52c378e230158b6e6e85d4",
+    "docs/implementation/issue-125-response-budget/measurement-8.json": "6dd8bfd01cb079c0f5d5c9364e8e215aa1e7dc6d18ab52e514390c8c744dda86",
+    "scripts/measure-response-budget.mjs": "b8c36993ee6a878634bcc135fc800ec2a8546fead2700fac820f3c407af4615b",
+    "src/eval-guest-runtime.ts": "c1f5d4bab30fa5e29684ee1ac3d39c9185b7ae563bcd927f5f6872f5893c4aea",
+    "src/eval-response-budget.ts": "45ba189e625aaa41791ebf2444fb2f44c29ac956a45894c85d4a87b01c364003",
+    "src/eval/guest.ts": "55fde4ec4fd1bdb9659e46200638e24def23cac08caca3af59165d36c1ba14a6",
+    "src/eval/mediator.ts": "9203c39373e6588cdaad531ffbb195a13277ce1918d7d1c54305aa5e757bb8c9",
+    "src/eval/plan.ts": "5e846d3f41c429065f89c4dff369c5055fcf6cd2ae8e8c3f633736b3d5f4a5fd",
+    "src/eval/runner.ts": "7b2ff2854599baac0198b79877457e299256a5ec820ddae05ec81c51e9f8bd30",
+    "src/provider-boundary.ts": "c3965b7a9e43da687fc2c99c897e859efe0b811faf402dfa94ae3c727ec15902",
+    "src/provider-response-budget.ts": "c16c4ba88a87dcf83fcab14567cc4de6aea6fd928b9f1673fcb2d1b1e9e945a5",
+    "src/runtime.ts": "32983a34dcb30b80e4b75f0f5ed1e44eadedc8f1ff9a7a218bffe6df4b44b150",
+    "test/compaction.test.ts": "8da1842c85489c258481d68f638f79bbbf21356d796942d67c23dd197bbc247f",
+    "test/eval.test.ts": "e2ea6011188e7ec2e2144bed77fcc908e2265d166cfb68c0335fa5ebfcd14a5b",
+    "test/fixtures/provider-response.ts": "de287c0cc8141a849f25e7b0b9a3031d84641cb2b31e8b7ccc9db9a4703eeff1",
+    "test/improve.test.ts": "ff5bd9e63237a6c5ca234d494453147bc5954ee138f5058407a3ca177d91bf42",
+    "test/provider-boundary.test.ts": "4fe90578db65f96b5ef6f09d0458126433db1e54c387a6033b85502f4b2549fe",
+    "test/runtime-provider.test.ts": "b520edfc07e8cd1345db1d3ea043e3a05b454ae57bbc093682c07651badc406f"
+  },
+  "localLogs": {
+    "build-final.log": {
+      "path": "/Users/nineofour/.codex/worktrees/issue125-response-budget/Durio/.scratch/issue-125/build-final.log",
+      "sha256": "c36a045fb1ef07e0cdf8453510b7d73bca7ea4b7338f1271f7e36b054a3ff281"
+    },
+    "remaining.log": {
+      "path": "/Users/nineofour/.codex/worktrees/issue125-response-budget/Durio/.scratch/issue-125/remaining.log",
+      "sha256": "5c572f4f3adf1f713414bad3720bbd139254a8ef10c6ce02ed3e12562d64c450"
+    },
+    "focused-1.log": {
+      "path": "/Users/nineofour/.codex/worktrees/issue125-response-budget/Durio/.scratch/issue-125/focused-1.log",
+      "sha256": "bfe66372d0d2c8093e3065379b13c6c2bf476802655aa437f9c4896986e09cf1"
+    },
+    "focused-2.log": {
+      "path": "/Users/nineofour/.codex/worktrees/issue125-response-budget/Durio/.scratch/issue-125/focused-2.log",
+      "sha256": "964c45990a9cfbb071e16190e338a20f3a1527c8a8eca22824dc948f43192c13"
+    },
+    "runtime-final.log": {
+      "path": "/Users/nineofour/.codex/worktrees/issue125-response-budget/Durio/.scratch/issue-125/runtime-final.log",
+      "sha256": "cc8fac0073837ca4061be3c3690e11bbdb9f15c9fb88eb46da4b041730d4254b"
+    },
+    "affected-final.log": {
+      "path": "/Users/nineofour/.codex/worktrees/issue125-response-budget/Durio/.scratch/issue-125/affected-final.log",
+      "sha256": "0ec97430585c5059bb54f60d60cc96c71ba57ba102d129b410d792d76417f7ae"
+    },
+    "compaction-final.log": {
+      "path": "/Users/nineofour/.codex/worktrees/issue125-response-budget/Durio/.scratch/issue-125/compaction-final.log",
+      "sha256": "882104bcc22c617ea6dcdd1a85bcdcba7ed9eb38df9fcc0e6f04411e95c7d749"
+    },
+    "measure-final-1.log": {
+      "path": "/Users/nineofour/.codex/worktrees/issue125-response-budget/Durio/.scratch/issue-125/measure-final-1.log",
+      "sha256": "e2d390244a599770e89ad9a14e540991787649bdecc5695ecfc9a9cb18e703f0"
+    },
+    "measure-final-8.log": {
+      "path": "/Users/nineofour/.codex/worktrees/issue125-response-budget/Durio/.scratch/issue-125/measure-final-8.log",
+      "sha256": "b0c7b3bc7cc733bcc2b7b3d63f18783d34bd755ae3b43fe67e0fac2751036047"
+    }
+  },
+  "realModelRequests": 0,
+  "commitPushOrTrackerMutation": false
+}

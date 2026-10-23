@@ -11,7 +11,8 @@ import {acquireOwner} from '../ownership.js';
 import {fixEvidence,verifyFixed} from '../fixed-evidence.js';
 import {PersistentBudget} from '../provider-boundary.js';
 import {scriptedTransport} from '../offline.js';
-import {loadEvalPlan,runtimeContent,validateGrader,type EvalPlan,type EvalTrial} from './plan.js';
+import {loadEvalPlan,runtimeContent,validatePlan,validateGrader,type EvalPlan,type EvalTrial} from './plan.js';
+import {EVAL_PROTOCOL_LIMITS as protocolLimits} from '../eval-response-budget.js';
 import {evalFacts,appendFact,materialize,regularFiles,captureFiles,type ContentFile} from './store.js';
 import {controlledSteps,type EvalCase} from './fixtures.js';
 import {evalMediator} from './mediator.js';
@@ -25,7 +26,6 @@ const boundaryPath=new URL('../../execution/isolation/boundary.mjs',import.meta.
 interface RestrictedResult {id:string;status:string;started:boolean;terminated:boolean;reason:string|null;stdout:string;stderr:string;code?:number;control:any[];modelRequests:any[]}
 interface Boundary {runRestricted:(options:any)=>Promise<RestrictedResult>;exportStopped:(execution:RestrictedResult,names:string[],destination:string,limits?:{maxFiles:number;maxBytes:number})=>Promise<{name:string;bytes:number;sha256:string}[]>}
 const boundary=()=>import(boundaryPath.href) as Promise<Boundary>;
-const protocolLimits={inputBytes:262144,responseBytes:1048576,lineBytes:1048576,totalBytes:8388608};
 const exportLimits={maxFiles:20000,maxBytes:134217728};
 export type TrialStatus='completed'|'preparation-error'|'error'|'timeout'|'cancelled'|'budget-stopped'|'service-error'|'original-error'|'invalid'|'not-run'|'unknown';
 export interface TrialOutcome {trialId:string;status:TrialStatus;started:boolean;valid:boolean;reason:string|null;runtimeResult:BlobRef|null;artifacts:ContentFile[];isolation:BlobRef|null;timing:{preparationMs:number;taskMs:number;gradingMs:number};source?:string}
@@ -55,7 +55,7 @@ function controlled(plan:EvalPlan,trial:EvalTrial){
  })as typeof fetch;
 }
 /** Worker entry: only acquired immutable bytes and host content are read. */
-export function verifyEvalRunContent(root:string,id:string){const plan=loadEvalPlan(root,id);planFix(root,plan.id);verifyBoundaryContent(root,plan);return plan;}
+export function verifyEvalRunContent(root:string,id:string){const plan=loadEvalPlan(root,id);validatePlan(plan);planFix(root,plan.id);verifyBoundaryContent(root,plan);return plan;}
 export interface RunEvalOptions {dataRoot:string;id:string;directory:string;signal?:AbortSignal;transportForTrial?:(trial:EvalTrial)=>typeof fetch|undefined;fault?:(kind:string)=>void;onCleanup?:(receipt:EvalCleanupReceipt)=>void;onPrepared?:()=>void}
 /** No runtime, task, or outcome is resumed. Reopening an interrupted plan is report-only. */
 export async function runEval(options:RunEvalOptions){

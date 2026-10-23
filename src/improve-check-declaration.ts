@@ -2,6 +2,7 @@
 import type {SourceTarget} from './improve-source.js';
 import type {DirectCheck} from './improve-validation.js';
 import {pairedTrials,validateComparison,type ComparisonPlan} from './eval-comparison-plan.js';
+import {evalTrialRequests,maxEvalOutputTokens} from './eval-response-budget.js';
 
 export interface CandidateFreshCheck {
  kind:'fresh';benefit?:'required'|'diagnostic';
@@ -26,7 +27,7 @@ export function validateCandidateChecks(value:unknown,targets:SourceTarget[]):as
    if(c.kind!=='resource'&&(c.resource!==undefined||c.benefit!==undefined))throw Error('IMPROVE_STRUCTURED_CHECK_INVALID');
    continue;
   }
-  if(!only(c,['kind','benefit','assets','mode','comparison','budget','trialTimeoutMs','gradingTimeoutMs','maxOutputTokens','effectiveTask'])||!['offline','live'].includes(c.mode)||!timeout(c.trialTimeoutMs)||!timeout(c.gradingTimeoutMs)||!positive(c.maxOutputTokens)||c.maxOutputTokens>16384||c.effectiveTask!==undefined&&!['read','coding'].includes(c.effectiveTask))throw Error('IMPROVE_FRESH_DECLARATION_INVALID');
+  if(!only(c,['kind','benefit','assets','mode','comparison','budget','trialTimeoutMs','gradingTimeoutMs','maxOutputTokens','effectiveTask'])||!['offline','live'].includes(c.mode)||!timeout(c.trialTimeoutMs)||!timeout(c.gradingTimeoutMs)||!positive(c.maxOutputTokens)||c.effectiveTask!==undefined&&!['read','coding'].includes(c.effectiveTask))throw Error('IMPROVE_FRESH_DECLARATION_INVALID');
   const b=c.budget;
   if(!b||!only(b,['maxRequests','maxTokens','maxRequestTokens','maxDurationMs'])||!Object.values(b).every(positive)||Object.keys(b).length!==4||b.maxRequests>100||b.maxRequestTokens>b.maxTokens||b.maxDurationMs>3600000||c.mode==='live'&&b.maxRequestTokens<1048576+c.maxOutputTokens)throw Error('IMPROVE_FRESH_BUDGET_INVALID');
   if(!Array.isArray(c.assets)||!c.assets.length||c.assets.length>16||c.assets.some((a:any)=>!a||!only(a,['targetId','path','caseIds'])||!Array.isArray(a.caseIds)||!a.caseIds.length||a.caseIds.some((id:any)=>typeof id!=='string')||!targets.some(t=>t.id===a.targetId&&t.kind==='eval-asset'&&t.state==='verified'&&t.files.some(f=>f.path===a.path&&f.state==='available'))))throw Error('IMPROVE_FRESH_REGISTERED_CASES_REQUIRED');
@@ -35,5 +36,6 @@ export function validateCandidateChecks(value:unknown,targets:SourceTarget[]):as
   if(new Set(ids).size!==ids.length||ids.length>16||ids.length*c.comparison.repetitions*2>32)throw Error('IMPROVE_FRESH_CASES_INVALID');
   const runtime={id:'host-bound-at-summary',manifest:{sha256:'host-bound',bytes:0},bytes:0};
   validateComparison({...c.comparison,scale:'relative',sides:{baseline:{runtime,instructions:''},candidate:{runtime,instructions:''}}},ids,pairedTrials('declaration',ids,c.comparison.repetitions),b);
+  if(c.maxOutputTokens>maxEvalOutputTokens(evalTrialRequests(c)))throw Error('IMPROVE_FRESH_DECLARATION_INVALID');
  }
 }

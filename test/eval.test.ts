@@ -10,7 +10,10 @@ import {fixEvidence} from '../src/fixed-evidence.js';
 import {representativeCases} from '../src/eval/fixtures.js';
 import {verifiedImage,validatePlan,prepareEval,loadEvalPlan,type EvalPlan} from '../src/eval/plan.js';
 import {hostPlanPrice} from '../src/cost-estimate.js';
-import {evalReport,formatEvalReport} from '../src/eval/runner.js';
+import {evalReport,formatEvalReport,verifyEvalRunContent} from '../src/eval/runner.js';
+import {EVAL_PROTOCOL_LIMITS,evalResponseBudget,evalTrialRequests,maxEvalOutputTokens,validateEvalResponseBudget} from '../src/eval-response-budget.js';
+import {runEvalGuest,evalGuestRequest} from '../src/eval-guest-runtime.js';
+import {fragmentedResponse,chunkedResponse} from './fixtures/provider-response.js';
 import {appendFact,evalFacts,installedRuntimeFiles,captureFiles,materialize} from '../src/eval/store.js';
 import {PersistentBudget} from '../src/provider-boundary.js';
 import {evalMediator} from '../src/eval/mediator.js';
@@ -60,6 +63,61 @@ test('mediator denies guest endpoint/model/structure changes before any provider
  const payload={model:'deepseek-flash',stream:true,max_tokens:32,messages:[{role:'user',content:'hello'}]};
  for(const bad of [{...payload,url:'http://localhost'},{...payload,model:'other'},{...payload,messages:[{role:'user',content:[{type:'image_url',image_url:{url:'http://localhost'}}]}]}])await assert.rejects(mediator.request({input:JSON.stringify(bad),maxOutputTokens:32,signal}),/DENIED/);
  assert.equal(calls,0);await mediator.request({input:JSON.stringify(payload),maxOutputTokens:32,signal});await assert.rejects(mediator.request({input:JSON.stringify(payload),maxOutputTokens:32,signal}),/BUDGET_UNKNOWN_USAGE/);assert.equal(calls,1);e.close();
+});
+
+test('eval rejects output/request combinations before start and keeps old oversized plans readable',()=>{
+ const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-eval-capacity-')),'plan'),p=plan(e);
+ try{
+  p.budget.maxRequests=1;p.maxOutputTokens=1572;validatePlan(p);
+  assert.equal(maxEvalOutputTokens(1),1572);assert.throws(()=>validatePlan({...p,maxOutputTokens:1573}),/EVAL_PROTOCOL_CAPACITY/);
+  p.budget.maxRequests=8;validatePlan(p);
+  assert.equal(maxEvalOutputTokens(8),1572);assert.throws(()=>validatePlan({...p,maxOutputTokens:1573}),/EVAL_PROTOCOL_CAPACITY/);
+  // The product permits at most eight requests per trial, so stdout aggregate
+  // capacity doesn't bind these plans. Batch request counts span distinct VMs.
+  assert.doesNotThrow(()=>validateEvalResponseBudget(1572,15));assert.throws(()=>validateEvalResponseBudget(1,16),/EVAL_PROTOCOL_CAPACITY/);
+  assert.ok(evalResponseBudget(1,16).mediatorBytes<EVAL_PROTOCOL_LIMITS.responseBytes);
+  assert.ok(evalResponseBudget(1572,8).responseLineBytes>EVAL_PROTOCOL_LIMITS.lineBytes,'host stdin responses are not guest stdout request lines');
+  p.maxOutputTokens=6000;appendFact(e,'eval.plan',p);
+  assert.equal(loadEvalPlan(e.root,p.id).maxOutputTokens,6000);
+  assert.throws(()=>verifyEvalRunContent(e.root,p.id),/EVAL_PROTOCOL_CAPACITY/);
+  assert.equal(evalFacts(e.root,p.id).some(f=>f.kind==='eval.started'),false);
+  assert.throws(()=>evalMediator(p,p.trials[0],new PersistentBudget(e,'plan',p.budget),async()=>{throw Error('must not dispatch');}),/EVAL_PROTOCOL_CAPACITY/);
+ }finally{e.close();}
+});
+
+test('historical plans above the former fixed output limit remain readable but cannot execute',()=>{
+ const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-eval-historical-capacity-')),'plan'),p=plan(e);
+ try{
+  p.maxOutputTokens=16385;appendFact(e,'eval.plan',p);
+  assert.equal(loadEvalPlan(e.root,p.id).maxOutputTokens,16385);
+  assert.throws(()=>verifyEvalRunContent(e.root,p.id),/EVAL_PROTOCOL_CAPACITY/);
+  assert.equal(evalFacts(e.root,p.id).some(f=>f.kind==='eval.started'),false);
+ }finally{e.close();}
+});
+
+test('mediator JSON round trips through the real guest adapter with terminal or missing usage',async()=>{
+ for(const usage of [true,false]){
+  const root=mkdtempSync(join(tmpdir(),'durio-eval-roundtrip-')),e=new Evidence(join(root,'host'),'plan'),p=plan(e);
+  p.maxOutputTokens=1572;p.budget={...p.budget,maxRequests:1,maxRequestTokens:2200,maxTokens:2200};
+  const budget=new PersistentBudget(e,'plan',p.budget),answer=JSON.stringify({value:'中文\\\"\n\t'.repeat(200)}),fixture=fragmentedResponse(answer,{usage,completionTokens:1572});
+  assert.ok(fixture.events<=1572+2);
+  let calls=0;
+  const mediator=evalMediator(p,p.trials[0],budget,async()=>{calls++;return chunkedResponse(fixture.bytes,997);});
+  const transport:typeof fetch=async(_url,init)=>{
+   const payload=JSON.parse(String(init?.body));assert.equal(payload.max_tokens,p.maxOutputTokens);
+   const output=await mediator.request({input:JSON.stringify(payload),maxOutputTokens:p.maxOutputTokens,signal:init!.signal!});
+   const line=JSON.stringify({kind:'model.response',id:calls,output})+'\n',bounds=evalResponseBudget(p.maxOutputTokens,evalTrialRequests(p));
+   assert.ok(Buffer.byteLength(output)<=bounds.mediatorBytes);assert.ok(Buffer.byteLength(line)<=bounds.responseLineBytes);
+   const decoded=JSON.parse(JSON.parse(line).output);assert.equal(decoded.body,fixture.bytes.toString());
+   return new Response(decoded.body,{status:decoded.status,headers:{'content-type':decoded.contentType}});
+  };
+  const workspace=join(root,'project');mkdirSync(workspace);writeFileSync(join(workspace,'README.md'),'Offline fixture\n');
+  try{
+   const result=await runEvalGuest({trialId:p.trials[0].id,mode:'offline',prompt:'Return the controlled JSON.',maxOutputTokens:p.maxOutputTokens,effectiveTask:{type:'read',profile:{version:1,instructions:'',compaction:{enabled:false}}}},transport,{dataRoot:join(root,'guest'),workspace});
+   assert.equal(result.status,'completed',JSON.stringify(result));assert.equal(result.answer,answer);assert.equal(calls,1);
+   assert.equal(budget.snapshot().knownTokens,usage?2072:0);assert.equal(budget.snapshot().reservedTokens,usage?0:2200);assert.equal(budget.snapshot().unknown,usage?0:1);
+  }finally{e.close();}
+ }
 });
 test('paid plan needs a fixed provider upper bound before dispatch, not only an after-the-fact exceeded marker',()=>{
  const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-live-plan-')),'plan'),p=plan(e);p.mode='live';p.authorization.paid=true;p.budget.unknownUpperBound={tokens:100,source:'https://api-docs.deepseek.com/quick_start/pricing/'};assert.throws(()=>validatePlan(p),/PROVEN_TOKEN_BOUND/);e.close();
@@ -111,4 +169,24 @@ test('new paid plans default to the host CNY peak output price with its version;
  assert.deepEqual(loadEvalPlan(data,'paid').price,hostPlanPrice('deepseek','deepseek-flash'));
  assert.deepEqual(await prepare('offline',{}),{version:'offline-zero-cny-v1',source:'deterministic local transport; no model inference or paid network',currency:'CNY',perMillionTokens:0});
  const usd={version:'first-version-usd',source:'explicit fixed price',currency:'USD' as const,perMillionTokens:2};assert.deepEqual(await prepare('usd',{paid:true,price:usd}),usd);
+});
+
+
+test('guest and mediator preserve a smaller effective output limit and enforce its byte budget',async()=>{
+ const e=new Evidence(mkdtempSync(join(tmpdir(),'durio-eval-effective-output-')),'plan'),p=plan(e);
+ p.maxOutputTokens=1572;p.budget={...p.budget,maxRequests:2,maxRequestTokens:2200,maxTokens:4400};
+ const budget=new PersistentBudget(e,'plan',p.budget),signal=new AbortController().signal;let calls=0,cancelled=0;
+ const answer=JSON.stringify({value:'中文'.repeat(400)}),valid=fragmentedResponse(answer,{completionTokens:512}).bytes,overflow=fragmentedResponse('x'.repeat(4800),{completionTokens:512}).bytes;
+ assert.ok(overflow.length>327680&&overflow.length<870400);
+ const mediator=evalMediator(p,p.trials[0],budget,async(_url,init)=>{assert.equal(JSON.parse(String(init?.body)).max_tokens,512);return chunkedResponse(++calls===1?valid:overflow,16381,()=>cancelled++);});
+ const body=(max_tokens:number)=>JSON.stringify({model:'deepseek-flash',stream:true,max_tokens,messages:[{role:'user',content:'hello'}]});
+ try{
+  for(const limit of [0,1573,1.5]){assert.throws(()=>evalGuestRequest(body(limit),p.maxOutputTokens),/EVAL_GUEST_OUTPUT_LIMIT/);await assert.rejects(mediator.request({input:body(limit),maxOutputTokens:limit,signal}),/EVAL_MEDIATOR_LIMIT/);}
+  await assert.rejects(mediator.request({input:body(513),maxOutputTokens:512,signal}),/EVAL_MEDIATOR_PAYLOAD_DENIED/);assert.equal(calls,0);
+  const request=evalGuestRequest(body(512),p.maxOutputTokens);assert.equal(request.maxOutputTokens,512);assert.equal(request.input,body(512));
+  const output=await mediator.request({...request,signal}),line=JSON.stringify({kind:'model.response',id:1,output}),decoded=JSON.parse(JSON.parse(line).output);
+  const guest=await (await import('../src/provider-boundary.js')).dispatchProvider({purpose:'compaction',operationId:'effective',maxOutputTokens:request.maxOutputTokens,transport:async()=>new Response(decoded.body,{status:decoded.status,headers:{'content-type':decoded.contentType}})},'https://offline.invalid');
+  assert.equal(await guest.text(),valid.toString());assert.equal(budget.snapshot().knownTokens,1012);
+  await assert.rejects(mediator.request({...request,signal}),/PROVIDER_RESPONSE_LIMIT/);assert.equal(calls,2);assert.equal(cancelled,1);assert.equal(budget.snapshot().unknown,1);assert.equal(budget.snapshot().reservedTokens,2200);
+ }finally{e.close();}
 });

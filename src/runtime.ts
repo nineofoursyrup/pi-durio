@@ -1,7 +1,8 @@
 import {type TaskOrigin} from './fact-clock.js';
 import {prepareImprove,validateImproveRequest,priorImprove,readImproveReport,IMPROVE_INSTRUCTIONS,type ImproveRequest,type ImproveReport} from './improve.js';
 import { CompactionFacts, type CompactionResultFact } from './compaction.js';
-import { dispatchProvider, type ProviderBoundary } from './provider-boundary.js';
+import { dispatchProvider, TASK_REQUEST_LIMIT, type ProviderBoundary } from './provider-boundary.js';
+import { providerResponseBytes } from './provider-response-budget.js';
 import { realpath, mkdir, chmod } from 'node:fs/promises';
 import { join, relative, isAbsolute, resolve, dirname, basename } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -221,7 +222,7 @@ export async function compactContext(options:CompactOptions):Promise<RunResult> 
   const original=closed?.result??source.findLast(r=>r.kind==='run.closed')?.data as RunResult|undefined;
   if(original?.status!=='completed'||original.cleanup!=='confirmed')throw Error('COMPACTION_SOURCE_NOT_COMPLETED');
   const config=source.find(r=>r.kind==='execution.config')?.data as any;
-  if(config.providerBoundary&&(!options.providerBoundary||options.providerBoundary.operationId!==config.providerBoundary.operationId||options.providerBoundary.budget?.id!==config.providerBoundary.budget?.id))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
+  if(config.providerBoundary&&(!options.providerBoundary||options.providerBoundary.operationId!==config.providerBoundary.operationId||options.providerBoundary.budget?.id!==config.providerBoundary.budget?.id||options.providerBoundary.maxOutputTokens!==config.providerBoundary.maxOutputTokens))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
   if(queueItems(options.dataRoot).some(i=>i.target.sessionId===accepted.sessionId&&['pending','dispatching','frozen'].includes(i.status)))throw Error('QUEUE_PREDECESSOR_UNRESOLVED');
   return executeTask({...options,workspace:auth.workspace,input:'compact',mode:auth.mode,toolEnvironment:auth.toolEnvironment},accepted.authorization.execution==='trusted-local-coding',undefined,undefined,{}, {requestId:options.requestId,source:{sourceRunId:options.runId,sourceSessionId:accepted.sessionId,sourceConversationId:started.conversationId}});
 }
@@ -367,6 +368,7 @@ export async function decideQueue(options:RecoveryOptions & {decision:QueueDecis
 interface QueueReplacement { item:QueueItemFact; confirmation:QueueConfirmation; decision:QueueDecision }
 async function executeTask(options: CodingTaskOptions, coding: boolean, recovery?: RecoveryPlan,queued?:{item:QueueItemFact;context:ContextSnapshot},handoff?:RunHandoff,maintenance?:Maintenance,improve?:ImproveExecution,replacement?:QueueReplacement): Promise<RunResult> {
   if (options.signal?.aborted) throw new Error(`RUN_CANCELLED_BEFORE_ACCEPTANCE: ${options.cancellation ?? 'exit'}`);
+  if(options.providerBoundary?.maxOutputTokens!==undefined)providerResponseBytes(options.providerBoundary.maxOutputTokens);
   const cleanupTimeoutMs = options.cleanupTimeoutMs ?? 10000;
   if (!Number.isSafeInteger(cleanupTimeoutMs) || cleanupTimeoutMs < 1 || cleanupTimeoutMs > 300000) throw new Error('INVALID_CLEANUP_TIMEOUT: provide 1–300000 milliseconds');
   if (!options.input.trim() || Buffer.byteLength(options.input) > 32 * 1024) throw new Error('INPUT_LIMIT: provide 1–32768 bytes');
@@ -509,7 +511,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       const expected=retainedExecutionConfig(dataRoot,coding,options.mode,options.toolEnvironment,config);
       if(maintenanceRecords.some(r=>r.kind==='recovery.ended'))throw Error('COMPACTION_SOURCE_ENDED');
       if(workspace!==sourceAccepted.workspace||Object.entries(expected).some(([key,value])=>JSON.stringify(config[key])!==JSON.stringify(value)))throw Error('COMPACTION_EXECUTION_CONFIGURATION_CHANGED');
-      if(config.providerBoundary&&(providerBoundary?.operationId!==config.providerBoundary.operationId||providerBoundary?.budget?.id!==config.providerBoundary.budget?.id))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
+      if(config.providerBoundary&&(providerBoundary?.operationId!==config.providerBoundary.operationId||providerBoundary?.budget?.id!==config.providerBoundary.budget?.id||providerBoundary?.maxOutputTokens!==config.providerBoundary.maxOutputTokens))throw Error('PROVIDER_BOUNDARY_RECOVERY_REQUIRED');
       if(inspected?.selectedSession?.pending)throw Error('COMPACTION_RECOVERY_REQUIRED: source has frozen durable work');
       if(!maintenance.item){
         const existing=findQueueItem(dataRoot,maintenance.requestId);
@@ -544,8 +546,8 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     else record('recovery.started', { decisionId: recovery.decision.id, snapshotId: recovery.report.snapshotId, capabilities: recovery.accepted.authorization.tools, previousRequests: requests, previousUsageUnknown: recovery.previousUsageUnknown, originalStatus: (recovery.report.original as {status:string}).status });
     guard();
     accepted = true;
-    if(improve){analysis=prepareImprove(evidence,improve.request,improve.target,guard);providerBoundary={budget:analysis.budget,purpose:'improve',operationId:`improve:${improve.request.id}`};analysisTimer=setTimeout(()=>fatal(Error('BUDGET_DEADLINE')),Math.max(1,Date.parse(analysis.deadline)-Date.now()));}
-    const authorization={ tools: improve ? ['evidence_summary','evidence_read','source_view'] : coding ? ['read', 'write', 'edit', 'bash'] : ['read'], execution: improve ? 'scoped-improve-analysis' : coding ? 'trusted-local-coding' : 'trusted-local-read-only', requestLimit: improve?improve.request.limits.maxRequests:8, fileLimitBytes: 256 * 1024, replay: 'unsafe' };
+    if(improve){analysis=prepareImprove(evidence,improve.request,improve.target,guard);providerBoundary={budget:analysis.budget,maxOutputTokens:improve.request.limits.maxOutputTokens,purpose:'improve',operationId:`improve:${improve.request.id}`};analysisTimer=setTimeout(()=>fatal(Error('BUDGET_DEADLINE')),Math.max(1,Date.parse(analysis.deadline)-Date.now()));}
+    const authorization={ tools: improve ? ['evidence_summary','evidence_read','source_view'] : coding ? ['read', 'write', 'edit', 'bash'] : ['read'], execution: improve ? 'scoped-improve-analysis' : coding ? 'trusted-local-coding' : 'trusted-local-read-only', requestLimit: improve?improve.request.limits.maxRequests:TASK_REQUEST_LIMIT, fileLimitBytes: 256 * 1024, replay: 'unsafe' };
     if (!recovery&&!maintenance) {
       const taskAdmission = { taskId, runId, sessionId, ...(improve?{kind:'improve',improveRequestId:improve.request.id,sourceTarget:improve.target}:{}), input: options.input, workspace, mode: options.mode, origin: improve ? {kind:'improve',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'} : options.taskOrigin ?? {kind:'coding',source:options.mode==='offline'?'synthetic':options.transport?'diagnostic':'ordinary'}, ...(queued?{queueRequestId:queued.item.requestId,sourceTarget:queued.item.target}:{}), ...(replacement?{replacesQueueRequestId:replacement.item.requestId,replacementDecisionId:replacement.decision.id,sourceTarget:replacement.item.target}:{}), authorization, credentials: { source: options.mode === 'offline' ? 'offline-placeholder' : 'DEEPSEEK_API_KEY', present: true } };
       if(replacement){
@@ -573,7 +575,7 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
     const model = models.getModel('deepseek', 'deepseek-flash');
     if (!model || model.api !== 'openai-completions' || model.baseUrl !== 'https://api.deepseek.com') throw new Error('MODEL_CONFIGURATION_MISMATCH');
     const settings = improve ? {...configuration.settings,toolExecution:'sequential' as const,stream:{...configuration.settings.stream,maxTokens:improve.request.limits.maxOutputTokens,timeoutMs:improve.request.limits.maxDurationMs}} : options.verificationCompaction ? {...configuration.settings,compaction:{enabled:true,...options.verificationCompaction}} : configuration.settings;
-    const configSeq=maintenance?maintenanceRecords.find(r=>r.kind==='execution.config')!.seq:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.config')!.seq:record('execution.config', { cleanupTimeoutMs, ...configuration, settings,...(defaults?{improveDefaults:defaults}:{}),...(options.verificationProfile?{verificationProfile:options.verificationProfile}:{}), ...(providerBoundary?{providerBoundary:{kind:'trusted-dispatch-capability',operationId:providerBoundary.operationId,budget:providerBoundary.budget?{id:providerBoundary.budget.id,root:providerBoundary.budget.evidence.root,runId:providerBoundary.budget.evidence.runId,limits:providerBoundary.budget.limits}:null,recovery:'requires-original-capability; this entry supports readonly or explicit end only'}}:{}), ...(options.verificationCompaction?{verificationCompaction:options.verificationCompaction}:{}), recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
+    const configSeq=maintenance?maintenanceRecords.find(r=>r.kind==='execution.config')!.seq:recovery?recoveryRecords(dataRoot,runId).find(record=>record.kind==='execution.config')!.seq:record('execution.config', { cleanupTimeoutMs, ...configuration, settings,...(defaults?{improveDefaults:defaults}:{}),...(options.verificationProfile?{verificationProfile:options.verificationProfile}:{}), ...(providerBoundary?{providerBoundary:{kind:'trusted-dispatch-capability',operationId:providerBoundary.operationId,...(providerBoundary.maxOutputTokens!==undefined?{maxOutputTokens:providerBoundary.maxOutputTokens}:{}),budget:providerBoundary.budget?{id:providerBoundary.budget.id,root:providerBoundary.budget.evidence.root,runId:providerBoundary.budget.evidence.runId,limits:providerBoundary.budget.limits}:null,recovery:'requires-original-capability; this entry supports readonly or explicit end only'}}:{}), ...(options.verificationCompaction?{verificationCompaction:options.verificationCompaction}:{}), recoveryProtocol: 1, capture: 'ordered Pi request messages, effective provider payload and parsed provider stream events; not HTTP wire bytes; authentication headers excluded' });
     if(maintenance){
       if(!maintenance.item){
         record('control.accepted',{requestId:maintenance.requestId,kind:'compact',input:'compact',taskId:null,target:{workspace,sessionId,taskId,runId},executionVersion:{artifactId:artifact.id,artifactSeq,configSeq},authorization});
@@ -589,7 +591,12 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
       completeSimple: ((requestedModel,context,streamOptions) => requestPurpose.run('compaction',()=>actualComplete(requestedModel,context,streamOptions))) as Models['completeSimple'],
       streamSimple: ((requestedModel, context, streamOptions) => {
         guard();
-        if (++requests > (improve?Number.MAX_SAFE_INTEGER:8)) { requests--; throw new Error('REQUEST_LIMIT: this task reached its provider attempt limit'); }
+        if (++requests > (improve?Number.MAX_SAFE_INTEGER:TASK_REQUEST_LIMIT)) { requests--; throw new Error('REQUEST_LIMIT: this task reached its provider attempt limit'); }
+        // The host cap also bounds compaction, without increasing a smaller
+        // upstream output limit. Dispatch bytes use this same effective value.
+        const maxOutputTokens=providerBoundary?.maxOutputTokens===undefined?streamOptions?.maxTokens:Math.min(providerBoundary.maxOutputTokens,streamOptions?.maxTokens??providerBoundary.maxOutputTokens);
+        const requestBoundary=providerBoundary?{...providerBoundary,...(maxOutputTokens!==undefined?{maxOutputTokens}:{})}:undefined;
+        if(requestBoundary?.maxOutputTokens!==undefined)providerResponseBytes(requestBoundary.maxOutputTokens);
         const attemptId = randomUUID();
         let hasUsage = false, responseRecorded = false, attemptDispatched = false;
         const purpose=requestPurpose.getStore()??(improve?'improve':'generation');
@@ -597,9 +604,9 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
           if(responseRecorded)return;responseRecorded=true;responses++;if(hasUsage)usageReports++;
           record('model.response', { attemptId,purpose,allocation:improve?'improve':maintenance?'maintenance':'task',maintenanceRequestId:maintenance?.requestId??null, message: { ...message, ...(message.errorMessage ? { errorMessage: safeError(message.errorMessage) } : {}) }, completeness: message.stopReason==='error'||message.stopReason==='aborted'?'partial':'complete', usage: hasUsage ? 'reported' : 'unknown', remoteTermination: message.stopReason==='error'||message.stopReason==='aborted'?'unknown':'response-returned' });
         };
-        record('model.intent', { attemptId, durableTaskId: purpose==='compaction'?null:generationTaskId, ...(purpose==='compaction'?{durableTaskSource:'unknown: Models.completeSimple exposes no owning compaction task ID'}:{}), ordinal: requests, model: { provider: requestedModel.provider, id: requestedModel.id }, context, purpose, allocation:improve?'improve':maintenance?'maintenance':'task',maintenanceRequestId:maintenance?.requestId??null, parentOperationId:providerBoundary?.operationId??null,providerOperationId:maintenance?`maintenance:${maintenance.requestId}`:providerBoundary?.operationId??null, boundary: 'Models.streamSimple', options: { maxRetries: streamOptions?.maxRetries, timeoutMs: streamOptions?.timeoutMs, reasoning: streamOptions?.reasoning, sessionId: streamOptions?.sessionId } });
+        record('model.intent', { attemptId, durableTaskId: purpose==='compaction'?null:generationTaskId, ...(purpose==='compaction'?{durableTaskSource:'unknown: Models.completeSimple exposes no owning compaction task ID'}:{}), ordinal: requests, model: { provider: requestedModel.provider, id: requestedModel.id }, context, purpose, allocation:improve?'improve':maintenance?'maintenance':'task',maintenanceRequestId:maintenance?.requestId??null, parentOperationId:providerBoundary?.operationId??null,providerOperationId:maintenance?`maintenance:${maintenance.requestId}`:providerBoundary?.operationId??null, boundary: 'Models.streamSimple', options: { maxTokens:maxOutputTokens,maxRetries: streamOptions?.maxRetries, timeoutMs: streamOptions?.timeoutMs, reasoning: streamOptions?.reasoning, sessionId: streamOptions?.sessionId } });
         const stream = actualStream(requestedModel, context, {
-          ...streamOptions, apiKey, fetch: async (url, init) => {
+          ...streamOptions, ...(maxOutputTokens!==undefined?{maxTokens:maxOutputTokens}:{}), apiKey, fetch: async (url, init) => {
             guard();
             const request={attemptId,purpose,url:String(url),method:init?.method,body:typeof init?.body==='string'?init.body:null};
             record('model.fetch-intent',{...request,boundary:'SDK fetch intent before host admission; not evidence of dispatch'});
@@ -618,8 +625,8 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
             let response:Response;
             try {
               guard();
-              response=providerBoundary
-                ?await dispatchProvider({...providerBoundary,purpose,...(maintenance?{operationId:`maintenance:${maintenance.requestId}`} :{}),transport},url,init)
+              response=requestBoundary
+                ?await dispatchProvider({...requestBoundary,purpose,...(maintenance?{operationId:`maintenance:${maintenance.requestId}`} :{}),transport},url,init)
                 :await transport(url,init);
             }catch(error){
               if(improve)providerFailure=safeError(error);

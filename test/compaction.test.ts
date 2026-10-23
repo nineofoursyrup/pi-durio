@@ -102,7 +102,7 @@ test('actual automatic background summary becomes stale after newer overflow com
   summary++;if(summary===1)await background;
   const response=await scriptedTransport([]).fetch(url,init);return new Response((await response.text()).replace('Controlled response: inspect actual tool evidence for acceptance.',summary===1?'OLDER SUMMARY':'NEWER SUMMARY'),{headers:{'content-type':'text/event-stream'}});
  };
- const result=await runCodingTask({...paths,input:'read twice then complete',mode:'offline',transport,providerBoundary:{purpose:'generation',operationId:'stale-verification'},verificationCompaction:{reserveTokens:980000,keepRecentTokens:1},onObservation:e=>{if(e.kind==='compaction.finished'){const last=recoveryRecords(paths.dataRoot,e.runId).findLast(r=>r.kind==='compaction.finished')?.data as any;if(last?.state==='applied')releaseBackground();}}});
+ const result=await runCodingTask({...paths,input:'read twice then complete',mode:'offline',transport,providerBoundary:{purpose:'generation',operationId:'stale-verification',maxOutputTokens:128},verificationCompaction:{reserveTokens:980000,keepRecentTokens:1},onObservation:e=>{if(e.kind==='compaction.finished'){const last=recoveryRecords(paths.dataRoot,e.runId).findLast(r=>r.kind==='compaction.finished')?.data as any;if(last?.state==='applied')releaseBackground();}}});
  assert.equal(result.status,'completed',JSON.stringify({status:result.status,reason:result.reason}));assert.equal(summary,2);assert.equal(generation,4);
  const facts=recoveryRecords(paths.dataRoot,result.runId),finished=facts.filter(r=>r.kind==='compaction.finished').map(r=>r.data as any);
  assert.ok(finished.some(f=>f.state==='stale'));assert.equal(finished.filter(f=>f.state==='applied').length,1);
@@ -134,7 +134,7 @@ test('manual usage is maintenance while authoritative session totals are project
 test('automatic generated-but-unplaced summary is frozen across whole-Harness recovery and ordinary submission',async()=>{
  const {checkRecovery}=await import('../src/runtime.js');const paths=await fixture();await writeFile(join(paths.workspace,'README.md'),'fixture');const controller=new AbortController();let generation=0,summary=0;
  const transport:typeof fetch=async(url,init)=>{const payload=JSON.parse(String(init?.body));if(!payload.tools?.length){summary++;return scriptedTransport([]).fetch(url,init);}generation++;if(generation===1)return scriptedTransport([{name:'read',args:{path:'README.md'}}]).fetch(url,init);return new Promise((_resolve,reject)=>{if(init!.signal!.aborted){reject(Error('exit'));return;}init!.signal!.addEventListener('abort',()=>reject(Error('exit')),{once:true});});};
- const result=await runCodingTask({...paths,input:'read then hold',mode:'offline',transport,providerBoundary:{purpose:'generation',operationId:'freeze-auto'},verificationCompaction:{reserveTokens:980000,keepRecentTokens:1},signal:controller.signal,cancellation:'exit',onObservation:e=>{if(e.kind==='compaction.generated')controller.abort();}});
+ const result=await runCodingTask({...paths,input:'read then hold',mode:'offline',transport,providerBoundary:{purpose:'generation',operationId:'freeze-auto',maxOutputTokens:128},verificationCompaction:{reserveTokens:980000,keepRecentTokens:1},signal:controller.signal,cancellation:'exit',onObservation:e=>{if(e.kind==='compaction.generated')controller.abort();}});
  assert.equal(result.status,'unknown');assert.equal(summary,1);
  const facts=recoveryRecords(paths.dataRoot,result.runId);assert.ok(facts.some(r=>r.kind==='compaction.generated'));assert.equal(facts.filter(r=>r.kind==='compaction.finished'&&(r.data as any).state==='applied').length,0);
  const report=await checkRecovery({...paths,runId:result.runId,authorization:{workspace:paths.workspace,mode:'offline',tools:['read','write','edit','bash']}});
@@ -187,13 +187,14 @@ test('manual maintenance keeps the original dispatch capability and exhausted pe
  const {compactContext}=await import('../src/runtime.js');const {PersistentBudget}=await import('../src/provider-boundary.js');const {Evidence}=await import('../src/evidence.js');
  const paths=await fixture(),ledger=new Evidence(join(paths.workspace,'budget-ledger'),'budget-host');
  const budget=new PersistentBudget(ledger,'original-budget',{maxRequests:1,maxTokens:100,maxRequestTokens:25,unknownUpperBound:null,deadline:new Date(Date.now()+60000).toISOString()});let dispatched=0;
- const providerBoundary={budget,purpose:'generation' as const,operationId:'original-operation',onDispatch:()=>{dispatched++;}};
+ const providerBoundary={budget,purpose:'generation' as const,operationId:'original-operation',maxOutputTokens:32768,onDispatch:()=>{dispatched++;}};
  try{const initial=await longSource(paths,{providerBoundary});assert.equal(initial.status,'completed');assert.equal(dispatched,1);
  const summary=scriptedTransport([]),result=await compactContext({...paths,runId:initial.runId,requestId:'budget-maintenance',authorization:{workspace:paths.workspace,mode:'offline',tools:['read','write','edit','bash']},transport:summary.fetch,providerBoundary});
  assert.equal(result.status,'failed');assert.equal(summary.calls.length,0);assert.equal(dispatched,1);assert.equal(budget.snapshot().requests,1);
  const facts=recoveryRecords(paths.dataRoot,initial.runId),operation=facts.findLast(r=>r.kind==='compaction.started')!.data as any;
  assert.equal(operation.providerOperation.parentOperationId,'original-operation');assert.equal(operation.providerOperation.operationId,'maintenance:budget-maintenance');assert.equal(operation.providerOperation.budgetId,'original-budget');assert.throws(()=>budget.check(),/BUDGET_REQUEST_LIMIT/);assert.equal(budget.snapshot().knownTokens,14);
  assert.equal(facts.filter(r=>r.kind==='model.dispatch').length,1,'a denied attempt never reaches the actual transport');
+ assert.equal((facts.findLast(r=>r.kind==='model.payload')?.data as any).payload.max_tokens,13107,'a larger host cap must not increase the upstream compaction output limit');
  const denied=facts.findLast(r=>r.kind==='model.dispatch-failed')?.data as any;assert.equal(denied.dispatched,false);assert.equal(denied.reason,'BUDGET_REQUEST_LIMIT');
  const {queryUsage}=await import('../src/usage-query.js');const usage=queryUsage(paths.dataRoot,[initial.runId]);assert.equal(usage.items[0].requestCoverage?.dispatches,1);assert.equal(usage.items[0].completeness,'known');
  const allocation=usage.requestAllocations.find(a=>a.maintenanceRequestId==='budget-maintenance') as any;assert.equal(allocation.dispatchState,'not-dispatched');assert.equal(allocation.completeness,'not-applicable');assert.equal(allocation.dispatchFailure.reason,'BUDGET_REQUEST_LIMIT');

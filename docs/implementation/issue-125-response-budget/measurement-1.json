@@ -1,0 +1,122 @@
+{
+  "scope": "offline host mediator + protocol roundtrip + guest provider boundary in one process; no VM or model inference",
+  "node": "v26.8.2",
+  "platform": "darwin",
+  "arch": "arm64",
+  "maxRequests": 1,
+  "maxOutputTokens": 1572,
+  "limits": {
+    "inputBytes": 262144,
+    "responseBytes": 1048576,
+    "lineBytes": 1048576,
+    "totalBytes": 8388608
+  },
+  "estimate": {
+    "responseBytes": 870400,
+    "mediatorBytes": 1048576,
+    "responseLineBytes": 1313792,
+    "requestLineBytes": 524416,
+    "totalBytes": 589952
+  },
+  "encoding": [
+    {
+      "tool": false,
+      "escaped": false,
+      "rawBytes": 454370,
+      "mediatorBytes": 511026,
+      "lineBytes": 621133,
+      "mediatorRatio": 1.1246913308537094,
+      "lineRatio": 1.367020269824152
+    },
+    {
+      "tool": false,
+      "escaped": true,
+      "rawBytes": 460654,
+      "mediatorBytes": 526736,
+      "lineBytes": 655695,
+      "mediatorRatio": 1.143452569607558,
+      "lineRatio": 1.4234002092676934
+    },
+    {
+      "tool": true,
+      "escaped": false,
+      "rawBytes": 573790,
+      "mediatorBytes": 649304,
+      "lineBytes": 797127,
+      "mediatorRatio": 1.1316056396939647,
+      "lineRatio": 1.3892312518517227
+    },
+    {
+      "tool": true,
+      "escaped": true,
+      "rawBytes": 580074,
+      "mediatorBytes": 665014,
+      "lineBytes": 831689,
+      "mediatorRatio": 1.1464295934656612,
+      "lineRatio": 1.4337636232618598
+    }
+  ],
+  "envelopeBytes": [
+    {
+      "raw": 870400,
+      "mediator": 928630,
+      "line": 1040309
+    }
+  ],
+  "baseline": {
+    "rss": 46759936,
+    "heapTotal": 8011776,
+    "heapUsed": 5477144,
+    "external": 2358621,
+    "arrayBuffers": 143773
+  },
+  "peakRssBytes": 92028928,
+  "rows": [
+    {
+      "name": "fixture-built",
+      "rss": 69156864,
+      "heapTotal": 22102016,
+      "heapUsed": 18877712,
+      "external": 3683431,
+      "arrayBuffers": 1468543,
+      "peakRssBytes": 69156864
+    },
+    {
+      "name": "mediator-1",
+      "rss": 80773120,
+      "heapTotal": 21397504,
+      "heapUsed": 18656920,
+      "external": 7220204,
+      "arrayBuffers": 3068267,
+      "peakRssBytes": 80773120
+    },
+    {
+      "name": "guest-decoded-1",
+      "rss": 85786624,
+      "heapTotal": 25313280,
+      "heapUsed": 22563448,
+      "external": 7220204,
+      "arrayBuffers": 3068267,
+      "peakRssBytes": 85786624
+    },
+    {
+      "name": "guest-consumed-1",
+      "rss": 91979776,
+      "heapTotal": 29704192,
+      "heapUsed": 26786688,
+      "external": 8961004,
+      "arrayBuffers": 4809067,
+      "peakRssBytes": 91979776
+    }
+  ],
+  "budget": {
+    "requests": 1,
+    "knownTokens": 2072,
+    "reservedTokens": 0,
+    "unknown": 0,
+    "violation": false,
+    "completeness": "known",
+    "deadline": "2026-10-23T19:26:45.313Z"
+  },
+  "paidCalls": 0
+}

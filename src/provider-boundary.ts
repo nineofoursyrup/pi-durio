@@ -1,5 +1,8 @@
 import {randomUUID} from 'node:crypto';
 import {Evidence,readObject} from './evidence.js';
+import {providerResponseBytes} from './provider-response-budget.js';
+
+export const TASK_REQUEST_LIMIT=8;
 
 export type RequestPurpose='generation'|'compaction'|'grading'|'eval-runtime'|'improve';
 export interface BudgetLimits {
@@ -35,7 +38,9 @@ export class PersistentBudget {
  }
  settle(value:Settlement){if(value.tokens!==null&&(!Number.isSafeInteger(value.tokens)||value.tokens<0))throw Error('INVALID_PROVIDER_USAGE');if(this.facts('budget.settle').some(f=>f.id===value.id))throw Error('BUDGET_ALREADY_SETTLED');this.evidence.append('budget.settle',{budgetId:this.id,...value});}
 }
-export interface ProviderBoundary {budget?:PersistentBudget;purpose:RequestPurpose;operationId:string;transport?:typeof fetch;onDispatch?:(id:string)=>void;maxResponseBytes?:number}
+export interface ProviderBoundary {budget?:PersistentBudget;purpose:RequestPurpose;operationId:string;transport?:typeof fetch;onDispatch?:(id:string)=>void;maxResponseBytes?:number;
+ /** Trusted caller's actual output limit. Takes precedence over the legacy byte-only limit. */
+ maxOutputTokens?:number}
 /** Only complete raw SSE events establish completion. SDK mirrors are not
  * admission evidence, and seeing usage alone does not prove a complete reply. */
 class ResponseUsage {
@@ -84,6 +89,7 @@ class ResponseUsage {
 export async function dispatchProvider(boundary:ProviderBoundary|undefined,url:Parameters<typeof fetch>[0],init?:RequestInit):Promise<Response>{
  if(!boundary)return fetch(url,init);
  if(init?.signal?.aborted)throw Error('PROVIDER_CANCELLED_BEFORE_DISPATCH');
+ const maxResponseBytes=boundary.maxOutputTokens===undefined?boundary.maxResponseBytes??1_048_576:providerResponseBytes(boundary.maxOutputTokens);
  const reservation=boundary.budget?.reserve(boundary.purpose,boundary.operationId),id=reservation?.id??randomUUID();
  const evidence=boundary.budget?.evidence;
  let settled=false;
@@ -100,7 +106,7 @@ export async function dispatchProvider(boundary:ProviderBoundary|undefined,url:P
     // The current block has already been acquired: retain it even when it
     // crosses the consumption limit, then stop without another read.
     evidence?.append('provider.bytes',{id,bytes:evidence.blob(next.value)});
-    total+=next.value.length;if(total>(boundary.maxResponseBytes??1_048_576))throw Error('PROVIDER_RESPONSE_LIMIT');
+    total+=next.value.length;if(total>maxResponseBytes)throw Error('PROVIDER_RESPONSE_LIMIT');
     usage.add(decoder.decode(next.value,{stream:true}));if(!consumerClosing)controller.enqueue(next.value);
    }catch(error){try{settle(null,init?.signal?.aborted?'cancelled':'error',String(error));}finally{await reader.cancel().catch(()=>{});controller.error(error);}}},
    async cancel(reason){consumerClosing=true;try{
