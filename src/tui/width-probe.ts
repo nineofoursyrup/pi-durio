@@ -61,9 +61,9 @@ export class TerminalWidthProbe {
       signal.addEventListener('abort',abort,{once:true});
       try {
         // Pi's startup DA1 is sent earlier and consumed by ProcessTerminal before this sentinel.
-        // Restore the prior caret in this same write, before waiting for CPR. Native IME acceptance
-        // must still establish whether the brief measuring move affects a live candidate window.
-        this.terminal.write(`\x1b[?2026h\x1b7\x1b[?25l\x1b[2;1H\x1b[2K${text}\x1b[6n\x1b8\x1b[?25${this.cursorVisible()?'h':'l'}\x1b[c`);
+        // CPR captures the measured position before EL2 clears the sample; then restore the caret
+        // in this same write. Native IME acceptance still covers the brief measuring move.
+        this.terminal.write(`\x1b[?2026h\x1b7\x1b[?25l\x1b[2;1H\x1b[2K${text}\x1b[6n\x1b[2K\x1b8\x1b[?25${this.cursorVisible()?'h':'l'}\x1b[c`);
       }catch(error){fail(`WIDTH_WRITE_FAILED: ${String(error)}`);}
     });
   }
