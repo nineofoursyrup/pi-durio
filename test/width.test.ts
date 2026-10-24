@@ -43,8 +43,32 @@ test('timed-out CPR cannot be reassigned before its trailing DA1, and contextual
   await assert.rejects(retry,/CONTEXT_MISMATCH/);
 });
 
+// Only the VT operations needed to observe the reserved row and restored caret.
+// Widths describe this controlled terminal, independently of the product profile.
+class ProbeScreen {
+  row=1;column=1;visible=false;line='';saved=[1,1];
+  feed(data:string) {
+    for(const token of data.match(/\x1b\[[0-?]*[ -/]*[@-~]|\x1b.|[^\x1b]+/gs)??[]) {
+      if(token==='\x1b7'){this.saved=[this.row,this.column];continue;}
+      if(token==='\x1b8'){[this.row,this.column]=this.saved;continue;}
+      const cup=/^\x1b\[(\d+);(\d+)H$/.exec(token);
+      if(cup){this.row=Number(cup[1]);this.column=Number(cup[2]);continue;}
+      if(token==='\x1b[2K'&&this.row===2){this.line='';continue;}
+      if(token==='\x1b[?25h')this.visible=true;
+      if(token==='\x1b[?25l')this.visible=false;
+      if(token.startsWith('\x1b'))continue;
+      for(const {segment} of new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(token)) {
+        if(/[\x00-\x1f\x7f]/.test(segment))continue;
+        if(this.row===2)this.line+=segment;
+        this.column+=/^[\x20-\x7e]$/.test(segment)?1:/[\u3400-\u9fff]/.test(segment)?2:1;
+      }
+    }
+  }
+}
+
 class MeasuringTerminal implements Terminal {
   columns=80;rows=24;kittyProtocolActive=false;writes:string[]=[];stopped=false;
+  screen=new ProbeScreen();
   input:(data:string)=>void=()=>{};resize:()=>void=()=>{};
   hold?:string;held:Array<()=>void>=[];samples:string[]=[];
   private buffer=new StdinBuffer();
@@ -52,7 +76,7 @@ class MeasuringTerminal implements Terminal {
   start(input:(data:string)=>void,resize:()=>void){this.input=input;this.resize=resize;}
   key(data:string){this.buffer.process(data);}
   write(data:string){
-    this.writes.push(data);
+    this.writes.push(data);this.screen.feed(data);
     const probe=/\x1b\[2;1H\x1b\[2K([^\x1b]*)\x1b\[6n/.exec(data);
     if(!probe)return;
     const sample=probe[1];this.samples.push(sample);
@@ -68,6 +92,50 @@ class MeasuringTerminal implements Terminal {
   moveBy(){}hideCursor(){this.write('\x1b[?25l');}showCursor(){this.write('\x1b[?25h');}clearLine(){}clearFromCursor(){}clearScreen(){}setTitle(){}setProgress(){}setProgramStatus(){}
 }
 async function until(predicate:()=>boolean){for(let i=0;i<300;i++){if(predicate())return;await new Promise(r=>setTimeout(r,10));}throw Error('condition timed out');}
+
+test('both width samples leave a clean row and restored caret while split CPR and DA1 are delayed',async()=>{
+  for(const grapheme of ['异','束'])for(const visible of [false,true]) {
+    const terminal=new MeasuringTerminal(),ordinary:string[]=[];
+    terminal.hold=grapheme;terminal.write(`\x1b[20;9H\x1b[?25${visible?'h':'l'}`);
+    const probe=new TerminalWidthProbe(terminal,1200,()=>visible);
+    terminal.start(data=>{if(!probe.consume(data))ordinary.push(data);},()=>{});
+    const measuring=probe.measure(grapheme,new AbortController().signal);
+    try {
+      assert.equal(terminal.screen.line,'','the bare sample is erased before its reply arrives');
+      assert.deepEqual([terminal.screen.row,terminal.screen.column,terminal.screen.visible],[20,9,visible]);
+      await new Promise(resolve=>setTimeout(resolve,20));
+      terminal.held.shift();terminal.key('x\x1b[2;');
+      await new Promise(resolve=>setTimeout(resolve,2));terminal.key('3R\x1b[?1;');
+      assert.deepEqual(terminal.samples,[grapheme],'CPR alone cannot begin the context query');
+      terminal.key('2c');await until(()=>terminal.held.length===1);
+      assert.equal(terminal.screen.line,'','the context sample is also erased before waiting');
+      assert.deepEqual([terminal.screen.row,terminal.screen.column,terminal.screen.visible],[20,9,visible]);
+      terminal.release();assert.equal(await measuring,2);
+      assert.deepEqual(terminal.samples,[grapheme,`A${grapheme}B`]);
+      assert.deepEqual(ordinary,['x']);
+    } finally {terminal.release();await measuring;}
+  }
+});
+
+test('cancelled and timed-out probes leave no sample and retain their DA1 boundary',async()=>{
+  for(const cancel of [false,true]) {
+    const terminal=new MeasuringTerminal();terminal.hold='异';terminal.write('\x1b[20;9H\x1b[?25h');
+    const probe=new TerminalWidthProbe(terminal,30,()=>true),controller=new AbortController();
+    terminal.start(data=>{probe.consume(data);},()=>{});
+    const measuring=probe.measure('异',controller.signal);
+    const rejected=assert.rejects(measuring,cancel?/WIDTH_PROBE_CANCELLED/:/WIDTH_CPR_TIMEOUT/);
+    try {
+      if(cancel)controller.abort();await rejected;
+      assert.equal(terminal.screen.line,'');
+      assert.deepEqual([terminal.screen.row,terminal.screen.column,terminal.screen.visible],[20,9,true]);
+      assert.equal(probe.canRetry,false);
+      terminal.key('\x1b[2;3R');assert.equal(probe.canRetry,false);
+      terminal.release();assert.equal(probe.canRetry,true);
+      assert.equal(probe.observations.length,0,'failed exchanges cannot publish widths');
+    } finally {terminal.release();await rejected;}
+  }
+});
+
 function calibratedFixture(transportOverride?:typeof fetch,onProviderEntered?:()=>void){
   const root=mkdtempSync(join(tmpdir(),'durio-calibrated-')),workspace=join(root,'project');mkdirSync(workspace);writeFileSync(join(workspace,'README.md'),'Fixture');
   const terminal=new MeasuringTerminal(),transport=demoTransport(),draftRoot=join(root,'drafts');
@@ -86,6 +154,8 @@ test('resize during an outstanding width query automatically remeasures and pain
     f.terminal.hold='Ω';f.terminal.key('Ω');await until(()=>f.terminal.held.length===1);
     const before=f.terminal.writes.length;
     f.terminal.columns=244;f.terminal.rows=68;f.terminal.resize();
+    f.terminal.key('\x0c');
+    assert.equal(f.terminal.screen.line,'','Ctrl+L and resize must not expose the pending sample');
     f.terminal.release();
     await until(()=>f.painted()||f.terminal.writes.slice(before).some(data=>data.includes('Display unverified')));
     assert.doesNotMatch(f.terminal.writes.slice(before).join(''),/Display unverified/,'the late window-change result must not wait for another resize or Ctrl+L');
