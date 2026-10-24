@@ -7,8 +7,8 @@ import {isDeepStrictEqual} from 'node:util';
 import {compareTrials,type ComparisonTrial} from './comparison.js';
 import {Evidence,readObject,openHostReadonly,type BlobRef} from '../evidence.js';
 import {retainExecutionOutput} from '../execution-output.js';
-import {acquireOwner} from '../ownership.js';
-import {fixEvidence,verifyFixed} from '../fixed-evidence.js';
+import {acquireOwner,type OwnerLease} from '../ownership.js';
+import {fixEvidence,verifyFixed,type FixRequest} from '../fixed-evidence.js';
 import {PersistentBudget} from '../provider-boundary.js';
 import {scriptedTransport} from '../offline.js';
 import {loadEvalPlan,runtimeContent,validatePlan,validateGrader,type EvalPlan,type EvalTrial} from './plan.js';
@@ -33,6 +33,10 @@ export interface Grade {id:string;trialId:string;outcome:string;graderVersion:st
 function planFix(root:string,id:string){const db=openHostReadonly(root);try{for(const row of db.prepare("SELECT seq,body FROM records WHERE run_id=? AND kind='evidence.fixed'").iterate(id)){const ref=JSON.parse(String(row.body)),fact=JSON.parse(readObject(root,ref).toString());if(fact.id===`eval-plan:${id}`){const result=verifyFixed(root,`e1:${row.seq}:${ref.sha256}`);if(result.state!=='protected')throw Error('EVAL_PLAN_CONTENT_UNAVAILABLE');return;}}throw Error('EVAL_PLAN_NOT_FIXED');}finally{db.close();}}
 function verifyBoundaryContent(root:string,plan:EvalPlan){if(!plan.environment.hostFiles?.length)throw Error('EVAL_HOST_CONTENT_MISSING');for(const file of plan.environment.hostFiles){if(file.path.split('/').some(part=>part==='..')||!readFileSync(new URL('../'+file.path,import.meta.url)).equals(readObject(root,file.ref)))throw Error('EVAL_HOST_CONTENT_CHANGED');}if(!plan.environment.boundaryFiles?.length)throw Error('EVAL_BOUNDARY_CONTENT_MISSING');for(const file of plan.environment.boundaryFiles){if(!['boundary.mjs','export.mjs','restrict.py'].includes(file.path)||!readFileSync(new URL('../../execution/isolation/'+file.path,import.meta.url)).equals(readObject(root,file.ref)))throw Error('EVAL_BOUNDARY_CONTENT_CHANGED');}}
 function outcomeProtection(root:string,id:string,through:number){if(!through)return 'no-outcomes';const db=openHostReadonly(root);let failure='not-fixed';try{for(const row of db.prepare("SELECT seq,body FROM records WHERE run_id=? AND kind='evidence.fixed' ORDER BY seq DESC").iterate(id)){const ref=JSON.parse(String(row.body)),fact=JSON.parse(readObject(root,ref).toString());if(fact.snapshot<through)continue;const result=verifyFixed(root,`e1:${row.seq}:${ref.sha256}`);if(result.state==='protected')return 'protected';failure=result.state;}return failure;}finally{db.close();}}
+async function fixEvalEvidence(root:string,evidence:Evidence,request:FixRequest,owner:OwnerLease){
+ try{return await fixEvidence(root,request,owner);}
+ catch(error){appendFact(evidence,'eval.fix-failed',{id:request.id,reason:String(error)});throw error;}
+}
 function snapshot(e:Evidence,budget:PersistentBudget,trialId:string){const result=budget.snapshot();e.append('eval.budget-snapshot',{trialId,...result});return result;}
 function classify(result:RestrictedResult,error:string|null,guest:any):TrialStatus{
  if(result.status==='invalid'||!result.terminated&&result.status!=='not-started')return 'invalid';if(result.reason==='deadline')return'budget-stopped';if(result.reason==='cancelled')return'cancelled';if(error?.includes('BUDGET_'))return'budget-stopped';if(result.reason==='timeout')return'timeout';if(error)return'service-error';if(guest?.reason?.includes('CONTROLLED_ORIGINAL_WRITE_FAILURE'))return'original-error';return result.code===0&&guest?.status==='completed'?'completed':'error';
@@ -125,7 +129,7 @@ async function runEvalOwned(options:RunEvalOptions,cleanup:EvalCleanupTracker){
    if(outcome.valid){const gradeAt=performance.now();const grade=await gradeOutcome(e,plan,trial,fixture,{...outcome,source:outcomeSource},engine,options.directory,signal,plan.budget.deadline);outcome.timing.gradingMs=performance.now()-gradeAt;appendFact(e,'eval.grade',grade);appendFact(e,'eval.timing',{trialId:trial.id,gradingMs:outcome.timing.gradingMs});if(grade.reason.startsWith('isolation:'))stopReason=grade.reason;}
   }
   finalSource=appendFact(e,'eval.closed',{at:new Date().toISOString(),budget:budget.snapshot(),stopReason});
-  if(finalSource)await fixEvidence(options.dataRoot,{id:`eval-outcomes:${plan.id}`,sources:[finalSource],purpose:'retain every trial outcome, provider original, grade and dependency; no outcome overwrite'},owner);
+  if(finalSource)await fixEvalEvidence(options.dataRoot,e,{id:`eval-outcomes:${plan.id}`,sources:[finalSource],purpose:'retain every trial outcome, provider original, grade and dependency; no outcome overwrite'},owner);
  }finally{try{if(evidence){evidence.close();cleanup.receipt.storage='closed';}}finally{await owner.release();cleanup.receipt.owner='released';}}
  return evalReport(options.dataRoot,plan.id);
 }
@@ -163,7 +167,8 @@ async function gradeOutcome(e:Evidence,plan:EvalPlan,trial:EvalTrial,fixture:Eva
 }
 export function evalReport(root:string,id:string,options:{asOf?:number}={}){
  const plan=loadEvalPlan(root,id),allFacts=evalFacts(root,id),facts=allFacts.filter(f=>options.asOf===undefined||f.seq<=options.asOf);
- const outcomeAvailability=outcomeProtection(root,id,Math.max(0,...facts.filter(f=>['eval.outcome','eval.grade','eval.applicability','eval.grader-revision'].includes(f.kind)).map(f=>f.seq)));
+ const outcomeThrough=Math.max(0,...facts.filter(f=>['eval.outcome','eval.grade','eval.applicability','eval.grader-revision'].includes(f.kind)).map(f=>f.seq));
+ const outcomeAvailability=outcomeProtection(root,id,outcomeThrough),fixFailure=facts.findLast(f=>f.kind==='eval.fix-failed'&&f.seq>outcomeThrough);
  let planAvailability='protected';try{planFix(root,id);}catch(error){planAvailability=String(error);}
  const revisions=facts.filter(f=>f.kind==='eval.grader-revision');
  const latestRevision=revisions.at(-1),regrading=latestRevision?(facts.findLast(f=>f.kind==='eval.regrade-closed'&&f.data.revision===latestRevision.source)?.data??{revisionId:latestRevision.data.id,state:'unknown',reason:'No terminal regrade receipt; existing grades and remaining scope stay visible'}) : null;
@@ -186,11 +191,16 @@ export function evalReport(root:string,id:string,options:{asOf?:number}={}){
   const applicability=facts.findLast(f=>f.kind==='eval.applicability'&&f.data.trialId===trial.id);
   const outcome:any=saved?{...saved.data,source:saved.source}:{trialId:trial.id,status:facts.some(f=>f.kind==='eval.trial-started'&&f.data.trialId===trial.id)?'unknown':'not-run',started:facts.some(f=>f.kind==='eval.trial-started'&&f.data.trialId===trial.id),valid:false,reason:'No final outcome acquired; never restart this identity automatically'};
   if(applicability){outcome.valid=applicability.data.valid;outcome.applicability={...applicability.data,source:applicability.source};}
-  if(planAvailability!=='protected'||outcomeAvailability!=='protected'){outcome.valid=false;outcome.evidenceAvailability=planAvailability!=='protected'?planAvailability:outcomeAvailability;}
-  if(saved)try{for(const file of saved.data.artifacts??[])readObject(root,file.ref);if(saved.data.isolation)readObject(root,saved.data.isolation);}catch(error){outcome.valid=false;outcome.evidenceAvailability=String(error);}
   const grades=facts.filter(f=>f.kind==='eval.grade'&&f.data.trialId===trial.id),revision=revisions.findLast(f=>f.data.graders[trial.caseId]);
   // A partially applied revision may never mix a new side with an old side.
   const grade=grades.filter(f=>revision?f.data.revision===revision.source:!f.data.revision).at(-1);
+  if(planAvailability!=='protected'){outcome.valid=false;outcome.evidenceAvailability=planAvailability;}
+  if(saved)try{for(const file of saved.data.artifacts??[])readObject(root,file.ref);if(saved.data.isolation)readObject(root,saved.data.isolation);}catch(error){outcome.valid=false;outcome.evidenceAvailability=String(error);}
+  if(saved&&outcomeAvailability!=='protected'){
+   if(outcomeAvailability==='not-fixed'&&!fixFailure){if(outcome.valid)outcome.pending=grade?'fixing':'grading';}
+   else outcome.evidenceAvailability=fixFailure?`EVAL_FIX_FAILED: ${fixFailure.data.reason}`:outcomeAvailability;
+   outcome.valid=false;
+  }
   const timings=facts.filter(f=>f.kind==='eval.timing'&&f.data.trialId===trial.id),trialRequests=requests.filter(r=>r.operationId===trial.id),usage=costs(trialRequests);
   const complete=!!saved&&outcome.started&&outcome.valid,dispatchComplete=trialRequests.every(r=>r.dispatch),metricReasons:ComparisonTrial['metricReasons']={};
   const metrics={requests:complete&&dispatchComplete?usage.dispatches:null,tokens:complete&&!usage.missing?usage.knownTokens:null,cost:complete?usage.totalValue:null,taskMs:complete&&Number.isFinite(outcome.timing?.taskMs)&&outcome.timing.taskMs>=0?outcome.timing.taskMs:null};
@@ -223,7 +233,7 @@ export function formatEvalReport(report:ReturnType<typeof evalReport>,root:strin
  return [`Eval ${readDisplayIndex(root).label('eval-plan',report.planId)} · ${report.mode} · 报告快照 #${report.asOf}`,report.scope,...(report.regrading?[`评分执行 ${report.regrading.revisionId}: ${report.regrading.state} · 未评分 ${JSON.stringify(report.regrading.remaining??null)}`]:[]),...report.ruleImpact.map(r=>`旧规则结论受后续评分修订影响：${r.revision} (${r.cases.join(', ')})；原判断保留`),`固定证据：plan ${report.planAvailability} / outcomes ${report.outcomeAvailability}`,`计划 ${report.counts.planned} / 启动 ${report.counts.started} / 完成 ${report.counts.completed} / 可评分 ${report.counts.gradable} / 通过 ${report.counts.passed}`,`通过率 ${report.counts.passRate??'N/A'} · 完成率 ${report.counts.completionRate??'N/A'} · 覆盖率 ${report.counts.coverageRate??'N/A'}`,
   ...Object.entries(report.sides).map(([side,v])=>`${side}: 计划 ${v.planned} / 启动 ${v.started} / 完成 ${v.completed} / 可评分 ${v.gradable} / 通过 ${v.passed}`),
   ...(c?[`效果：${c.conclusion} · ${c.reason}`,c.scope,...c.evidenceGaps.map(reason=>`证据缺口：${reason}`),`有效配对 ${c.validPairs}/${c.pairs.length}`,`保护回归 R/V=${c.regression.counts.regressed}/${c.regression.counts.valid} (${c.regression.counts.regressionRate??'N/A'})；覆盖 V/P=${c.regression.counts.valid}/${c.regression.counts.planned} (${c.regression.counts.coverageRate??'N/A'})`,...c.pairs.map(p=>`配对 ${p.id} ${p.role}: ${value(objective,p.before)} → ${value(objective,p.after)}；d=${report.plan.comparison?.scale==='relative'&&objective!=='task-pass'&&p.delta!==null?`${(p.delta*100).toFixed(1)}%`:value(objective,p.delta)}${p.exclusion?' · '+p.exclusion:''}`),...c.regression.pairs.map(p=>`保护 ${p.requirement}/${p.caseId}/${p.repeat}: ${value(protectionMetric(p.requirement),p.before)} → ${value(protectionMetric(p.requirement),p.after)} · ${p.regressed?'新增退化':p.reason??'可比较'}`)]:[]),
-  ...report.trials.map(t=>`${t.id} ${t.side} ${t.caseId}: ${t.outcome.status}, ${t.grade?.judgment??'ungraded'}${t.outcome.valid?'':' [正式评分排除: '+(t.outcome.evidenceAvailability??t.outcome.status)+']'} · ${t.outcome.reason??t.grade?.reason??''}`),
+  ...report.trials.map(t=>`${t.id} ${t.side} ${t.caseId}: ${t.outcome.status}, ${t.grade?.judgment??'ungraded'}${t.outcome.valid?'':' [正式评分排除: '+(t.outcome.evidenceAvailability??(t.outcome.pending==='grading'?'待评分':t.outcome.pending==='fixing'?'待固定':t.outcome.status))+']'} · ${t.outcome.reason??t.grade?.reason??''}`),
   ...report.gradingRevisions.map(r=>`评分修订 ${r.id} · 受影响 ${Object.keys(r.graders).join(', ')} · 原报告 ${JSON.stringify(r.previousReport??null)}`),...costLines,`时间 ${JSON.stringify(report.timing)}`].join('\n');
 }
 
@@ -251,7 +261,7 @@ async function regradeEvalOwned(options:RegradeEvalOptions,cleanup:EvalCleanupTr
   }
   const remaining=affected.filter(id=>!attempted.includes(id));source=appendFact(evidence,'eval.regrade-closed',{revisionId:options.revisionId,revision,state:abort.signal.aborted?'cancelled':remaining.length||unknown?'incomplete':'completed',affected,attempted,remaining,gradeSources,reason:abort.signal.aborted?'Cancellation stopped the in-flight VM and prevented later grading; no old grades fill the new revision':remaining.length||unknown?'Some affected saved outcomes remain unavailable, ungraded or unknown':null});
   source??=revision;
-  await fixEvidence(options.dataRoot,{id:`eval-grade:${plan.id}:${options.revisionId}`,sources:[source!],purpose:'retain new grader content and additive judgment over unchanged outcomes'},owner);
+  await fixEvalEvidence(options.dataRoot,evidence,{id:`eval-grade:${plan.id}:${options.revisionId}`,sources:[source!],purpose:'retain new grader content and additive judgment over unchanged outcomes'},owner);
  }finally{options.signal?.removeEventListener('abort',cancel);try{if(evidence){evidence.close();cleanup.receipt.storage='closed';}}finally{await owner.release();cleanup.receipt.owner='released';}}
  return evalReport(options.dataRoot,plan.id);
 }
