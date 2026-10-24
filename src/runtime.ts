@@ -639,7 +639,12 @@ async function executeTask(options: CodingTaskOptions, coding: boolean, recovery
             return response;
           },
           signal: AbortSignal.any([controller.signal, ...(streamOptions?.signal ? [streamOptions.signal] : [])]),
-          onPayload: payload => { guard(); record('model.payload', { attemptId, payload, boundary: 'Pi provider onPayload before dispatch', transform: '@earendil-works/pi-ai@1.1.0/openai-completions' }); },
+          onPayload: payload => {
+            guard();
+            const effective=purpose==='improve'?{...(payload as object),response_format:{type:'json_object'}}:payload;
+            record('model.payload', { attemptId, payload:effective, boundary: 'Pi provider onPayload before dispatch', transform: '@earendil-works/pi-ai@1.1.0/openai-completions'+(purpose==='improve'?'+pi-durio/improve-json-output-v1':'') });
+            return effective;
+          },
           onProviderStreamEvent: event => {
             const candidate = event as { usage?: { prompt_tokens?: number; completion_tokens?: number } };
             if (typeof candidate.usage?.prompt_tokens === 'number' && typeof candidate.usage?.completion_tokens === 'number') hasUsage = true;
