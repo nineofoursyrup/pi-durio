@@ -1,4 +1,4 @@
-import { openHostReadonly, readObject } from './evidence.js';
+import { openHostReadonly, readObject, type HostReadonlySnapshot } from './evidence.js';
 import { boundedInteger } from './history.js';
 import { taskTypeOf } from './task-type.js';
 
@@ -38,7 +38,7 @@ export class SessionChains {
   private readonly last = new Map<string, { seq: number; at: string }>();
   /** Heads in last-activity order, newest first. */
   private readonly recent: string[];
-  constructor(private readonly root: string, readonly through: number, private readonly nodes: Map<string, Node>, activity = new Map<string, { seq: number; at: string }>()) {
+  constructor(private readonly root: string, readonly through: number, private readonly nodes: Map<string, Node>, activity = new Map<string, { seq: number; at: string }>(), private readonly snapshot?: HostReadonlySnapshot) {
     for (const node of nodes.values()) {
       const value = activity.get(node.runId) ?? { seq: node.seq, at: node.at };
       if (value.seq > (this.last.get(node.head)?.seq ?? 0)) this.last.set(node.head, value);
@@ -125,19 +125,19 @@ export class SessionChains {
   }
   private read(runId: string) {
     if (!this.accepted.has(runId)) {
-      const db = openHostReadonly(this.root);let row: Record<string, unknown> | undefined;
+      const db = this.snapshot?.database ?? openHostReadonly(this.root);let row: Record<string, unknown> | undefined;
       try { row = db.prepare("SELECT body FROM records WHERE run_id=? AND kind='task.accepted' AND seq<=? ORDER BY seq LIMIT 1").get(runId, this.through) as Record<string, unknown> | undefined; }
-      finally { db.close(); }
+      finally { if (!this.snapshot) db.close(); }
       this.accepted.set(runId, row ? JSON.parse(readObject(this.root, JSON.parse(String(row.body))).toString()) : null);
     }
     return this.accepted.get(runId);
   }
   private status(runId: string): SessionTaskStatus {
-    const db = openHostReadonly(this.root);let closed: Record<string, unknown> | undefined, started: unknown;
+    const db = this.snapshot?.database ?? openHostReadonly(this.root);let closed: Record<string, unknown> | undefined, started: unknown;
     try {
       closed = db.prepare("SELECT kind,body FROM records WHERE run_id=? AND seq<=? AND kind IN ('run.closed','recovery.closed','recovery.ended') ORDER BY seq DESC LIMIT 1").get(runId, this.through) as Record<string, unknown> | undefined;
       started = closed ? true : db.prepare("SELECT 1 FROM records WHERE run_id=? AND seq<=? AND kind='run.started' LIMIT 1").get(runId, this.through);
-    } finally { db.close(); }
+    } finally { if (!this.snapshot) db.close(); }
     if (!closed) return started ? 'running' : 'accepted';
     if (closed.kind === 'recovery.ended') return 'ended';
     const data = JSON.parse(readObject(this.root, JSON.parse(String(closed.body))).toString());
@@ -150,10 +150,10 @@ export class SessionChains {
  * Derives the session chains of one data root at a snapshot. Only `task.accepted` row identities and the
  * small `context.imported` bodies are read here; task details are decoded lazily for the pages asked for.
  */
-export function readSessionChains(root: string, options: { through?: number } = {}) {
+export function readSessionChains(root: string, options: { through?: number } = {}, snapshot?: HostReadonlySnapshot) {
   const nodes = new Map<string, Node>();
   let db: ReturnType<typeof openHostReadonly>;
-  try { db = openHostReadonly(root); }
+  try { db = snapshot?.database ?? openHostReadonly(root); }
   catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return new SessionChains(root, 0, nodes); throw error; }
   let rows: Record<string, unknown>[], through: number;
   const activity = new Map<string, { seq: number; at: string }>();
@@ -161,7 +161,7 @@ export function readSessionChains(root: string, options: { through?: number } = 
     through = options.through ?? Number((db.prepare('SELECT COALESCE(MAX(seq),0) AS n FROM records').get() as { n: number }).n);
     for (const row of db.prepare("SELECT run_id, MAX(seq) AS seq, at FROM records WHERE seq<=? GROUP BY run_id").all(through)) activity.set(String(row.run_id), { seq: Number(row.seq), at: String(row.at) });
     rows = db.prepare("SELECT seq,run_id,kind,at,body FROM records WHERE kind IN ('task.accepted','context.imported') AND seq<=? ORDER BY seq").all(through) as Record<string, unknown>[];
-  } finally { db.close(); }
+  } finally { if (!snapshot) db.close(); }
   for (const row of rows) {
     const runId = String(row.run_id);
     if (row.kind === 'task.accepted') { if (!nodes.has(runId)) nodes.set(runId, { runId, seq: Number(row.seq), at: String(row.at), parent: null, children: [], depth: 1, head: runId, next: null }); continue; }
@@ -177,5 +177,5 @@ export function readSessionChains(root: string, options: { through?: number } = 
     node.depth = parent.depth + 1;
     if (parent.children[0] === node.runId) { node.head = parent.head; parent.next = node.runId; }
   }
-  return new SessionChains(root, through, nodes, activity);
+  return new SessionChains(root, through, nodes, activity, snapshot);
 }

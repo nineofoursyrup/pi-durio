@@ -1,14 +1,14 @@
-import {openHostReadonly,readObject,digest} from './evidence.js';
+import {openHostReadonly,readObject,digest,type HostReadonlySnapshot} from './evidence.js';
 import type {ImproveCandidate} from './improve.js';
 import {formatAmount} from './cost-estimate.js';
 
 export interface ImproveFact {sourceId:string;runId:string;seq:number;at:string;kind:string;data:any}
 /** Facts remain in the existing host journal; no separate decision database. */
-export function improveFacts(root:string,through=Number.MAX_SAFE_INTEGER):ImproveFact[]{
- const db=openHostReadonly(root);
+export function improveFacts(root:string,through=Number.MAX_SAFE_INTEGER,snapshot?:HostReadonlySnapshot):ImproveFact[]{
+ const db=snapshot?.database??openHostReadonly(root);
  try{return db.prepare("SELECT * FROM records WHERE kind IN ('improve.decision','improve.execution-version','improve.group-started','improve.validation','improve.batch','improve.resume','improve.restore','improve.prepared','improve.check','improve.check-started','improve.eval','improve.batch-started','improve.formal-started','improve.formal','improve.write-intent','improve.write-result','improve.activation','improve.rollback','improve.rollback-request','improve.rollback-intent','improve.rollback-result','improve.default-observed','improve.build-started','improve.build-execution','improve.build-startup','improve.build','improve.build-activation','improve.process-request','improve.process-started','improve.process-result','improve.eval-asset') AND seq<=? ORDER BY seq").all(through).map(row=>{
   const ref=JSON.parse(String(row.body));return {sourceId:`e1:${row.seq}:${ref.sha256}`,runId:String(row.run_id),seq:Number(row.seq),at:String(row.at),kind:String(row.kind),data:JSON.parse(readObject(root,ref).toString())};
- });}finally{db.close();}
+ });}finally{if(!snapshot)db.close();}
 }
 export function problemIdentity(candidate:ImproveCandidate){
  const paths=[...candidate.scope].sort();
@@ -67,8 +67,8 @@ export function decisionBudgetAmount(maxTokens:number,price:{version:string;curr
  if(!price)return {tokens:maxTokens,amount:null,currency:null,version:null,display:'首版选择未固定价格；按记录只显示 token 上限，不重算'};
  const amount=maxTokens*price.perMillionTokens/1e6;return {tokens:maxTokens,amount,currency:price.currency,version:price.version,display:`${formatAmount(amount,price.currency)}（${price.version}，高峰输出价）`};
 }
-export function readImproveDecision(root:string,id:string){
- const facts=improveFacts(root),accepted=facts.find(f=>f.kind==='improve.decision'&&f.data.id===id);
+export function readImproveDecision(root:string,id:string,snapshot?:HostReadonlySnapshot){
+ const facts=improveFacts(root,Number.MAX_SAFE_INTEGER,snapshot),accepted=facts.find(f=>f.kind==='improve.decision'&&f.data.id===id);
  if(!accepted)throw Error('IMPROVE_DECISION_NOT_FOUND');
  const related=facts.filter(f=>f.data.id===id&&f.seq>=accepted.seq),last=related.filter(f=>f.kind==='improve.batch').at(-1);
  const groups=accepted.data.decision.groups.map((g:any)=>{

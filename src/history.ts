@@ -1,4 +1,4 @@
-import { openHostReadonly, readObject, digest, readAcceptedTasks, type AcceptedTaskFact, type BlobRef } from './evidence.js';
+import { openHostReadonly, readObject, digest, readAcceptedTasks, type AcceptedTaskFact, type BlobRef, type HostReadonlySnapshot } from './evidence.js';
 import { readObjectRange, readTextPage } from './query.js';
 import { readDisplayIndex, readRunOrdinals, modelRequestNumber } from './display-number.js';
 import { readSessionChains } from './session-chain.js';
@@ -10,27 +10,27 @@ export interface HistoryFilter { project?:string; session?:string; from?:string;
 export interface HistoryCursor { snapshot:number; after:number; filter:string }
 export const reference = (row:any):EvidenceReference => { const ref=JSON.parse(String(row.body)); return {id:`e1:${row.seq}:${ref.sha256}`,runId:String(row.run_id),seq:Number(row.seq),kind:String(row.kind),at:String(row.at),ref}; };
 export function boundedInteger(n:number,min=0,max=Number.MAX_SAFE_INTEGER) { if(!Number.isSafeInteger(n)||n<min||n>max)throw Error('INVALID_QUERY_RANGE');return n; }
-export function watermark(root:string) { const db=openHostReadonly(root);try{return Number(db.prepare('SELECT COALESCE(MAX(seq),0) AS n FROM records').get()!.n);}finally{db.close();} }
-export function* records(root:string,options:{runId?:string;through?:number;after?:number;kinds?:readonly string[]}={}) {
-  let after=boundedInteger(options.after??0);const through=boundedInteger(options.through??watermark(root));
+export function watermark(root:string,snapshot?:HostReadonlySnapshot) { const db=snapshot?.database??openHostReadonly(root);try{return Number(db.prepare('SELECT COALESCE(MAX(seq),0) AS n FROM records').get()!.n);}finally{if(!snapshot)db.close();} }
+export function* records(root:string,options:{runId?:string;through?:number;after?:number;kinds?:readonly string[]}={},snapshot?:HostReadonlySnapshot) {
+  let after=boundedInteger(options.after??0);const through=boundedInteger(options.through??watermark(root,snapshot));
   for(;;) {
-    const db=openHostReadonly(root);let rows;
+    const db=snapshot?.database??openHostReadonly(root);let rows;
     try{rows=db.prepare(`SELECT * FROM records WHERE seq>? AND seq<=? ${options.runId?'AND run_id=?':''} ${options.kinds?.length?`AND kind IN (${options.kinds.map(()=>'?').join(',')})`:''} ORDER BY seq LIMIT 32`).all(after,through,...options.runId?[options.runId]:[],...options.kinds??[]);}
-    finally{db.close();}
+    finally{if(!snapshot)db.close();}
     if(!rows.length)return;
     for(const row of rows){after=Number(row.seq);yield reference(row);}
   }
 }
 export function decode(root:string,ref:EvidenceReference):any { if(ref.ref.bytes>2*1024*1024)throw Error('EVIDENCE_RECORD_LIMIT');return JSON.parse(readObject(root,ref.ref).toString()); }
-export function resolveEvidence(root:string,id:string):EvidenceReference {
+export function resolveEvidence(root:string,id:string,snapshot?:HostReadonlySnapshot):EvidenceReference {
   const match=/^e1:([1-9][0-9]*):([a-f0-9]{64})$/.exec(id);if(!match)throw Error('INVALID_EVIDENCE_ID');
-  const db=openHostReadonly(root);try{const row=db.prepare('SELECT * FROM records WHERE seq=?').get(boundedInteger(Number(match[1]),1));if(!row)throw Error('EVIDENCE_NOT_FOUND');const ref=reference(row);if(ref.id!==id)throw Error('EVIDENCE_ID_CHANGED');return ref;}finally{db.close();}
+  const db=snapshot?.database??openHostReadonly(root);try{const row=db.prepare('SELECT * FROM records WHERE seq=?').get(boundedInteger(Number(match[1]),1));if(!row)throw Error('EVIDENCE_NOT_FOUND');const ref=reference(row);if(ref.id!==id)throw Error('EVIDENCE_ID_CHANGED');return ref;}finally{if(!snapshot)db.close();}
 }
 function errorState(error:unknown):Availability { return String(error).includes('CORRUPT')?'corrupt':(error as NodeJS.ErrnoException).code==='ENOENT'?'collection-gap':'temporarily-unreadable'; }
-export function readEvidence(root:string,id:string,options:{offset?:number;limit?:number;decodedOutput?:boolean}={}) {
-  const source=resolveEvidence(root,id);
+export function readEvidence(root:string,id:string,options:{offset?:number;limit?:number;decodedOutput?:boolean}={},snapshot?:HostReadonlySnapshot) {
+  const source=resolveEvidence(root,id,snapshot);
   let declared:Availability|undefined;
-  for(const ref of records(root,{kinds:['evidence.availability']})) {const data=decode(root,ref);if(data.sourceId===id||data.sha256===source.ref.sha256)declared=data.state;}
+  for(const ref of records(root,{kinds:['evidence.availability']},snapshot)) {const data=decode(root,ref);if(data.sourceId===id||data.sha256===source.ref.sha256)declared=data.state;}
   if(declared==='cleaned'||declared==='archived')return {source,state:declared,display:'unavailable',error:declared==='cleaned'?'Explicitly cleaned; original judgment remains historical':'Archived; restoration required for this original'};
   try {
     if(options.decodedOutput) {

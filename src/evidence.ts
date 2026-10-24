@@ -63,14 +63,14 @@ function queueFact(root:string,db:DatabaseSync,record:EvidenceRecord,through:num
 }
 
 /** Strictly readonly. `through` bounds admissions AND all status/link/decision facts on every page. */
-export function readQueue(root:string,options:FactPageOptions & {targetRunId?:string}={}) {
-  const db=openHostReadonly(root);
+export function readQueue(root:string,options:FactPageOptions & {targetRunId?:string}={},snapshot?:HostReadonlySnapshot) {
+  const db=snapshot?.database??openHostReadonly(root);
   try {
     const {through,after,limit}=factPage(db,options);
     const rows=db.prepare(`SELECT * FROM records WHERE kind='control.accepted' AND seq>? AND seq<=? ${options.targetRunId?'AND run_id=?':''} ORDER BY seq LIMIT ?`).all(after,through,...(options.targetRunId?[options.targetRunId]:[]),limit+1);
     const items=rows.slice(0,limit).map(row=>queueFact(root,db,decodeRecord(root,row),through));
     return {items,through,next:rows.length>limit?items.at(-1)!.acceptedSeq:null};
-  } finally {db.close();}
+  } finally {if(!snapshot)db.close();}
 }
 
 /** One member per independent acceptance; steer is never a member and a linked follow-up is never counted twice. */
@@ -173,14 +173,45 @@ export function readObject(root: string, ref: BlobRef): Buffer {
   return value;
 }
 
-/** No Harness or writable storage is opened. Paginated host facts reference durable content-addressed originals. */
-export function openHostReadonly(root: string) {
+export function isSqliteBusy(error:unknown) {
+  const code=(error as {errcode?:number}|null)?.errcode;
+  return typeof code==='number'&&(code&0xff)===5;
+}
+
+export interface HostReadonlyPolicy { snapshotWaitMs:number }
+const readonlyWaitSignal=new Int32Array(new SharedArrayBuffer(4));
+
+/** No Harness or writable storage is opened. The explicit policy acquires one
+ * read snapshot within a shared deadline, including retries of schema reads.
+ * Once acquired, its SHARED lock keeps every subsequent query on that snapshot;
+ * no later statement/connection gets another wait budget. Default opens keep
+ * SQLite's zero waiting and existing per-query transaction behavior. */
+export function openHostReadonly(root: string,policy?:HostReadonlyPolicy) {
   const path = join(root, 'host.sqlite');
   const fd = openSync(path, 'r');
   const bytes = Buffer.alloc(20);
   try { readSync(fd, bytes, 0, bytes.length, 0); } finally { closeSync(fd); }
   if (bytes[18] !== 1 || bytes[19] !== 1) throw new Error('RECOVERY_REQUIRED: unsupported host journal; no read-side migration');
-  return new DatabaseSync(path, { readOnly: true });
+  const deadline=performance.now()+(policy?.snapshotWaitMs??0);
+  for(;;) {
+    const db=new DatabaseSync(path,{readOnly:true});
+    if(!policy)return db;
+    try {db.exec('BEGIN; SELECT 1 FROM records LIMIT 1');return db;}
+    catch(error) {
+      db.close();
+      const remaining=deadline-performance.now();
+      if(!isSqliteBusy(error)||remaining<=0)throw error;
+      Atomics.wait(readonlyWaitSignal,0,0,Math.min(10,remaining));
+    }
+  }
+}
+
+/** Lazy opening preserves each caller's existing missing-store/ID semantics. */
+export class HostReadonlySnapshot {
+  private db?:DatabaseSync;
+  constructor(private readonly root:string,private readonly policy:HostReadonlyPolicy) {}
+  get database() {return this.db??=openHostReadonly(this.root,this.policy);}
+  close() {this.db?.close();}
 }
 
 export async function readRun(root: string, runId: string, options: { after?: number; limit?: number } = {}) {
