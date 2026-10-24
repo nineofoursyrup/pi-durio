@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { StdinBuffer, TuiAltScreen, stripTerminalSequences, type Terminal } from '@earendil-works/pi-tui';
 import { Evidence, readObject } from '../src/evidence.js';
 import { fixEvidence } from '../src/fixed-evidence.js';
@@ -14,6 +16,7 @@ import { ownPlanSource } from '../src/eval/overview.js';
 import { EvalPlanView, trialGlyph, trialNote } from '../src/tui/eval.js';
 import { fullScreenHeight, showFullScreen } from '../src/tui/fullscreen.js';
 import { TerminalWidthGate } from '../src/tui/width-gate.js';
+import { acquireOwner, hasOwnerMarker } from '../src/ownership.js';
 
 async function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'durio-eval-pending-')), id = 'pending', evidence = new Evidence(root, id);
@@ -82,13 +85,13 @@ for (const measured of [false, true]) test(`outcome → grade → closed → fix
     const outcome = f.outcome(); await capture('outcome');
     f.grade(outcome); await capture('grade');
     if (gate) terminal.hold = '束';
-    const closed = f.close(); runningHere = false; await capture('closed', measured);
+    const closed = f.close(); await capture('closed', measured);
     if (gate) {
       await until(() => terminal.held.length === 1);
       assert.equal(gate.blocked, true);
       assert.equal(terminal.frames.at(-1), frames.find(f => f.stage === 'grade')!.text, 'the gate retains the previous physical frame');
     }
-    await f.fix(closed); await capture('fixed', measured);
+    await f.fix(closed); runningHere = false; await capture('fixed', measured);
     terminal.release(); await until(() => !gate?.blocked);
     if (!gate) tui.renderNow(true);
     const finalText = terminal.frames.at(-1)!;
@@ -113,6 +116,75 @@ for (const measured of [false, true]) test(`outcome → grade → closed → fix
     assert.equal(frames.find(f => f.stage === 'grade')!.report.trials[0].grade.judgment, 'PASS');
     assert.deepEqual(evalFacts(f.root, f.id).filter(f => ['eval.outcome', 'eval.grade', 'eval.closed'].includes(f.kind)).map(f => f.kind), ['eval.outcome', 'eval.grade', 'eval.closed']);
   } finally { terminal.release(); gate?.beginClose(); await gate?.settle(); tui.stop(); gate?.dispose(); f.facts.close(); }
+});
+
+for (const history of [false, true]) test(`${history ? 'historical' : 'released-owner'} closed outcomes without fixing report an actionable error and stop refreshing`, async () => {
+  const f = await fixture();
+  try {
+    if (!history) {
+      const owner = await acquireOwner(f.root, () => {});
+      try { f.start(); const outcome = f.outcome(); f.grade(outcome); f.close(); }
+      finally { await owner.release(); }
+    } else { const outcome = f.outcome(); f.grade(outcome); f.close(); }
+    const before = readFileSync(join(f.root, 'host.sqlite'));
+    const view = new EvalPlanView(ownPlanSource(f.root, f.id), { openTrial() {} }, { runningHere: () => false });
+    const text = stripTerminalSequences(view.render(132, 38, 'none').join('\n')), report = view.report!, trial = report.trials[0];
+    assert.equal(trialNote(trial), '固定未完成');
+    assert.equal(trialGlyph(trial), 'invalid'); assert.equal(view.live, false);
+    assert.match(text, /固定未完成/); assert.match(text, /pi-durio eval report 查看原因/);
+    assert.doesNotMatch(text, /待评分|待固定|证据不可读/);
+    assert.doesNotMatch(trialNote(trial)!, /不可读|损坏|污染/);
+    assert.match(formatEvalReport(evalReport(f.root, f.id), f.root), /固定未完成/);
+    assert.equal(report.counts.passed, 0); assert.equal(report.counts.gradable, 0); assert.equal(report.counts.passRate, null);
+    assert.equal(trial.outcome.status, 'completed'); assert.equal(trial.grade.judgment, 'PASS');
+    assert.equal(readObject(f.root, f.artifact).toString(), 'Readable outcome bytes');
+    assert.equal(hasOwnerMarker(f.root), false);
+    assert.equal(evalFacts(f.root, f.id).some(fact => fact.kind === 'eval.fix-failed'), false);
+    assert.deepEqual(readFileSync(join(f.root, 'host.sqlite')), before, 'reporting an incomplete fix does not append or migrate facts');
+  } finally { f.facts.close(); }
+});
+
+test('a closed batch stays pending while its owner is held, then stops after release without fixing', async t => {
+  const f = await fixture(), owner = await acquireOwner(f.root, () => {});
+  let released = false, now = Date.now(); t.mock.method(Date, 'now', () => now);
+  try {
+    f.start(); const outcome = f.outcome(); f.grade(outcome); f.close();
+    const before = readFileSync(join(f.root, 'host.sqlite'));
+    const view = new EvalPlanView(ownPlanSource(f.root, f.id), { openTrial() {} }, { runningHere: () => false });
+    const text = stripTerminalSequences(view.render(132, 38, 'none').join('\n'));
+    assert.equal(trialNote(view.report!.trials[0]), '待固定'); assert.equal(view.live, true);
+    assert.match(text, /待固定/); assert.doesNotMatch(text, /固定未完成|证据不可读/);
+    assert.equal(view.report!.counts.passed, 0); assert.equal(view.report!.counts.gradable, 0);
+    owner.assertHeld();
+    await owner.release(); released = true; now += 1001;
+    const stopped = stripTerminalSequences(view.render(132, 38, 'none').join('\n'));
+    assert.match(stopped, /固定未完成/); assert.match(stopped, /pi-durio eval report 查看原因/);
+    assert.doesNotMatch(stopped, /待固定|待评分|证据不可读/); assert.equal(view.live, false);
+    assert.deepEqual(readFileSync(join(f.root, 'host.sqlite')), before, 'polling never writes failure facts or takes ownership');
+  } finally { if (!released) await owner.release(); f.facts.close(); }
+});
+
+test('a killed owner leaves readable outcomes and stale markers but cannot keep fixing live', async t => {
+  const f = await fixture();
+  const child = spawn(process.execPath, ['--input-type=module', '-e', `import { acquireOwner } from ${JSON.stringify(new URL('../src/ownership.js', import.meta.url).href)}; await acquireOwner(process.argv[1], () => {}); process.send('ready'); process.on('message', () => {});`, f.root], { stdio: ['ignore', 'ignore', 'pipe', 'ipc'] });
+  let exited = false, now = Date.now(); t.mock.method(Date, 'now', () => now);
+  const exit = once(child, 'exit');
+  try {
+    await once(child, 'message');
+    f.start(); const outcome = f.outcome(); f.grade(outcome); f.close();
+    const view = new EvalPlanView(ownPlanSource(f.root, f.id), { openTrial() {} }, { runningHere: () => false });
+    assert.equal(trialNote(view.report!.trials[0]), '待固定'); assert.equal(view.live, true);
+    child.kill('SIGKILL'); await exit; exited = true;
+    assert.equal(hasOwnerMarker(f.root), true, 'SIGKILL leaves the owner markers for explicit recovery');
+    const before = readFileSync(join(f.root, 'owner.json')), database = readFileSync(join(f.root, 'host.sqlite'));
+    now += 1001;
+    const text = stripTerminalSequences(view.render(132, 38, 'none').join('\n'));
+    assert.match(text, /固定未完成/); assert.match(text, /pi-durio eval report 查看原因/);
+    assert.doesNotMatch(text, /待固定|待评分|证据不可读/); assert.equal(view.live, false);
+    assert.equal(readObject(f.root, f.artifact).toString(), 'Readable outcome bytes');
+    assert.deepEqual(readFileSync(join(f.root, 'owner.json')), before, 'stale claims are never replaced or removed by a reader');
+    assert.deepEqual(readFileSync(join(f.root, 'host.sqlite')), database);
+  } finally { if (!exited) { child.kill('SIGKILL'); await exit; } f.facts.close(); }
 });
 
 for (const failure of ['missing', 'corrupt'] as const) test(`real ${failure} evidence stays excluded with an actionable note`, async () => {

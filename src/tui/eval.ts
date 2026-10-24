@@ -11,6 +11,7 @@ import { COLOR_TIER, SPINNER_FRAMES, SPINNER_INTERVAL_MS, styledLine, horizontal
 import { SPACER, boxInnerWidth, clean, escHint, fixedFrame, fitSegments as fit, hintLine, settleSpacers, statusError, truncateEnd, widthTier } from './view-stack.js';
 import { formatDuration, formatTokens } from './trace.js';
 import { clock } from './session-screen.js';
+import { hasLiveOwner } from '../ownership.js';
 
 // ─── 纯函数：字形、d、四格、判定原因（oracle 与 golden 共用） ─────────────────
 
@@ -34,10 +35,13 @@ const STATUS_NOTE: Record<string, string> = {
   timeout: '超时', cancelled: '取消', 'budget-stopped': '预算停止', 'service-error': '服务故障', invalid: '无效',
   'preparation-error': '准备失败', 'original-error': '原文写入失败', error: '任务出错',
 };
+function evidenceFailureNote(failure: string): string {
+  return failure.startsWith('EVAL_FIX_FAILED:') ? '固定失败' : failure.startsWith('EVAL_FIX_INCOMPLETE:') ? '固定未完成' : '证据不可读';
+}
 export function trialNote(t: EvalReportTrial, runningHere = false): string | null {
   if (t.outcome.status === 'not-run') return null;
   if (t.outcome.status === 'unknown') return runningHere ? '运行中' : '未取得结果';
-  if (t.outcome.evidenceAvailability) return t.outcome.evidenceAvailability.startsWith('EVAL_FIX_FAILED:') ? '固定失败' : '证据不可读';
+  if (t.outcome.evidenceAvailability) return evidenceFailureNote(t.outcome.evidenceAvailability);
   const note = STATUS_NOTE[t.outcome.status];
   const pending = t.outcome.pending === 'grading' ? '待评分' : t.outcome.pending === 'fixing' ? `${t.grade?.judgment === 'unknown' ? '无法评分 · ' : ''}待固定` : null;
   if (pending) return [note, pending].filter(Boolean).join(' · ');
@@ -268,10 +272,10 @@ export class EvalPlanView {
   refresh(){this.read();if(this.current)this.revisions=[this.source.through,...this.current.gradingRevisions.toReversed().map(r=>Number(String(r.source).split(':')[1])-1)];}
   private now() { return this.options.now?.() ?? Date.now(); }
   private runningHere() { return !!this.options.runningHere?.(); }
-  /** 最新报告在批次运行或结果待固定时继续跟踪；关闭后仍可能追加固定记录。 */
-  get live() { return this.source.through === undefined && !!this.current && this.revision === 0 && (planState(this.current) === 'running' || this.current.trials.some(t => t.outcome.pending)); }
+  /** 待完成报告再读一次以观察 owner 释放；进程已退出的报告不再轮询。 */
+  get live() { return this.source.through === undefined && !!this.current && this.revision === 0 && (this.current.trials.some(t => t.outcome.pending) || planState(this.current) === 'running' && (this.runningHere() || hasLiveOwner(this.source.root))); }
   private read() {
-    try { const read = readPlanReport(this.source, { asOf: this.revisions[this.revision] }); this.current = read.report; this.from = read.from; this.error = undefined; }
+    try { const read = readPlanReport(this.source, { asOf: this.revisions[this.revision], runningHere: this.runningHere() }); this.current = read.report; this.from = read.from; this.error = undefined; }
     catch (error) { const text = clean(String((error as Error)?.message ?? error)); this.error = { message: '计划报告不可读取', code: text.replace(/^Error:\s*/, '').split(/[\s:]/)[0] || 'EVAL_REPORT_UNAVAILABLE' }; }
     this.lastRead = Date.now();
   }
@@ -342,7 +346,7 @@ export class EvalPlanView {
     const selectedRow = rows[this.caseIndex];
     const failure = this.selectedTrial?.outcome.evidenceAvailability;
     const summary = [...tierW === 'wide' ? [] : [line([{ text: truncateEnd(clean(`${selectedRow?.id ?? ''} · ${this.trialLabel(rows)}${selectedRow?.note ? ` · ${selectedRow.note}` : ''}`), width), fg: 'fg.body' }])],
-      ...failure ? statusError(failure.startsWith('EVAL_FIX_FAILED:') ? '固定失败' : '证据不可读', clean(failure).replace(/^Error:\s*/, '').split(/[\s:]/)[0], 'pi-durio eval report 查看原因', width, tier) : []];
+      ...failure ? statusError(evidenceFailureNote(failure), clean(failure).replace(/^Error:\s*/, '').split(/[\s:]/)[0], 'pi-durio eval report 查看原因', width, tier) : []];
     // 高度不够时依次：收空行（矩阵行间、块间）、收图例与计数公式行（含预算说明行）、判定框收成一行、主体滚动且选中案例始终可见。
     // SPACER 的去留与 fixedFrame 同一规则（settleSpacers）；紧凑时先去掉，再逐级收起。
     let matrix = this.matrix(report, rows, width, tier, true), full = [...body, ...matrix.lines, SPACER, legend, line([]), ...lower(true)], foot = [SPACER, ...box, status, ...summary, hint];

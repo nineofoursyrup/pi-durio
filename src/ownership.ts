@@ -21,6 +21,21 @@ export function hasOwnerMarker(path: string): boolean {
   return false;
 }
 
+/** Read-only progress check for a same-host holder; stale markers grant no liveness or write authority. */
+export function hasLiveOwner(path: string): boolean {
+  try {
+    const canonical = realpathSync(path);
+    lstatSync(`${canonical}.lock`);
+    const claim = JSON.parse(readFileSync(join(canonical, 'owner.json'), 'utf8'));
+    if (claim.host !== hostname()) return false;
+    process.kill(claim.pid, 0);
+    return true;
+  } catch (error) {
+    if (missing(error) || error instanceof Error && 'code' in error && error.code === 'ESRCH') return false;
+    throw error;
+  }
+}
+
 function rejectExisting(canonical: string) {
   for (const marker of [`${canonical}.lock`, join(canonical, 'owner.json')]) {
     try { lstatSync(marker); } catch (error) { if (missing(error)) continue; throw error; }

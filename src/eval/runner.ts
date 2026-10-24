@@ -7,7 +7,7 @@ import {isDeepStrictEqual} from 'node:util';
 import {compareTrials,type ComparisonTrial} from './comparison.js';
 import {Evidence,readObject,openHostReadonly,type BlobRef} from '../evidence.js';
 import {retainExecutionOutput} from '../execution-output.js';
-import {acquireOwner,type OwnerLease} from '../ownership.js';
+import {acquireOwner,hasLiveOwner,type OwnerLease} from '../ownership.js';
 import {fixEvidence,verifyFixed,type FixRequest} from '../fixed-evidence.js';
 import {PersistentBudget} from '../provider-boundary.js';
 import {scriptedTransport} from '../offline.js';
@@ -165,10 +165,11 @@ async function gradeOutcome(e:Evidence,plan:EvalPlan,trial:EvalTrial,fixture:Eva
  }catch(error){grade.reason=(grade.judgment==='FAIL'?grade.reason+'; ':'')+String(error);}finally{await gradingProbe?.close();}
  return grade;
 }
-export function evalReport(root:string,id:string,options:{asOf?:number}={}){
+export function evalReport(root:string,id:string,options:{asOf?:number;runningHere?:boolean}={}){
  const plan=loadEvalPlan(root,id),allFacts=evalFacts(root,id),facts=allFacts.filter(f=>options.asOf===undefined||f.seq<=options.asOf);
  const outcomeThrough=Math.max(0,...facts.filter(f=>['eval.outcome','eval.grade','eval.applicability','eval.grader-revision'].includes(f.kind)).map(f=>f.seq));
  const outcomeAvailability=outcomeProtection(root,id,outcomeThrough),fixFailure=facts.findLast(f=>f.kind==='eval.fix-failed'&&f.seq>outcomeThrough);
+ const fixingActive=outcomeAvailability==='not-fixed'&&!fixFailure&&(options.runningHere||hasLiveOwner(root));
  let planAvailability='protected';try{planFix(root,id);}catch(error){planAvailability=String(error);}
  const revisions=facts.filter(f=>f.kind==='eval.grader-revision');
  const latestRevision=revisions.at(-1),regrading=latestRevision?(facts.findLast(f=>f.kind==='eval.regrade-closed'&&f.data.revision===latestRevision.source)?.data??{revisionId:latestRevision.data.id,state:'unknown',reason:'No terminal regrade receipt; existing grades and remaining scope stay visible'}) : null;
@@ -197,7 +198,7 @@ export function evalReport(root:string,id:string,options:{asOf?:number}={}){
   if(planAvailability!=='protected'){outcome.valid=false;outcome.evidenceAvailability=planAvailability;}
   if(saved)try{for(const file of saved.data.artifacts??[])readObject(root,file.ref);if(saved.data.isolation)readObject(root,saved.data.isolation);}catch(error){outcome.valid=false;outcome.evidenceAvailability=String(error);}
   if(saved&&outcomeAvailability!=='protected'){
-   if(outcomeAvailability==='not-fixed'&&!fixFailure){if(outcome.valid)outcome.pending=grade?'fixing':'grading';}
+   if(outcomeAvailability==='not-fixed'&&!fixFailure){if(outcome.valid){if(fixingActive)outcome.pending=grade?'fixing':'grading';else outcome.evidenceAvailability='EVAL_FIX_INCOMPLETE: 固定未完成；执行进程已不在，使用 pi-durio eval report 查看原因';}}
    else outcome.evidenceAvailability=fixFailure?`EVAL_FIX_FAILED: ${fixFailure.data.reason}`:outcomeAvailability;
    outcome.valid=false;
   }

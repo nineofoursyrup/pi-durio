@@ -93,13 +93,13 @@ export function ownPlanSource(root: string, id: string): PlanSource {
  * 读计划报告。improve 发起且已结束的计划读主数据根的报告快照（子数据根可能已清理）；
  * 其余从计划所在数据根实时读（`asOf` 为旧报告修订）。
  */
-export function readPlanReport(source: PlanSource, options: { asOf?: number } = {}): { report: EvalReport; from: 'live' | 'snapshot' } {
+export function readPlanReport(source: PlanSource, options: { asOf?: number; runningHere?: boolean } = {}): { report: EvalReport; from: 'live' | 'snapshot' } {
   const asOf = source.through === undefined ? options.asOf : Math.min(options.asOf ?? source.through, source.through);
   if (source.snapshot) {
     const report: EvalReport = JSON.parse(readObject(source.snapshot.root, source.snapshot.ref).toString());
     if (asOf === undefined || report.asOf <= asOf) return { report, from: 'snapshot' };
   }
-  return { report: evalReport(source.root, source.id, { asOf }), from: 'live' };
+  return { report: evalReport(source.root, source.id, { asOf, runningHere: options.runningHere }), from: 'live' };
 }
 
 export type PlanState = 'not-started' | 'running' | 'ended' | 'stopped';
