@@ -3,6 +3,7 @@ import {analyzeImprove} from './runtime.js';
 import {listImproveReports,readImproveReport,formatImproveReport,offlineImproveTransport} from './improve.js';
 import {exitHostIfUnconfirmed} from './headless-lifecycle.js';
 import {resolveDisplayInput} from './display-number.js';
+import {HostReadonlySnapshot,isSqliteBusy} from './evidence.js';
 import {previewImproveDecision,submitImproveDecision,readImproveDecision,resumeImproveDecision,listImproveSuppressions,restoreImproveSuggestion,rollbackImproveDecision,readImproveDefaults,readImproveBuildDefault,launchImproveBuild,readImproveEvalAssets,regradeImproveAsset} from './improve-decisions.js';
 
 export async function improveCommand(action:string|undefined,dataRoot:string,values:Record<string,string|boolean|undefined>) {
@@ -23,7 +24,14 @@ export async function improveCommand(action:string|undefined,dataRoot:string,val
   finally{process.off('SIGINT',stop);process.off('SIGTERM',stop);}return;
  }
  if(action==='list'){const result=listImproveReports(dataRoot,{after:values.after?Number(values.after):undefined,limit:values.limit?Number(values.limit):undefined});console.log(JSON.stringify(result,null,2));return;}
- if(action==='report'){if(typeof values.id!=='string')throw Error('USAGE: improve report requires --id');const result=readImproveReport(dataRoot,values.id);console.log(values.format==='text'?formatImproveReport(result,dataRoot):JSON.stringify(result,null,2));return;}
+ if(action==='report'){
+  if(typeof values.id!=='string')throw Error('USAGE: improve report requires --id');
+  const waitMs=1000,snapshot=new HostReadonlySnapshot(dataRoot,{snapshotWaitMs:waitMs});let output:string;
+  try{const id=resolveDisplayInput(dataRoot,'improve-report',values.id,snapshot),result=readImproveReport(dataRoot,id,snapshot);output=values.format==='text'?formatImproveReport(result,dataRoot,snapshot):JSON.stringify(result,null,2);}
+  catch(error){if(isSqliteBusy(error))throw Error(`IMPROVE_REPORT_TEMPORARILY_UNREADABLE: Report is temporarily unreadable; retry improve report after the writer releases the database lock (wait budget ${waitMs}ms).`,{cause:error});throw error;}
+  finally{snapshot.close();}
+  console.log(output);return;
+ }
  if(action!=='analyze'||typeof values.spec!=='string')throw Error('USAGE: improve analyze --spec FILE; improve list; improve report --id ID [--format text]');
  const spec=JSON.parse(await readFile(values.spec,'utf8'));
  if(!['live','offline'].includes(spec.mode)||typeof spec.workspace!=='string'||typeof spec.targetRunId!=='string')throw Error('IMPROVE_SPEC_REQUIRED: explicit workspace, targetRunId, mode and request');

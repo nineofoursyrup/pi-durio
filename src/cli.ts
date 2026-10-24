@@ -53,7 +53,7 @@ async function main() {
   const dataRoot = values['data-root'] ?? join(homedir(), 'Library', 'Application Support', 'pi-durio');
   // Resolve display numbers before any command opens storage, takes ownership or writes facts.
   for (const key of ['run', 'context-run'] as const) if (values[key]) values[key] = values[key].split(',').map(input => resolveDisplayInput(dataRoot, 'run', input)).join(',');
-  const idKind = command === 'eval' && ['run', 'report', 'grade'].includes(positionals[1]) ? 'eval-plan' : command === 'improve' && positionals[1] === 'report' ? 'improve-report' : undefined;
+  const idKind = command === 'eval' && ['run', 'report', 'grade'].includes(positionals[1]) ? 'eval-plan' : undefined;
   if (idKind && values.id) values.id = resolveDisplayInput(dataRoot, idKind, values.id);
   if (!command || command === 'resume') {
     // 交互入口（S3、U6）：无参数在当前目录（或 --workspace）打开 TUI，默认 coding，--read-only 收窄。
@@ -207,5 +207,5 @@ main().catch(error => {
   const message = error instanceof Error ? error.message : String(error);
   const code = message.split(':')[0].split(' ')[0];
   console.error(JSON.stringify({ error: { code, message, ...(error instanceof DisplayInputError ? { candidates: error.candidates } : {}) } }));
-  process.exitCode = code === 'AUTH_MISSING' ? 78 : code === 'OWNER_CONFLICT' ? 73 : /RECOVERY|DECISION|OWNER_(STILL|CHANGED|IDENTITY|HOST)/.test(code) ? 75 : code === 'RUN_CANCELLED_BEFORE_ACCEPTANCE' ? 130 : 1;
+  process.exitCode = code === 'AUTH_MISSING' ? 78 : code === 'OWNER_CONFLICT' ? 73 : code === 'IMPROVE_REPORT_TEMPORARILY_UNREADABLE' || /RECOVERY|DECISION|OWNER_(STILL|CHANGED|IDENTITY|HOST)/.test(code) ? 75 : code === 'RUN_CANCELLED_BEFORE_ACCEPTANCE' ? 130 : 1;
 });

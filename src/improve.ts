@@ -2,7 +2,7 @@ import {scriptedTransport} from './offline.js';
 import {captureImproveSources,redactAnalysisText,type ImproveSource,type SourceTarget} from './improve-source.js';
 import {Type} from '@earendil-works/pi-ai';
 import {defineTool,type ToolRegistration} from '@earendil-works/pi-durable';
-import {Evidence,digest,readObject,openHostReadonly,readQueue,type ControlTarget} from './evidence.js';
+import {Evidence,digest,readObject,openHostReadonly,readQueue,isSqliteBusy,type ControlTarget,type HostReadonlySnapshot} from './evidence.js';
 import {records,decode,watermark,summarizeRun,queryEvidence,readEvidence,reference,type EvidenceReference} from './history.js';
 import {scopedEvidence} from './derived-evidence.js';
 import {PersistentBudget} from './provider-boundary.js';
@@ -48,15 +48,15 @@ export function validateImproveRequest(value:unknown,mode:'live'|'offline'):Impr
  if(r.query){const bounds={maxRuns:10,maxRecords:200,maxEvidenceBytes:32768,maxSourceBytes:32768};if(Object.keys(r.query).length!==4||Object.entries(bounds).some(([k,max])=>!Number.isSafeInteger((r.query as any)[k])||(r.query as any)[k]<1||(r.query as any)[k]>max))throw Error('IMPROVE_QUERY_LIMIT_INVALID');}
  return structuredClone(r);
 }
-export function priorImprove(root:string,id:string):{source:EvidenceReference;data:any}|undefined {
- try {for(const source of records(root,{kinds:['improve.started']})){const data=decode(root,source);if(data.request.id===id)return {source,data};}}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+export function priorImprove(root:string,id:string,snapshot?:HostReadonlySnapshot):{source:EvidenceReference;data:any}|undefined {
+ try {for(const source of records(root,{kinds:['improve.started']},snapshot)){const data=decode(root,source);if(data.request.id===id)return {source,data};}}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
 }
-export function readImproveReport(root:string,id:string) {
- const start=priorImprove(root,id);if(!start){let after:number|undefined;do{const page=readQueue(root,{after,limit:100});const item=page.items.find(i=>i.kind==='improve'&&i.requestId===id);if(item)return {id,runId:item.runId,report:null,state:item.status,started:null,result:null,selected:[],execution:'not-started',activation:'not-enabled',effect:'unverified',availability:[],queue:item};after=page.next??undefined;}while(after);throw Error('IMPROVE_REPORT_NOT_FOUND');}
+export function readImproveReport(root:string,id:string,snapshot?:HostReadonlySnapshot) {
+ const start=priorImprove(root,id,snapshot);if(!start){let after:number|undefined;do{const page=readQueue(root,{after,limit:100},snapshot);const item=page.items.find(i=>i.kind==='improve'&&i.requestId===id);if(item)return {id,runId:item.runId,report:null,state:item.status,started:null,result:null,selected:[],execution:'not-started',activation:'not-enabled',effect:'unverified',availability:[],queue:item};after=page.next??undefined;}while(after);throw Error('IMPROVE_REPORT_NOT_FOUND');}
  let report:ImproveReport|undefined,result:any;
- for(const ref of records(root,{runId:start.source.runId,kinds:['improve.report','run.closed']})){const data=decode(root,ref);if(ref.kind==='improve.report')report=data;else result=data;}
- const decisions=improveFacts(root).filter(f=>f.kind==='improve.decision'&&f.data.decision.reportId===id).map(f=>readImproveDecision(root,f.data.id));
- return {id,runId:start.source.runId,report:report??null,state:report?.state??'interrupted-or-running',started:start.data,result:result??null,selected:[],execution:decisions.length?'see-decisions':'not-started',activation:decisions.length?'see-decision-phases':'not-enabled',effect:decisions.length?'see-combination-results':'unverified',decisions,availability:(report?.evidence??[]).map(id=>{try{return{id,state:readEvidence(root,id,{limit:128}).state};}catch(error){return{id,state:'unavailable',reason:String(error)};}})};
+ for(const ref of records(root,{runId:start.source.runId,kinds:['improve.report','run.closed']},snapshot)){const data=decode(root,ref);if(ref.kind==='improve.report')report=data;else result=data;}
+ const decisions=improveFacts(root,Number.MAX_SAFE_INTEGER,snapshot).filter(f=>f.kind==='improve.decision'&&f.data.decision.reportId===id).map(f=>readImproveDecision(root,f.data.id,snapshot));
+ return {id,runId:start.source.runId,report:report??null,state:report?.state??'interrupted-or-running',started:start.data,result:result??null,selected:[],execution:decisions.length?'see-decisions':'not-started',activation:decisions.length?'see-decision-phases':'not-enabled',effect:decisions.length?'see-combination-results':'unverified',decisions,availability:(report?.evidence??[]).map(id=>{try{return{id,state:readEvidence(root,id,{limit:128},snapshot).state};}catch(error){if(isSqliteBusy(error))throw error;return{id,state:'unavailable',reason:String(error)};}})};
 }
 export function listImproveReports(root:string,options:{after?:number;limit?:number}={}) {
  const limit=options.limit??20;if(!Number.isSafeInteger(limit)||limit<1||limit>50)throw Error('INVALID_QUERY_RANGE');
@@ -160,11 +160,11 @@ export function prepareImprove(evidence:Evidence,request:ImproveRequest,target:C
  }};
 }
 
-export function formatImproveReport(value:ReturnType<typeof readImproveReport>,root:string) {
- const index=readDisplayIndex(root),r=value.report;if(!r)return `improve ${index.label('improve-report',value.id)} · ${value.state}\nNo complete report receipt; inspect original run/queue. No implicit continuation.\nSelected: none; execution not started; effect unverified.`;
+export function formatImproveReport(value:ReturnType<typeof readImproveReport>,root:string,snapshot?:HostReadonlySnapshot) {
+ const index=readDisplayIndex(root,snapshot),r=value.report;if(!r)return `improve ${index.label('improve-report',value.id)} · ${value.state}\nNo complete report receipt; inspect original run/queue. No implicit continuation.\nSelected: none; execution not started; effect unverified.`;
  // Human text names candidates only by C-NN@rN; the record keeps its recorded `display` and full candidate IDs.
  const listed=[...r.candidates,...(r.suppressed??[]).map(s=>s.candidate)],link=(id:string)=>{const c=listed.find(c=>c.id===id);return c?index.candidate(c):id;};
- const session=readSessionChains(root).sessionOfRun(r.target.runId);
+ const session=readSessionChains(root,{},snapshot).sessionOfRun(r.target.runId);
  const shown=(c:ImproveCandidate)=>({...c,display:index.candidate(c),dependencies:c.dependencies.map(link),conflicts:c.conflicts.map(link)});
  return `improve ${index.label('improve-report',r.id)} · ${r.state}\n${isUserChosenId(r.id)?`原 id ${r.id}\n`:''}revision ${r.revision}\nTarget ${r.target.workspace} / session ${session?index.label('session',session.id):r.target.sessionId} / run ${index.label('run',r.target.runId)}\nEvidence cutoff ${r.cutoff}; deadline ${r.deadline}\nReport default — Selected: none. Report itself authorizes no execution. Activation: not enabled.\n${r.summary}\nCandidates: ${r.candidates.length} (zero is a valid result)\n`+r.candidates.map(c=>`${index.candidate(c)} ${c.title}\n${JSON.stringify(shown(c),null,2)}`).join('\n')+`\nSuppressed advice: ${JSON.stringify((r.suppressed??[]).map(s=>({...s,candidate:shown(s.candidate)})))}\nSaved decisions and validation facts: ${JSON.stringify(value.decisions??[])}\nCoverage/gaps: ${r.gaps.join('; ')||'none reported; coverage remains scoped'}\nBudget: ${JSON.stringify(r.budget)}\nCurrent evidence availability: ${JSON.stringify(value.availability)}`;
 }

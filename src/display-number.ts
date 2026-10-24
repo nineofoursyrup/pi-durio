@@ -1,4 +1,4 @@
-import { openHostReadonly, readObject, digest } from './evidence.js';
+import { openHostReadonly, readObject, digest, type HostReadonlySnapshot } from './evidence.js';
 import { readObjectRange } from './query.js';
 import { readSessionChains } from './session-chain.js';
 
@@ -102,15 +102,16 @@ export function isUserChosenId(id: string) { return !UUID.test(id); }
  * queue requests (`control.accepted`), improve reports (`improve.started`), eval plans (`eval.plan`; plans
  * have no project) and improve candidate revisions (`improve.report`).
  */
-export function readDisplayIndex(root: string) {
+export function readDisplayIndex(root: string, snapshot?: HostReadonlySnapshot) {
   let db: ReturnType<typeof openHostReadonly>;
-  try { db = openHostReadonly(root); }
+  try { db = snapshot?.database ?? openHostReadonly(root); }
   catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return new DisplayIndex([]); throw error; }
-  // Copy rows out first so the shared read lock is not held while originals are decoded.
+  // Ordinary opens release the shared lock before decoding; a report keeps its
+  // explicit snapshot until ID resolution and report formatting both finish.
   let rows: Record<string, unknown>[];
-  const chains = readSessionChains(root);
+  const chains = readSessionChains(root, {}, snapshot);
   try { rows = db.prepare("SELECT run_id,kind,at,body FROM records WHERE kind IN ('task.accepted','control.accepted','improve.started','improve.report','eval.plan') AND seq<=? ORDER BY seq").all(chains.through) as Record<string, unknown>[]; }
-  finally { db.close(); }
+  finally { if (!snapshot) db.close(); }
   const objects: DisplayObject[] = [], revisions = new Map<string, string[]>();
   for (const row of rows) {
     const runId = String(row.run_id), at = String(row.at), kind = String(row.kind);
@@ -190,9 +191,9 @@ export class DisplayInputError extends Error {
  * unique full identity or rejected before any action; other input (a full identity) is returned
  * unchanged for the command's own lookup.
  */
-export function resolveDisplayInput(root: string, kind: DisplayKind, input: string) {
+export function resolveDisplayInput(root: string, kind: DisplayKind, input: string, snapshot?: HostReadonlySnapshot) {
   if (!DISPLAY_INPUT.test(input)) return input;
-  const resolution = readDisplayIndex(root).resolve(kind, input);
+  const resolution = readDisplayIndex(root, snapshot).resolve(kind, input);
   if (resolution.status !== 'found') throw new DisplayInputError(resolution);
   return resolution.object.id;
 }
